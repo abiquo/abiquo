@@ -26,9 +26,15 @@ import java.util.List;
 import org.apache.wink.server.utils.LinkBuilders;
 
 import com.abiquo.model.rest.RESTLink;
-import com.abiquo.server.core.appslibrary.OVFPackageDto;
-import com.abiquo.server.core.appslibrary.OVFPackageListDto;
+import com.abiquo.server.core.appslibrary.Category;
+import com.abiquo.server.core.appslibrary.CategoryDto;
+import com.abiquo.server.core.appslibrary.Icon;
+import com.abiquo.server.core.appslibrary.IconDto;
+import com.abiquo.server.core.appslibrary.TemplateDefinitionDto;
+import com.abiquo.server.core.appslibrary.TemplateDefinitionListDto;
+import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
 import com.abiquo.server.core.cloud.VirtualApplianceDto;
+import com.abiquo.server.core.cloud.VirtualApplianceStateDto;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.config.LicenseDto;
 import com.abiquo.server.core.config.SystemPropertyDto;
@@ -51,6 +57,7 @@ import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
 import com.abiquo.server.core.infrastructure.network.VLANNetwork;
 import com.abiquo.server.core.infrastructure.network.VLANNetworkDto;
 import com.abiquo.server.core.infrastructure.network.VMNetworkConfiguration;
+import com.abiquo.server.core.infrastructure.storage.DiskManagement;
 import com.abiquo.server.core.infrastructure.storage.Tier;
 import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
 import com.abiquo.server.core.pricing.CostCode;
@@ -100,10 +107,11 @@ public interface IRESTBuilder
 
     public List<RESTLink> buildUserLinks(Integer enterpriseId, Integer roleId, UserDto user);
 
-    public List<RESTLink> buildOVFPackageListLinks(Integer datacenterId,
-        OVFPackageListDto ovfPackageList);
+    public List<RESTLink> buildTemplateDefinitionListLinks(Integer datacenterId,
+        TemplateDefinitionListDto templateDefinitionList);
 
-    public List<RESTLink> buildOVFPackageLinks(Integer datacenterId, OVFPackageDto ovfPackage);
+    public List<RESTLink> buildTemplateDefinitionLinks(Integer enterpriseId,
+        TemplateDefinitionDto templateDefinition, Category category, Icon icon);
 
     public List<RESTLink> buildVirtualDatacenterLinks(VirtualDatacenter vdc, Integer datacenterId,
         Integer enterpriseId);
@@ -116,6 +124,16 @@ public interface IRESTBuilder
 
     public List<RESTLink> buildPublicNetworkLinks(final Integer datacenterId,
         final VLANNetwork network);
+
+    public List<RESTLink> buildDatacenterRepositoryLinks(final Integer enterpriseId,
+        final Integer dcId, final Integer repoId);
+
+    public List<RESTLink> buildVirtualMachineTemplateLinks(final Integer enterpriseId,
+        final Integer dcId, final VirtualMachineTemplate template,
+        final VirtualMachineTemplate master);
+
+    public RESTLink buildVirtualMachineTemplateLink(final Integer enterpriseId, final Integer dcId,
+        final Integer virtualImageId);
 
     /*
      * Premium methods
@@ -130,7 +148,8 @@ public interface IRESTBuilder
         Integer machineId, Integer enterpriseId, Integer userId);
 
     public List<RESTLink> buildVirtualMachineCloudLinks(Integer vdcId, Integer vappId,
-        Integer vmId, boolean chefEnabled);
+        Integer vmId, boolean chefEnabled, final Integer[] volumeIds, final Integer[] diskIds,
+        final List<IpPoolManagement> ips);
 
     public List<RESTLink> buildSystemPropertyLinks(SystemPropertyDto systemProperty);
 
@@ -158,7 +177,8 @@ public interface IRESTBuilder
     public List<RESTLink> buildVirtualMachineCloudAdminLinks(final Integer vdcId,
         final Integer vappId, final Integer vmId, final Integer datacenterId, final Integer rackId,
         final Integer machineId, final Integer enterpriseId, final Integer userId,
-        boolean chefEnabled);
+        boolean chefEnabled, Integer[] volumeIds, Integer[] diksIds,
+        final List<IpPoolManagement> ips);
 
     public List<RESTLink> buildEnterpriseExclusionRuleLinks(
         final EnterpriseExclusionRuleDto enterpriseExclusionDto,
@@ -168,6 +188,27 @@ public interface IRESTBuilder
         final MachineLoadRule mlr);
 
     public List<RESTLink> buildFitPolicyRuleLinks(FitPolicyRuleDto fprDto, FitPolicyRule fpr);
+
+    public List<RESTLink> buildVirtualApplianceStateLinks(VirtualApplianceStateDto dto, Integer id,
+        Integer vdcId);
+
+    public List<RESTLink> buildVirtualMachineStateLinks(Integer vappId, Integer vdcId, Integer vmId);
+
+    public List<RESTLink> buildCurrencyLinks(CurrencyDto currencyDto, Currency currency);
+
+    public List<RESTLink> buildPricingTemplateLinks(final Integer currencyId,
+        final PricingTemplateDto pricingTemplate);
+
+    public List<RESTLink> buildCostCodeLinks(final Integer costCodeId);
+
+    public List<RESTLink> buildCostCodeCurrencyLinks(CostCode costCode, Currency currency,
+        CostCodeCurrencyDto dto);
+
+    public List<RESTLink> buildPricingCostCodeLinks(CostCode costCode,
+        PricingTemplate pricingTemplate, PricingCostCodeDto dto);
+
+    public List<RESTLink> buildPricingTierLinks(Tier tier, PricingTemplate pricingTemplate,
+        PricingTierDto dto);
 
     public List<RESTLink> buildPublicNetworksLinks(Integer datacenterId);
 
@@ -191,22 +232,21 @@ public interface IRESTBuilder
     public List<RESTLink> buildExternalIpRasdLinks(final Integer entId, final Integer limitId,
         IpPoolManagement ip);
 
-    public List<RESTLink> buildCurrencyLinks(CurrencyDto currencyDto, Currency currency);
+    public List<RESTLink> buildDiskLinks(final DiskManagement disk, final Integer vdcId,
+        final Integer vappId);
 
-    public List<RESTLink> buildPricingTemplateLinks(final Integer currencyId,
-        final PricingTemplateDto pricingTemplate);
+    public List<RESTLink> buildCategoryLinks(CategoryDto categorydto);
 
-    public List<RESTLink> buildCostCodeLinks(final Integer costCodeId);
+    public List<RESTLink> buildIconLinks(final IconDto icon);
 
-    public List<RESTLink> buildCostCodeCurrencyLinks(CostCode costCode, Currency currency,
-        CostCodeCurrencyDto dto);
+    public List<RESTLink> buildVirtualDatacenterDiskLinks(DiskManagement disk);
 
-    public List<RESTLink> buildPricingCostCodeLinks(CostCode costCode,
-        PricingTemplate pricingTemplate, PricingCostCodeDto dto);
-
-    public List<RESTLink> buildPricingTierLinks(Tier tier, PricingTemplate pricingTemplate,
-        PricingTierDto dto);
+    public RESTLink buildUserLink(Integer enterpriseId, Integer userId);
 
     public List<RESTLink> buildVirtualDatacenterTierLinks(Integer virtualDatacenterId, Integer id);
+
+    public RESTLink buildMovedVolumeLinks(VolumeManagement movedVolume);
+
+    public RESTLink buildVirtualMachineLink(Integer vdc, Integer vapp, Integer vm);
 
 }

@@ -75,6 +75,7 @@
             [Bindable]
             private var languageDP:ArrayCollection = AbiCloudModel.getInstance().configurationManager.languageSet;
 
+
             [Bindable]
             private var _loginLogo:String;
             

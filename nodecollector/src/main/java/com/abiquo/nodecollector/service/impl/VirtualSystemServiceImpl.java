@@ -30,6 +30,7 @@ import com.abiquo.nodecollector.domain.PluginLoader;
 import com.abiquo.nodecollector.exception.CollectorException;
 import com.abiquo.nodecollector.exception.ConnectionException;
 import com.abiquo.nodecollector.exception.LoginException;
+import com.abiquo.nodecollector.exception.NodecollectorException;
 import com.abiquo.nodecollector.exception.UnprovisionedException;
 import com.abiquo.nodecollector.service.VirtualSystemService;
 import com.abiquo.nodecollector.utils.ProvisioningUtils;
@@ -103,21 +104,19 @@ public class VirtualSystemServiceImpl implements VirtualSystemService
     @Override
     public VirtualSystemDto getVirtualSystemByName(final String ip,
         final HypervisorType hypervisorType, final String user, final String password,
-        final Integer aimport, final String name) throws CollectorException, LoginException,
-        ConnectionException, UnprovisionedException
+        final Integer port, final String uuid) throws NodecollectorException
     {
-
         VirtualSystemCollectionDto listOfVS =
-            this.getVirtualSystemList(ip, hypervisorType, user, password, aimport);
+            this.getVirtualSystemList(ip, hypervisorType, user, password, port);
         for (VirtualSystemDto vs : listOfVS.getVirtualSystems())
         {
-            if (vs.getName().equalsIgnoreCase(name))
+            if (vs.getName().equalsIgnoreCase(uuid))
             {
                 return vs;
             }
         }
 
-        LOGGER.info("Could not find the virtual system {} at cloud node {}", name, ip);
+        LOGGER.info("Could not find the virtual system {} at cloud node {}", uuid, ip);
         throw new UnprovisionedException(MessageValues.NOVS_EXCP);
     }
 }

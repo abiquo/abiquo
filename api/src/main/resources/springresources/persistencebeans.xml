@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
     xmlns:context="http://www.springframework.org/schema/context"
     xsi:schemaLocation="
 	   http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
@@ -23,6 +24,10 @@
                 <value>com.abiquo.api.exceptions.mapper.PersistenceExceptionMapper</value>
             </set>
         </property>
+        <!--
+            Is mandatory to place the parent before the child. Eg Volumes before Volume. Or
+            autowired will fail.
+        -->
         <property name="instances">
             <set>
                 <ref bean="datacentersResource" />
@@ -41,10 +46,10 @@
                 <ref bean="privilegeResource" />
                 <ref bean="usersResource" />
                 <ref bean="userResource" />
-                <ref bean="OVFPackageListsResource" />
-                <ref bean="OVFPackageListResource" />
-                <ref bean="OVFPackagesResource" />
-                <ref bean="OVFPackageResource" />
+                <ref bean="templateDefinitionListsResource" />
+                <ref bean="templateDefinitionListResource" />
+                <ref bean="templateDefinitionsResource" />
+                <ref bean="templateDefinitionResource" />
                 <ref bean="virtualDatacentersResource" />
                 <ref bean="virtualDatacenterResource" />
                 <ref bean="privateNetworksResource" />
@@ -58,18 +63,32 @@
                 <ref bean="virtualMachinesResource" />
                 <ref bean="virtualMachineResource" />
                 <ref bean="virtualMachineNetworkConfigurationResource" />
-                <!-- AM as REST Resource -->
-                <ref bean="AMResource" />
-                <ref bean="enterpriseRepositoryResource" />
-                <ref bean="OVFPackageInstancesResource" />
-                <ref bean="OVFPackageInstanceResource" />
+                <ref bean="virtualMachineStorageConfigurationResource" />
+                <ref bean="datacenterRepositoriesResource" />
+                <ref bean="datacenterRepositoryResource" />
+                <ref bean="virtualMachineTemplatesResource" />
+                <ref bean="virtualMachineTemplateResource" />
                 <ref bean="datastoresResource" />
                 <ref bean="datastoreResource" />
                 <!-- Configuration -->
                 <ref bean="systemPropertiesResource" />
                 <ref bean="systemPropertyResource" />
+                <ref bean="categoriesResource" />
+                <ref bean="categoryResource" />
+                <ref bean="iconsResource" />
+                <ref bean="iconResource" />
+                <ref bean="diskFormatTypeResource" />
+                <ref bean="diskFormatTypesResource" />
+                <ref bean="hypervisorTypeResource" />
+                <ref bean="hypervisorTypesResource" />
+
                 <!-- Login -->
                 <ref bean="loginResource" />
+                <!--  -->
+                <ref bean="virtualMachinesInfrastructureResource" />
+                <ref bean="virtualMachineInfrastructureResource" />
+                <ref bean="disksResource" />
+                <ref bean="diskResource" />
             </set>
         </property>
     </bean>

@@ -47,7 +47,7 @@ public class VirtualappHB implements java.io.Serializable, IPojoHB<VirtualApplia
 
     private StateEnum state;
 
-    private StateEnum subState;
+    // private StateEnum subState;
 
     private String name;
 
@@ -86,7 +86,7 @@ public class VirtualappHB implements java.io.Serializable, IPojoHB<VirtualApplia
         return idVirtualApp;
     }
 
-    public void setIdVirtualApp(Integer idVirtualApp)
+    public void setIdVirtualApp(final Integer idVirtualApp)
     {
         this.idVirtualApp = idVirtualApp;
     }
@@ -96,33 +96,33 @@ public class VirtualappHB implements java.io.Serializable, IPojoHB<VirtualApplia
         return state;
     }
 
-    public void setState(StateEnum state)
+    public void setState(final StateEnum state)
     {
         this.state = state;
     }
 
-    /**
-     * @param subState the subState to set
-     */
-    public void setSubState(StateEnum subState)
-    {
-        this.subState = subState;
-    }
-
-    /**
-     * @return the subState
-     */
-    public StateEnum getSubState()
-    {
-        return subState;
-    }
+    // /**
+    // * @param subState the subState to set
+    // */
+    // public void setSubState(final StateEnum subState)
+    // {
+    // this.subState = subState;
+    // }
+    //
+    // /**
+    // * @return the subState
+    // */
+    // public StateEnum getSubState()
+    // {
+    // return subState;
+    // }
 
     public String getName()
     {
         return name;
     }
 
-    public void setName(String name)
+    public void setName(final String name)
     {
         this.name = name;
     }
@@ -132,7 +132,7 @@ public class VirtualappHB implements java.io.Serializable, IPojoHB<VirtualApplia
         return public_;
     }
 
-    public void setPublic_(int public_)
+    public void setPublic_(final int public_)
     {
         this.public_ = public_;
     }
@@ -142,7 +142,7 @@ public class VirtualappHB implements java.io.Serializable, IPojoHB<VirtualApplia
         return highDisponibility;
     }
 
-    public void setHighDisponibility(int highDisponibility)
+    public void setHighDisponibility(final int highDisponibility)
     {
         this.highDisponibility = highDisponibility;
     }
@@ -152,7 +152,7 @@ public class VirtualappHB implements java.io.Serializable, IPojoHB<VirtualApplia
         return error;
     }
 
-    public void setError(Integer error)
+    public void setError(final Integer error)
     {
         this.error = error;
     }
@@ -162,7 +162,7 @@ public class VirtualappHB implements java.io.Serializable, IPojoHB<VirtualApplia
         return virtualDataCenterHB;
     }
 
-    public void setVirtualDataCenterHB(VirtualDataCenterHB virtualDataCenterHB)
+    public void setVirtualDataCenterHB(final VirtualDataCenterHB virtualDataCenterHB)
     {
         this.virtualDataCenterHB = virtualDataCenterHB;
     }
@@ -172,7 +172,7 @@ public class VirtualappHB implements java.io.Serializable, IPojoHB<VirtualApplia
         return enterpriseHB;
     }
 
-    public void setEnterpriseHB(EnterpriseHB enterpriseHB)
+    public void setEnterpriseHB(final EnterpriseHB enterpriseHB)
     {
         this.enterpriseHB = enterpriseHB;
     }
@@ -182,7 +182,7 @@ public class VirtualappHB implements java.io.Serializable, IPojoHB<VirtualApplia
         return nodesHB;
     }
 
-    public void setNodesHB(Collection<NodeHB< ? >> nodesHB)
+    public void setNodesHB(final Collection<NodeHB< ? >> nodesHB)
     {
         this.nodesHB = nodesHB;
     }
@@ -192,7 +192,7 @@ public class VirtualappHB implements java.io.Serializable, IPojoHB<VirtualApplia
         return nodeConnections;
     }
 
-    public void setNodeConnections(String nodeConnections)
+    public void setNodeConnections(final String nodeConnections)
     {
         this.nodeConnections = nodeConnections;
     }
@@ -202,7 +202,7 @@ public class VirtualappHB implements java.io.Serializable, IPojoHB<VirtualApplia
         return logsHB;
     }
 
-    public void setLogsHB(Set<LogHB> logsHB)
+    public void setLogsHB(final Set<LogHB> logsHB)
     {
         this.logsHB = logsHB;
     }
@@ -210,6 +210,7 @@ public class VirtualappHB implements java.io.Serializable, IPojoHB<VirtualApplia
     /**
      * This method transform the hibernate pojo to normal pojo object
      */
+    @Override
     public VirtualAppliance toPojo()
     {
         VirtualAppliance virtualAppliance = new VirtualAppliance();
@@ -218,10 +219,10 @@ public class VirtualappHB implements java.io.Serializable, IPojoHB<VirtualApplia
         virtualAppliance.setIsPublic(public_ != 0);
         virtualAppliance.setName(name);
         virtualAppliance.setState(new State(state));
-        virtualAppliance.setSubState(new State(subState));
+        // virtualAppliance.setSubState(new State(subState));
         virtualAppliance.setError(error != 0);
         virtualAppliance.setVirtualDataCenter(virtualDataCenterHB != null ? virtualDataCenterHB
-                .toPojo() : null);
+            .toPojo() : null);
         virtualAppliance.setNodeConnections(nodeConnections);
 
         if (enterpriseHB != null)

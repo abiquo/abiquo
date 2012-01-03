@@ -26,7 +26,9 @@ import java.util.List;
 
 import javax.persistence.EntityManager;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.context.SecurityContextHolder;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -36,20 +38,22 @@ import com.abiquo.api.exceptions.NotFoundException;
 import com.abiquo.api.services.MachineService;
 import com.abiquo.api.services.cloud.VirtualMachineService;
 import com.abiquo.api.services.stub.VsmServiceStubMock;
+import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.model.enumerator.RemoteServiceType;
-import com.abiquo.model.enumerator.VirtualMachineState;
+import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
 import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.cloud.NodeVirtualImage;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
-import com.abiquo.server.core.cloud.VirtualImage;
 import com.abiquo.server.core.cloud.VirtualMachine;
+import com.abiquo.server.core.cloud.VirtualMachineState;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.Privilege;
 import com.abiquo.server.core.enterprise.Role;
 import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.Machine;
+import com.abiquo.server.core.infrastructure.Rack;
 import com.abiquo.server.core.infrastructure.RemoteService;
 import com.softwarementors.bzngine.engines.jpa.EntityManagerHelper;
 
@@ -64,8 +68,20 @@ public class MachineServiceTest extends AbstractUnitTest
     // "physicalmachine", "rack", "datacenter", "network", "user", "role", "enterprise");
     // }
 
+    @Override
+    @AfterMethod
+    public void tearDown()
+    {
+        super.tearDown();
+    }
+
     @BeforeMethod
     public void setupSysadmin()
+    {
+    }
+
+    @Test
+    public void testDeleteMachineWithVirtualMachinesDeployed()
     {
         Enterprise e = enterpriseGenerator.createUniqueInstance();
         Role r = roleGenerator.createInstance();
@@ -73,45 +89,52 @@ public class MachineServiceTest extends AbstractUnitTest
         setup(e, r, u);
 
         SecurityContextHolder.getContext().setAuthentication(new SysadminAuthentication());
-    }
 
-    @Test
-    public void testDeleteMachineWithVirtualMachinesDeployed()
-    {
-        Hypervisor hypervisor = hypervisorGenerator.createUniqueInstance();
-        Datacenter datacenter = hypervisor.getMachine().getDatacenter();
-        VirtualDatacenter vdc = vdcGenerator.createInstance(datacenter);
+        Datacenter datacenter = datacenterGenerator.createUniqueInstance();
+
+        Rack rack = rackGenerator.createInstance(datacenter);
+
+        Machine machine = machineGenerator.createMachine(datacenter, rack);
+
+        Hypervisor hypervisor =
+            machine.createHypervisor(HypervisorType.VBOX, "127.0.0.1", "127.0.0.1", 10, "foo",
+                "bar");
+        VirtualDatacenter vdc = vdcGenerator.createInstance(datacenter, e);
         RemoteService rm =
             remoteServiceGenerator.createInstance(RemoteServiceType.VIRTUAL_SYSTEM_MONITOR,
                 datacenter);
 
-        VirtualImage image = virtualImageGenerator.createInstance(vdc.getEnterprise());
+        VirtualMachineTemplate image =
+            virtualMachineTemplateGenerator.createInstance(vdc.getEnterprise());
         VirtualAppliance vapp = virtualApplianceGenerator.createInstance(vdc);
         VirtualMachine vm =
-            vmGenerator.createInstance(image, vdc.getEnterprise(), hypervisor, "vm_test");
-        vm.setState(VirtualMachineState.RUNNING);
+            vmGenerator.createInstance(image, vdc.getEnterprise(), hypervisor, u, "vm_test");
+        vm.setState(VirtualMachineState.ON);
         vm.setIdType(VirtualMachine.MANAGED);
 
         NodeVirtualImage node = new NodeVirtualImage("node_test", vapp, image, vm);
 
-        hypervisor.getMachine().setHypervisor(hypervisor);
+        // hypervisor.getMachine().setHypervisor(hypervisor);
+        image.getRepository().setDatacenter(datacenter);
 
         List<Object> entitiesToPersist = new ArrayList<Object>();
-        entitiesToPersist.add(vdc.getEnterprise());
+        // entitiesToPersist.add(vdc.getEnterprise());
         entitiesToPersist.add(datacenter);
+        entitiesToPersist.add(rack);
+        entitiesToPersist.add(machine);
         entitiesToPersist.add(rm);
-        entitiesToPersist.add(hypervisor.getMachine().getRack());
-        entitiesToPersist.add(hypervisor.getMachine());
         entitiesToPersist.add(hypervisor);
         entitiesToPersist.add(vdc);
+        entitiesToPersist.add(image.getRepository());
+        entitiesToPersist.add(image.getCategory());
         entitiesToPersist.add(image);
         entitiesToPersist.add(vapp);
-        for (Privilege p : vm.getUser().getRole().getPrivileges())
-        {
-            entitiesToPersist.add(p);
-        }
-        entitiesToPersist.add(vm.getUser().getRole());
-        entitiesToPersist.add(vm.getUser());
+        // for (Privilege p : vm.getUser().getRole().getPrivileges())
+        // {
+        // entitiesToPersist.add(p);
+        // }
+        // entitiesToPersist.add(vm.getUser().getRole());
+        // entitiesToPersist.add(vm.getUser());
         entitiesToPersist.add(vm);
         entitiesToPersist.add(node);
 
@@ -131,22 +154,23 @@ public class MachineServiceTest extends AbstractUnitTest
         EntityManagerHelper.beginRollbackTransaction(em);
         service = new MachineService(em);
 
+        VirtualMachineService vmService = new VirtualMachineService(em);
         try
         {
-            Machine m = service.getMachine(machineId);
+            service.getMachine(machineId);
+            org.testng.Assert.fail("machine deleted");
         }
-        catch (NotFoundException e)
+        catch (NotFoundException ex)
         {
-            org.testng.Assert.assertEquals(e.getErrors().iterator().next().getMessage(),
+            org.testng.Assert.assertEquals(ex.getErrors().iterator().next().getMessage(),
                 "The requested machine does not exist");
         }
-
-        VirtualMachineService vmService = new VirtualMachineService(em);
 
         VirtualMachine virtualMachine =
             vmService.getVirtualMachine(vdc.getId(), vapp.getId(), vm.getId());
         org.testng.Assert.assertNull(virtualMachine.getHypervisor());
         org.testng.Assert.assertNull(virtualMachine.getDatastore());
-        org.testng.Assert.assertEquals(virtualMachine.getState(), VirtualMachineState.NOT_DEPLOYED);
+        org.testng.Assert
+            .assertEquals(virtualMachine.getState(), VirtualMachineState.NOT_ALLOCATED);
     }
 }

@@ -193,6 +193,7 @@ package net.undf.abicloud.view.virtualimage.components.virtualimage
                 }
 
                 event.enterprise = AbiCloudModel.getInstance().loginManager.user.enterprise;
+                event.datacenter = repository.datacenter;
                 event.repository = repository;
                 event.category = category;
                 event.callback = setVirtualImages;
@@ -312,7 +313,10 @@ package net.undf.abicloud.view.virtualimage.components.virtualimage
                 //if the image matches with all search criteria
                 if(isCorrect){
                 	virtualImageMiniature = new VirtualImageMiniature();
-                	virtualImageMiniature.id = "virtual_image_" + count;
+
+                	//FIXME in-master virtualImageMiniature.id = "virtual_image_" + count;
+                	virtualImageMiniature.datacenter = repository.datacenter;
+
                     virtualImageMiniature.virtualImage = virtualImage;
                     virtualImageMiniature.sizeMultiplier = sizeMultiplier;
                     virtualImageMiniature.editable = editable;
@@ -447,7 +451,10 @@ package net.undf.abicloud.view.virtualimage.components.virtualimage
                 {
                     //Build the miniature immediately
                     var virtualImageMiniature:VirtualImageMiniature = new VirtualImageMiniature();
-                    virtualImageMiniature.id = "virtual_image_" + (virtualImageMiniatures.length + 1);
+
+                    //FIXME in-master virtualImageMiniature.id = "virtual_image_" + (virtualImageMiniatures.length + 1);
+
+                    virtualImageMiniature.datacenter = repository.datacenter;
                     virtualImageMiniature.sizeMultiplier = sizeMultiplier;
                     virtualImageMiniature.virtualImage = virtualImage;
                     virtualImageMiniature.editable = editable;

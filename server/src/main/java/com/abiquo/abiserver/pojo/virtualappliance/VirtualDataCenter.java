@@ -202,6 +202,24 @@ public class VirtualDataCenter implements IPojo<VirtualDataCenterHB>
         return virtualDatacenter;
     }
 
+    public static VirtualDataCenter create(final VirtualDatacenterDto dto, final int datacenterId,
+        final Enterprise enterprise)
+    {
+        final VirtualDataCenter virtualDatacenter = new VirtualDataCenter();
+
+        virtualDatacenter.setId(dto.getId());
+        virtualDatacenter.setName(dto.getName());
+        virtualDatacenter.setEnterprise(enterprise);
+        virtualDatacenter.setIdDataCenter(datacenterId);
+        virtualDatacenter.setHyperType(new HyperVisorType(dto.getHypervisorType()));
+
+        virtualDatacenter.setLimits(ResourceAllocationLimit.create(dto));
+        virtualDatacenter.setDefaultVlan(VlanNetwork.create(dto.getVlan(), dto.getVlan().getId(),
+            true));
+
+        return virtualDatacenter;
+    }
+
     public VlanNetwork getDefaultVlan()
     {
         return defaultVlan;

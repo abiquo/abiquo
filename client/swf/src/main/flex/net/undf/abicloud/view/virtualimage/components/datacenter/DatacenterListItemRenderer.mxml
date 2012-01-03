@@ -32,6 +32,7 @@
 
     <mx:Script>
         <![CDATA[
+        	import net.undf.abicloud.view.virtualimage.VirtualImageManagement;
             import mx.binding.utils.ChangeWatcher;
             import mx.containers.ViewStack;
             import mx.controls.List;
@@ -79,6 +80,12 @@
                     expanded = false;
                 }
             }
+            
+            private function onClickRefreshLogButton(event:MouseEvent):void
+            {
+            	event.stopImmediatePropagation();
+            	VirtualImageManagement(parentDocument).onClickDatacenterList(true);
+            }
         ]]>
     </mx:Script>
 
@@ -98,9 +105,13 @@
 					  																			  ((AbiCloudModel.getInstance().virtualImageManager.repository.repositoryCapacityMb / AbiCloudModel.GB_TO_MBYTES).toFixed(2) + ' GB')}"/>
         </mx:FormItem>
 
-        <mx:FormItem label="@Resource(bundle='Networking', key='LABEL_REMAINING')">
+        <mx:FormItem label="@Resource(bundle='Networking', key='LABEL_REMAINING')" direction="horizontal">
             <mx:Label text="{AbiCloudModel.getInstance().virtualImageManager.repository == null ? '-' :
 					  																			  ((AbiCloudModel.getInstance().virtualImageManager.repository.repositoryRemainingMb / AbiCloudModel.GB_TO_MBYTES).toFixed(2) + ' GB')}"/>
+            <mx:Button id="refreshLogButton"
+                    styleName="RefreshButton"
+                    toolTip="@Resource(bundle='VirtualAppliance', key='TOOLTIP_REFRESH_LOG_BUTTON')"
+                    click="onClickRefreshLogButton(event)"/>					  																			  
         </mx:FormItem>
     </mx:Form>
     <mx:Text width="100%"

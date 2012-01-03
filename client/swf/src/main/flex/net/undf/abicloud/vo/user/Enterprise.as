@@ -53,8 +53,6 @@ package net.undf.abicloud.vo.user
 		//FIXME: this is hardcoded. Should be aquire from server         
         public var defaultTheme:String ="abicloudDefault";
         
-        public var idPricingTemplate:int;
-        
         /*******
         * 
         * Related with Chef integration
@@ -69,6 +67,8 @@ package net.undf.abicloud.vo.user
         public var chefClient:String;
         
         public var chefClientCertificate:String;
+
+        public var idPricingTemplate:int;
 
         public function Enterprise()
         {

@@ -88,6 +88,24 @@ public class NodeVirtualImageStatefulConversionGenerator extends
         return nodeVirtualImageStatefulConversion;
     }
 
+    public NodeVirtualImageStatefulConversion createInstance(
+        final NodeVirtualImage nodeVirtualImage,
+        final VirtualApplianceStatefulConversion virtualApplianceStatefulConversion)
+    {
+        String newName =
+            newString(nextSeed(), NodeVirtualImageStatefulConversion.NEW_NAME_LENGTH_MIN,
+                NodeVirtualImageStatefulConversion.NEW_NAME_LENGTH_MAX);
+        Tier tier = tierGenerator.createUniqueInstance();
+
+        NodeVirtualImageStatefulConversion nodeVirtualImageStatefulConversion =
+            new NodeVirtualImageStatefulConversion(newName,
+                virtualApplianceStatefulConversion,
+                nodeVirtualImage,
+                tier);
+
+        return nodeVirtualImageStatefulConversion;
+    }
+
     @Override
     public void addAuxiliaryEntitiesToPersist(final NodeVirtualImageStatefulConversion entity,
         final List<Object> entitiesToPersist)

@@ -24,17 +24,21 @@ package com.abiquo.server.core.common.persistence;
 import java.util.List;
 
 import com.abiquo.server.core.appslibrary.AppsLibrary;
+import com.abiquo.server.core.appslibrary.Category;
+import com.abiquo.server.core.appslibrary.Icon;
+import com.abiquo.server.core.appslibrary.TemplateDefinition;
+import com.abiquo.server.core.appslibrary.TemplateDefinitionList;
+import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
+import com.abiquo.server.core.appslibrary.VirtualImageConversion;
 import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.cloud.NodeVirtualImage;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
-import com.abiquo.server.core.cloud.VirtualImage;
-import com.abiquo.server.core.cloud.VirtualImageConversion;
 import com.abiquo.server.core.cloud.VirtualMachine;
+import com.abiquo.server.core.cloud.chef.RunlistElement;
 import com.abiquo.server.core.cloud.stateful.DiskStatefulConversion;
 import com.abiquo.server.core.cloud.stateful.NodeVirtualImageStatefulConversion;
 import com.abiquo.server.core.cloud.stateful.VirtualApplianceStatefulConversion;
-import com.abiquo.server.core.cloud.chef.RunlistElement;
 import com.abiquo.server.core.config.License;
 import com.abiquo.server.core.config.SystemProperty;
 import com.abiquo.server.core.enterprise.DatacenterLimits;
@@ -76,7 +80,6 @@ import com.abiquo.server.core.statistics.DatacenterResources;
 import com.abiquo.server.core.statistics.EnterpriseResources;
 import com.abiquo.server.core.statistics.VirtualAppResources;
 import com.abiquo.server.core.statistics.VirtualDatacenterResources;
-import com.abiquo.server.core.tasks.Task;
 import com.softwarementors.bzngine.engines.jpa.test.configuration.EntityManagerFactoryForTesting;
 import com.softwarementors.bzngine.engines.jpa.test.configuration.JpaEntityManagerFactoryForTesting;
 import com.softwarementors.bzngine.engines.jpa.test.configuration.PersistentClassRemovalInformation;
@@ -121,7 +124,7 @@ public class TestDataAccessManager
         if (factory == null)
         {
             factory =
-                new JpaEntityManagerFactoryForTesting("abiquoPersistence",
+                new JpaEntityManagerFactoryWithFilters("abiquoPersistence",
                     persistentClassesInEntityDeletionOrder,
                     associationTablesInAssociationDeletionOrder);
         }
@@ -142,28 +145,24 @@ public class TestDataAccessManager
          */
         addPersistentClassesToCleanInRemovalOrder(NetworkAssignment.class, NodeVirtualImage.class,
             EnterpriseExclusionRule.class, FitPolicyRule.class, MachineLoadRule.class,
-            VirtualAppResources.class, VirtualAppliance.class, RunlistElement.class, VirtualMachine.class,
+            VirtualAppResources.class, VirtualAppliance.class, RunlistElement.class,
+            VirtualMachine.class, TemplateDefinitionList.class, TemplateDefinition.class,
             AppsLibrary.class, VolumeManagement.class, VirtualImageConversion.class,
-            VirtualImage.class, IpPoolManagement.class, RasdManagement.class, VLANNetwork.class,
-            NetworkConfiguration.class, VirtualDatacenterResources.class, VirtualDatacenter.class,
-            DatacenterResources.class, DatacenterLimits.class, Session.class, User.class,
-            RoleLdap.class, Role.class, Privilege.class, EnterpriseResources.class,
-            Enterprise.class, Hypervisor.class, Datastore.class, Machine.class, Rack.class,
-            StoragePool.class, Tier.class, StorageDevice.class, RemoteService.class,
-            Repository.class, CloudUsage.class, Datacenter.class, Network.class,
-            SystemProperty.class, Rasd.class, License.class, Task.class,
+            VirtualMachineTemplate.class, Category.class, Icon.class, IpPoolManagement.class,
+            RasdManagement.class, VLANNetwork.class, NetworkConfiguration.class,
+            VirtualDatacenterResources.class, VirtualDatacenter.class, DatacenterResources.class,
+            DatacenterLimits.class, Session.class, User.class, RoleLdap.class, Role.class,
+            Privilege.class, EnterpriseResources.class, Enterprise.class, Hypervisor.class,
+            Datastore.class, Machine.class, Rack.class, StoragePool.class, Tier.class,
+            StorageDevice.class, RemoteService.class, Repository.class, CloudUsage.class,
+            Datacenter.class, Network.class, SystemProperty.class, Rasd.class, License.class,
             NodeVirtualImageStatefulConversion.class, DiskStatefulConversion.class,
             VirtualApplianceStatefulConversion.class, CostCodeCurrency.class,
             PricingCostCode.class, PricingTier.class, PricingTemplate.class, CostCode.class,
             Currency.class, OneTimeTokenSession.class);
 
-        // XXX after virtualmachine -- OVFPackageList.class, OVFPackage.class,
-        // AppsLibrary.class,
-        // Icon.class,
-        // XXX last -- Category.class
-
         addIntermediateTablesToCleanInRemovalOrder(Machine.DATASTORES_ASSOCIATION_TABLE,
-            DatacenterLimits.TABLE_NAME, EnterpriseResources.TABLE_NAME, Role.ASSOCIATION_TABLE
-        /* , OVFPackageList.ASSOCIATION_TABLE */);
+            DatacenterLimits.TABLE_NAME, EnterpriseResources.TABLE_NAME, Role.ASSOCIATION_TABLE,
+            TemplateDefinitionList.TEMPLATE_DEFINITION_TABLE);
     }
 }

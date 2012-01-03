@@ -140,8 +140,9 @@ public class EnterpriseResourceIT extends AbstractJpaGeneratorIT
         assertLinkExist(dto, href + "/users", "users");
 
         assertLinkExist(dto, resolveEnterpriseActionGetIPsURI(enterprise.getId()),
-            IpAddressesResource.IP_ADDRESSES);
+            IpAddressesResource.IP_ADDRESSES, IpAddressesResource.IP_ADDRESSES);
         assertLinkExist(dto, resolveEnterpriseActionGetVirtualMachinesURI(enterprise.getId()),
+            VirtualMachinesResource.VIRTUAL_MACHINES_PATH,
             VirtualMachinesResource.VIRTUAL_MACHINES_PATH);
     }
 
@@ -207,10 +208,11 @@ public class EnterpriseResourceIT extends AbstractJpaGeneratorIT
                 IPAddress.newIPAddress(vlan.getConfiguration().getAddress()),
                 IPNetworkRang.masktoNumberOfNodes(vlan.getConfiguration().getMask()));
 
-        List<IpPoolManagement> ips = new ArrayList<IpPoolManagement>();
+        List<Object> ips = new ArrayList<Object>();
         while (!ip.equals(lastIP))
         {
             IpPoolManagement ippool = ipGenerator.createInstance(vdc, vlan, ip.toString());
+            ips.add(ippool.getRasd());
             ips.add(ippool);
             ip = ip.nextIPAddress();
         }
@@ -422,7 +424,8 @@ public class EnterpriseResourceIT extends AbstractJpaGeneratorIT
                 vm.getEnterprise());
         VirtualAppliance vapp = vappGenerator.createInstance(vdc);
         NodeVirtualImage nvi = nodeVirtualImageGenerator.createInstance(vapp, vm);
-
+        vm.getVirtualMachineTemplate().getRepository()
+            .setDatacenter(vm.getHypervisor().getMachine().getDatacenter());
         List<Object> entitiesToSetup = new ArrayList<Object>();
 
         entitiesToSetup.add(vm.getEnterprise());
@@ -438,8 +441,10 @@ public class EnterpriseResourceIT extends AbstractJpaGeneratorIT
         entitiesToSetup.add(vm.getHypervisor().getMachine().getRack());
         entitiesToSetup.add(vm.getHypervisor().getMachine());
         entitiesToSetup.add(vm.getHypervisor());
-        entitiesToSetup.add(vm.getVirtualImage().getEnterprise());
-        entitiesToSetup.add(vm.getVirtualImage());
+        entitiesToSetup.add(vm.getVirtualMachineTemplate().getRepository());
+        entitiesToSetup.add(vm.getVirtualMachineTemplate().getEnterprise());
+        entitiesToSetup.add(vm.getVirtualMachineTemplate().getCategory());
+        entitiesToSetup.add(vm.getVirtualMachineTemplate());
         entitiesToSetup.add(vm);
         entitiesToSetup.add(vdc);
         entitiesToSetup.add(vapp);

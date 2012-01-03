@@ -37,15 +37,21 @@ import org.testng.ISuiteListener;
  */
 public class TestServerListener implements ISuiteListener
 {
-    private static final Logger LOGGER = LoggerFactory.getLogger(TestServerListener.class);
+    protected static final Logger LOGGER = LoggerFactory.getLogger(TestServerListener.class);
 
-    private static final String WEBAPP_DIR = "webapp.dir";
+    protected static final String WEBAPP_DIR = "webapp.dir";
 
-    private static final String WEBAPP_CONTEXT = "webapp.context";
+    protected static final String WEBAPP_CONTEXT = "webapp.context";
 
-    private static final String WEBAPP_PORT = "webapp.port";
+    protected static final String WEBAPP_PORT = "webapp.port";
 
-    private Server server;
+    private final static String PORT = getParameter(WEBAPP_PORT, DEFAULT_SERVER_PORT);
+
+    private final static String CONTEXT = getParameter(WEBAPP_CONTEXT);
+
+    public final static String BASE_URI = "http://localhost:" + PORT + CONTEXT;
+
+    protected Server server;
 
     @Override
     public void onStart(final ISuite suite)
@@ -53,10 +59,11 @@ public class TestServerListener implements ISuiteListener
         LOGGER.info("Starting test server...");
         long start = System.currentTimeMillis();
         int port = Integer.valueOf(getParameter(WEBAPP_PORT, DEFAULT_SERVER_PORT));
+
         server = new Server(port);
 
         WebAppContext webapp = new WebAppContext();
-        webapp.setContextPath(getParameter(WEBAPP_CONTEXT));
+        webapp.setContextPath(CONTEXT);
         webapp.setWar(getParameter(WEBAPP_DIR));
         webapp.setServer(server);
 

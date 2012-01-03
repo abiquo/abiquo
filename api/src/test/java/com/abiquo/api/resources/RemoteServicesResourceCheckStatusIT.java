@@ -38,7 +38,7 @@ import org.testng.annotations.Test;
 import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.server.core.infrastructure.RemoteServiceDto;
 
-public class RemoteServicesResourceCheckStatusIT extends AbstractResourcePlusAMIT
+public class RemoteServicesResourceCheckStatusIT extends AbstractJpaGeneratorIT
 {
     private String remoteServicesURI = resolveRemoteServicesURI(1);
 
@@ -91,7 +91,6 @@ public class RemoteServicesResourceCheckStatusIT extends AbstractResourcePlusAMI
     // }
     // }
     //
-    @Override
     protected List<String> data()
     {
         return Arrays.asList("/data/machine-am-infrastructure.xml");

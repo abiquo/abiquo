@@ -55,6 +55,7 @@ import com.abiquo.api.resources.RoleResource;
 import com.abiquo.api.resources.RolesResource;
 import com.abiquo.api.spring.security.AbiquoUserDetails;
 import com.abiquo.api.spring.security.SecurityService;
+import com.abiquo.api.spring.security.SecurityService;
 import com.abiquo.api.util.URIResolver;
 import com.abiquo.model.enumerator.Privileges;
 import com.abiquo.model.rest.RESTLink;
@@ -252,9 +253,10 @@ public class UserService extends DefaultApiService
 
         repo.insertUser(user);
 
-        tracer.log(SeverityType.INFO, ComponentType.USER, EventType.USER_CREATE, "User "
-            + user.getName() + " has been created [Enterprise: " + enterprise.getName() + " Name: "
-            + user.getName() + " Surname: " + user.getSurname() + " Role: " + user.getRole() + "]");
+        tracer
+            .log(SeverityType.INFO, ComponentType.USER, EventType.USER_CREATE, "user.created",
+                user.getName(), enterprise.getName(), user.getName(), user.getSurname(),
+                user.getRole());
 
         return user;
     }
@@ -401,10 +403,9 @@ public class UserService extends DefaultApiService
 
         updateUser(old);
 
-        tracer.log(SeverityType.INFO, ComponentType.USER, EventType.USER_MODIFY, "User "
-            + old.getName() + " has been modified [Enterprise: " + old.getEnterprise().getName()
-            + " Name: " + old.getName() + " Surname: " + old.getSurname() + " Role: "
-            + old.getRole() + "]");
+        tracer.log(SeverityType.INFO, ComponentType.USER, EventType.USER_MODIFY, "user.modified",
+            old.getName(), old.getEnterprise().getName(), old.getName(), old.getSurname(),
+            old.getRole());
 
         return old;
     }
@@ -443,10 +444,9 @@ public class UserService extends DefaultApiService
 
         repo.removeUser(user);
 
-        tracer.log(SeverityType.INFO, ComponentType.USER, EventType.USER_DELETE, "User "
-            + user.getName() + " has been deleted [Enterprise: " + user.getEnterprise().getName()
-            + " Name: " + user.getName() + " Surname: " + user.getSurname() + " Role: "
-            + user.getRole() + "]");
+        tracer.log(SeverityType.INFO, ComponentType.USER, EventType.USER_DELETE, "user.deleted",
+            user.getName(), user.getEnterprise().getName(), user.getName(), user.getSurname(),
+            user.getRole());
     }
 
     public boolean isAssignedTo(final Integer enterpriseId, final Integer userId)

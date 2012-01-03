@@ -38,8 +38,23 @@ public class TestConfig
     /** TestNG group for networking unit tests. */
     public static final String NETWORK_UNIT_TESTS = "test-network";
 
+    /** TestNG group for storage unit tests. */
+    public static final String STORAGE_UNIT_TESTS = "test-storage";
+
     /** TestNG group for networking integration tests. */
     public static final String NETWORK_INTEGRATION_TESTS = "it-network";
+
+    /** TestNG group for storage integration tests. */
+    public static final String STORAGE_INTEGRATION_TESTS = "it-storage";
+
+    /** TestNG group for appliance library tests. */
+    public static final String AM_INTEGRATION_TESTS = "it-am";
+
+    /** TestNG group for appslibrary integration tests. */
+    public static final String APPS_INTEGRATION_TESTS = "it-appslibrary";
+
+    /** TestNG group for the edit and reconfigure virtual machine. */
+    public static final String EDIT_VM_INTEGRATION_TESTS = "it-editvm";
 
     /** TestNG group for all unit tests. */
     public static final String ALL_UNIT_TESTS = "test-all";
@@ -59,8 +74,17 @@ public class TestConfig
     /** TestNG group for networking premium integration tests. */
     public static final String PREMIUM_NETWORK_INTEGRATION_TESTS = "it-premium-network";
 
+    /** TestNG group for virtual appliance unit tests. */
+    public static final String VAPP_UNIT_TESTS = "test-vapp";
+
+    /** TestNG group for the edit and reconfigure virtual machine. */
+    public static final String PREMIUM_EDIT_VM_INTEGRATION_TESTS = "it-premium-editvm";
+
     /** TestNG group for all premium unit tests. */
     public static final String PREMIUM_ALL_UNIT_TESTS = "test-premium-all";
+
+    /** TestNG group for all VirtualMachineAllocatorServicePremiumTest. */
+    public static final String PREMIUM_ALLOCATOR_TESTS = "test-premium-allocator";
 
     /** TestNG group for all premium integration tests. */
     public static final String PREMIUM_ALL_INTEGRATION_TESTS = "it-premium-all";

@@ -58,12 +58,12 @@ import com.abiquo.util.resources.ResourceManager;
 
 public class AuthenticationManagerApi implements IAuthenticationManager
 {
+    private static final Logger logger = LoggerFactory.getLogger(AuthenticationManagerApi.class);
+
     /**
      * Abiquo API URL.
      */
     private String apiUri;
-
-    private static final Logger logger = LoggerFactory.getLogger(AuthenticationManagerApi.class);
 
     /**
      * Factory of DAOs and transaction manager.
@@ -112,6 +112,8 @@ public class AuthenticationManagerApi implements IAuthenticationManager
                 // authentication.log
                 // errorManager
                 // .reportError(resourceManger, checkSessionResult, "checkSession.invalid");
+                logger.trace("Invalid session. Please login again");
+
             }
             else
             {
@@ -136,6 +138,8 @@ public class AuthenticationManagerApi implements IAuthenticationManager
                     // authentication.log
                     // errorManager.reportError(resourceManger, checkSessionResult,
                     // "checkSession.expired");
+                    logger.trace("Session expired. Please login again");
+
                 }
 
             }
@@ -147,8 +151,7 @@ public class AuthenticationManagerApi implements IAuthenticationManager
             {
                 getFactory().rollbackConnection();
             }
-            errorManager.reportError(resourceManger, checkSessionResult, "checkSession.exception",
-                e);
+            logger.trace("Unexpected error while checking the user session", e);
         }
         finally
         {

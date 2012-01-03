@@ -35,7 +35,7 @@ import com.abiquo.model.enumerator.HypervisorType;
 
 public class TestEntityGenerationUtils
 {
-    public static EnterpriseHB createEnterprise(String name)
+    public static EnterpriseHB createEnterprise(final String name)
     {
         EnterpriseHB enterprise = new EnterpriseHB();
         enterprise.setName(name);
@@ -46,14 +46,14 @@ public class TestEntityGenerationUtils
         return enterprise;
     }
 
-    public static DatacenterHB createDatacenter(String name)
+    public static DatacenterHB createDatacenter(final String name)
     {
         DatacenterHB datacenter = new DatacenterHB();
         datacenter.setName(name);
         return datacenter;
     }
 
-    public static RackHB createRack(DatacenterHB datacenter, String name)
+    public static RackHB createRack(final DatacenterHB datacenter, final String name)
     {
         RackHB result = new RackHB();
         result.setDatacenter(datacenter);
@@ -61,7 +61,7 @@ public class TestEntityGenerationUtils
         return result;
     }
 
-    public static PhysicalmachineHB createMachine(RackHB rack, String name)
+    public static PhysicalmachineHB createMachine(final RackHB rack, final String name)
     {
         PhysicalmachineHB result = new PhysicalmachineHB();
         result.setRack(rack);
@@ -71,8 +71,8 @@ public class TestEntityGenerationUtils
         return result;
     }
 
-    public static HypervisorHB createHypervisor(String description, PhysicalmachineHB machine,
-        HypervisorType type)
+    public static HypervisorHB createHypervisor(final String description,
+        final PhysicalmachineHB machine, final HypervisorType type)
     {
         HypervisorHB hypervisor = new HypervisorHB();
         hypervisor.setPhysicalMachine(machine);
@@ -86,12 +86,12 @@ public class TestEntityGenerationUtils
         return hypervisor;
     }
 
-    public static VirtualmachineHB createVirtualmachine(String name)
+    public static VirtualmachineHB createVirtualmachine(final String name)
     {
         VirtualmachineHB result = new VirtualmachineHB();
         result.setUuid(new UUID().toString());
         result.setName(name);
-        result.setState(StateEnum.RUNNING);
+        result.setState(StateEnum.ON);
         result.setIdType(1);
         return result;
     }

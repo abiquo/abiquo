@@ -30,19 +30,20 @@ import javax.persistence.Table;
 
 import org.hibernate.annotations.ForeignKey;
 
+import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
 import com.softwarementors.validation.constraints.Required;
 
 @Entity
 @Table(name = NodeVirtualImage.TABLE_NAME)
-@DiscriminatorValue("1")
+@DiscriminatorValue(NodeVirtualImage.DISCRIMINATOR)
 public class NodeVirtualImage extends Node
 {
-    public static final String DISCRIMINATOR = "1";
+    public static final String DISCRIMINATOR = "VIRTUAL_IMAGE";
 
     public static final String TABLE_NAME = "nodevirtualimage";
 
-    public NodeVirtualImage(String name, VirtualAppliance virtualAppliance,
-        VirtualImage virtualImage, VirtualMachine virtualMachine)
+    public NodeVirtualImage(final String name, final VirtualAppliance virtualAppliance,
+        final VirtualMachineTemplate virtualImage, final VirtualMachine virtualMachine)
     {
         super(DISCRIMINATOR);
 
@@ -65,15 +66,15 @@ public class NodeVirtualImage extends Node
     @JoinColumn(name = VIRTUAL_IMAGE_ID_COLUMN)
     @ManyToOne(fetch = FetchType.LAZY)
     @ForeignKey(name = "FK_" + TABLE_NAME + "_virtualImage")
-    private VirtualImage virtualImage;
+    private VirtualMachineTemplate virtualImage;
 
     @Required(value = VIRTUAL_IMAGE_REQUIRED)
-    public VirtualImage getVirtualImage()
+    public VirtualMachineTemplate getVirtualImage()
     {
         return this.virtualImage;
     }
 
-    public void setVirtualImage(VirtualImage virtualImage)
+    public void setVirtualImage(final VirtualMachineTemplate virtualImage)
     {
         this.virtualImage = virtualImage;
     }
@@ -95,7 +96,7 @@ public class NodeVirtualImage extends Node
         return this.virtualMachine;
     }
 
-    public void setVirtualMachine(VirtualMachine virtualMachine)
+    public void setVirtualMachine(final VirtualMachine virtualMachine)
     {
         this.virtualMachine = virtualMachine;
     }

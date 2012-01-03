@@ -41,12 +41,13 @@ import com.abiquo.api.services.cloud.VirtualMachineService;
 import com.abiquo.api.services.stub.VsmServiceStub;
 import com.abiquo.api.tracer.TracerLogger;
 import com.abiquo.model.enumerator.RemoteServiceType;
-import com.abiquo.model.enumerator.VirtualMachineState;
 import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.cloud.NodeVirtualImage;
 import com.abiquo.server.core.cloud.VirtualAppliance;
+import com.abiquo.server.core.cloud.VirtualApplianceState;
 import com.abiquo.server.core.cloud.VirtualDatacenterRep;
 import com.abiquo.server.core.cloud.VirtualMachine;
+import com.abiquo.server.core.cloud.VirtualMachineState;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.Datastore;
 import com.abiquo.server.core.infrastructure.DatastoreDto;
@@ -189,8 +190,7 @@ public class MachineService extends DefaultApiService
                 machineDto.getIpService(), machineDto.getPort(), machineDto.getUser(),
                 machineDto.getPassword());
 
-        vsm.monitor(vsmRS.getUri(), hypervisor.getIp(), hypervisor.getPort(), hypervisor.getType()
-            .name(), hypervisor.getUser(), hypervisor.getPassword());
+        vsm.monitor(vsmRS, hypervisor);
 
         repo.insertMachine(machine);
 
@@ -271,11 +271,9 @@ public class MachineService extends DefaultApiService
 
         repo.updateMachine(old);
 
-        tracer
-            .log(SeverityType.INFO, ComponentType.MACHINE, EventType.MACHINE_CREATE, "Machine "
-                + old.getName() + "[ ip: " + old.getHypervisor().getIp() + " type: "
-                + old.getHypervisor().getType() + " state: " + old.getState()
-                + "] created succesfully");
+        tracer.log(SeverityType.INFO, ComponentType.MACHINE, EventType.MACHINE_CREATE,
+            "machine.created", old.getName(), old.getHypervisor().getIp(), old.getHypervisor()
+                .getType(), old.getState());
 
         return old;
     }
@@ -312,7 +310,7 @@ public class MachineService extends DefaultApiService
         Hypervisor hypervisor = machine.getHypervisor();
         try
         {
-            vsm.shutdownMonitor(vsmRS.getUri(), hypervisor.getIp(), hypervisor.getPort());
+            vsm.shutdownMonitor(vsmRS, hypervisor);
         }
         catch (InternalServerErrorException e)
         {
@@ -332,10 +330,9 @@ public class MachineService extends DefaultApiService
                 VirtualAppliance vapp =
                     virtualDatacenterRep.findVirtualApplianceByVirtualMachine(vm);
 
-                VirtualMachineState newState = VirtualMachineState.NOT_DEPLOYED;
                 for (NodeVirtualImage node : vapp.getNodes())
                 {
-                    if (node.getVirtualMachine().getState() != VirtualMachineState.NOT_DEPLOYED)
+                    if (node.getVirtualMachine().getState() != VirtualMachineState.NOT_ALLOCATED)
                     {
                         if (!force)
                         {
@@ -344,19 +341,15 @@ public class MachineService extends DefaultApiService
                         }
                         else
                         {
-                            newState = VirtualMachineState.APPLY_CHANGES_NEEDED;
                             break;
                         }
                     }
                 }
 
-                vm.setState(VirtualMachineState.NOT_DEPLOYED);
+                vm.setState(VirtualMachineState.NOT_ALLOCATED);
                 vm.setDatastore(null);
                 vm.setHypervisor(null);
 
-                vapp.setState(newState);
-                vapp.setSubState(newState);
-                virtualDatacenterRep.updateVirtualAppliance(vapp);
                 virtualMachineService.updateVirtualMachine(vm);
             }
         }
@@ -373,10 +366,9 @@ public class MachineService extends DefaultApiService
 
         repo.deleteMachine(machine);
 
-        tracer.log(SeverityType.INFO, ComponentType.MACHINE, EventType.MACHINE_DELETE, "Machine "
-            + machine.getName() + "[ ip: " + machine.getHypervisor().getIp() + " type: "
-            + machine.getHypervisor().getType() + " state: " + machine.getState()
-            + "] deleted succesfully");
+        tracer.log(SeverityType.INFO, ComponentType.MACHINE, EventType.MACHINE_DELETE,
+            "machine.deleted", machine.getName(), machine.getHypervisor().getIp(), machine
+                .getHypervisor().getType(), machine.getState());
     }
 
     protected void deleteMachineLoadRulesFromMachine(final Machine machine)

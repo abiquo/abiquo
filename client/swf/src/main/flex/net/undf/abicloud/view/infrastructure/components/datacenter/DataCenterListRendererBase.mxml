@@ -95,7 +95,7 @@
                 var i:int = 0;
                 while (i < length && !this._hasRemoteServices)
                 {
-                    if (DataCenter(data).remoteServices[i].remoteServiceType.valueOf == RemoteServiceType.VIRTUAL_FACTORY)
+                    if (DataCenter(data).remoteServices[i].remoteServiceType.valueOf == RemoteServiceType.TARANTINO)
                     {
                         hasVirtualFactory = true;
                     }

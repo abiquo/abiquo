@@ -62,19 +62,16 @@ public interface VirtualSystemService
         throws NodecollectorException;
 
     /**
-     * Get a unique virtual system based on its name.
+     * Get a unique virtual system.
      * 
-     * @param ip address of the hypervisor where the virtual system is deployed
-     * @param hypervisorType kind of {@link HypervisorType} it is used.
-     * @param user user to log in
-     * @param password password to authenticate
-     * @param port port to attach to get info (libvirt only)
-     * @param name name of the Virtual System.
-     * @return the found Virtual System.
-     * @throws NodecollectorException
+     * @param ip address of the virtual system
+     * @param hypervisorType
+     * @param user
+     * @param password
+     * @param uuid
+     * @return
      */
     public VirtualSystemDto getVirtualSystemByName(String ip, HypervisorType hypervisorType,
         String user, String password, final Integer port, String name)
         throws NodecollectorException;
-
 }

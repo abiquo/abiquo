@@ -24,9 +24,6 @@ package com.abiquo.abiserver.services.flex;
 import java.util.List;
 import java.util.Set;
 
-import com.abiquo.abiserver.business.BusinessDelegateProxy;
-import com.abiquo.abiserver.commands.NetworkCommand;
-import com.abiquo.abiserver.commands.impl.NetworkCommandImpl;
 import com.abiquo.abiserver.commands.stub.APIStubFactory;
 import com.abiquo.abiserver.commands.stub.NetworkResourceStub;
 import com.abiquo.abiserver.commands.stub.impl.NetworkResourceStubImpl;
@@ -54,11 +51,6 @@ import com.abiquo.server.core.infrastructure.network.VLANNetworkDto;
 public class NetworkingService
 {
 
-    /**
-     * The command related to this service
-     */
-    NetworkCommand networkCommand;
-
     /** The stub used to connect to the API. */
     private NetworkResourceStub networkStub;
 
@@ -68,7 +60,6 @@ public class NetworkingService
      */
     public NetworkingService()
     {
-        networkCommand = new NetworkCommandImpl();
         networkStub = new NetworkResourceStubImpl();
     }
 
@@ -409,9 +400,6 @@ public class NetworkingService
 
         try
         {
-            NetworkCommand proxy =
-                BusinessDelegateProxy
-                    .getInstance(userSession, networkCommand, NetworkCommand.class);
 
             NetworkResolver netResolver = new NetworkResolver();
             List<String> mask = netResolver.resolveMask(networkClass);
@@ -446,10 +434,6 @@ public class NetworkingService
         DataResult<List<List<String>>> dataResult = new DataResult<List<List<String>>>();
         try
         {
-            NetworkCommand proxy =
-                BusinessDelegateProxy
-                    .getInstance(userSession, networkCommand, NetworkCommand.class);
-
             NetworkResolver netResolver = new NetworkResolver();
             List<List<String>> networks =
                 netResolver.resolvePossibleNetworks(networkClass, netmask);
@@ -526,23 +510,5 @@ public class NetworkingService
     protected NetworkResourceStub proxyStub(final UserSession userSession)
     {
         return APIStubFactory.getInstance(userSession, networkStub, NetworkResourceStub.class);
-    }
-
-    private NetworkCommand instantiateNetworkCommand()
-    {
-        NetworkCommand netComm;
-        try
-        {
-            netComm =
-                (NetworkCommand) Thread.currentThread().getContextClassLoader()
-                    .loadClass("com.abiquo.abiserver.commands.impl.NetworkingCommandPremiumImpl")
-                    .newInstance();
-        }
-        catch (Exception e)
-        {
-            netComm = new NetworkCommandImpl();
-        }
-
-        return netComm;
     }
 }

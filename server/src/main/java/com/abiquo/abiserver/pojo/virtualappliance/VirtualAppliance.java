@@ -52,7 +52,7 @@ public class VirtualAppliance implements IPojo<VirtualappHB>
 
     private State state;
 
-    private State subState;
+    // private State subState;
 
     private Boolean highDisponibility;
 
@@ -128,21 +128,21 @@ public class VirtualAppliance implements IPojo<VirtualappHB>
         this.state = state;
     }
 
-    /**
-     * @param subState the subState to set
-     */
-    public void setSubState(final State subState)
-    {
-        this.subState = subState;
-    }
-
-    /**
-     * @return the subState
-     */
-    public State getSubState()
-    {
-        return subState;
-    }
+    // /**
+    // * @param subState the subState to set
+    // */
+    // public void setSubState(final State subState)
+    // {
+    // this.subState = subState;
+    // }
+    //
+    // /**
+    // * @return the subState
+    // */
+    // public State getSubState()
+    // {
+    // return subState;
+    // }
 
     public Boolean getHighDisponibility()
     {
@@ -217,6 +217,7 @@ public class VirtualAppliance implements IPojo<VirtualappHB>
     /**
      * This method transform the pojo object to hibernate pojo object.
      */
+    @Override
     public VirtualappHB toPojoHB()
     {
         VirtualappHB virtualappHB = new VirtualappHB();
@@ -225,7 +226,7 @@ public class VirtualAppliance implements IPojo<VirtualappHB>
         virtualappHB.setHighDisponibility(highDisponibility ? 1 : 0);
         virtualappHB.setPublic_(isPublic ? 1 : 0);
         virtualappHB.setState(StateEnum.fromId(state.getId()));
-        virtualappHB.setSubState(StateEnum.fromId(subState.getId()));
+        // virtualappHB.setSubState(StateEnum.fromId(subState.getId()));
         virtualappHB.setError(error ? 1 : 0);
         virtualappHB.setVirtualDataCenterHB(virtualDataCenter.toPojoHB());
         virtualappHB.setNodeConnections(nodeConnections);

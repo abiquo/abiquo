@@ -25,6 +25,8 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
+import javax.persistence.EntityManager;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,7 +54,6 @@ import com.abiquo.server.core.infrastructure.Machine;
  * TODO this should be a @Repository
  */
 @Component
-@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
 public class VirtualMachineFactory
 {
     /** Use an invalid port to indicate a disabled vrdp. */
@@ -64,7 +65,17 @@ public class VirtualMachineFactory
     protected InfrastructureRep datacenterRepo;
 
     @Autowired
-    protected SystemPropertyService systemPropertyService;
+    private SystemPropertyService systemPropertyService;
+
+    public VirtualMachineFactory()
+    {
+    }
+
+    public VirtualMachineFactory(final EntityManager em)
+    {
+        this.datacenterRepo = new InfrastructureRep(em);
+        this.systemPropertyService = new SystemPropertyService(em);
+    }
 
     /** The remote desktop min port **/
     public final static int MIN_REMOTE_DESKTOP_PORT = Integer.valueOf(ConfigService
@@ -76,10 +87,11 @@ public class VirtualMachineFactory
     protected final static String ALLOW_RDP_PROPERTY = "client.virtual.allowVMRemoteAccess";
 
     /**
-     * Create a Virtual Machine on the given PhysicalMachine to deploy the given VirtualImage.
+     * Create a Virtual Machine on the given PhysicalMachine to deploy the given
+     * VirtualMachineTemplate.
      * 
-     * @param machine, the machine hypervisor will be used to create the new virtual image.
-     * @param image, the virtual image (vm template) to be deployed.
+     * @param machine, the machine hypervisor will be used to create the new virtual machine
+     *            template.
      * @return a new VirtualMachine instance inside physical to load image.
      *         <p>
      *         TODO: creating default Hypervisor instance
@@ -89,6 +101,7 @@ public class VirtualMachineFactory
      * @throws NotEnoughResourcesException, if the target machine haven't enough resources to hold
      *             the virtual machine
      */
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public VirtualMachine createVirtualMachine(final Machine machine,
         final VirtualMachine virtualMachine) throws NotEnoughResourcesException
     {
@@ -103,7 +116,7 @@ public class VirtualMachineFactory
 
         if (virtualMachine.getDatastore() == null)
         {
-            final long datastoreRequ = virtualMachine.getVirtualImage().getDiskFileSize();
+            final long datastoreRequ = virtualMachine.getVirtualMachineTemplate().getDiskFileSize();
             final Datastore datastore = selectDatastore(machine, datastoreRequ);
             virtualMachine.setDatastore(datastore);
         }
@@ -131,11 +144,10 @@ public class VirtualMachineFactory
      * 
      * @param physical the physical machine
      * @param session
-     * @param image
      * @return the target datastore where the virtual machine will be deployed
      * @throws SchedulerException
      */
-    private Datastore selectDatastore(final Machine machine, final Long hdImageRequired)
+    private Datastore selectDatastore(final Machine machine, final Long hdDiskRequired)
         throws NotEnoughResourcesException
     {
 
@@ -163,7 +175,7 @@ public class VirtualMachineFactory
             }
         }
 
-        if (betterDatastore == null || freeLargerSize < hdImageRequired)
+        if (betterDatastore == null || freeLargerSize < hdDiskRequired)
         {
             final String cause =
                 "The target physical machine has no datastores enabled with the required free size.";

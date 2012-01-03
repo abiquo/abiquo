@@ -620,4 +620,5 @@ public class NodeCollectorRESTClient
     {
         return remoteServiceURI;
     }
+
 }

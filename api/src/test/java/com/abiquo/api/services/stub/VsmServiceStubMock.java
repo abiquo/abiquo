@@ -24,6 +24,7 @@ import static org.mockito.Mockito.mock;
 
 import org.springframework.stereotype.Service;
 
+import com.abiquo.server.core.infrastructure.RemoteService;
 import com.abiquo.vsm.client.VSMClient;
 
 /**
@@ -35,14 +36,14 @@ import com.abiquo.vsm.client.VSMClient;
 public class VsmServiceStubMock extends VsmServiceStub
 {
     @Override
-    public VSMClient initializeVSMClient(String serviceUri)
+    protected VSMClient getClientFromPool(final RemoteService service)
     {
-        VSMClient mockClient = mock(VSMClient.class);
+        return mock(VSMClient.class);
+    }
 
-        // set here the mock behaviour.
-
-        // ....
-
-        return mockClient;
+    @Override
+    protected void returnClientToPool(final VSMClient client)
+    {
+        // Do nothing
     }
 }

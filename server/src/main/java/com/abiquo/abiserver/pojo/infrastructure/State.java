@@ -41,7 +41,7 @@ public class State implements Serializable
 
     public State()
     {
-        this(StateEnum.NOT_DEPLOYED);
+        this(StateEnum.NOT_ALLOCATED);
     }
 
     public State(final StateEnum state)

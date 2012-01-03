@@ -53,6 +53,9 @@ public class VirtualMachineRep extends DefaultRepBase
     @Autowired
     private RunlistElementDAO chefDao;
 
+    @Autowired
+    private NodeVirtualImageDAO nodeVirtualImageDAO;
+
     public VirtualMachineRep()
     {
 
@@ -68,6 +71,7 @@ public class VirtualMachineRep extends DefaultRepBase
         this.dao = new VirtualMachineDAO(entityManager);
         this.rasdDao = new RasdManagementDAO(entityManager);
         this.chefDao = new RunlistElementDAO(entityManager);
+        this.nodeVirtualImageDAO = new NodeVirtualImageDAO(entityManager);
     }
 
     public Collection<VirtualMachine> findByHypervisor(final Hypervisor hypervisor)
@@ -114,14 +118,20 @@ public class VirtualMachineRep extends DefaultRepBase
         return dao.findById(vmId);
     }
 
-    public void deleteNotManagedVirtualMachines(final Hypervisor hypervisor)
+    public VirtualMachine findVirtualMachineByHypervisor(final Hypervisor hypervisor,
+        final Integer virtualMachineId)
     {
-        dao.deleteNotManagedVirtualMachines(hypervisor);
+        return dao.findVirtualMachineByHypervisor(hypervisor, virtualMachineId);
     }
 
     public void update(final VirtualMachine vm)
     {
         dao.flush();
+    }
+
+    public void refreshLock(final VirtualMachine vm)
+    {
+        dao.refreshLock(vm);
     }
 
     public Collection<RasdManagement> findRasdManagementByVirtualMachine(
@@ -139,7 +149,7 @@ public class VirtualMachineRep extends DefaultRepBase
         this.dao.persist(virtualMachine);
         this.dao.flush();
     }
-    
+
     public RunlistElement findRunlistElementById(final Integer id)
     {
         return chefDao.findById(id);
@@ -170,4 +180,70 @@ public class VirtualMachineRep extends DefaultRepBase
         chefDao.clearVirtualMachineRunlist(virtualMachine);
     }
 
+    public NodeVirtualImage insertNodeVirtualImage(final NodeVirtualImage nodeVirtualImage)
+    {
+        nodeVirtualImageDAO.persist(nodeVirtualImage);
+        return nodeVirtualImage;
+    }
+
+    public NodeVirtualImage findNodeVirtualImageByVm(final VirtualMachine virtualMachine)
+    {
+
+        return nodeVirtualImageDAO.findByVirtualMachine(virtualMachine);
+
+    }
+
+    public List<NodeVirtualImage> findNodeVirtualImagesByVirtualAppliance(
+        final VirtualAppliance virtualAppliance)
+    {
+
+        return nodeVirtualImageDAO.findByVirtualAppliance(virtualAppliance);
+
+    }
+
+    public void updateNodeVirtualImage(final NodeVirtualImage nodeVirtualImage)
+    {
+        nodeVirtualImageDAO.flush();
+    }
+
+    public void deleteNodeVirtualImage(final NodeVirtualImage nodeVirtualImage)
+    {
+        nodeVirtualImageDAO.remove(nodeVirtualImage);
+    }
+
+    public VirtualMachine findBackup(final VirtualMachine vmachine)
+    {
+        return dao.findBackup(vmachine);
+    }
+
+    public void refresh(final VirtualMachine vmachine)
+    {
+        dao.refresh(vmachine);
+    }
+
+    public void detachHypervisor(final VirtualMachine vm)
+    {
+        dao.detachHypervisor(vm);
+    }
+
+    public void detachVirtualMachine(final VirtualMachine vm)
+    {
+        dao.detachVirtualMachine(vm);
+    }
+
+    public void deleteVirtualMachine(final VirtualMachine virtualMachine)
+    {
+        dao.remove(virtualMachine);
+    }
+
+    public VirtualMachine createVirtualMachine(final VirtualMachine virtualMachine)
+    {
+        dao.persist(virtualMachine);
+        return virtualMachine;
+    }
+
+    public void deleteNotManagedVirtualMachines(final Hypervisor hypervisor)
+    {
+        dao.deleteNotManagedVirtualMachines(hypervisor);
+    }
 }

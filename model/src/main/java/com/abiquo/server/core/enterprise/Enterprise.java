@@ -44,7 +44,7 @@ import org.hibernate.validator.constraints.URL;
 
 import com.abiquo.model.validation.LimitRange;
 import com.abiquo.server.core.appslibrary.AppsLibrary;
-import com.abiquo.server.core.cloud.VirtualImage;
+import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
 import com.abiquo.server.core.common.DefaultEntityWithLimits;
 import com.abiquo.server.core.common.Limit;
 import com.abiquo.server.core.pricing.PricingTemplate;
@@ -192,28 +192,6 @@ public class Enterprise extends DefaultEntityWithLimits
         setRepositoryHard(limit.hard);
     }
 
-    public final static String PRICING_PROPERTY = "pricingTemplate";
-
-    private final static boolean PRICING_REQUIRED = false;
-
-    private final static String PRICING_ID_COLUMN = "idPricingTemplate";
-
-    @JoinColumn(name = PRICING_ID_COLUMN)
-    @ManyToOne(fetch = FetchType.LAZY)
-    @ForeignKey(name = "enterprise_pricingTemp_fk")
-    private PricingTemplate pricingTemplate;
-
-    @Required(value = PRICING_REQUIRED)
-    public PricingTemplate getPricingTemplate()
-    {
-        return pricingTemplate;
-    }
-
-    public void setPricingTemplate(final PricingTemplate pricingTemplate)
-    {
-        this.pricingTemplate = pricingTemplate;
-    }
-
     public final static String CHEF_URL_PROPERTY = "chefURL";
 
     private final static boolean CHEF_URL_REQUIRED = false;
@@ -346,6 +324,28 @@ public class Enterprise extends DefaultEntityWithLimits
         this.chefValidatorCertificate = chefValidatorCertificate.trim();
     }
 
+    public final static String PRICING_PROPERTY = "pricingTemplate";
+
+    private final static boolean PRICING_REQUIRED = false;
+
+    private final static String PRICING_ID_COLUMN = "idPricingTemplate";
+
+    @JoinColumn(name = PRICING_ID_COLUMN)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @ForeignKey(name = "enterprise_pricingTemp_fk")
+    private PricingTemplate pricingTemplate;
+
+    @Required(value = PRICING_REQUIRED)
+    public PricingTemplate getPricingTemplate()
+    {
+        return pricingTemplate;
+    }
+
+    public void setPricingTemplate(final PricingTemplate pricingTemplate)
+    {
+        this.pricingTemplate = pricingTemplate;
+    }
+
     // *************************** Mandatory constructors ***********************
     public Enterprise(final String name, final int ramSoftLimitInMb, final int cpuCountSoftLimit,
         final long hdSoftLimitInMb, final int ramHardLimitInMb, final int cpuCountHardLimit,
@@ -381,7 +381,8 @@ public class Enterprise extends DefaultEntityWithLimits
     private final List<DatacenterLimits> datacenterLimits = new ArrayList<DatacenterLimits>();
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "enterprise")
-    private final List<VirtualImage> virtualImages = new ArrayList<VirtualImage>();
+    private final List<VirtualMachineTemplate> virtualImages =
+        new ArrayList<VirtualMachineTemplate>();
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "enterprise")
     private final List<AppsLibrary> appsLibraries = new ArrayList<AppsLibrary>();

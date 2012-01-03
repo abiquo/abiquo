@@ -21,6 +21,8 @@
 
 package com.abiquo.abiserver.commands.stub;
 
+import java.util.Collection;
+
 import com.abiquo.abiserver.exception.HardLimitExceededException;
 import com.abiquo.abiserver.exception.NotEnoughResourcesException;
 import com.abiquo.abiserver.exception.SchedulerException;
@@ -28,25 +30,42 @@ import com.abiquo.abiserver.exception.SoftLimitExceededException;
 import com.abiquo.abiserver.pojo.authentication.UserSession;
 import com.abiquo.abiserver.pojo.infrastructure.VirtualMachine;
 import com.abiquo.abiserver.pojo.result.BasicResult;
+import com.abiquo.abiserver.pojo.result.DataResult;
+import com.abiquo.abiserver.pojo.virtualappliance.Node;
+import com.abiquo.server.core.cloud.VirtualMachineState;
 
 public interface VirtualMachineResourceStub
 
 {
-
+    @Deprecated
     void allocate(UserSession userSession, Integer virtualDatacenterId, Integer virtualApplianceId,
         Integer virtualMachineId, boolean forceEnterpirseLimits) throws HardLimitExceededException,
         SoftLimitExceededException, SchedulerException, NotEnoughResourcesException;
 
+    @Deprecated
     void deallocate(UserSession userSession, Integer virtualDatacenterId,
         Integer virtualApplianceId, Integer virtualMachineId) throws HardLimitExceededException,
         SoftLimitExceededException, SchedulerException, NotEnoughResourcesException;
 
-    void checkEdit(UserSession userSession, Integer virtualDatacenterId,
-        Integer virtualApplianceId, Integer virtualMachineId, final int newcpu, final int newram)
-        throws HardLimitExceededException, SoftLimitExceededException, SchedulerException,
-        NotEnoughResourcesException;
-
     public BasicResult updateVirtualMachine(Integer virtualDatacenterId,
         Integer virtualApplianceId, VirtualMachine virtualMachine);
 
+    public BasicResult deleteVirtualMachine(Integer virtualDatacenterId,
+        Integer virtualApplianceId, VirtualMachine virtualMachine);
+
+    DataResult editVirtualMachineState(final Integer virtualDatacenterId,
+        final Integer virtualApplianceId, VirtualMachine virtualMachine,
+        VirtualMachineState virtualMachineState);
+
+    DataResult powerOffVirtualMachine(final Integer virtualDatacenterId,
+        final Integer virtualApplianceId, VirtualMachine virtualMachine);
+
+    DataResult powerOnVirtualMachine(final Integer virtualDatacenterId,
+        final Integer virtualApplianceId, VirtualMachine virtualMachine);
+
+    DataResult pauseVirtualMachine(final Integer virtualDatacenterId,
+        final Integer virtualApplianceId, VirtualMachine virtualMachine);
+
+    DataResult instanceVirtualMachines(final Integer virtualDatacenterId,
+        final Integer virtualApplianceId, Collection<Node> nodes);
 }

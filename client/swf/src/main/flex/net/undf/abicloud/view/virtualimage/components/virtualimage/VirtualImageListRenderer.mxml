@@ -30,6 +30,7 @@
 
     <mx:Script>
         <![CDATA[
+        	import net.undf.abicloud.utils.AbicloudUtils;
         	import net.undf.abicloud.events.virtualimage.VirtualImageEvent;
             import net.undf.abicloud.business.managers.virtualimage.VirtualImageManager;
             import net.undf.abicloud.vo.virtualimage.VirtualImage;
@@ -83,19 +84,42 @@
         maxWidth="200" text="{this._virtualImage.name}" truncateToFit="true"
         toolTip="{this._virtualImage.name}"/>
 
-    <mx:Label id="ramLabel"
-        left="80" top="22"
-        fontSize="12"
-        maxWidth="200"
-        text="{ResourceManager.getInstance().getString('Infrastructure', 'TEXTINPUT_LABEL_RAM') + ': '+this._virtualImage.ramRequired.toString() + ' MB'}"
-        truncateToFit="true" toolTip="{this._virtualImage.name}"/>
-    
-    <mx:Label id="cpuLabel"
-        left="80" top="39"
-        fontSize="12"
-        maxWidth="200"
-        text="{ResourceManager.getInstance().getString('Infrastructure', 'TEXTINPUT_LABEL_CPU') + ': '+this._virtualImage.cpuRequired}"
-        truncateToFit="true" toolTip="{this._virtualImage.name}"/>
+    <mx:Grid
+       verticalGap="0" 
+        left="80" top="22">
+        <mx:GridRow>
+            <mx:GridItem>
+                <mx:Label id="ramLabel"
+                   fontSize="12"
+                   maxWidth="200"
+                   text="{ResourceManager.getInstance().getString('Infrastructure', 'TEXTINPUT_LABEL_RAM') + ': '+this._virtualImage.ramRequired.toString() + ' MB'}"
+                   truncateToFit="true" toolTip="{this._virtualImage.name}"/>
+            </mx:GridItem>
+            <mx:GridItem>
+                <mx:Label id="userLabel"
+                    fontSize="12"
+                    maxWidth="200"
+                    text="{ResourceManager.getInstance().getString('Infrastructure', 'LABEL_USER') + ': '+this._virtualImage.creationUser}"
+                    truncateToFit="true" toolTip="{this._virtualImage.creationUser}"/>
+            </mx:GridItem>
+        </mx:GridRow>
+        <mx:GridRow>
+            <mx:GridItem>
+                <mx:Label id="cpuLabel"
+                   fontSize="12"
+                   maxWidth="200"
+                   text="{ResourceManager.getInstance().getString('Infrastructure', 'TEXTINPUT_LABEL_CPU') + ': '+this._virtualImage.cpuRequired}"
+                   truncateToFit="true" toolTip="{this._virtualImage.name}"/>
+            </mx:GridItem>
+            <mx:GridItem>
+                <mx:Label id="creationLabel"
+                    fontSize="12"
+                    maxWidth="200"
+                    text="{ResourceManager.getInstance().getString('Infrastructure', 'LABEL_CREATION_DATE') + ': '+AbicloudUtils.formatDate(this._virtualImage.creationDate,false)}"
+                    truncateToFit="true" toolTip="{AbicloudUtils.formatDate(this._virtualImage.creationDate,false)}"/>
+            </mx:GridItem>
+        </mx:GridRow>
+    </mx:Grid>
 
     <mx:Label id="masterLabel"
         right="25" top="5"

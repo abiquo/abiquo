@@ -151,6 +151,8 @@
 	                //Announcing that a virtual machine has been edited
 	                var infrastructureEvent:InfrastructureEvent = new InfrastructureEvent(InfrastructureEvent.EDIT_VIRTUALMACHINE);
 	                infrastructureEvent.infrastructureElement = virtualMachineEdited;
+	                infrastructureEvent.virtualDatacenter = this._virtualDatacenter;
+	                infrastructureEvent.virtualAppliance = this._virtualAppliance;
 	                dispatchEvent(infrastructureEvent);
                 }
             }

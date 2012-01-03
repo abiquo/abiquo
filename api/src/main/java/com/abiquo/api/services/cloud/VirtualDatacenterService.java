@@ -39,6 +39,7 @@ import com.abiquo.api.services.DefaultApiService;
 import com.abiquo.api.services.NetworkService;
 import com.abiquo.api.services.UserService;
 import com.abiquo.api.spring.security.SecurityService;
+import com.abiquo.api.spring.security.SecurityService;
 import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.model.transport.error.CommonError;
 import com.abiquo.server.core.cloud.NodeVirtualImage;
@@ -141,6 +142,7 @@ public class VirtualDatacenterService extends DefaultApiService
         return repo.findByDatacenter(datacenter);
     }
 
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
     public VirtualDatacenter getVirtualDatacenter(final Integer id)
     {
         VirtualDatacenter vdc = repo.findById(id);
@@ -167,8 +169,8 @@ public class VirtualDatacenterService extends DefaultApiService
 
         // set as default vlan (as it is the first one) and create it.
         VLANNetwork vlan =
-            networkService.createPrivateNetwork(vdc.getId(), PrivateNetworkResource
-                .createPersistenceObject(dto.getVlan()), false);
+            networkService.createPrivateNetwork(vdc.getId(),
+                PrivateNetworkResource.createPersistenceObject(dto.getVlan()), false);
 
         // find the default vlan stablished by the enterprise-datacenter limits
         DatacenterLimits dcLimits =
@@ -283,8 +285,11 @@ public class VirtualDatacenterService extends DefaultApiService
         final Datacenter datacenter, final Enterprise enterprise, final Network network)
     {
         VirtualDatacenter vdc =
-            new VirtualDatacenter(enterprise, datacenter, network, dto.getHypervisorType(), dto
-                .getName());
+            new VirtualDatacenter(enterprise,
+                datacenter,
+                network,
+                dto.getHypervisorType(),
+                dto.getName());
 
         setLimits(dto, vdc);
         validateVirtualDatacenter(vdc, dto.getVlan(), datacenter);

@@ -21,7 +21,10 @@
 
 package net.undf.abicloud.utils
 {
+	import flash.utils.ByteArray;
+	
 	import mx.formatters.DateFormatter;
+	import mx.utils.Base64Decoder;
 	
 	import net.undf.abicloud.controller.ThemeHandler;
 	
@@ -116,5 +119,18 @@ package net.undf.abicloud.utils
 			}
 			
 		}
+		
+		/**
+         * Decode a string in base 64  
+         * @param value a encoded string
+         * 
+         */
+        public static function decodeString(value:String):String
+        {
+            var myDecoder:Base64Decoder = new Base64Decoder();
+            myDecoder.decode(value);
+            var decodedByteArr:ByteArray = myDecoder.toByteArray();
+            return decodedByteArr.toString();
+        }
     }
 }

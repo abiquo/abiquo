@@ -273,7 +273,6 @@ package net.undf.abicloud.controller.virtualappliance
                 {
                     //Need to revert the virtual appliance state and subState
                     _virtualAppliance.state = VirtualAppliance(DataResult(result).data).state;
-                    _virtualAppliance.subState = VirtualAppliance(DataResult(result).data).subState;
                     //Soft limits exceeded, but we can still force operation. Asking user...
                     AbiCloudAlert.showAlert(ResourceManager.getInstance().getString("Common",
                                                                                     "ALERT_ERROR_TITLE_LABEL"),
@@ -329,7 +328,7 @@ package net.undf.abicloud.controller.virtualappliance
                     else
                     {
                         //We try to make a local change to not block user
-                        if (_virtualAppliance.state.id == State.IN_PROGRESS)
+                        if (_virtualAppliance.state.description == State.LOCKED.description)
                             //The VirtualAppliance was APPLY_CHANGES_NEEDED. We leave as it was
                             AbiCloudModel.getInstance().virtualApplianceManager.setVirtualApplianceApplyChangesNeeded(_virtualAppliance);
                     }
@@ -645,6 +644,49 @@ package net.undf.abicloud.controller.virtualappliance
                 //Returning the list of logs retrieved
                 var logs:ArrayCollection = DataResult(result).data as ArrayCollection;
                 callback(logs);
+            }
+            else
+            {
+                //There was a problem forcing the virtual appliance refresh
+                super.handleResult(result);
+            }
+        }
+        
+        public function getDisksByVirtualMachineHandler(result:BasicResult, callback:Function):void
+        {
+            if (result.success)
+            {
+                //Returning the list of hard disks retrieved
+                var hardDisks:ArrayCollection = DataResult(result).data as ArrayCollection;
+                callback(hardDisks);
+            }
+            else
+            {
+                //There was a problem forcing the virtual appliance refresh
+                super.handleResult(result);
+            }
+        }
+        
+        public function deleteDiskFromVirtualMachineHandler(result:BasicResult):void
+        {
+            if (result.success)
+            {
+                var event:VirtualApplianceEvent = new VirtualApplianceEvent(VirtualApplianceEvent.HARD_DISKS_UPDATED);
+                AbiCloudModel.getInstance().virtualApplianceManager.dispatchEvent(event);
+            }
+            else
+            {
+                //There was a problem forcing the virtual appliance refresh
+                super.handleResult(result);
+            }
+        }
+        
+        public function createDiskIntoVirtualMachineHandler(result:BasicResult):void
+        {
+            if (result.success)
+            {
+                var event:VirtualApplianceEvent = new VirtualApplianceEvent(VirtualApplianceEvent.HARD_DISKS_UPDATED);
+                AbiCloudModel.getInstance().virtualApplianceManager.dispatchEvent(event);
             }
             else
             {

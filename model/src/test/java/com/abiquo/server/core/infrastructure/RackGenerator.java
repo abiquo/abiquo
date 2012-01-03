@@ -69,8 +69,10 @@ public class RackGenerator extends DefaultEntityGenerator<Rack>
         Integer vlan_id_min = Rack.VLAN_ID_MIN_DEFAULT_VALUE;
         Integer vlan_id_max = Rack.VLAN_ID_MAX_DEFAULT_VALUE;
         Integer nrsq = Rack.NRSQ_DEFAULT_VALUE;
-        String vlans_id_avoided = Rack.VLANS_ID_AVOIDED_DEFAULT_VALUE;
-        Integer vlan_per_vdc_expected = Rack.VLAN_PER_VDC_EXPECTED_DEFAULT_VALUE;
+        String vlans_id_avoided =
+            newString(this.nextSeed(), Rack.VLANS_ID_AVOIDED_LENGTH_MIN,
+                Rack.VLANS_ID_AVOIDED_LENGTH_MAX);
+        Integer vlan_per_vdc_expected = nextSeed();
         Rack result =
             new Rack(name, datacenter, vlan_id_min, vlan_id_max, vlan_per_vdc_expected, nrsq);
         result.setVlansIdAvoided(vlans_id_avoided);

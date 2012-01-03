@@ -178,8 +178,8 @@ public class VirtualmachineHB implements java.io.Serializable, IPojoHB<VirtualMa
 
     public void setName(String name)
     {
-        if (!name.startsWith("ABQ_")
-            && !(state == StateEnum.RUNNING || state == StateEnum.IN_PROGRESS) && isManaged())
+        if (!name.startsWith("ABQ_") && !(state == StateEnum.ON || state == StateEnum.LOCKED)
+            && isManaged())
         {
             name = "ABQ_" + name;
         }
@@ -404,7 +404,7 @@ public class VirtualmachineHB implements java.io.Serializable, IPojoHB<VirtualMa
         return password;
     }
 
-    public void setPassword(String password)
+    public void setPassword(final String password)
     {
         this.password = password;
     }

@@ -20,250 +20,459 @@
  */
 package com.abiquo.abiserver.appslibrary.stub;
 
-import static java.lang.String.valueOf;
-
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
 import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Cookie;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.Response.Status.Family;
 
-import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.lang.StringUtils;
 import org.apache.wink.client.ClientResponse;
 import org.apache.wink.client.Resource;
-import org.apache.wink.client.RestClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import com.abiquo.abiserver.business.authentication.TokenUtils;
-import com.abiquo.abiserver.business.hibernate.pojohb.user.UserHB;
+import com.abiquo.abiserver.commands.stub.AbstractAPIStub;
 import com.abiquo.abiserver.config.AbiConfigManager;
-import com.abiquo.abiserver.persistence.DAOFactory;
-import com.abiquo.abiserver.persistence.hibernate.HibernateDAOFactory;
-import com.abiquo.abiserver.pojo.authentication.UserSession;
+import com.abiquo.abiserver.pojo.result.BasicResult;
+import com.abiquo.abiserver.pojo.result.DataResult;
+import com.abiquo.abiserver.pojo.virtualimage.Category;
+import com.abiquo.abiserver.pojo.virtualimage.Icon;
+import com.abiquo.abiserver.pojo.virtualimage.OVFPackage;
+import com.abiquo.abiserver.pojo.virtualimage.OVFPackageInstanceStatus;
+import com.abiquo.abiserver.pojo.virtualimage.OVFPackageList;
+import com.abiquo.appliancemanager.transport.TemplateStateDto;
+import com.abiquo.appliancemanager.transport.TemplatesStateDto;
+import com.abiquo.model.enumerator.DiskFormatType;
+import com.abiquo.model.rest.RESTLink;
 import com.abiquo.model.transport.error.ErrorDto;
 import com.abiquo.model.transport.error.ErrorsDto;
-import com.abiquo.server.core.appslibrary.OVFPackageListDto;
-import com.abiquo.server.core.appslibrary.OVFPackageListsDto;
-import com.abiquo.server.core.appslibrary.OVFPackagesDto;
+import com.abiquo.server.core.appslibrary.CategoriesDto;
+import com.abiquo.server.core.appslibrary.CategoryDto;
+import com.abiquo.server.core.appslibrary.DiskFormatTypeDto;
+import com.abiquo.server.core.appslibrary.DiskFormatTypesDto;
+import com.abiquo.server.core.appslibrary.IconDto;
+import com.abiquo.server.core.appslibrary.IconsDto;
+import com.abiquo.server.core.appslibrary.TemplateDefinitionDto;
+import com.abiquo.server.core.appslibrary.TemplateDefinitionListDto;
+import com.abiquo.server.core.appslibrary.TemplateDefinitionListsDto;
+import com.abiquo.server.core.appslibrary.TemplateDefinitionsDto;
 
-public class AppsLibraryStubImpl implements AppsLibraryStub
+public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryStub
 {
 
-    private RestClient client;
-
-    public static final String OVF_PACKAGE_LISTS_PATH = "appslib/ovfpackagelists";
+    private static final Logger logger = LoggerFactory.getLogger(AppsLibraryStubImpl.class);
 
     public static final String ENTERPRISES_PATH = "admin/enterprises";
 
-    public String baseUri;
+    public static final String TEMPLATE_DEFINITION_PATH = "appslib/templateDefinitions";
 
-    final String user;
+    public static final String TEMPLATE_DEFINITION_LISTS_PATH = "appslib/templateDefinitionList";
 
-    final String password;
-
-    final String authType;
-
-    public static final String OVF_PACKAGE_PATH = "appslib/ovfpackages";
-
-    public AppsLibraryStubImpl(final UserSession session)
+    @Override
+    public DataResult<Icon> createIcon(final IconDto icon)
     {
-        client = new RestClient();
-        baseUri = AbiConfigManager.getInstance().getAbiConfig().getApiLocation();
+        DataResult<Icon> result = new DataResult<Icon>();
 
-        DAOFactory factory = HibernateDAOFactory.instance();
-        factory.beginConnection();
-        UserHB user =
-            factory.getUserDAO().getUserByLoginAuth(session.getUser(), session.getAuthType());
-        factory.endConnection();
+        String uri = createIconsLink();
 
-        this.user = user.getUser();
-        this.password = user.getPassword();
-        this.authType = user.getAuthType();
-    }
+        ClientResponse response = post(uri, icon);
 
-    private void setAuthCookie(final Resource resource)
-    {
-        long tokenExpiration = System.currentTimeMillis() + 1000L * 1800;
-        String signature = TokenUtils.makeTokenSignature(tokenExpiration, user, password);
-        String authType = this.authType;
-        String[] tokens;
-        if (authType != null)
+        if (response.getStatusType().getFamily() == Family.SUCCESSFUL)
         {
-            tokens = new String[] {user, valueOf(tokenExpiration), signature, authType};
+            result.setSuccess(Boolean.TRUE);
+            result.setData(createFlexIconObject(response.getEntity(IconDto.class)));
         }
         else
         {
-            tokens = new String[] {user, valueOf(tokenExpiration), signature};
+            populateErrors(response, result, "createIcon");
         }
-        String cookieValue = StringUtils.join(tokens, ":");
 
-        cookieValue = new String(Base64.encodeBase64(cookieValue.getBytes()));
-
-        resource.cookie(new Cookie("auth", cookieValue));
+        return result;
     }
 
-    public Resource createResourceOVFPackageLists(final Integer idEnterprise)
+    private Category createFlexCategoryObject(final CategoryDto dto)
     {
-        final String path =
-            ENTERPRISES_PATH + '/' + String.valueOf(idEnterprise) + '/' + OVF_PACKAGE_LISTS_PATH;
-        Resource reso = client.resource(baseUri + "/" + path);
-
-        setAuthCookie(reso);
-
-        return reso;
+        Category category = new Category();
+        return category.toPojo(dto);
     }
-
-    public Resource createResourceOVFPackageList(final Integer idEnterprise,
-        final Integer idOvfpackageList)
-    {
-        final String path =
-            ENTERPRISES_PATH + '/' + String.valueOf(idEnterprise) + '/' + OVF_PACKAGE_LISTS_PATH
-                + '/' + String.valueOf(idOvfpackageList);
-
-        Resource reso = client.resource(baseUri + "/" + path);
-
-        setAuthCookie(reso);
-
-        return reso;
-    }
-
-    // //////////
 
     @Override
-    public OVFPackageListDto createOVFPackageList(final Integer idEnterprise,
-        final String ovfpackageListURL)
+    public DataResult<OVFPackageList> createTemplateDefinitionListFromOVFIndexUrl(
+        final Integer idEnterprise, final String ovfindexURL)
     {
-        Resource resource = createResourceOVFPackageLists(idEnterprise);
+        DataResult<OVFPackageList> result = new DataResult<OVFPackageList>();
+
+        String uri = createTemplateDefinitionListsLink(idEnterprise.toString());
+
+        // Resource resource = createResourceOVFPackageLists(idEnterprise);
         // resource.queryParam("ovfindexURL", ovfpackageListURL);
 
         ClientResponse response =
-            resource.contentType(MediaType.TEXT_PLAIN).accept(MediaType.APPLICATION_XML)
-                .post(ovfpackageListURL);
-
+            resource(uri).accept(MediaType.APPLICATION_XML).contentType(MediaType.TEXT_PLAIN).post(
+                ovfindexURL);
         final Integer httpStatus = response.getStatusCode();
 
-        if (httpStatus / 200 != 1)
+        if (response.getStatusType().getFamily() != Family.SUCCESSFUL)
         {
-            throw new WebApplicationException(response(response));
+            populateErrors(response, result, "createOVFPackageList");
+        }
+        else
+        {
+            result.setSuccess(Boolean.TRUE);
+            result.setData(createFlexOVFPackageListObject(response
+                .getEntity(TemplateDefinitionListDto.class)));
         }
 
-        return response.getEntity(OVFPackageListDto.class);
+        return result;
     }
 
     @Override
-    public void deleteOVFPackageList(final Integer idEnterprise, final String nameOvfpackageList)
+    public BasicResult deleteTemplateDefinitionList(final Integer idEnterprise,
+        final String templateDefinitionListName)
     {
-        final Integer idOvfPackageList =
-            getOVFPackageListIdFromName(idEnterprise, nameOvfpackageList);
 
-        Resource resource = createResourceOVFPackageList(idEnterprise, idOvfPackageList);
-        ClientResponse response = resource.accept(MediaType.APPLICATION_XML).delete();
+        BasicResult result = new BasicResult();
+        final Integer templateDefinitionListId =
+            getTemplateDefinitionListIdFromName(idEnterprise, templateDefinitionListName);
 
-        final Integer httpStatus = response.getStatusCode();
+        String uri =
+            createTemplateDefinitionListLink(idEnterprise.toString(), templateDefinitionListId
+                .toString());
+        ClientResponse response = delete(uri);
 
-        if (httpStatus / 200 != 1)
+        if (response.getStatusType().getFamily() != Family.SUCCESSFUL)
         {
-            throw new WebApplicationException(response(response));
+            populateErrors(response, result, "deleteOVFPackageList");
         }
+        else
+        {
+            result.setSuccess(Boolean.TRUE);
+        }
+        return result;
     }
 
     @Override
-    public OVFPackageListDto getOVFPackageList(final Integer idEnterprise,
-        final String nameOVFPackageList)
+    public DataResult<List<OVFPackageInstanceStatus>> getTemplatesState(
+        final String templateDefinitionListName, final Integer idEnterprise,
+        final Integer datacenterId)
     {
-        final Integer idOvfPackageList =
-            getOVFPackageListIdFromName(idEnterprise, nameOVFPackageList);
+        final DataResult<List<OVFPackageInstanceStatus>> result =
+            new DataResult<List<OVFPackageInstanceStatus>>();
 
-        Resource resource = createResourceOVFPackageList(idEnterprise, idOvfPackageList);
-        ClientResponse response = resource.accept(MediaType.APPLICATION_XML).get();
+        final Integer listId =
+            getTemplateDefinitionListIdFromName(idEnterprise, templateDefinitionListName);
+        final String uri =
+            createTemplateStateFromListLink(idEnterprise.toString(), String.valueOf(listId));
 
-        final Integer httpStatus = response.getStatusCode();
+        ClientResponse response = resource(uri).queryParam("datacenterId", datacenterId).get();
 
-        if (httpStatus / 200 != 1)
+        if (response.getStatusType().getFamily() == Family.SUCCESSFUL)
         {
-            throw new WebApplicationException(response(response));
+            result.setSuccess(Boolean.TRUE);
+            result.setData(createFlexOVFPackageListObject(response
+                .getEntity(TemplatesStateDto.class)));
+        }
+        else
+        {
+            populateErrors(response, result, "getOVFPackageList");
         }
 
-        return response.getEntity(OVFPackageListDto.class);
+        return result;
     }
 
-    private Integer getOVFPackageListIdFromName(final Integer idEnterprise, final String packageName)
+    @Override
+    public DataResult<List<OVFPackageInstanceStatus>> getTemplatesState(final List<String> ovfUrls,
+        final Integer idEnterprise, final Integer datacenterId)
     {
-        OVFPackageListsDto packageLists = getOVFPackageLists(idEnterprise);
+        final DataResult<List<OVFPackageInstanceStatus>> result =
+            new DataResult<List<OVFPackageInstanceStatus>>();
+        final List<OVFPackageInstanceStatus> list = new LinkedList<OVFPackageInstanceStatus>();
+        for (String templateDefinitionUrl : ovfUrls)
+        {
+            list.add(getTemplateState(templateDefinitionUrl, idEnterprise, datacenterId).getData());
+        }
 
-        for (OVFPackageListDto list : packageLists.getCollection())
+        result.setSuccess(Boolean.TRUE);
+        result.setData(list);
+        return result;
+    }
+
+    @Override
+    public DataResult<OVFPackageInstanceStatus> getTemplateState(
+        final String templateDefinitionUrl, final Integer idEnterprise, final Integer datacenterId)
+    {
+        final DataResult<OVFPackageInstanceStatus> result =
+            new DataResult<OVFPackageInstanceStatus>();
+
+        final Integer templateDefinitionId =
+            getTemplateDefinitionIdByUrl(templateDefinitionUrl, idEnterprise);
+
+        final String uri =
+            createTemplateStateLink(String.valueOf(idEnterprise), String
+                .valueOf(templateDefinitionId));
+
+        ClientResponse response = resource(uri).queryParam("datacenterId", datacenterId).get();
+
+        if (response.getStatusType().getFamily() == Family.SUCCESSFUL)
+        {
+            result.setSuccess(Boolean.TRUE);
+            result.setData(createFlexOVFPackageListObject(response
+                .getEntity(TemplateStateDto.class)));
+        }
+        else
+        {
+            populateErrors(response, result, "getOVFPackageList");
+            // TODO getOVFPackageStatus messages
+        }
+
+        return result;
+    }
+
+    @Override
+    public BasicResult installTemplateDefinitionsInDatacenter(
+        final List<String> templateDefinitionUrls, final Integer idEnterprise,
+        final Integer datacenterId)
+    {
+        for (String templateDefUrl : templateDefinitionUrls)
+        {
+            installTemplateDefinitionInDatacenter(templateDefUrl, idEnterprise, datacenterId);
+        }
+
+        BasicResult result = new BasicResult();
+        result.setSuccess(true);
+        return result;
+    }
+
+    private BasicResult installTemplateDefinitionInDatacenter(final String templateDefinitionUrl,
+        final Integer idEnterprise, final Integer datacenterId)
+    {
+        final Integer templateDefinitionId =
+            getTemplateDefinitionIdByUrl(templateDefinitionUrl, idEnterprise);
+
+        final String uri =
+            createTemplateDefinitionInstallLink(String.valueOf(idEnterprise), String
+                .valueOf(templateDefinitionId));
+
+        Resource resource = resource(uri).contentType(MediaType.TEXT_PLAIN);
+        ClientResponse response = resource.post(String.valueOf(datacenterId));
+        // TODO post use the the provided mediatype both for mediatype and accepttype
+        // ClientResponse response = post(uri, String.valueOf(ovfPackageId), MediaType.TEXT_PLAIN);
+        BasicResult result = new BasicResult();
+        result.setSuccess(true);
+        if (response.getStatusType().getFamily() != Family.SUCCESSFUL)
+        {
+            logger.error("Can't install TemplateDefinition {} in dc {}", templateDefinitionUrl,
+                datacenterId);
+            result.setSuccess(false);
+            result.setMessage(response.getMessage());
+            // error cause will be shown with getOVFPackageState
+        }
+        return result;
+    }
+
+    @Override
+    public DataResult<OVFPackageInstanceStatus> uninstallTemplateDefinitionInDatacenter(
+        final String templateDefinitionUrl, final Integer idEnterprise, final Integer datacenterId)
+    {
+
+        DataResult<OVFPackageInstanceStatus> result = new DataResult<OVFPackageInstanceStatus>();
+        final Integer templateDefinitionId =
+            getTemplateDefinitionIdByUrl(templateDefinitionUrl, idEnterprise);
+
+        final String uri =
+            createTemplateDefinitionUninstallLink(String.valueOf(idEnterprise), String
+                .valueOf(templateDefinitionId));
+
+        Resource resource = resource(uri).contentType(MediaType.TEXT_PLAIN);
+        ClientResponse response = resource.post(String.valueOf(datacenterId));
+        // TODO post use the the provided mediatype both for mediatype and accepttype
+        // ClientResponse response = post(uri, String.valueOf(ovfPackageId), MediaType.TEXT_PLAIN);
+
+        if (response.getStatusType().getFamily() != Family.SUCCESSFUL)
+        {
+            logger.error("Can't install TemplateDefinition {} in dc {}", templateDefinitionUrl,
+                datacenterId);
+            populateErrors(response, result, "uninstallTemplateDefinitionInDatacenter");
+            // error cause will be shown with getOVFPackageState
+        }
+        return result;
+    }
+
+    @Override
+    public DataResult<OVFPackageList> getTemplateDefinitionList(final Integer idEnterprise,
+        final String templateDefinitionListName)
+    {
+
+        DataResult<OVFPackageList> result = new DataResult<OVFPackageList>();
+        final Integer templateDefListId =
+            getTemplateDefinitionListIdFromName(idEnterprise, templateDefinitionListName);
+        String uri =
+            createTemplateDefinitionListLink(idEnterprise.toString(), templateDefListId.toString());
+
+        ClientResponse response = get(uri);
+
+        if (response.getStatusType().getFamily() == Family.SUCCESSFUL)
+        {
+            result.setSuccess(Boolean.TRUE);
+            result.setData(createFlexOVFPackageListObject(response
+                .getEntity(TemplateDefinitionListDto.class)));
+        }
+        else
+        {
+            populateErrors(response, result, "getOVFPackageList");
+        }
+
+        return result;
+    }
+
+    private Integer getTemplateDefinitionListIdFromName(final Integer idEnterprise,
+        final String templateDefinitionListName)
+    {
+        TemplateDefinitionListsDto packageLists = getTemplateDefinitionLists(idEnterprise);
+
+        for (TemplateDefinitionListDto list : packageLists.getCollection())
         {
             final String listName = list.getName();
-            if (packageName.equalsIgnoreCase(listName))
+            if (templateDefinitionListName.equalsIgnoreCase(listName))
             {
                 return list.getId();
             }
         }
 
         final String cause =
-            String.format("Can not locat OVFPackageList named [%s] for enterprise [%s]",
-                packageName, idEnterprise);
+            String.format("Can not locat TemplateDescriptionList named [%s] for enterprise [%s]",
+                templateDefinitionListName, idEnterprise);
         final Response response = Response.status(Status.NOT_FOUND).entity(cause).build();
         throw new WebApplicationException(response);
     }
 
     @Override
-    public List<String> getOVFPackageListName(final Integer idEnterprise)
+    public DataResult<List<String>> getTemplateDefinitionListNames(final Integer idEnterprise)
     {
-        List<String> packageNameList = new LinkedList<String>();
+        DataResult<List<String>> result = new DataResult<List<String>>();
 
-        OVFPackageListsDto packageLists = getOVFPackageLists(idEnterprise);
+        List<String> templateDefListNames = new LinkedList<String>();
 
-        for (OVFPackageListDto list : packageLists.getCollection())
+        TemplateDefinitionListsDto listsDto = new TemplateDefinitionListsDto();
+        try
         {
-            packageNameList.add(list.getName());
+            listsDto = getTemplateDefinitionLists(idEnterprise);
+        }
+        catch (WebApplicationException e)
+        {
+            result.setSuccess(Boolean.FALSE);
+            result.setMessage(e.getMessage());
+            return result;
         }
 
-        return packageNameList;
+        if (listsDto == null || listsDto.getCollection().size() == 0)
+        {
+            DataResult<OVFPackageList> defaultList = addDefaultTemplateDefinitionList(idEnterprise);
+            if (defaultList == null || !defaultList.getSuccess())
+            {
+                result.setSuccess(Boolean.FALSE);
+                String message =
+                    defaultList != null ? defaultList.getMessage()
+                        : "Cannot add default respository";
+                result.setMessage(message);
+
+                return result;
+            }
+            templateDefListNames.add(defaultList.getData().getName());
+        }
+        for (TemplateDefinitionListDto list : listsDto.getCollection())
+        {
+            templateDefListNames.add(list.getName());
+        }
+        result.setSuccess(Boolean.TRUE);
+        result.setData(templateDefListNames);
+
+        return result;
+    }
+
+    private DataResult<OVFPackageList> addDefaultTemplateDefinitionList(final Integer idEnterprise)
+    {
+        String defaultTemplateRepository =
+            AbiConfigManager.getInstance().getAbiConfig().getDefaultTemplateRepository();
+        if (defaultTemplateRepository == null || defaultTemplateRepository.isEmpty())
+        {
+            logger.debug("There is no default remote repository space defined");
+            return null;
+        }
+        else
+        {
+            logger.debug("Adding default remote repository space at [{}]",
+                defaultTemplateRepository);
+            DataResult<OVFPackageList> list =
+                createTemplateDefinitionListFromOVFIndexUrl(idEnterprise, defaultTemplateRepository);
+            return list;
+
+        }
     }
 
     // XXX not used on the AppsLibraryCommand
-    private OVFPackageListsDto getOVFPackageLists(final Integer idEnterprise)
+    private TemplateDefinitionListsDto getTemplateDefinitionLists(final Integer idEnterprise)
     {
-        Resource resource = createResourceOVFPackageLists(idEnterprise);
-        ClientResponse response = resource.accept(MediaType.APPLICATION_XML).get();
 
-        final Integer httpStatus = response.getStatusCode();
-        if (httpStatus != 200)
+        String uri = createTemplateDefinitionListsLink(idEnterprise.toString());
+        ClientResponse response = get(uri);
+
+        if (response.getStatusType().getFamily() != Family.SUCCESSFUL)
         {
             throw new WebApplicationException(response(response));
         }
 
-        return response.getEntity(OVFPackageListsDto.class);
+        return response.getEntity(TemplateDefinitionListsDto.class);
     }
 
     @Override
-    public OVFPackageListDto refreshOVFPackageList(final Integer idEnterprise,
-        final String nameOvfpackageList)
+    public DataResult<OVFPackageList> refreshTemplateDefinitionListFromRepository(
+        final Integer idEnterprise, final String templateDefintionListName)
     {
-        final Integer idList = getOVFPackageListIdFromName(idEnterprise, nameOvfpackageList);
+        DataResult<OVFPackageList> result = new DataResult<OVFPackageList>();
 
-        return refreshOVFPackageList(idEnterprise, idList);
+        final Integer idList =
+            getTemplateDefinitionListIdFromName(idEnterprise, templateDefintionListName);
+        TemplateDefinitionListDto list = new TemplateDefinitionListDto();
+        try
+        {
+            list = refreshTemplateDefintionListFromRepository(idEnterprise, idList);
+        }
+        catch (WebApplicationException e)
+        {
+            result.setSuccess(Boolean.FALSE);
+            result.setMessage(e.getMessage());
+        }
+        result.setSuccess(Boolean.TRUE);
+        result.setData(createFlexOVFPackageListObject(list));
+
+        return result;
+
     }
 
-    private OVFPackageListDto refreshOVFPackageList(final Integer idEnterprise, final Integer idList)
+    private TemplateDefinitionListDto refreshTemplateDefintionListFromRepository(
+        final Integer idEnterprise, final Integer idList)
     {
-        Resource resource = createResourceOVFPackageList(idEnterprise, idList);
-        ClientResponse response =
-            resource.accept(MediaType.APPLICATION_XML).contentType(MediaType.TEXT_PLAIN).put(null);
 
-        final Integer httpStatus = response.getStatusCode();
-        if (httpStatus != 200)
+        String uri = createTemplateDefinitionListLink(idEnterprise.toString(), idList.toString());
+        ClientResponse response =
+            resource(uri).accept(MediaType.APPLICATION_XML).contentType(MediaType.TEXT_PLAIN).put(
+                null);
+
+        if (response.getStatusType().getFamily() != Family.SUCCESSFUL)
         {
             throw new WebApplicationException(response(response));
         }
 
-        return response.getEntity(OVFPackageListDto.class);
+        return response.getEntity(TemplateDefinitionListDto.class);
     }
 
+    @Deprecated
+    // TODO remove
     private static Response response(final ClientResponse response)
     {
         String cause = new String();
@@ -284,35 +493,336 @@ public class AppsLibraryStubImpl implements AppsLibraryStub
     }
 
     @Override
-    public OVFPackagesDto getOVFPackages(final Integer idEnterprise, final String nameOVFPackageList)
+    public TemplateDefinitionsDto getTemplateDefinitions(final Integer idEnterprise,
+        final String templateDefinitionListName)
     {
-        final Integer idOvfPackageList =
-            getOVFPackageListIdFromName(idEnterprise, nameOVFPackageList);
+        final Integer templateDefinitionListId =
+            getTemplateDefinitionListIdFromName(idEnterprise, templateDefinitionListName);
 
-        Resource resource = createResourceOVFPackages(idEnterprise, idOvfPackageList);
-        ClientResponse response = resource.accept(MediaType.APPLICATION_XML).get();
+        String uri =
+            createTemplateDefinitionLink(idEnterprise.toString(), templateDefinitionListId
+                .toString());
+        ClientResponse response = get(uri);
 
-        final Integer httpStatus = response.getStatusCode();
-
-        if (httpStatus != 200)
+        if (response.getStatusType().getFamily() != Family.SUCCESSFUL)
         {
             throw new WebApplicationException(response(response));
         }
 
-        return response.getEntity(OVFPackagesDto.class);
+        return response.getEntity(TemplateDefinitionsDto.class);
     }
 
-    public Resource createResourceOVFPackages(final Integer idEnterprise,
-        final Integer idOvfpackageList)
+    @Override
+    public BasicResult deleteIcon(final Integer idIcon)
     {
-        final String path =
-            ENTERPRISES_PATH + '/' + String.valueOf(idEnterprise) + '/' + OVF_PACKAGE_PATH + '/'
-                + String.valueOf(idOvfpackageList);
+        BasicResult result = new BasicResult();
 
-        Resource reso = client.resource(baseUri + "/" + path);
+        final String uri = createIconLink(idIcon);
 
-        setAuthCookie(reso);
+        ClientResponse response = delete(uri);
 
-        return reso;
+        if (response.getStatusType().getFamily() == Family.SUCCESSFUL)
+        {
+            result.setSuccess(Boolean.TRUE);
+        }
+        else
+        {
+            populateErrors(response, result, "deleteIcon");
+        }
+        return result;
+    }
+
+    @Override
+    public BasicResult editIcon(final Icon icon)
+    {
+        DataResult<Icon> result = new DataResult<Icon>();
+
+        final String uri = createIconLink(icon.getId());
+
+        IconDto iconDto = new IconDto();
+
+        iconDto.setId(icon.getId());
+        iconDto.setName(icon.getName());
+        iconDto.setPath(icon.getPath());
+
+        ClientResponse response = put(uri, iconDto);
+
+        if (response.getStatusType().getFamily() == Family.SUCCESSFUL)
+        {
+            result.setSuccess(Boolean.TRUE);
+            result.setData(createFlexIconObject(response.getEntity(IconDto.class)));
+        }
+        else
+        {
+            populateErrors(response, result, "editIcon");
+        }
+        return result;
+
+    }
+
+    @Override
+    public DataResult<List<Icon>> getIcons()
+    {
+
+        DataResult<List<Icon>> result = new DataResult<List<Icon>>();
+
+        final String uri = createIconsLink();
+
+        ClientResponse response = get(uri);
+
+        if (response.getStatusType().getFamily() == Family.SUCCESSFUL)
+        {
+            result.setSuccess(Boolean.TRUE);
+            IconsDto icons = response.getEntity(IconsDto.class);
+            List<Icon> listIcon = new ArrayList<Icon>();
+            for (IconDto icon : icons.getCollection())
+            {
+                listIcon.add(createFlexIconObject(icon));
+            }
+            result.setData(listIcon);
+        }
+        else
+        {
+            populateErrors(response, result, "getIcons");
+        }
+
+        return result;
+
+    }
+
+    public static Icon createFlexIconObject(final IconDto iconDto)
+    {
+        Icon icon = new Icon();
+        icon.setName(iconDto.getName());
+        icon.setPath(iconDto.getPath());
+        icon.setId(iconDto.getId());
+        return icon;
+    }
+
+    @Override
+    public DataResult<List<com.abiquo.abiserver.pojo.virtualimage.DiskFormatType>> getDiskFormatTypes()
+    {
+
+        DataResult<List<com.abiquo.abiserver.pojo.virtualimage.DiskFormatType>> result =
+            new DataResult<List<com.abiquo.abiserver.pojo.virtualimage.DiskFormatType>>();
+
+        final String uri = createDiskFormatTypesLink();
+
+        ClientResponse response = get(uri);
+
+        if (response.getStatusType().getFamily() == Family.SUCCESSFUL)
+        {
+            result.setSuccess(Boolean.TRUE);
+            DiskFormatTypesDto diskFormatTypes = response.getEntity(DiskFormatTypesDto.class);
+
+            List<com.abiquo.abiserver.pojo.virtualimage.DiskFormatType> listDiskFormatType =
+                new ArrayList<com.abiquo.abiserver.pojo.virtualimage.DiskFormatType>();
+            for (DiskFormatTypeDto diskFormatType : diskFormatTypes.getCollection())
+            {
+                listDiskFormatType.add(createFlexDiskFormatTypeObject(diskFormatType));
+            }
+            result.setData(listDiskFormatType);
+        }
+        else
+        {
+            populateErrors(response, result, "getDiskFormatTypes");
+        }
+
+        return result;
+
+    }
+
+    public static com.abiquo.abiserver.pojo.virtualimage.DiskFormatType createFlexDiskFormatTypeObject(
+        final DiskFormatTypeDto diskFormatTypeDto)
+    {
+        return new com.abiquo.abiserver.pojo.virtualimage.DiskFormatType(DiskFormatType
+            .fromId(diskFormatTypeDto.getId()));
+    }
+
+    protected OVFPackageList createFlexOVFPackageListObject(final TemplateDefinitionListDto listDto)
+    {
+        OVFPackageList list = new OVFPackageList();
+        list.setName(listDto.getName());
+        list.setUrl(listDto.getUrl());
+
+        List<OVFPackage> packs = new LinkedList<OVFPackage>();
+
+        if (listDto.getTemplateDefinitions() != null)
+        {
+            for (TemplateDefinitionDto packDto : listDto.getTemplateDefinitions().getCollection())
+            {
+                packs.add(createFlexOVFPackageObject(packDto));
+            }
+        }
+
+        list.setOvfpackages(packs);
+        return list;
+    }
+
+    protected OVFPackage createFlexOVFPackageObject(final TemplateDefinitionDto packDto)
+    {
+        OVFPackage pack = new OVFPackage();
+        if (packDto.getName() != null)
+        {
+            pack.setCategory(packDto.getName());
+        }
+        else
+        {
+            pack.setCategory("Others");
+        }
+        pack.setDescription(packDto.getDescription());
+        pack.setDiskFormat(String.valueOf(packDto.getDiskFormatType()));
+        pack.setDiskSizeMb(packDto.getDiskFileSize());
+        RESTLink iconLink = packDto.searchLink("icon");
+        if (iconLink != null)
+        {
+            pack.setIconUrl(iconLink.getTitle());
+        }
+
+        pack.setIdOVFPackage(packDto.getId());
+        pack.setName(packDto.getProductName()); // XXX duplicated name
+        pack.setProductName(packDto.getProductName());
+        pack.setProductUrl(packDto.getProductUrl());
+        pack.setProductVendor(packDto.getProductVendor());
+        pack.setProductVersion(packDto.getProductVersion());
+        pack.setUrl(packDto.getUrl());
+
+        return pack;
+    }
+
+    private List<OVFPackageInstanceStatus> createFlexOVFPackageListObject(
+        final TemplatesStateDto entity)
+    {
+        List<OVFPackageInstanceStatus> statusList = new LinkedList<OVFPackageInstanceStatus>();
+
+        for (TemplateStateDto statusDto : entity.getCollection())
+        {
+            statusList.add(createFlexOVFPackageListObject(statusDto));
+        }
+
+        return statusList;
+    }
+
+    protected OVFPackageInstanceStatus createFlexOVFPackageListObject(
+        final TemplateStateDto statusDto)
+    {
+        OVFPackageInstanceStatus status = new OVFPackageInstanceStatus();
+
+        status.setStatus(statusDto.getStatus().name());
+        status.setUrl(statusDto.getOvfId());
+
+        status.setError(statusDto.getErrorCause());
+
+        if (statusDto.getDownloadingProgress() != null)
+        {
+            status.setProgress(statusDto.getDownloadingProgress().floatValue());
+        }
+
+        return status;
+    }
+
+    // TODO the client should use IDS for OVFPackages .... then this code MUST die
+    private Integer getTemplateDefinitionIdByUrl(final String templateDefinitionUrl,
+        final Integer idEnterprise)
+    {
+        List<TemplateDefinitionDto> ovfs = getTemplateDefinitions(idEnterprise).getCollection();
+
+        for (TemplateDefinitionDto ovf : ovfs)
+        {
+            if (templateDefinitionUrl.equalsIgnoreCase(ovf.getUrl()))
+            {
+                return ovf.getId();
+            }
+        }
+        return null; // TODO FAIL ... see the TODO above, if there is a related bug fix it first
+    }
+
+    private TemplateDefinitionsDto getTemplateDefinitions(final Integer idEnterprise)
+    {
+        String uri = createTemplateDefinitionsLink(idEnterprise.toString());
+        ClientResponse response = get(uri);
+
+        if (response.getStatusType().getFamily() != Family.SUCCESSFUL)
+        {
+            throw new WebApplicationException(response(response));
+        }
+
+        return response.getEntity(TemplateDefinitionsDto.class);
+    }
+
+    /**
+     * CATEGORY
+     */
+
+    @Override
+    public DataResult<List<Category>> getCategories()
+    {
+
+        DataResult<List<Category>> result = new DataResult<List<Category>>();
+
+        final String uri = createCategoriesLink();
+
+        ClientResponse response = get(uri);
+
+        if (response.getStatusType().getFamily() == Family.SUCCESSFUL)
+        {
+            result.setSuccess(Boolean.TRUE);
+            CategoriesDto categoriesDto = response.getEntity(CategoriesDto.class);
+            List<Category> listCategory = new ArrayList<Category>();
+            for (CategoryDto category : categoriesDto.getCollection())
+            {
+                listCategory.add(createFlexCategoryObject(category));
+            }
+            result.setData(listCategory);
+        }
+        else
+        {
+            populateErrors(response, result, "getIcons");
+        }
+
+        return result;
+
+    }
+
+    @Override
+    public DataResult<Category> createCategory(final CategoryDto categoryDto)
+    {
+        DataResult<Category> result = new DataResult<Category>();
+
+        String uri = createCategoriesLink();
+
+        ClientResponse response = post(uri, categoryDto);
+
+        if (response.getStatusType().getFamily() == Family.SUCCESSFUL)
+        {
+            result.setSuccess(Boolean.TRUE);
+            result.setData(createFlexCategoryObject(response.getEntity(CategoryDto.class)));
+        }
+        else
+        {
+            populateErrors(response, result, "createCategory");
+        }
+
+        return result;
+    }
+
+    @Override
+    public BasicResult deleteCategory(final Integer idCategory)
+    {
+        BasicResult result = new BasicResult();
+
+        final String uri = createCategoryLink(idCategory);
+
+        ClientResponse response = delete(uri);
+
+        if (response.getStatusType().getFamily() == Family.SUCCESSFUL)
+        {
+            result.setSuccess(Boolean.TRUE);
+        }
+        else
+        {
+            populateErrors(response, result, "deleteCategory");
+        }
+        return result;
     }
 }

@@ -615,7 +615,9 @@ public class Machine extends DefaultEntityBase
 
     public final static String HYPERVISOR_PROPERTY = "hypervisor";
 
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "machine")
+    public final static String HYPERVISOR_ID_COLUMN = "hypervisor";
+
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = Hypervisor.MACHINE_PROPERTY)
     private Hypervisor hypervisor;
 
     @Required(value = false)
@@ -624,6 +626,8 @@ public class Machine extends DefaultEntityBase
         return this.hypervisor;
     }
 
+    @Deprecated
+    // use machine.createHypervisor
     public void setHypervisor(final Hypervisor hypervisor)
     {
         this.hypervisor = hypervisor;
@@ -745,7 +749,9 @@ public class Machine extends DefaultEntityBase
     public Hypervisor createHypervisor(final HypervisorType type, final String ip,
         final String ipService, final int port, final String user, final String password)
     {
-        return new Hypervisor(this, type, ip, ipService, port, user, password);
+        Hypervisor h = new Hypervisor(this, type, ip, ipService, port, user, password);
+        this.hypervisor = h;
+        return h;
     }
 
     public boolean hasFencingCapabilities()
@@ -760,7 +766,6 @@ public class Machine extends DefaultEntityBase
     }
 
     // Transient attributes needed to Management Racks functionality
-
     @Transient
     private List<String> listOfMacs;
 

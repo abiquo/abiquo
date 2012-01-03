@@ -62,11 +62,11 @@ import com.abiquo.server.core.util.network.IPNetworkRang;
 @Test(groups = {NETWORK_UNIT_TESTS})
 public class PrivateNetworkServiceTest extends AbstractUnitTest
 {
-    VirtualDatacenter vdc;
+    protected VirtualDatacenter vdc;
 
-    VLANNetwork vlan;
+    protected VLANNetwork vlan;
 
-    RemoteService rs;
+    protected RemoteService rs;
 
     @BeforeMethod(groups = {BASIC_UNIT_TESTS, NETWORK_UNIT_TESTS})
     public void setupBasicUser()

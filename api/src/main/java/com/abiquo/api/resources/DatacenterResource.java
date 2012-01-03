@@ -50,6 +50,7 @@ import com.abiquo.api.services.InfrastructureService;
 import com.abiquo.api.services.NetworkService;
 import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.model.enumerator.HypervisorType;
+import com.abiquo.model.enumerator.MachineState;
 import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.model.rest.RESTLink;
 import com.abiquo.model.util.ModelTransformer;
@@ -63,6 +64,7 @@ import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.DatacenterDto;
 import com.abiquo.server.core.infrastructure.Machine;
 import com.abiquo.server.core.infrastructure.MachineDto;
+import com.abiquo.server.core.infrastructure.MachineStateDto;
 import com.abiquo.server.core.infrastructure.MachinesDto;
 import com.abiquo.server.core.infrastructure.Rack;
 import com.abiquo.server.core.util.PagedList;
@@ -104,6 +106,14 @@ public class DatacenterResource extends AbstractResource
 
     public static final String ACTION_DISCOVER_HYPERVISOR_TYPE_REL = "hypervisor";
 
+    public static final String ACTION_MACHINES_CHECK = "action/checkmachinestate";
+
+    public static final String ACTION_MACHINES_CHECK_REL = "checkmachinestate";
+
+    public static final String ACTION_MACHINES_CHECK_IPMI = "action/checkmachineipmi";
+
+    public static final String ACTION_MACHINES_CHECK_IPMI_REL = "checkmachineipmi";
+
     public static final String IP = "ip";
 
     public static final String HYPERVISOR = "hypervisor";
@@ -119,6 +129,8 @@ public class DatacenterResource extends AbstractResource
     public static final String IP_TO = "ipTo";
 
     public static final String VSWITCH = "vswitch";
+
+    public final static String URL = "url";
 
     @Autowired
     DatacenterService service;
@@ -195,12 +207,12 @@ public class DatacenterResource extends AbstractResource
         Set<HypervisorType> types = service.getHypervisorTypes(datacenter);
 
         HypervisorTypesDto dto = new HypervisorTypesDto();
+
         dto.setCollection(new ArrayList<HypervisorType>(types));
 
         return dto;
     }
 
-    // FIXME: Not allowed right now
     @DELETE
     public void deleteDatacenter(@PathParam(DATACENTER) final Integer datacenterId)
     {
@@ -224,6 +236,10 @@ public class DatacenterResource extends AbstractResource
 
     }
 
+    // --------- //
+    // ACTIONS //
+    // --------- //
+
     /**
      * Get the hypervisor type of the specified cloud node.
      * 
@@ -240,14 +256,7 @@ public class DatacenterResource extends AbstractResource
     {
         validatePathParameters(datacenterId);
 
-        try
-        {
-            return infraService.discoverRemoteHypervisorType(datacenterId, ip).getValue();
-        }
-        catch (Exception e)
-        {
-            throw translateException(e);
-        }
+        return infraService.discoverRemoteHypervisorType(datacenterId, ip).getValue();
     }
 
     /**
@@ -316,6 +325,67 @@ public class DatacenterResource extends AbstractResource
                 IPAddress.newIPAddress(ipTo), HypervisorType.fromValue(hypervisorType), user,
                 password, port, vswitch);
         return MachinesResource.transformMachinesDto(restBuilder, machines);
+    }
+
+    /**
+     * Check the machine state and update it.
+     * 
+     * @param datacenterId The ID of the datacenter where this remote service are assigned.
+     * @param ip The IP of the target cloud node.
+     * @param hypervisorType The cloud node hypervisor type.
+     * @param user The hypervisor user.
+     * @param password The hypervisor password.
+     * @param port The hypervisor AIM port.
+     * @return The actual machine's state.
+     */
+    @GET
+    @Path(ACTION_MACHINES_CHECK)
+    public MachineStateDto checkMachineState(
+        @PathParam(DatacenterResource.DATACENTER) final Integer datacenterId,
+        @PathParam(RackResource.RACK) final Integer rackId,
+        @QueryParam("ip") @NotNull final String ip,
+        @QueryParam("hypervisor") @NotNull final HypervisorType hypervisorType,
+        @QueryParam("user") @NotNull final String user,
+        @QueryParam("password") @NotNull final String password,
+        @QueryParam("port") @NotNull final Integer port, @Context final IRESTBuilder restBuilder)
+        throws Exception
+    {
+        try
+        {
+            MachineState state =
+                infraService.checkMachineState(datacenterId, ip, hypervisorType, user, password,
+                    port);
+
+            MachineStateDto dto = new MachineStateDto();
+            dto.setState(state);
+            return dto;
+        }
+        catch (Exception e)
+        {
+            throw translateException(e);
+        }
+    }
+
+    /**
+     * Checks the ipmi configuration
+     * 
+     * @param datacenterId The ID of the datacenter where this remote service is assigned.
+     * @param ip The IP of the target cloud node.
+     * @param user The hypervisor user.
+     * @param password The hypervisor password.
+     * @param port The hypervisor AIM port.
+     */
+    @GET
+    @Path(ACTION_MACHINES_CHECK_IPMI)
+    public void isStonithUp(@PathParam(DatacenterResource.DATACENTER) final Integer datacenterId,
+        @PathParam(RackResource.RACK) final Integer rackId,
+        @PathParam(MachineResource.MACHINE) final Integer machineId,
+        @QueryParam("ip") @NotNull final String ip, @QueryParam("user") @NotNull final String user,
+        @QueryParam("password") @NotNull final String password,
+        @QueryParam("port") @NotNull final Integer port, @Context final IRESTBuilder restBuilder)
+        throws Exception
+    {
+        infraService.isStonithUp(datacenterId, ip, user, password, port);
     }
 
     // no resources response

@@ -21,25 +21,67 @@
 
 package com.abiquo.abiserver.commands.stub.impl;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.commons.codec.binary.Base64;
 import org.apache.wink.client.ClientResponse;
 import org.apache.wink.common.internal.utils.UriHelper;
 
 import com.abiquo.abiserver.commands.stub.AbstractAPIStub;
 import com.abiquo.abiserver.commands.stub.MachineResourceStub;
+import com.abiquo.abiserver.pojo.infrastructure.HypervisorRemoteAccessInfo;
 import com.abiquo.abiserver.pojo.infrastructure.PhysicalMachine;
+import com.abiquo.abiserver.pojo.infrastructure.VirtualMachine;
 import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.result.DataResult;
 import com.abiquo.abiserver.pojo.ucs.BladeLocatorLed;
 import com.abiquo.abiserver.pojo.ucs.LogicServer;
+import com.abiquo.server.core.cloud.VirtualMachineDto;
+import com.abiquo.server.core.cloud.VirtualMachinesDto;
 import com.abiquo.server.core.infrastructure.MachineDto;
 
 public class MachineResourceStubImpl extends AbstractAPIStub implements MachineResourceStub
 {
+
+    @Override
+    public DataResult<HypervisorRemoteAccessInfo> getHypervisorRemoteAccess(
+        final PhysicalMachine machine)
+    {
+        String uri = createMachineLink(machine) + "?credentials=true";
+
+        DataResult<HypervisorRemoteAccessInfo> result =
+            new DataResult<HypervisorRemoteAccessInfo>();
+
+        ClientResponse response = get(uri);
+        if (response.getStatusCode() == 200)
+        {
+            MachineDto dto = response.getEntity(MachineDto.class);
+
+            HypervisorRemoteAccessInfo info = new HypervisorRemoteAccessInfo();
+
+            String encodedUser = new String(Base64.encodeBase64(dto.getUser().getBytes()));
+            String encodedPass = new String(Base64.encodeBase64(dto.getPassword().getBytes()));
+
+            info.setParam1(encodedUser);
+            info.setParam2(encodedPass);
+
+            result.setSuccess(true);
+            result.setData(info);
+        }
+        else
+        {
+            populateErrors(response, result, "getMachineWithCredentials");
+        }
+
+        return result;
+    }
+
     @Override
     public BasicResult deleteNotManagedVirtualMachines(final PhysicalMachine machine)
     {
         String uri = createMachineLink(machine);
-        uri = UriHelper.appendPathToBaseUri(uri, "action/virtualmachines");
+        uri = UriHelper.appendPathToBaseUri(uri, "/virtualmachines");
 
         BasicResult result = new BasicResult();
 
@@ -141,4 +183,34 @@ public class MachineResourceStubImpl extends AbstractAPIStub implements MachineR
         // PREMIUM
         return null;
     }
+
+    @Override
+    public BasicResult getVirtualMachinesFromMachine(final Integer datacenterId,
+        final Integer rackId, final Integer machineId)
+    {
+        String uri = createMachineLinkVms(datacenterId, rackId, machineId);
+
+        DataResult<List<VirtualMachine>> result = new DataResult<List<VirtualMachine>>();
+
+        ClientResponse response = get(uri);
+        if (response.getStatusCode() == 200)
+        {
+            VirtualMachinesDto dtos = response.getEntity(VirtualMachinesDto.class);
+            List<VirtualMachine> vms = new ArrayList<VirtualMachine>();
+            for (VirtualMachineDto dto : dtos.getCollection())
+            {
+                VirtualMachine vm = VirtualMachine.createFlexObject(dto);
+                vms.add(vm);
+            }
+            result.setData(vms);
+            result.setSuccess(Boolean.TRUE);
+        }
+        else
+        {
+            populateErrors(response, result, "getVirtualMachinesFromMachine");
+        }
+
+        return result;
+    }
+
 }

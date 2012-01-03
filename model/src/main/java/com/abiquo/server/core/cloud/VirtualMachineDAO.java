@@ -24,21 +24,23 @@ package com.abiquo.server.core.cloud;
 import java.util.List;
 
 import javax.persistence.EntityManager;
+import javax.persistence.LockModeType;
 import javax.persistence.TypedQuery;
 
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.Criteria;
 import org.hibernate.Query;
+import org.hibernate.Session;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 
-import com.abiquo.model.enumerator.VirtualMachineState;
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.infrastructure.Datacenter;
+import com.softwarementors.bzngine.entities.PersistentEntity;
 
 @Repository("jpaVirtualMachineDAO")
 public class VirtualMachineDAO extends DefaultDAOBase<Integer, VirtualMachine>
@@ -46,6 +48,13 @@ public class VirtualMachineDAO extends DefaultDAOBase<Integer, VirtualMachine>
     public static final String BY_VAPP_AND_ID = "SELECT nvi.virtualMachine "
         + "FROM NodeVirtualImage nvi "
         + "WHERE nvi.virtualAppliance.id = :vapp_id AND nvi.virtualMachine.id = :vm_id";
+
+    private static Criterion equalName(final String name)
+    {
+        assert !StringUtils.isEmpty(name);
+
+        return Restrictions.eq(Datacenter.NAME_PROPERTY, name);
+    }
 
     private static Criterion sameEnterprise(final Enterprise enterprise)
     {
@@ -76,16 +85,17 @@ public class VirtualMachineDAO extends DefaultDAOBase<Integer, VirtualMachine>
         super(VirtualMachine.class, entityManager);
     }
 
-    public void deleteNotManagedVirtualMachines(final Hypervisor hypervisor)
+    public List<VirtualMachine> getNotManagedVirtualMachines(final Hypervisor hypervisor)
     {
         Criteria criteria = createCriteria(sameHypervisor(hypervisor), notManaged());
-        List<VirtualMachine> notManaged = getResultList(criteria);
+        return getResultList(criteria);
+    }
 
-        for (VirtualMachine vm : notManaged)
-        {
-            remove(vm);
-        }
-        flush();
+    public boolean existsAnyWithName(final String name)
+    {
+        assert !StringUtils.isEmpty(name);
+
+        return this.existsAnyByCriterions(equalName(name));
     }
 
     public VirtualMachine findByIdByVirtualApp(final VirtualAppliance vapp, final Integer vmId)
@@ -116,6 +126,15 @@ public class VirtualMachineDAO extends DefaultDAOBase<Integer, VirtualMachine>
         criteria.addOrder(Order.asc(VirtualMachine.NAME_PROPERTY));
         List<VirtualMachine> result = getResultList(criteria);
         return result;
+    }
+
+    public VirtualMachine findVirtualMachineByHypervisor(final Hypervisor hypervisor,
+        final Integer virtualMachineId)
+    {
+        Criteria criteria =
+            createCriteria(sameHypervisor(hypervisor),
+                Restrictions.eq(PersistentEntity.ID_PROPERTY, virtualMachineId));
+        return (VirtualMachine) criteria.uniqueResult();
     }
 
     public List<VirtualMachine> findVirtualMachines(final Hypervisor hypervisor)
@@ -190,17 +209,59 @@ public class VirtualMachineDAO extends DefaultDAOBase<Integer, VirtualMachine>
         return Restrictions.eq(VirtualMachine.ID_TYPE_PROPERTY, VirtualMachine.NOT_MANAGED);
     }
 
-    private static Criterion equalName(final String name)
+    private Criteria temporalVirtualMachine(final Integer vmachineId)
     {
-        assert !StringUtils.isEmpty(name);
-
-        return Restrictions.eq(Datacenter.NAME_PROPERTY, name);
+        return createCriteria(Restrictions.eq(VirtualMachine.TEMPORAL_PROPERTY, vmachineId));
     }
 
-    public boolean existsAnyWithName(final String name)
+    public VirtualMachine findBackup(final VirtualMachine vmachine)
     {
-        assert !StringUtils.isEmpty(name);
+        Session session = getSession();
+        try
+        {
+            session.disableFilter(VirtualMachine.NOT_TEMP);
+            session.enableFilter(VirtualMachine.ONLY_TEMP);
 
-        return this.existsAnyByCriterions(equalName(name));
+            return getSingleResult(temporalVirtualMachine(vmachine.getId()));
+        }
+        finally
+        {
+            session.enableFilter(VirtualMachine.NOT_TEMP);
+            session.disableFilter(VirtualMachine.ONLY_TEMP);
+        }
+    }
+
+    public void refreshLock(final VirtualMachine vm)
+    {
+        // We force the refresh from database (PESSIMISTIC) and increment the version of the object
+        // (INCREMENT) to ensure that no other code will be using the "unlocked" object.
+        getEntityManager().refresh(vm, LockModeType.PESSIMISTIC_FORCE_INCREMENT);
+    }
+
+    public void refresh(final VirtualMachine vm)
+    {
+        getEntityManager().refresh(vm);
+    }
+
+    public void detachHypervisor(final VirtualMachine vm)
+    {
+        getEntityManager().detach(vm.getHypervisor());
+    }
+
+    public void detachVirtualMachine(final VirtualMachine vm)
+    {
+        getEntityManager().detach(vm);
+    }
+
+    public void deleteNotManagedVirtualMachines(final Hypervisor hypervisor)
+    {
+        Criteria criteria = createCriteria(sameHypervisor(hypervisor), notManaged());
+        List<VirtualMachine> notManaged = getResultList(criteria);
+
+        for (VirtualMachine vm : notManaged)
+        {
+            remove(vm);
+        }
+        flush();
     }
 }

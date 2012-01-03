@@ -179,7 +179,7 @@
 					this._infoToolTip = resourceManager.getString('VirtualAppliance','TOOL_TIP_NODE_DELETED');
 				}else if(NodeVirtualImage(this._node).virtualMachine){
 					//Need to be added
-					if(NodeVirtualImage(this._node).virtualMachine.state.id == net.undf.abicloud.vo.infrastructure.State.NOT_DEPLOYED){							
+					if(NodeVirtualImage(this._node).virtualMachine.state.description == net.undf.abicloud.vo.infrastructure.State.NOT_ALLOCATED.description){							
 						this._pendingStatus = "NodeVirtualImageAdded";
 					}
 				}else{
@@ -403,9 +403,12 @@
             	if(event && event.virtualMachine){
                     if(NodeVirtualImage(this._node) && NodeVirtualImage(this._node).virtualMachine){
                     	if(NodeVirtualImage(this._node).virtualMachine.id == event.virtualMachine.id){
+
                     		//Update virtual machine state
-                    		NodeVirtualImage(this._node).virtualMachine.state = event.virtualMachine.state;
-                    		if(event.virtualMachine.state.id == net.undf.abicloud.vo.infrastructure.State.IN_PROGRESS){
+                    		//FIXME in-master NodeVirtualImage(this._node).virtualMachine.state = event.virtualMachine.state;
+                    		//FIXME in-master if(event.virtualMachine.state.id == net.undf.abicloud.vo.infrastructure.State.IN_PROGRESS){
+                    		
+                    		if(event.virtualMachine.state.description == net.undf.abicloud.vo.infrastructure.State.LOCKED.description){
                     			this._canBeModified = false;
                     		}
                     	}
@@ -420,7 +423,7 @@
             private function onRollOver():void
             {
                 if(this._node && this._node is NodeVirtualImage && NodeVirtualImage(this._node).virtualMachine){
-	                buttonsContainer.visible = this._canBeModified && NodeVirtualImage(this._node).virtualMachine.state.id != net.undf.abicloud.vo.infrastructure.State.IN_PROGRESS;
+	                buttonsContainer.visible = this._canBeModified && NodeVirtualImage(this._node).virtualMachine.state.description != net.undf.abicloud.vo.infrastructure.State.LOCKED.description;
                 }else{
                 	buttonsContainer.visible = true;
                 }
@@ -446,7 +449,7 @@
                 
                 //We add the remove state
                 if(NodeVirtualImage(this._node).virtualMachine){
-	                if(NodeVirtualImage(this._node).virtualMachine.state.id == net.undf.abicloud.vo.infrastructure.State.RUNNING){	
+	                if(NodeVirtualImage(this._node).virtualMachine.state.description == net.undf.abicloud.vo.infrastructure.State.ON.description){	
 	
 		                this.enabled = false;
 						this._pendingStatus = "NodeVirtualImageDeleted";   

@@ -161,17 +161,18 @@ public class EnterprisesResourceStubImpl extends AbstractAPIStub implements Ente
     {
         EnterpriseDto dto = new EnterpriseDto();
         dto.setName(enterprise.getName());
-        dto.setIsReservationRestricted(enterprise.getIsReservationRestricted());
-        if (enterprise.getIdPricingTemplate() != null)
-        {
-            dto.addLink(new RESTLink("pricingtemplate", createPricingTemplateLink(enterprise
-                .getIdPricingTemplate())));
-        }
         dto.setChefURL(enterprise.getChefURL());
         dto.setChefClient(enterprise.getChefClient());
         dto.setChefValidator(enterprise.getChefValidator());
         dto.setChefClientCertificate(enterprise.getChefClientCertificate());
         dto.setChefValidatorCertificate(enterprise.getChefValidatorCertificate());
+        if (enterprise.getIdPricingTemplate() != null)
+        {
+            dto.addLink(new RESTLink("pricingtemplate", createPricingTemplateLink(enterprise
+                .getIdPricingTemplate())));
+        }
+
+        dto.setIsReservationRestricted(enterprise.getIsReservationRestricted());
 
         ResourceAllocationLimit limits = enterprise.getLimits();
         return (EnterpriseDto) fillLimits(dto, limits);

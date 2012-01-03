@@ -53,17 +53,16 @@ import com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.Virtualap
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualmachineHB;
 import com.abiquo.abiserver.commands.BasicCommand;
 import com.abiquo.abiserver.commands.InfrastructureCommand;
-import com.abiquo.abiserver.commands.RemoteServicesCommand;
 import com.abiquo.abiserver.commands.stub.APIStubFactory;
 import com.abiquo.abiserver.commands.stub.EnterprisesResourceStub;
 import com.abiquo.abiserver.commands.stub.VirtualMachineResourceStub;
 import com.abiquo.abiserver.commands.stub.impl.EnterprisesResourceStubImpl;
 import com.abiquo.abiserver.commands.stub.impl.VirtualMachineResourceStubImpl;
-import com.abiquo.abiserver.eventing.EventingException;
-import com.abiquo.abiserver.eventing.EventingSupport;
 import com.abiquo.abiserver.exception.InfrastructureCommandException;
 import com.abiquo.abiserver.exception.InvalidIPAddressException;
+import com.abiquo.abiserver.exception.NotEnoughResourcesException;
 import com.abiquo.abiserver.exception.PersistenceException;
+import com.abiquo.abiserver.exception.SoftLimitExceededException;
 import com.abiquo.abiserver.networking.IPAddress;
 import com.abiquo.abiserver.persistence.DAOFactory;
 import com.abiquo.abiserver.persistence.dao.infrastructure.DataCenterDAO;
@@ -124,9 +123,6 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
 
     private IInfrastructureWS infrastructureWS;
 
-    // TODO autowire
-    private final RemoteServicesCommand rsCommand = new RemoteServicesCommandImpl();
-
     public InfrastructureCommandImpl()
     {
         factory = HibernateDAOFactory.instance();
@@ -134,8 +130,9 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
         try
         {
             infrastructureWS =
-                (IInfrastructureWS) Thread.currentThread().getContextClassLoader().loadClass(
-                    "com.abiquo.abiserver.abicloudws.InfrastructureWSPremium").newInstance();
+                (IInfrastructureWS) Thread.currentThread().getContextClassLoader()
+                    .loadClass("com.abiquo.abiserver.abicloudws.InfrastructureWSPremium")
+                    .newInstance();
         }
         catch (Exception e)
         {
@@ -217,8 +214,8 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
             conjunction.add(Restrictions.isNull("rack"));
             conjunction.add(Restrictions.eq("dataCenter", datacenterPojo));
             ArrayList<PhysicalmachineHB> physicalMachinesWORack =
-                (ArrayList<PhysicalmachineHB>) session.createCriteria(PhysicalmachineHB.class).add(
-                    conjunction).list();
+                (ArrayList<PhysicalmachineHB>) session.createCriteria(PhysicalmachineHB.class)
+                    .add(conjunction).list();
             for (PhysicalmachineHB physicalMachineHB : physicalMachinesWORack)
             {
                 infrastructures.add(physicalMachineHB.toPojo());
@@ -237,8 +234,7 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
                 transaction.rollback();
             }
 
-            errorManager.reportError(InfrastructureCommandImpl.resourceManager, dataResult,
-                "getInfrastructureByDataCenter", e);
+            logger.trace("Unexpected database error when refreshing infrastructure data", e);
         }
 
         return dataResult;
@@ -405,17 +401,17 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
             "http://" + hypervisor.getIp() + ":" + hypervisor.getPort() + "/";
 
         HypervisorType hypervisorType = hypervisor.toPojoHB().getType();
-        try
-        {
-            EventingSupport.monitorPhysicalMachine(virtualSystemAddress, hypervisorType,
-                virtualSystemMonitorAddress, user, password);
-        }
-        catch (EventingException e)
-        {
-            errorManager.reportError(InfrastructureCommandImpl.resourceManager, dataResult,
-                "createPhysicalMachine", e);
-            return dataResult;
-        }
+        // try
+        // {
+        // EventingSupport.monitorPhysicalMachine(virtualSystemAddress, hypervisorType,
+        // virtualSystemMonitorAddress, user, password);
+        // }
+        // catch (EventingException e)
+        // {
+        // errorManager.reportError(InfrastructureCommandImpl.resourceManager, dataResult,
+        // "createPhysicalMachine", e);
+        // return dataResult;
+        // }
 
         try
         {
@@ -471,8 +467,8 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
             // Returning the PhysicalMachine and the Hypervisors created to the
             // client
             PhysicalmachineHB physicalMachineHBCreated =
-                (PhysicalmachineHB) session.get(PhysicalmachineHB.class, physicalMachineHB
-                    .getIdPhysicalMachine());
+                (PhysicalmachineHB) session.get(PhysicalmachineHB.class,
+                    physicalMachineHB.getIdPhysicalMachine());
             PhysicalMachine physicalMachineCreated = physicalMachineHBCreated.toPojo();
 
             transaction.commit();
@@ -493,8 +489,8 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
                 userSession, physicalMachine.getDataCenter(), null, "Physical machine '"
                     + physicalMachine.getName() + "' has been created [" + physicalMachine.getCpu()
                     + "CPUs, " + physicalMachine.getRam() + " RAM, " + physicalMachine.getHd()
-                    + " HD, " + hyperName + " hypervisor]", null, (Rack) physicalMachine
-                    .getAssignedTo(), physicalMachine, null, null);
+                    + " HD, " + hyperName + " hypervisor]", null,
+                (Rack) physicalMachine.getAssignedTo(), physicalMachine, null, null);
 
         }
         catch (Exception e)
@@ -513,16 +509,16 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
             traceLog(SeverityType.CRITICAL, ComponentType.MACHINE, EventType.MACHINE_CREATE,
                 userSession, physicalMachine.getDataCenter(), null, e.getMessage(), null,
                 (Rack) physicalMachine.getAssignedTo(), physicalMachine, null, null);
-            try
-            {
-                EventingSupport.unMonitorPhysicalMachine(virtualSystemAddress, hypervisorType,
-                    virtualSystemMonitorAddress, user, password);
-            }
-            catch (EventingException e1)
-            {
-                errorManager.reportError(InfrastructureCommandImpl.resourceManager, dataResult,
-                    "createPhysicalMachine", e1);
-            }
+            // try
+            // {
+            // EventingSupport.unMonitorPhysicalMachine(virtualSystemAddress, hypervisorType,
+            // virtualSystemMonitorAddress, user, password);
+            // }
+            // catch (EventingException e1)
+            // {
+            // errorManager.reportError(InfrastructureCommandImpl.resourceManager, dataResult,
+            // "createPhysicalMachine", e1);
+            // }
         }
         return dataResult;
 
@@ -546,9 +542,6 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
 
             PhysicalMachineDAO machineDao = factory.getPhysicalMachineDAO();
             PhysicalmachineHB machine = machineDao.findById(physicalMachine.getId());
-            List<VirtualmachineHB> vms =
-                machineDao.getDeployedVirtualMachines(machine.getIdPhysicalMachine());
-
             HypervisorHB hypervisor = machine.getHypervisor();
 
             try
@@ -581,21 +574,6 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
 
             String virtualSystemMonitorAddress =
                 RemoteServiceUtils.getVirtualSystemMonitorFromPhysicalMachine(physicalMachine);
-
-            for (VirtualmachineHB vm : vms)
-            {
-                try
-                {
-                    EventingSupport.unsubscribe(vm.getName(), virtualSystemMonitorAddress);
-                }
-                catch (EventingException e)
-                {
-                    logger.debug(e.getMessage());
-                }
-            }
-
-            EventingSupport.unMonitorPhysicalMachine(virtualSystemAddress, hypervisor.getType(),
-                virtualSystemMonitorAddress, user, password);
 
             factory.endConnection();
 
@@ -662,14 +640,14 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
 
         // Update information to delete PhysicalMachine reference and update state
         vMachine.setDatastore(null);
-        vMachine.setState(StateEnum.NOT_DEPLOYED);
+        vMachine.setState(StateEnum.ALLOCATED);
         vMachine.setHypervisor(null);
 
         vmDAO.makePersistent(vMachine);
 
         VirtualappHB vApp = vmDAO.findVirtualAppFromVM(vMachine.getIdVm());
 
-        StateEnum newState = StateEnum.NOT_DEPLOYED;
+        StateEnum newState = StateEnum.ALLOCATED;
 
         Collection<NodeHB< ? >> nodes = vApp.getNodesHB();
 
@@ -678,16 +656,16 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
             for (NodeHB< ? > node : nodes)
             {
                 NodeVirtualImageHB nVI = (NodeVirtualImageHB) node;
-                if (nVI.getVirtualMachineHB().getState() != StateEnum.NOT_DEPLOYED)
+                if (nVI.getVirtualMachineHB().getState() != StateEnum.ALLOCATED)
                 {
-                    newState = StateEnum.APPLY_CHANGES_NEEDED;
+                    newState = StateEnum.NEEDS_SYNC;
                     break;
                 }
             }
         }
 
         vApp.setState(newState);
-        vApp.setSubState(newState);
+        // vApp.setSubState(newState);
         vAppDAO.makePersistent(vApp);
 
         // Finally we update the userResources
@@ -695,8 +673,8 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
 
         traceLog(SeverityType.WARNING, ComponentType.VIRTUAL_MACHINE,
             com.abiquo.tracer.EventType.VM_UNDEPLOY_FORCED, user, null, vApp
-                .getVirtualDataCenterHB().getName(), "FORCED UNDEPLOY of the VM" + " ["
-                + vMachine.getName() + "] of the enterprise " + "["
+                .getVirtualDataCenterHB().getName(),
+            "FORCED UNDEPLOY of the VM" + " [" + vMachine.getName() + "] of the enterprise " + "["
                 + vMachine.getEnterpriseHB().getName() + "], Virtual Appliance [" + vApp.getName()
                 + "] on VirtualDataCenter [" + vApp.getVirtualDataCenterHB().getName() + "]"
                 + " updated, please force re-deploy", vApp.toPojo(), null, null, null, null);
@@ -807,8 +785,8 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
 
             // Log the event
             traceLog(SeverityType.CRITICAL, ComponentType.MACHINE, EventType.MACHINE_MODIFY,
-                userSession, physicalMachineCreation.getPhysicalMachine().getDataCenter(), null, e
-                    .getMessage(), null, (Rack) physicalMachineCreation.getPhysicalMachine()
+                userSession, physicalMachineCreation.getPhysicalMachine().getDataCenter(), null,
+                e.getMessage(), null, (Rack) physicalMachineCreation.getPhysicalMachine()
                     .getAssignedTo(), physicalMachineHb.toPojo(), null, null);
 
         }
@@ -986,7 +964,7 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
 
             // Generate the Virtual Machine that will be created
             VirtualmachineHB virtualMachineHB = virtualMachine.toPojoHB();
-            virtualMachineHB.setState(StateEnum.NOT_DEPLOYED);
+            virtualMachineHB.setState(StateEnum.NOT_ALLOCATED);
             virtualMachineHB.setUuid(UUID.randomUUID().toString());
 
             session.save(virtualMachineHB);
@@ -1095,133 +1073,11 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
      * .pojo.authentication.UserSession, com.abiquo.abiserver.pojo.infrastructure.VirtualMachine)
      */
     @Override
+    @Deprecated
     public BasicResult editVirtualMachine(final UserSession userSession,
         final VirtualMachine virtualMachine)
     {
-        BasicResult basicResult = new BasicResult();
-        basicResult.setSuccess(true);
-        Session session = null;
-        Transaction transaction = null;
-        try
-        {
-            DAOFactory daoF = HibernateDAOFactory.instance();
-            session = HibernateUtil.getSession();
-            transaction = session.beginTransaction();
-
-            VirtualmachineHB virtualMachineHB =
-                (VirtualmachineHB) session.get(VirtualmachineHB.class, virtualMachine.getId());
-
-            VirtualappHB vapp =
-                daoF.getVirtualMachineDAO().findVirtualAppFromVM(virtualMachineHB.getIdVm());
-
-            final int virtualDatacenterId = vapp.getVirtualDataCenterHB().getIdVirtualDataCenter();
-            final int virtualApplianceId = vapp.getIdVirtualApp();
-
-            if (virtualMachineHB.getState() != StateEnum.NOT_DEPLOYED)
-            {
-
-                if (virtualMachineHB.getHypervisor() != null
-                    && virtualMachineHB.getHypervisor().getPhysicalMachine() != null)
-                {
-                    // Check using the API if some limits are exceeded or the target hypervisors
-                    // have enought resources
-                    if (virtualMachine.getCpu() != virtualMachineHB.getCpu()
-                        || virtualMachine.getRam() != virtualMachineHB.getRam())
-                    {
-                        VirtualMachineResourceStub vmachineResource =
-                            APIStubFactory.getInstance(userSession,
-                                new VirtualMachineResourceStubImpl(),
-                                VirtualMachineResourceStub.class);
-
-                        // DAOFactory daoF = HibernateDAOFactory.instance();
-                        //
-                        // VirtualappHB vapp =
-                        // daoF.getVirtualMachineDAO().findVirtualAppFromVM(
-                        // virtualMachineHB.getIdVm());
-
-                        // final int virtualDatacenterId =
-                        // vapp.getVirtualDataCenterHB().getIdVirtualDataCenter();
-                        // final int virtualApplianceId = vapp.getIdVirtualApp();
-
-                        final int newcpu = virtualMachine.getCpu();
-                        final int newram = virtualMachine.getRam();
-
-                        try
-                        {
-                            vmachineResource.checkEdit(userSession, virtualDatacenterId,
-                                virtualApplianceId, virtualMachineHB.getIdVm(), newcpu, newram);
-                        }
-                        catch (Exception e)
-                        {
-                            basicResult.setSuccess(false);
-                            basicResult.setMessage(e.toString());
-                            // errorManager.reportError(resourceManager, basicResult,
-                            // "editVirtualMachine", e.toString());
-                            if (e.getMessage().startsWith("LIMIT_EXCEEDED"))
-                            {
-                                basicResult.setResultCode(BasicResult.HARD_LIMT_EXCEEDED);
-                            }
-                            return basicResult;
-                        }
-                    }
-                }
-
-                VirtualMachine vmPojo = virtualMachineHB.toPojo();
-
-                try
-                {
-                    ignoreVSMEventsIfNecessary(virtualMachineHB, vmPojo);
-                    basicResult = getInfrastructureWS().editVirtualMachine(virtualMachine);
-                }
-                finally
-                {
-                    listenAgainToVSMIfNecessary(virtualMachineHB, vmPojo);
-                }
-            }
-
-            if (basicResult.getSuccess())
-            {
-
-                VirtualMachineResourceStub vmachineResource =
-                    APIStubFactory.getInstance(userSession, new VirtualMachineResourceStubImpl(),
-                        VirtualMachineResourceStub.class);
-
-                // DAOFactory daoF = HibernateDAOFactory.instance();
-                //
-                // VirtualappHB vapp =
-                // daoF.getVirtualMachineDAO().findVirtualAppFromVM(virtualMachineHB.getIdVm());
-
-                // final int virtualDatacenterId =
-                // vapp.getVirtualDataCenterHB().getIdVirtualDataCenter();
-                // final int virtualApplianceId = vapp.getIdVirtualApp();
-
-                vmachineResource.updateVirtualMachine(virtualDatacenterId, virtualApplianceId,
-                    virtualMachine);
-
-            }
-            else
-            {
-                errorManager.reportError(resourceManager, basicResult, "editVirtualMachine",
-                    basicResult.getMessage());
-                return basicResult;
-            }
-
-        }
-        catch (Exception e)
-        {
-            if (transaction != null && transaction.isActive())
-            {
-                transaction.rollback();
-            }
-
-            errorManager.reportError(resourceManager, basicResult, "editVirtualMachine", e);
-        }
-
-        basicResult.setSuccess(true);
-        basicResult.setMessage(InfrastructureCommandImpl.resourceManager
-            .getMessage("editVirtualMachine.success"));
-
-        return basicResult;
+        throw new RuntimeException("move not use editVirtualMachine");
     }
 
     /**
@@ -1291,7 +1147,7 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
                     basicResult =
                         setVirtualMachineState(virtualMachine, AbiCloudConstants.RESUME_ACTION);
                     break;
-                case POWERED_OFF:
+                case OFF:
                     basicResult =
                         setVirtualMachineState(virtualMachine, AbiCloudConstants.POWERUP_ACTION);
                     break;
@@ -1320,7 +1176,7 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
             dataResult.setMessage(basicResult.getMessage());
             dataResult.setSuccess(basicResult.getSuccess());
             // Decomment this to enable the state changes through eventing
-            State inProgressState = new State(StateEnum.IN_PROGRESS);
+            State inProgressState = new State(StateEnum.LOCKED);
             dataResult.setData(inProgressState);
 
         }
@@ -1390,7 +1246,6 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
                         + virtualMachine.getName() + " because datacenter isn't well configured.",
                     null, machine.getRack(), machine, userSession.getUser(),
                     userSession.getEnterpriseName());
-
                 // Generating the result
                 dataResult.setMessage(basicResult.getMessage());
                 dataResult.setSuccess(basicResult.getSuccess());
@@ -1400,7 +1255,7 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
 
             dataResult.setMessage(basicResult.getMessage());
             dataResult.setSuccess(basicResult.getSuccess());
-            State inProgressState = new State(StateEnum.IN_PROGRESS);
+            State inProgressState = new State(StateEnum.LOCKED);
             dataResult.setData(inProgressState);
 
         }
@@ -1488,7 +1343,7 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
 
                 dataResult.setMessage(basicResultPowerUP.getMessage());
                 dataResult.setSuccess(basicResultPowerUP.getSuccess());
-                State inProgressState = new State(StateEnum.IN_PROGRESS);
+                State inProgressState = new State(StateEnum.LOCKED);
                 dataResult.setData(inProgressState);
             }
         }
@@ -1577,7 +1432,7 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
             }
             dataResult.setMessage(basicResult.getMessage());
             dataResult.setSuccess(basicResult.getSuccess());
-            State inProgressState = new State(StateEnum.IN_PROGRESS);
+            State inProgressState = new State(StateEnum.LOCKED);
             dataResult.setData(inProgressState);
 
         }
@@ -1641,19 +1496,19 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
                 (VirtualmachineHB) session.get(VirtualmachineHB.class, virtualMachine.getId());
 
             if (virtualMachine.getState().toEnum() == virtualMachineHB.getState()
-                && virtualMachineHB.getState() != StateEnum.IN_PROGRESS)
+                && virtualMachineHB.getState() != StateEnum.LOCKED)
             {
                 // The given virtual machine is up to date, and is not in
                 // progress.
                 // We set it now to IN_PROGRESS, and return that it is allowed
                 // to manipulate it
-                virtualMachineHB.setState(StateEnum.IN_PROGRESS);
+                virtualMachineHB.setState(StateEnum.LOCKED);
 
                 session.update(virtualMachineHB);
 
                 // Generating the result
                 currentStateAndAllow.setSuccess(true);
-                currentStateAndAllow.setData(new State(StateEnum.IN_PROGRESS));
+                currentStateAndAllow.setData(new State(StateEnum.LOCKED));
             }
             else
             {
@@ -1714,8 +1569,8 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
 
             // Getting the virtual machines updated from the data base
             ArrayList<VirtualmachineHB> virtualMachinesHBChecked =
-                (ArrayList<VirtualmachineHB>) session.createCriteria(VirtualmachineHB.class).add(
-                    Restrictions.in("idVm", virtualMachinesToCheckIds)).list();
+                (ArrayList<VirtualmachineHB>) session.createCriteria(VirtualmachineHB.class)
+                    .add(Restrictions.in("idVm", virtualMachinesToCheckIds)).list();
 
             // Returning the result
             for (VirtualmachineHB virtualMachineHB : virtualMachinesHBChecked)
@@ -1883,8 +1738,7 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
         // IP not filed
         if (ip == null || ip.equals(""))
         {
-            throw new InfrastructureCommandException(resourceManager
-                .getMessage("assignPublicIPDatacenter.NOIP.extraMsg"),
+            throw new InfrastructureCommandException(resourceManager.getMessage("assignPublicIPDatacenter.NOIP.extraMsg"),
                 AbiCloudError.INFRASTRUCTURE_ERROR);
         }
 
@@ -1895,8 +1749,7 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
         }
         catch (InvalidIPAddressException e)
         {
-            throw new InfrastructureCommandException(resourceManager
-                .getMessage("assignPublicIPDatacenter.IPNOWELLFORMED.extraMsg"),
+            throw new InfrastructureCommandException(resourceManager.getMessage("assignPublicIPDatacenter.IPNOWELLFORMED.extraMsg"),
                 AbiCloudError.INFRASTRUCTURE_ERROR);
         }
     }
@@ -1915,8 +1768,7 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
         if (physicalMachine.getCpu() <= 0 || physicalMachine.getRam() <= 0
             || physicalMachine.getHd() <= 0)
         {
-            throw new InfrastructureCommandException(resourceManager
-                .getMessage("checkPhysicalMachine.zerovalues.extraMsg"),
+            throw new InfrastructureCommandException(resourceManager.getMessage("checkPhysicalMachine.zerovalues.extraMsg"),
                 AbiCloudError.INFRASTRUCTURE_ERROR);
         }
 
@@ -2002,37 +1854,6 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
         return updateUsedResourcesByDatacenter(dataCenter.getIdDataCenter());
     }
 
-    public static void ignoreVSMEventsIfNecessary(final VirtualmachineHB vmHB,
-        final VirtualMachine vmPojo) throws Exception
-    {
-        // In XEN and KVM, we need to redefine the domain again, so to void receiving
-        // invalid destruction events, we unsubscribe from the VSM while the operation
-        // is in progress
-        HypervisorType targetHypervisor = vmHB.getHypervisor().getType();
-        if (targetHypervisor == HypervisorType.KVM || targetHypervisor == HypervisorType.XEN_3)
-        {
-            String virtualSystemMonitorAddress =
-                RemoteServiceUtils.getVirtualSystemMonitor(vmHB.getHypervisor()
-                    .getPhysicalMachine().getDataCenter().getIdDataCenter());
-
-            EventingSupport.unsubscribeEvent(vmPojo, virtualSystemMonitorAddress);
-        }
-    }
-
-    public static void listenAgainToVSMIfNecessary(final VirtualmachineHB vm,
-        final VirtualMachine vmPojo) throws Exception
-    {
-        HypervisorType targetHypervisor = vm.getHypervisor().getType();
-        if (targetHypervisor == HypervisorType.KVM || targetHypervisor == HypervisorType.XEN_3)
-        {
-            String virtualSystemMonitorAddress =
-                RemoteServiceUtils.getVirtualSystemMonitor(vm.getHypervisor().getPhysicalMachine()
-                    .getDataCenter().getIdDataCenter());
-
-            EventingSupport.subscribeEvent(vmPojo, virtualSystemMonitorAddress);
-        }
-    }
-
     /*
      * (non-Javadoc)
      * @see
@@ -2069,5 +1890,36 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
         }
 
         return dataResult;
+    }
+
+    public static void ignoreVSMEventsIfNecessary(final VirtualmachineHB vmHB,
+        final VirtualMachine vmPojo) throws Exception
+    {
+        // In XEN and KVM, we need to redefine the domain again, so to void receiving
+        // invalid destruction events, we unsubscribe from the VSM while the operation
+        // is in progress
+        HypervisorType targetHypervisor = vmHB.getHypervisor().getType();
+        if (targetHypervisor == HypervisorType.KVM || targetHypervisor == HypervisorType.XEN_3)
+        {
+            String virtualSystemMonitorAddress =
+                RemoteServiceUtils.getVirtualSystemMonitor(vmHB.getHypervisor()
+                    .getPhysicalMachine().getDataCenter().getIdDataCenter());
+
+            // EventingSupport.unsubscribeEvent(vmPojo, virtualSystemMonitorAddress);
+        }
+    }
+
+    public static void listenAgainToVSMIfNecessary(final VirtualmachineHB vm,
+        final VirtualMachine vmPojo) throws Exception
+    {
+        HypervisorType targetHypervisor = vm.getHypervisor().getType();
+        if (targetHypervisor == HypervisorType.KVM || targetHypervisor == HypervisorType.XEN_3)
+        {
+            String virtualSystemMonitorAddress =
+                RemoteServiceUtils.getVirtualSystemMonitor(vm.getHypervisor().getPhysicalMachine()
+                    .getDataCenter().getIdDataCenter());
+
+            // EventingSupport.subscribeEvent(vmPojo, virtualSystemMonitorAddress);
+        }
     }
 }

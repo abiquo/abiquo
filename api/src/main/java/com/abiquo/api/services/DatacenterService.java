@@ -59,6 +59,7 @@ import com.abiquo.server.core.infrastructure.RemoteServicesDto;
 import com.abiquo.server.core.infrastructure.network.Network;
 import com.abiquo.server.core.infrastructure.storage.StorageDevice;
 import com.abiquo.server.core.infrastructure.storage.Tier;
+import com.abiquo.server.core.pricing.PricingRep;
 import com.abiquo.server.core.pricing.PricingTemplate;
 import com.abiquo.server.core.pricing.PricingTier;
 import com.abiquo.tracer.ComponentType;
@@ -88,6 +89,9 @@ public class DatacenterService extends DefaultApiService
 
     @Autowired
     EnterpriseRep enterpriseRep;
+
+    @Autowired
+    PricingRep pricingRep;
 
     public DatacenterService()
     {
@@ -126,8 +130,7 @@ public class DatacenterService extends DefaultApiService
         if (repo.existsAnyDatacenterWithName(datacenter.getName()))
         {
             tracer.log(SeverityType.MINOR, ComponentType.DATACENTER, EventType.DC_CREATE,
-                "Another datacenter with the name '" + datacenter.getName()
-                    + "' already exists. Please choose a different name.");
+                "datacenter.repeated", datacenter.getName());
             addConflictErrors(APIError.DATACENTER_DUPLICATED_NAME);
             flushErrors();
         }
@@ -146,7 +149,7 @@ public class DatacenterService extends DefaultApiService
             new DatacenterLimits(userService.getCurrentUser().getEnterprise(), datacenter);
         enterpriseRep.insertLimit(dcLimits);
 
-        List<PricingTemplate> pricingTemplateList = repo.getPricingTemplates();
+        List<PricingTemplate> pricingTemplateList = pricingRep.findPricingTemplats();
         BigDecimal zero = new BigDecimal(0);
 
         // Add the default tiers
@@ -161,15 +164,14 @@ public class DatacenterService extends DefaultApiService
                 for (PricingTemplate pt : pricingTemplateList)
                 {
                     PricingTier pricingTier = new PricingTier(zero, pt, tier);
-                    repo.insertPricingTier(pricingTier);
+                    pricingRep.insertPricingTier(pricingTier);
                 }
-
             }
         }
 
         // Log the event
-        tracer.log(SeverityType.INFO, ComponentType.DATACENTER, EventType.DC_CREATE, "Datacenter '"
-            + datacenter.getName() + "' has been created in " + datacenter.getLocation());
+        tracer.log(SeverityType.INFO, ComponentType.DATACENTER, EventType.DC_CREATE,
+            "datacenter.created", datacenter.getName(), datacenter.getLocation());
 
         return datacenter;
     }
@@ -225,18 +227,14 @@ public class DatacenterService extends DefaultApiService
             for (ErrorDto error : responseRemoteService.getConfigErrors().getCollection())
             {
                 tracer.log(SeverityType.MAJOR, ComponentType.DATACENTER, EventType.DC_CREATE,
-                    "Datacenter '" + datacenter.getName() + ": " + error.getMessage());
+                    "datacenter.createError", datacenter.getName(), error.getMessage());
             }
         }
         else
         {
             // Log the event
-            tracer.log(
-                SeverityType.INFO,
-                ComponentType.DATACENTER,
-                EventType.DC_CREATE,
-                "Datacenter '" + datacenter.getName() + "' has been created in "
-                    + datacenter.getLocation());
+            tracer.log(SeverityType.INFO, ComponentType.DATACENTER, EventType.DC_CREATE,
+                "datacenter.created", datacenter.getName(), datacenter.getLocation());
         }
 
         if (responseRemoteService.getConfigErrors() != null
@@ -297,9 +295,8 @@ public class DatacenterService extends DefaultApiService
 
         repo.update(old);
 
-        tracer.log(SeverityType.INFO, ComponentType.DATACENTER, EventType.DC_MODIFY, "Datacenter '"
-            + old.getName() + "' has been modified [Name: " + datacenter.getName()
-            + ", Situation: " + datacenter.getLocation() + "]");
+        tracer.log(SeverityType.INFO, ComponentType.DATACENTER, EventType.DC_MODIFY,
+            "datacenter.modified", old.getName(), datacenter.getName(), datacenter.getLocation());
 
         return old;
     }
@@ -380,12 +377,12 @@ public class DatacenterService extends DefaultApiService
                 LOGGER.debug("Deleting datacenter");
 
                 tracer.log(SeverityType.INFO, ComponentType.DATACENTER, EventType.DC_DELETE,
-                    "Datacenter " + datacenter.getName() + " deleted");
+                    "datacenter.removed", datacenter.getName());
             }
             else
             {
                 tracer.log(SeverityType.CRITICAL, ComponentType.DATACENTER, EventType.DC_DELETE,
-                    "Cannot delete datacenter with storage devices associated");
+                    "datacenter.withStorageDevices");
                 addConflictErrors(APIError.DATACENTER_DELETE_STORAGE);
                 flushErrors();
             }
@@ -393,7 +390,7 @@ public class DatacenterService extends DefaultApiService
         else
         {
             tracer.log(SeverityType.CRITICAL, ComponentType.DATACENTER, EventType.DC_DELETE,
-                "Cannot delete datacenter with virtual datacenters associated");
+                "datacenter.withVDC");
             addConflictErrors(APIError.DATACENTER_DELETE_VIRTUAL_DATACENTERS);
             flushErrors();
         }

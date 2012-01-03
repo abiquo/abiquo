@@ -46,20 +46,24 @@ public enum EventType implements Serializable
         206, "VIRTUAL_MACHINE_HEALTH_STATE", "Virtual Machine checked"), VM_CRASHED(207,
         "VM_CRASHED", "Virtual Machine turned into 'crashed' state"), VM_UNKNOWN(208, "VM_UNKNOWN",
         "Virtual Machine turned into 'unknown' state"), VM_UNDEPLOY_FORCED(209,
-        "VM_UNDEPLOY_FORCED", "Virtual Machine undeploy forced"), VM_CREATE(210, "VM_CREATE",
-        "Virtual Machine created"), VDC_CREATE(211, "VDC_CREATE", "Created Virtual Datacenter"), VDC_MODIFY(
-        212, "VDC_MODIFY", "Modified Virtual Datacenter"), VDC_DELETE(213, "VDC_DELETE",
-        "Deleted Virtual Datacenter"), VAPP_CREATE(214, "VAPP_CREATE", "Created Virtual Appliance"), VAPP_MODIFY(
-        215, "VAPP_MODIFY", "Modified Virtual Appliance"), VAPP_DELETE(216, "VAPP_DELETE",
-        "Deleted Virtual Appliance"), VAPP_POWERON(217, "VAPP_POWERON",
-        "Deployed Virtual Appliance"), VAPP_POWEROFF(218, "VAPP_POWEROFF",
-        "Undeployed Virtual Appliance"), VAPP_RUNNING(219, "VAPP_RUNNING",
-        "Started Virtual Appliance"), VAPP_MOVE(220, "VAPP_MOVE", "Virtual Appliance moved"), VAPP_COPY(
-        221, "VAPP_COPY", "Virtual Appliance copied"), VAPP_REFRESH(222, "VIRTUAL_APPLIANCE_STATE",
-        "Virtual Appliance State Refreshed"), VAPP_CRASHED(223, "VAPP_CRASHED",
-        "Virtual Appliance turned into 'crashed' state"), VAPP_UNKNOWN(224, "VAPP_UNKNOWN",
-        "Virtual Appliance turned into 'unknown' state"), VAPP_INSTANCE(225, "VAPP_INSTANCE",
-        "Virtual Appliance instance started"),
+        "VM_UNDEPLOY_FORCED", "Virtual Machine undeploy forced"), VDC_CREATE(210, "VDC_CREATE",
+        "Created Virtual Datacenter"), VDC_MODIFY(211, "VDC_MODIFY", "Modified Virtual Datacenter"), VDC_DELETE(
+        212, "VDC_DELETE", "Deleted Virtual Datacenter"), VAPP_CREATE(213, "VAPP_CREATE",
+        "Created Virtual Appliance"), VAPP_MODIFY(214, "VAPP_MODIFY", "Modified Virtual Appliance"), VAPP_DELETE(
+        215, "VAPP_DELETE", "Deleted Virtual Appliance"), VAPP_POWERON(216, "VAPP_POWERON",
+        "Deployed Virtual Appliance"), VAPP_POWEROFF(217, "VAPP_POWEROFF",
+        "Undeployed Virtual Appliance"), VAPP_RUNNING(218, "VAPP_RUNNING",
+        "Started Virtual Appliance"), VAPP_MOVE(219, "VAPP_MOVE", "Virtual Appliance moved"), VAPP_COPY(
+        220, "VAPP_COPY", "Virtual Appliance copied"), VAPP_REFRESH(221, "VIRTUAL_APPLIANCE_STATE",
+        "Virtual Appliance State Refreshed"), VAPP_CRASHED(222, "VAPP_CRASHED",
+        "Virtual Appliance turned into 'crashed' state"), VAPP_UNKNOWN(223, "VAPP_UNKNOWN",
+        "Virtual Appliance turned into 'unknown' state"), VAPP_INSTANCE(224, "VAPP_INSTANCE",
+        "Virtual Appliance instance started"), VM_CREATE(225, "VM_CREATE",
+        "Created Virtual Machine"), VM_DELETE(226, "VM_DELETE", "Deleted Virtual Machine"), VM_UNDEPLOY(
+        227, "VM_UNDEPLOY", "Undeploy Virtual Machine"), VM_DEPLOY(228, "VM_DEPLOY",
+        "Deploy Virtual Machine"), VM_STATE(229, "VM_STATE", "Apply state Virtual Machine"), VM_RECONFIGURE(
+        230, "VM_RECONFIGURE", "Reconfigure Virtual Machine"), VM_INSTANCE(231, "VM_INSTANCE",
+        "Instance Virtual Machine"),
 
     // Infrastructure-related events
     DC_CREATE(300, "DC_CREATE", "Datacenter Created"), DC_MODIFY(301, "DC_MODIFY",
@@ -89,14 +93,18 @@ public enum EventType implements Serializable
         "Volume deleted"), VOLUME_ASSIGN(409, "VOLUME_ATTACHED", "Volume attached"), VOLUME_UNASSIGN(
         410, "VOLUME_DETACHED", "Volume detached"), VOLUME_ATTACH(411, "VOLUME_ATTACH",
         "Volume attached"), VOLUME_DETACH(412, "VOLUME_DETACH", "Volume detached"), GET_INITIATOR_MAPPINGS(
-        413, "GET_INITIATOR_MAPPINGS", "Initiator mappings retrieved"),
+        413, "GET_INITIATOR_MAPPINGS", "Initiator mappings retrieved"), HARD_DISK_CREATE(414,
+        "HARD_DISK_CREATE", "Hard disk created"), HARD_DISK_DELETE(415, "HARD_DISK_DELETE",
+        "Hard disk deleted"), HARD_DISK_ASSIGN(416, "HARD_DISK_ASSIGN", "Hard disk assigned"), HARD_DISK_UNASSIGN(
+        417, "HARD_DISK_UNASSIGN", "Hard disk unassigned"),
 
     // Image-related events
     VI_DOWNLOAD(500, "VI_DOWNLOAD", "Virtual Image download from a Remote Repository"), VI_ADD(501,
         "VI_ADD", "Virtual Image added to the Appliance Library"), VI_DELETE(502, "VI_DELETE",
         "Virtual Image deleted from the Appliance Library"), DISK_CONVERSION(503,
         "DISK_CONVERSION", "Disc conversion started"), RAW_IMPORT_CONVERSION(504,
-        "RAW_IMPORT_CONVERSION", "Raw import conversion started"),
+        "RAW_IMPORT_CONVERSION", "Raw import conversion started"), VI_UPDATE(505, "VI_UPDATE",
+        "Virtual Image updated"),
 
     // Stateful related events
     PERSISTENT_PROCESS_START(600, "PERSISTENT_PROCESS_START",
@@ -211,7 +219,23 @@ public enum EventType implements Serializable
         "Blade disassociation with a Service Profile in UCS"), UCS_DELETED(1703,
         "SERVICE_PROFILE_DELETED", "Service Profile deletion in UCS"), UCS_BLADE_POWEROFF(1704,
         "UCS_BLADE_POWER_OFF", "Blade powered off in UCS"), UCS_BLADE_POWERON(1705,
-        "UCS_BLADE_POWER_ON", "Blade powered on in UCS");
+        "UCS_BLADE_POWER_ON", "Blade powered on in UCS"),
+
+    // CATEGORY
+    CATEGORY_CREATED(1700, "CATEGORY CREATED", "Category created"), CATEGORY_MODIFIED(1701,
+        "CATEGORY MODIFIED", "Category modified"), CATEGORY_DELETED(1702, "CATEGORY DELETED",
+        "Category deleted"),
+
+    // OVF PACKAGES LISTS
+    OVF_PACKAGES_LIST_CREATED(1800, "OVFPACKAGE LIST CREATED", "OVFPackage list created"), TEMPLATE_DEFINITION_LIST_DELETED(
+        1801, "OVFPACKAGE LIST DELETED", "OVFPackage list deleted"), TEMPLATE_DEFINITION_LIST_MODIFIED(
+        1802, "OVFPACKAGE LIST MODIFIED", "OVFPackage list modified"),
+
+    // INSTANCE PROCESS
+    INSTANCE_PROCESS_START(1803, "INSTANCE_PROCESS_START",
+        "A Intance conversion process has started"), INSTANCE_PROCESS_FINISHED(1804,
+        "INSTANCE_PROCESS_FINISHED", "A Instance conversion process has finished succesfuly"), INSTANCE_PROCESS_FAILED(
+        1805, "INSTANCE_PROCESS_FAILED", "A Instance conversion process has failed");
 
     private final int event;
 

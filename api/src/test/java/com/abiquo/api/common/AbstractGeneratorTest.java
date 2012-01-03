@@ -34,12 +34,20 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 
+import com.abiquo.server.core.appslibrary.AppsLibraryGenerator;
+import com.abiquo.server.core.appslibrary.CategoryGenerator;
+import com.abiquo.server.core.appslibrary.IconGenerator;
+import com.abiquo.server.core.appslibrary.TemplateDefinitionGenerator;
+import com.abiquo.server.core.appslibrary.VirtualMachineTemplateGenerator;
 import com.abiquo.server.core.cloud.HypervisorGenerator;
 import com.abiquo.server.core.cloud.NodeVirtualImageGenerator;
 import com.abiquo.server.core.cloud.VirtualApplianceGenerator;
 import com.abiquo.server.core.cloud.VirtualDatacenterGenerator;
-import com.abiquo.server.core.cloud.VirtualImageGenerator;
+import com.abiquo.server.core.cloud.VirtualImageConversionGenerator;
 import com.abiquo.server.core.cloud.VirtualMachineGenerator;
+import com.abiquo.server.core.cloud.stateful.NodeVirtualImageStatefulConversionGenerator;
+import com.abiquo.server.core.cloud.stateful.VirtualApplianceStatefulConversionGenerator;
+import com.abiquo.server.core.common.persistence.JPAConfiguration;
 import com.abiquo.server.core.config.SystemPropertyGenerator;
 import com.abiquo.server.core.enterprise.EnterpriseGenerator;
 import com.abiquo.server.core.enterprise.PrivilegeGenerator;
@@ -52,16 +60,19 @@ import com.abiquo.server.core.infrastructure.DatastoreGenerator;
 import com.abiquo.server.core.infrastructure.MachineGenerator;
 import com.abiquo.server.core.infrastructure.RackGenerator;
 import com.abiquo.server.core.infrastructure.RemoteServiceGenerator;
+import com.abiquo.server.core.infrastructure.RepositoryGenerator;
 import com.abiquo.server.core.infrastructure.UcsRackGenerator;
 import com.abiquo.server.core.infrastructure.management.RasdGenerator;
 import com.abiquo.server.core.infrastructure.management.RasdManagementGenerator;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagementGenerator;
 import com.abiquo.server.core.infrastructure.network.VLANNetworkGenerator;
+import com.abiquo.server.core.infrastructure.storage.DiskManagementGenerator;
+import com.abiquo.server.core.infrastructure.storage.InitiatorMappingGenerator;
 import com.abiquo.server.core.infrastructure.storage.VolumeManagementGenerator;
 import com.abiquo.server.core.pricing.PricingTemplateGenerator;
 import com.softwarementors.commons.test.SeedGenerator;
 
-@TestExecutionListeners( {DependencyInjectionTestExecutionListener.class,
+@TestExecutionListeners({DependencyInjectionTestExecutionListener.class,
 TransactionalTestExecutionListener.class})
 @ContextConfiguration(locations = {"classpath:springresources/applicationContext-test.xml"})
 public abstract class AbstractGeneratorTest extends AbstractTestNGSpringContextTests
@@ -99,7 +110,11 @@ public abstract class AbstractGeneratorTest extends AbstractTestNGSpringContextT
     protected VolumeManagementGenerator volumeManagementGenerator =
         new VolumeManagementGenerator(seed);
 
-    protected VirtualImageGenerator virtualImageGenerator = new VirtualImageGenerator(seed);
+    protected VirtualMachineTemplateGenerator virtualMachineTemplateGenerator =
+        new VirtualMachineTemplateGenerator(seed);
+
+    protected VirtualImageConversionGenerator conversionGenerator =
+        new VirtualImageConversionGenerator(seed);
 
     protected NodeVirtualImageGenerator nodeVirtualImageGenerator =
         new NodeVirtualImageGenerator(seed);
@@ -122,6 +137,31 @@ public abstract class AbstractGeneratorTest extends AbstractTestNGSpringContextT
 
     protected RoleLdapGenerator roleLdapGenerator = new RoleLdapGenerator(seed);
 
+    protected CategoryGenerator categoryGenerator = new CategoryGenerator(seed);
+
+    protected TemplateDefinitionGenerator templateDefGenerator =
+        new TemplateDefinitionGenerator(seed);
+
+    protected AppsLibraryGenerator appsLibraryGenerator = new AppsLibraryGenerator(seed);
+
+    protected IconGenerator iconGenerator = new IconGenerator(seed);
+
+    protected RepositoryGenerator repositoryGenerator = new RepositoryGenerator(seed);
+
+    protected DiskManagementGenerator diskGenerator = new DiskManagementGenerator(seed);
+
+    protected InitiatorMappingGenerator initiatorMappingGenerator =
+        new InitiatorMappingGenerator(seed);
+
+    protected VirtualImageConversionGenerator virtualImageConversionGenerator =
+        new VirtualImageConversionGenerator(seed);
+
+    protected VirtualApplianceStatefulConversionGenerator virtualApplianceStatefulConversionGenerator =
+        new VirtualApplianceStatefulConversionGenerator(seed);
+
+    protected NodeVirtualImageStatefulConversionGenerator nodeVirtualImageStatefulConversionGenerator =
+        new NodeVirtualImageStatefulConversionGenerator(seed);
+
     protected PricingTemplateGenerator pricingTemplateGenerator =
         new PricingTemplateGenerator(seed);
 
@@ -135,6 +175,7 @@ public abstract class AbstractGeneratorTest extends AbstractTestNGSpringContextT
             em.persist(entity);
         }
         em.getTransaction().commit();
+        em.close();
     }
 
     protected void update(final Object... entities)
@@ -147,6 +188,7 @@ public abstract class AbstractGeneratorTest extends AbstractTestNGSpringContextT
             em.merge(entity);
         }
         em.getTransaction().commit();
+        em.close();
     }
 
     @BeforeMethod
@@ -171,15 +213,16 @@ public abstract class AbstractGeneratorTest extends AbstractTestNGSpringContextT
             "vlan_network_assignment", "network_configuration", "chef_runlist", "storage_pool",
             "tier", "storage_device", "remote_service", "datastore_assignment", "datastore",
             "hypervisor", "workload_machine_load_rule", "physicalmachine", "rack", "ucs_rack",
-            "datacenter", "repository", "workload_fit_policy_rule", "network", "session", "user",
+            "datacenter", "workload_fit_policy_rule", "network", "session", "user",
             "roles_privileges", "role_ldap", "role", "privilege", "enterprise_properties_map",
             "enterprise_properties", "enterprise", "enterprise_limits_by_datacenter",
             "workload_enterprise_exclusion_rule", "ovf_package_list_has_ovf_package",
-            "ovf_package", "ovf_package_list", "apps_library", "license", "system_properties",
-            "vdc_enterprise_stats", "vapp_enterprise_stats", "dc_enterprise_stats",
-            "enterprise_resources_stats", "cloud_usage_stats", "log", "metering", "tasks",
-            "alerts", "heartbeatlog", "icon", "register", "costCodeCurrency", "pricingCostCode",
-            "pricingTier", "pricingTemplate", "currency", "costCode"};
+            "ovf_package", "ovf_package_list", "category", "apps_library", "license",
+            "system_properties", "vdc_enterprise_stats", "vapp_enterprise_stats",
+            "dc_enterprise_stats", "enterprise_resources_stats", "cloud_usage_stats", "log",
+            "metering", "tasks", "alerts", "heartbeatlog", "icon", "repository", "register",
+            "costCodeCurrency", "pricingCostCode", "pricingTier", "pricingTemplate", "currency",
+            "costCode"};
 
         tearDown(entities);
     }
@@ -197,6 +240,9 @@ public abstract class AbstractGeneratorTest extends AbstractTestNGSpringContextT
 
         em.getTransaction().commit();
         em.close();
+
+        // Avoid having closed EntityManagers bound to the thread
+        TransactionSynchronizationManager.unbindResource(getEntityManagerFactory());
     }
 
     private EntityManagerFactory getEntityManagerFactory()
@@ -208,28 +254,27 @@ public abstract class AbstractGeneratorTest extends AbstractTestNGSpringContextT
     {
         EntityManager em = getEntityManager();
         em.getTransaction().begin();
-
         return em;
     }
 
     protected EntityManager getEntityManager()
     {
         EntityManagerFactory emf = getEntityManagerFactory();
-        EntityManager em;
+        EntityManager em = null;
 
         if (TransactionSynchronizationManager.hasResource(emf))
         {
-            EntityManagerHolder emHolder = unbind(emf);
+            EntityManagerHolder emHolder = getResource(emf);
             em = emHolder.getEntityManager();
 
             if (!em.isOpen())
             {
-                em = emf.createEntityManager();
+                em = createEntityManager(emf);
             }
         }
         else
         {
-            em = emf.createEntityManager();
+            em = createEntityManager(emf);
             TransactionSynchronizationManager.bindResource(emf, new EntityManagerHolder(em));
         }
 
@@ -252,9 +297,14 @@ public abstract class AbstractGeneratorTest extends AbstractTestNGSpringContextT
         }
     }
 
-    private EntityManagerHolder unbind(final EntityManagerFactory emf)
+    private EntityManagerHolder getResource(final EntityManagerFactory emf)
     {
-        return (EntityManagerHolder) TransactionSynchronizationManager.unbindResource(emf);
+        return (EntityManagerHolder) TransactionSynchronizationManager.getResource(emf);
+    }
+
+    private EntityManager createEntityManager(final EntityManagerFactory emf)
+    {
+        return JPAConfiguration.enableDefaultFilters(emf.createEntityManager());
     }
 
 }

@@ -45,6 +45,8 @@ public enum HypervisorType
 
     public DiskFormatType[] compatibilityTable;
 
+    /* package */private final static int ID_MAX = 6;
+
     private HypervisorType(final int defaultPort, final DiskFormatType baseFormat,
         final DiskFormatType[] compatibilityTable)
     {
@@ -66,6 +68,11 @@ public enum HypervisorType
     public static HypervisorType fromId(final int id)
     {
         return values()[id - 1];
+    }
+
+    public static int getIdMax()
+    {
+        return ID_MAX;
     }
 
     /**

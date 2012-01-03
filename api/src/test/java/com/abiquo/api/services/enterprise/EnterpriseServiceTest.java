@@ -39,8 +39,8 @@ import com.abiquo.api.exceptions.NotFoundException;
 import com.abiquo.api.services.EnterpriseService;
 import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.server.core.appslibrary.AppsLibrary;
-import com.abiquo.server.core.appslibrary.OVFPackage;
-import com.abiquo.server.core.appslibrary.OVFPackageList;
+import com.abiquo.server.core.appslibrary.TemplateDefinition;
+import com.abiquo.server.core.appslibrary.TemplateDefinitionList;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.Privilege;
 import com.abiquo.server.core.enterprise.Role;
@@ -73,8 +73,8 @@ public class EnterpriseServiceTest extends AbstractUnitTest
     {
         Enterprise enterprise = enterpriseGenerator.createUniqueInstance();
         AppsLibrary library = new AppsLibrary(enterprise);
-        OVFPackage ovfPackage = new OVFPackage();
-        OVFPackageList packageList = new OVFPackageList();
+        TemplateDefinition ovfPackage = new TemplateDefinition();
+        TemplateDefinitionList packageList = new TemplateDefinitionList();
 
         packageList.setAppsLibrary(library);
         ovfPackage.setAppsLibrary(library);

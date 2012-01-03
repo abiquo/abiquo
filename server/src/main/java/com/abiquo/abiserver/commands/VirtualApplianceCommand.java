@@ -375,5 +375,4 @@ public interface VirtualApplianceCommand
 
     public abstract DataResult<Collection<Log>> getVirtualApplianceLogs(UserSession userSession,
         VirtualAppliance virtualAppliance);
-
 }

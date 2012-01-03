@@ -39,6 +39,17 @@
             <groupId>com.abiquo.abicloud</groupId>
             <artifactId>tracer</artifactId>
             <version>${project.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.abiquo</groupId>
+                    <artifactId>commons-amqp</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>com.abiquo</groupId>
+            <artifactId>commons-amqp</artifactId>
+            <version>${commonsamqp.version}</version>
         </dependency>
         <dependency>
             <groupId>com.abiquo.abicloud</groupId>
@@ -174,12 +185,6 @@
         <!-- END: WINK DEPENDENCIES -->
         <!-- TEST DEPENDENCIES -->
         <dependency>
-            <groupId>org.dbunit</groupId>
-            <artifactId>dbunit</artifactId>
-            <version>2.2</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
             <version>${testng.version}</version>
@@ -240,7 +245,7 @@
 	<dependency>
 	    <groupId>com.google.guava</groupId>
 	    <artifactId>guava</artifactId>
-	    <version>r09</version>
+	    <version>${guava.version}</version>
 	</dependency>
         <dependency>
             <groupId>commons-collections</groupId>
@@ -361,6 +366,7 @@
                 <artifactId>maven-failsafe-plugin</artifactId>
                 <configuration>
                     <systemPropertyVariables>
+                        <rs.basedir>${basedir}</rs.basedir>
                         <db.create>${basedir}/../database/test/kinton-schema-test.sql</db.create>
                         <db.insert>${basedir}/src/test/resources/data/execute_test_inserts.sql</db.insert>
                         <db.delete>${basedir}/src/test/resources/data/execute_test_deletes.sql</db.delete>
@@ -368,6 +374,8 @@
                         <webapp.dir>${basedir}/src/test/webapp</webapp.dir>
                         <abiquo.server.networking.vlanPerVdc>4</abiquo.server.networking.vlanPerVdc>
                         <abicloud.tracer.brokerUrl>tcp://localhost:6996</abicloud.tracer.brokerUrl>
+                        <am.webapp.context>/am</am.webapp.context>
+                        <am.webapp.dir>${basedir}/../am/target/am</am.webapp.dir>
                     </systemPropertyVariables>
                 </configuration>
             </plugin>

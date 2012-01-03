@@ -50,6 +50,7 @@ import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.services.stub.NodecollectorServiceStubMock;
 import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.model.enumerator.RemoteServiceType;
+import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.cloud.HypervisorTypesDto;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.enterprise.DatacenterLimits;
@@ -66,8 +67,6 @@ import com.abiquo.server.core.infrastructure.network.VLANNetwork;
 public class DatacenterResourceIT extends AbstractJpaGeneratorIT
 {
 
-    private String validDatacenterUri;
-
     private String validDatacenterUriDiscover;
 
     private String validDatacenterUriDiscoverMultiple;
@@ -82,8 +81,6 @@ public class DatacenterResourceIT extends AbstractJpaGeneratorIT
         RemoteService rs =
             remoteServiceGenerator.createInstance(RemoteServiceType.NODE_COLLECTOR, datacenter);
         setup(datacenter, rs);
-
-        validDatacenterUri = resolveDatacenterURI(datacenter.getId());
     }
 
     @Test
@@ -134,10 +131,13 @@ public class DatacenterResourceIT extends AbstractJpaGeneratorIT
         Machine m0 = machineGenerator.createMachine(datacenter);
         Machine m1 = machineGenerator.createMachine(datacenter);
 
-        m0.setHypervisor(hypervisorGenerator.createInstance(m0));
-        m1.setHypervisor(hypervisorGenerator.createInstance(m1));
+        // m0.setHypervisor(hypervisorGenerator.createInstance(m0));
+        // m1.setHypervisor(hypervisorGenerator.createInstance(m1));
 
-        setup(datacenter, m0, m1);
+        Hypervisor h1 = hypervisorGenerator.createInstance(m0);
+        Hypervisor h2 = hypervisorGenerator.createInstance(m1);
+
+        setup(datacenter, m0, m1, h1, h2);
 
         String uri = resolveHypervisorTypesURI(datacenter.getId());
 

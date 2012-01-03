@@ -21,10 +21,14 @@
 
 package com.abiquo.api.services.appslibrary;
 
+import static java.lang.System.getProperty;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
+import java.net.Proxy;
 import java.net.URL;
 
 import javax.xml.bind.JAXBContext;
@@ -51,6 +55,30 @@ public class RepositorySpaceXML
     private final static Logger logger = LoggerFactory.getLogger(RepositorySpaceXML.class);
 
     private final static Boolean JAXB_FORMATTED_OUTPUT = true;
+
+    private static String PROXY_HOST;
+
+    private static Integer PROXY_PORT;
+
+    static
+    {
+
+        PROXY_HOST = getProperty("abiquo.proxy.host", null);
+        try
+        {
+            PROXY_PORT = Integer.parseInt(getProperty("abiquo.proxy.port", "80"));
+        }
+        catch (NumberFormatException e)
+        {
+            logger
+                .debug("Cannot load proxy configuration properly, port must be an Integer, will proceed to use direct connection");
+            PROXY_HOST = null;
+            PROXY_PORT = 80;
+        }
+        proxy = getProxy();
+    }
+
+    private static Proxy proxy;
 
     /** Define the allowed objects to be binded form/into the OVFIndex schema definition. */
     private final JAXBContext contextIndex;
@@ -102,7 +130,7 @@ public class RepositorySpaceXML
      * @param os, the destination of the XML document.
      * @throws OVFSchemaException, any XML problem.
      */
-    public void writeAsXML(RepositorySpace rs, OutputStream os) throws XMLException
+    public void writeAsXML(final RepositorySpace rs, final OutputStream os) throws XMLException
     {
         XMLStreamWriter writer = null;
         Marshaller marshall;
@@ -146,7 +174,7 @@ public class RepositorySpaceXML
      * @return the RepositorySpace read from source.
      * @throws XMLException, if it is not a RepositorySpace type or any XML problem.
      */
-    public RepositorySpace readAsXML(InputStream is) throws XMLException
+    public RepositorySpace readAsXML(final InputStream is) throws XMLException
     {
         XMLStreamReader reader = null;
 
@@ -185,15 +213,20 @@ public class RepositorySpaceXML
      * XXX
      */
     public RepositorySpace obtainRepositorySpace(final String repositorySpaceURL)
-        throws XMLException
+        throws XMLException, IOException, MalformedURLException
     {
         RepositorySpace repo;
 
         try
         {
+
+            Proxy proxy = getProxy();
+
             URL rsUrl = new URL(repositorySpaceURL);
+
             InputStream isRs = rsUrl.openStream();
 
+            rsUrl.openConnection(proxy);
             repo = readAsXML(isRs);
         }
         catch (XMLException e) // XMLStreamException or JAXBException
@@ -204,12 +237,12 @@ public class RepositorySpaceXML
         catch (MalformedURLException e)
         {
             final String msg = "Invalid repository space identifier : " + repositorySpaceURL;
-            throw new XMLException(msg, e);
+            throw new MalformedURLException(msg);
         }
         catch (IOException e)
         {
             final String msg = "Can not open a connection to : " + repositorySpaceURL;
-            throw new XMLException(msg, e);
+            throw new IOException(msg);
         }
 
         repo.setRepositoryURI(repositorySpaceURL); // XXX
@@ -217,4 +250,21 @@ public class RepositorySpaceXML
         return repo;
     }
 
+    private static Proxy getProxy()
+    {
+        if (proxy == null)
+        {
+            if (PROXY_HOST == null)
+            {
+                proxy = Proxy.NO_PROXY;
+            }
+            else
+            {
+                proxy =
+                    new Proxy(Proxy.Type.HTTP, new InetSocketAddress(PROXY_HOST,
+                        Integer.valueOf(PROXY_PORT)));
+            }
+        }
+        return proxy;
+    }
 }

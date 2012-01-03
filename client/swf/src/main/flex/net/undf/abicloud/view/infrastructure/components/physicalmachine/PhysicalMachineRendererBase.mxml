@@ -32,6 +32,7 @@
 
     <mx:Script>
         <![CDATA[
+        	import net.undf.abicloud.vo.infrastructure.HyperVisor;
             import net.undf.abicloud.vo.infrastructure.PhysicalMachineCreation;
             import mx.resources.ResourceManager;
             import mx.resources.ResourceBundle;
@@ -50,6 +51,21 @@
 
             [Bindable]
             private var _editMode:Boolean;
+            
+            private var _hypervisor:HyperVisor;
+            
+            [Bindable(event="hypervisorUpdatedEvent")]
+            public function get hypervisor():HyperVisor
+            {
+            	return this._hypervisor;
+            }
+            
+            public function set hypervisor(value:HyperVisor):void
+            {
+            	this._hypervisor = value;
+            	dispatchEvent(new Event('hypervisorUpdatedEvent'));
+            }
+            
 
 
             public function set physicalMachine(value:PhysicalMachine):void
@@ -163,6 +179,11 @@
         	private function updateTab():void{
         		
         	}
+        	
+        	private function onHypervisorUpdated():void
+        	{
+        		hypervisor = physicalMachineRendererGeneral.hypervisor;
+        	}
         ]]>
     </mx:Script>
 
@@ -236,6 +257,7 @@
             width="100%" height="100%"
             label="@Resource(bundle='Infrastructure', key='LABEL_GENERAL')"
             physicalMachine="{this._physicalMachine}"
+            hypervisorUpdated="onHypervisorUpdated()"
             editMode="{this._editMode}"/>
 
         <!-- Description Info -->

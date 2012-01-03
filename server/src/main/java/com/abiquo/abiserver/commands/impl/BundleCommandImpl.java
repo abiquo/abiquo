@@ -166,7 +166,7 @@ public class BundleCommandImpl extends BasicCommand implements BundleCommand
             factory.rollbackConnection();
             traceBundleError("Error instantiating VirtualAppliance: " + va.getId());
 
-            State notDeployed = new State(StateEnum.NOT_DEPLOYED);
+            State notDeployed = new State(StateEnum.DEPLOYED); // ALLOCATED
             updateVirtualAppliance(va.toPojoHB(), notDeployed, notDeployed);
 
             return reportBundleError(va, "instanceVirtualAppliance.databaseError", e.getMessage(),
@@ -208,7 +208,7 @@ public class BundleCommandImpl extends BasicCommand implements BundleCommand
         int enterpriseId = user.getEnterpriseHB().getIdEnterprise();
 
         VirtualappHB virtualApp = virtualappDAO.findByIdNamedExtended(idVirtualApp);
-        virtualApp = virtualappDAO.blockVirtualAppliance(virtualApp, StateEnum.INSTANTIATING);
+        virtualApp = virtualappDAO.blockVirtualAppliance(virtualApp, StateEnum.LOCKED);
 
         factory.endConnection();
 
@@ -224,7 +224,7 @@ public class BundleCommandImpl extends BasicCommand implements BundleCommand
         }
         catch (BundleException e)
         {
-            throw new BundleException(e.getMessage(), new State(StateEnum.RUNNING));
+            throw new BundleException(e.getMessage(), new State(StateEnum.DEPLOYED));
         }
 
         checkTransaction();
@@ -232,8 +232,8 @@ public class BundleCommandImpl extends BasicCommand implements BundleCommand
         // Power off all selected nodes
         if (!powerOffNodes(getNodes(nodeIds)))
         {
-            throw new BundleException("instanceVirtualAppliance.powerOffError",
-                new State(StateEnum.RUNNING));
+            throw new BundleException("bundleVirtualAppliance.powerOffError",
+                new State(StateEnum.DEPLOYED));
         }
 
         factory.endConnection();
@@ -259,19 +259,19 @@ public class BundleCommandImpl extends BasicCommand implements BundleCommand
         if (!powerOnNodes(getNodes(CollectionUtils.collect(nodes,
             InvokerTransformer.getInstance("getId")))))
         {
-            throw new BundleException("instanceVirtualAppliance.powerOnError",
-                new State(StateEnum.RUNNING));
+            throw new BundleException("bundleVirtualAppliance.powerOnError",
+                new State(StateEnum.DEPLOYED));
         }
 
         if (!completed)
         {
-            throw new BundleException("instanceVirtualAppliance", new State(StateEnum.RUNNING));
+            throw new BundleException("bundleVirtualAppliance", new State(StateEnum.DEPLOYED));
         }
 
         factory.endConnection();
 
-        return manageImagesAndUpdateAppliance(virtualApp, nodes, enterpriseId, StateEnum.RUNNING,
-            StateEnum.RUNNING);
+        return manageImagesAndUpdateAppliance(virtualApp, nodes, enterpriseId, StateEnum.DEPLOYED,
+            StateEnum.DEPLOYED);
     }
 
     protected VirtualAppliance manageImagesAndUpdateAppliance(VirtualappHB virtualApp,
@@ -394,7 +394,7 @@ public class BundleCommandImpl extends BasicCommand implements BundleCommand
             VirtualApplianceDAO virtualappDAO = factory.getVirtualApplianceDAO();
 
             virtualApp.setState(state.toEnum());
-            virtualApp.setSubState(subState.toEnum());
+            // virtualApp.setSubState(subState.toEnum());
 
             virtualappDAO.makePersistentBasic(virtualApp);
             factory.endConnection();
@@ -656,7 +656,7 @@ public class BundleCommandImpl extends BasicCommand implements BundleCommand
                     ApplianceManagerResourceStubImpl amStub =
                         new ApplianceManagerResourceStubImpl(amServiceUri);
 
-                    amStub.preBundleOVFPackage(String.valueOf(idEnterprise), name);
+                    amStub.preBundleTemplate(String.valueOf(idEnterprise), name);
                 }
                 catch (Exception e)
                 {

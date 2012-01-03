@@ -36,6 +36,7 @@ import javax.persistence.Table;
 
 import org.hibernate.annotations.ForeignKey;
 import org.hibernate.validator.constraints.Length;
+import org.hibernate.validator.constraints.Range;
 
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
@@ -50,6 +51,9 @@ import com.softwarementors.validation.constraints.Required;
 @DiscriminatorColumn(name = "idResourceType", discriminatorType = DiscriminatorType.STRING)
 public class RasdManagement extends DefaultEntityBase
 {
+    /** The first attachment sequence number to be used. */
+    public static final int FIRST_ATTACHMENT_SEQUENCE = 0;
+
     public static final String TABLE_NAME = "rasd_management";
 
     // DO NOT ACCESS: present due to needs of infrastructure support. *NEVER* call from business
@@ -198,6 +202,55 @@ public class RasdManagement extends DefaultEntityBase
         this.rasd = rasd;
     }
 
+    public final static String TEMPORAL_PROPERTY = "temporal";
+
+    private final static String TEMPORAL_COLUMN = "temporal";
+
+    private final static int TEMPORAL_MIN = 1;
+
+    private final static int TEMPORAL_MAX = Integer.MAX_VALUE;
+
+    @Column(name = TEMPORAL_COLUMN, nullable = true)
+    @Range(min = TEMPORAL_MIN, max = TEMPORAL_MAX)
+    private Integer temporal;
+
+    public Integer getTemporal()
+    {
+        return this.temporal;
+    }
+
+    public void setTemporal(final Integer temporal)
+    {
+        this.temporal = temporal;
+    }
+
+    public final static String SEQUENCE_PROPERTY = "sequence";
+
+    private final static String SEQUENCE_COLUMN = "sequence";
+
+    private final static int SEQUENCE_MIN = 0;
+
+    private final static int SEQUENCE_MAX = Integer.MAX_VALUE;
+
+    @Column(name = SEQUENCE_COLUMN, nullable = true)
+    @Range(min = SEQUENCE_MIN, max = SEQUENCE_MAX)
+    private Integer sequence;
+
+    public Integer getSequence()
+    {
+        return this.sequence == null ? 0 : this.sequence;
+    }
+
+    public void setSequence(final Integer sequence)
+    {
+        if (sequence < FIRST_ATTACHMENT_SEQUENCE)
+        {
+            throw new IllegalArgumentException("Attachment order should be greater or equal to "
+                + FIRST_ATTACHMENT_SEQUENCE);
+        }
+        this.sequence = sequence;
+    }
+
     // **************************** Rasd delegating methods ***************************
 
     public String getDescription()
@@ -210,14 +263,27 @@ public class RasdManagement extends DefaultEntityBase
         getRasd().setDescription(description);
     }
 
-    public long getAttachmentOrder()
+    // *************************** Resource state transitions ***************************
+
+    public void attach(final int sequence, final VirtualMachine vm)
     {
-        Long generation = getRasd().getGeneration();
-        return generation == null ? 0L : generation;
+        throw new UnsupportedOperationException("Must call concrete subclass attach method");
     }
 
-    public void setAttachmentOrder(final long order)
+    public void attach(final int sequence, final VirtualMachine vm, final VirtualAppliance vapp)
     {
-        getRasd().setGeneration(order < 0 ? 0L : order);
+        attach(sequence, vm);
+        setVirtualAppliance(vapp);
     }
+
+    public void detach()
+    {
+        throw new UnsupportedOperationException("Must call concrete subclass dettach method");
+    }
+
+    public boolean isAttached()
+    {
+        throw new UnsupportedOperationException("Must call concrete subclass 'isAttached' method");
+    }
+
 }

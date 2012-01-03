@@ -23,10 +23,14 @@ package com.abiquo.api.resources.cloud;
 
 import java.util.List;
 
+import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 
 import org.apache.wink.common.annotations.Parent;
@@ -37,12 +41,16 @@ import com.abiquo.api.services.NetworkService;
 import com.abiquo.api.services.UserService;
 import com.abiquo.api.services.cloud.VirtualApplianceService;
 import com.abiquo.api.util.IRESTBuilder;
-import com.abiquo.model.enumerator.VirtualMachineState;
+import com.abiquo.model.rest.RESTLink;
+import com.abiquo.model.transport.AcceptedRequestDto;
 import com.abiquo.model.util.ModelTransformer;
+import com.abiquo.scheduler.SchedulerLock;
+import com.abiquo.server.core.appslibrary.VirtualMachineTemplateDto;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualApplianceDto;
-import com.abiquo.server.core.cloud.VirtualImageDto;
-import com.abiquo.server.core.cloud.VirtualMachineChangeStateResultDto;
+import com.abiquo.server.core.cloud.VirtualApplianceState;
+import com.abiquo.server.core.cloud.VirtualApplianceStateDto;
+import com.abiquo.server.core.cloud.VirtualMachineTaskDto;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
 import com.abiquo.server.core.infrastructure.network.IpsPoolManagementDto;
 
@@ -55,19 +63,39 @@ public class VirtualApplianceResource
 
     public static final String VIRTUAL_APPLIANCE_PARAM = "{" + VIRTUAL_APPLIANCE + "}";
 
-    public static final String VIRTUAL_APPLIANCE_ACTION_GET_IPS = "/action/ips";
+    public static final String VIRTUAL_APPLIANCE_GET_IPS_PATH = "action/ips";
 
-    public static final String VIRTUAL_APPLIANCE_ACTION_ADD_IMAGE = "/action/addImage";
+    public static final String VIRTUAL_APPLIANCE_ACTION_ADD_IMAGE = "action/addImage";
 
-    public static final String VIRTUAL_APPLIANCE_ACTION_DEPLOY = "/action/deploy";
+    public static final String VIRTUAL_APPLIANCE_DEPLOY_PATH = "action/deploy";
 
-    public static final String VIRTUAL_APPLIANCE_ACTION_POWERON = "/action/poweron";
+    public static final String VIRTUAL_APPLIANCE_DEPLOY_REL = "deploy";
 
-    public static final String VIRTUAL_APPLIANCE_ACTION_POWEROFF = "/action/poweroff";
+    public static final String VIRTUAL_APPLIANCE_UNDEPLOY_PATH = "action/undeploy";
 
-    public static final String VIRTUAL_APPLIANCE_ACTION_PAUSE = "/action/pause";
+    public static final String VIRTUAL_APPLIANCE_UNDEPLOY_REL = "undeploy";
 
-    public static final String VIRTUAL_APPLIANCE_ACTION_RESUME = "/action/resume";
+    public static final String VIRTUAL_APPLIANCE_PRICE_PATH = "action/price";
+
+    public static final String VIRTUAL_APPLIANCE_POWERON_PATH = "action/poweron";
+
+    public static final String VIRTUAL_APPLIANCE_POWERON_REL = "poweron";
+
+    public static final String VIRTUAL_APPLIANCE_POWEROFF_PATH = "action/poweroff";
+
+    public static final String VIRTUAL_APPLIANCE_POWEROFF_REL = "poweroff";
+
+    public static final String VIRTUAL_APPLIANCE_PAUSE_PATH = "action/pause";
+
+    public static final String VIRTUAL_APPLIANCE_PAUSE_REL = "pause";
+
+    public static final String VIRTUAL_APPLIANCE_RESUME_PATH = "action/resume";
+
+    public static final String VIRTUAL_APPLIANCE_RESUME_REL = "resume";
+
+    public static final String VIRTUAL_APPLIANCE_STATE_REL = "state";
+
+    public static final String VIRTUAL_APPLIANCE_FORCE_DELETE_PARAM = "force";
 
     public static final String VIRTUAL_APPLIANCE_ACTION_PRICE = "/action/price";
 
@@ -112,7 +140,7 @@ public class VirtualApplianceResource
     }
 
     @GET
-    @Path(VirtualApplianceResource.VIRTUAL_APPLIANCE_ACTION_GET_IPS)
+    @Path(VirtualApplianceResource.VIRTUAL_APPLIANCE_GET_IPS_PATH)
     public IpsPoolManagementDto getIPsByVirtualAppliance(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
@@ -148,7 +176,6 @@ public class VirtualApplianceResource
         dto =
             addLinks(builder, dto, vapp.getVirtualDatacenter().getId(), vapp.getEnterprise()
                 .getId());
-
         return dto;
     }
 
@@ -170,81 +197,113 @@ public class VirtualApplianceResource
     public void addImage(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
-        final VirtualImageDto image)
+        final VirtualMachineTemplateDto vmtemplate)
     {
-
+        /**
+         * TODO
+         */
     }
 
-    // @POST
-    // @Path(VIRTUAL_APPLIANCE_ACTION_DEPLOY)
-    /***********************************/
-    /***********************************/
-    /* EXPERIMENTAL, NOT AVAILABLE YET */
-    /***********************************/
-    /***********************************/
-    public void deploy(
-        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
-        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId)
-    {
-        service.startVirtualAppliance(vdcId, vappId);
-    }
-
-    @PUT
-    @Path(VIRTUAL_APPLIANCE_ACTION_POWERON)
-    public List<VirtualMachineChangeStateResultDto> powerOnVirtualApp(
+    @GET
+    @Path(VIRTUAL_APPLIANCE_STATE_REL)
+    public VirtualApplianceStateDto getChangeState(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
         @Context final IRESTBuilder restBuilder) throws Exception
     {
-
-        VirtualAppliance vapp = service.getVirtualAppliance(vdcId, vappId);
-        userService.checkCurrentEnterpriseForPostMethods(vapp.getEnterprise());
-        return service.changeVirtualAppMachinesState(vdcId, vappId, VirtualMachineState.RUNNING);
-
-    }
-
-    @PUT
-    @Path(VIRTUAL_APPLIANCE_ACTION_POWEROFF)
-    public List<VirtualMachineChangeStateResultDto> powerOffVirtualApp(
-        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
-        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
-        @Context final IRESTBuilder restBuilder) throws Exception
-    {
-        VirtualAppliance vapp = service.getVirtualAppliance(vdcId, vappId);
-        userService.checkCurrentEnterpriseForPostMethods(vapp.getEnterprise());
-        return service
-            .changeVirtualAppMachinesState(vdcId, vappId, VirtualMachineState.POWERED_OFF);
+        VirtualApplianceState state = service.getVirtualApplianceState(vdcId, vappId);
+        VirtualApplianceStateDto dto =
+            virtualApplianceStateToDto(vdcId, vappId, restBuilder, state);
+        return dto;
 
     }
 
-    @PUT
-    @Path(VIRTUAL_APPLIANCE_ACTION_PAUSE)
-    public List<VirtualMachineChangeStateResultDto> pauseVirtualApp(
+    @POST
+    @Path(VIRTUAL_APPLIANCE_DEPLOY_PATH)
+    public AcceptedRequestDto<String> deploy(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
-        @Context final IRESTBuilder restBuilder) throws Exception
+        @Context final IRESTBuilder restBuilder)
     {
-        VirtualAppliance vapp = service.getVirtualAppliance(vdcId, vappId);
-        userService.checkCurrentEnterpriseForPostMethods(vapp.getEnterprise());
-        return service.changeVirtualAppMachinesState(vdcId, vappId, VirtualMachineState.PAUSED);
+        AcceptedRequestDto<String> dto = new AcceptedRequestDto<String>();
 
+        final String lockMsg = "Allocate vapp " + vappId;
+        try
+        {
+            SchedulerLock.acquire(lockMsg);
+
+            List<String> links = service.deployVirtualAppliance(vdcId, vappId);
+            addStatusLinks(links, dto);
+        }
+        finally
+        {
+            SchedulerLock.release(lockMsg);
+        }
+
+        return dto;
     }
 
-    @PUT
-    @Path(VIRTUAL_APPLIANCE_ACTION_RESUME)
-    public List<VirtualMachineChangeStateResultDto> resumeVirtualApp(
+    @POST
+    @Path(VIRTUAL_APPLIANCE_UNDEPLOY_PATH)
+    public AcceptedRequestDto<String> undeploy(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
-        @Context final IRESTBuilder restBuilder) throws Exception
+        final VirtualMachineTaskDto taskOptions, @Context final IRESTBuilder restBuilder)
     {
-        VirtualAppliance vapp = service.getVirtualAppliance(vdcId, vappId);
-        userService.checkCurrentEnterpriseForPostMethods(vapp.getEnterprise());
-        return service.changeVirtualAppMachinesState(vdcId, vappId, VirtualMachineState.REBOOTED);
+        Boolean forceUndeploy;
+        if (taskOptions.getForceUndeploy() == null)
+        {
+            forceUndeploy = Boolean.FALSE;
+        }
+        else
+        {
+            forceUndeploy = taskOptions.getForceUndeploy();
+        }
+        List<String> links = service.undeployVirtualAppliance(vdcId, vappId, forceUndeploy);
+        AcceptedRequestDto<String> dto = new AcceptedRequestDto<String>();
+        addStatusLinks(links, dto);
+        return dto;
+    }
+
+    private VirtualApplianceStateDto virtualApplianceStateToDto(final Integer vdcId,
+        final Integer vappId, final IRESTBuilder restBuilder, final VirtualApplianceState state)
+    {
+        VirtualApplianceStateDto dto = new VirtualApplianceStateDto();
+        dto.setPower(state.name());
+        dto.addLinks(restBuilder.buildVirtualApplianceStateLinks(dto, vappId, vdcId));
+        return dto;
+    }
+
+    private void addStatusLinks(final List<String> links, final AcceptedRequestDto<String> dto)
+    {
+        for (String url : links)
+        {
+            RESTLink link = new RESTLink("status", url);
+            dto.addLink(link);
+        }
+    }
+
+    /**
+     * Delete the virtual appliance if exists.
+     * 
+     * @param vdcId identifier of the virtual datacenter.
+     * @param vappId identifier of the virtual appliance.
+     * @param restBuilder to build the links
+     * @throws Exception
+     */
+    @DELETE
+    public void deleteVirtualAppliance(
+        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
+        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
+        @QueryParam(VIRTUAL_APPLIANCE_FORCE_DELETE_PARAM) @DefaultValue(value = "false") final Boolean forceDelete)
+        throws Exception
+    {
+        service.deleteVirtualAppliance(vdcId, vappId, forceDelete);
 
     }
 
     @GET
-    @Path(VIRTUAL_APPLIANCE_ACTION_PRICE)
+    @Path(VIRTUAL_APPLIANCE_PRICE_PATH)
     public String getPriceVirtualAppliance(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
@@ -256,5 +315,4 @@ public class VirtualApplianceResource
         String virtualAppliancePrice = service.getPriceVirtualApplianceText(vdcId, vappId);
         return virtualAppliancePrice;
     }
-
 }

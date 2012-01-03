@@ -81,7 +81,9 @@ public abstract class DefaultDAOBase<I extends Serializable, T extends GenericEn
     public boolean isInTransaction()
     {
         if (!managed)
+        {
             return super.isInTransaction();
+        }
 
         return TransactionSynchronizationManager.isActualTransactionActive();
     }
@@ -90,7 +92,9 @@ public abstract class DefaultDAOBase<I extends Serializable, T extends GenericEn
     public boolean isInReadWriteTransaction()
     {
         if (!managed)
+        {
             return super.isInReadWriteTransaction();
+        }
 
         return !TransactionSynchronizationManager.isCurrentTransactionReadOnly();
     }
@@ -99,7 +103,9 @@ public abstract class DefaultDAOBase<I extends Serializable, T extends GenericEn
     public boolean isInRollbackTransaction()
     {
         if (!managed)
+        {
             return super.isInRollbackTransaction();
+        }
 
         return !TransactionSynchronizationManager.isSynchronizationActive();
     }

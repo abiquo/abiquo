@@ -30,7 +30,7 @@ import com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.ResourceAl
 public class AbiConfig
 {
 
-    public String getDefaultRepositorySpace()
+    public String getDefaultTemplateRepository()
     {
         return System.getProperty("abiquo.server.remoteSpace.default");
     }

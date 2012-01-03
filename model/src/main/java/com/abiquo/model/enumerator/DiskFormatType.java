@@ -21,6 +21,13 @@
 
 package com.abiquo.model.enumerator;
 
+import javax.xml.bind.annotation.XmlEnum;
+import javax.xml.bind.annotation.XmlType;
+
+import org.apache.commons.lang.StringUtils;
+
+@XmlType(name = "diskFormatType")
+@XmlEnum
 public enum DiskFormatType
 {
     /* 0 */
@@ -49,11 +56,11 @@ public enum DiskFormatType
 
     /* 6 */
     VHD_FLAT("http://technet.microsoft.com/en-us/virtualserver/bb676673.aspx#monolithic_flat",
-        "VHD Fixed Disk", DiskFormatTypeAlias.VHD),
+        "VHD Fixed Disk", DiskFormatTypeAlias.VHD, "vhd"),
 
     /* 7 */
     VHD_SPARSE("http://technet.microsoft.com/en-us/virtualserver/bb676673.aspx#monolithic_sparse",
-        "VHD Sparse Disk", DiskFormatTypeAlias.VHD),
+        "VHD Sparse Disk", DiskFormatTypeAlias.VHD, "vhd"),
 
     /* 8 */
     VDI_FLAT("http://forums.virtualbox.org/viewtopic.php?t=8046#monolithic_flat", "VDI Fixed disk",
@@ -75,6 +82,8 @@ public enum DiskFormatType
 
     public final DiskFormatTypeAlias alias;
 
+    public final String extension;
+
     public static final DiskFormatType[] VBOX_COMPATIBLES = new DiskFormatType[] {VMDK_SPARSE,
     VHD_FLAT, VHD_SPARSE, VDI_FLAT, VDI_SPARSE};
 
@@ -91,11 +100,41 @@ public enum DiskFormatType
 
     public static final DiskFormatType[] XENSERVER_COMPATIBLES = HYPERV_COMPATIBLES;
 
-    private DiskFormatType(String uri, String description, DiskFormatTypeAlias alias)
+    /* package */final static int ID_MIN = 0;
+
+    /* package */private final static int ID_MAX = 11;
+
+    private DiskFormatType(final String uri, final String description,
+        final DiskFormatTypeAlias alias)
     {
         this.uri = uri;
         this.description = description;
         this.alias = alias;
+        this.extension = StringUtils.EMPTY;
+    }
+
+    private DiskFormatType(final String uri, final String description,
+        final DiskFormatTypeAlias alias, final String extension)
+    {
+        this.uri = uri;
+        this.description = description;
+        this.alias = alias;
+        this.extension = extension;
+    }
+
+    public DiskFormatTypeAlias getAlias()
+    {
+        return alias;
+    }
+
+    public String getUri()
+    {
+        return uri;
+    }
+
+    public String getDescription()
+    {
+        return description;
     }
 
     public int id()
@@ -103,12 +142,12 @@ public enum DiskFormatType
         return ordinal();
     }
 
-    public static DiskFormatType fromId(int id)
+    public static DiskFormatType fromId(final int id)
     {
         return values()[id];
     }
 
-    public static DiskFormatType fromURI(String URI)
+    public static DiskFormatType fromURI(final String URI)
     {
         for (DiskFormatType type : values())
         {
@@ -118,5 +157,20 @@ public enum DiskFormatType
             }
         }
         return null;
+    }
+
+    public static DiskFormatType fromValue(final String v)
+    {
+        return valueOf(v);
+    }
+
+    public static int getIdMax()
+    {
+        return ID_MAX;
+    }
+
+    public boolean requiresExtension()
+    {
+        return !StringUtils.isBlank(extension);
     }
 }

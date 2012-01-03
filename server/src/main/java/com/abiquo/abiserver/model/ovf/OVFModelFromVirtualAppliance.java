@@ -57,6 +57,7 @@ import org.slf4j.LoggerFactory;
 
 import com.abiquo.abiserver.abicloudws.AbiCloudConstants;
 import com.abiquo.abiserver.business.hibernate.pojohb.authorization.OneTimeTokenSessionHB;
+import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.HypervisorHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.StateEnum;
 import com.abiquo.abiserver.business.hibernate.pojohb.networking.DhcpOptionHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.networking.IpPoolManagementHB;
@@ -265,18 +266,18 @@ public class OVFModelFromVirtualAppliance
         String state = null;
         switch (virtualMachine.getState().toEnum())
         {
-            case RUNNING:
+            case ON:
                 state = AbiCloudConstants.POWERUP_ACTION;
                 break;
             case PAUSED:
                 state = AbiCloudConstants.PAUSE_ACTION;
                 break;
-            case POWERED_OFF:
+            case OFF:
                 state = AbiCloudConstants.POWERDOWN_ACTION;
                 break;
-            case REBOOTED:
-                state = AbiCloudConstants.RESUME_ACTION;
-                break;
+        // case REBOOTED:
+        // state = AbiCloudConstants.RESUME_ACTION;
+        // break;
         }
         return state;
     }
@@ -891,7 +892,7 @@ public class OVFModelFromVirtualAppliance
             CIMVirtualSystemSettingDataUtils.createVirtualSystemSettingData("Hypervisor",
                 instanceID, null, null, null, null); // TODO
 
-        insertUserAndPassword(vssd, hypervisor.getUser(), hypervisor.getPassword());
+        insertUserAndPassword(vssd, hypervisor);
 
         // Setting the hypervisor address as VirtualSystemIdentifier element
         String virtualSystemIdentifier = hypervisorAddres;
@@ -970,14 +971,21 @@ public class OVFModelFromVirtualAppliance
      * Adds user and password in the Virtual System Type
      * 
      * @param vssd the virtual system type
-     * @param user the user
-     * @param password the password
+     * @param hypervisor The hypervisor
      */
-    private static void insertUserAndPassword(final VSSDType vssd, final String user,
-        final String password)
+    private static void insertUserAndPassword(final VSSDType vssd, final HyperVisor hypervisor)
     {
-        vssd.getOtherAttributes().put(AbiCloudConstants.ADMIN_USER_QNAME, user);
-        vssd.getOtherAttributes().put(AbiCloudConstants.ADMIN_USER_PASSWORD_QNAME, password);
+        DAOFactory factory = HibernateDAOFactory.instance();
+        factory.beginConnection(true);
+
+        // Refresh credentials from database, since Flex Client does not provide them
+        HypervisorHB hv = factory.getHyperVisorDAO().findById(hypervisor.getId());
+
+        vssd.getOtherAttributes().put(AbiCloudConstants.ADMIN_USER_QNAME, hv.getUser());
+        vssd.getOtherAttributes()
+            .put(AbiCloudConstants.ADMIN_USER_PASSWORD_QNAME, hv.getPassword());
+
+        factory.endConnection();
     }
 
     /**
@@ -1084,10 +1092,10 @@ public class OVFModelFromVirtualAppliance
         String actionState = null;
         switch (state.toEnum())
         {
-            case RUNNING:
+            case ON:
                 actionState = AbiCloudConstants.POWERUP_ACTION;
                 break;
-            case POWERED_OFF:
+            case OFF:
                 actionState = AbiCloudConstants.POWERDOWN_ACTION;
                 break;
             case PAUSED:

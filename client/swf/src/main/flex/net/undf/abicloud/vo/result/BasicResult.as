@@ -59,12 +59,15 @@ package net.undf.abicloud.vo.result
         public var message:String;
 
         public var resultCode:int;
+        
+        public var errorCode:String;
 
         public function BasicResult()
         {
             success = false;
             message = "";
             resultCode = BasicResult.STANDARD_RESULT;
+            errorCode = null;
         }
 
     }

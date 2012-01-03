@@ -23,31 +23,25 @@ package com.abiquo.server.core.cloud;
 
 import java.util.List;
 
-import com.abiquo.model.enumerator.VirtualMachineState;
 import com.abiquo.server.core.common.DefaultEntityGenerator;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.EnterpriseGenerator;
+import com.abiquo.server.core.infrastructure.Datacenter;
 import com.softwarementors.commons.test.SeedGenerator;
 import com.softwarementors.commons.testng.AssertEx;
 
 public class VirtualApplianceGenerator extends DefaultEntityGenerator<VirtualAppliance>
 {
+    private EnterpriseGenerator enterpriseGenerator;
 
-    EnterpriseGenerator enterpriseGenerator;
-
-    VirtualDatacenterGenerator virtualDatacenterGenerator;
-
-    // NodeVirtualImageGenerator nodeGenerator;
+    private VirtualDatacenterGenerator virtualDatacenterGenerator;
 
     public VirtualApplianceGenerator(final SeedGenerator seed)
     {
         super(seed);
 
         enterpriseGenerator = new EnterpriseGenerator(seed);
-
         virtualDatacenterGenerator = new VirtualDatacenterGenerator(seed);
-
-        // nodeGenerator = new NodeVirtualImageGenerator(seed);
     }
 
     @Override
@@ -56,19 +50,37 @@ public class VirtualApplianceGenerator extends DefaultEntityGenerator<VirtualApp
         AssertEx.assertPropertiesEqualSilent(obj1, obj2, VirtualAppliance.NAME_PROPERTY,
             VirtualAppliance.NODECONNECTIONS_PROPERTY, VirtualAppliance.PUBLIC_APP_PROPERTY,
             VirtualAppliance.HIGH_DISPONIBILITY_PROPERTY, VirtualAppliance.ERROR_PROPERTY,
-            VirtualAppliance.SUB_STATE_PROPERTY, VirtualAppliance.STATE_PROPERTY);
+            VirtualAppliance.STATE_PROPERTY);
     }
 
     @Override
     public VirtualAppliance createUniqueInstance()
     {
-        String name = newString(nextSeed(), 0, 255);
-        VirtualMachineState state = newEnum(VirtualMachineState.class, nextSeed());
         Enterprise enterprise = enterpriseGenerator.createUniqueInstance();
+        return createInstance(enterprise);
+    }
+
+    public VirtualAppliance createInstance(final Enterprise enterprise)
+    {
+        String name = newString(nextSeed(), 0, 255);
+        VirtualApplianceState state = VirtualApplianceState.NOT_DEPLOYED;
         VirtualDatacenter virtualDatacenter = virtualDatacenterGenerator.createInstance(enterprise);
 
         VirtualAppliance virtualAppliance =
-            new VirtualAppliance(enterprise, virtualDatacenter, name, state, state);
+            new VirtualAppliance(enterprise, virtualDatacenter, name, state);
+
+        return virtualAppliance;
+    }
+
+    public VirtualAppliance createInstance(final Enterprise enterprise, final Datacenter datacenter)
+    {
+        String name = newString(nextSeed(), 0, 255);
+        VirtualApplianceState state = VirtualApplianceState.NOT_DEPLOYED;
+        VirtualDatacenter virtualDatacenter =
+            virtualDatacenterGenerator.createInstance(datacenter, enterprise);
+
+        VirtualAppliance virtualAppliance =
+            new VirtualAppliance(enterprise, virtualDatacenter, name, state);
 
         return virtualAppliance;
     }
@@ -76,11 +88,11 @@ public class VirtualApplianceGenerator extends DefaultEntityGenerator<VirtualApp
     public VirtualAppliance createInstance(final VirtualDatacenter virtualDatacenter)
     {
         String name = newString(nextSeed(), 0, 255);
-        VirtualMachineState state = newEnum(VirtualMachineState.class, nextSeed());
+        VirtualApplianceState state = newEnum(VirtualApplianceState.class, nextSeed());
         Enterprise enterprise = virtualDatacenter.getEnterprise();
 
         VirtualAppliance virtualAppliance =
-            new VirtualAppliance(enterprise, virtualDatacenter, name, state, state);
+            new VirtualAppliance(enterprise, virtualDatacenter, name, state);
 
         return virtualAppliance;
     }
@@ -88,28 +100,14 @@ public class VirtualApplianceGenerator extends DefaultEntityGenerator<VirtualApp
     public VirtualAppliance createInstance(final VirtualDatacenter virtualDatacenter,
         final String vappName)
     {
-        VirtualMachineState state = newEnum(VirtualMachineState.class, nextSeed());
+        VirtualApplianceState state = newEnum(VirtualApplianceState.class, nextSeed());
         Enterprise enterprise = virtualDatacenter.getEnterprise();
 
         VirtualAppliance virtualAppliance =
-            new VirtualAppliance(enterprise, virtualDatacenter, vappName, state, state);
+            new VirtualAppliance(enterprise, virtualDatacenter, vappName, state);
 
         return virtualAppliance;
     }
-
-    // public VirtualAppliance createInstance(List<VirtualImage> virtualImages)
-    // {
-    // VirtualAppliance vapp = createUniqueInstance();
-    //
-    // for (VirtualImage vimage : virtualImages)
-    // {
-    // NodeVirtualImage node = nodeGenerator.createInstance(vapp, vimage);
-    //
-    // vapp.addToNodeVirtualImages(node);
-    // }
-    //
-    // return vapp;
-    // }
 
     @Override
     public void addAuxiliaryEntitiesToPersist(final VirtualAppliance entity,

@@ -22,12 +22,16 @@
 package com.abiquo.server.core.infrastructure.network;
 
 import java.util.List;
+import java.util.Random;
 
 import com.abiquo.server.core.cloud.VirtualApplianceGenerator;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualDatacenterGenerator;
 import com.abiquo.server.core.cloud.VirtualMachineGenerator;
 import com.abiquo.server.core.common.DefaultEntityGenerator;
+import com.abiquo.server.core.infrastructure.management.Rasd;
+import com.abiquo.server.core.infrastructure.management.RasdGenerator;
+import com.abiquo.server.core.infrastructure.management.RasdManagement;
 import com.abiquo.server.core.infrastructure.management.RasdManagementGenerator;
 import com.softwarementors.commons.test.SeedGenerator;
 import com.softwarementors.commons.testng.AssertEx;
@@ -44,6 +48,8 @@ public class IpPoolManagementGenerator extends DefaultEntityGenerator<IpPoolMana
     private VirtualApplianceGenerator vappGenerator;
 
     private VirtualMachineGenerator vmGenerator;
+    
+    private RasdGenerator rasdGenerator;
 
     public IpPoolManagementGenerator(final SeedGenerator seed)
     {
@@ -54,6 +60,7 @@ public class IpPoolManagementGenerator extends DefaultEntityGenerator<IpPoolMana
         rasdmGenerator = new RasdManagementGenerator(seed);
         vappGenerator = new VirtualApplianceGenerator(seed);
         vmGenerator = new VirtualMachineGenerator(seed);
+        rasdGenerator = new RasdGenerator(seed);
     }
 
     @Override
@@ -89,7 +96,7 @@ public class IpPoolManagementGenerator extends DefaultEntityGenerator<IpPoolMana
         String networkName = newString(nextSeed(), 0, 255);
 
         IpPoolManagement ipPoolManagement =
-            new IpPoolManagement(vlan, mac, name, ip, networkName, IpPoolManagement.Type.PRIVATE);
+            new IpPoolManagement(vlan, mac, name, ip, networkName);
 
         ipPoolManagement.setVirtualDatacenter(vdc);
 
@@ -104,10 +111,15 @@ public class IpPoolManagementGenerator extends DefaultEntityGenerator<IpPoolMana
         String ip = IPAddress;
         String networkName = newString(nextSeed(), 0, 255);
 
+        Integer randomIdResource = new Random().nextInt(10000);
         IpPoolManagement ipPoolManagement =
-            new IpPoolManagement(vlan, mac, name, ip, networkName, IpPoolManagement.Type.PRIVATE);
-
+            new IpPoolManagement(vlan, mac, name, ip, networkName);
         ipPoolManagement.setVirtualDatacenter(vdc);
+        ipPoolManagement.setIdResourceType(randomIdResource.toString());
+        
+        Rasd rasd = rasdGenerator.createInstance(Integer.valueOf(randomIdResource));
+        ipPoolManagement.setRasd(rasd);
+        ipPoolManagement.setType(IpPoolManagement.Type.PRIVATE);
 
         return ipPoolManagement;
     }

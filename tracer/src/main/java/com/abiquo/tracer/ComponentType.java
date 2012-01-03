@@ -82,11 +82,14 @@ public enum ComponentType implements Serializable
     // COSTCODE
     COSTCODE(16777216, "Cost Code"),
 
-    // STORAGE DEVICES
-    STORAGE_DEVICE(33554432, "Storage device"),
-
     // Abiquo's UCS
-    UCS(10485776, "UCS");
+    UCS(10485776, "UCS"),
+
+    // STORAGE DEVICES
+    STORAGE_DEVICE(5242888, "Storage device"),
+
+    // INSTANCE_CONVERTER
+    INSTANCE_CONVERTER(33554432 | VIRTUAL_APPLIANCE.getValue(), "Instance converter");
 
     private final int component;
 

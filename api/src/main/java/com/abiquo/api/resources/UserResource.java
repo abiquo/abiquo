@@ -143,7 +143,7 @@ public class UserResource extends AbstractResource
 
         Collection<VirtualMachine> vms = vmService.findVirtualMachinesByUser(enterprise, user);
 
-        return VirtualMachinesResource.createAdminTransferObjects(vms, restBuilder);
+        return VirtualMachinesResource.createTransferObjects(vms, restBuilder);
     }
 
     private static UserDto addLinks(final IRESTBuilder restBuilder, final UserDto user,

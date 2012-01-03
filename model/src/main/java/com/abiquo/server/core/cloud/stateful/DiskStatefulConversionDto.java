@@ -25,8 +25,8 @@ import java.util.Date;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
-import com.abiquo.model.enumerator.VirtualMachineState;
 import com.abiquo.model.transport.SingleResourceTransportDto;
+import com.abiquo.server.core.cloud.VirtualMachineState;
 import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
 
 @XmlRootElement(name = "diskStatefulConversion")

@@ -55,8 +55,6 @@ import com.abiquo.server.core.infrastructure.network.VLANNetworkDAO;
 import com.abiquo.server.core.infrastructure.storage.StorageRep;
 import com.abiquo.server.core.infrastructure.storage.Tier;
 import com.abiquo.server.core.pricing.PricingRep;
-import com.abiquo.server.core.pricing.PricingTemplate;
-import com.abiquo.server.core.pricing.PricingTier;
 import com.abiquo.server.core.util.PagedList;
 
 @Repository
@@ -269,6 +267,11 @@ public class InfrastructureRep extends DefaultRepBase
         return types;
     }
 
+    public Collection<HypervisorType> findHypervisorsType(final Datacenter datacenter)
+    {
+        return hypervisorDao.findTypesfromDatacenter(datacenter.getId());
+    }
+
     public List<Enterprise> findEnterprisesByDataCenter(final Datacenter datacenter,
         final Boolean network, final Integer firstElem, final Integer numElem)
     {
@@ -399,7 +402,8 @@ public class InfrastructureRep extends DefaultRepBase
 
     public Machine findMachineByIp(final Integer datacenterId, final String ip)
     {
-        return this.machineDao.findByIp(datacenterId, ip);
+        Datacenter datacenter = findById(datacenterId);
+        return this.machineDao.findByIp(datacenter, ip);
     }
 
     public void insertMachine(final Machine machine)
@@ -449,10 +453,10 @@ public class InfrastructureRep extends DefaultRepBase
         hypervisorDao.persist(hypervisor);
         hypervisorDao.flush();
 
-        Machine machine = hypervisor.getMachine();
-
-        machine.setHypervisor(hypervisor);
-        updateMachine(machine);
+        // Machine machine = hypervisor.getMachine();
+        //
+        // machine.setHypervisor(hypervisor);
+        // updateMachine(machine);
     }
 
     // public boolean existAnyHypervisorWithIp(final String ip)
@@ -684,6 +688,12 @@ public class InfrastructureRep extends DefaultRepBase
         return repositoryDao.findByDatacenter(datacenter);
     }
 
+    public com.abiquo.server.core.infrastructure.Repository findRepositoryByLocation(
+        final String location)
+    {
+        return repositoryDao.findByRepositoryLocation(location);
+    }
+
     public boolean existDeployedVirtualMachines(final Datacenter datacenter)
     {
         assert datacenter != null;
@@ -874,14 +884,15 @@ public class InfrastructureRep extends DefaultRepBase
         datacenterLimitDao.flush();
     }
 
-    public List<PricingTemplate> getPricingTemplates()
+    public List<VirtualMachine> getNotManagedVirtualMachines(final Hypervisor hypervisor)
     {
-        return pricingRep.findPricingTemplats();
+        return virtualMachineDao.getNotManagedVirtualMachines(hypervisor);
     }
 
-    public void insertPricingTier(final PricingTier pricingTier)
+    public VirtualMachine findVirtualMachineByHypervisor(final Hypervisor hypervisor,
+        final Integer vmId)
     {
-        pricingRep.insertPricingTier(pricingTier);
+        return virtualMachineDao.findVirtualMachineByHypervisor(hypervisor, vmId);
     }
 
     public Collection<DhcpOption> findAllDhcp()
@@ -911,6 +922,7 @@ public class InfrastructureRep extends DefaultRepBase
 
         }
         this.dhcpOptionDAO.flush();
+
     }
 
     public List<Integer> findUsedRemoteDesktopPortsInRack(final Rack rack)

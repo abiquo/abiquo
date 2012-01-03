@@ -22,8 +22,10 @@
 package com.abiquo.server.core.infrastructure;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceException;
@@ -110,19 +112,14 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
         return result;
     }
 
-    /**
-     * @return the list of physical machines of the infrastructure without virtual machines in the
-     *         allocator.
-     */
-    public Machine isMachineInAllocator(final Integer machineId)
+    public boolean isMachineInAllocator(final Integer machineId)
     {
         // The way to define the virtual machines in the allocator is:
         // All the virtual machines with an hypervisor associated and with state=NOT_DEPLOYED
         Query query = getSession().createQuery(QUERY_IS_MACHINE_IN_ALLOCATOR);
         query.setParameter("machineId", machineId);
 
-        return (Machine) query.uniqueResult();
-
+        return !query.list().isEmpty();
     }
 
     public List<Machine> findRackMachines(final Rack rack)
@@ -780,11 +777,10 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
             "    AND datastore.datastoreUUID = :datastoreUuid";
 
     private static final String QUERY_IS_MACHINE_IN_ALLOCATOR =
-        "SELECT m FROM com.abiquo.server.core.infrastructure.Machine m " + "WHERE m.id not in ( "
-            + "SELECT mac.id FROM " + "com.abiquo.server.core.cloud.VirtualMachine vm "
-            + "join vm.hypervisor h " + "join h.machine mac "
-            + "WHERE vm.state != 'RUNNING' AND vm.state != 'POWERED_OFF' "
-            + ") AND m.id = :machineId";
+        "SELECT vm FROM com.abiquo.server.core.cloud.VirtualMachine vm "
+            + "join vm.hypervisor h join h.machine m WHERE m.id = :machineId "
+            + "AND vm.state != 'RUNNING' AND vm.state != 'POWERED_OFF' "
+            + "AND vm.state != 'PAUSED' AND vm.state != 'REBOOTED'";
 
     public Machine findByIds(final Integer datacenterId, final Integer rackId,
         final Integer machineId)
@@ -793,10 +789,26 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
             Restrictions.eq("rack.id", rackId), Restrictions.eq("id", machineId));
     }
 
-    public Machine findByIp(final Integer datacenterId, final String ip)
+    public Machine findByIp(final Datacenter datacenter, final String ip)
     {
-        return findUniqueByCriterions(Restrictions.eq("datacenter.id", datacenterId),
-            Restrictions.eq("hypervisor.ip", ip));
+        Criteria crit = createCriteria();
+        crit.createAlias(Machine.HYPERVISOR_PROPERTY, "hypervisor");
+
+        crit.add(sameDatacenter(datacenter));
+        crit.add(Restrictions.eq("hypervisor.ip", ip));
+
+        return (Machine) crit.uniqueResult();
+    }
+
+    public Set<Integer> findAllIds()
+    {
+        Set<Integer> ids = new HashSet<Integer>();
+        List<Machine> machines = findAll();
+        for (Machine m : machines)
+        {
+            ids.add(m.getId());
+        }
+        return ids;
     }
 
 }

@@ -21,34 +21,35 @@
 
 package com.abiquo.scheduler;
 
+import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.infrastructure.Machine;
+import com.abiquo.server.core.scheduler.VirtualMachineRequirements;
 
 /**
  * Updates the physical machine resource utilization when a new virtual machine is instantiated.
  */
 public interface IResourceUpgradeUse
 {
-
     /**
      * Increments the physical machine resource utilization
      * 
      * @param machine, the target physical machine to increment its resource utilization.
-     * @param virtualMachine, the new resource requirements (based on its virtual image and
-     *            additional resource configuration).
+     * @param virtualMachine, the new resource requirements (based on its virtual machine template
+     *            and additional resource configuration).
      * @param virtualApplianceId, the virtual appliance the virtual machine belongs to.
      * @throws ResourceUpgradeUseException, if the operation can be performed: there isn't enough
      *             resources to allocate the virtual machine, the virtual appliances is not on any
      *             virtual datacenter.
      */
-    public void updateUse(Integer virtualApplianceId, VirtualMachine virtualMachine);
+    public void updateUse(VirtualAppliance virtualAppliance, VirtualMachine virtualMachine);
 
     /**
      * Do not update the datastore utilization.
      * 
      * @param sourceMachineId, the machine id of the source (where the HA vmachine were deployed)
      */
-    public void updateUseHa(Integer virtualApplianceId, VirtualMachine virtualMachine,
+    public void updateUseHa(VirtualAppliance virtualAppliance, VirtualMachine virtualMachine,
         Integer sourceMachineId);
 
     /**
@@ -56,13 +57,15 @@ public interface IResourceUpgradeUse
      * 
      * @param machine, the target physical machine to decrements its resource utilization.
      * @param virtualMachine, the resource requirements to be deallocated (based on its virtual
-     *            image and additional resource configuration).
+     *            machine template and additional resource configuration).
      */
     public void rollbackUse(VirtualMachine virtual);
 
     /**
      * Increase the ram and cpu resources on the provided machine.
+     * 
+     * @param requirements, the increased resources (now only used for CPU and RAM)
      */
-    public void updateUsed(final Machine machine, final int cpuIncrease, final int ramIncrease);
+    public void updateUsed(final Machine machine, final VirtualMachineRequirements requirements);
 
 }

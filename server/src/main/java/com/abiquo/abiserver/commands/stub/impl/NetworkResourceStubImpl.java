@@ -1403,7 +1403,7 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
 
         ClientResponse response = post(uri, links);
 
-        if (response.getStatusCode() == 201)
+        if (response.getStatusCode() == 204 || response.getStatusCode() == 202)
         {
             result.setSuccess(Boolean.TRUE);
         }

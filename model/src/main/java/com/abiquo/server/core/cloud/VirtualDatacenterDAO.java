@@ -39,7 +39,6 @@ import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 
-import com.abiquo.model.enumerator.VirtualMachineState;
 import com.abiquo.server.core.common.DefaultEntityCurrentUsed;
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
 import com.abiquo.server.core.enterprise.Enterprise;
@@ -189,7 +188,7 @@ public class VirtualDatacenterDAO extends DefaultDAOBase<Integer, VirtualDatacen
         Object[] vmResources =
             (Object[]) getSession().createSQLQuery(SUM_VM_RESOURCES)
                 .setParameter("virtualDatacenterId", virtualDatacenterId)
-                .setParameter("not_deployed", VirtualMachineState.NOT_DEPLOYED.toString())
+                .setParameter("not_deployed", VirtualMachineState.NOT_ALLOCATED.name())
                 .uniqueResult();
 
         Long cpu = vmResources[0] == null ? 0 : ((BigDecimal) vmResources[0]).longValue();

@@ -28,7 +28,6 @@ import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -38,10 +37,10 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import org.hibernate.annotations.ForeignKey;
+import org.hibernate.annotations.Formula;
 import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.Range;
 
-import com.abiquo.model.enumerator.VirtualMachineState;
 import com.abiquo.server.core.common.DefaultEntityBase;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.softwarementors.validation.constraints.LeadingOrTrailingWhitespace;
@@ -59,13 +58,12 @@ public class VirtualAppliance extends DefaultEntityBase
     }
 
     public VirtualAppliance(final Enterprise enterprise, final VirtualDatacenter virtualDatacenter,
-        final String name, final VirtualMachineState state, final VirtualMachineState subState)
+        final String name, final VirtualApplianceState state)
     {
         setEnterprise(enterprise);
         setVirtualDatacenter(virtualDatacenter);
         setName(name);
         setState(state);
-        setSubState(subState);
         setPublicApp(0);
         setError(0);
         setHighDisponibility(0);
@@ -245,46 +243,36 @@ public class VirtualAppliance extends DefaultEntityBase
         this.error = error;
     }
 
-    public final static String SUB_STATE_PROPERTY = "subState";
-
-    private final static boolean SUB_STATE_REQUIRED = true;
-
-    private final static String SUB_STATE_COLUMN = "subState";
-
-    @Enumerated(value = javax.persistence.EnumType.STRING)
-    @Column(name = SUB_STATE_COLUMN, nullable = !SUB_STATE_REQUIRED)
-    private VirtualMachineState subState;
-
-    @Required(value = SUB_STATE_REQUIRED)
-    public VirtualMachineState getSubState()
-    {
-        return this.subState;
-    }
-
-    public void setSubState(final VirtualMachineState subState)
-    {
-        this.subState = subState;
-    }
-
     public final static String STATE_PROPERTY = "state";
 
-    private final static boolean STATE_REQUIRED = true;
+    /**
+     * @see VirtualApplianceState
+     */
+    // This are the valid mapping when HHH-6347 is fixed
+    // @Enumerated(value = javax.persistence.EnumType.STRING)
+    // @Type(type = "com.abiquo.server.core.cloud.VirtualApplianceState")
+    @Formula(value = "( select case when not exists (  select  virtualmac20_.idVM  from virtualapp virtualapp17_  inner join node nodesvirtu18_ on virtualapp17_.idVirtualApp=nodesvirtu18_.idVirtualApp  inner join nodevirtualimage nodevirtua19_  inner join node nodevirtua19_1_ on nodevirtua19_.idNode=nodevirtua19_1_.idNode  inner join virtualmachine virtualmac20_ on nodevirtua19_.idVM=virtualmac20_.idVM  where virtualapp17_.idVirtualApp=idVirtualApp  and nodesvirtu18_.idNode=nodevirtua19_.idNode ) then 'NOT_DEPLOYED' when exists (  select  virtualmac4_.state  from virtualapp virtualapp1_  inner join node nodesvirtu2_ on virtualapp1_.idVirtualApp=nodesvirtu2_.idVirtualApp  inner join nodevirtualimage nodevirtua3_  inner join node nodevirtua3_1_ on nodevirtua3_.idNode=nodevirtua3_1_.idNode  inner join virtualmachine virtualmac4_ on nodevirtua3_.idVM=virtualmac4_.idVM  where virtualapp1_.idVirtualApp=idVirtualApp  and nodesvirtu2_.idNode=nodevirtua3_.idNode  and virtualmac4_.state='UNKNOWN' ) then 'UNKNOWN' when exists (  select  virtualmac8_.state  from virtualapp virtualapp5_  inner join node nodesvirtu6_ on virtualapp5_.idVirtualApp=nodesvirtu6_.idVirtualApp  inner join nodevirtualimage nodevirtua7_  inner join node nodevirtua7_1_ on nodevirtua7_.idNode=nodevirtua7_1_.idNode  inner join virtualmachine virtualmac8_ on nodevirtua7_.idVM=virtualmac8_.idVM  where virtualapp5_.idVirtualApp=idVirtualApp  and nodesvirtu6_.idNode=nodevirtua7_.idNode  and virtualmac8_.state='LOCKED' ) then 'LOCKED' when not exists (  select  virtualmac12_.state  from virtualapp virtualapp9_  inner join node nodesvirtu10_ on virtualapp9_.idVirtualApp=nodesvirtu10_.idVirtualApp  inner join nodevirtualimage nodevirtua11_  inner join node nodevirtua11_1_ on nodevirtua11_.idNode=nodevirtua11_1_.idNode  inner join virtualmachine virtualmac12_ on nodevirtua11_.idVM=virtualmac12_.idVM  where virtualapp9_.idVirtualApp=idVirtualApp  and nodesvirtu10_.idNode=nodevirtua11_.idNode  and ( virtualmac12_.state not in ('OFF' , 'PAUSED' , 'ON', 'CONFIGURED') ) ) then 'DEPLOYED' when not exists (  select  virtualmac16_.state  from virtualapp virtualapp13_  inner join node nodesvirtu14_ on virtualapp13_.idVirtualApp=nodesvirtu14_.idVirtualApp  inner join nodevirtualimage nodevirtua15_  inner join node nodevirtua15_1_ on nodevirtua15_.idNode=nodevirtua15_1_.idNode  inner join virtualmachine virtualmac16_ on nodevirtua15_.idVM=virtualmac16_.idVM  where virtualapp13_.idVirtualApp=idVirtualApp  and nodesvirtu14_.idNode=nodevirtua15_.idNode  and ( virtualmac16_.state not in ( 'NOT_ALLOCATED' , 'ALLOCATED')) ) then 'NOT_DEPLOYED' else 'NEEDS_SYNC' end)")
+    private String state; // This should be VirtualApplianceState but enums does not work with
+                          // formula this bug https://hibernate.onjira.com/browse/HHH-6347
 
-    private final static String STATE_COLUMN = "state";
-
-    @Enumerated(value = javax.persistence.EnumType.STRING)
-    @Column(name = STATE_COLUMN, nullable = !STATE_REQUIRED)
-    private VirtualMachineState state;
-
-    @Required(value = STATE_REQUIRED)
-    public VirtualMachineState getState()
+    /**
+     * @see VirtualApplianceState
+     */
+    public VirtualApplianceState getState()
     {
-        return this.state;
+        // enums does not work with
+        // formula this bug https://hibernate.onjira.com/browse/HHH-6347
+        return VirtualApplianceState.valueOf(this.state);
     }
 
-    public void setState(final VirtualMachineState state)
+    /**
+     * @see VirtualApplianceState
+     */
+    public void setState(final VirtualApplianceState state)
     {
-        this.state = state;
+        // enums does not work with
+        // formula this bug https://hibernate.onjira.com/browse/HHH-6347
+        this.state = state.name();
     }
 
     //

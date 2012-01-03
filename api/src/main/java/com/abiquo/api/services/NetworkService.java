@@ -23,6 +23,7 @@ package com.abiquo.api.services;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
@@ -39,21 +40,24 @@ import org.springframework.transaction.annotation.Transactional;
 import com.abiquo.api.config.ConfigService;
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.exceptions.BadRequestException;
+import com.abiquo.api.services.cloud.VirtualMachineService;
 import com.abiquo.api.tracer.TracerLogger;
 import com.abiquo.model.enumerator.NetworkType;
-import com.abiquo.model.enumerator.VirtualMachineState;
+import com.abiquo.model.transport.LinksDto;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualDatacenterRep;
 import com.abiquo.server.core.cloud.VirtualMachine;
+import com.abiquo.server.core.cloud.VirtualMachineState;
 import com.abiquo.server.core.enterprise.DatacenterLimits;
-import com.abiquo.server.core.enterprise.DatacenterLimitsDAO;
+import com.abiquo.server.core.enterprise.EnterpriseRep;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.InfrastructureRep;
 import com.abiquo.server.core.infrastructure.management.Rasd;
 import com.abiquo.server.core.infrastructure.network.DhcpOption;
 import com.abiquo.server.core.infrastructure.network.DhcpOptionDto;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
+import com.abiquo.server.core.infrastructure.network.IpPoolManagement.OrderByEnum;
 import com.abiquo.server.core.infrastructure.network.VLANNetwork;
 import com.abiquo.server.core.infrastructure.network.VMNetworkConfiguration;
 import com.abiquo.server.core.util.network.IPAddress;
@@ -72,9 +76,55 @@ public class NetworkService extends DefaultApiService
     /** Logger. */
     private static final Logger LOGGER = LoggerFactory.getLogger(NetworkService.class);
 
+    /**
+     * Prepares the {@link Rasd} entity regarding on the virtual machine and the ip we are
+     * assigning. It's up to the method that calls this entity either save the Rasd or not.
+     * 
+     * @param vm {@link VirtualMachine} entity where the IP will belong to.
+     * @param ip {@link IpPoolManagement} entity that will store this rasd.
+     * @return the created Rasd entity.
+     */
+    public static Rasd createRasdEntity(final VirtualMachine vm, final IpPoolManagement ip)
+    {
+        // create the Rasd object.
+        Rasd rasd =
+            new Rasd(UUID.randomUUID().toString(),
+                IpPoolManagement.DEFAULT_RESOURCE_NAME,
+                Integer.valueOf(IpPoolManagement.DISCRIMINATOR));
+
+        rasd.setDescription(IpPoolManagement.DEFAULT_RESOURCE_DESCRIPTION);
+        rasd.setConnection("");
+        rasd.setAllocationUnits("0");
+        rasd.setAutomaticAllocation(0);
+        rasd.setAutomaticDeallocation(0);
+        rasd.setAddress(ip.getMac());
+        rasd.setParent(ip.getNetworkName());
+        rasd.setResourceSubType(String.valueOf(defineIpType(ip.getVlanNetwork()).ordinal()));
+
+        return rasd;
+    }
+
+    private static IpPoolManagement.Type defineIpType(final VLANNetwork vlan)
+    {
+        switch (vlan.getType())
+        {
+            case INTERNAL:
+                return IpPoolManagement.Type.PRIVATE;
+            case PUBLIC:
+                return IpPoolManagement.Type.PUBLIC;
+            case EXTERNAL:
+                return IpPoolManagement.Type.EXTERNAL;
+            default:
+                return IpPoolManagement.Type.UNMANAGED;
+        }
+    }
+
     /** Autowired infrastructure DAO repository. */
     @Autowired
     protected InfrastructureRep datacenterRepo;
+
+    @Autowired
+    protected EnterpriseRep entRep;
 
     /** Autowired Virtual Infrastructure DAO repository. */
     @Autowired
@@ -89,6 +139,9 @@ public class NetworkService extends DefaultApiService
     protected UserService userService;
 
     @Autowired
+    protected VirtualMachineService vmService;
+
+    @Autowired
     private EnterpriseService entService;
 
     /**
@@ -100,7 +153,8 @@ public class NetworkService extends DefaultApiService
     }
 
     /**
-     * Auxiliar constructor for test purposes. Haters gonna hate bzengine.
+     * Auxiliar constructor for test purposes. Haters gonna hate 'bzengine'. And his creator as
+     * well...
      * 
      * @param em {@link EntityManager} instance with active transaction.
      */
@@ -109,87 +163,122 @@ public class NetworkService extends DefaultApiService
         repo = new VirtualDatacenterRep(em);
         datacenterRepo = new InfrastructureRep(em);
         userService = new UserService(em);
+        // TODO initialize the tracer
     }
 
     /**
-     * Associates a NIC to a Private IP address.
+     * Assign the default NIC to a Virtual Machine. Depending on which vlan type is, we should do an
+     * action, or another one. This method will be only called from another services, so we
+     * understand we don't have to check the NotFound case.
      * 
-     * @param vdcId Identifier of the Virtual Datacenter.
-     * @param vappId Identifier of the Virtual Appliance.
-     * @param vmId Identifier of the Virtual Machine that will store the NIC.
-     * @param vlanId Identifier of the VLAN of the IP
-     * @param ipId Identifier of the IP address inside the VLAN.
-     * @return the resulting {@link IpPoolManagement} object.
+     * @param vmId identifier of the Virtual Machine.
      */
-    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public IpPoolManagement associateVirtualMachinePrivateNic(final Integer vdcId,
-        final Integer vappId, final Integer vmId, final Integer vlanId, final Integer ipId)
+    public void assignDefaultNICToVirtualMachine(final Integer vmId)
     {
         // Get the needed objects.
-        VirtualDatacenter vdc = getVirtualDatacenter(vdcId);
-        VLANNetwork vlan = getPrivateVlan(vdc, vlanId);
-        VirtualAppliance vapp = getVirtualAppliance(vdc, vappId);
-        VirtualMachine vm = getVirtualMachine(vapp, vmId);
+        VirtualMachine vm = repo.findVirtualMachineById(vmId);
+        VirtualAppliance vapp = repo.findVirtualApplianceByVirtualMachine(vm);
+        VirtualDatacenter vdc = vapp.getVirtualDatacenter();
 
-        IpPoolManagement ip = repo.findIp(vlan, ipId);
+        VLANNetwork vlan = vdc.getDefaultVlan();
 
-        if (ip == null)
+        IpPoolManagement ip = null;
+        switch (vlan.getType())
         {
-            addConflictErrors(APIError.VLANS_IP_DOES_NOT_EXISTS);
-            flushErrors();
+            case INTERNAL:
+                // find next available IP to use.
+                ip =
+                    repo.findIpsByPrivateVLANAvailableFiltered(vdc.getId(), vlan.getId(), 0, 1,
+                        new String(), OrderByEnum.IP, Boolean.TRUE).get(0);
+                break;
+
+            default:
+                DatacenterLimits dcLimits =
+                    entRep.findLimitsByEnterpriseAndDatacenter(vdc.getEnterprise(),
+                        vdc.getDatacenter());
+                ip =
+                    repo.findExternalIpsByVlan(vdc.getEnterprise().getId(), dcLimits.getId(),
+                        vlan.getId(), 0, 1, new String(), OrderByEnum.IP, Boolean.TRUE,
+                        Boolean.TRUE).get(0);
+                ip.setVirtualDatacenter(vdc);
+                ip.setMac(IPNetworkRang.requestRandomMacAddress(vdc.getHypervisorType()));
+                ip.setName(ip.getMac() + "_host");
         }
 
-        // The user has the role for manage This. But... is the user from the same enterprise
-        // than Virtual Datacenter?
-        userService.checkCurrentEnterpriseForPostMethods(vdc.getEnterprise());
+        Rasd rasd = createRasdEntity(vm, ip);
 
-        // Check if the machine is in the correct state to perform the action.
-        if (!vm.getState().equals(VirtualMachineState.NOT_DEPLOYED))
-        {
-            addConflictErrors(APIError.VIRTUAL_MACHINE_INCOHERENT_STATE);
-            flushErrors();
-        }
-
-        // check if the ip address is already defined to a virtual machine
-        if (ip.getVirtualMachine() != null)
-        {
-            addConflictErrors(APIError.VLANS_IP_ALREADY_ASSIGNED_TO_A_VIRTUAL_MACHINE);
-            flushErrors();
-        }
-
-        // create the Rasd object.
-        Rasd rasd =
-            new Rasd(UUID.randomUUID().toString(), IpPoolManagement.DEFAULT_RESOURCE_NAME, Integer
-                .valueOf(IpPoolManagement.DISCRIMINATOR));
-
-        rasd.setDescription(IpPoolManagement.DEFAULT_RESOURCE_DESCRIPTION);
-        rasd.setConnection("");
-        rasd.setAllocationUnits("0");
-        rasd.setAutomaticAllocation(0);
-        rasd.setAutomaticDeallocation(0);
-        rasd.setAddress(ip.getMac());
-        rasd.setParent(ip.getNetworkName());
-        rasd.setResourceSubType(String.valueOf(IpPoolManagement.Type.PRIVATE.ordinal()));
-        // Configuration Name sets the order in the virtual machine, put it in the last place.
-        rasd.setConfigurationName(String.valueOf(repo.findIpsByVirtualMachine(vm).size()));
         repo.insertRasd(rasd);
-
         ip.setRasd(rasd);
+
+        ip.attach(0, vm, vapp);
+
         ip.setVirtualAppliance(vapp);
         ip.setVirtualMachine(vm);
+        ip.setConfigureGateway(Boolean.TRUE);
+
         repo.updateIpManagement(ip);
 
-        if (tracer != null)
-        {
-            String messageTrace =
-                "Virtual Machine '" + vm.getName()
-                    + "' has created a NIC associated to private IP Address '" + ip.getIp()
-                    + "' from VLAN '" + ip.getNetworkName() + "'";
-            tracer.log(SeverityType.INFO, ComponentType.VIRTUAL_MACHINE,
-                EventType.NIC_ASSIGNED_VIRTUAL_MACHINE, messageTrace);
-        }
+        return;
+    }
 
-        return ip;
+    /**
+     * Attach a list of NICs to a virtual machine.
+     * <p>
+     * If the virtual machine is not deployed, the method simply returns <code>null</code>. If the
+     * virtual machine is deployed, the attachment will run a reconfigure operation and this method
+     * will return the identifier of the task object associated to the reconfigure operation.
+     * 
+     * @param vdcId identifier of the virtual datacenter.
+     * @param vappId identifier of the virtual appliance
+     * @param vmId identifier of the virtual machine
+     * @param nicRefs list of links to disks to attach.
+     * @return The id of the Tarantino task if the virtual machine is deployed, <code>null</code>
+     *         otherwise.
+     */
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    public Object attachNICs(final Integer vdcId, final Integer vappId, final Integer vmId,
+        final LinksDto nicRefs)
+    {
+        VirtualDatacenter vdc = getVirtualDatacenter(vdcId);
+        VirtualAppliance vapp = getVirtualAppliance(vdc, vappId);
+        VirtualMachine oldvm = getVirtualMachine(vapp, vmId);
+
+        VirtualMachine newvm = vmService.createBackUpObject(oldvm);
+        List<IpPoolManagement> ips = vmService.getNICsFromDto(vdc, nicRefs);
+
+        newvm.getIps().addAll(ips);
+
+        return vmService.reconfigureVirtualMachine(vdc, vapp, oldvm, newvm);
+    }
+
+    /**
+     * Attach a list of NICs to a virtual machine.
+     * <p>
+     * If the virtual machine is not deployed, the method simply returns <code>null</code>. If the
+     * virtual machine is deployed, the attachment will run a reconfigure operation and this method
+     * will return the identifier of the task object associated to the reconfigure operation.
+     * 
+     * @param vdcId identifier of the virtual datacenter.
+     * @param vappId identifier of the virtual appliance
+     * @param vmId identifier of the virtual machine
+     * @param nicRefs list of links to disks to attach.
+     * @return The id of the Tarantino task if the virtual machine is deployed, <code>null</code>
+     *         otherwise.
+     */
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    public Object changeNICs(final Integer vdcId, final Integer vappId, final Integer vmId,
+        final LinksDto nicRefs)
+    {
+        VirtualDatacenter vdc = getVirtualDatacenter(vdcId);
+        VirtualAppliance vapp = getVirtualAppliance(vdc, vappId);
+        VirtualMachine oldvm = getVirtualMachine(vapp, vmId);
+
+        VirtualMachine newvm = vmService.createBackUpObject(oldvm);
+        List<IpPoolManagement> ips = vmService.getNICsFromDto(vdc, nicRefs);
+
+        newvm.setIps(ips);
+
+        return vmService.reconfigureVirtualMachine(vdc, vapp, oldvm, newvm);
     }
 
     /**
@@ -262,16 +351,12 @@ public class NetworkService extends DefaultApiService
         }
 
         // store the dhcp and all the ips.
-        storeIPs(virtualDatacenter.getDatacenter(), virtualDatacenter, newVlan, range,
-            IpPoolManagement.Type.PRIVATE);
+        storeIPs(virtualDatacenter.getDatacenter(), virtualDatacenter, newVlan, range);
         // Trace
         if (tracer != null)
         {
-            String messageTrace =
-                "A new internal VLAN with in a private range with name '" + newVlan.getName()
-                    + "' has been created in " + virtualDatacenter.getName();
             tracer.log(SeverityType.INFO, ComponentType.NETWORK, EventType.VLAN_CREATED,
-                messageTrace);
+                "privateVlan.created", newVlan.getName(), virtualDatacenter.getName());
         }
         if (defaultVlan != null && defaultVlan == true)
         {
@@ -324,11 +409,62 @@ public class NetworkService extends DefaultApiService
 
         if (tracer != null)
         {
-            String messageTrace =
-                "The internal VLAN with name '" + vlanToDelete.getName() + "' has been deleted.";
             tracer.log(SeverityType.INFO, ComponentType.NETWORK, EventType.VLAN_DELETED,
-                messageTrace);
+                "privateVlan.deleted", vlanToDelete.getName());
         }
+    }
+
+    /**
+     * Detach all the list of NICs from a Virtual Machine.
+     * <p>
+     * If the virtual machine is not deployed, the method simply returns <code>null</code>. If the
+     * virtual machine is deployed, the detachment will run a reconfigure operation and this method
+     * will return the identifier of the task object associated to the reconfigure operation.
+     * 
+     * @param vdcId identifier of the virtual datacenter.
+     * @param vappId identifier of the virtual appliance
+     * @param vmId identifier of the virtual machine
+     * @return The id of the Tarantino task if the virtual machine is deployed, <code>null</code>
+     *         otherwise.
+     */
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    public Object detachNIC(final Integer vdcId, final Integer vappId, final Integer vmId,
+        final Integer nicId)
+    {
+        VirtualDatacenter vdc = getVirtualDatacenter(vdcId);
+        VirtualAppliance vapp = getVirtualAppliance(vdc, vappId);
+        VirtualMachine vm = getVirtualMachine(vapp, vmId);
+
+        List<IpPoolManagement> ips = repo.findIpsByVirtualMachine(vm);
+        if (ips.size() == 1)
+        {
+            addConflictErrors(APIError.VLANS_CAN_NOT_DETACH_LAST_NIC);
+            flushErrors();
+        }
+
+        IpPoolManagement ipToDetach = repo.findIpByVirtualMachine(vm, nicId);
+        if (ipToDetach == null)
+        {
+            addNotFoundErrors(APIError.NON_EXISTENT_IP);
+            flushErrors();
+        }
+
+        VirtualMachine newVm = vmService.createBackUpObject(vm);
+        Iterator<IpPoolManagement> ipIterator = newVm.getIps().iterator();
+        while (ipIterator.hasNext())
+        {
+            IpPoolManagement currentIp = ipIterator.next();
+            if (currentIp.getRasd().equals(ipToDetach.getRasd()))
+            {
+                ipIterator.remove();
+                return vmService.reconfigureVirtualMachine(vdc, vapp, vm, newVm);
+            }
+        }
+
+        addUnexpectedErrors(APIError.NON_EXISTENT_IP);
+        flushErrors();
+
+        return vmService.reconfigureVirtualMachine(vdc, vapp, vm, newVm);
     }
 
     /**
@@ -351,6 +487,34 @@ public class NetworkService extends DefaultApiService
         LOGGER.debug("Returning the default network used by Virtual Datacenter '" + vdc.getName()
             + "'.");
         return vdc.getDefaultVlan();
+    }
+
+    /**
+     * Asks for an IP managed by a Virtual Virtual Machine.
+     * 
+     * @param vdcId identifier of the Virtual Datacenter.
+     * @param vappId identifier of the Virtual Appliance.
+     * @param vmId identifier of the Virtual Machine.
+     * @param nicId identifier of the IP to return
+     * @return the list of matching elements.
+     */
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
+    public IpPoolManagement getIpPoolManagementByVirtualMachine(final Integer vdcId,
+        final Integer vappId, final Integer vmId, final Integer nicId)
+    {
+        VirtualDatacenter vdc = getVirtualDatacenter(vdcId);
+        VirtualAppliance vapp = getVirtualAppliance(vdc, vappId);
+        VirtualMachine vm = getVirtualMachine(vapp, vmId);
+
+        IpPoolManagement ip = repo.findIpByVirtualMachine(vm, nicId);
+        if (ip == null)
+        {
+            addNotFoundErrors(APIError.NON_EXISTENT_IP);
+            flushErrors();
+        }
+
+        LOGGER.debug("Returning the list of IPs used by Virtual Machine '" + vm.getName() + "'.");
+        return ip;
     }
 
     /**
@@ -436,7 +600,8 @@ public class NetworkService extends DefaultApiService
         {
             // get the enterprise and datacenter and get the external and unmanaged ips
             List<IpPoolManagement> ips =
-                repo.findPublicIpsByEnterprise(vdc.getDatacenter().getId(), vdc.getEnterprise().getId(), firstElem, numElem, has, orderByEnum, asc, netType);
+                repo.findPublicIpsByEnterprise(vdc.getDatacenter().getId(), vdc.getEnterprise()
+                    .getId(), firstElem, numElem, has, orderByEnum, asc, netType);
             LOGGER
                 .debug("Returning the list of external and unmanaged IPs used by VirtualDatacenter '"
                     + vdc.getName() + "'.");
@@ -493,8 +658,8 @@ public class NetworkService extends DefaultApiService
             {
                 // needed for REST links.
                 DatacenterLimits dl =
-                    datacenterRepo.findDatacenterLimits(ip.getVlanNetwork().getEnterprise(), vdc
-                        .getDatacenter());
+                    datacenterRepo.findDatacenterLimits(ip.getVlanNetwork().getEnterprise(),
+                        vdc.getDatacenter());
                 ip.getVlanNetwork().setLimitId(dl.getId());
             }
         }
@@ -703,7 +868,7 @@ public class NetworkService extends DefaultApiService
         userService.checkCurrentEnterpriseForPostMethods(vdc.getEnterprise());
 
         // Check if the machine is in the correct state to perform the action.
-        if (!vm.getState().equals(VirtualMachineState.NOT_DEPLOYED))
+        if (!vm.getState().equals(VirtualMachineState.NOT_ALLOCATED))
         {
             addConflictErrors(APIError.VIRTUAL_MACHINE_INCOHERENT_STATE);
             flushErrors();
@@ -717,7 +882,7 @@ public class NetworkService extends DefaultApiService
         List<IpPoolManagement> ips = repo.findIpsByVirtualMachine(vm);
         if (ips.size() == 1)
         {
-            addConflictErrors(APIError.VLANS_CAN_NOT_DELETE_LAST_NIC);
+            addConflictErrors(APIError.VLANS_CAN_NOT_DETACH_LAST_NIC);
             flushErrors();
         }
         Boolean found = Boolean.FALSE;
@@ -778,26 +943,25 @@ public class NetworkService extends DefaultApiService
 
                     found = Boolean.TRUE;
 
-                    String messageTrace =
-                        "Virtual Machine '" + vm.getName()
-                            + "' has released the NIC associated to IP Address '" + ip.getIp()
-                            + "' from VLAN '" + ip.getNetworkName() + "'";
                     if (tracer != null)
                     {
                         if (privateIp)
                         {
                             tracer.log(SeverityType.INFO, ComponentType.VIRTUAL_MACHINE,
-                                EventType.NIC_RELEASED_VIRTUAL_MACHINE, messageTrace);
+                                EventType.NIC_RELEASED_VIRTUAL_MACHINE, "nic.released",
+                                vm.getName(), ip.getIp(), ip.getNetworkName());
                         }
                         else if (publicIp)
                         {
                             tracer.log(SeverityType.INFO, ComponentType.VIRTUAL_MACHINE,
-                                EventType.PUBLIC_IP_UNASSIGN, messageTrace);
+                                EventType.PUBLIC_IP_UNASSIGN, "nic.released", vm.getName(),
+                                ip.getIp(), ip.getNetworkName());
                         }
                         else
                         {
                             tracer.log(SeverityType.INFO, ComponentType.VIRTUAL_MACHINE,
-                                EventType.EXTERNAL_IP_UNASSIGN, messageTrace);
+                                EventType.EXTERNAL_IP_UNASSIGN, "nic.released", vm.getName(),
+                                ip.getIp(), ip.getNetworkName());
                         }
                     }
                 }
@@ -858,7 +1022,7 @@ public class NetworkService extends DefaultApiService
         userService.checkCurrentEnterpriseForPostMethods(vdc.getEnterprise());
 
         // Check if the machine is in the correct state to perform the action.
-        if (!vm.getState().equals(VirtualMachineState.NOT_DEPLOYED))
+        if (!vm.getState().equals(VirtualMachineState.NOT_ALLOCATED))
         {
             addConflictErrors(APIError.VIRTUAL_MACHINE_INCOHERENT_STATE);
             flushErrors();
@@ -917,10 +1081,8 @@ public class NetworkService extends DefaultApiService
 
         if (tracer != null)
         {
-            String messageTrace =
-                "NICs from Virtual Machine with name '" + vm.getName() + "' have been reordered";
             tracer.log(SeverityType.INFO, ComponentType.VIRTUAL_MACHINE,
-                EventType.NIC_REORDER_VIRTUAL_MACHINE, messageTrace);
+                EventType.NIC_REORDER_VIRTUAL_MACHINE, "nic.reordered", vm.getName());
         }
     }
 
@@ -947,12 +1109,8 @@ public class NetworkService extends DefaultApiService
 
         if (tracer != null)
         {
-            String messageTrace =
-                "Internal VLAN with name '" + vlan.getName()
-                    + "' has been marked as the default one in Virtual Datacenter '"
-                    + vdc.getName() + "'.";
             tracer.log(SeverityType.INFO, ComponentType.VIRTUAL_DATACENTER, EventType.VLAN_DEFAULT,
-                messageTrace);
+                "vlan.default", vlan.getName(), vdc.getName());
         }
     }
 
@@ -986,10 +1144,10 @@ public class NetworkService extends DefaultApiService
         userService.checkCurrentEnterpriseForPostMethods(vdc.getEnterprise());
 
         // Values 'address', 'mask', and 'tag' can not be changed by the edit process
-        if (!oldNetwork.getConfiguration().getAddress().equalsIgnoreCase(
-            newNetwork.getConfiguration().getAddress())
-            || !oldNetwork.getConfiguration().getMask().equals(
-                newNetwork.getConfiguration().getMask())
+        if (!oldNetwork.getConfiguration().getAddress()
+            .equalsIgnoreCase(newNetwork.getConfiguration().getAddress())
+            || !oldNetwork.getConfiguration().getMask()
+                .equals(newNetwork.getConfiguration().getMask())
             || oldNetwork.getTag() == null
             && newNetwork.getTag() != null
             || oldNetwork.getTag() != null
@@ -1002,8 +1160,8 @@ public class NetworkService extends DefaultApiService
         }
 
         // Check the new gateway is inside the range of IPs.
-        if (!newNetwork.getConfiguration().getGateway().equalsIgnoreCase(
-            oldNetwork.getConfiguration().getGateway()))
+        if (!newNetwork.getConfiguration().getGateway()
+            .equalsIgnoreCase(oldNetwork.getConfiguration().getGateway()))
         {
             IPAddress networkIP =
                 IPAddress.newIPAddress(newNetwork.getConfiguration().getAddress());
@@ -1073,11 +1231,8 @@ public class NetworkService extends DefaultApiService
         if (tracer != null)
         {
             // Trace and log message.
-            String messageTrace =
-                "The Private VLAN with name '" + oldNetwork.getName()
-                    + "' has been modified in Virtual Datacenter " + vdc.getName();
             tracer.log(SeverityType.INFO, ComponentType.NETWORK, EventType.VLAN_EDITED,
-                messageTrace);
+                "privateVlan.updated", oldNetwork.getName(), vdc.getName());
         }
 
         return oldNetwork;
@@ -1119,7 +1274,7 @@ public class NetworkService extends DefaultApiService
         userService.checkCurrentEnterpriseForPostMethods(repo.findById(vdcId).getEnterprise());
 
         // Check if the machine is in the correct state to perform the action.
-        if (!vm.getState().equals(VirtualMachineState.NOT_DEPLOYED))
+        if (!vm.getState().equals(VirtualMachineState.NOT_ALLOCATED))
         {
             addConflictErrors(APIError.VIRTUAL_MACHINE_INCOHERENT_STATE);
             flushErrors();
@@ -1237,11 +1392,9 @@ public class NetworkService extends DefaultApiService
 
         if (tracer != null)
         {
-            String messageTrace =
-                "Virtual Machine '" + vm.getName() + "' has updated its default configuration";
 
             tracer.log(SeverityType.INFO, ComponentType.NETWORK,
-                EventType.NETWORK_CONFIGURATION_UPDATED, messageTrace);
+                EventType.NETWORK_CONFIGURATION_UPDATED, "virtualMachine.configured", vm.getName());
         }
         return vmConfig;
 
@@ -1412,8 +1565,11 @@ public class NetworkService extends DefaultApiService
     public DhcpOption addDhcpOption(final DhcpOptionDto dto)
     {
         DhcpOption opt =
-            new DhcpOption(dto.getOption(), dto.getGateway(), dto.getNetworkAddress(), dto
-                .getMask(), dto.getNetmask());
+            new DhcpOption(dto.getOption(),
+                dto.getGateway(),
+                dto.getNetworkAddress(),
+                dto.getMask(),
+                dto.getNetmask());
 
         if (!opt.isValid())
         {
@@ -1436,7 +1592,7 @@ public class NetworkService extends DefaultApiService
      * @return
      */
     protected void storeIPs(final Datacenter datacenter, final VirtualDatacenter vdc,
-        final VLANNetwork vlan, final Collection<IPAddress> range, final IpPoolManagement.Type type)
+        final VLANNetwork vlan, final Collection<IPAddress> range)
     {
 
         Collection<String> allMacAddresses = repo.getAllMacs();
@@ -1461,12 +1617,7 @@ public class NetworkService extends DefaultApiService
             }
 
             IpPoolManagement ipManagement =
-                new IpPoolManagement(vlan,
-                    macAddress,
-                    name,
-                    address.toString(),
-                    vlan.getName(),
-                    type);
+                new IpPoolManagement(vlan, macAddress, name, address.toString(), vlan.getName());
 
             if (vdc != null)
             {
