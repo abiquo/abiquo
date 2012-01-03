@@ -133,7 +133,7 @@
                     super.keyboardHandler(keyboardEvent);
                 else
                 {
-                    if (keyboardEvent.keyCode == 13)
+                    if (keyboardEvent.keyCode == 13 && addButton.enabled)
                         onAdd();
                 }
             }
