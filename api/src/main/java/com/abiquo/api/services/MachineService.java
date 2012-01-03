@@ -271,8 +271,8 @@ public class MachineService extends DefaultApiService
 
         repo.updateMachine(old);
 
-        tracer.log(SeverityType.INFO, ComponentType.MACHINE, EventType.MACHINE_CREATE,
-            "machine.created", old.getName(), old.getHypervisor().getIp(), old.getHypervisor()
+        tracer.log(SeverityType.INFO, ComponentType.MACHINE, EventType.MACHINE_MODIFY,
+            "machine.modify", old.getName(), old.getHypervisor().getIp(), old.getHypervisor()
                 .getType(), old.getState());
 
         return old;

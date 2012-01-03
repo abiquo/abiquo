@@ -587,6 +587,7 @@ public class VirtualMachineService extends DefaultApiService
         old.setDescription(vmnew.getDescription());
         old.setRam(vmnew.getRam());
 
+        old.setPassword(vmnew.getPassword());
         old.setVirtualMachineTemplate(vmnew.getVirtualMachineTemplate());
 
         List<Integer> usedNICslots = dellocateOldNICs(old, vmnew);
@@ -1173,6 +1174,8 @@ public class VirtualMachineService extends DefaultApiService
         }
         catch (APIException e)
         {
+            traceApiExceptionVm(e, virtualMachine.getName());
+
             unlockVirtualMachineState(virtualMachine, originalState);
             /*
              * Select a machine to allocate the virtual machine, Check limits, Check resources If
@@ -2084,6 +2087,7 @@ public class VirtualMachineService extends DefaultApiService
         vm.setIps(ips);
         vm.setDisks(disks);
 
+        vm.setPassword(dto.getPassword());
         return vm;
     }
 
