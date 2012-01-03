@@ -121,24 +121,6 @@ public class SnapshotUtils
     }
 
     /**
-     * Generates a snapshot filename of a certain {@link VirtualMachineTemplate}.
-     * 
-     * @param template The {@link VirtualMachineTemplate} to consider
-     * @return The snapshot filename
-     */
-    public static String formatSnapshotRawFilename(final VirtualMachineTemplate template)
-    {
-        String name = FilenameUtils.getBaseName(template.getPath());
-
-        if (!template.isMaster())
-        {
-            name = FilenameUtils.getBaseName(template.getMaster().getPath());
-        }
-
-        return String.format("%s-snapshot-%s.raw", UUID.randomUUID().toString(), name);
-    }
-
-    /**
      * Indicates if a {@link VirtualMachine} must be powered off before snapshot.
      * 
      * @param virtualMachineState The actual {@link VirtualMachineState} of the
