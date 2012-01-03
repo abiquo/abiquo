@@ -1200,16 +1200,18 @@ public class InfrastructureService extends DefaultApiService
         }
     }
 
-    public void powerOn(final Integer id)
+    public Machine powerOn(final int machineId)
     {
         // XXX community impl
         LOGGER.error("[powerOn] community not implemented");
+        return null;
 
     }
 
-    public void powerOff(final Integer id, final MachineState haltedForSave)
+    public Machine powerOff(final int machineId, final MachineState state)
     {
         // XXX community impl
         LOGGER.error("[powerOff] community not implemented");
+        return null;
     }
 }
