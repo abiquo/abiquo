@@ -105,7 +105,7 @@
                 
                 this._staticRules = new StaticRulesForm();
                 this._staticRules.addEventListener("closePopUp",closeStaticRulesPopUp);
-                this._staticRules.init();
+                this._staticRules.init(true);
             }
 
 
