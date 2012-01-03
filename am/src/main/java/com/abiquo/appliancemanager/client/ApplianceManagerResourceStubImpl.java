@@ -31,6 +31,8 @@ import com.abiquo.appliancemanager.transport.RepositoryConfigurationDto;
 import com.abiquo.appliancemanager.transport.TemplateDto;
 import com.abiquo.appliancemanager.transport.TemplateStateDto;
 import com.abiquo.appliancemanager.transport.TemplatesStateDto;
+import com.abiquo.model.transport.error.ErrorDto;
+import com.abiquo.model.transport.error.ErrorsDto;
 
 public class ApplianceManagerResourceStubImpl extends ApplianceManagerResourceStub
 {
@@ -60,7 +62,10 @@ public class ApplianceManagerResourceStubImpl extends ApplianceManagerResourceSt
             String cause = null;
             try
             {
-                cause = response.getEntity(String.class);
+                StringBuilder builder = new StringBuilder("");
+                ErrorsDto errors = response.getEntity(ErrorsDto.class);
+                errors.getCollection().remove(0);
+                cause = errors.toString();
             }
             catch (Exception e)
             {
