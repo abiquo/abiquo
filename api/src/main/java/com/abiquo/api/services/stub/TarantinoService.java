@@ -648,13 +648,9 @@ public class TarantinoService extends DefaultApiService
     {
         VirtualMachineTemplate template = virtualMachine.getVirtualMachineTemplate();
 
-        String snapshotFilename =
-            type.equals(SnapshotType.FROM_DISK_CONVERSION) ? SnapshotUtils
-                .formatSnapshotRawFilename(template) : SnapshotUtils
-                .formatSnapshotFilename(template);
-
         return snapshotVirtualMachine(virtualAppliance, virtualMachine, originalState,
-            snapshotName, SnapshotUtils.formatSnapshotPath(template), snapshotFilename);
+            snapshotName, SnapshotUtils.formatSnapshotPath(template),
+            SnapshotUtils.formatSnapshotFilename(template));
     }
 
     /**

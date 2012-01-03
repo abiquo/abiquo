@@ -1669,9 +1669,9 @@ public class VirtualMachineService extends DefaultApiService
                         virtualMachine.getName());
                     break;
 
-                case FROM_NOT_MANAGED_VIRTUALMACHINE:
+                case FROM_IMPORTED_VIRTUALMACHINE:
                     taskId =
-                        snapshotNotManagedVirtualMachine(virtualApp, virtualMachine, originalState,
+                        snapshotImportedVirtualMachine(virtualApp, virtualMachine, originalState,
                             snapshotName);
                     LOGGER.debug("Instance of virtual machine {} enqueued!",
                         virtualMachine.getName());
@@ -1722,7 +1722,7 @@ public class VirtualMachineService extends DefaultApiService
     }
 
     /**
-     * Performs an instance of type {@link SnapshotType#FROM_NOT_MANAGED_VIRTUALMACHINE}
+     * Performs an instance of type {@link SnapshotType#FROM_IMPORTED_VIRTUALMACHINE}
      * 
      * @param virtualAppliance {@link VirtualAppliance} where the {@link VirtualMachine} is
      *            contained.
@@ -1731,7 +1731,7 @@ public class VirtualMachineService extends DefaultApiService
      * @param snapshotName The final name of the {@link VirtualMachineTemplate}
      * @return The {@link Task} UUID for progress tracking
      */
-    private String snapshotNotManagedVirtualMachine(final VirtualAppliance virtualAppliance,
+    private String snapshotImportedVirtualMachine(final VirtualAppliance virtualAppliance,
         final VirtualMachine virtualMachine, final VirtualMachineState originalState,
         final String snapshotName)
     {

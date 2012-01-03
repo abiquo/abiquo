@@ -47,9 +47,9 @@ public class SnapshotUtils
         FROM_DISK_CONVERSION,
 
         /**
-         * The {@link VirtualMachine} deployed is not managed by abiquo.
+         * The {@link VirtualMachine} deployed is an imported one.
          */
-        FROM_NOT_MANAGED_VIRTUALMACHINE,
+        FROM_IMPORTED_VIRTUALMACHINE,
 
         /**
          * The {@link VirtualMachine} is a stateful one.
@@ -64,9 +64,9 @@ public class SnapshotUtils
          */
         public static SnapshotType getSnapshotType(final VirtualMachine virtualMachine)
         {
-            if (!virtualMachine.isManaged())
+            if (virtualMachine.isImported())
             {
-                return SnapshotType.FROM_NOT_MANAGED_VIRTUALMACHINE;
+                return SnapshotType.FROM_IMPORTED_VIRTUALMACHINE;
             }
             else if (virtualMachine.getVirtualImageConversion() != null)
             {
@@ -118,24 +118,6 @@ public class SnapshotUtils
         }
 
         return String.format("%s-snapshot-%s", UUID.randomUUID().toString(), name);
-    }
-
-    /**
-     * Generates a snapshot filename of a certain {@link VirtualMachineTemplate}.
-     * 
-     * @param template The {@link VirtualMachineTemplate} to consider
-     * @return The snapshot filename
-     */
-    public static String formatSnapshotRawFilename(final VirtualMachineTemplate template)
-    {
-        String name = FilenameUtils.getBaseName(template.getPath());
-
-        if (!template.isMaster())
-        {
-            name = FilenameUtils.getBaseName(template.getMaster().getPath());
-        }
-
-        return String.format("%s-snapshot-%s.raw", UUID.randomUUID().toString(), name);
     }
 
     /**
