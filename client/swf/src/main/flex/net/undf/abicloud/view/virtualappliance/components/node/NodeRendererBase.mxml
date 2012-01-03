@@ -40,6 +40,7 @@
 
     <mx:Script>
         <![CDATA[
+        	import mx.events.CloseEvent;
         	import net.undf.abicloud.events.VirtualApplianceEvent;
         	import net.undf.abicloud.vo.virtualappliance.VirtualAppliance;
         	import net.undf.abicloud.vo.infrastructure.VirtualMachine;
@@ -429,38 +430,53 @@
             {
                 buttonsContainer.visible = false;
             }
+            
+            private function onPreviousEraseNodeButton():void
+            {
+            	AbiCloudAlert.showAlert(ResourceManager.getInstance().getString("Common",
+                                                                                "ALERT_TITLE_LABEL"),
+                                        ResourceManager.getInstance().getString("VirtualAppliance",
+                                                                                "ALERT_DELETE_NODE_VIRTUALIMAGE_HEADER"),
+                                        ResourceManager.getInstance().getString("VirtualAppliance",
+                                                                                "ALERT_DELETE_NODE_VIRTUALIMAGE_TEXT"),
+                                        Alert.YES | Alert.NO,
+                                        onClickEraseNodeButton);
+            }
 
             /**
              * Announces that user wants to delete this node
              **/
-            private function onClickEraseNodeButton():void
+            private function onClickEraseNodeButton(closeEvent:CloseEvent):void
             {
-                if (this._isSelected)
+                if (closeEvent.detail == Alert.YES)
                 {
-                    isSelected = false;
-                }
-                
-                //We add the remove state
-                if(NodeVirtualImage(this._node).virtualMachine){
-	                if(NodeVirtualImage(this._node).virtualMachine.state.description == net.undf.abicloud.vo.infrastructure.State.ON.description){	
+	                if (this._isSelected)
+	                {
+	                    isSelected = false;
+	                }
+	                
+	                //We add the remove state
+	                if(NodeVirtualImage(this._node).virtualMachine){
+		                if(NodeVirtualImage(this._node).virtualMachine.state.description == net.undf.abicloud.vo.infrastructure.State.ON.description){	
+		
+			                this.enabled = false;
+							this._pendingStatus = "NodeVirtualImageDeleted";   
+							this._infoToolTip = resourceManager.getString('VirtualAppliance','TOOL_TIP_NODE_DELETED');
+							AbicloudUtils.getImageFromStyle(this._pendingStatus, nodeRenedererBase);             	
+		                }                	
+	                }
+	                //We have to Unregister the Connector for this NodeRenderer
+	                if (this._connector)
+	                {
+	                    var connectionEvent:ConnectionEvent = new ConnectionEvent(ConnectionEvent.UNREGISTER_CONNECTOR);
+	                    connectionEvent.connector = this._connector;
+	                    this._connector.dispatchEvent(connectionEvent);
+	                }
 	
-		                this.enabled = false;
-						this._pendingStatus = "NodeVirtualImageDeleted";   
-						this._infoToolTip = resourceManager.getString('VirtualAppliance','TOOL_TIP_NODE_DELETED');
-						AbicloudUtils.getImageFromStyle(this._pendingStatus, nodeRenedererBase);             	
-	                }                	
-                }
-                //We have to Unregister the Connector for this NodeRenderer
-                if (this._connector)
-                {
-                    var connectionEvent:ConnectionEvent = new ConnectionEvent(ConnectionEvent.UNREGISTER_CONNECTOR);
-                    connectionEvent.connector = this._connector;
-                    this._connector.dispatchEvent(connectionEvent);
-                }
-
-                var nodeRendererEvent:NodeRendererEvent = new NodeRendererEvent(NodeRendererEvent.NODERENDERER_ERASE);
-                nodeRendererEvent.nodeRenderer = this;
-                dispatchEvent(nodeRendererEvent);
+	                var nodeRendererEvent:NodeRendererEvent = new NodeRendererEvent(NodeRendererEvent.NODERENDERER_ERASE);
+	                nodeRendererEvent.nodeRenderer = this;
+	                dispatchEvent(nodeRendererEvent);
+	            }
             }
 
             /**
@@ -661,7 +677,7 @@
             styleName="VirtualApplianceEraseNodeButton"
             mouseDown="stopMouseDownUpPropagation(event)"
             mouseUp="stopMouseDownUpPropagation(event)"
-            click="onClickEraseNodeButton()"/>
+            click="onPreviousEraseNodeButton()"/>
     </mx:HBox>
 
 </mx:Canvas>
