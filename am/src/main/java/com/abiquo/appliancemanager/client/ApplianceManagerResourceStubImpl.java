@@ -31,6 +31,8 @@ import com.abiquo.appliancemanager.transport.RepositoryConfigurationDto;
 import com.abiquo.appliancemanager.transport.TemplateDto;
 import com.abiquo.appliancemanager.transport.TemplateStateDto;
 import com.abiquo.appliancemanager.transport.TemplatesStateDto;
+import com.abiquo.model.transport.error.ErrorDto;
+import com.abiquo.model.transport.error.ErrorsDto;
 
 public class ApplianceManagerResourceStubImpl extends ApplianceManagerResourceStub
 {
@@ -57,19 +59,19 @@ public class ApplianceManagerResourceStubImpl extends ApplianceManagerResourceSt
         final Integer httpStatus = response.getStatusCode();
         if (httpStatus != expectedStatus)
         {
-            String cause = null;
+            String cause = response.getMessage();
             try
             {
-                cause = response.getEntity(String.class);
+                ErrorsDto errors = response.getEntity(ErrorsDto.class);
+                cause = errors.toString();
             }
             catch (Exception e)
             {
-                cause = response.getMessage();
+                throw new ApplianceManagerStubException(String.format("%d - %s\n %s", httpStatus,
+                    response.getMessage(), cause));
 
             }
-
-            throw new ApplianceManagerStubException(String.format("%d - %s\n %s", httpStatus,
-                response.getMessage(), cause));
+            throw new ApplianceManagerStubException(cause);
         }
     }
 

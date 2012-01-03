@@ -245,20 +245,12 @@ public class TemplateResource extends AbstractResource
      * delete
      */
     @DELETE
-    public Response deleteTemplate(
+    public void deleteTemplate(
         @PathParam(EnterpriseRepositoryResource.ENTERPRISE_REPOSITORY) final String idEnterprise,
         @PathParam(TemplateResource.TEMPLATE) final String ovfIdIn)
     {
         final String ovfId = ovfUrl(ovfIdIn);
-        try
-        {
-            service.delete(idEnterprise, ovfId);
-        }
-        catch (AMException e)
-        {
-            return Response.status(409).build();
-        }
-        return Response.noContent().build();
+        service.delete(idEnterprise, ovfId);
     }
 
     /*
