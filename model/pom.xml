@@ -332,7 +332,7 @@
                                 <include>**/cloud/VirtualMachineStateTransition.class</include>
                                 <include>**/Job*.class</include>
                                 <include>com/abiquo/server/core/task/enums/*.class</include>
-                                <include>com/abiquo/model/redis/RedisEntityBase.class</include>
+                                <include>com/abiquo/model/**/RedisEntityBase.class</include>
                             </includes>
                         </configuration>
                     </execution>
