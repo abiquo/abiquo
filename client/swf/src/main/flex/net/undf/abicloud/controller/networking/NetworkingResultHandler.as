@@ -24,10 +24,13 @@ package net.undf.abicloud.controller.networking
     import flash.events.Event;
     
     import mx.collections.ArrayCollection;
+    import mx.controls.Alert;
+    import mx.resources.ResourceManager;
     
     import net.undf.abicloud.controller.ResultHandler;
     import net.undf.abicloud.events.NetworkingEvent;
     import net.undf.abicloud.model.AbiCloudModel;
+    import net.undf.abicloud.view.general.AbiCloudAlert;
     import net.undf.abicloud.vo.infrastructure.VirtualMachine;
     import net.undf.abicloud.vo.networking.IPAddress;
     import net.undf.abicloud.vo.networking.Network;
@@ -80,6 +83,17 @@ package net.undf.abicloud.controller.networking
         {
             if (result.success)
             {
+            	//Check if an error occured with static rutes
+            	if(result.message != "")
+            	{
+                    AbiCloudAlert.showAlert(ResourceManager.getInstance().getString("Common",
+                                                                                    "ALERT_TITLE_LABEL"),
+                                            ResourceManager.getInstance().getString("Networking",
+                                                                                    "ALERT_STATIC_ROUTE_HEADER"),
+                                            ResourceManager.getInstance().getString("Networking",
+                                                                                    "ALERT_STATIC_ROUTE_TEXT"),
+                                            Alert.OK);
+            	}
                 
                 if(defaultNewtwork)
                 {
@@ -107,6 +121,18 @@ package net.undf.abicloud.controller.networking
         {
             if (result.success)
             {
+                //Check if an error occured with static rutes
+                if(result.message != "")
+                {
+                    AbiCloudAlert.showAlert(ResourceManager.getInstance().getString("Common",
+                                                                                    "ALERT_TITLE_LABEL"),
+                                            ResourceManager.getInstance().getString("Networking",
+                                                                                    "ALERT_STATIC_ROUTE_HEADER"),
+                                            ResourceManager.getInstance().getString("Networking",
+                                                                                    "ALERT_STATIC_ROUTE_TEXT"),
+                                            Alert.OK);
+                }
+                
                 //Updating VlanNetwork values in model
                 AbiCloudModel.getInstance().networkingManager.updateVLANNetwork(network,
                                                                                 vlanNetwork,

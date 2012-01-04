@@ -59,22 +59,19 @@ public class ApplianceManagerResourceStubImpl extends ApplianceManagerResourceSt
         final Integer httpStatus = response.getStatusCode();
         if (httpStatus != expectedStatus)
         {
-            String cause = null;
+            String cause = response.getMessage();
             try
             {
-                StringBuilder builder = new StringBuilder("");
                 ErrorsDto errors = response.getEntity(ErrorsDto.class);
-                errors.getCollection().remove(0);
                 cause = errors.toString();
             }
             catch (Exception e)
             {
-                cause = response.getMessage();
+                throw new ApplianceManagerStubException(String.format("%d - %s\n %s", httpStatus,
+                    response.getMessage(), cause));
 
             }
-
-            throw new ApplianceManagerStubException(String.format("%d - %s\n %s", httpStatus,
-                response.getMessage(), cause));
+            throw new ApplianceManagerStubException(cause);
         }
     }
 

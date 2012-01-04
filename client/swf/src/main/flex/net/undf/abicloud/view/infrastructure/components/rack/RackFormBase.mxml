@@ -150,6 +150,8 @@
                     event = new InfrastructureEvent(InfrastructureEvent.CREATE_RACK);
                     event.infrastructureElement = this._rack;
                 }
+                
+                AbiCloudModel.getInstance().configurationManager.modifyRegisteredSharedObject("automaticOpenPhysicalMachine",automaticOpenCheck.selected);
 
                 //Announcing Rack creation or edition
                 dispatchEvent(event);

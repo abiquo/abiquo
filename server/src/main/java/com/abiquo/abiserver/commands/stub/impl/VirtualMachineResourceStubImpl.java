@@ -102,10 +102,14 @@ public class VirtualMachineResourceStubImpl extends AbstractAPIStub implements
             org.jclouds.abiquo.domain.cloud.VirtualMachine vm =
                 vapp.getVirtualMachine(virtualMachine.getId());
 
-            if (vm.getCpu() != virtualMachine.getCpu() || vm.getRam() != virtualMachine.getRam())
+            if (vm.getCpu() != virtualMachine.getCpu() || vm.getRam() != virtualMachine.getRam()
+                || virtualMachine.getPassword() != null
+                && !virtualMachine.getPassword().equals(vm.getPassword()))
             {
                 vm.setCpu(virtualMachine.getCpu());
                 vm.setRam(virtualMachine.getRam());
+
+                vm.setPassword(virtualMachine.getPassword());
 
                 // Here we actually perform the request to create the virtual machine
                 vm.update();
@@ -374,8 +378,8 @@ public class VirtualMachineResourceStubImpl extends AbstractAPIStub implements
     }
 
     @Override
-    public DataResult instanceVirtualMachines(Integer virtualDatacenterId,
-        Integer virtualApplianceId, Collection<Node> nodes)
+    public DataResult instanceVirtualMachines(final Integer virtualDatacenterId,
+        final Integer virtualApplianceId, final Collection<Node> nodes)
     {
         Collection<RESTLink> links = new HashSet<RESTLink>();
         StringBuilder errors = new StringBuilder();

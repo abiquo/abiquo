@@ -62,9 +62,19 @@
             [Bindable]
             private var _gatewayIpIsValid:Boolean;
             
+            [Bindable]
+            private var _editMode:Boolean;
             
-           	public function init(staticRules:ArrayCollection = null):void
+            public function get editMode():Boolean
+            {
+            	return this._editMode;
+            }
+            
+            
+           	public function init(editMode:Boolean, staticRules:ArrayCollection = null):void
            	{
+           	    this._editMode = editMode;
+           	    
            	    if(staticRules){
 	           	    this._staticRules = staticRules;	
            	    }else{
@@ -133,7 +143,7 @@
                     super.keyboardHandler(keyboardEvent);
                 else
                 {
-                    if (keyboardEvent.keyCode == 13)
+                    if (keyboardEvent.keyCode == 13 && addButton.enabled)
                         onAdd();
                 }
             }
@@ -246,7 +256,9 @@
     
     <mx:VBox verticalGap="0" paddingTop="0" width="100%" horizontalAlign="right">    	
     
-	    <mx:Form width="100%" paddingTop="0">
+	    <mx:Form width="100%" paddingTop="0"
+	    	includeInLayout="{this._editMode}"
+	    	visible="{this._editMode}">
 	       <mx:Label 
                 fontWeight="bold"
                 text="@Resource(bundle='Infrastructure', key='LABEL_ADD_STATIC_RULE')"/>
@@ -325,6 +337,7 @@
 		                            </mx:Script>
 		                            <mx:Button
 		                                id="deleteButton"
+		                                visible="{StaticRulesForm(outerDocument).editMode}"
 		                                width="19" height="19"
 		                                styleName="DeleteButton"
 		                                click="onClickDeleteButton()"/>
