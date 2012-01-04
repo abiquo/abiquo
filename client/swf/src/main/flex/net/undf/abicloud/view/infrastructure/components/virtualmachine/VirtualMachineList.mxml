@@ -185,6 +185,11 @@
                     this._virtualMachinesFiltered = virtualMachinesFiltered;                    
                 }
                 virtualMachinesDataGrid.selectedIndex = this._selectedIndex;
+                if(virtualMachinesDataGrid.selectedItem)
+                {
+	                selectedVirtualMachine = virtualMachinesDataGrid.selectedItem as VirtualMachine;
+	                dispatchEvent(new Event("virtualMachineSelected"));
+                }
             }
 
             /**
