@@ -30,6 +30,9 @@ import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineState;
 
+/**
+ * @author eruiz@abiquo.com
+ */
 public class SnapshotUtils
 {
     public enum SnapshotType
