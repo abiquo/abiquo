@@ -155,6 +155,11 @@
             }
             
             private function populatePrivateNetworks(networks:ArrayCollection):void{
+            	if(!_virtualDatacenter.network){
+                    _virtualDatacenter.network = new Network();
+                }
+                _virtualDatacenter.network.networks = new ArrayCollection(); 
+                
             	_virtualDatacenter.network.networks.addAll(networks);
             	setDefaultNetwork(this._virtualDatacenter.defaultVlan,networks);
             }

@@ -93,9 +93,12 @@
                 
                 getAvailableNetmasks();
                 
+                //Static Routes editable
+                var editMode:Boolean = this._vlanNetwork.networkType == VlanNetwork.INTERNAL;
+                
                 this._staticRules = new StaticRulesForm();
                 this._staticRules.addEventListener("closePopUp",closeStaticRulesPopUp);
-                this._staticRules.init(this._vlanNetwork.dhcpOptions);
+                this._staticRules.init(editMode,this._vlanNetwork.dhcpOptions);
             }
 
             private function validateForm():void

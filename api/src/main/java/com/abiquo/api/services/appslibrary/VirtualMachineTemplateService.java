@@ -450,7 +450,15 @@ public class VirtualMachineTemplateService extends DefaultApiServiceWithApplianc
         }
         catch (ApplianceManagerStubException e)
         {
-            CommonError error = new CommonError("409", e.getMessage());
+            CommonError error;
+            try
+            {
+                error = new CommonError("409", e.getCause().toString());
+            }
+            catch (Exception ex)
+            {
+                error = new CommonError("409", e.getMessage());
+            }
             addConflictErrors(error);
             flushErrors();
         }
