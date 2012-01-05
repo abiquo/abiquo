@@ -190,10 +190,12 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
                             errors.append("The Virtual Image is null or exists in DB");
                         }
                         VirtualMachine machine = createEmptyVirtualMachine(n);
-                        VirtualMachineDto virtualMachineDto =
-                            virtualMachineToDto(virtualAppliance, machine, n, virtualDatacenterId,
-                                virtualAppliance.getVirtualDataCenter().getIdDataCenter());
-                        ClientResponse post = post(linkVirtualMachines, virtualMachineDto);
+                        VirtualMachineWithNodeDto virtualMachineDto =
+                            virtualImageNodeToDto(virtualAppliance, machine, n,
+                                virtualDatacenterId, virtualAppliance.getVirtualDataCenter()
+                                    .getIdDataCenter());
+                        ClientResponse post =
+                            post(linkVirtualMachines, virtualMachineDto, VM_NODE_MEDIA_TYPE);
                         if (post.getStatusCode() != Status.CREATED.getStatusCode())
                         {
                             errors.append(n.getVirtualImage().getName());
@@ -207,8 +209,8 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
                     case Node.NODE_MODIFIED:
                     {
                         // We should only update DB without sending a reconfigure operation
-                        VirtualMachineDto virtualMachineDto =
-                            virtualMachineToDto(virtualAppliance, n.getVirtualMachine(), n,
+                        VirtualMachineWithNodeDto virtualMachineDto =
+                            virtualImageNodeToDto(virtualAppliance, n.getVirtualMachine(), n,
                                 virtualDatacenterId, virtualAppliance.getVirtualDataCenter()
                                     .getIdDataCenter());
 
@@ -285,7 +287,7 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
         VirtualMachine virtualMachine = new VirtualMachine();
         VirtualImage virtualImage = nodeVIPojo.getVirtualImage();
         virtualMachine.setState(new State(StateEnum.NOT_ALLOCATED));
-        virtualMachine.setName(virtualImage.getName());
+        virtualMachine.setName(nodeVIPojo.getName());
         virtualMachine.setDescription(virtualImage.getDescription());
         virtualMachine.setRam(virtualImage.getRamRequired());
         virtualMachine.setCpu(virtualImage.getCpuRequired());
@@ -431,11 +433,45 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
         dto.setIdState(VirtualMachineState.NOT_ALLOCATED.id());
         // It belongs the this app
         dto.setIdType(com.abiquo.server.core.cloud.VirtualMachine.MANAGED);
+        dto.setName(node.getName());
+        dto.setPassword(virtualMachine.getPassword());
+        dto.setRam(virtualMachine.getRam());
+        dto.setState(VirtualMachineState.NOT_ALLOCATED);
+        dto.setUuid(virtualMachine.getUUID());
+        dto.addLink(new RESTLink("virtualmachinetemplate", createVirtualMachineTemplateLink(node
+            .getVirtualImage().getIdEnterprise(), datacenterId, node.getVirtualImage().getId())));
+
+        dto.addLink(new RESTLink("enterprise", createEnterpriseLink(virtualAppliance
+            .getEnterprise().getId())));
+
+        dto.addLink(new RESTLink("user", createUserLink(virtualAppliance.getEnterprise().getId(),
+            currentSession.getUserIdDb())));
+        return dto;
+    }
+
+    private VirtualMachineWithNodeDto virtualImageNodeToDto(
+        final VirtualAppliance virtualAppliance, final VirtualMachine virtualMachine,
+        final NodeVirtualImage node, final Integer virtualDatacenterId, final Integer datacenterId)
+    {
+        VirtualMachineWithNodeDto dto = new VirtualMachineWithNodeDto();
+        dto.setCpu(virtualMachine.getCpu());
+        dto.setDescription(virtualMachine.getDescription());
+        dto.setHdInBytes(virtualMachine.getHd());
+        dto.setHighDisponibility(virtualMachine.getHighDisponibility() ? 1 : 0);
+        dto.setIdState(VirtualMachineState.NOT_ALLOCATED.id());
+        // It belongs the this app
+        dto.setIdType(com.abiquo.server.core.cloud.VirtualMachine.MANAGED);
         dto.setName(virtualMachine.getName());
         dto.setPassword(virtualMachine.getPassword());
         dto.setRam(virtualMachine.getRam());
         dto.setState(VirtualMachineState.NOT_ALLOCATED);
         dto.setUuid(virtualMachine.getUUID());
+
+        dto.setNodeName(node.getName());
+
+        dto.setX(node.getPosX());
+        dto.setY(node.getPosY());
+
         dto.addLink(new RESTLink("virtualmachinetemplate", createVirtualMachineTemplateLink(node
             .getVirtualImage().getIdEnterprise(), datacenterId, node.getVirtualImage().getId())));
 
@@ -1060,7 +1096,13 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
                     if (node instanceof NodeVirtualImage)
                     {
                         NodeVirtualImage nvi = (NodeVirtualImage) node;
-                        if (!nvi.getVirtualMachine().getState().toEnum().existsInHypervisor())
+                        if (Node.NODE_ERASED == nvi.getModified())
+                        {
+                            org.jclouds.abiquo.domain.cloud.VirtualMachine virtualMachine =
+                                appliance.getVirtualMachine(nvi.getVirtualMachine().getId());
+                            virtualMachine.delete();
+                        }
+                        else if (!nvi.getVirtualMachine().getState().toEnum().existsInHypervisor())
                         {
                             org.jclouds.abiquo.domain.cloud.VirtualMachine virtualMachine =
                                 appliance.getVirtualMachine(nvi.getVirtualMachine().getId());

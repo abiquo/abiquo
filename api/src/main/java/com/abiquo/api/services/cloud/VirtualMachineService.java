@@ -34,6 +34,7 @@ import javax.persistence.EntityManager;
 import javax.ws.rs.core.MultivaluedMap;
 
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang.StringUtils;
 import org.hibernate.Hibernate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -92,6 +93,7 @@ import com.abiquo.server.core.cloud.VirtualMachineDto;
 import com.abiquo.server.core.cloud.VirtualMachineRep;
 import com.abiquo.server.core.cloud.VirtualMachineState;
 import com.abiquo.server.core.cloud.VirtualMachineStateTransition;
+import com.abiquo.server.core.cloud.VirtualMachineWithNodeDto;
 import com.abiquo.server.core.enterprise.DatacenterLimits;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.EnterpriseRep;
@@ -333,6 +335,30 @@ public class VirtualMachineService extends DefaultApiService
         newvm.setHypervisor(virtualMachine.getHypervisor());
 
         return reconfigureVirtualMachine(vdc, virtualAppliance, virtualMachine, newvm);
+    }
+
+    /**
+     * Gets the DTO object and validates all of its parameters. Prepares the {@link VirtualMachine}
+     * object and sends the object to the method
+     * {@link VirtualMachineService#reconfigureVirtualMachine(VirtualDatacenter, VirtualAppliance, VirtualMachine, VirtualMachine)
+     * . This method also updates {@link NodeVirtualImage} names.
+     * 
+     * @param vdcId identifier of the {@link VirtualDatacenter}
+     * @param vappId identifier of the {@link VirtualAppliance}
+     * @param vmId identifier of the {@link VirtualMachine}
+     * @param dto input {@link VirtualMachineDto} object with all its links.
+     * @return the link to the asnyncronous task.
+     */
+    @Transactional(propagation = Propagation.REQUIRED)
+    public String reconfigureVirtualMachineAndNode(final Integer vdcId, final Integer vappId,
+        final Integer vmId, final VirtualMachineWithNodeDto dto)
+    {
+        String task = this.reconfigureVirtualMachine(vdcId, vappId, vmId, dto);
+        NodeVirtualImage nodeVirtualImage = getNodeVirtualImage(vdcId, vappId, vmId);
+
+        nodeVirtualImage.setName(dto.getNodeName());
+
+        return task;
     }
 
     /**
@@ -931,6 +957,12 @@ public class VirtualMachineService extends DefaultApiService
         // First we get from dto. All the values wi
         VirtualMachine virtualMachine = buildVirtualMachineFromDto(vdc, virtualAppliance, dto);
         virtualMachine.setUuid(UUID.randomUUID().toString());
+        String nodeName = virtualMachine.getName();
+        if (dto instanceof VirtualMachineWithNodeDto)
+        {
+            nodeName = ((VirtualMachineWithNodeDto) dto).getNodeName();// we use the name to create
+                                                                       // the node
+        }
         virtualMachine.setName("ABQ_" + virtualMachine.getUuid());
 
         // Set the user and enterprise
@@ -950,7 +982,8 @@ public class VirtualMachineService extends DefaultApiService
 
         // The entity that defines the relation between a virtual machine, virtual applicance and
         // virtual machine template is VirtualImageNode
-        createNodeVirtualImage(virtualMachine, virtualAppliance);
+        createNodeVirtualImage(virtualMachine, virtualAppliance, StringUtils.isBlank(nodeName)
+            ? virtualMachine.getVirtualMachineTemplate().getName() : nodeName);
 
         // We must add the default NIC. This is the very next free IP in the virtual datacenter's
         // default VLAN
@@ -1052,12 +1085,12 @@ public class VirtualMachineService extends DefaultApiService
      * @param virtualAppliance void where the virtual machine exists.
      */
     private void createNodeVirtualImage(final VirtualMachine virtualMachine,
-        final VirtualAppliance virtualAppliance)
+        final VirtualAppliance virtualAppliance, final String name)
     {
         LOGGER.debug("Create node virtual image with name virtual machine: {}",
             virtualMachine.getName());
         NodeVirtualImage nodeVirtualImage =
-            new NodeVirtualImage(virtualMachine.getVirtualMachineTemplate().getName(),
+            new NodeVirtualImage(name,
                 virtualAppliance,
                 virtualMachine.getVirtualMachineTemplate(),
                 virtualMachine);
@@ -1402,7 +1435,8 @@ public class VirtualMachineService extends DefaultApiService
                     APIError.VIRTUAL_MACHINE_INVALID_STATE_UNDEPLOY.getMessage());
 
                 tracer.systemLog(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
-                    EventType.VM_UNDEPLOY, "virtualMachine.cannotUndeployed");
+                    EventType.VM_UNDEPLOY, "virtualMachine.cannotUndeployed",
+                    virtualMachine.getName());
                 addConflictErrors(APIError.VIRTUAL_MACHINE_INVALID_STATE_UNDEPLOY);
                 flushErrors();
 
@@ -1523,7 +1557,8 @@ public class VirtualMachineService extends DefaultApiService
 
             // For the Admin to know all errors
             tracer.systemLog(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
-                EventType.VM_UNDEPLOY, "virtualMachine.undeployError", e.toString());
+                EventType.VM_UNDEPLOY, "virtualMachine.undeployError", e.toString(),
+                virtualMachine.getName(), e.getMessage());
             LOGGER
                 .error(
                     "Error undeploying setting the virtual machine to UNKNOWN virtual machine name {}: {}",
@@ -1588,8 +1623,9 @@ public class VirtualMachineService extends DefaultApiService
             tracer.log(SeverityType.INFO, ComponentType.VIRTUAL_MACHINE, EventType.VM_UNDEPLOY,
                 "virtualMachine.enqueued", virtualMachine.getName());
             // For the Admin to know all errors
-            tracer.systemLog(SeverityType.INFO, ComponentType.VIRTUAL_MACHINE,
-                EventType.VM_UNDEPLOY, "virtualMachine.enqueuedTarantino");
+            tracer
+                .systemLog(SeverityType.INFO, ComponentType.VIRTUAL_MACHINE, EventType.VM_UNDEPLOY,
+                    "virtualMachine.enqueuedTarantino", virtualMachine.getName());
 
             return idAsyncTask;
 
@@ -1606,7 +1642,8 @@ public class VirtualMachineService extends DefaultApiService
 
             // For the Admin to know all errors
             tracer.systemLog(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
-                EventType.VM_UNDEPLOY, "virtualMachine.undeployError", e.toString());
+                EventType.VM_UNDEPLOY, "virtualMachine.undeployError", e.toString(),
+                virtualMachine.getName(), e.getMessage());
             LOGGER
                 .error(
                     "Error undeploying setting the virtual machine to UNKNOWN virtual machine name {}: {}",
@@ -1807,7 +1844,7 @@ public class VirtualMachineService extends DefaultApiService
                 "virtualMachine.applyVirtualMachineEnqueued", virtualMachine.getName());
             // For the Admin to know all errors
             tracer.systemLog(SeverityType.INFO, ComponentType.VIRTUAL_MACHINE, EventType.VM_STATE,
-                "virtualMachine.applyVirtualMachineTarantinoEnqueued");
+                "virtualMachine.applyVirtualMachineTarantinoEnqueued", virtualMachine.getName());
 
             // tasksService.
             // Here we add the url which contains the status

@@ -54,6 +54,7 @@ import com.abiquo.scheduler.SchedulerLock;
 import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
 import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.cloud.NodeVirtualImage;
+import com.abiquo.server.core.cloud.VirtualApplianceDto;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineDto;
 import com.abiquo.server.core.cloud.VirtualMachineInstanceDto;
@@ -154,6 +155,7 @@ public class VirtualMachineResource extends AbstractResource
      * @throws Exception AcceptedRequestDto
      */
     @PUT
+    @Consumes(MediaType.APPLICATION_XML)
     public AcceptedRequestDto<String> updateVirtualMachine(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) @NotNull @Min(1) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) @NotNull @Min(1) final Integer vappId,
@@ -186,22 +188,22 @@ public class VirtualMachineResource extends AbstractResource
      */
     @PUT
     @Consumes(VM_NODE_MEDIA_TYPE)
-    public VirtualMachineDto updateVirtualMachineNode(
+    public AcceptedRequestDto<String> updateVirtualMachineNode(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) @NotNull @Min(1) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) @NotNull @Min(1) final Integer vappId,
         @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) @NotNull @Min(1) final Integer vmId,
         final VirtualMachineDto dto, @Context final IRESTBuilder restBuilder,
         @Context final UriInfo uriInfo) throws Exception
     {
-        // TODO: validatePathParameters(vdcId, vappId, vmId);
+        String taskId = vmService.reconfigureVirtualMachine(vdcId, vappId, vmId, dto);
 
-        VirtualMachine modifiedVMachine = vmService.modifyVirtualMachine(vdcId, vappId, vmId);
+        if (taskId == null)
+        {
+            // If the link is null no Task was performed
+            return null;
+        }
 
-        final VirtualMachineDto modifiedVMachineDto =
-            VirtualMachineResource.createTransferObject(modifiedVMachine, vdcId, vappId,
-                restBuilder, null, null, null);
-
-        return modifiedVMachineDto;
+        return buildAcceptedRequestDtoWithTaskLink(taskId, uriInfo);
     }
 
     /**
@@ -683,7 +685,7 @@ public class VirtualMachineResource extends AbstractResource
                 .getId(), v.getHypervisor().getMachine().getRack().getDatacenter().getId(),
                 vmtemplate.getId()));
         }
-        
+
         return dto;
     }
 
