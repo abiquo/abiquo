@@ -432,7 +432,11 @@ public class VirtualMachineService extends DefaultApiService
             // and set the ID of the backupmachine (which has the old values) for recovery purposes.
             LOGGER.debug("Updating the virtual machine in the DB with id {}", vm.getId());
             updateVirtualMachineToNewValues(vapp, vm, newValues);
+
             LOGGER.debug("Updated virtual machine {}", vm.getId());
+
+            LOGGER.debug("Checking requires add initiatorMappings");
+            initiatorMappings(vm);
 
             // it is required a tarantino Task ?
             if (vm.getState() == VirtualMachineState.NOT_ALLOCATED)
@@ -2692,7 +2696,7 @@ public class VirtualMachineService extends DefaultApiService
             rasdDao.restoreDefaultFilters();
         }
 
-        // This is what we like
+        // FIXME This is what we like
         // try
         // {
         // rasdDao.enableTemporalOnlyFilter();
@@ -2868,9 +2872,22 @@ public class VirtualMachineService extends DefaultApiService
     protected boolean allocateResource(final VirtualMachine vm, final VirtualAppliance vapp,
         final RasdManagement resource, final Integer attachOrder)
     {
-        if (resource.getVirtualMachine() != null && resource.getVirtualMachine().getId() != null)
+
+        if (resource.isAttached())
         {
             if (!resource.getVirtualMachine().getId().equals(vm.getId()))
+            {
+                addConflictErrors(APIError.RESOURCE_ALREADY_ASSIGNED_TO_A_VIRTUAL_MACHINE);
+                flushErrors();
+            }
+
+            return false;
+        }
+
+        if (resource.getVirtualMachine() != null
+            && resource.getVirtualMachine().getTemporal() != null)
+        {
+            if (!resource.getVirtualMachine().getTemporal().equals(vm.getId()))
             {
                 addConflictErrors(APIError.RESOURCE_ALREADY_ASSIGNED_TO_A_VIRTUAL_MACHINE);
                 flushErrors();

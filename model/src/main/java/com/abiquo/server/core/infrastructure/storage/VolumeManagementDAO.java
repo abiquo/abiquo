@@ -356,6 +356,8 @@ import com.softwarementors.bzngine.entities.PersistentEntity;
         return Restrictions.eq(PersistentEntity.ID_PROPERTY, id);
     }
 
+    @Deprecated
+    // use vm.getVolumes
     public List<VolumeManagement> getVolumesByVirtualMachine(final VirtualMachine vm)
     {
         Criteria criteria = createCriteria(sameVirtualMachine(vm), sameState(VolumeState.ATTACHED));

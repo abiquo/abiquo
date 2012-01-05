@@ -226,30 +226,6 @@ public class TarantinoService extends DefaultApiService
     }
 
     /**
-     * Unsubscribe from the VSM if a reconfigure task is sent to a XEN or KVM.
-     * <p>
-     * Since reconfigure tasks in those hypervisors may undefine the domain and redefine it again,
-     * the unsubscription is performed to ignore all DESTROY and CREATE events that may arrive
-     * because of that process.
-     * 
-     * @param datacenter The datacenter where the tasks are performed.
-     * @param vm The virtual machine to unsubscribe.
-     */
-    private void ignoreVSMEventsIfNecessary(final Datacenter datacenter, final VirtualMachine vm)
-    {
-        HypervisorType type = vm.getHypervisor().getType();
-
-        if (type == HypervisorType.XEN_3 || type == HypervisorType.KVM)
-        {
-            RemoteService vsmRS =
-                remoteServiceService.getRemoteService(datacenter.getId(),
-                    RemoteServiceType.VIRTUAL_SYSTEM_MONITOR);
-
-            vsm.unsubscribe(vsmRS, vm);
-        }
-    }
-
-    /**
      * Creates and sends a deploy operation.
      * 
      * @param virtualMachine The virtual machine to reconfigure.
@@ -302,7 +278,7 @@ public class TarantinoService extends DefaultApiService
     }
 
     /**
-     * Creates and sends a reconfigure operation.
+     * Creates and sends a reconfigure operation. Unsubscribe el VirtualMachine
      * 
      * @param vm The virtual machine to reconfigure.
      * @param originalConfig The original configuration for the virtual machine.
@@ -315,7 +291,12 @@ public class TarantinoService extends DefaultApiService
         final VirtualMachineDescriptionBuilder newConfig)
     {
         Datacenter datacenter = vm.getHypervisor().getMachine().getDatacenter();
-        ignoreVSMEventsIfNecessary(datacenter, vm);
+
+        RemoteService vsmRS =
+            remoteServiceService.getRemoteService(datacenter.getId(),
+                RemoteServiceType.VIRTUAL_SYSTEM_MONITOR);
+
+        vsm.unsubscribe(vsmRS, vm);
 
         try
         {
@@ -340,6 +321,7 @@ public class TarantinoService extends DefaultApiService
             logger.debug("Error enqueuing the reconfiguretask dto to Tarantino with error: "
                 + e.getMessage() + " unmonitoring the machine: " + vm.getName());
 
+            vsm.subscribe(vsmRS, vm);
             throw e;
         }
         catch (RuntimeException e)
@@ -354,10 +336,8 @@ public class TarantinoService extends DefaultApiService
             tracer.systemLog(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
                 EventType.VM_RECONFIGURE, "tarantino.reconfigureVMError", e.getMessage());
 
-            // We need to unsuscribe the machine
-            // logger.debug("Error enqueuing the deploy task dto to Tarantino with error: "
-            // + e.getMessage() + " unmonitoring the machine: " + virtualMachine.getName());
-            // vsm.unsubscribe(remoteService, virtualMachine);
+            // We need to re subscribe to the machine
+            vsm.subscribe(vsmRS, vm);
 
             // There is no point in continue
             addUnexpectedErrors(APIError.GENERIC_OPERATION_ERROR);
