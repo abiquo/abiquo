@@ -202,12 +202,28 @@ public class UserService extends DefaultApiService
 
         checkEnterpriseAdminCredentials(enterprise);
 
+        if (dto.getPassword() == null || dto.getPassword().isEmpty())
+        {
+            addValidationErrors(APIError.USER_PASSWORD_IS_NECESSARY);
+            flushErrors();
+        }
+        if (dto.getNick() == null || dto.getNick().isEmpty())
+        {
+            addValidationErrors(APIError.USER_NICK_IS_NECESSARY);
+            flushErrors();
+        }
+        if (dto.getName() == null || dto.getName().isEmpty())
+        {
+            addValidationErrors(APIError.USER_NAME_IS_NECESSARY);
+            flushErrors();
+        }
+
         User user =
             enterprise.createUser(role, dto.getName(), dto.getSurname(), dto.getEmail(), dto
                 .getNick(), encrypt(dto.getPassword()), dto.getLocale());
         user.setActive(dto.isActive() ? 1 : 0);
         user.setDescription(dto.getDescription());
-
+        validate(user);
         if (securityService.hasPrivilege(Privileges.USERS_PROHIBIT_VDC_RESTRICTION, user))
         {
             user.setAvailableVirtualDatacenters(null);
@@ -456,7 +472,13 @@ public class UserService extends DefaultApiService
 
     private Role findRole(final UserDto dto)
     {
-        return repo.findRoleById(getRoleId(dto));
+        Role role = repo.findRoleById(getRoleId(dto));
+        if (role == null)
+        {
+            addNotFoundErrors(APIError.NON_EXISTENT_ROLE);
+            flushErrors();
+        }
+        return role;
     }
 
     private Integer getRoleId(final UserDto user)

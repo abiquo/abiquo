@@ -71,11 +71,11 @@ public class User extends DefaultEntityBase
 
     public final static String NAME_PROPERTY = "name";
 
-    private final static boolean NAME_REQUIRED = false;
+    private final static boolean NAME_REQUIRED = true;
 
-    private final static int NAME_LENGTH_MIN = 0;
+    private final static int NAME_LENGTH_MIN = 1;
 
-    private final static int NAME_LENGTH_MAX = 255;
+    private final static int NAME_LENGTH_MAX = 128;
 
     private final static boolean NAME_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
 
@@ -123,9 +123,9 @@ public class User extends DefaultEntityBase
 
     private final static boolean NICK_REQUIRED = false;
 
-    private final static int NICK_LENGTH_MIN = 0;
+    private final static int NICK_LENGTH_MIN = 1;
 
-    private final static int NICK_LENGTH_MAX = 255;
+    private final static int NICK_LENGTH_MAX = 128;
 
     private final static boolean NICK_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
 
@@ -171,11 +171,11 @@ public class User extends DefaultEntityBase
 
     public final static String LOCALE_PROPERTY = "locale";
 
-    private final static boolean LOCALE_REQUIRED = false;
+    private final static boolean LOCALE_REQUIRED = true;
 
     private final static int LOCALE_LENGTH_MIN = 0;
 
-    private final static int LOCALE_LENGTH_MAX = 255;
+    private final static int LOCALE_LENGTH_MAX = 10;
 
     private final static boolean LOCALE_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
 
@@ -231,7 +231,7 @@ public class User extends DefaultEntityBase
 
     private final static int SURNAME_LENGTH_MIN = 0;
 
-    private final static int SURNAME_LENGTH_MAX = 255;
+    private final static int SURNAME_LENGTH_MAX = 50;
 
     private final static boolean SURNAME_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
 
@@ -281,7 +281,7 @@ public class User extends DefaultEntityBase
 
     private final static int EMAIL_LENGTH_MIN = 0;
 
-    private final static int EMAIL_LENGTH_MAX = 255;
+    private final static int EMAIL_LENGTH_MAX = 200;
 
     private final static boolean EMAIL_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
 
@@ -309,7 +309,7 @@ public class User extends DefaultEntityBase
 
     private final static int DESCRIPTION_LENGTH_MIN = 0;
 
-    private final static int DESCRIPTION_LENGTH_MAX = 255;
+    private final static int DESCRIPTION_LENGTH_MAX = 100;
 
     private final static boolean DESCRIPTION_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = true;
 
