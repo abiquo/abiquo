@@ -24,16 +24,15 @@ import javax.ws.rs.core.MediaType;
 
 import org.apache.wink.client.ClientResponse;
 import org.apache.wink.client.Resource;
-import org.dmtf.schemas.ovf.envelope._1.EnvelopeType;
 
 import com.abiquo.appliancemanager.transport.EnterpriseRepositoryDto;
 import com.abiquo.appliancemanager.transport.RepositoryConfigurationDto;
 import com.abiquo.appliancemanager.transport.TemplateDto;
 import com.abiquo.appliancemanager.transport.TemplateStateDto;
 import com.abiquo.appliancemanager.transport.TemplatesStateDto;
-import com.abiquo.model.transport.error.ErrorDto;
 import com.abiquo.model.transport.error.ErrorsDto;
-
+import org.dmtf.schemas.ovf.envelope._1.EnvelopeType;
+import com.abiquo.model.transport.error.ErrorDto;
 public class ApplianceManagerResourceStubImpl extends ApplianceManagerResourceStub
 {
 
@@ -205,7 +204,7 @@ public class ApplianceManagerResourceStubImpl extends ApplianceManagerResourceSt
         ClientResponse response =
             resource.accept(MediaType.TEXT_PLAIN).contentType(MediaType.TEXT_PLAIN).post(name);
 
-        checkResponse(response, 200);
+        checkResponse(response, 202);
 
         return response.getEntity(String.class);
     }

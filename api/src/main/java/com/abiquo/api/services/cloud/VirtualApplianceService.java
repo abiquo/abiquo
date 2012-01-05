@@ -458,7 +458,7 @@ public class VirtualApplianceService extends DefaultApiService
             // vmService.getVirtualMachine(vmid); vmService.allocate(virtualMachine, vapp,
             // foreceEnterpriseSoftLimits); } finally { SchedulerLock.release(msg); } }
         }
-        catch (Exception e)
+        catch (APIException e)
         {
             for (NodeVirtualImage nvi : vapp.getNodes())
             {
@@ -473,6 +473,25 @@ public class VirtualApplianceService extends DefaultApiService
                     vmService.updateVirtualMachineBySystem(vm);
                 }
             }
+            throw e;
+        }
+        catch (RuntimeException e)
+        {
+            for (NodeVirtualImage nvi : vapp.getNodes())
+            {
+
+                VirtualMachine vm = nvi.getVirtualMachine();
+                if (vm.getState() == VirtualMachineState.ALLOCATED)
+                {
+                    vmallocator.deallocateVirtualMachine(vm);
+
+                    // TODO consider moving the set NOT_ALLOCATED in deallocateVM
+                    vm.setState(VirtualMachineState.NOT_ALLOCATED);
+                    vmService.updateVirtualMachineBySystem(vm);
+                }
+            }
+            addUnexpectedErrors(APIError.STATUS_INTERNAL_SERVER_ERROR);
+            flushErrors();
         }
 
     }
@@ -505,22 +524,12 @@ public class VirtualApplianceService extends DefaultApiService
 
                 dto.add(link);
             }
-            catch (APIException e)
-            {
-                logger.error("Error deploying virtual appliance name {}. {}",
-                    virtualAppliance.getName(), e.toString());
-            }
             catch (Exception e)
             {
-                // The virtual appliance is in an unknown state
-                tracer.log(SeverityType.CRITICAL, ComponentType.VIRTUAL_APPLIANCE,
-                    EventType.VM_DEPLOY, APIError.GENERIC_OPERATION_ERROR.getMessage());
-
-                // For the Admin to know all errors
-                tracer.systemLog(SeverityType.CRITICAL, ComponentType.VIRTUAL_APPLIANCE,
-                    EventType.VM_DEPLOY, "virtualAppliance.deployError", e.toString());
-                logger.error("Error deploying virtual appliance name {}. {}",
-                    virtualAppliance.getName(), e.toString());
+                logger
+                    .error(
+                        "Error already loggegd in the sendDeploy deploying virtual appliance name {}. {}",
+                        virtualAppliance.getName(), e.toString());
             }
         }
         return dto;
