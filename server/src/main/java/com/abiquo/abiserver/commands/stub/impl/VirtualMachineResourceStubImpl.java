@@ -38,6 +38,7 @@ import org.apache.wink.common.internal.utils.UriHelper;
 
 import com.abiquo.abiserver.abicloudws.AbiCloudConstants;
 import com.abiquo.abiserver.business.UserSessionException;
+import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.StateEnum;
 import com.abiquo.abiserver.commands.BasicCommand;
 import com.abiquo.abiserver.commands.stub.AbstractAPIStub;
 import com.abiquo.abiserver.commands.stub.VirtualMachineResourceStub;
@@ -46,6 +47,7 @@ import com.abiquo.abiserver.exception.NotEnoughResourcesException;
 import com.abiquo.abiserver.exception.SchedulerException;
 import com.abiquo.abiserver.exception.SoftLimitExceededException;
 import com.abiquo.abiserver.pojo.authentication.UserSession;
+import com.abiquo.abiserver.pojo.infrastructure.State;
 import com.abiquo.abiserver.pojo.infrastructure.VirtualMachine;
 import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.result.DataResult;
@@ -71,9 +73,17 @@ public class VirtualMachineResourceStubImpl extends AbstractAPIStub implements
     VirtualMachineResourceStub
 {
     /* Set the timeout to the double fo time of the set in the system properties */
-    private final static Integer TIMEOUT = Integer.parseInt(System.getProperty(
-        "abiquo.nodecollector.timeout", "0")) * 2 * 2; // 3 minutes the second * 2 is due to the
-                                                       // synchronization on allocate
+    private final static Integer TIMEOUT =
+        Integer.parseInt(System.getProperty("abiquo.nodecollector.timeout", "0")) * 2 * 2; // 3
+
+    // minutes
+    // the
+    // second
+    // * 2 is
+    // due to
+    // the
+
+    // synchronization on allocate
 
     public VirtualMachineResourceStubImpl()
     {
@@ -144,8 +154,8 @@ public class VirtualMachineResourceStubImpl extends AbstractAPIStub implements
         Resource vmachineResource = resource(vmachineUrl);
 
         ClientResponse response =
-            vmachineResource.contentType(MediaType.APPLICATION_XML)
-                .accept(MediaType.APPLICATION_XML).post(null);
+            vmachineResource.contentType(MediaType.APPLICATION_XML).accept(
+                MediaType.APPLICATION_XML).post(null);
 
         // ClientResponse response = put(vappUrl, String.valueOf(forceEnterpirseLimits));
 
@@ -309,8 +319,8 @@ public class VirtualMachineResourceStubImpl extends AbstractAPIStub implements
     {
         BasicResult result = new BasicResult();
         String vmachineUrl =
-            resolveVirtualMachineUrl(virtualDatacenterId, virtualApplianceId,
-                virtualMachine.getId());
+            resolveVirtualMachineUrl(virtualDatacenterId, virtualApplianceId, virtualMachine
+                .getId());
 
         ClientResponse response = delete(vmachineUrl);
 
@@ -342,8 +352,15 @@ public class VirtualMachineResourceStubImpl extends AbstractAPIStub implements
         if (response.getStatusCode() == Status.ACCEPTED.getStatusCode())
         {
             result.setSuccess(true);
-            AcceptedRequestDto acc = response.getEntity(AcceptedRequestDto.class);
-            result.setData(acc.getLinks());
+
+            // Retrieve the VirtualDatacenter to associate the new virtual appliance
+            org.jclouds.abiquo.domain.cloud.VirtualAppliance vapp =
+                getApiClient().getCloudService().getVirtualDatacenter(virtualDatacenterId)
+                    .getVirtualAppliance(virtualApplianceId);
+
+            org.jclouds.abiquo.domain.cloud.VirtualMachine vm =
+                vapp.getVirtualMachine(virtualMachine.getId());
+            result.setData(new State(StateEnum.valueOf(vm.getState().name())));
         }
         else
         {

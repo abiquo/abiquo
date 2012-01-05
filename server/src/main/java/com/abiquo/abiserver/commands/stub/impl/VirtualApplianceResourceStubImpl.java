@@ -78,8 +78,8 @@ import com.abiquo.server.core.cloud.VirtualMachineTaskDto;
 import com.abiquo.server.core.cloud.VirtualMachineWithNodeDto;
 import com.abiquo.server.core.cloud.VirtualMachinesWithNodeDto;
 import com.abiquo.server.core.enterprise.EnterpriseDto;
-import com.abiquo.server.core.enterprise.User.AuthType;
 import com.abiquo.server.core.enterprise.UserDto;
+import com.abiquo.server.core.enterprise.User.AuthType;
 import com.abiquo.server.core.infrastructure.network.VLANNetworkDto;
 import com.abiquo.util.ErrorManager;
 import com.abiquo.util.URIResolver;
@@ -387,9 +387,11 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
 
         vdc.setDefaultVlan(NetworkResourceStubImpl.createFlexObject(vlanDto));
 
-        vdc.setHyperType(HyperVisorType.create(
-            dto.getHypervisorType(),
-            new com.abiquo.abiserver.pojo.virtualimage.DiskFormatType(dto.getHypervisorType().baseFormat)));
+        vdc
+            .setHyperType(HyperVisorType
+                .create(dto.getHypervisorType(),
+                    new com.abiquo.abiserver.pojo.virtualimage.DiskFormatType(dto
+                        .getHypervisorType().baseFormat)));
         vdc.setEnterprise(enterprise);
         vdc.setId(dto.getId());
         vdc.setIdDataCenter(dto.getIdFromLink("datacenter"));
@@ -605,6 +607,7 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
         if (categoryLink != null)
         {
             Category category = new Category();
+            category.setId(Integer.parseInt(getIdFromLink(categoryLink)));
             category.setName(categoryLink.getTitle());
             image.setCategory(category);
         }
@@ -709,8 +712,12 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
         if (response.getStatusCode() == 202)
         {
             result.setSuccess(Boolean.TRUE);
-            AcceptedRequestDto entity = response.getEntity(AcceptedRequestDto.class);
-            result.setData(entity.getLinks());
+
+            // Retrieve the VirtualDatacenter to associate the new virtual appliance
+            org.jclouds.abiquo.domain.cloud.VirtualAppliance vapp =
+                getApiClient().getCloudService().getVirtualDatacenter(virtualDatacenterId)
+                    .getVirtualAppliance(virtualApplianceId);
+            result.setData(dtoToVirtualAppliance(vapp.unwrap(), virtualDatacenterId, result));
         }
         else
         {
@@ -790,7 +797,8 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
                 ClientResponse response = get(app.getHref());
                 VirtualAppliancesDto virtualAppliancesDto =
                     response.getEntity(VirtualAppliancesDto.class);
-                list.addAll(dtosToVirtualAppliance(virtualAppliancesDto, virtualDatacenter, result));
+                list
+                    .addAll(dtosToVirtualAppliance(virtualAppliancesDto, virtualDatacenter, result));
             }
             result.setData(list);
         }
@@ -969,13 +977,13 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
 
             // The only data a virtual appliance has is the name
             org.jclouds.abiquo.domain.cloud.VirtualAppliance vapp =
-                org.jclouds.abiquo.domain.cloud.VirtualAppliance.builder(getApiClient(), vdc)
-                    .name(virtualAppliance.getName()).build();
+                org.jclouds.abiquo.domain.cloud.VirtualAppliance.builder(getApiClient(), vdc).name(
+                    virtualAppliance.getName()).build();
             // Here we actually perform the request to create the virtual appliance
             vapp.save();
 
-            result.setData(dtoToVirtualAppliance(vapp.unwrap(),
-                virtualAppliance.getVirtualDataCenter(), result));
+            result.setData(dtoToVirtualAppliance(vapp.unwrap(), virtualAppliance
+                .getVirtualDataCenter(), result));
             result.setSuccess(Boolean.TRUE);
         }
         catch (Exception e)
@@ -1004,8 +1012,8 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
                     virtualAppliance.getVirtualDataCenter().getId());
 
             VirtualApplianceDto dto =
-                getApiClient().getApi().getCloudClient()
-                    .getVirtualAppliance(vdc.unwrap(), virtualAppliance.getId());
+                getApiClient().getApi().getCloudClient().getVirtualAppliance(vdc.unwrap(),
+                    virtualAppliance.getId());
 
             org.jclouds.abiquo.domain.cloud.VirtualAppliance vapp =
                 DomainWrapper.wrap(getApiClient(),
@@ -1098,8 +1106,8 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
             }
             else
             {
-                errors.append(abiquoException.getMessage()).append("\n")
-                    .append(abiquoException.getErrors().get(0).getCode());
+                errors.append(abiquoException.getMessage()).append("\n").append(
+                    abiquoException.getErrors().get(0).getCode());
             }
         }
         else
