@@ -32,7 +32,7 @@ import com.abiquo.model.transport.SingleResourceTransportDto;
  * 
  * @author ssedano
  */
-@XmlRootElement(name = "virtualMachineTask")
+@XmlRootElement(name = "virtualmachinetask")
 public class VirtualMachineTaskDto extends SingleResourceTransportDto implements Serializable
 {
 
@@ -50,15 +50,13 @@ public class VirtualMachineTaskDto extends SingleResourceTransportDto implements
      * </ul>
      */
     private Boolean forceEnterpriseSoftLimits;
-    
-    
+
     /**
-     * Imported machines does not have the image stored in an Abiquo repo. If we 
-     * undpeloy them, we have lost the image and it is unrecoverable. Use it if you
-     * force to undeploy imported VirtualMachines.
+     * Imported machines does not have the image stored in an Abiquo repo. If we undpeloy them, we
+     * have lost the image and it is unrecoverable. Use it if you force to undeploy imported
+     * VirtualMachines.
      */
     private Boolean forceUndeploy;
-    
 
     /**
      * Force the soft limits defined for the enterprise in the deploy. <br>
@@ -100,7 +98,7 @@ public class VirtualMachineTaskDto extends SingleResourceTransportDto implements
     /**
      * @param forceUndeploy
      */
-    public void setForceUndeploy(Boolean forceUndeploy)
+    public void setForceUndeploy(final Boolean forceUndeploy)
     {
         this.forceUndeploy = forceUndeploy;
     }
