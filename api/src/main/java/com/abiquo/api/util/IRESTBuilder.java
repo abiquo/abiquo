@@ -249,4 +249,6 @@ public interface IRESTBuilder
 
     public RESTLink buildVirtualMachineLink(Integer vdc, Integer vapp, Integer vm);
 
+    public RESTLink buildVirtualMachineTasksLink(Integer vdc, Integer vapp, Integer vm);
+
 }

@@ -22,6 +22,8 @@
 package com.abiquo.api.resources.cloud;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
@@ -32,11 +34,13 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.UriInfo;
 
 import org.apache.wink.common.annotations.Parent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
+import com.abiquo.api.resources.TaskResourceUtils;
 import com.abiquo.api.services.NetworkService;
 import com.abiquo.api.services.UserService;
 import com.abiquo.api.services.cloud.VirtualApplianceService;
@@ -67,6 +71,8 @@ public class VirtualApplianceResource
 
     public static final String VIRTUAL_APPLIANCE_ACTION_ADD_IMAGE = "action/addImage";
 
+    public static final String VIRTUAL_APPLIANCE_ACTION_ADD_IMAGE_REL = "addimage";
+
     public static final String VIRTUAL_APPLIANCE_DEPLOY_PATH = "action/deploy";
 
     public static final String VIRTUAL_APPLIANCE_DEPLOY_REL = "deploy";
@@ -77,21 +83,7 @@ public class VirtualApplianceResource
 
     public static final String VIRTUAL_APPLIANCE_PRICE_PATH = "action/price";
 
-    public static final String VIRTUAL_APPLIANCE_POWERON_PATH = "action/poweron";
-
-    public static final String VIRTUAL_APPLIANCE_POWERON_REL = "poweron";
-
-    public static final String VIRTUAL_APPLIANCE_POWEROFF_PATH = "action/poweroff";
-
-    public static final String VIRTUAL_APPLIANCE_POWEROFF_REL = "poweroff";
-
-    public static final String VIRTUAL_APPLIANCE_PAUSE_PATH = "action/pause";
-
-    public static final String VIRTUAL_APPLIANCE_PAUSE_REL = "pause";
-
-    public static final String VIRTUAL_APPLIANCE_RESUME_PATH = "action/resume";
-
-    public static final String VIRTUAL_APPLIANCE_RESUME_REL = "resume";
+    public static final String VIRTUAL_APPLIANCE_PRICE_REL = "price";
 
     public static final String VIRTUAL_APPLIANCE_STATE_REL = "state";
 
@@ -223,7 +215,7 @@ public class VirtualApplianceResource
     public AcceptedRequestDto<String> deploy(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
-        @Context final IRESTBuilder restBuilder)
+        @Context final IRESTBuilder restBuilder, @Context final UriInfo uriInfo)
     {
         AcceptedRequestDto<String> dto = new AcceptedRequestDto<String>();
 
@@ -232,8 +224,8 @@ public class VirtualApplianceResource
         {
             SchedulerLock.acquire(lockMsg);
 
-            List<String> links = service.deployVirtualAppliance(vdcId, vappId);
-            addStatusLinks(links, dto);
+            Map<Integer, String> links = service.deployVirtualAppliance(vdcId, vappId);
+            addStatusLinks(links, dto, uriInfo);
         }
         finally
         {
@@ -248,7 +240,8 @@ public class VirtualApplianceResource
     public AcceptedRequestDto<String> undeploy(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
-        final VirtualMachineTaskDto taskOptions, @Context final IRESTBuilder restBuilder)
+        final VirtualMachineTaskDto taskOptions, @Context final IRESTBuilder restBuilder,
+        @Context final UriInfo uriInfo)
     {
         Boolean forceUndeploy;
         if (taskOptions.getForceUndeploy() == null)
@@ -259,9 +252,9 @@ public class VirtualApplianceResource
         {
             forceUndeploy = taskOptions.getForceUndeploy();
         }
-        List<String> links = service.undeployVirtualAppliance(vdcId, vappId, forceUndeploy);
+        Map<Integer, String> links = service.undeployVirtualAppliance(vdcId, vappId, forceUndeploy);
         AcceptedRequestDto<String> dto = new AcceptedRequestDto<String>();
-        addStatusLinks(links, dto);
+        addStatusLinks(links, dto, uriInfo);
         return dto;
     }
 
@@ -274,11 +267,14 @@ public class VirtualApplianceResource
         return dto;
     }
 
-    private void addStatusLinks(final List<String> links, final AcceptedRequestDto<String> dto)
+    private void addStatusLinks(final Map<Integer, String> links,
+        final AcceptedRequestDto<String> dto, final UriInfo uriInfo)
     {
-        for (String url : links)
+        for (Entry<Integer, String> e : links.entrySet())
         {
-            RESTLink link = new RESTLink("status", url);
+            Integer vmId = e.getKey();
+            String url = e.getValue();
+            RESTLink link = buildTaskLink(vmId, url, uriInfo);
             dto.addLink(link);
         }
     }
@@ -314,5 +310,20 @@ public class VirtualApplianceResource
         // return virtualAppliancePriceDto;
         String virtualAppliancePrice = service.getPriceVirtualApplianceText(vdcId, vappId);
         return virtualAppliancePrice;
+    }
+
+    protected RESTLink buildTaskLink(final Integer vmId, final String taskId, final UriInfo uriInfo)
+    {
+        // Build task link
+        String link = uriInfo.getRequestUri().toString();
+
+        link = link.replaceAll("action.*", "");
+        link = link.replaceAll("(/)*$", "");
+        link =
+            link.concat(VirtualMachinesResource.VIRTUAL_MACHINES_PATH).concat("/")
+                .concat(String.valueOf(vmId)).concat("/").concat(TaskResourceUtils.TASKS_PATH)
+                .concat("/").concat(taskId);
+
+        return new RESTLink("status", link);
     }
 }

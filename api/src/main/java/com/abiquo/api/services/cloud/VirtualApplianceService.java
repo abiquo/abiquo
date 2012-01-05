@@ -25,7 +25,6 @@
 package com.abiquo.api.services.cloud;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -506,14 +505,14 @@ public class VirtualApplianceService extends DefaultApiService
      * @return List<String>
      */
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public List<String> deployVirtualAppliance(final Integer vdcId, final Integer vappId)
+    public Map<Integer, String> deployVirtualAppliance(final Integer vdcId, final Integer vappId)
     {
 
         VirtualAppliance virtualAppliance = getVirtualAppliance(vdcId, vappId);
 
         allocateVirtualAppliance(virtualAppliance, Boolean.TRUE);
 
-        List<String> dto = new ArrayList<String>();
+        Map<Integer, String> dto = new HashMap<Integer, String>();
         for (NodeVirtualImage nodevi : virtualAppliance.getNodes())
         {
             VirtualMachine vmachine = nodevi.getVirtualMachine();
@@ -522,7 +521,7 @@ public class VirtualApplianceService extends DefaultApiService
             {
                 String link = vmService.sendDeploy(vmachine, virtualAppliance);
 
-                dto.add(link);
+                dto.put(vmachine.getId(), link);
             }
             catch (Exception e)
             {
@@ -543,7 +542,7 @@ public class VirtualApplianceService extends DefaultApiService
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public List<String> undeployVirtualAppliance(final Integer vdcId, final Integer vappId,
+    public Map<Integer, String> undeployVirtualAppliance(final Integer vdcId, final Integer vappId,
         final Boolean forceUndeploy)
     {
         VirtualAppliance virtualAppliance = getVirtualAppliance(vdcId, vappId);
@@ -561,7 +560,7 @@ public class VirtualApplianceService extends DefaultApiService
             }
         }
 
-        List<String> dto = new ArrayList<String>();
+        Map<Integer, String> dto = new HashMap<Integer, String>();
         for (NodeVirtualImage machine : virtualAppliance.getNodes())
         {
             try
@@ -569,7 +568,7 @@ public class VirtualApplianceService extends DefaultApiService
                 String link =
                     vmService.undeployVirtualMachine(machine.getVirtualMachine().getId(), vappId,
                         vdcId, forceUndeploy);
-                dto.add(link);
+                dto.put(machine.getVirtualMachine().getId(), link);
             }
             catch (Exception e)
             {
@@ -579,7 +578,8 @@ public class VirtualApplianceService extends DefaultApiService
 
                 // For the Admin to know all errors
                 tracer.systemLog(SeverityType.CRITICAL, ComponentType.VIRTUAL_APPLIANCE,
-                    EventType.VM_UNDEPLOY, "virtualAppliance.deployError", e.toString());
+                    EventType.VM_UNDEPLOY, "virtualAppliance.deployError", e.toString(),
+                    machine.getName(), e.getMessage());
                 logger
                     .error(
                         "Error undeploying virtual appliance name {}. But we continue with next virtual machine: {}",
@@ -665,4 +665,5 @@ public class VirtualApplianceService extends DefaultApiService
             }
         }
     }
+
 }

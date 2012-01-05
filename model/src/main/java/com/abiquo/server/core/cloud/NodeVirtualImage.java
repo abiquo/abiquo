@@ -101,4 +101,9 @@ public class NodeVirtualImage extends Node
         this.virtualMachine = virtualMachine;
     }
 
+    @Override
+    public void setName(final String name)
+    {
+        super.setName(name);
+    }
 }

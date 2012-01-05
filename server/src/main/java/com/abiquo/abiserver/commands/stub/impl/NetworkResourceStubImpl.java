@@ -1261,7 +1261,7 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
 
         ClientResponse response = delete(uri.toString());
 
-        if (response.getStatusCode() == 204)
+        if (response.getStatusCode() == 202)
         {
             result.setSuccess(Boolean.TRUE);
         }
