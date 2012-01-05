@@ -2875,7 +2875,15 @@ public class VirtualMachineService extends DefaultApiService
 
         if (resource.isAttached())
         {
-            if (!resource.getVirtualMachine().getId().equals(vm.getId()))
+            // FIXME BE AWARE OF IT:
+            // the provided vm sometimes have ID (came form DDBB) and sometimes havent ID
+            // (createBackup) but have the TemporalID. So it is not always called with the same type
+            // of parameter.
+            final Integer currentId =
+                resource.getVirtualMachine().getId() != null ? resource.getVirtualMachine().getId()
+                    : resource.getVirtualMachine().getTemporal();
+
+            if (!currentId.equals(vm.getId()))
             {
                 addConflictErrors(APIError.RESOURCE_ALREADY_ASSIGNED_TO_A_VIRTUAL_MACHINE);
                 flushErrors();
