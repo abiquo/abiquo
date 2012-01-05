@@ -51,9 +51,9 @@ public class TaskResourceUtils extends AbstractResource
 
     protected static final String PARENT_REL = "parent";
 
-    protected static final String TASKS_REL = "tasks";
+    public static final String TASKS_REL = "tasks";
 
-    public static TasksDto transform(List<Task> tasks, UriInfo uriInfo)
+    public static TasksDto transform(final List<Task> tasks, final UriInfo uriInfo)
     {
         TasksDto dto = new TasksDto();
 
@@ -73,7 +73,7 @@ public class TaskResourceUtils extends AbstractResource
         return dto;
     }
 
-    public static TaskDto transform(Task task, UriInfo uriInfo)
+    public static TaskDto transform(final Task task, final UriInfo uriInfo)
     {
         TaskDto dto = new TaskDto();
 
@@ -97,7 +97,7 @@ public class TaskResourceUtils extends AbstractResource
         return dto;
     }
 
-    public static SingleResourceTransportDto addTasksLink(SingleResourceTransportDto dto,
+    public static SingleResourceTransportDto addTasksLink(final SingleResourceTransportDto dto,
         final RESTLink baseLink)
     {
         if (dto != null && baseLink != null)
@@ -109,7 +109,7 @@ public class TaskResourceUtils extends AbstractResource
         return dto;
     }
 
-    protected static JobsDto transform(List<Job> jobs)
+    protected static JobsDto transform(final List<Job> jobs)
     {
         JobsDto jobsDto = new JobsDto();
 
@@ -142,7 +142,7 @@ public class TaskResourceUtils extends AbstractResource
         return path.replaceAll("(/)*$", "");
     }
 
-    protected static SingleResourceTransportDto addLink(SingleResourceTransportDto dto,
+    protected static SingleResourceTransportDto addLink(final SingleResourceTransportDto dto,
         final String rel, final String href)
     {
         dto.addLink(new RESTLink(rel, href));
