@@ -461,14 +461,14 @@ public class VirtualMachineService extends DefaultApiService
 
             LOGGER.debug("Updated virtual machine {}", vm.getId());
 
-            LOGGER.debug("Checking requires add initiatorMappings");
-            initiatorMappings(vm);
-
             // it is required a tarantino Task ?
             if (vm.getState() == VirtualMachineState.NOT_ALLOCATED)
             {
                 return null;
             }
+
+            LOGGER.debug("Checking requires add initiatorMappings");
+            initiatorMappings(vm);
 
             // refresh the virtualmachine object with the new values to get the
             // correct resources.
