@@ -37,6 +37,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.Scanner;
 import java.util.Set;
@@ -119,7 +120,39 @@ public class TemplateFileSystem
             return state;
         }
 
+        final boolean isInstance = TemplateConventions.isBundleOvfId(ovfId);
         final String packagePath = getTemplatePath(enterpriseRepositoryPath, ovfId);
+
+        if (isInstance)
+        {
+
+            final String snapshot =
+                ovfId.substring(ovfId.lastIndexOf('/') + 1, ovfId.indexOf("-snapshot-"));
+            final String masterPath =
+                TemplateConventions.getTemplatePath(enterpriseRepositoryPath,
+                    TemplateConventions.getBundleMasterOvfId(ovfId));
+
+            final File folder = new File(masterPath);
+            if (folder.list(new FilenameFilter()
+            {
+                @Override
+                public boolean accept(final File file, final String name)
+                {
+                    return name.startsWith(snapshot);
+                }
+
+            }).length == 0)
+            {
+                state.setStatus(TemplateStatusEnumType.NOT_DOWNLOAD);
+            }
+            else
+            {
+                state.setStatus(TemplateStatusEnumType.DOWNLOAD);
+            }
+
+            return state;
+        }
+
         final String ovfEnvelopePath =
             FilenameUtils.concat(enterpriseRepositoryPath, getRelativeTemplatePath(ovfId));
 
@@ -433,8 +466,9 @@ public class TemplateFileSystem
                     }
                     catch (IOException e1)
                     {
-                        throw new AMException(AMError.TEMPLATE_DELETE, packageFile
-                            .getAbsolutePath(), e1);
+                        throw new AMException(AMError.TEMPLATE_DELETE,
+                            packageFile.getAbsolutePath(),
+                            e1);
                     }
                 }// nfs issue
 

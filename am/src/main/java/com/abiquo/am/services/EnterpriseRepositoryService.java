@@ -67,6 +67,7 @@ import com.abiquo.ovfmanager.ovf.xml.OVFSerializer;
 import static com.abiquo.am.services.TemplateConventions.getTemplatePath;
 import org.dmtf.schemas.ovf.envelope._1.EnvelopeType;
 import org.dmtf.schemas.ovf.envelope._1.FileType;
+
 /**
  * Each enterprise have its own logical separation on the current physical Repository. This is
  * implemented using a folder (with the Enterprise identifier)
@@ -334,7 +335,6 @@ public class EnterpriseRepositoryService
 
     public TemplateStateDto getTemplateStatus(final String ovfId)
     {
-
         return TemplateFileSystem.getTemplateStatus(erepoPath, ovfId);
     }
 
