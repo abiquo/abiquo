@@ -299,8 +299,8 @@ public class EnterprisesResourceStubImpl extends AbstractAPIStub implements Ente
         DataResult<EnterpriseListResult> result = new DataResult<EnterpriseListResult>();
 
         String uri =
-            createEnterprisesLink(enterpriseListOptions.getFilterLike(), enterpriseListOptions
-                .getOffset(), enterpriseListOptions.getNumberOfNodes());
+            createEnterprisesLink(enterpriseListOptions.getFilterLike(),
+                enterpriseListOptions.getOffset(), enterpriseListOptions.getNumberOfNodes());
 
         ClientResponse response = get(uri);
         if (response.getStatusCode() == 200)
@@ -382,8 +382,8 @@ public class EnterprisesResourceStubImpl extends AbstractAPIStub implements Ente
                         "{datacenter}", "datacenter");
 
                 NetworkHB network = factory.getNetworkDAO().findByVirtualDatacenter(vdc.getId());
-                datacenters.add(VirtualDataCenter.create(vdc, datacenterId, enterprise, network
-                    .toPojo()));
+                datacenters.add(VirtualDataCenter.create(vdc, datacenterId, enterprise,
+                    network.toPojo()));
             }
             result.setData(datacenters);
 
@@ -412,8 +412,8 @@ public class EnterprisesResourceStubImpl extends AbstractAPIStub implements Ente
         DataResult<EnterpriseListResult> result = new DataResult<EnterpriseListResult>();
 
         String uri =
-            createEnterprisesLink(enterpriseListOptions.getFilterLike(), enterpriseListOptions
-                .getOffset(), enterpriseListOptions.getNumberOfNodes());
+            createEnterprisesLink(enterpriseListOptions.getFilterLike(),
+                enterpriseListOptions.getOffset(), enterpriseListOptions.getNumberOfNodes());
 
         Map<String, String[]> queryParams = new HashMap<String, String[]>();
         if (idPricingTemplate != null)

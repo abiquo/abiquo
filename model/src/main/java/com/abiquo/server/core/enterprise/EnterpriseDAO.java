@@ -81,18 +81,25 @@ class EnterpriseDAO extends DefaultDAOBase<Integer, Enterprise>
         return createCriteria().list();
     }
 
-    public List<Enterprise> findAll(final Integer offset, final Integer numResults)
+    public List<Enterprise> findAll(Integer firstElem, final Integer numResults)
     {
+
+        // Check if the page requested is bigger than the last one
         Criteria criteria = createCriteria();
         Long total = count();
 
-        criteria.setFirstResult(offset * numResults);
+        if (firstElem >= total.intValue())
+        {
+            firstElem = total.intValue() - numResults;
+        }
+
+        criteria.setFirstResult(firstElem);
         criteria.setMaxResults(numResults);
 
         List<Enterprise> result = getResultList(criteria);
 
         com.abiquo.server.core.util.PagedList<Enterprise> page = new PagedList<Enterprise>(result);
-        page.setCurrentElement(offset);
+        page.setCurrentElement(firstElem);
         page.setPageSize(numResults);
         page.setTotalResults(total.intValue());
 
@@ -109,23 +116,30 @@ class EnterpriseDAO extends DefaultDAOBase<Integer, Enterprise>
         return result;
     }
 
-    public List<Enterprise> findByPricingTemplate(final PricingTemplate pt, final boolean included,
-        final String filterName, final Integer offset, final Integer numResults)
+    public List<Enterprise> findByPricingTemplate(Integer firstElem, final PricingTemplate pt,
+        final boolean included, final String filterName, final Integer numResults)
     {
+        // Check if the page requested is bigger than the last one
+
         Criteria criteria = createCriteria(pt, included, filterName);
 
         Long total = count(criteria);
 
+        if (firstElem >= total.intValue())
+        {
+            firstElem = total.intValue() - numResults;
+        }
+
         criteria = createCriteria(pt, included, filterName);
 
-        criteria.setFirstResult(offset * numResults);
+        criteria.setFirstResult(firstElem);
         criteria.setMaxResults(numResults);
 
         List<Enterprise> result = getResultList(criteria);
 
         PagedList<Enterprise> page = new PagedList<Enterprise>();
         page.addAll(result);
-        page.setCurrentElement(offset);
+        page.setCurrentElement(firstElem);
         page.setPageSize(numResults);
         page.setTotalResults(total.intValue());
 

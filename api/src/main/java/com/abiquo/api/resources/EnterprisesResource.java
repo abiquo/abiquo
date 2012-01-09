@@ -25,6 +25,8 @@ import static com.abiquo.api.resources.EnterpriseResource.createTransferObject;
 
 import java.util.Collection;
 
+import javax.validation.constraints.Min;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -61,30 +63,17 @@ public class EnterprisesResource extends AbstractResource
     UriInfo uriInfo;
 
     @GET
-    public EnterprisesDto getEnterprises(@QueryParam("idPricingTemplate") final String idPricTempl,
-        @QueryParam("included") final boolean included,
-        @QueryParam("filter") final String filterName, @QueryParam("page") Integer page,
-        @QueryParam("numResults") Integer numResults, @Context final IRESTBuilder restBuilder)
+    public EnterprisesDto getEnterprises(
+        @QueryParam(START_WITH) @DefaultValue("0") @Min(0) final Integer startwith,
+        @QueryParam(FILTER) @DefaultValue("") final String filterName,
+        @QueryParam(LIMIT) @Min(1) @DefaultValue(DEFAULT_PAGE_LENGTH_STRING) final Integer numResults,
+        @QueryParam("idPricingTemplate") @DefaultValue("-1") final int idPricingTempl,
+        @QueryParam("included") final boolean included, @Context final IRESTBuilder restBuilder)
         throws Exception
     {
-        if (page == null)
-        {
-            page = 0;
-        }
-
-        if (numResults == null)
-        {
-            numResults = DEFAULT_PAGE_LENGTH;
-        }
-
-        int idPricingTempl = -1;
-        if (idPricTempl != null)
-        {
-            idPricingTempl = Integer.valueOf(idPricTempl);
-        }
 
         Collection<Enterprise> all =
-            service.getEnterprises(idPricingTempl, included, filterName, page, numResults);
+            service.getEnterprises(startwith, idPricingTempl, included, filterName, numResults);
         EnterprisesDto enterprises = new EnterprisesDto();
 
         if (all != null && !all.isEmpty())

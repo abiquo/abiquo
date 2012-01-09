@@ -33,6 +33,7 @@ import javax.ws.rs.core.MultivaluedMap;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.AccessDeniedException;
+import org.springframework.security.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -131,8 +132,8 @@ public class EnterpriseService extends DefaultApiService
         return userService.getCurrentUser().getEnterprise();
     }
 
-    public Collection<Enterprise> getEnterprises(final int idPricingTempl, final boolean included,
-        final String filterName, final Integer offset, final Integer numResults)
+    public Collection<Enterprise> getEnterprises(final Integer startwith, final int idPricingTempl,
+        final boolean included, final String filterName, final Integer numResults)
     {
         User user = userService.getCurrentUser();
         // if (user.getRole().getType() == Role.Type.ENTERPRISE_ADMIN)
@@ -150,7 +151,7 @@ public class EnterpriseService extends DefaultApiService
             {
                 pt = findPricingTemplate(idPricingTempl);
             }
-            return repo.findByPricingTemplate(pt, included, filterName, offset, numResults);
+            return repo.findByPricingTemplate(startwith, pt, included, filterName, numResults);
         }
 
         if (!StringUtils.isEmpty(filterName))
@@ -158,7 +159,7 @@ public class EnterpriseService extends DefaultApiService
             return repo.findByNameAnywhere(filterName);
         }
 
-        return repo.findAll(offset, numResults);
+        return repo.findAll(startwith, numResults);
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
@@ -472,11 +473,20 @@ public class EnterpriseService extends DefaultApiService
         }
 
         DatacenterLimits limit =
-            new DatacenterLimits(enterprise, datacenter, dto.getRamSoftLimitInMb(), dto
-                .getCpuCountSoftLimit(), dto.getHdSoftLimitInMb(), dto.getRamHardLimitInMb(), dto
-                .getCpuCountHardLimit(), dto.getHdHardLimitInMb(), dto.getStorageSoft(), dto
-                .getStorageHard(), dto.getPublicIpsSoft(), dto.getPublicIpsHard(), dto
-                .getVlansSoft(), dto.getVlansHard());
+            new DatacenterLimits(enterprise,
+                datacenter,
+                dto.getRamSoftLimitInMb(),
+                dto.getCpuCountSoftLimit(),
+                dto.getHdSoftLimitInMb(),
+                dto.getRamHardLimitInMb(),
+                dto.getCpuCountHardLimit(),
+                dto.getHdHardLimitInMb(),
+                dto.getStorageSoft(),
+                dto.getStorageHard(),
+                dto.getPublicIpsSoft(),
+                dto.getPublicIpsHard(),
+                dto.getVlansSoft(),
+                dto.getVlansHard());
 
         if (!limit.isValid())
         {
