@@ -65,9 +65,12 @@ public interface VirtualApplianceResourceStub
         final VirtualAppliance virtualAppliance);
 
     public DataResult<VirtualAppliance> getVirtualApplianceNodes(final Integer virtualDatacenterId,
-        final Integer virtualApplianceId);
+        final Integer virtualApplianceId, final String methodName);
 
     public DataResult<List<Node>> getAppNodes(final VirtualAppliance entity);
+
+    public DataResult<VirtualAppliance> instanceVirtualApplianceNodes(
+        final Integer virtualDatacenterId, final Integer virtualApplianceId, Collection<Node> nodes);
 
     DataResult<Collection<VirtualAppliance>> getVirtualAppliancesByEnterprise(
         UserSession userSession, Enterprise enterprise);
