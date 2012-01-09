@@ -34,7 +34,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * Valid transactions between {@link VirtualMachineState}.
+ * Valid transactions between virtual machine states.
  */
 public enum VirtualMachineStateTransition
 {
