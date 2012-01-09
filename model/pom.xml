@@ -327,9 +327,9 @@
                                 <include>**/rest/*.class</include>
                                 <include>**/*Dto.class</include>
                                 <include>com/abiquo/model/util/*.class</include>
-                                <include>**/cloud/VirtualApplianceState.class</include>
-                                <include>**/cloud/VirtualMachineState.class</include>
-                                <include>**/cloud/VirtualMachineStateTransition.class</include>
+                                <include>**/cloud/VirtualApplianceState*.class</include>
+                                <include>**/cloud/VirtualMachineState*.class</include>
+                                <include>**/cloud/VirtualMachineStateTransition*.class</include>
                                 <include>**/Job*.class</include>
                                 <include>com/abiquo/server/core/task/enums/*.class</include>
                                 <include>com/abiquo/**/RedisEntityBase.class</include>
