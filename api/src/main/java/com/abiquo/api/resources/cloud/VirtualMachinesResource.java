@@ -21,13 +21,10 @@
 
 package com.abiquo.api.resources.cloud;
 
-import static com.abiquo.api.resources.EnterpriseResource.ENTERPRISE;
-import static com.abiquo.api.resources.appslibrary.VirtualMachineTemplateResource.VIRTUAL_MACHINE_TEMPLATE;
-import static com.abiquo.api.util.URIResolver.buildPath;
-
 import java.util.Collection;
 import java.util.List;
 
+import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -40,24 +37,17 @@ import org.apache.wink.common.annotations.Parent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
-import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.resources.AbstractResource;
-import com.abiquo.api.resources.EnterpriseResource;
-import com.abiquo.api.resources.EnterprisesResource;
-import com.abiquo.api.resources.appslibrary.DatacenterRepositoriesResource;
-import com.abiquo.api.resources.appslibrary.DatacenterRepositoryResource;
-import com.abiquo.api.resources.appslibrary.VirtualMachineTemplateResource;
-import com.abiquo.api.resources.appslibrary.VirtualMachineTemplatesResource;
 import com.abiquo.api.services.cloud.VirtualApplianceService;
 import com.abiquo.api.services.cloud.VirtualMachineService;
 import com.abiquo.api.util.IRESTBuilder;
-import com.abiquo.model.util.ModelTransformer;
 import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
 import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.cloud.NodeVirtualImage;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineDto;
+import com.abiquo.server.core.cloud.VirtualMachineWithNodeDto;
 import com.abiquo.server.core.cloud.VirtualMachinesDto;
 import com.abiquo.server.core.cloud.VirtualMachinesWithNodeDto;
 import com.abiquo.server.core.enterprise.Enterprise;
@@ -151,6 +141,7 @@ public class VirtualMachinesResource extends AbstractResource
      * @throws Exception
      */
     @POST
+    @Consumes(MediaType.APPLICATION_XML)
     public VirtualMachineDto createVirtualMachine(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
@@ -160,6 +151,35 @@ public class VirtualMachinesResource extends AbstractResource
 
         final VirtualMachine virtualMachine =
             service.createVirtualMachine(vdcId, vappId, virtualMachineDto);
+
+        final VirtualMachineDto vappsDto =
+            VirtualMachineResource.createTransferObject(virtualMachine, vdcId, vappId, restBuilder,
+                null, null, null);
+
+        return vappsDto;
+    }
+
+    /**
+     * Creates a resource {@link VirtualMachine} under this root.
+     * 
+     * @param v virtual machine
+     * @param vdcId identifier of the virtual datacenter
+     * @param vappId identifier of the virtual appliance
+     * @param restBuilder {@link IRESTBuilder} object injected by context.
+     * @return the generate {@link VirtualMachineDto} object.
+     * @throws Exception
+     */
+    @POST
+    @Consumes(VirtualMachineResource.VM_NODE_MEDIA_TYPE)
+    public VirtualMachineDto createVirtualMachineWithNode(
+        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
+        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
+        final VirtualMachineWithNodeDto virtualMachineWithNodeDto,
+        @Context final IRESTBuilder restBuilder) throws Exception
+    {
+
+        final VirtualMachine virtualMachine =
+            service.createVirtualMachine(vdcId, vappId, virtualMachineWithNodeDto);
 
         final VirtualMachineDto vappsDto =
             VirtualMachineResource.createTransferObject(virtualMachine, vdcId, vappId, restBuilder,

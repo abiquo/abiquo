@@ -44,6 +44,7 @@ import com.abiquo.api.resources.RacksResource;
 import com.abiquo.api.resources.RemoteServiceResource;
 import com.abiquo.api.resources.RemoteServicesResource;
 import com.abiquo.api.resources.RoleResource;
+import com.abiquo.api.resources.TaskResourceUtils;
 import com.abiquo.api.resources.UserResource;
 import com.abiquo.api.resources.UsersResource;
 import com.abiquo.api.resources.VirtualMachinesInfrastructureResource;
@@ -410,6 +411,7 @@ public class RESTBuilder implements IRESTBuilder
         return links;
     }
 
+    @Override
     public List<RESTLink> buildEnterprisePropertiesLinks(final Integer enterpriseId,
         final EnterprisePropertiesDto enterpriseProperties)
     {
@@ -497,8 +499,8 @@ public class RESTBuilder implements IRESTBuilder
         if (icon != null)
         {
             params.put(IconResource.ICON, String.valueOf(icon.getId()));
-            links.add(builder.buildRestLink(IconResource.class, null, IconResource.ICON, icon
-                .getPath(), params));
+            links.add(builder.buildRestLink(IconResource.class, null, IconResource.ICON,
+                icon.getPath(), params));
 
         }
 
@@ -606,22 +608,6 @@ public class RESTBuilder implements IRESTBuilder
             VirtualMachinesResource.VIRTUAL_MACHINES_PATH, params));
 
         links.add(builder.buildRestLink(VirtualApplianceResource.class,
-            VirtualApplianceResource.VIRTUAL_APPLIANCE_RESUME_PATH,
-            VirtualApplianceResource.VIRTUAL_APPLIANCE_RESUME_REL, params));
-
-        links.add(builder.buildRestLink(VirtualApplianceResource.class,
-            VirtualApplianceResource.VIRTUAL_APPLIANCE_PAUSE_PATH,
-            VirtualApplianceResource.VIRTUAL_APPLIANCE_PAUSE_REL, params));
-
-        links.add(builder.buildRestLink(VirtualApplianceResource.class,
-            VirtualApplianceResource.VIRTUAL_APPLIANCE_POWEROFF_PATH,
-            VirtualApplianceResource.VIRTUAL_APPLIANCE_POWEROFF_REL, params));
-
-        links.add(builder.buildRestLink(VirtualApplianceResource.class,
-            VirtualApplianceResource.VIRTUAL_APPLIANCE_POWERON_PATH,
-            VirtualApplianceResource.VIRTUAL_APPLIANCE_POWERON_REL, params));
-
-        links.add(builder.buildRestLink(VirtualApplianceResource.class,
             VirtualApplianceResource.VIRTUAL_APPLIANCE_STATE_REL,
             VirtualApplianceResource.VIRTUAL_APPLIANCE_STATE_REL, params));
 
@@ -637,6 +623,13 @@ public class RESTBuilder implements IRESTBuilder
             VirtualApplianceResource.VIRTUAL_APPLIANCE_DEPLOY_PATH,
             VirtualApplianceResource.VIRTUAL_APPLIANCE_DEPLOY_REL, params));
 
+        links.add(builder.buildRestLink(VirtualApplianceResource.class,
+            VirtualApplianceResource.VIRTUAL_APPLIANCE_PRICE_PATH,
+            VirtualApplianceResource.VIRTUAL_APPLIANCE_PRICE_REL, params));
+
+        links.add(builder.buildRestLink(VirtualApplianceResource.class,
+            VirtualApplianceResource.VIRTUAL_APPLIANCE_ACTION_ADD_IMAGE,
+            VirtualApplianceResource.VIRTUAL_APPLIANCE_ACTION_ADD_IMAGE_REL, params));
         return links;
     }
 
@@ -767,6 +760,9 @@ public class RESTBuilder implements IRESTBuilder
         links.add(builder.buildRestLink(VirtualMachineResource.class,
             VirtualMachineResource.VIRTUAL_MACHINE_ACTION_SNAPSHOT,
             VirtualMachineResource.VIRTUAL_MACHINE_ACTION_SNAPSHOT_REL, params));
+
+        links.add(builder.buildRestLink(VirtualMachineResource.class, TaskResourceUtils.TASKS_PATH,
+            TaskResourceUtils.TASKS_REL, params));
 
         links
             .add(builder.buildRestLink(VirtualMachineResource.class, RESTBuilder.REL_EDIT, params));
@@ -1399,5 +1395,19 @@ public class RESTBuilder implements IRESTBuilder
         {
             list.remove(link);
         }
+    }
+
+    @Override
+    public RESTLink buildVirtualMachineTasksLink(final Integer vdc, final Integer vapp,
+        final Integer vm)
+    {
+        AbiquoLinkBuilder builder = AbiquoLinkBuilder.createBuilder(linkProcessor);
+        Map<String, String> params = new HashMap<String, String>();
+        params.put(VirtualDatacenterResource.VIRTUAL_DATACENTER, String.valueOf(vdc));
+        params.put(VirtualApplianceResource.VIRTUAL_APPLIANCE, String.valueOf(vapp));
+        params.put(VirtualMachineResource.VIRTUAL_MACHINE, String.valueOf(vm));
+
+        return builder.buildRestLink(VirtualMachineResource.class, "tasks", params);
+
     }
 }

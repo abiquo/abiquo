@@ -187,8 +187,9 @@ public class MachineService extends DefaultApiService
         repo.updateMachine(old);
 
         tracer.log(SeverityType.INFO, ComponentType.MACHINE, EventType.MACHINE_MODIFY,
-            "machine.modify", old.getName(), old.getHypervisor().getIp(), old.getHypervisor()
-                .getType(), old.getState());
+            "machine.modified", old.getName(), old.getHypervisor() == null ? "No Hypervisor" : old
+                .getHypervisor().getIp(), old.getHypervisor() == null ? "No Hypervisor" : old
+                .getHypervisor().getType(), old.getState());
 
         return old;
     }

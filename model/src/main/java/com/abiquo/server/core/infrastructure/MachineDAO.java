@@ -103,9 +103,6 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
 
     public List<Machine> findMachines(final Datacenter datacenter)
     {
-        assert datacenter != null;
-        assert isManaged2(datacenter);
-
         Criteria criteria = createCriteria(sameDatacenter(datacenter));
         criteria.addOrder(Order.asc(Machine.NAME_PROPERTY));
         List<Machine> result = getResultList(criteria);

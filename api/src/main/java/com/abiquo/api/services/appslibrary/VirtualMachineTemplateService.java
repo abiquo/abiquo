@@ -75,8 +75,8 @@ import com.abiquo.tracer.SeverityType;
 public class VirtualMachineTemplateService extends DefaultApiServiceWithApplianceManagerClient
 {
 
-    final private static Logger logger =
-        LoggerFactory.getLogger(VirtualMachineTemplateService.class);
+    final private static Logger logger = LoggerFactory
+        .getLogger(VirtualMachineTemplateService.class);
 
     @Autowired
     private RepositoryDAO repositoryDao;
@@ -106,11 +106,12 @@ public class VirtualMachineTemplateService extends DefaultApiServiceWithApplianc
         this.categoryService = new CategoryService(em);
     }
 
+    /**
+     * Ignoring credentinals check
+     */
     @Transactional(readOnly = true)
-    public Repository getDatacenterRepository(final Integer dcId, final Integer enterpriseId)
+    public Repository getDatacenterRepositoryBySystem(final Integer dcId, final Integer enterpriseId)
     {
-        checkEnterpriseCanUseDatacenter(enterpriseId, dcId);
-
         Datacenter datacenter = infrastructureService.getDatacenter(dcId);
         Repository repo = repositoryDao.findByDatacenter(datacenter);
 
@@ -121,6 +122,13 @@ public class VirtualMachineTemplateService extends DefaultApiServiceWithApplianc
         }
 
         return repo;
+    }
+
+    @Transactional(readOnly = true)
+    public Repository getDatacenterRepository(final Integer dcId, final Integer enterpriseId)
+    {
+        checkEnterpriseCanUseDatacenter(enterpriseId, dcId);
+        return getDatacenterRepositoryBySystem(dcId, enterpriseId);
     }
 
     /**

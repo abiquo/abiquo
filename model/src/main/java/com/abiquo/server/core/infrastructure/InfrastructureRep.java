@@ -235,9 +235,6 @@ public class InfrastructureRep extends DefaultRepBase
 
     public List<Machine> findMachines(final Datacenter datacenter)
     {
-        assert datacenter != null;
-        assert this.dao.isManaged(datacenter);
-
         return this.machineDao.findMachines(datacenter);
     }
 
