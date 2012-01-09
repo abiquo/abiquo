@@ -29,6 +29,7 @@ import java.util.List;
 import javax.persistence.EntityManager;
 import javax.ws.rs.core.MultivaluedMap;
 
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -437,7 +438,7 @@ public class VirtualMachineTemplateService extends DefaultApiServiceWithApplianc
 
         String viOvf = vmtemplateToDelete.getOvfid();
 
-        if (viOvf == null)
+        if (StringUtils.isEmpty(viOvf))
         {
             // this is a bundle of an imported virtual machine (it havent OVF)
             viOvf = codifyBundleImportedOVFid(vmtemplateToDelete.getPath());
