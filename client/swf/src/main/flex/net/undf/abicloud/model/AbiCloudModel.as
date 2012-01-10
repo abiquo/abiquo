@@ -123,7 +123,7 @@ package net.undf.abicloud.model
         //For example, HardDisk values are always stored in Bytes, so when we receive or send HD values from / to server,
         //must always be in Bytes
         public static const ramUnitsSelectorDP:Array = [ { label: 'MB', conversion: 1, maximum: 9999999, minimum: 1, stepSize: 1 },
-                                                         { label: 'GB', conversion: 1024, maximum: 999, minimum: 1, stepSize: 1 } ];
+                                                         { label: 'GB', conversion: 1024, maximum: 9999, minimum: 1, stepSize: 1 } ];
 
         public static const hdUnitsSelectorDP:Array = [ { label: 'MB', conversion: 1048576, maximum: 999999999, minimum: 1, stepSize: 1 },
                                                         { label: 'GB', conversion: 1073741824, maximum: 999999, minimum: 1, stepSize: 1 } ];
