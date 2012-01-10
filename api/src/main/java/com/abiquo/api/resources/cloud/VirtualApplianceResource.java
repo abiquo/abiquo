@@ -260,7 +260,7 @@ public class VirtualApplianceResource
         final Integer vappId, final IRESTBuilder restBuilder, final VirtualApplianceState state)
     {
         VirtualApplianceStateDto dto = new VirtualApplianceStateDto();
-        dto.setPower(state.name());
+        dto.setPower(state);
         dto.addLinks(restBuilder.buildVirtualApplianceStateLinks(dto, vappId, vdcId));
         return dto;
     }
