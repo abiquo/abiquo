@@ -25,11 +25,10 @@ import javax.xml.bind.annotation.XmlEnum;
 import javax.xml.bind.annotation.XmlType;
 
 /**
- * The {@link VirtualMachine} State model. The transitions between states are in
- * {@link VirtualMachineStateTransition}.
+ * The virtual machine state model. The transitions between states are in virtual machine state
+ * transition.
  * 
  * @author ssedano
- * @see com.abiquo.server.core.cloud.VirtualMachineStateTransition
  */
 @XmlType(name = "VirtualMachineState")
 @XmlEnum
