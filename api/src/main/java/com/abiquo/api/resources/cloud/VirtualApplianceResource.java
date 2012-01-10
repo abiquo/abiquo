@@ -260,7 +260,7 @@ public class VirtualApplianceResource
         final Integer vappId, final IRESTBuilder restBuilder, final VirtualApplianceState state)
     {
         VirtualApplianceStateDto dto = new VirtualApplianceStateDto();
-        dto.setPower(state.name());
+        dto.setPower(state);
         dto.addLinks(restBuilder.buildVirtualApplianceStateLinks(dto, vappId, vdcId));
         return dto;
     }
@@ -318,9 +318,9 @@ public class VirtualApplianceResource
         link = link.replaceAll("action.*", "");
         link = link.replaceAll("(/)*$", "");
         link =
-            link.concat(VirtualMachinesResource.VIRTUAL_MACHINES_PATH).concat("/")
-                .concat(String.valueOf(vmId)).concat("/").concat(TaskResourceUtils.TASKS_PATH)
-                .concat("/").concat(taskId);
+            link.concat("/").concat(VirtualMachinesResource.VIRTUAL_MACHINES_PATH).concat("/")
+                .concat(String.valueOf(vmId)).concat(TaskResourceUtils.TASKS_PATH).concat("/")
+                .concat(taskId);
 
         return new RESTLink("status", link);
     }
