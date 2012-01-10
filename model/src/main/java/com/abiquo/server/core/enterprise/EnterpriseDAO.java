@@ -82,18 +82,25 @@ class EnterpriseDAO extends DefaultDAOBase<Integer, Enterprise>
         return createCriteria().list();
     }
 
-    public List<Enterprise> findAll(final Integer offset, final Integer numResults)
+    public List<Enterprise> findAll(Integer firstElem, final Integer numResults)
     {
+
+        // Check if the page requested is bigger than the last one
         Criteria criteria = createCriteria();
         Long total = count();
 
-        criteria.setFirstResult(offset * numResults);
+        if (firstElem >= total.intValue())
+        {
+            firstElem = total.intValue() - numResults;
+        }
+
+        criteria.setFirstResult(firstElem);
         criteria.setMaxResults(numResults);
 
         List<Enterprise> result = getResultList(criteria);
 
         com.abiquo.server.core.util.PagedList<Enterprise> page = new PagedList<Enterprise>(result);
-        page.setCurrentElement(offset);
+        page.setCurrentElement(firstElem);
         page.setPageSize(numResults);
         page.setTotalResults(total.intValue());
 
