@@ -1159,8 +1159,9 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
     }
 
     @Override
-    public DataResult<VirtualAppliance> instanceVirtualApplianceNodes(Integer virtualDatacenterId,
-        Integer virtualApplianceId, Collection<Node> nodes)
+    public DataResult<VirtualAppliance> instanceVirtualApplianceNodes(
+        final Integer virtualDatacenterId, final Integer virtualApplianceId,
+        final Collection<Node> nodes)
     {
         StringBuilder errors = new StringBuilder();
         DataResult result = new DataResult();
