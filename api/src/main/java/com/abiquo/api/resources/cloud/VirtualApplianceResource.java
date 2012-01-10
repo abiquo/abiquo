@@ -87,8 +87,6 @@ public class VirtualApplianceResource
 
     public static final String VIRTUAL_APPLIANCE_STATE_REL = "state";
 
-    public static final String VIRTUAL_APPLIANCE_FORCE_DELETE_PARAM = "force";
-
     @Autowired
     VirtualApplianceService service;
 
@@ -288,11 +286,10 @@ public class VirtualApplianceResource
     @DELETE
     public void deleteVirtualAppliance(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
-        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
-        @QueryParam(VIRTUAL_APPLIANCE_FORCE_DELETE_PARAM) @DefaultValue(value = "false") final Boolean forceDelete)
+        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId)
         throws Exception
     {
-        service.deleteVirtualAppliance(vdcId, vappId, forceDelete);
+        service.deleteVirtualAppliance(vdcId, vappId);
 
     }
 
