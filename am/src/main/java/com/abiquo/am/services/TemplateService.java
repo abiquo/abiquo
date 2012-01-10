@@ -94,8 +94,8 @@ public class TemplateService
         downloader.uploadTemplate(diskinfo, diskFile);
 
         // sets the current state to start downloading
-        notifier.setTemplateStatus(String.valueOf(diskinfo.getEnterpriseRepositoryId()), diskinfo
-            .getUrl(), TemplateStatusEnumType.DOWNLOAD);
+        notifier.setTemplateStatus(String.valueOf(diskinfo.getEnterpriseRepositoryId()),
+            diskinfo.getUrl(), TemplateStatusEnumType.DOWNLOAD);
     }
 
     public void delete(final String erId, final String ovfId)
