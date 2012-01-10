@@ -447,7 +447,7 @@ public class TarantinoJobCreator extends DefaultApiService
                     .getFenceMode(), configuration.getAddress(), configuration.getGateway(),
                     configuration.getNetMask(), configuration.getPrimaryDNS(), configuration
                         .getSecondaryDNS(), configuration.getSufixDNS(), i.getSequence(),
-                    toDchpOptionCom(dhcplist));
+                    toDchpOptionCom(dhcplist), i.getConfigureGateway());
                 continue;
             }
             logger.debug("Network configuration without gateway");
@@ -456,7 +456,8 @@ public class TarantinoJobCreator extends DefaultApiService
             Integer tag = i.getVlanNetwork().getTag();
             vmDesc.addNetwork(i.getMac(), i.getIp(), virtualMachine.getHypervisor().getMachine()
                 .getVirtualSwitch(), i.getNetworkName(), tag, i.getName(), null, null, null, null,
-                null, null, null, i.getSequence(), toDchpOptionCom(dhcplist));
+                null, null, null, i.getSequence(), toDchpOptionCom(dhcplist),
+                i.getConfigureGateway());
 
         }
     }
