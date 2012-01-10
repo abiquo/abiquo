@@ -104,7 +104,12 @@
             
             private var _canBeModified:Boolean;
 
-
+            private var _virtualAppliance:VirtualAppliance;
+            
+            public function set virtualAppliance(value:VirtualAppliance):void
+            {
+            	this._virtualAppliance = value;
+            }
             
             private function onCreationComplete():void{
             	//Checking privilege
@@ -433,22 +438,26 @@
             
             private function onPreviousEraseNodeButton():void
             {
-            	AbiCloudAlert.showAlert(ResourceManager.getInstance().getString("Common",
-                                                                                "ALERT_TITLE_LABEL"),
-                                        ResourceManager.getInstance().getString("VirtualAppliance",
-                                                                                "ALERT_DELETE_NODE_VIRTUALIMAGE_HEADER"),
-                                        ResourceManager.getInstance().getString("VirtualAppliance",
-                                                                                "ALERT_DELETE_NODE_VIRTUALIMAGE_TEXT"),
-                                        Alert.YES | Alert.NO,
-                                        onClickEraseNodeButton);
+            	if(this._virtualAppliance.state.description == net.undf.abicloud.vo.infrastructure.State.DEPLOYED.description){
+	            	AbiCloudAlert.showAlert(ResourceManager.getInstance().getString("Common",
+	                                                                                "ALERT_TITLE_LABEL"),
+	                                        ResourceManager.getInstance().getString("VirtualAppliance",
+	                                                                                "ALERT_DELETE_NODE_VIRTUALIMAGE_HEADER"),
+	                                        ResourceManager.getInstance().getString("VirtualAppliance",
+	                                                                                "ALERT_DELETE_NODE_VIRTUALIMAGE_TEXT"),
+	                                        Alert.YES | Alert.NO,
+	                                        onClickEraseNodeButton);
+            	}else{
+            		onClickEraseNodeButton();
+            	}
             }
 
             /**
              * Announces that user wants to delete this node
              **/
-            private function onClickEraseNodeButton(closeEvent:CloseEvent):void
+            private function onClickEraseNodeButton(closeEvent:CloseEvent = null):void
             {
-                if (closeEvent.detail == Alert.YES)
+                if (closeEvent.detail == Alert.YES || !closeEvent)
                 {
 	                if (this._isSelected)
 	                {
