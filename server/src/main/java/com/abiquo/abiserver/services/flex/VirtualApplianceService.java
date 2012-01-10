@@ -387,7 +387,8 @@ public class VirtualApplianceService
         // VirtualApplianceCommand command = proxyCommand(session);
         DataResult<VirtualAppliance> virtualApplianceNodes =
             proxyVirtualApplianceResourceStub(session).getVirtualApplianceNodes(
-                virtualAppliance.getVirtualDataCenter().getId(), virtualAppliance.getId());
+                virtualAppliance.getVirtualDataCenter().getId(), virtualAppliance.getId(),
+                "forceRefreshVirtualApplianceState");
         return virtualApplianceNodes;
         // return command.forceRefreshVirtualApplianceState(virtualAppliance);
 

@@ -1669,7 +1669,7 @@ public class VirtualMachineService extends DefaultApiService
      * @param vdcId {@link VirtualDatacenter} Id
      * @return The {@link Task} UUID
      */
-    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public String snapshotVirtualMachine(final Integer vmId, final Integer vappId,
         final Integer vdcId, final String snapshotName)
     {

@@ -242,7 +242,8 @@ public class NonBlockingService
         final VirtualAppliance virtualAppliance)
     {
         return proxyVirtualApplianceResourceStub(session).undeployVirtualAppliance(
-            virtualAppliance.getVirtualDataCenter().getId(), virtualAppliance.getId(), Boolean.FALSE);
+            virtualAppliance.getVirtualDataCenter().getId(), virtualAppliance.getId(),
+            Boolean.FALSE);
     }
 
     /**
@@ -333,7 +334,8 @@ public class NonBlockingService
         // BusinessDelegateProxy.getInstance(session, virtualAppCommand,
         // VirtualApplianceCommand.class);
         return proxyVirtualApplianceResourceStub(session).getVirtualApplianceNodes(
-            virtualAppliance.getVirtualDataCenter().getId(), virtualAppliance.getId());
+            virtualAppliance.getVirtualDataCenter().getId(), virtualAppliance.getId(),
+            "checkVirtualAppliance");
         // return command.checkVirtualAppliance(virtualAppliance);
     }
 
@@ -350,7 +352,7 @@ public class NonBlockingService
         final VirtualAppliance virtualAppliance, final ArrayList<Node> nodes,
         final Boolean updateNodes)
     {
-        return proxyVirtualMachineResourceStub(session).instanceVirtualMachines(
+        return proxyVirtualApplianceResourceStub(session).instanceVirtualApplianceNodes(
             virtualAppliance.getVirtualDataCenter().getId(), virtualAppliance.getId(), nodes);
     }
 
@@ -388,6 +390,7 @@ public class NonBlockingService
     {
 
         return proxyVirtualApplianceResourceStub(session).undeployVirtualAppliance(
-            virtualAppliance.getVirtualDataCenter().getId(), virtualAppliance.getId(), Boolean.FALSE);
+            virtualAppliance.getVirtualDataCenter().getId(), virtualAppliance.getId(),
+            Boolean.FALSE);
     }
 }
