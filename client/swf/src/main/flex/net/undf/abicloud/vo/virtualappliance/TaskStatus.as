@@ -29,14 +29,28 @@ package net.undf.abicloud.vo.virtualappliance
 	[Bindable]
 	public class TaskStatus
 	{
+		/*******
+		 *  States
+		 * 
+		 *  FINISHED_SUCCESSFULLY,
+		 * 
+		 *  FINISHED_UNSUCCESSFULLY,
+		 *
+		 *  PENDING,
+		 * 
+		 *  STARTED,
+		 * 
+		 *  ABORTED
+		 * 
+		 * *****/
         public var uuid:String;
-        public var statusname:String;
+        public var statusName:String;
         public var message:String;
 
 		public function TaskStatus()
 		{
 			uuid = "";
-			statusname = "";
+			statusName = "";
 			message = "";
 		}
 

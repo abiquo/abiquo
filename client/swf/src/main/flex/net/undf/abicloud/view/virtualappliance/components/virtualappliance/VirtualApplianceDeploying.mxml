@@ -133,8 +133,7 @@
             
             private function returnStatus(object:NodeVirtualImage, column:DataGridColumn):String
             {
-                //return object.taskStatus.message;
-                return "In Progress";
+                return resourceManager.getString('VirtualAppliance','LABEL_STATUS_' + object.taskStatus.statusName);
             }
         ]]>
     </mx:Script>
