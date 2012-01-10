@@ -388,6 +388,10 @@ public class AbstractAPIStub
             {
                 result.setResultCode(BasicResult.HARD_LIMT_EXCEEDED);
             }
+            if (errors.getCollection().get(0).getCode().equals("VM-44"))
+            {
+                result.setResultCode(BasicResult.NOT_MANAGED_VIRTUAL_IMAGE);
+            }
         }
     }
 
