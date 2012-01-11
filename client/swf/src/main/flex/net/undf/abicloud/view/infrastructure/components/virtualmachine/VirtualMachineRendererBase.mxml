@@ -470,7 +470,8 @@
             {
                 event.stopImmediatePropagation();
 
-                if (HyperVisor(this._virtualMachine.assignedTo).type.id == HyperVisorType.HYPERV)
+                if (HyperVisor(this._virtualMachine.assignedTo).type.id == HyperVisorType.HYPERV
+                 || HyperVisor(this._virtualMachine.assignedTo).type.id == HyperVisorType.XENSERVER)
                 {
                     //This hypervisor type does not support graphical remote access
                     AbiCloudAlert.showAlert(ResourceManager.getInstance().getString("Common",
