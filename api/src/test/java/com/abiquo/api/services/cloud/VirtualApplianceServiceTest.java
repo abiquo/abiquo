@@ -76,6 +76,7 @@ public class VirtualApplianceServiceTest extends AbstractUnitTest
         setup(vdc.getDatacenter(), rs, vdc.getNetwork(), vdc, dclimit, vapp);
 
         SecurityContextHolder.getContext().setAuthentication(new BasicUserAuthentication());
+
     }
 
     @Override
