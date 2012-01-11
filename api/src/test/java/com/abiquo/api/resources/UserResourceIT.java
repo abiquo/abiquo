@@ -50,6 +50,7 @@ import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.resources.cloud.VirtualMachinesResource;
 import com.abiquo.model.rest.RESTLink;
 import com.abiquo.model.transport.error.ErrorsDto;
+import com.abiquo.server.core.cloud.NodeVirtualImage;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineDto;
 import com.abiquo.server.core.cloud.VirtualMachinesDto;
@@ -466,6 +467,7 @@ public class UserResourceIT extends AbstractJpaGeneratorIT
     public void getVirtualMachinesByUser()
     {
         VirtualMachine vm = vmGenerator.createUniqueInstance();
+        NodeVirtualImage nvi = nodeVirtualImageGenerator.createInstance(vm);
 
         vm.getVirtualMachineTemplate().getRepository()
             .setDatacenter(vm.getHypervisor().getMachine().getDatacenter());
@@ -488,6 +490,10 @@ public class UserResourceIT extends AbstractJpaGeneratorIT
         entitiesToSetup.add(vm.getVirtualMachineTemplate().getCategory());
         entitiesToSetup.add(vm.getVirtualMachineTemplate());
         entitiesToSetup.add(vm);
+        entitiesToSetup.add(nvi.getVirtualAppliance().getVirtualDatacenter().getNetwork());
+        entitiesToSetup.add(nvi.getVirtualAppliance().getVirtualDatacenter());
+        entitiesToSetup.add(nvi.getVirtualAppliance());
+        entitiesToSetup.add(nvi);
 
         setup(entitiesToSetup.toArray());
 
