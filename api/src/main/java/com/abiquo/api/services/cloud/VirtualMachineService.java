@@ -217,7 +217,7 @@ public class VirtualMachineService extends DefaultApiService
         return repo.findByEnterprise(enterprise);
     }
 
-    public Collection<VirtualMachine> findVirtualMachinesByUser(final Enterprise enterprise,
+    public List<VirtualMachine> findVirtualMachinesByUser(final Enterprise enterprise,
         final User user)
     {
         return repo.findVirtualMachinesByUser(enterprise, user);
