@@ -49,15 +49,7 @@ import com.abiquo.server.core.cloud.VirtualMachineDto;
 import com.abiquo.server.core.cloud.VirtualMachineWithNodeDto;
 import com.abiquo.server.core.cloud.VirtualMachinesDto;
 import com.abiquo.server.core.cloud.VirtualMachinesWithNodeDto;
-<<<<<<< HEAD
 import com.abiquo.server.core.cloud.VirtualMachinesWithNodeExtendedDto;
-import com.abiquo.server.core.enterprise.Enterprise;
-import com.abiquo.server.core.enterprise.User;
-import com.abiquo.server.core.infrastructure.Datacenter;
-import com.abiquo.server.core.infrastructure.Machine;
-import com.abiquo.server.core.infrastructure.Rack;
-=======
->>>>>>> 46b61da512d7ba809f8f5e5cfe12bcf894196289
 
 @Parent(VirtualApplianceResource.class)
 @Path(VirtualMachinesResource.VIRTUAL_MACHINES_PATH)
@@ -179,7 +171,6 @@ public class VirtualMachinesResource extends AbstractResource
         return vappsDto;
     }
 
-<<<<<<< HEAD
     @GET
     @Produces(VirtualMachineResource.VM_NODE_EXTENDED_MEDIA_TYPE)
     public VirtualMachinesWithNodeExtendedDto getVirtualMachinesWithNodeExtended(
@@ -200,12 +191,8 @@ public class VirtualMachinesResource extends AbstractResource
         return vmsDto;
     }
 
-    public static VirtualMachinesDto createTransferObjects(final Collection<VirtualMachine> vms,
-        final IRESTBuilder restBuilder)
-=======
     public static VirtualMachinesDto createTransferObjects(final List<VirtualMachine> vms,
         final List<VirtualDatacenter> vdcs, final IRESTBuilder restBuilder)
->>>>>>> 46b61da512d7ba809f8f5e5cfe12bcf894196289
     {
         VirtualMachinesDto dtos = new VirtualMachinesDto();
         for (int i = 0; i < vms.size(); i++)
