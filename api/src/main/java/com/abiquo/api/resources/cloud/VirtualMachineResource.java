@@ -492,7 +492,7 @@ public class VirtualMachineResource extends AbstractResource
         @Context final UriInfo uriInfo) throws Exception
     {
         String taskId =
-            vmService.snapshotVirtualMachine(vmId, vappId, vdcId, snapshotData.getSnapshotName());
+            vmService.instanceVirtualMachine(vmId, vappId, vdcId, snapshotData.getSnapshotName());
 
         if (taskId == null)
         {
