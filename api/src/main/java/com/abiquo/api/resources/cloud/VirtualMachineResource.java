@@ -594,12 +594,13 @@ public class VirtualMachineResource extends AbstractResource
         final List<IpPoolManagement> ips) throws Exception
     {
         User userVm = v.getVirtualMachine().getUser();
-        String userName = userVm.getSurname().concat(" ").concat(userVm.getName());
-        String enterpriseName = userVm.getEnterprise().getName();
         VirtualMachineWithNodeDto dto =
             createNodeTransferObject(v, vdcId, vappId, restBuilder, volumeIds, diskIds, ips);
         VirtualMachineWithNodeExtendedDto extendedDto =
-            new VirtualMachineWithNodeExtendedDto(dto, userName, enterpriseName);
+            new VirtualMachineWithNodeExtendedDto(dto,
+                userVm.getName(),
+                userVm.getSurname(),
+                userVm.getEnterprise().getName());
         return extendedDto;
     }
 

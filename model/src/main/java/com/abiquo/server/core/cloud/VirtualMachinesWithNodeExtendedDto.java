@@ -32,11 +32,10 @@ import com.abiquo.model.transport.WrapperDto;
 public class VirtualMachinesWithNodeExtendedDto extends
     WrapperDto<VirtualMachineWithNodeExtendedDto>
 {
-
     /**
      * 
      */
-    private static final long serialVersionUID = -1891560795147901395L;
+    private static final long serialVersionUID = 7198327837451823717L;
 
     @Override
     @XmlElement(name = "virtualmachinewithnodeextended")

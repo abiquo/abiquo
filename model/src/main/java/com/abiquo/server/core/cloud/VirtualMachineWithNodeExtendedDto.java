@@ -30,6 +30,8 @@ public class VirtualMachineWithNodeExtendedDto extends VirtualMachineWithNodeDto
 
     private String userName;
 
+    private String userSurname;
+
     private String enterpriseName;
 
     public String getUserName()
@@ -42,6 +44,16 @@ public class VirtualMachineWithNodeExtendedDto extends VirtualMachineWithNodeDto
         this.userName = userName;
     }
 
+    public String getUserSurname()
+    {
+        return userSurname;
+    }
+
+    public void setUserSurname(final String userSurname)
+    {
+        this.userSurname = userSurname;
+    }
+
     public String getEnterpriseName()
     {
         return enterpriseName;
@@ -52,10 +64,18 @@ public class VirtualMachineWithNodeExtendedDto extends VirtualMachineWithNodeDto
         this.enterpriseName = enterpriseName;
     }
 
+    public VirtualMachineWithNodeExtendedDto()
+    {
+    }
+
     public VirtualMachineWithNodeExtendedDto(final VirtualMachineWithNodeDto dto,
-        final String userName, final String enterpriseName)
+        final String userName, final String userSurname, final String enterpriseName)
     {
         this.setLinks(dto.getLinks());
+        this.setId(dto.getId());
+        this.setName(dto.getName());
+        this.setDescription(dto.getDescription());
+        this.setRam(dto.getRam());
         this.setCpu(dto.getCpu());
         this.setHdInBytes(dto.getHdInBytes());
         this.setVdrpPort(dto.getVdrpPort());
@@ -72,6 +92,7 @@ public class VirtualMachineWithNodeExtendedDto extends VirtualMachineWithNodeDto
         this.setX(dto.getX());
         this.setY(dto.getY());
         this.setUserName(userName);
+        this.setUserSurname(userSurname);
         this.setEnterpriseName(enterpriseName);
     }
 }
