@@ -63,6 +63,7 @@ import com.abiquo.server.core.cloud.VirtualMachineStateDto;
 import com.abiquo.server.core.cloud.VirtualMachineStateTransition;
 import com.abiquo.server.core.cloud.VirtualMachineTaskDto;
 import com.abiquo.server.core.cloud.VirtualMachineWithNodeDto;
+import com.abiquo.server.core.cloud.VirtualMachineWithNodeExtendedDto;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.infrastructure.Machine;
@@ -104,6 +105,8 @@ public class VirtualMachineResource extends AbstractResource
     public static final String VIRTUAL_MACHINE_BOOTSTRAP_REL = "bootstrap";
 
     public static final String VM_NODE_MEDIA_TYPE = "application/vnd.vm-node+xml";
+
+    public static final String VM_NODE_EXTENDED_MEDIA_TYPE = "application/vnd.vm-node-extended+xml";
 
     public static final String VIRTUAL_MACHINE_ACTION_DEPLOY_REL = "deploy";
 
@@ -574,6 +577,21 @@ public class VirtualMachineResource extends AbstractResource
         TaskResourceUtils.addTasksLink(dto, dto.getEditLink());
 
         return dto;
+    }
+
+    public static VirtualMachineWithNodeExtendedDto createNodeExtendedTransferObject(
+        final NodeVirtualImage v, final Integer vdcId, final Integer vappId,
+        final IRESTBuilder restBuilder, final Integer[] volumeIds, final Integer[] diskIds,
+        final List<IpPoolManagement> ips) throws Exception
+    {
+        User userVm = v.getVirtualMachine().getUser();
+        String userName = userVm.getSurname().concat(" ").concat(userVm.getName());
+        String enterpriseName = userVm.getEnterprise().getName();
+        VirtualMachineWithNodeDto dto =
+            createNodeTransferObject(v, vdcId, vappId, restBuilder, volumeIds, diskIds, ips);
+        VirtualMachineWithNodeExtendedDto extendedDto =
+            new VirtualMachineWithNodeExtendedDto(dto, userName, enterpriseName);
+        return extendedDto;
     }
 
     @Deprecated
