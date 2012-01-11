@@ -38,14 +38,14 @@ package net.undf.abicloud.vo.virtualappliance
         //It may be null
         public var virtualMachine:VirtualMachine;
         
-        //public var taskStatus:TaskStatus;
+        public var taskStatus:TaskStatus;
 
         public function NodeVirtualImage()
         {
             super();
             virtualImage = new VirtualImage();
             virtualMachine = null;
-            //taskStatus = new TaskStatus();
+            taskStatus = new TaskStatus();
         }
 
     }

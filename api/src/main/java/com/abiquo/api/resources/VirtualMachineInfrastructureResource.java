@@ -117,7 +117,7 @@ public class VirtualMachineInfrastructureResource extends AbstractResource
             userId = vm.getUser().getId();
         }
         vmDto.setLinks(restBuilder.buildVirtualMachineAdminLinks(datacenterId, rackId, machineId,
-            enterpriseId, userId));
+            enterpriseId, userId, vm.getHypervisor().getType()));
         return vmDto;
     }
 }

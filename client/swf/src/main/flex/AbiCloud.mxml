@@ -145,7 +145,7 @@
             	if( ThemeHandler.getInstance().isThemeLoaded("base") ){
             		cursorManager.removeBusyCursor();
             		
-            		checkSingleSignOn()
+            		checkSingleSignOn();
 
 	                application.addEventListener(KeyboardEvent.KEY_UP, keyboardHandler);
 	

@@ -26,6 +26,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import javax.ws.rs.core.Response.Status;
 
@@ -34,6 +35,7 @@ import org.apache.wink.client.ClientResponse;
 import org.jclouds.abiquo.domain.DomainWrapper;
 import org.jclouds.abiquo.domain.cloud.VirtualDatacenter;
 import org.jclouds.abiquo.domain.exception.AbiquoException;
+import org.jclouds.abiquo.domain.task.AsyncTask;
 import org.jclouds.rest.AuthorizationException;
 
 import com.abiquo.abiserver.abicloudws.AbiCloudConstants;
@@ -46,6 +48,7 @@ import com.abiquo.abiserver.commands.stub.AbstractAPIStub;
 import com.abiquo.abiserver.commands.stub.VirtualApplianceResourceStub;
 import com.abiquo.abiserver.exception.VirtualApplianceCommandException;
 import com.abiquo.abiserver.pojo.authentication.UserSession;
+import com.abiquo.abiserver.pojo.infrastructure.HyperVisor;
 import com.abiquo.abiserver.pojo.infrastructure.HyperVisorType;
 import com.abiquo.abiserver.pojo.infrastructure.State;
 import com.abiquo.abiserver.pojo.infrastructure.VirtualMachine;
@@ -56,6 +59,7 @@ import com.abiquo.abiserver.pojo.user.Enterprise;
 import com.abiquo.abiserver.pojo.user.User;
 import com.abiquo.abiserver.pojo.virtualappliance.Node;
 import com.abiquo.abiserver.pojo.virtualappliance.NodeVirtualImage;
+import com.abiquo.abiserver.pojo.virtualappliance.TaskStatus;
 import com.abiquo.abiserver.pojo.virtualappliance.VirtualAppliance;
 import com.abiquo.abiserver.pojo.virtualappliance.VirtualDataCenter;
 import com.abiquo.abiserver.pojo.virtualhardware.ResourceAllocationLimit;
@@ -63,6 +67,7 @@ import com.abiquo.abiserver.pojo.virtualimage.Category;
 import com.abiquo.abiserver.pojo.virtualimage.Icon;
 import com.abiquo.abiserver.pojo.virtualimage.VirtualImage;
 import com.abiquo.model.enumerator.DiskFormatType;
+import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.model.rest.RESTLink;
 import com.abiquo.model.transport.AcceptedRequestDto;
 import com.abiquo.model.transport.error.ErrorsDto;
@@ -82,9 +87,13 @@ import com.abiquo.server.core.enterprise.EnterpriseDto;
 import com.abiquo.server.core.enterprise.User.AuthType;
 import com.abiquo.server.core.enterprise.UserDto;
 import com.abiquo.server.core.infrastructure.network.VLANNetworkDto;
+import com.abiquo.server.core.task.TaskDto;
+import com.abiquo.server.core.task.TasksDto;
+import com.abiquo.server.core.task.enums.TaskState;
 import com.abiquo.util.ErrorManager;
 import com.abiquo.util.URIResolver;
 import com.abiquo.util.resources.ResourceManager;
+import com.google.common.collect.Iterables;
 
 /**
  * @author jdevesa
@@ -612,6 +621,26 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
                     populateErrors(imageResponse, new BasicResult(), "getVirtualImage");
                 }
             }
+            
+            TaskStatus currentTask = new TaskStatus();
+            
+            TasksDto tasks = getApiClient().getApi().getTaskClient().listTasks(dto);
+            if (!tasks.isEmpty())
+            {
+                TaskDto lastTask = tasks.getCollection().get(0);       
+                currentTask.setUuid(lastTask.getTaskId());
+                currentTask.setStatusName(lastTask.getState().name());
+                currentTask.setMessage("");
+            }
+            else
+            {
+                currentTask.setUuid("");
+                currentTask.setStatusName("");
+                currentTask.setMessage("");
+            }
+        
+            
+            nodeVirtualImage.setTaskStatus(currentTask);
             nodeVirtualImages.add(nodeVirtualImage);
         }
         return nodeVirtualImages;
@@ -686,6 +715,13 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
         vm.setVdrpIP(virtualMachineDto.getVdrpIP());
         vm.setVdrpPort(virtualMachineDto.getVdrpPort());
 
+        // Build the hypervisor with the information available.
+        // It will only be used to check the type.
+        RESTLink vdcLink = virtualMachineDto.searchLink("virtualdatacenter");
+        HyperVisor hypervisor = new HyperVisor();
+        hypervisor.setType(new HyperVisorType(HypervisorType.valueOf(vdcLink.getTitle())));
+        vm.setAssignedTo(hypervisor);
+
         RESTLink userLink = virtualMachineDto.searchLink("user");
         if (userLink != null)
         {
@@ -701,7 +737,6 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
             {
                 populateErrors(userResponse, new BasicResult(), "getUser");
             }
-
         }
 
         return vm;
@@ -1041,7 +1076,6 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
         BasicResult result = new BasicResult();
         try
         {
-
             // Retrieve the VirtualDatacenter to associate the new virtual appliance
             VirtualDatacenter vdc =
                 getApiClient().getCloudService().getVirtualDatacenter(
@@ -1056,7 +1090,7 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
                     org.jclouds.abiquo.domain.cloud.VirtualAppliance.class, dto);
 
             // Here we actually perform the request to delete the virtual appliance
-            vapp.delete(forceDelete);
+            vapp.delete();
 
             result.setSuccess(Boolean.TRUE);
         }
@@ -1159,8 +1193,9 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
     }
 
     @Override
-    public DataResult<VirtualAppliance> instanceVirtualApplianceNodes(Integer virtualDatacenterId,
-        Integer virtualApplianceId, Collection<Node> nodes)
+    public DataResult<VirtualAppliance> instanceVirtualApplianceNodes(
+        final Integer virtualDatacenterId, final Integer virtualApplianceId,
+        final Collection<Node> nodes)
     {
         StringBuilder errors = new StringBuilder();
         DataResult result = new DataResult();

@@ -246,7 +246,8 @@
 	            			//Finally, must be a XenServer Image
 	            			if(this._virtualMachine.assignedTo){
 	            				if(HyperVisor(this._virtualMachine.assignedTo).type.id == HyperVisorType.XENSERVER){
-	            					_vncIconEnable = true;
+	            					//Disable due to security issue
+	            					//_vncIconEnable = true;
 	            				}
 	            			}
 	            		}
@@ -469,7 +470,8 @@
             {
                 event.stopImmediatePropagation();
 
-                if (HyperVisor(this._virtualMachine.assignedTo).type.id == HyperVisorType.HYPERV)
+                if (HyperVisor(this._virtualMachine.assignedTo).type.id == HyperVisorType.HYPERV
+                 || HyperVisor(this._virtualMachine.assignedTo).type.id == HyperVisorType.XENSERVER)
                 {
                     //This hypervisor type does not support graphical remote access
                     AbiCloudAlert.showAlert(ResourceManager.getInstance().getString("Common",
@@ -672,7 +674,7 @@
             <mx:Button id="accessRemoteButton"
                 styleName="RemoteAccessButton"
                 toolTip="@Resource(bundle='Infrastructure', key='TOOLTIP_REMOTE_ACCESS')"
-                click="onClickPreviousRemoteAccess(event)"
+                click="onClickAccessRemoteButton(event)"
                 enabled="{this._vncIconEnable}"
                 includeInLayout="{AbiCloudModel.getInstance().configurationManager.config.client_virtual_allowVMRemoteAccess.value == 1 ? true:false}"
                 visible="{AbiCloudModel.getInstance().configurationManager.config.client_virtual_allowVMRemoteAccess.value == 1 ? true:false}"/>
@@ -884,9 +886,9 @@
                             includeInLayout="{AbiCloudModel.getInstance().configurationManager.config.client_virtual_allowVMRemoteAccess.value == 1}"
                             direction="horizontal">
                             <mx:Label id="remoteAccessLabel"
-                                text="{(this._virtualMachine.vdrpIP == null                                          || 
-                                        HyperVisor(this._virtualMachine.assignedTo).type.id == HyperVisorType.HYPERV || 
-                                        HyperVisor(this._virtualMachine.assignedTo).type.id == HyperVisorType.XENSERVER) ? ResourceManager.getInstance().getString('Infrastructure', 'LABEL_NOT_AVAILABLE') :
+                                text="{(this._virtualMachine.vdrpIP == null
+                                || HyperVisor(this._virtualMachine.assignedTo).type.id == HyperVisorType.HYPERV
+                                || HyperVisor(this._virtualMachine.assignedTo).type.id == HyperVisorType.XENSERVER) ? ResourceManager.getInstance().getString('Infrastructure', 'LABEL_NOT_AVAILABLE') :
 																												           _virtualMachine.vdrpIP + ':' + _virtualMachine.vdrpPort.toString()}"
                                 selectable="true"/>
 

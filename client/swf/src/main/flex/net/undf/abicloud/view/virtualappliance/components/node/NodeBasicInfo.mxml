@@ -248,8 +248,8 @@
             direction="horizontal">
             <mx:Label id="remoteAccessLabel"
                 text="{(this._virtualMachine.vdrpIP == null || 
-                        HyperVisor(this._virtualMachine.assignedTo).type.id == HyperVisorType.HYPERV || 
-                        HyperVisor(this._virtualMachine.assignedTo).type.id == HyperVisorType.XENSERVER) ? ResourceManager.getInstance().getString('Infrastructure', 'LABEL_NOT_AVAILABLE') :
+                        HyperVisor(this._virtualMachine.assignedTo).type.id == HyperVisorType.HYPERV
+                     || HyperVisor(this._virtualMachine.assignedTo).type.id == HyperVisorType.XENSERVER) ? ResourceManager.getInstance().getString('Infrastructure', 'LABEL_NOT_AVAILABLE') :
                                                                                                                            _virtualMachine.vdrpIP + ':' + _virtualMachine.vdrpPort.toString()}"
                 selectable="true"/>
 

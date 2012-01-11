@@ -76,6 +76,7 @@ public class VirtualApplianceServiceTest extends AbstractUnitTest
         setup(vdc.getDatacenter(), rs, vdc.getNetwork(), vdc, dclimit, vapp);
 
         SecurityContextHolder.getContext().setAuthentication(new BasicUserAuthentication());
+
     }
 
     @Override
@@ -90,7 +91,7 @@ public class VirtualApplianceServiceTest extends AbstractUnitTest
     {
         EntityManager em = getEntityManagerWithAnActiveTransaction();
         VirtualApplianceService service = new VirtualApplianceService(em);
-        service.deleteVirtualAppliance(vdc.getId(), vapp.getId(), Boolean.TRUE);
+        service.deleteVirtualAppliance(vdc.getId(), vapp.getId());
     }
 
     @Test(enabled = false, groups = {BASIC_UNIT_TESTS, VAPP_UNIT_TESTS}, expectedExceptions = {Exception.class})
@@ -107,6 +108,6 @@ public class VirtualApplianceServiceTest extends AbstractUnitTest
         vapp.addToNodeVirtualImages(nodeVirtualImage);
         setup(vm, nodeVirtualImage, vapp);
 
-        service.deleteVirtualAppliance(vdc.getId(), vapp.getId(), Boolean.TRUE);
+        service.deleteVirtualAppliance(vdc.getId(), vapp.getId());
     }
 }
