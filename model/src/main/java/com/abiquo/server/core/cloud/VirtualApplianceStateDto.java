@@ -50,7 +50,7 @@ public class VirtualApplianceStateDto extends SingleResourceTransportDto impleme
      * <li><b>NEEDS_SYNCHRONIZE</b></li>
      * </ul>
      */
-    private String power;
+    private VirtualApplianceState power;
 
     /**
      * Machine power state.
@@ -61,7 +61,7 @@ public class VirtualApplianceStateDto extends SingleResourceTransportDto impleme
      *         <li><b>NEEDS_SYNCHRONIZE</b></li>
      *         </ul>
      */
-    public String getPower()
+    public VirtualApplianceState getPower()
     {
         return power;
     }
@@ -82,7 +82,7 @@ public class VirtualApplianceStateDto extends SingleResourceTransportDto impleme
      *            </ul>
      *            void
      */
-    public void setPower(final String power)
+    public void setPower(final VirtualApplianceState power)
     {
         this.power = power;
     }

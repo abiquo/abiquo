@@ -219,7 +219,7 @@ public class VirtualMachineService extends DefaultApiService
         return repo.findByEnterprise(enterprise);
     }
 
-    public Collection<VirtualMachine> findVirtualMachinesByUser(final Enterprise enterprise,
+    public List<VirtualMachine> findVirtualMachinesByUser(final Enterprise enterprise,
         final User user)
     {
         return repo.findVirtualMachinesByUser(enterprise, user);
@@ -463,14 +463,14 @@ public class VirtualMachineService extends DefaultApiService
 
             LOGGER.debug("Updated virtual machine {}", vm.getId());
 
-            LOGGER.debug("Checking requires add initiatorMappings");
-            initiatorMappings(vm);
-
             // it is required a tarantino Task ?
             if (vm.getState() == VirtualMachineState.NOT_ALLOCATED)
             {
                 return null;
             }
+
+            LOGGER.debug("Checking requires add initiatorMappings");
+            initiatorMappings(vm);
 
             // refresh the virtualmachine object with the new values to get the
             // correct resources.
@@ -1670,7 +1670,7 @@ public class VirtualMachineService extends DefaultApiService
      * @param vdcId {@link VirtualDatacenter} Id
      * @return The {@link Task} UUID
      */
-    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public String snapshotVirtualMachine(final Integer vmId, final Integer vappId,
         final Integer vdcId, final String snapshotName)
     {

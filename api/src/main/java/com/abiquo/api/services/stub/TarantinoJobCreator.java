@@ -19,10 +19,31 @@
  * Boston, MA 02111-1307, USA.
  */
 
+/**
+ * Abiquo community edition
+ * cloud management application for hybrid clouds
+ * Copyright (C) 2008-2010 - Abiquo Holdings S.L.
+ *
+ * This application is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU LESSER GENERAL PUBLIC
+ * LICENSE as published by the Free Software Foundation under
+ * version 3 of the License
+ *
+ * This software is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * LESSER GENERAL PUBLIC LICENSE v.3 for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the
+ * Boston, MA 02111-1307, USA.
+ */
+
 package com.abiquo.api.services.stub;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -39,6 +60,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.services.DefaultApiService;
 import com.abiquo.api.services.RemoteServiceService;
+import com.abiquo.commons.amqp.impl.tarantino.domain.DhcpOptionCom;
 import com.abiquo.commons.amqp.impl.tarantino.domain.DiskDescription;
 import com.abiquo.commons.amqp.impl.tarantino.domain.DiskDescription.DiskControllerType;
 import com.abiquo.commons.amqp.impl.tarantino.domain.HypervisorConnection;
@@ -61,6 +83,7 @@ import com.abiquo.server.core.cloud.VirtualMachineState;
 import com.abiquo.server.core.cloud.VirtualMachineStateTransition;
 import com.abiquo.server.core.infrastructure.InfrastructureRep;
 import com.abiquo.server.core.infrastructure.RemoteService;
+import com.abiquo.server.core.infrastructure.network.DhcpOption;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
 import com.abiquo.server.core.infrastructure.network.NetworkConfiguration;
 import com.abiquo.server.core.infrastructure.storage.DiskManagement;
@@ -409,6 +432,8 @@ public class TarantinoJobCreator extends DefaultApiService
     {
         for (IpPoolManagement i : virtualMachine.getIps())
         {
+            List<DhcpOption> dhcplist = i.getVlanNetwork().getDhcpOption();
+
             if (i.getConfigureGateway())
             {
                 // This interface is the one that configures the Network parameters.
@@ -421,7 +446,8 @@ public class TarantinoJobCreator extends DefaultApiService
                     .getTag() == null ? 0 : i.getVlanNetwork().getTag(), i.getName(), configuration
                     .getFenceMode(), configuration.getAddress(), configuration.getGateway(),
                     configuration.getNetMask(), configuration.getPrimaryDNS(), configuration
-                        .getSecondaryDNS(), configuration.getSufixDNS(), i.getSequence());
+                        .getSecondaryDNS(), configuration.getSufixDNS(), i.getSequence(),
+                    toDchpOptionCom(dhcplist), i.getConfigureGateway());
                 continue;
             }
             logger.debug("Network configuration without gateway");
@@ -430,8 +456,30 @@ public class TarantinoJobCreator extends DefaultApiService
             Integer tag = i.getVlanNetwork().getTag();
             vmDesc.addNetwork(i.getMac(), i.getIp(), virtualMachine.getHypervisor().getMachine()
                 .getVirtualSwitch(), i.getNetworkName(), tag, i.getName(), null, null, null, null,
-                null, null, null, i.getSequence());
+                null, null, null, i.getSequence(), toDchpOptionCom(dhcplist),
+                i.getConfigureGateway());
+
         }
+    }
+
+    private List<DhcpOptionCom> toDchpOptionCom(final List<DhcpOption> dhcplist)
+    {
+
+        List<DhcpOptionCom> dhcpComList = new ArrayList<DhcpOptionCom>();
+
+        for (DhcpOption d : dhcplist)
+        {
+            DhcpOptionCom dhcp = new DhcpOptionCom();
+            dhcp.setMask(d.getMask());
+            dhcp.setOption(d.getOption());
+            dhcp.setNetworkAddress(d.getNetworkAddress());
+            dhcp.setGateway(d.getGateway());
+            dhcp.setNetmask(d.getNetmask());
+
+            dhcpComList.add(dhcp);
+        }
+        return dhcpComList;
+
     }
 
     protected void bootstrapConfiguration(final VirtualMachine virtualMachine,

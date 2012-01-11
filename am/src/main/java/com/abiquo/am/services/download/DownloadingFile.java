@@ -120,7 +120,7 @@ public class DownloadingFile implements AsyncHandler<Boolean>
         {
             expectedBytes =
                 Long.parseLong(h.getHeaders().getFirstValue(HttpHeaders.CONTENT_LENGTH));
-            LOG.debug("File {} will download %d Mb", destinationPath, expectedBytes / B_2_MB);
+            LOG.debug("File {} will download {} Mb", destinationPath, expectedBytes / B_2_MB);
         }
         catch (Exception e)
         {

@@ -60,6 +60,7 @@ import com.abiquo.model.enumerator.Privileges;
 import com.abiquo.server.core.cloud.NodeVirtualImage;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
+import com.abiquo.server.core.cloud.VirtualDatacenterDto;
 import com.abiquo.server.core.cloud.VirtualDatacentersDto;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachinesDto;
@@ -233,8 +234,8 @@ public class EnterpriseResource extends AbstractResource
             VirtualAppliance vapp = nvimg.getVirtualAppliance();
             VirtualMachine vm = nvimg.getVirtualMachine();
 
-            vmDto.add(VirtualMachineResource.createTransferObject(vm, vapp.getVirtualDatacenter()
-                .getId(), vapp.getId(), restBuilder, null, null, null));
+            vmDto.add(VirtualMachineResource.createTransferObject(vm, vapp.getVirtualDatacenter(),
+                vapp.getId(), restBuilder, null, null, null));
         }
         return vmDto;
 

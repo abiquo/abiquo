@@ -26,13 +26,11 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import javax.ws.rs.DELETE;
-import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.UriInfo;
 
@@ -262,7 +260,7 @@ public class VirtualApplianceResource
         final Integer vappId, final IRESTBuilder restBuilder, final VirtualApplianceState state)
     {
         VirtualApplianceStateDto dto = new VirtualApplianceStateDto();
-        dto.setPower(state.name());
+        dto.setPower(state);
         dto.addLinks(restBuilder.buildVirtualApplianceStateLinks(dto, vappId, vdcId));
         return dto;
     }
@@ -290,11 +288,10 @@ public class VirtualApplianceResource
     @DELETE
     public void deleteVirtualAppliance(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
-        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
-        @QueryParam(VIRTUAL_APPLIANCE_FORCE_DELETE_PARAM) @DefaultValue(value = "false") final Boolean forceDelete)
+        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId)
         throws Exception
     {
-        service.deleteVirtualAppliance(vdcId, vappId, forceDelete);
+        service.deleteVirtualAppliance(vdcId, vappId);
 
     }
 
@@ -320,9 +317,9 @@ public class VirtualApplianceResource
         link = link.replaceAll("action.*", "");
         link = link.replaceAll("(/)*$", "");
         link =
-            link.concat(VirtualMachinesResource.VIRTUAL_MACHINES_PATH).concat("/")
-                .concat(String.valueOf(vmId)).concat("/").concat(TaskResourceUtils.TASKS_PATH)
-                .concat("/").concat(taskId);
+            link.concat("/").concat(VirtualMachinesResource.VIRTUAL_MACHINES_PATH).concat("/")
+                .concat(String.valueOf(vmId)).concat(TaskResourceUtils.TASKS_PATH).concat("/")
+                .concat(taskId);
 
         return new RESTLink("status", link);
     }

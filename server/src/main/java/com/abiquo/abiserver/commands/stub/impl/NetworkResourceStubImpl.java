@@ -1261,7 +1261,7 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
 
         ClientResponse response = delete(uri.toString());
 
-        if (response.getStatusCode() == 202)
+        if (response.getStatusCode() == 204 || response.getStatusCode() == 202)
         {
             result.setSuccess(Boolean.TRUE);
         }
@@ -1368,7 +1368,7 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
                 linkDto.addLink(externalIPlink);
 
                 response = post(uriNIC, linkDto);
-                if (response.getStatusCode() == 201)
+                if (response.getStatusCode() == 204 || response.getStatusCode() == 202)
                 {
                     result.setSuccess(Boolean.TRUE);
                 }
@@ -1431,7 +1431,7 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
 
         ClientResponse response = post(uri, links);
 
-        if (response.getStatusCode() == 201)
+        if (response.getStatusCode() == 204 || response.getStatusCode() == 202)
         {
             result.setSuccess(Boolean.TRUE);
         }

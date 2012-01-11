@@ -26,6 +26,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import javax.ws.rs.core.Response.Status;
 
@@ -34,6 +35,7 @@ import org.apache.wink.client.ClientResponse;
 import org.jclouds.abiquo.domain.DomainWrapper;
 import org.jclouds.abiquo.domain.cloud.VirtualDatacenter;
 import org.jclouds.abiquo.domain.exception.AbiquoException;
+import org.jclouds.abiquo.domain.task.AsyncTask;
 import org.jclouds.rest.AuthorizationException;
 
 import com.abiquo.abiserver.abicloudws.AbiCloudConstants;
@@ -46,6 +48,7 @@ import com.abiquo.abiserver.commands.stub.AbstractAPIStub;
 import com.abiquo.abiserver.commands.stub.VirtualApplianceResourceStub;
 import com.abiquo.abiserver.exception.VirtualApplianceCommandException;
 import com.abiquo.abiserver.pojo.authentication.UserSession;
+import com.abiquo.abiserver.pojo.infrastructure.HyperVisor;
 import com.abiquo.abiserver.pojo.infrastructure.HyperVisorType;
 import com.abiquo.abiserver.pojo.infrastructure.State;
 import com.abiquo.abiserver.pojo.infrastructure.VirtualMachine;
@@ -56,6 +59,7 @@ import com.abiquo.abiserver.pojo.user.Enterprise;
 import com.abiquo.abiserver.pojo.user.User;
 import com.abiquo.abiserver.pojo.virtualappliance.Node;
 import com.abiquo.abiserver.pojo.virtualappliance.NodeVirtualImage;
+import com.abiquo.abiserver.pojo.virtualappliance.TaskStatus;
 import com.abiquo.abiserver.pojo.virtualappliance.VirtualAppliance;
 import com.abiquo.abiserver.pojo.virtualappliance.VirtualDataCenter;
 import com.abiquo.abiserver.pojo.virtualhardware.ResourceAllocationLimit;
@@ -63,6 +67,7 @@ import com.abiquo.abiserver.pojo.virtualimage.Category;
 import com.abiquo.abiserver.pojo.virtualimage.Icon;
 import com.abiquo.abiserver.pojo.virtualimage.VirtualImage;
 import com.abiquo.model.enumerator.DiskFormatType;
+import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.model.rest.RESTLink;
 import com.abiquo.model.transport.AcceptedRequestDto;
 import com.abiquo.model.transport.error.ErrorsDto;
@@ -73,17 +78,22 @@ import com.abiquo.server.core.cloud.VirtualAppliancesDto;
 import com.abiquo.server.core.cloud.VirtualDatacenterDto;
 import com.abiquo.server.core.cloud.VirtualDatacentersDto;
 import com.abiquo.server.core.cloud.VirtualMachineDto;
+import com.abiquo.server.core.cloud.VirtualMachineInstanceDto;
 import com.abiquo.server.core.cloud.VirtualMachineState;
 import com.abiquo.server.core.cloud.VirtualMachineTaskDto;
 import com.abiquo.server.core.cloud.VirtualMachineWithNodeDto;
 import com.abiquo.server.core.cloud.VirtualMachinesWithNodeDto;
 import com.abiquo.server.core.enterprise.EnterpriseDto;
-import com.abiquo.server.core.enterprise.UserDto;
 import com.abiquo.server.core.enterprise.User.AuthType;
+import com.abiquo.server.core.enterprise.UserDto;
 import com.abiquo.server.core.infrastructure.network.VLANNetworkDto;
+import com.abiquo.server.core.task.TaskDto;
+import com.abiquo.server.core.task.TasksDto;
+import com.abiquo.server.core.task.enums.TaskState;
 import com.abiquo.util.ErrorManager;
 import com.abiquo.util.URIResolver;
 import com.abiquo.util.resources.ResourceManager;
+import com.google.common.collect.Iterables;
 
 /**
  * @author jdevesa
@@ -123,13 +133,14 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
             AcceptedRequestDto entity = response.getEntity(AcceptedRequestDto.class);
             result.setData(entity.getLinks());
 
-            return this.getVirtualApplianceNodes(virtualDatacenterId, virtualApplianceId);
-
+            return this.getVirtualApplianceNodes(virtualDatacenterId, virtualApplianceId,
+                "deployVirtualAppliance");
         }
         else
         {
             populateErrors(response, result, "deployVirtualAppliance");
         }
+
         return result;
     }
 
@@ -389,11 +400,9 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
 
         vdc.setDefaultVlan(NetworkResourceStubImpl.createFlexObject(vlanDto));
 
-        vdc
-            .setHyperType(HyperVisorType
-                .create(dto.getHypervisorType(),
-                    new com.abiquo.abiserver.pojo.virtualimage.DiskFormatType(dto
-                        .getHypervisorType().baseFormat)));
+        vdc.setHyperType(HyperVisorType.create(
+            dto.getHypervisorType(),
+            new com.abiquo.abiserver.pojo.virtualimage.DiskFormatType(dto.getHypervisorType().baseFormat)));
         vdc.setEnterprise(enterprise);
         vdc.setId(dto.getId());
         vdc.setIdDataCenter(dto.getIdFromLink("datacenter"));
@@ -513,7 +522,7 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
 
     @Override
     public DataResult<VirtualAppliance> getVirtualApplianceNodes(final Integer virtualDatacenterId,
-        final Integer virtualApplianceId)
+        final Integer virtualApplianceId, final String methodName)
     {
         DataResult result = new DataResult();
         String link = createVirtualApplianceUrl(virtualDatacenterId, virtualApplianceId);
@@ -529,24 +538,26 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
 
                 VirtualAppliance app = dtoToVirtualAppliance(entity, virtualDatacenterId, result);
                 RESTLink virtualMachines = entity.searchLink("virtualmachines");
+
                 if (virtualMachines != null)
                 {
                     DataResult<List<Node>> nodeVirtualImages =
                         getAppNodes(virtualMachines.getHref());
                     app.setNodes(nodeVirtualImages.getData());
                 }
+
                 result.setData(app);
             }
             catch (Exception e)
             {
-                populateErrors(response, result, "undeployVirtualAppliance");
+                populateErrors(response, result, methodName);
             }
-
         }
         else
         {
-            populateErrors(response, result, "undeployVirtualAppliance");
+            populateErrors(response, result, methodName);
         }
+
         return result;
     }
 
@@ -610,6 +621,26 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
                     populateErrors(imageResponse, new BasicResult(), "getVirtualImage");
                 }
             }
+            
+            TaskStatus currentTask = new TaskStatus();
+            
+            TasksDto tasks = getApiClient().getApi().getTaskClient().listTasks(dto);
+            if (!tasks.isEmpty())
+            {
+                TaskDto lastTask = tasks.getCollection().get(0);       
+                currentTask.setUuid(lastTask.getTaskId());
+                currentTask.setStatusName(lastTask.getState().name());
+                currentTask.setMessage("");
+            }
+            else
+            {
+                currentTask.setUuid("");
+                currentTask.setStatusName("");
+                currentTask.setMessage("");
+            }
+        
+            
+            nodeVirtualImage.setTaskStatus(currentTask);
             nodeVirtualImages.add(nodeVirtualImage);
         }
         return nodeVirtualImages;
@@ -684,6 +715,13 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
         vm.setVdrpIP(virtualMachineDto.getVdrpIP());
         vm.setVdrpPort(virtualMachineDto.getVdrpPort());
 
+        // Build the hypervisor with the information available.
+        // It will only be used to check the type.
+        RESTLink vdcLink = virtualMachineDto.searchLink("virtualdatacenter");
+        HyperVisor hypervisor = new HyperVisor();
+        hypervisor.setType(new HyperVisorType(HypervisorType.valueOf(vdcLink.getTitle())));
+        vm.setAssignedTo(hypervisor);
+
         RESTLink userLink = virtualMachineDto.searchLink("user");
         if (userLink != null)
         {
@@ -699,7 +737,6 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
             {
                 populateErrors(userResponse, new BasicResult(), "getUser");
             }
-
         }
 
         return vm;
@@ -748,12 +785,11 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
         if (response.getStatusCode() == 202)
         {
             result.setSuccess(Boolean.TRUE);
+            AcceptedRequestDto entity = response.getEntity(AcceptedRequestDto.class);
+            result.setData(entity.getLinks());
 
-            // Retrieve the VirtualDatacenter to associate the new virtual appliance
-            org.jclouds.abiquo.domain.cloud.VirtualAppliance vapp =
-                getApiClient().getCloudService().getVirtualDatacenter(virtualDatacenterId)
-                    .getVirtualAppliance(virtualApplianceId);
-            result.setData(dtoToVirtualAppliance(vapp.unwrap(), virtualDatacenterId, result));
+            return this.getVirtualApplianceNodes(virtualDatacenterId, virtualApplianceId,
+                "undeployVirtualAppliance");
         }
         else
         {
@@ -833,8 +869,7 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
                 ClientResponse response = get(app.getHref());
                 VirtualAppliancesDto virtualAppliancesDto =
                     response.getEntity(VirtualAppliancesDto.class);
-                list
-                    .addAll(dtosToVirtualAppliance(virtualAppliancesDto, virtualDatacenter, result));
+                list.addAll(dtosToVirtualAppliance(virtualAppliancesDto, virtualDatacenter, result));
             }
             result.setData(list);
         }
@@ -1013,13 +1048,13 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
 
             // The only data a virtual appliance has is the name
             org.jclouds.abiquo.domain.cloud.VirtualAppliance vapp =
-                org.jclouds.abiquo.domain.cloud.VirtualAppliance.builder(getApiClient(), vdc).name(
-                    virtualAppliance.getName()).build();
+                org.jclouds.abiquo.domain.cloud.VirtualAppliance.builder(getApiClient(), vdc)
+                    .name(virtualAppliance.getName()).build();
             // Here we actually perform the request to create the virtual appliance
             vapp.save();
 
-            result.setData(dtoToVirtualAppliance(vapp.unwrap(), virtualAppliance
-                .getVirtualDataCenter(), result));
+            result.setData(dtoToVirtualAppliance(vapp.unwrap(),
+                virtualAppliance.getVirtualDataCenter(), result));
             result.setSuccess(Boolean.TRUE);
         }
         catch (Exception e)
@@ -1041,22 +1076,21 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
         BasicResult result = new BasicResult();
         try
         {
-
             // Retrieve the VirtualDatacenter to associate the new virtual appliance
             VirtualDatacenter vdc =
                 getApiClient().getCloudService().getVirtualDatacenter(
                     virtualAppliance.getVirtualDataCenter().getId());
 
             VirtualApplianceDto dto =
-                getApiClient().getApi().getCloudClient().getVirtualAppliance(vdc.unwrap(),
-                    virtualAppliance.getId());
+                getApiClient().getApi().getCloudClient()
+                    .getVirtualAppliance(vdc.unwrap(), virtualAppliance.getId());
 
             org.jclouds.abiquo.domain.cloud.VirtualAppliance vapp =
                 DomainWrapper.wrap(getApiClient(),
                     org.jclouds.abiquo.domain.cloud.VirtualAppliance.class, dto);
 
             // Here we actually perform the request to delete the virtual appliance
-            vapp.delete(forceDelete);
+            vapp.delete();
 
             result.setSuccess(Boolean.TRUE);
         }
@@ -1148,13 +1182,60 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
             }
             else
             {
-                errors.append(abiquoException.getMessage()).append("\n").append(
-                    abiquoException.getErrors().get(0).getCode());
+                errors.append(abiquoException.getMessage()).append("\n")
+                    .append(abiquoException.getErrors().get(0).getCode());
             }
         }
         else
         {
             errors.append(ex.getMessage()).append("\n");
+        }
+    }
+
+    @Override
+    public DataResult<VirtualAppliance> instanceVirtualApplianceNodes(
+        final Integer virtualDatacenterId, final Integer virtualApplianceId,
+        final Collection<Node> nodes)
+    {
+        StringBuilder errors = new StringBuilder();
+        DataResult result = new DataResult();
+        result.setSuccess(Boolean.TRUE);
+
+        for (Node node : nodes)
+        {
+            NodeVirtualImage nvi = (NodeVirtualImage) node;
+            Integer virtualMachineId = nvi.getVirtualMachine().getId();
+            String instanceName = node.getName();
+
+            String url =
+                createVirtualMachineInstanceUrl(virtualDatacenterId, virtualApplianceId,
+                    virtualMachineId);
+
+            VirtualMachineInstanceDto options = new VirtualMachineInstanceDto();
+            options.setSnapshotName(instanceName);
+
+            ClientResponse response = post(url, options);
+
+            if (response.getStatusCode() != 202)
+            {
+                result.setSuccess(Boolean.FALSE);
+                addErrors(result, errors, response, "instanceVirtualApplianceNodes");
+            }
+        }
+
+        DataResult<VirtualAppliance> virtualAppData =
+            getVirtualApplianceNodes(virtualDatacenterId, virtualApplianceId,
+                "instanceVirtualApplianceNodes");
+
+        if (virtualAppData.getSuccess())
+        {
+            result.setData(virtualAppData.getData());
+            result.setMessage(errors.toString());
+            return result;
+        }
+        else
+        {
+            return virtualAppData;
         }
     }
 }

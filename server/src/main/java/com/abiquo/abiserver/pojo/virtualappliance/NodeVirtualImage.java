@@ -34,6 +34,8 @@ public class NodeVirtualImage extends Node<NodeVirtualImageHB>
     private VirtualImage virtualImage;
 
     private VirtualMachine virtualMachine;
+    
+    private TaskStatus taskStatus;
 
     public NodeVirtualImage()
     {
@@ -98,6 +100,16 @@ public class NodeVirtualImage extends Node<NodeVirtualImageHB>
         }
 
         return nodeVirtualImageHB;
+    }
+
+    public void setTaskStatus(TaskStatus taskStatus)
+    {
+        this.taskStatus = taskStatus;
+    }
+
+    public TaskStatus getTaskStatus()
+    {
+        return taskStatus;
     }
 
 }

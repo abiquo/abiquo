@@ -142,7 +142,7 @@
             	dispatchEvent(new Event('remoteServiceFormItemChange'));
             }
 
-            private function onClickCheckButton():void
+            public function onClickCheckButton():void
             {
                 //Checking the uri
                 var remoteService:RemoteService = new RemoteService();
