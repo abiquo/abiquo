@@ -53,6 +53,19 @@ public class AppsLibraryDAO extends DefaultDAOBase<Integer, AppsLibrary>
         return (AppsLibrary) criteria.uniqueResult();
     }
 
+    public AppsLibrary findByEnterpriseOrInitialize(final Enterprise enterprise)
+    {
+        AppsLibrary appsLib = findByEnterprise(enterprise);
+
+        if (appsLib == null)
+        {
+            appsLib = new AppsLibrary(enterprise);
+            persist(appsLib);
+        }
+
+        return appsLib;
+    }
+
     private static Criterion sameEnterprise(final Enterprise enterprise)
     {
         return Restrictions.eq(AppsLibrary.ENTERPRISE_PROPERTY, enterprise);

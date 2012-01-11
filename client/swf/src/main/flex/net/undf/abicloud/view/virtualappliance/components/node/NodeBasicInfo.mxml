@@ -35,6 +35,7 @@
 
     <mx:Script>
         <![CDATA[
+        	import net.undf.abicloud.vo.virtualappliance.Node;
         	import net.undf.abicloud.vo.user.PrivilegeType;
         	import net.undf.abicloud.utils.SecuredPrivilegeAccess;
         	import net.undf.abicloud.vo.virtualappliance.VirtualAppliance;
@@ -128,6 +129,7 @@
                 	if(updatedNode)
                 	{
 	                	updatedNode.name = nameInput.text;
+	                	updatedNode.modified = Node.NODE_MODIFIED;
 	                	var virtualApplianceEvent:VirtualApplianceEvent = new VirtualApplianceEvent(VirtualApplianceEvent.EDIT_VIRTUALAPPLIANCE);
 	                    virtualApplianceEvent.virtualAppliance = _virtualAppliance;
 	                    dispatchEvent(virtualApplianceEvent);
