@@ -48,6 +48,7 @@ import com.abiquo.abiserver.commands.stub.AbstractAPIStub;
 import com.abiquo.abiserver.commands.stub.VirtualApplianceResourceStub;
 import com.abiquo.abiserver.exception.VirtualApplianceCommandException;
 import com.abiquo.abiserver.pojo.authentication.UserSession;
+import com.abiquo.abiserver.pojo.infrastructure.HyperVisor;
 import com.abiquo.abiserver.pojo.infrastructure.HyperVisorType;
 import com.abiquo.abiserver.pojo.infrastructure.State;
 import com.abiquo.abiserver.pojo.infrastructure.VirtualMachine;
@@ -66,6 +67,7 @@ import com.abiquo.abiserver.pojo.virtualimage.Category;
 import com.abiquo.abiserver.pojo.virtualimage.Icon;
 import com.abiquo.abiserver.pojo.virtualimage.VirtualImage;
 import com.abiquo.model.enumerator.DiskFormatType;
+import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.model.rest.RESTLink;
 import com.abiquo.model.transport.AcceptedRequestDto;
 import com.abiquo.model.transport.error.ErrorsDto;
@@ -713,6 +715,13 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
         vm.setVdrpIP(virtualMachineDto.getVdrpIP());
         vm.setVdrpPort(virtualMachineDto.getVdrpPort());
 
+        // Build the hypervisor with the information available.
+        // It will only be used to check the type.
+        RESTLink vdcLink = virtualMachineDto.searchLink("virtualdatacenter");
+        HyperVisor hypervisor = new HyperVisor();
+        hypervisor.setType(new HyperVisorType(HypervisorType.valueOf(vdcLink.getTitle())));
+        vm.setAssignedTo(hypervisor);
+
         RESTLink userLink = virtualMachineDto.searchLink("user");
         if (userLink != null)
         {
@@ -728,7 +737,6 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
             {
                 populateErrors(userResponse, new BasicResult(), "getUser");
             }
-
         }
 
         return vm;
