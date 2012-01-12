@@ -1671,8 +1671,8 @@ public class VirtualMachineService extends DefaultApiService
      * @return The {@link Task} UUID
      */
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public String snapshotVirtualMachine(final Integer vmId, final Integer vappId,
-        final Integer vdcId, final String snapshotName)
+    public String instanceVirtualMachine(final Integer vmId, final Integer vappId,
+        final Integer vdcId, final String instanceName)
     {
         // Retrieve entities
         VirtualMachine virtualMachine = getVirtualMachine(vdcId, vappId, vmId);
@@ -1696,7 +1696,6 @@ public class VirtualMachineService extends DefaultApiService
 
         try
         {
-            // Do the instance
             SnapshotType type = SnapshotType.getSnapshotType(virtualMachine);
             String taskId = null;
 
@@ -1709,22 +1708,25 @@ public class VirtualMachineService extends DefaultApiService
                 case FROM_DISK_CONVERSION:
                     taskId =
                         tarantino.snapshotVirtualMachine(virtualApp, virtualMachine, originalState,
-                            snapshotName, type);
-                    LOGGER.debug("Instance of virtual machine {} enqueued!",
-                        virtualMachine.getName());
+                            instanceName);
                     break;
 
                 case FROM_IMPORTED_VIRTUALMACHINE:
                     taskId =
-                        snapshotImportedVirtualMachine(virtualApp, virtualMachine, originalState,
-                            snapshotName);
-                    LOGGER.debug("Instance of virtual machine {} enqueued!",
-                        virtualMachine.getName());
+                        instanceImportedVirtualMachine(virtualApp, virtualMachine, originalState,
+                            instanceName);
                     break;
 
                 case FROM_STATEFUL_DISK:
-                    // TODO
+                    taskId =
+                        tarantino.instanceStatefulVirtualMachine(virtualApp, virtualMachine,
+                            originalState, instanceName);
                     break;
+            }
+
+            if (taskId != null)
+            {
+                LOGGER.debug("Instance of virtual machine {} enqueued!", virtualMachine.getName());
             }
 
             return taskId;
@@ -1755,9 +1757,7 @@ public class VirtualMachineService extends DefaultApiService
                     EventType.VM_INSTANCE, e, "virtualMachine.instanceFailed",
                     virtualMachine.getName());
 
-            LOGGER.debug("Unlocking virtual machine {}", virtualMachine.getName());
             unlockVirtualMachineState(virtualMachine, originalState);
-            LOGGER.debug("Virtual machine {} unlocked!", virtualMachine.getName());
 
             addUnexpectedErrors(APIError.STATUS_INTERNAL_SERVER_ERROR);
             flushErrors();
@@ -1773,12 +1773,12 @@ public class VirtualMachineService extends DefaultApiService
      *            contained.
      * @param virtualMachine The {@link VirtualMachine} to instance.
      * @param originalState The original {@link VirtualMachineState}.
-     * @param snapshotName The final name of the {@link VirtualMachineTemplate}
+     * @param instanceName The final name of the {@link VirtualMachineTemplate}
      * @return The {@link Task} UUID for progress tracking
      */
-    private String snapshotImportedVirtualMachine(final VirtualAppliance virtualAppliance,
+    private String instanceImportedVirtualMachine(final VirtualAppliance virtualAppliance,
         final VirtualMachine virtualMachine, final VirtualMachineState originalState,
-        final String snapshotName)
+        final String instanceName)
     {
         Datacenter datacenter = virtualMachine.getHypervisor().getMachine().getDatacenter();
         RemoteService service = remoteServiceService.getAMRemoteService(datacenter);
@@ -1789,7 +1789,7 @@ public class VirtualMachineService extends DefaultApiService
 
         String ovfPath =
             am.preBundleTemplate(String.valueOf(virtualAppliance.getEnterprise().getId()),
-                snapshotName);
+                instanceName);
 
         // Do the instance
         String snapshotPath = FilenameUtils.getFullPath(ovfPath);
@@ -1797,7 +1797,7 @@ public class VirtualMachineService extends DefaultApiService
             FilenameUtils.getName(virtualMachine.getVirtualMachineTemplate().getPath());
 
         return tarantino.snapshotVirtualMachine(virtualAppliance, virtualMachine, originalState,
-            snapshotName, snapshotPath, snapshotFilename);
+            instanceName, snapshotPath, snapshotFilename);
     }
 
     /**
@@ -2242,6 +2242,7 @@ public class VirtualMachineService extends DefaultApiService
             if (!resourceIntoNewList(ip, newVm.getIps()))
             {
                 ip.detach();
+                vdcRep.deleteRasd(ip.getRasd());
                 vdcRep.updateIpManagement(ip);
             }
             else

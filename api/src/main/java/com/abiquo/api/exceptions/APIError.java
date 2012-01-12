@@ -612,7 +612,13 @@ public enum APIError
 
     // DHCP_OPTION
     NON_EXISTENT_DHCP_OPTION("DHCP_OPTION-0", "The requested dhcp option does not exist"), DHCP_OPTION_PARAM_NOT_FOUND(
-        "DHCP_OPTION-12", "Missing dhcp option parameter");
+        "DHCP_OPTION-12", "Missing dhcp option parameter"),
+
+    // REDIS
+    REDIS_CONNECTION_FAILED("REDIS-0", "Failed connection to Redis"),
+
+    // RABBITMQ
+    RABBITMQ_CONNECTION_FAILED("RABBITMQ-0", "Failed connection to RabbitMQ");
 
     /**
      * Internal error code

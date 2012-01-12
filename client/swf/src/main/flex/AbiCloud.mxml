@@ -44,6 +44,7 @@
     
     <mx:Script>
         <![CDATA[
+        	import mx.collections.ArrayCollection;
         	import net.undf.abicloud.vo.configuration.Language;
         	import net.undf.abicloud.vo.configuration.LanguageLabelLoader;
         	import net.undf.abicloud.events.ConfigurationEvent;
@@ -144,8 +145,6 @@
             	
             	if( ThemeHandler.getInstance().isThemeLoaded("base") ){
             		cursorManager.removeBusyCursor();
-            		
-            		checkSingleSignOn();
 
 	                application.addEventListener(KeyboardEvent.KEY_UP, keyboardHandler);
 	
@@ -155,6 +154,10 @@
 	                //Detect when the channel for services is defined
                		BindingUtils.bindSetter(trackChannel, AbiCloudModel.getInstance().configurationManager,
                                         "channelSet");
+                    
+                    //Detect when languages are loaded
+                    BindingUtils.bindSetter(checkSingleSignOn, AbiCloudModel.getInstance().configurationManager,
+                                        "languageSet");
 
             	}
             }
@@ -281,7 +284,7 @@
             }
             
             
-            private function checkSingleSignOn():void{ 
+            private function checkSingleSignOn(languages:ArrayCollection):void{ 
        	
 				var urlString:String = ExternalInterface.call('window.location.href.toString');
 

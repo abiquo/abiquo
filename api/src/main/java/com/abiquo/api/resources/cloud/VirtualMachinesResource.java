@@ -49,6 +49,7 @@ import com.abiquo.server.core.cloud.VirtualMachineDto;
 import com.abiquo.server.core.cloud.VirtualMachineWithNodeDto;
 import com.abiquo.server.core.cloud.VirtualMachinesDto;
 import com.abiquo.server.core.cloud.VirtualMachinesWithNodeDto;
+import com.abiquo.server.core.cloud.VirtualMachinesWithNodeExtendedDto;
 
 @Parent(VirtualApplianceResource.class)
 @Path(VirtualMachinesResource.VIRTUAL_MACHINES_PATH)
@@ -168,6 +169,26 @@ public class VirtualMachinesResource extends AbstractResource
         }
 
         return vappsDto;
+    }
+
+    @GET
+    @Produces(VirtualMachineResource.VM_NODE_EXTENDED_MEDIA_TYPE)
+    public VirtualMachinesWithNodeExtendedDto getVirtualMachinesWithNodeExtended(
+        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
+        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
+        @Context final IRESTBuilder restBuilder) throws Exception
+    {
+        vappService.getVirtualAppliance(vdcId, vappId);
+        final List<NodeVirtualImage> all = service.getNodeVirtualImages(vdcId, vappId);
+        final VirtualMachinesWithNodeExtendedDto vmsDto = new VirtualMachinesWithNodeExtendedDto();
+
+        for (final NodeVirtualImage n : all)
+        {
+            vmsDto.add(VirtualMachineResource.createNodeExtendedTransferObject(n, vdcId, vappId,
+                restBuilder, null, null, null));
+        }
+
+        return vmsDto;
     }
 
     public static VirtualMachinesDto createTransferObjects(final List<VirtualMachine> vms,

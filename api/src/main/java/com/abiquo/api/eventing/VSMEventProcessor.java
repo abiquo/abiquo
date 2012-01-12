@@ -276,8 +276,7 @@ public class VSMEventProcessor implements VSMCallback
     }
 
     /**
-     * TODO: Auxiliary methods to be included in Helper Class. Also in
-     * HighAvailabilityEventProcessor
+     * Performs an unsubscribe when a DESTROYED event is detected
      * 
      * @param vMachine
      * @return
@@ -295,12 +294,12 @@ public class VSMEventProcessor implements VSMCallback
         {
             LOGGER
                 .error(
-                    "HA Move task on virtual machine name {} failed: Unsubscribing to VSM with Exception {}",
+                    "There was a problem processing a DESTROY event  on Virtual Machine {}: Unsubscribing to VSM failed {}",
                     new Object[] {vMachine.getName(), e.getMessage()});
             tracer.systemLog(SeverityType.MAJOR, ComponentType.VIRTUAL_MACHINE,
-                EventType.VM_MOVING_BY_HA,
-                "HA Move Task on virtual machine name {} failed: Unsubscribing to VSM",
-                vMachine.getName());
+                EventType.VM_DESTROY, "virtualMachine.destroyed.unsubscribeFailed", new Object[] {
+                vMachine.getName(),
+                e.getMessage()});
             return false;
         }
     }

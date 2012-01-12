@@ -38,6 +38,7 @@ import com.abiquo.abiserver.pojo.virtualimage.Category;
 import com.abiquo.abiserver.pojo.virtualimage.Icon;
 import com.abiquo.abiserver.pojo.virtualimage.VirtualImage;
 import com.abiquo.model.enumerator.DiskFormatType;
+import com.abiquo.model.enumerator.StatefulInclusion;
 import com.abiquo.model.rest.RESTLink;
 import com.abiquo.server.core.appslibrary.VirtualMachineTemplateDto;
 import com.abiquo.server.core.appslibrary.VirtualMachineTemplatesDto;
@@ -102,7 +103,7 @@ public class VirtualMachineTemplateResourceStubImpl extends AbstractAPIStub impl
         {
             vmtemplatesResource =
                 vmtemplatesResource.queryParam(VIRTUAL_MACHINE_TEMPLATE_GET_STATEFUL_QUERY_PARAM,
-                    valueOf(true));
+                    valueOf(StatefulInclusion.NOTUSED));
         }
 
         ClientResponse response = vmtemplatesResource.get();

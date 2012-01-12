@@ -464,7 +464,7 @@
              **/
             private function onClickEraseNodeButton(closeEvent:CloseEvent = null):void
             {
-                if (closeEvent.detail == Alert.YES || !closeEvent)
+                if (!closeEvent || closeEvent.detail == Alert.YES )
                 {
 	                if (this._isSelected)
 	                {

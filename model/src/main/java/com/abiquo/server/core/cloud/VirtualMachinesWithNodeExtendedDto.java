@@ -19,50 +19,28 @@
  * Boston, MA 02111-1307, USA.
  */
 
-/**
- * 
- */
-package com.abiquo.abiserver.pojo.virtualappliance;
+package com.abiquo.server.core.cloud;
 
-/**
- * @author jaume
- *
- */
-public class TaskStatus
+import java.util.List;
+
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+
+import com.abiquo.model.transport.WrapperDto;
+
+@XmlRootElement(name = "virtualmachineswithnodeextended")
+public class VirtualMachinesWithNodeExtendedDto extends
+    WrapperDto<VirtualMachineWithNodeExtendedDto>
 {
-    private String uuid;
-    
-    private String statusName;
-      
-    private String message;
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 7198327837451823717L;
 
-    public void setMessage(String message)
+    @Override
+    @XmlElement(name = "virtualmachinewithnodeextended")
+    public List<VirtualMachineWithNodeExtendedDto> getCollection()
     {
-        this.message = message;
-    }
-
-    public String getMessage()
-    {
-        return message;
-    }
-
-    public void setStatusName(String statusName)
-    {
-        this.statusName = statusName;
-    }
-
-    public String getStatusName()
-    {
-        return statusName;
-    }
-
-    public void setUuid(String uuid)
-    {
-        this.uuid = uuid;
-    }
-
-    public String getUuid()
-    {
-        return uuid;
+        return collection;
     }
 }

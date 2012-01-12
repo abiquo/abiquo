@@ -65,6 +65,7 @@ import com.abiquo.server.core.cloud.VirtualMachineStateDto;
 import com.abiquo.server.core.cloud.VirtualMachineStateTransition;
 import com.abiquo.server.core.cloud.VirtualMachineTaskDto;
 import com.abiquo.server.core.cloud.VirtualMachineWithNodeDto;
+import com.abiquo.server.core.cloud.VirtualMachineWithNodeExtendedDto;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.infrastructure.Machine;
@@ -106,6 +107,8 @@ public class VirtualMachineResource extends AbstractResource
     public static final String VIRTUAL_MACHINE_BOOTSTRAP_REL = "bootstrap";
 
     public static final String VM_NODE_MEDIA_TYPE = "application/vnd.vm-node+xml";
+
+    public static final String VM_NODE_EXTENDED_MEDIA_TYPE = "application/vnd.vm-node-extended+xml";
 
     public static final String VIRTUAL_MACHINE_ACTION_DEPLOY_REL = "deploy";
 
@@ -498,7 +501,7 @@ public class VirtualMachineResource extends AbstractResource
         @Context final UriInfo uriInfo) throws Exception
     {
         String taskId =
-            vmService.snapshotVirtualMachine(vmId, vappId, vdcId, snapshotData.getSnapshotName());
+            vmService.instanceVirtualMachine(vmId, vappId, vdcId, snapshotData.getSnapshotName());
 
         if (taskId == null)
         {
@@ -583,6 +586,22 @@ public class VirtualMachineResource extends AbstractResource
         TaskResourceUtils.addTasksLink(dto, dto.getEditLink());
 
         return dto;
+    }
+
+    public static VirtualMachineWithNodeExtendedDto createNodeExtendedTransferObject(
+        final NodeVirtualImage v, final Integer vdcId, final Integer vappId,
+        final IRESTBuilder restBuilder, final Integer[] volumeIds, final Integer[] diskIds,
+        final List<IpPoolManagement> ips) throws Exception
+    {
+        User userVm = v.getVirtualMachine().getUser();
+        VirtualMachineWithNodeDto dto =
+            createNodeTransferObject(v, vdcId, vappId, restBuilder, volumeIds, diskIds, ips);
+        VirtualMachineWithNodeExtendedDto extendedDto =
+            new VirtualMachineWithNodeExtendedDto(dto,
+                userVm.getName(),
+                userVm.getSurname(),
+                userVm.getEnterprise().getName());
+        return extendedDto;
     }
 
     @Deprecated

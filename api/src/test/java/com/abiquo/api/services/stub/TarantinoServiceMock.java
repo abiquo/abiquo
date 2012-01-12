@@ -28,11 +28,10 @@ import static org.mockito.Mockito.when;
 
 import java.util.UUID;
 
+import javax.persistence.EntityManager;
+
 import org.springframework.stereotype.Service;
 
-import com.abiquo.api.util.snapshot.SnapshotUtils.SnapshotType;
-import com.abiquo.commons.amqp.impl.tarantino.domain.DiskSnapshot;
-import com.abiquo.commons.amqp.impl.tarantino.domain.VirtualMachineDefinition;
 import com.abiquo.commons.amqp.impl.tarantino.domain.builder.VirtualMachineDescriptionBuilder;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualMachine;
@@ -47,16 +46,23 @@ import com.abiquo.server.core.cloud.VirtualMachineStateTransition;
 @Service
 public class TarantinoServiceMock extends TarantinoService
 {
-    /** The target mock object. */
-    private TarantinoService mock = createMock();
+    protected TarantinoService mock;
 
-    /**
-     * Mocks the {@link TarantinoService} to return random task ids when invoking the methods that
-     * would perform a call to Tarantino.
-     */
-    private static TarantinoService createMock()
+    public TarantinoServiceMock()
     {
-        TarantinoService mock = mock(TarantinoService.class);
+        super();
+        mock = mockTarantinoService(TarantinoService.class);
+    }
+
+    public TarantinoServiceMock(EntityManager em)
+    {
+        super(em);
+        mock = mockTarantinoService(TarantinoService.class);
+    }
+
+    public static <T extends TarantinoService> T mockTarantinoService(Class<T> mockClass)
+    {
+        T mock = mock(mockClass);
 
         when(mock.applyVirtualMachineState(anyVM(), anyDesc(), anyTransition())).thenReturn(
             randomTaskId());
@@ -65,78 +71,18 @@ public class TarantinoServiceMock extends TarantinoService
             randomTaskId());
         when(mock.reconfigureVirtualMachine(anyVM(), anyDesc(), anyDesc())).thenReturn(
             randomTaskId());
-        when(
-            mock.snapshotVirtualMachine(anyVirtualAppliance(), anyVM(), anyState(), anyString(),
-                anyType())).thenReturn(randomTaskId());
+        when(mock.snapshotVirtualMachine(anyVirtualAppliance(), anyVM(), anyState(), anyString()))
+            .thenReturn(randomTaskId());
         when(
             mock.snapshotVirtualMachine(anyVirtualAppliance(), anyVM(), anyState(), anyString(),
                 anyString(), anyString())).thenReturn(randomTaskId());
+        when(
+            mock.instanceStatefulVirtualMachine(anyVirtualAppliance(), anyVM(), anyState(),
+                anyString())).thenReturn(randomTaskId());
         when(mock.undeployVirtualMachine(anyVM(), anyDesc(), anyState()))
             .thenReturn(randomTaskId());
 
         return mock;
-    }
-
-    // Overridden methods delegate to the mock object
-
-    @Override
-    public String reconfigureVirtualMachine(final VirtualMachine vm,
-        final VirtualMachineDescriptionBuilder originalConfig,
-        final VirtualMachineDescriptionBuilder newConfig)
-    {
-        return mock.reconfigureVirtualMachine(vm, originalConfig, newConfig);
-    }
-
-    @Override
-    public String deployVirtualMachine(final VirtualMachine virtualMachine,
-        final VirtualMachineDescriptionBuilder virtualMachineDesciptionBuilder)
-    {
-        return mock.deployVirtualMachine(virtualMachine, virtualMachineDesciptionBuilder);
-    }
-
-    @Override
-    public String deployVirtualMachineHA(final VirtualMachine virtualMachine,
-        final VirtualMachineDescriptionBuilder virtualMachineDesciptionBuilder,
-        final boolean originalVMStateON)
-    {
-        return mock.deployVirtualMachineHA(virtualMachine, virtualMachineDesciptionBuilder,
-            originalVMStateON);
-    }
-
-    @Override
-    public String undeployVirtualMachine(final VirtualMachine virtualMachine,
-        final VirtualMachineDescriptionBuilder virtualMachineDesciptionBuilder,
-        final VirtualMachineState currentState)
-    {
-        return mock.undeployVirtualMachine(virtualMachine, virtualMachineDesciptionBuilder,
-            currentState);
-    }
-
-    @Override
-    public String applyVirtualMachineState(final VirtualMachine virtualMachine,
-        final VirtualMachineDescriptionBuilder virtualMachineDesciptionBuilder,
-        final VirtualMachineStateTransition machineStateTransition)
-    {
-        return mock.applyVirtualMachineState(virtualMachine, virtualMachineDesciptionBuilder,
-            machineStateTransition);
-    }
-
-    @Override
-    public String snapshotVirtualMachine(final VirtualAppliance virtualAppliance,
-        final VirtualMachine virtualMachine, final VirtualMachineState originalState,
-        final String snapshotName, final SnapshotType type)
-    {
-        return mock.snapshotVirtualMachine(virtualAppliance, virtualMachine, originalState,
-            snapshotName, type);
-    }
-
-    @Override
-    public String snapshotVirtualMachine(final VirtualAppliance virtualAppliance,
-        final VirtualMachine virtualMachine, final VirtualMachineState originalState,
-        final String snapshotName, final String snapshotPath, final String snapshotFilename)
-    {
-        return mock.snapshotVirtualMachine(virtualAppliance, virtualMachine, originalState,
-            snapshotName, snapshotPath, snapshotFilename);
     }
 
     // Helper methods
@@ -161,16 +107,6 @@ public class TarantinoServiceMock extends TarantinoService
         return (VirtualMachineDescriptionBuilder) any();
     }
 
-    private static VirtualMachineDefinition anyDef()
-    {
-        return (VirtualMachineDefinition) any();
-    }
-
-    private static DiskSnapshot anyDiskSnapshot()
-    {
-        return (DiskSnapshot) any();
-    }
-
     private static VirtualAppliance anyVirtualAppliance()
     {
         return (VirtualAppliance) any();
@@ -181,8 +117,71 @@ public class TarantinoServiceMock extends TarantinoService
         return UUID.randomUUID().toString();
     }
 
-    private static SnapshotType anyType()
+    // Delegate methods
+
+    public String deployVirtualMachine(VirtualMachine virtualMachine,
+        VirtualMachineDescriptionBuilder virtualMachineDesciptionBuilder)
     {
-        return (SnapshotType) any();
+        return mock.deployVirtualMachine(virtualMachine, virtualMachineDesciptionBuilder);
     }
+
+    public String reconfigureVirtualMachine(VirtualMachine vm,
+        VirtualMachineDescriptionBuilder originalConfig, VirtualMachineDescriptionBuilder newConfig)
+    {
+        return mock.reconfigureVirtualMachine(vm, originalConfig, newConfig);
+    }
+
+    public String deployVirtualMachineHA(VirtualMachine virtualMachine,
+        VirtualMachineDescriptionBuilder virtualMachineDesciptionBuilder, boolean originalVMStateON)
+    {
+        return mock.deployVirtualMachineHA(virtualMachine, virtualMachineDesciptionBuilder,
+            originalVMStateON);
+    }
+
+    public String undeployVirtualMachine(VirtualMachine virtualMachine,
+        VirtualMachineDescriptionBuilder virtualMachineDesciptionBuilder,
+        VirtualMachineState currentState)
+    {
+        return mock.undeployVirtualMachine(virtualMachine, virtualMachineDesciptionBuilder,
+            currentState);
+    }
+
+    public String undeployVirtualMachineAndDelete(VirtualMachine virtualMachine,
+        VirtualMachineDescriptionBuilder virtualMachineDesciptionBuilder,
+        VirtualMachineState currentState)
+    {
+        return mock.undeployVirtualMachineAndDelete(virtualMachine,
+            virtualMachineDesciptionBuilder, currentState);
+    }
+
+    public String applyVirtualMachineState(VirtualMachine virtualMachine,
+        VirtualMachineDescriptionBuilder virtualMachineDesciptionBuilder,
+        VirtualMachineStateTransition machineStateTransition)
+    {
+        return mock.applyVirtualMachineState(virtualMachine, virtualMachineDesciptionBuilder,
+            machineStateTransition);
+    }
+
+    public String snapshotVirtualMachine(VirtualAppliance virtualAppliance,
+        VirtualMachine virtualMachine, VirtualMachineState originalState, String snapshotName)
+    {
+        return mock.snapshotVirtualMachine(virtualAppliance, virtualMachine, originalState,
+            snapshotName);
+    }
+
+    public String snapshotVirtualMachine(VirtualAppliance virtualAppliance,
+        VirtualMachine virtualMachine, VirtualMachineState originalState, String snapshotName,
+        String snapshotPath, String snapshotFilename)
+    {
+        return mock.snapshotVirtualMachine(virtualAppliance, virtualMachine, originalState,
+            snapshotName, snapshotPath, snapshotFilename);
+    }
+
+    public String instanceStatefulVirtualMachine(VirtualAppliance virtualAppliance,
+        VirtualMachine virtualMachine, VirtualMachineState originalState, String snapshotName)
+    {
+        return mock.instanceStatefulVirtualMachine(virtualAppliance, virtualMachine, originalState,
+            snapshotName);
+    }
+
 }
