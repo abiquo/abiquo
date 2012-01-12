@@ -239,10 +239,9 @@
                 bottom="3"
                 horizontalCenter="0"
                 minimum="1" snapInterval="1"
-                maximum="{int(Math.ceil(AbiCloudModel.getInstance().userManager.totalEnterprises / ENTERPRISES_RESULTS_PER_PAGE))}"
+                maximum="{int(Math.ceil(totalNumEnterprises / ENTERPRISES_RESULTS_PER_PAGE))}"
                 liveDragging="true" showDataTip="false"
-                change="onChangePaginatorSlider()"
-                mouseDown="onMouseDownPaginatorSlider()"/>
+                change="onChangePaginatorSlider()"/>
         </mx:Canvas>
     </general:GeneralSubPanelToolBox>
 </mx:VBox>
