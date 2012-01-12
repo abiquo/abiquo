@@ -37,6 +37,8 @@ import org.springframework.stereotype.Repository;
 import com.abiquo.model.enumerator.ConversionState;
 import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.model.enumerator.HypervisorType;
+import com.abiquo.model.enumerator.StatefulInclusion;
+import com.abiquo.model.enumerator.VolumeState;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
 import com.abiquo.server.core.enterprise.Enterprise;
@@ -74,13 +76,13 @@ import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
         return getResultList(criteria);
     }
 
-    public List<VirtualMachineTemplate> findImportedByEnterprise(Enterprise enterprise)
+    public List<VirtualMachineTemplate> findImportedByEnterprise(final Enterprise enterprise)
     {
         Criteria criteria = createCriteria(importedVirtualMachineTemplate(enterprise));
         criteria.addOrder(Order.asc(VirtualMachine.NAME_PROPERTY));
         return getResultList(criteria);
     }
-    
+
     public List<VirtualMachineTemplate> findBy(final Enterprise enterprise,
         final com.abiquo.server.core.infrastructure.Repository repository, final Category category,
         final HypervisorType hypervisor)
@@ -102,8 +104,8 @@ import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
         return result;
     }
 
-    public List<VirtualMachineTemplate> findImportedBy(Enterprise enterprise, Category category,
-        HypervisorType hypervisor)
+    public List<VirtualMachineTemplate> findImportedBy(final Enterprise enterprise,
+        final Category category, final HypervisorType hypervisor)
     {
         Criteria criteria = createCriteria(importedVirtualMachineTemplate(enterprise));
 
@@ -121,8 +123,8 @@ import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
         List<VirtualMachineTemplate> result = getResultList(criteria);
         return result;
     }
-    
-    private Criterion importedVirtualMachineTemplate(Enterprise enterprise)
+
+    private Criterion importedVirtualMachineTemplate(final Enterprise enterprise)
     {
         return Restrictions.and(sameEnterprise(enterprise), repositoryNull());
     }
@@ -190,26 +192,28 @@ import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
 
     public List<VirtualMachineTemplate> findStatefuls()
     {
-        Criteria criteria = createCriteria(statefulVirtualMachineTemplate());
+        Criteria criteria = createCriteria();
+        criteria.add(statefulVirtualMachineTemplate(StatefulInclusion.ALL, criteria));
         criteria.addOrder(Order.asc(VirtualMachine.NAME_PROPERTY));
         return getResultList(criteria);
     }
 
-    public List<VirtualMachineTemplate> findStatefulsByDatacenter(final Datacenter datacenter)
+    public List<VirtualMachineTemplate> findStatefulsByDatacenter(final Datacenter datacenter,
+        final StatefulInclusion stateful)
     {
 
         Criteria crit = criteriaWithStatefulNavigation();
-        crit.add(statefulVirtualMachineTemplate());
+        crit.add(statefulVirtualMachineTemplate(stateful, crit));
         crit.add(sameStatefulDatacenter(datacenter));
         crit.addOrder(Order.asc(VirtualMachineTemplate.NAME_PROPERTY));
         return getResultList(crit);
     }
 
     public List<VirtualMachineTemplate> findStatefulsByCategoryAndDatacenter(
-        final Category category, final Datacenter datacenter)
+        final Category category, final Datacenter datacenter, final StatefulInclusion stateful)
     {
         Criteria crit = criteriaWithStatefulNavigation();
-        crit.add(statefulVirtualMachineTemplate());
+        crit.add(statefulVirtualMachineTemplate(stateful, crit));
         crit.add(sameCategory(category));
         crit.add(sameStatefulDatacenter(datacenter));
         crit.addOrder(Order.asc(VirtualMachineTemplate.NAME_PROPERTY));
@@ -243,7 +247,7 @@ import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
     {
         return Restrictions.eq(VirtualMachineTemplate.REPOSITORY_PROPERTY, repository);
     }
-    
+
     private static Criterion repositoryNull()
     {
         return Restrictions.isNull(VirtualMachineTemplate.REPOSITORY_PROPERTY);
@@ -253,11 +257,28 @@ import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
     {
         return Restrictions.eq(VirtualMachineTemplate.SHARED_PROPERTY, true);
     }
-    
-    private static Criterion statefulVirtualMachineTemplate()
+
+    private static Criterion statefulVirtualMachineTemplate(final StatefulInclusion stateful,
+        final Criteria criteria)
     {
-        return Restrictions.and(Restrictions.eq(VirtualMachineTemplate.STATEFUL_PROPERTY, true),
-            Restrictions.isNotNull(VirtualMachineTemplate.VOLUME_PROPERTY));
+        Criterion cri = Restrictions.eq(VirtualMachineTemplate.STATEFUL_PROPERTY, true);
+
+        switch (stateful)
+        {
+            case ALL:
+                Restrictions.and(cri,
+                    Restrictions.isNotNull(VirtualMachineTemplate.VOLUME_PROPERTY));
+                break;
+            case USED:
+                // use function criteriaWithStatefulNavigation before
+                return Restrictions.and(cri,
+                    Restrictions.eq("vl." + VolumeManagement.STATE_PROPERTY, VolumeState.ATTACHED));
+            case NOTUSED:
+                // use function criteriaWithStatefulNavigation before
+                return Restrictions.and(cri,
+                    Restrictions.eq("vl." + VolumeManagement.STATE_PROPERTY, VolumeState.DETACHED));
+        }
+        return cri;
     }
 
     private static Criterion sameEnterpriseOrShared(final Enterprise enterprise)
@@ -301,6 +322,5 @@ import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
         crit.createAlias("pool." + StoragePool.DEVICE_PROPERTY, "device");
         return crit;
     }
-
 
 }
