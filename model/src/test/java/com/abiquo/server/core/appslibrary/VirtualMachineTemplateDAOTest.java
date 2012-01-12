@@ -33,6 +33,8 @@ import org.testng.annotations.Test;
 import com.abiquo.model.enumerator.ConversionState;
 import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.model.enumerator.HypervisorType;
+import com.abiquo.model.enumerator.StatefulInclusion;
+import com.abiquo.model.enumerator.VolumeState;
 import com.abiquo.server.core.cloud.VirtualImageConversionGenerator;
 import com.abiquo.server.core.common.persistence.DefaultDAOTestBase;
 import com.abiquo.server.core.common.persistence.TestDataAccessManager;
@@ -47,7 +49,8 @@ import com.abiquo.server.core.infrastructure.storage.VolumeManagementGenerator;
 import com.softwarementors.bzngine.engines.jpa.test.configuration.EntityManagerFactoryForTesting;
 import com.softwarementors.bzngine.entities.test.PersistentInstanceTester;
 
-public class VirtualMachineTemplateDAOTest extends DefaultDAOTestBase<VirtualMachineTemplateDAO, VirtualMachineTemplate>
+public class VirtualMachineTemplateDAOTest extends
+    DefaultDAOTestBase<VirtualMachineTemplateDAO, VirtualMachineTemplate>
 {
     private EnterpriseGenerator enterpriseGenerator;
 
@@ -158,7 +161,8 @@ public class VirtualMachineTemplateDAOTest extends DefaultDAOTestBase<VirtualMac
         persistAll(ds(), entitiesToPersist, vi);
 
         VirtualMachineTemplateDAO dao = createDaoForRollbackTransaction();
-        VirtualMachineTemplate template = dao.findByPath(vi.getEnterprise(), vi.getRepository(), vi.getPath());
+        VirtualMachineTemplate template =
+            dao.findByPath(vi.getEnterprise(), vi.getRepository(), vi.getPath());
         assertNotNull(template);
 
         try
@@ -206,7 +210,8 @@ public class VirtualMachineTemplateDAOTest extends DefaultDAOTestBase<VirtualMac
 
         VirtualMachineTemplateDAO dao = createDaoForRollbackTransaction();
 
-        List<VirtualMachineTemplate> compatiblesVbox = dao.findBy(ent, repo, null, HypervisorType.VBOX);
+        List<VirtualMachineTemplate> compatiblesVbox =
+            dao.findBy(ent, repo, null, HypervisorType.VBOX);
 
         assertEquals(compatiblesVbox.size(), 0);
     }
@@ -230,7 +235,8 @@ public class VirtualMachineTemplateDAOTest extends DefaultDAOTestBase<VirtualMac
 
         VirtualMachineTemplateDAO dao = createDaoForRollbackTransaction();
 
-        List<VirtualMachineTemplate> compatiblesVbox = dao.findBy(ent, repo, null, HypervisorType.VBOX);
+        List<VirtualMachineTemplate> compatiblesVbox =
+            dao.findBy(ent, repo, null, HypervisorType.VBOX);
 
         assertEquals(compatiblesVbox.size(), 1);
         assertEquals(compatiblesVbox.get(0).getName(), "compatible-vmx");
@@ -256,7 +262,8 @@ public class VirtualMachineTemplateDAOTest extends DefaultDAOTestBase<VirtualMac
 
         VirtualMachineTemplateDAO dao = createDaoForRollbackTransaction();
 
-        List<VirtualMachineTemplate> compatiblesVbox = dao.findBy(ent, repo, null, HypervisorType.VBOX);
+        List<VirtualMachineTemplate> compatiblesVbox =
+            dao.findBy(ent, repo, null, HypervisorType.VBOX);
 
         assertEquals(compatiblesVbox.size(), 0);
     }
@@ -280,7 +287,8 @@ public class VirtualMachineTemplateDAOTest extends DefaultDAOTestBase<VirtualMac
 
         VirtualMachineTemplateDAO dao = createDaoForRollbackTransaction();
 
-        List<VirtualMachineTemplate> compatiblesVbox = dao.findBy(ent, repo, null, HypervisorType.VBOX);
+        List<VirtualMachineTemplate> compatiblesVbox =
+            dao.findBy(ent, repo, null, HypervisorType.VBOX);
 
         assertEquals(compatiblesVbox.size(), 0);
     }
@@ -302,7 +310,8 @@ public class VirtualMachineTemplateDAOTest extends DefaultDAOTestBase<VirtualMac
 
         VirtualMachineTemplateDAO dao = createDaoForRollbackTransaction();
 
-        List<VirtualMachineTemplate> compatiblesVbox = dao.findBy(ent, repo, null, HypervisorType.VBOX);
+        List<VirtualMachineTemplate> compatiblesVbox =
+            dao.findBy(ent, repo, null, HypervisorType.VBOX);
 
         assertEquals(compatiblesVbox.size(), 1);
         assertEquals(compatiblesVbox.get(0).getName(), "compatible-vmx");
@@ -326,7 +335,8 @@ public class VirtualMachineTemplateDAOTest extends DefaultDAOTestBase<VirtualMac
 
         VirtualMachineTemplateDAO dao = createDaoForRollbackTransaction();
 
-        List<VirtualMachineTemplate> compatiblesVbox = dao.findBy(ent, repo, null, HypervisorType.VBOX);
+        List<VirtualMachineTemplate> compatiblesVbox =
+            dao.findBy(ent, repo, null, HypervisorType.VBOX);
 
         assertEquals(compatiblesVbox.size(), 1);
         assertEquals(compatiblesVbox.get(0).getName(), "compatible-vmx");
@@ -346,7 +356,8 @@ public class VirtualMachineTemplateDAOTest extends DefaultDAOTestBase<VirtualMac
 
         VirtualMachineTemplateDAO dao = createDaoForRollbackTransaction();
 
-        List<VirtualMachineTemplate> compatiblesVbox = dao.findBy(ent, repo, null, HypervisorType.VBOX);
+        List<VirtualMachineTemplate> compatiblesVbox =
+            dao.findBy(ent, repo, null, HypervisorType.VBOX);
 
         assertEquals(compatiblesVbox.size(), 1);
         assertEquals(compatiblesVbox.get(0).getName(), "compatible-vbox");
@@ -369,7 +380,8 @@ public class VirtualMachineTemplateDAOTest extends DefaultDAOTestBase<VirtualMac
 
         VirtualMachineTemplateDAO dao = createDaoForRollbackTransaction();
 
-        List<VirtualMachineTemplate> compatiblesVbox = dao.findBy(ent, repo, null, HypervisorType.VBOX);
+        List<VirtualMachineTemplate> compatiblesVbox =
+            dao.findBy(ent, repo, null, HypervisorType.VBOX);
 
         assertEquals(compatiblesVbox.size(), 1);
         assertEquals(compatiblesVbox.get(0).getName(), "compatible-vbox");
@@ -415,7 +427,44 @@ public class VirtualMachineTemplateDAOTest extends DefaultDAOTestBase<VirtualMac
         Datacenter datacenter = statefulVolume.getStoragePool().getDevice().getDatacenter();
 
         VirtualMachineTemplateDAO dao = createDaoForRollbackTransaction();
-        List<VirtualMachineTemplate> templatess = dao.findStatefulsByDatacenter(datacenter);
+        List<VirtualMachineTemplate> templatess =
+            dao.findStatefulsByDatacenter(datacenter, StatefulInclusion.ALL);
+        assertEquals(templatess.size(), 1);
+    }
+
+    @Test
+    public void testFindStatefulsByDatacenterUsed()
+    {
+        VolumeManagement statefulVolume = volumeGenerator.createStatefulInstance();
+        statefulVolume.setState(VolumeState.ATTACHED);
+
+        List<Object> entitiesToPersist = new ArrayList<Object>();
+        volumeGenerator.addAuxiliaryEntitiesToPersist(statefulVolume, entitiesToPersist);
+        persistAll(ds(), entitiesToPersist, statefulVolume);
+
+        Datacenter datacenter = statefulVolume.getStoragePool().getDevice().getDatacenter();
+
+        VirtualMachineTemplateDAO dao = createDaoForRollbackTransaction();
+        List<VirtualMachineTemplate> templatess =
+            dao.findStatefulsByDatacenter(datacenter, StatefulInclusion.USED);
+        assertEquals(templatess.size(), 1);
+    }
+
+    @Test
+    public void testFindStatefulsByDatacenterNotUsed()
+    {
+        VolumeManagement statefulVolume = volumeGenerator.createStatefulInstance();
+        statefulVolume.setState(VolumeState.DETACHED);
+
+        List<Object> entitiesToPersist = new ArrayList<Object>();
+        volumeGenerator.addAuxiliaryEntitiesToPersist(statefulVolume, entitiesToPersist);
+        persistAll(ds(), entitiesToPersist, statefulVolume);
+
+        Datacenter datacenter = statefulVolume.getStoragePool().getDevice().getDatacenter();
+
+        VirtualMachineTemplateDAO dao = createDaoForRollbackTransaction();
+        List<VirtualMachineTemplate> templatess =
+            dao.findStatefulsByDatacenter(datacenter, StatefulInclusion.NOTUSED);
         assertEquals(templatess.size(), 1);
     }
 
@@ -430,7 +479,8 @@ public class VirtualMachineTemplateDAOTest extends DefaultDAOTestBase<VirtualMac
         persistAll(ds(), entitiesToPersist, statefulVolume, anotherDatacenter);
 
         VirtualMachineTemplateDAO dao = createDaoForRollbackTransaction();
-        List<VirtualMachineTemplate> templates = dao.findStatefulsByDatacenter(anotherDatacenter);
+        List<VirtualMachineTemplate> templates =
+            dao.findStatefulsByDatacenter(anotherDatacenter, StatefulInclusion.ALL);
         assertEquals(templates.size(), 0);
     }
 
@@ -447,7 +497,8 @@ public class VirtualMachineTemplateDAOTest extends DefaultDAOTestBase<VirtualMac
         Category category = statefulVolume.getVirtualMachineTemplate().getCategory();
 
         VirtualMachineTemplateDAO dao = createDaoForRollbackTransaction();
-        List<VirtualMachineTemplate> templates = dao.findStatefulsByCategoryAndDatacenter(category, datacenter);
+        List<VirtualMachineTemplate> templates =
+            dao.findStatefulsByCategoryAndDatacenter(category, datacenter, StatefulInclusion.ALL);
         assertEquals(templates.size(), 1);
     }
 
@@ -465,7 +516,8 @@ public class VirtualMachineTemplateDAOTest extends DefaultDAOTestBase<VirtualMac
 
         VirtualMachineTemplateDAO dao = createDaoForRollbackTransaction();
         List<VirtualMachineTemplate> templates =
-            dao.findStatefulsByCategoryAndDatacenter(category, anotherDatacenter);
+            dao.findStatefulsByCategoryAndDatacenter(category, anotherDatacenter,
+                StatefulInclusion.ALL);
         assertEquals(templates.size(), 0);
     }
 
@@ -483,7 +535,8 @@ public class VirtualMachineTemplateDAOTest extends DefaultDAOTestBase<VirtualMac
 
         VirtualMachineTemplateDAO dao = createDaoForRollbackTransaction();
         List<VirtualMachineTemplate> templates =
-            dao.findStatefulsByCategoryAndDatacenter(anotherCategory, datacenter);
+            dao.findStatefulsByCategoryAndDatacenter(anotherCategory, datacenter,
+                StatefulInclusion.ALL);
         assertEquals(templates.size(), 0);
     }
 
@@ -500,7 +553,8 @@ public class VirtualMachineTemplateDAOTest extends DefaultDAOTestBase<VirtualMac
 
         VirtualMachineTemplateDAO dao = createDaoForRollbackTransaction();
         List<VirtualMachineTemplate> templates =
-            dao.findStatefulsByCategoryAndDatacenter(anotherCategory, anotherDatacenter);
+            dao.findStatefulsByCategoryAndDatacenter(anotherCategory, anotherDatacenter,
+                StatefulInclusion.ALL);
         assertEquals(templates.size(), 0);
     }
 

@@ -149,7 +149,7 @@ package net.undf.abicloud.business.managers
                 this._languageSet.addItem(language);
             }
 
-            dispatchEvent(new Event("channelSetUpdated")); 
+            dispatchEvent(new Event("languageSetUpdated")); 
         }
         
         private var _selectedLanguage:Language;
