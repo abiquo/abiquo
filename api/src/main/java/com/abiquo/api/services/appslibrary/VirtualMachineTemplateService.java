@@ -55,6 +55,7 @@ import com.abiquo.appliancemanager.client.ApplianceManagerResourceStubImpl;
 import com.abiquo.appliancemanager.client.ApplianceManagerResourceStubImpl.ApplianceManagerStubException;
 import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.model.enumerator.HypervisorType;
+import com.abiquo.model.enumerator.StatefulInclusion;
 import com.abiquo.model.rest.RESTLink;
 import com.abiquo.model.transport.error.CommonError;
 import com.abiquo.server.core.appslibrary.AppsLibraryRep;
@@ -481,17 +482,18 @@ public class VirtualMachineTemplateService extends DefaultApiServiceWithApplianc
 
     @Transactional(readOnly = true)
     public List<VirtualMachineTemplate> findStatefulVirtualMachineTemplatesByDatacenter(
-        final Integer enterpriseId, final Integer datacenterId)
+        final Integer enterpriseId, final Integer datacenterId, final StatefulInclusion stateful)
     {
         checkEnterpriseCanUseDatacenter(enterpriseId, datacenterId);
 
         Datacenter datacenter = infrastructureService.getDatacenter(datacenterId);
-        return appsLibraryRep.findStatefulVirtualMachineTemplatesByDatacenter(datacenter);
+        return appsLibraryRep.findStatefulVirtualMachineTemplatesByDatacenter(datacenter, stateful);
     }
 
     @Transactional(readOnly = true)
     public List<VirtualMachineTemplate> findStatefulVirtualMachineTemplatesByCategoryAndDatacenter(
-        final Integer enterpriseId, final Integer datacenterId, final String categoryName)
+        final Integer enterpriseId, final Integer datacenterId, final String categoryName,
+        final StatefulInclusion stateful)
     {
         checkEnterpriseCanUseDatacenter(enterpriseId, datacenterId);
 
@@ -499,7 +501,7 @@ public class VirtualMachineTemplateService extends DefaultApiServiceWithApplianc
         Category category = categoryService.getCategoryByName(categoryName);
 
         return appsLibraryRep.findStatefulVirtualMachineTemplatesByCategoryAndDatacenter(category,
-            datacenter);
+            datacenter, stateful);
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)

@@ -178,7 +178,7 @@ public class TracerLogger
      * 
      * @param trace The trace to publish.
      */
-    private void publishTrace(final Trace trace)
+    private synchronized void publishTrace(final Trace trace)
     {
         try
         {
