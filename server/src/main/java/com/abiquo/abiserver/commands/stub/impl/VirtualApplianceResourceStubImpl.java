@@ -26,7 +26,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 import javax.ws.rs.core.Response.Status;
 
@@ -35,7 +34,6 @@ import org.apache.wink.client.ClientResponse;
 import org.jclouds.abiquo.domain.DomainWrapper;
 import org.jclouds.abiquo.domain.cloud.VirtualDatacenter;
 import org.jclouds.abiquo.domain.exception.AbiquoException;
-import org.jclouds.abiquo.domain.task.AsyncTask;
 import org.jclouds.rest.AuthorizationException;
 
 import com.abiquo.abiserver.abicloudws.AbiCloudConstants;
@@ -82,18 +80,17 @@ import com.abiquo.server.core.cloud.VirtualMachineInstanceDto;
 import com.abiquo.server.core.cloud.VirtualMachineState;
 import com.abiquo.server.core.cloud.VirtualMachineTaskDto;
 import com.abiquo.server.core.cloud.VirtualMachineWithNodeDto;
-import com.abiquo.server.core.cloud.VirtualMachinesWithNodeDto;
+import com.abiquo.server.core.cloud.VirtualMachineWithNodeExtendedDto;
+import com.abiquo.server.core.cloud.VirtualMachinesWithNodeExtendedDto;
 import com.abiquo.server.core.enterprise.EnterpriseDto;
 import com.abiquo.server.core.enterprise.User.AuthType;
 import com.abiquo.server.core.enterprise.UserDto;
 import com.abiquo.server.core.infrastructure.network.VLANNetworkDto;
 import com.abiquo.server.core.task.TaskDto;
 import com.abiquo.server.core.task.TasksDto;
-import com.abiquo.server.core.task.enums.TaskState;
 import com.abiquo.util.ErrorManager;
 import com.abiquo.util.URIResolver;
 import com.abiquo.util.resources.ResourceManager;
-import com.google.common.collect.Iterables;
 
 /**
  * @author jdevesa
@@ -566,11 +563,12 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
         List<Node> nodeVirtualImages = new ArrayList<Node>();
         final DataResult<List<Node>> result = new DataResult<List<Node>>();
         result.setSuccess(Boolean.TRUE);
-        ClientResponse machinesResponse = get(virtualMachinesLink, "application/vnd.vm-node+xml");
+        ClientResponse machinesResponse =
+            get(virtualMachinesLink, "application/vnd.vm-node-extended+xml"); // application/vnd.vm-node+xml
         if (machinesResponse.getStatusCode() == Status.OK.getStatusCode())
         {
-            VirtualMachinesWithNodeDto virtualMachinesWithNodeDto =
-                machinesResponse.getEntity(VirtualMachinesWithNodeDto.class);
+            VirtualMachinesWithNodeExtendedDto virtualMachinesWithNodeDto =
+                machinesResponse.getEntity(VirtualMachinesWithNodeExtendedDto.class);
 
             nodeVirtualImages.addAll(createNodeVirtualImages(virtualMachinesWithNodeDto));
         }
@@ -591,10 +589,10 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
     }
 
     private List<NodeVirtualImage> createNodeVirtualImages(
-        final VirtualMachinesWithNodeDto virtualMachinesDto)
+        final VirtualMachinesWithNodeExtendedDto virtualMachinesDto)
     {
         List<NodeVirtualImage> nodeVirtualImages = new ArrayList<NodeVirtualImage>();
-        for (VirtualMachineWithNodeDto dto : virtualMachinesDto.getCollection())
+        for (VirtualMachineWithNodeExtendedDto dto : virtualMachinesDto.getCollection())
         {
             VirtualMachine virtualMachine = dtoToVirtualMachine(dto);
             NodeVirtualImage nodeVirtualImage = new NodeVirtualImage();
@@ -621,13 +619,13 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
                     populateErrors(imageResponse, new BasicResult(), "getVirtualImage");
                 }
             }
-            
+
             TaskStatus currentTask = new TaskStatus();
-            
+
             TasksDto tasks = getApiClient().getApi().getTaskClient().listTasks(dto);
             if (!tasks.isEmpty())
             {
-                TaskDto lastTask = tasks.getCollection().get(0);       
+                TaskDto lastTask = tasks.getCollection().get(0);
                 currentTask.setUuid(lastTask.getTaskId());
                 currentTask.setStatusName(lastTask.getState().name());
                 currentTask.setMessage("");
@@ -638,8 +636,7 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
                 currentTask.setStatusName("");
                 currentTask.setMessage("");
             }
-        
-            
+
             nodeVirtualImage.setTaskStatus(currentTask);
             nodeVirtualImages.add(nodeVirtualImage);
         }
@@ -699,7 +696,8 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
 
     }
 
-    private VirtualMachine dtoToVirtualMachine(final VirtualMachineDto virtualMachineDto)
+    private VirtualMachine dtoToVirtualMachine(
+        final VirtualMachineWithNodeExtendedDto virtualMachineDto)
     {
         VirtualMachine vm = new VirtualMachine();
         vm.setCpu(virtualMachineDto.getCpu());
@@ -722,22 +720,37 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
         hypervisor.setType(new HyperVisorType(HypervisorType.valueOf(vdcLink.getTitle())));
         vm.setAssignedTo(hypervisor);
 
-        RESTLink userLink = virtualMachineDto.searchLink("user");
-        if (userLink != null)
+        RESTLink entLink = virtualMachineDto.searchLink("enterprise");
+        if (entLink != null)
         {
-            ClientResponse userResponse = get(userLink.getHref());
-            if (userResponse.getStatusCode() == Status.OK.getStatusCode())
+            ClientResponse entResponse = get(entLink.getHref());
+            if (entResponse.getStatusCode() == Status.OK.getStatusCode())
             {
 
-                UserDto userDto = userResponse.getEntity(UserDto.class);
-                User user = dtoToUser(userDto);
-                vm.setUser(user);
+                EnterpriseDto entDto = entResponse.getEntity(EnterpriseDto.class);
+                Enterprise ent = dtoToEnterprise(entDto);
+                vm.setEnterprise(ent);
             }
             else
             {
-                populateErrors(userResponse, new BasicResult(), "getUser");
+                populateErrors(entResponse, new BasicResult(), "getUser");
             }
         }
+
+        UserDto userDto =
+            new UserDto(virtualMachineDto.getUserName(),
+                virtualMachineDto.getUserSurname(),
+                null,
+                null,
+                null,
+                null,
+                null,
+                AuthType.ABIQUO.name());
+        User user = dtoToUser(userDto);
+        Enterprise ent = new Enterprise();
+        ent.setName(virtualMachineDto.getEnterpriseName());
+        user.setEnterprise(ent);
+        vm.setUser(user);
 
         return vm;
     }

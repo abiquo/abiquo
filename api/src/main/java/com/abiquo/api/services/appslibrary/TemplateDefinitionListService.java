@@ -59,8 +59,8 @@ import com.abiquo.tracer.SeverityType;
 public class TemplateDefinitionListService extends DefaultApiServiceWithApplianceManagerClient
 {
 
-    private final static Logger LOGGER =
-        LoggerFactory.getLogger(TemplateDefinitionListService.class);
+    private final static Logger LOGGER = LoggerFactory
+        .getLogger(TemplateDefinitionListService.class);
 
     @Autowired
     protected AppsLibraryDAO appsLibraryDao;
@@ -105,9 +105,7 @@ public class TemplateDefinitionListService extends DefaultApiServiceWithApplianc
             flushErrors();
         }
 
-        AppsLibrary appsLibrary = appsLibraryDao.findByEnterprise(ent);
-
-        templateDefList.setAppsLibrary(appsLibrary);
+        templateDefList.setAppsLibrary(appsLibraryDao.findByEnterpriseOrInitialize(ent));
 
         repo.persistTemplateDefinitionList(templateDefList);
 
@@ -161,8 +159,8 @@ public class TemplateDefinitionListService extends DefaultApiServiceWithApplianc
         {
             try
             {
-                stateList.add(amClient.getTemplateStatus(String.valueOf(enterpriseId), templateDef
-                    .getUrl()));
+                stateList.add(amClient.getTemplateStatus(String.valueOf(enterpriseId),
+                    templateDef.getUrl()));
             }
             catch (Exception e)
             {
