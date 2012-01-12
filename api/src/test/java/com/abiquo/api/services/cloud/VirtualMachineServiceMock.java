@@ -20,11 +20,8 @@
  */
 package com.abiquo.api.services.cloud;
 
-import javax.persistence.EntityManager;
-
 import org.springframework.stereotype.Service;
 
-import com.abiquo.api.services.stub.TarantinoServiceMock;
 import com.abiquo.model.transport.error.ErrorsDto;
 
 /**
@@ -35,23 +32,9 @@ import com.abiquo.model.transport.error.ErrorsDto;
 @Service
 public class VirtualMachineServiceMock extends VirtualMachineService
 {
-
-    public VirtualMachineServiceMock()
-    {
-        super();
-        tarantino = new TarantinoServiceMock();
-    }
-
-    public VirtualMachineServiceMock(final EntityManager em)
-    {
-        super(em);
-        tarantino = new TarantinoServiceMock();
-    }
-
     @Override
     public ErrorsDto checkRemoteServiceStatusByDatacenter(final Integer datacenterId)
     {
         return new ErrorsDto(); // Return a DTO without errors
     }
-
 }
