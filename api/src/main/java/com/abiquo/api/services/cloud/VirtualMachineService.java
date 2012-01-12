@@ -922,7 +922,7 @@ public class VirtualMachineService extends DefaultApiService
     {
         for (IpPoolManagement ip : virtualMachine.getIps())
         {
-            //vdcRep.deleteRasd(ip.getRasd());
+            vdcRep.deleteRasd(ip.getRasd());
             ip.detach();
             if (Type.EXTERNAL == ip.getType())
             {
@@ -2241,6 +2241,7 @@ public class VirtualMachineService extends DefaultApiService
             if (!resourceIntoNewList(ip, newVm.getIps()))
             {
                 ip.detach();
+                vdcRep.deleteRasd(ip.getRasd());
                 vdcRep.updateIpManagement(ip);
             }
             else

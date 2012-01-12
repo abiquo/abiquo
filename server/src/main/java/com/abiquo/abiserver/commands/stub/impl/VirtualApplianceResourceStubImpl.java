@@ -572,7 +572,18 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
             VirtualMachinesWithNodeDto virtualMachinesWithNodeDto =
                 machinesResponse.getEntity(VirtualMachinesWithNodeDto.class);
 
-            nodeVirtualImages.addAll(createNodeVirtualImages(virtualMachinesWithNodeDto));
+            try
+            {
+                nodeVirtualImages.addAll(createNodeVirtualImages(virtualMachinesWithNodeDto));
+            }
+            catch (Exception ex)
+            {
+                populateErrors(ex, result, "getVirtualApplianceNodes");
+            }
+            finally
+            {
+                releaseApiClient();
+            }
         }
         else
         {
@@ -621,13 +632,13 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
                     populateErrors(imageResponse, new BasicResult(), "getVirtualImage");
                 }
             }
-            
+
             TaskStatus currentTask = new TaskStatus();
-            
+
             TasksDto tasks = getApiClient().getApi().getTaskClient().listTasks(dto);
             if (!tasks.isEmpty())
             {
-                TaskDto lastTask = tasks.getCollection().get(0);       
+                TaskDto lastTask = tasks.getCollection().get(0);
                 currentTask.setUuid(lastTask.getTaskId());
                 currentTask.setStatusName(lastTask.getState().name());
                 currentTask.setMessage("");
@@ -638,11 +649,12 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
                 currentTask.setStatusName("");
                 currentTask.setMessage("");
             }
-        
-            
+
             nodeVirtualImage.setTaskStatus(currentTask);
             nodeVirtualImages.add(nodeVirtualImage);
+
         }
+
         return nodeVirtualImages;
     }
 
