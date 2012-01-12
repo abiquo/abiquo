@@ -65,12 +65,14 @@ public class TarantinoServiceMock extends TarantinoService
             randomTaskId());
         when(mock.reconfigureVirtualMachine(anyVM(), anyDesc(), anyDesc())).thenReturn(
             randomTaskId());
-        when(
-            mock.snapshotVirtualMachine(anyVirtualAppliance(), anyVM(), anyState(), anyString(),
-                anyType())).thenReturn(randomTaskId());
+        when(mock.snapshotVirtualMachine(anyVirtualAppliance(), anyVM(), anyState(), anyString()))
+            .thenReturn(randomTaskId());
         when(
             mock.snapshotVirtualMachine(anyVirtualAppliance(), anyVM(), anyState(), anyString(),
                 anyString(), anyString())).thenReturn(randomTaskId());
+        when(
+            mock.instanceStatefulVirtualMachine(anyVirtualAppliance(), anyVM(), anyState(),
+                anyString())).thenReturn(randomTaskId());
         when(mock.undeployVirtualMachine(anyVM(), anyDesc(), anyState()))
             .thenReturn(randomTaskId());
 
@@ -122,21 +124,28 @@ public class TarantinoServiceMock extends TarantinoService
     }
 
     @Override
-    public String snapshotVirtualMachine(final VirtualAppliance virtualAppliance,
-        final VirtualMachine virtualMachine, final VirtualMachineState originalState,
-        final String snapshotName, final SnapshotType type)
+    public String snapshotVirtualMachine(VirtualAppliance virtualAppliance,
+        VirtualMachine virtualMachine, VirtualMachineState originalState, String snapshotName)
     {
         return mock.snapshotVirtualMachine(virtualAppliance, virtualMachine, originalState,
-            snapshotName, type);
+            snapshotName);
     }
 
     @Override
-    public String snapshotVirtualMachine(final VirtualAppliance virtualAppliance,
-        final VirtualMachine virtualMachine, final VirtualMachineState originalState,
-        final String snapshotName, final String snapshotPath, final String snapshotFilename)
+    public String snapshotVirtualMachine(VirtualAppliance virtualAppliance,
+        VirtualMachine virtualMachine, VirtualMachineState originalState, String snapshotName,
+        String snapshotPath, String snapshotFilename)
     {
         return mock.snapshotVirtualMachine(virtualAppliance, virtualMachine, originalState,
             snapshotName, snapshotPath, snapshotFilename);
+    }
+
+    @Override
+    public String instanceStatefulVirtualMachine(VirtualAppliance virtualAppliance,
+        VirtualMachine virtualMachine, VirtualMachineState originalState, String snapshotName)
+    {
+        return mock.instanceStatefulVirtualMachine(virtualAppliance, virtualMachine, originalState,
+            snapshotName);
     }
 
     // Helper methods

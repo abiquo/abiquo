@@ -136,12 +136,12 @@ public class TarantinoService extends DefaultApiService
         catch (RuntimeException e)
         {
             tracer.log(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE, eventType,
-                APIError.GENERIC_OPERATION_ERROR.getMessage());
+                APIError.REDIS_CONNECTION_FAILED.getMessage());
 
             tracer.systemError(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE, eventType, e,
                 "redis.persistTaskError", e.getMessage());
 
-            addNotFoundErrors(APIError.GENERIC_OPERATION_ERROR);
+            addServiceUnavailableErrors(APIError.REDIS_CONNECTION_FAILED);
             flushErrors();
         }
 
@@ -155,7 +155,7 @@ public class TarantinoService extends DefaultApiService
         catch (Exception e)
         {
             tracer.log(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE, eventType,
-                APIError.GENERIC_OPERATION_ERROR.getMessage());
+                APIError.RABBITMQ_CONNECTION_FAILED.getMessage());
 
             tracer.systemError(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE, eventType, e,
                 "tarantino.sendError", e.getMessage());
@@ -174,7 +174,7 @@ public class TarantinoService extends DefaultApiService
                     r, "redis.deleteTaskError", r.getMessage());
             }
 
-            addNotFoundErrors(APIError.GENERIC_OPERATION_ERROR);
+            addServiceUnavailableErrors(APIError.RABBITMQ_CONNECTION_FAILED);
             flushErrors();
         }
         finally
@@ -209,10 +209,9 @@ public class TarantinoService extends DefaultApiService
         try
         {
             // Add Redis task for progress tracking and send the tarantino task
-            logger
-                .debug("Enqueuing instance task for virtual machine {}", virtualMachine.getName());
+            logger.debug("Enqueuing task for virtual machine {}", virtualMachine.getName());
             enqueueTask(datacenter, redisTask, tarantinoTask, eventType);
-            logger.debug("Instance task for virtual machine {} enqueued", virtualMachine.getName());
+            logger.debug("Task for virtual machine {} enqueued", virtualMachine.getName());
         }
         catch (APIException e)
         {
@@ -706,11 +705,21 @@ public class TarantinoService extends DefaultApiService
             originalState, destinationDisk);
     }
 
+    /**
+     * Creates and sends the DTOs for an instance of type {@link SnapshotType#FROM_STATEFUL_DISK}.
+     * 
+     * @param virtualAppliance The {@link VirtualAppliance} where the {@link VirtualMachine} is
+     *            located.
+     * @param virtualMachine The {@link VirtualMachine} to instance.
+     * @param originalState The original {@link VirtualMachineState}.
+     * @param snapshotName The final name of the {@link VirtualMachineTemplate}.
+     * @return The {@link Task} UUID for progress tracking
+     */
     public String instanceStatefulVirtualMachine(final VirtualAppliance virtualAppliance,
         final VirtualMachine virtualMachine, final VirtualMachineState originalState,
         final String snapshotName)
     {
-        logger.debug("Unsupported instance type {} in community version.",
+        logger.debug("Unsupported instance type {} on community version.",
             SnapshotType.FROM_STATEFUL_DISK.name());
         addConflictErrors(APIError.STATUS_CONFLICT);
         flushErrors();
