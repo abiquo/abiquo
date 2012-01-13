@@ -922,13 +922,17 @@ public class VirtualMachineService extends DefaultApiService
     {
         for (IpPoolManagement ip : virtualMachine.getIps())
         {
-            //vdcRep.deleteRasd(ip.getRasd());
+            // vdcRep.deleteRasd(ip.getRasd());
             ip.detach();
             if (Type.EXTERNAL == ip.getType())
             {
                 ip.setVirtualDatacenter(null);
                 ip.setMac(null);
                 ip.setName(null);
+            }
+            else if (Type.UNMANAGED == ip.getType())
+            {
+                vdcRep.deleteIpPoolManagement(ip);
             }
         }
     }
@@ -2240,8 +2244,16 @@ public class VirtualMachineService extends DefaultApiService
         {
             if (!resourceIntoNewList(ip, newVm.getIps()))
             {
-                ip.detach();
-                vdcRep.updateIpManagement(ip);
+                if (ip.getVlanNetwork().getType().equals(NetworkType.UNMANAGED))
+                {
+                    vdcRep.deleteIpPoolManagement(ip);
+                }
+                else
+                {
+                    ip.detach();
+                    vdcRep.updateIpManagement(ip);
+                }
+
             }
             else
             {
