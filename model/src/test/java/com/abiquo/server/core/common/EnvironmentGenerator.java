@@ -26,7 +26,7 @@ import java.util.List;
 import com.abiquo.model.enumerator.MachineState;
 import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.model.enumerator.StorageTechnologyType;
-import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
+import com.abiquo.server.core.appslibrary.VirtualMachineTemplateGenerator;
 import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.cloud.HypervisorGenerator;
 import com.abiquo.server.core.cloud.NodeVirtualImage;
@@ -107,6 +107,8 @@ public class EnvironmentGenerator
 
     private final VirtualMachineGenerator virtualMachineGenerator;
 
+    private final VirtualMachineTemplateGenerator virtualMachineTemplateGenerator;
+
     private final StoragePoolGenerator poolGenerator;
 
     private final RemoteServiceGenerator remoteServiceGenerator;
@@ -138,6 +140,7 @@ public class EnvironmentGenerator
         vappGenerator = new VirtualApplianceGenerator(seed);
         nodeVirtualImageGenerator = new NodeVirtualImageGenerator(seed);
         virtualMachineGenerator = new VirtualMachineGenerator(seed);
+        virtualMachineTemplateGenerator = new VirtualMachineTemplateGenerator(seed);
         volumeGenerator = new VolumeManagementGenerator(seed);
         vlanGenerator = new VLANNetworkGenerator(seed);
         hypervisorGenerator = new HypervisorGenerator(seed);
@@ -211,14 +214,16 @@ public class EnvironmentGenerator
     public List<Object> generateNotManagedAllocatedVirtualMachine()
     {
         // Entities that should be already added to the environment
-        VirtualMachineTemplate vmTemplate = get(VirtualMachineTemplate.class);
         Enterprise enterprise = get(Enterprise.class);
         Hypervisor hypervisor = get(Hypervisor.class);
         Datastore datastore = get(Datastore.class);
         User user = get(User.class);
+        VirtualDatacenter vdc = get(VirtualDatacenter.class);
+        VirtualAppliance vapp = vappGenerator.createInstance(vdc);
+        NodeVirtualImage node = nodeVirtualImageGenerator.createInstance(vapp, user);
         VirtualMachine vm =
-            virtualMachineGenerator.createInstance(vmTemplate, enterprise, hypervisor, datastore,
-                user, "vmNotManaged");
+            virtualMachineGenerator.createInstance(node.getVirtualImage(), enterprise, hypervisor,
+                datastore, user, "vmNotManaged");
 
         // Allocate the virtual machine
         vm.setHypervisor(hypervisor);
@@ -226,6 +231,11 @@ public class EnvironmentGenerator
         vm.setIdType(VirtualMachine.NOT_MANAGED);
         vm.setState(VirtualMachineState.OFF); // Allocated and powered off
 
+        add(vapp);
+        add(node.getVirtualImage().getRepository());
+        add(node.getVirtualImage().getCategory());
+        add(node.getVirtualImage());
+        add(node);
         add(vm);
 
         return getEnvironment();

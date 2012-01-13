@@ -116,7 +116,7 @@ public class MachineServiceTest extends AbstractUnitTest
 
     }
 
-    @Test
+    @Test(enabled = false)
     public void testDeleteMachineWithVirtualMachineNotManagedDeployed()
     {
         environment.generateNotManagedAllocatedVirtualMachine();
