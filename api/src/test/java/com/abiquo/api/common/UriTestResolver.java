@@ -82,6 +82,7 @@ import com.abiquo.api.resources.config.SystemPropertiesResource;
 import com.abiquo.api.resources.config.SystemPropertyResource;
 import com.abiquo.api.util.URIResolver;
 import com.abiquo.model.enumerator.RemoteServiceType;
+import com.abiquo.model.enumerator.StatefulInclusion;
 
 public class UriTestResolver
 {
@@ -421,8 +422,8 @@ public class UriTestResolver
 
         Map<String, String> values = new HashMap<String, String>();
         values.put(EnterpriseResource.ENTERPRISE, String.valueOf(enterpriseId));
-        values.put(TemplateDefinitionListResource.TEMPLATE_DEFINITION_LIST, ovfPackageListId
-            .toString());
+        values.put(TemplateDefinitionListResource.TEMPLATE_DEFINITION_LIST,
+            ovfPackageListId.toString());
 
         return resolveURI(template, values);
 
@@ -1080,7 +1081,7 @@ public class UriTestResolver
         Map<String, String[]> queryParams = new HashMap<String, String[]>();
         queryParams.put(
             VirtualMachineTemplatesResource.VIRTUAL_MACHINE_TEMPLATE_GET_STATEFUL_QUERY_PARAM,
-            new String[] {"true"});
+            new String[] {StatefulInclusion.ALL.name()});
 
         return resolveURI(template, values, queryParams);
     }
@@ -1106,7 +1107,7 @@ public class UriTestResolver
             new String[] {categoryName});
         queryParams.put(
             VirtualMachineTemplatesResource.VIRTUAL_MACHINE_TEMPLATE_GET_STATEFUL_QUERY_PARAM,
-            new String[] {"true"});
+            new String[] {StatefulInclusion.ALL.name()});
 
         return resolveURI(template, values, queryParams);
     }
@@ -1127,8 +1128,8 @@ public class UriTestResolver
         values.put(EnterpriseResource.ENTERPRISE, String.valueOf(enterpriseId));
         values
             .put(DatacenterRepositoryResource.DATACENTER_REPOSITORY, String.valueOf(datacenterId));
-        values.put(VirtualMachineTemplateResource.VIRTUAL_MACHINE_TEMPLATE, String
-            .valueOf(virtualMachineTemplateId));
+        values.put(VirtualMachineTemplateResource.VIRTUAL_MACHINE_TEMPLATE,
+            String.valueOf(virtualMachineTemplateId));
 
         return resolveURI(template, values);
     }
@@ -1188,8 +1189,8 @@ public class UriTestResolver
         String template =
             buildPath(CategoriesResource.CATEGORIES_PATH, CategoryResource.CATEGORY_PARAM);
 
-        return resolveURI(template, Collections.singletonMap(CategoryResource.CATEGORY, categoryId
-            .toString()));
+        return resolveURI(template,
+            Collections.singletonMap(CategoryResource.CATEGORY, categoryId.toString()));
     }
 
     public static String resolveCategoriesURI()

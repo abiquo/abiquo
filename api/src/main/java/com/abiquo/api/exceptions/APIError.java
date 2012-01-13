@@ -69,7 +69,8 @@ public enum APIError
         "The current enterprise cannot use this datacenter"), DATACENTER_DELETE_STORAGE("DC-5",
         "Cannot delete datacenter with storage devices associated"), DATACENTER_DELETE_VIRTUAL_DATACENTERS(
         "DC-6", "Cannot delete datacenter with virtual datacenters associated"), DATACENTER_QUEUE_NOT_CONFIGURED(
-        "DC-7", "Datacenter queues are not configured (check BPM and Tarantino remote services)"),
+        "DC-7",
+        "Datacenter queues are not configured (check BPM and the virtual factory remote services)"),
 
     // ENTERPRISE
     NON_EXISTENT_ENTERPRISE("EN-0", "The requested enterprise does not exist"), ENTERPRISE_DUPLICATED_NAME(
@@ -671,8 +672,8 @@ public enum APIError
         // Outputs all errors in wiki table format
         for (APIError error : errors)
         {
-            System.out.println(String.format("| %s | %s | %s |", error.code, error.message,
-                error.name()));
+            System.out.println(String.format("| %s | %s | %s |", error.code, error.message, error
+                .name()));
         }
 
         System.out.println("\n ************ Flex client labels ************** \n");
