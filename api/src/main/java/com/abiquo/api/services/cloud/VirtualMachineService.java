@@ -2243,7 +2243,13 @@ public class VirtualMachineService extends DefaultApiService
             if (!resourceIntoNewList(ip, newVm.getIps()))
             {
                 ip.detach();
-                vdcRep.deleteRasd(ip.getRasd());
+                if (oldVm.getState() == VirtualMachineState.NOT_ALLOCATED)
+                {
+                    // only delete the RASD if the machine is NOT_ALLOCATED.
+                    // if the machine is in OFF state it will be the handler
+                    // who will delete the rasd.
+                    vdcRep.deleteRasd(ip.getRasd());
+                }   
                 vdcRep.updateIpManagement(ip);
             }
             else
@@ -2646,7 +2652,6 @@ public class VirtualMachineService extends DefaultApiService
             ipTmp.setSequence(ip.getSequence());
             ipTmp.setTemporal(ip.getId());
             ipTmp.setIdResourceType(ip.getIdResourceType());
-            Hibernate.initialize(ip.getRasd());
             ipTmp.setRasd(ip.getRasd());
             ipTmp.setVirtualAppliance(ip.getVirtualAppliance());
             ipTmp.setVirtualDatacenter(ip.getVirtualDatacenter());
@@ -2711,22 +2716,29 @@ public class VirtualMachineService extends DefaultApiService
      * Cleanup backup resources
      */
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public void deleteBackupResources(final VirtualMachine vm)
+    public void deleteBackupResources(final VirtualMachine backupVm)
     {
 
         try
         {
             rasdDao.enableTemporalOnlyFilter();
 
-            List<RasdManagement> rasds = vm.getRasdManagements();
+            List<RasdManagement> rasds = backupVm.getRasdManagements();
 
             // we need to first delete the vm (as it updates the rasd_man)
-            repo.deleteVirtualMachine(vm);
+            repo.deleteVirtualMachine(backupVm);
 
-            for (RasdManagement rasd : rasds)
+            for (RasdManagement rollbackRasd : rasds)
             {
+                RasdManagement originalRasd = rasdDao.findById(rollbackRasd.getTemporal());
+                if (originalRasd instanceof IpPoolManagement && !originalRasd.isAttached())
+                {
+                    // if the resource is an IP and the original one is not detached,
+                    // remove the rasd.
+                    vdcRep.deleteRasd(rollbackRasd.getRasd());
+                }
                 // refresh as the vm delete was updated the rasd
-                rasdDao.remove(rasdDao.findById(rasd.getId()));
+                rasdDao.remove(rasdDao.findById(rollbackRasd.getId()));
             }
 
             rasdDao.flush();
@@ -2817,7 +2829,7 @@ public class VirtualMachineService extends DefaultApiService
             {
                 // Re attach the resource to the virtual machine
                 LOGGER.trace("restore: attach resource " + originalRasd.getId());
-                originalRasd.attach(originalRasd.getSequence(), updatedVm);
+                originalRasd.attach(rollbackRasd.getSequence(), updatedVm);
 
             }
 

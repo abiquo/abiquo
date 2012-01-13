@@ -146,7 +146,7 @@ public enum EventType implements Serializable
 
     // API events
     API_REQUEST(900, "API_REQUEST", "Functionallity executed by API request"), API_RESPONSE(901,
-        "API_RESPONSE", "API response"),
+        "API_RESPONSE", "API response"), 
 
     // Workload Engine Events
     WORKLOAD_LOAD_RULES(1000, "WORKLOAD_LOAD_RULES", "Workload load rules"), WORKLOAD_APPLY_RULES(
@@ -223,7 +223,10 @@ public enum EventType implements Serializable
     INSTANCE_PROCESS_START(1803, "INSTANCE_PROCESS_START",
         "A Intance conversion process has started"), INSTANCE_PROCESS_FINISHED(1804,
         "INSTANCE_PROCESS_FINISHED", "A Instance conversion process has finished succesfuly"), INSTANCE_PROCESS_FAILED(
-        1805, "INSTANCE_PROCESS_FAILED", "A Instance conversion process has failed");
+        1805, "INSTANCE_PROCESS_FAILED", "A Instance conversion process has failed"),
+    
+    // Asynch handlers
+    ASYNC_HANDLER_RESPONSE(1900, "ASYNC_HANDLER_RESPONSE", "Asynchronous hander response");
 
     private final int event;
 
