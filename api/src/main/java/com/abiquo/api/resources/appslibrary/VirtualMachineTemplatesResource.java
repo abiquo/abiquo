@@ -43,6 +43,8 @@ import com.abiquo.api.services.InfrastructureService;
 import com.abiquo.api.services.appslibrary.VirtualMachineTemplateService;
 import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.model.enumerator.RemoteServiceType;
+import com.abiquo.model.enumerator.StatefulInclusion;
+import com.abiquo.model.validation.IncludeStateful;
 import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
 import com.abiquo.server.core.appslibrary.VirtualMachineTemplatesDto;
 
@@ -59,7 +61,7 @@ public class VirtualMachineTemplatesResource extends AbstractResource
         "hypervisorTypeName";
 
     public final static String VIRTUAL_MACHINE_TEMPLATE_GET_STATEFUL_QUERY_PARAM = "stateful";
-    
+
     public final static String VIRTUAL_MACHINE_TEMPLATE_IMPORTED = "imported";
 
     @Autowired
@@ -74,7 +76,7 @@ public class VirtualMachineTemplatesResource extends AbstractResource
         @PathParam(DatacenterRepositoryResource.DATACENTER_REPOSITORY) final Integer datacenterId,
         @QueryParam(VIRTUAL_MACHINE_TEMPLATE_GET_CATEGORY_QUERY_PARAM) final String categoryName,
         @QueryParam(VIRTUAL_MACHINE_TEMPLATE_GET_HYPERVISOR_COMATIBLE_QUERY_PARAM) final String hypervisorTypeName,
-        @QueryParam(VIRTUAL_MACHINE_TEMPLATE_GET_STATEFUL_QUERY_PARAM) @DefaultValue("false") final Boolean stateful,
+        @QueryParam(VIRTUAL_MACHINE_TEMPLATE_GET_STATEFUL_QUERY_PARAM) @IncludeStateful(required = false) final String stateful,
         @QueryParam(VIRTUAL_MACHINE_TEMPLATE_IMPORTED) @DefaultValue("false") final Boolean imported,
         @Context final IRESTBuilder restBuilder) throws Exception
     {
@@ -86,7 +88,7 @@ public class VirtualMachineTemplatesResource extends AbstractResource
 
         List<VirtualMachineTemplate> all = null;
 
-        if (!stateful)
+        if (stateful == null)
         {
             all =
                 service.getVirtualMachineTemplates(enterpriseId, datacenterId, categoryName,
@@ -97,12 +99,15 @@ public class VirtualMachineTemplatesResource extends AbstractResource
             if (categoryName != null)
             {
                 all =
-                    service.findStatefulVirtualMachineTemplatesByCategoryAndDatacenter(enterpriseId,
-                        datacenterId, categoryName);
+                    service.findStatefulVirtualMachineTemplatesByCategoryAndDatacenter(
+                        enterpriseId, datacenterId, categoryName,
+                        StatefulInclusion.valueOf(stateful.toUpperCase()));
             }
             else
             {
-                all = service.findStatefulVirtualMachineTemplatesByDatacenter(enterpriseId, datacenterId);
+                all =
+                    service.findStatefulVirtualMachineTemplatesByDatacenter(enterpriseId,
+                        datacenterId, StatefulInclusion.valueOf(stateful.toUpperCase()));
             }
         }
 
@@ -112,8 +117,10 @@ public class VirtualMachineTemplatesResource extends AbstractResource
         {
             for (VirtualMachineTemplate vmtemplate : all)
             {
-                templatessDto.getCollection().add(
-                    createTransferObject(vmtemplate, enterpriseId, datacenterId, amUri, restBuilder));
+                templatessDto.getCollection()
+                    .add(
+                        createTransferObject(vmtemplate, enterpriseId, datacenterId, amUri,
+                            restBuilder));
             }
         }
 

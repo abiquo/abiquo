@@ -570,7 +570,18 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
             VirtualMachinesWithNodeExtendedDto virtualMachinesWithNodeDto =
                 machinesResponse.getEntity(VirtualMachinesWithNodeExtendedDto.class);
 
-            nodeVirtualImages.addAll(createNodeVirtualImages(virtualMachinesWithNodeDto));
+            try
+            {
+                nodeVirtualImages.addAll(createNodeVirtualImages(virtualMachinesWithNodeDto));
+            }
+            catch (Exception ex)
+            {
+                populateErrors(ex, result, "getVirtualApplianceNodes");
+            }
+            finally
+            {
+                releaseApiClient();
+            }
         }
         else
         {
@@ -639,7 +650,9 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
 
             nodeVirtualImage.setTaskStatus(currentTask);
             nodeVirtualImages.add(nodeVirtualImage);
+
         }
+
         return nodeVirtualImages;
     }
 
