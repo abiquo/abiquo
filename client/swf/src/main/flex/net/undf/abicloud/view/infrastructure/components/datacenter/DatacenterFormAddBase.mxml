@@ -183,6 +183,11 @@
                 remoteService.port = Number(virtualFactoryInput.portInput.text);
                 remoteService.serviceMapping = virtualFactoryInput.serviceMappingInput.text;
                 remoteService.name = virtualFactoryInput.formedUri;
+                if(virtualFactoryType.valueOf == RemoteServiceType.TARANTINO 
+                && virtualFactoryInput.serviceMappingInput.text == "virtualfactory"){
+                    remoteService.serviceMapping = "tarantino";
+                    remoteService.name = remoteService.name.replace("virtualfactory","tarantino");
+                }
                 remoteServices.addItem(remoteService);
 
                 //VirtualSystemMonitor
