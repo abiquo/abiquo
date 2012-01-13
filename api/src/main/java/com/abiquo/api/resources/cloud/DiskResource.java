@@ -100,7 +100,7 @@ public class DiskResource extends AbstractResource
      *             {@link APIExceptionMapper} exception mapper.
      */
     @DELETE
-    public void createHardDisk(
+    public void deleteHardDisk(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) @NotNull @Min(1) final Integer vdcId,
         @PathParam(DiskResource.DISK) @NotNull @Min(1) final Integer diskId,
         @Context final IRESTBuilder restBuilder) throws Exception
