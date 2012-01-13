@@ -44,6 +44,7 @@
     
     <mx:Script>
         <![CDATA[
+        	import mx.collections.ArrayCollection;
         	import net.undf.abicloud.vo.configuration.Language;
         	import net.undf.abicloud.vo.configuration.LanguageLabelLoader;
         	import net.undf.abicloud.events.ConfigurationEvent;
@@ -144,8 +145,6 @@
             	
             	if( ThemeHandler.getInstance().isThemeLoaded("base") ){
             		cursorManager.removeBusyCursor();
-            		
-            		checkSingleSignOn();
 
 	                application.addEventListener(KeyboardEvent.KEY_UP, keyboardHandler);
 	
@@ -155,6 +154,10 @@
 	                //Detect when the channel for services is defined
                		BindingUtils.bindSetter(trackChannel, AbiCloudModel.getInstance().configurationManager,
                                         "channelSet");
+                    
+                    //Detect when languages are loaded
+                    BindingUtils.bindSetter(checkSingleSignOn, AbiCloudModel.getInstance().configurationManager,
+                                        "languageSet");
 
             	}
             }
@@ -281,35 +284,37 @@
             }
             
             
-            private function checkSingleSignOn():void{ 
+            private function checkSingleSignOn(languages:ArrayCollection):void{ 
        	
-				var urlString:String = ExternalInterface.call('window.location.href.toString');
-				var parameters:Array = urlString.split("?");
-				
-				//we save the current URL, for the logout process
-				AbiCloudModel.getInstance().configurationManager.config.currentUrl = parameters[0];
-				
-				
-				//the separator exists
-				if(parameters.length != 1){
-					var parameterList:Object = URLUtil.stringToObject(parameters[1], "&");         
-		            var token:String = parameterList.auth;
-		            var language:Language = new Language('',parameterList.lang);         
+				if(languages)
+				{
+				    var urlString:String = ExternalInterface.call('window.location.href.toString');
+	                var parameters:Array = urlString.split("?");
+	                
+	                //we save the current URL, for the logout process
+	                AbiCloudModel.getInstance().configurationManager.config.currentUrl = parameters[0];
+	                
+	                
+	                //the separator exists
+	                if(parameters.length != 1){
+	                    var parameterList:Object = URLUtil.stringToObject(parameters[1], "&");         
+	                    var token:String = parameterList.auth;
+	                    var language:Language = new Language('',parameterList.lang);         
+	                }
+	                //we check if the selected language is passed in the URL
+	                if(language){               
+	                    this._tokenLanguage = loginView.returnLanguage(language);
+	                    
+	                }
+	                //if the token exists, we try an automatic loggin
+	                if(token){
+	                    this._isTokenUsed = true;
+	                    singleSignOnlogin(token);
+	                }else{
+	                    this._isTokenUsed = false;
+	                    showLoginform();
+	                }
 				}
-            	//we check if the selected language is passed in the URL
-            	if(language){          		
-            		this._tokenLanguage = loginView.returnLanguage(language);
-            		
-            	}
-            	//if the token exists, we try an automatic loggin
-            	if(token){
-            		this._isTokenUsed = true;
-            		singleSignOnlogin(token);
-            	}else{
-            		this._isTokenUsed = false;
-            		showLoginform();
-            	}
-            	
             }
             
             private function showRelatedFormAfterAuthenticationFail(event:Event):void

@@ -29,6 +29,7 @@ import org.springframework.stereotype.Repository;
 
 import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.model.enumerator.HypervisorType;
+import com.abiquo.model.enumerator.StatefulInclusion;
 import com.abiquo.server.core.common.DefaultRepBase;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.infrastructure.Datacenter;
@@ -205,7 +206,8 @@ public class AppsLibraryRep extends DefaultRepBase
         return virtualMachineTemplateDAO.findAll();
     }
 
-    public VirtualMachineTemplate findVirtualMachineTemplateById(final Integer virtualMachineTemplate)
+    public VirtualMachineTemplate findVirtualMachineTemplateById(
+        final Integer virtualMachineTemplate)
     {
         return virtualMachineTemplateDAO.findById(virtualMachineTemplate);
     }
@@ -215,7 +217,8 @@ public class AppsLibraryRep extends DefaultRepBase
         return virtualMachineTemplateDAO.findByName(name);
     }
 
-    public List<VirtualMachineTemplate> findVirtualMachineTemplatesByEnterprise(final Enterprise enterprise)
+    public List<VirtualMachineTemplate> findVirtualMachineTemplatesByEnterprise(
+        final Enterprise enterprise)
     {
         return virtualMachineTemplateDAO.findByEnterprise(enterprise);
     }
@@ -226,7 +229,7 @@ public class AppsLibraryRep extends DefaultRepBase
     {
         return virtualMachineTemplateDAO.findByEnterpriseAndRepository(enterprise, repository);
     }
-    
+
     public List<VirtualMachineTemplate> findImportedVirtualMachineTemplatesByEnterprise(
         final Enterprise enterprise)
     {
@@ -234,12 +237,12 @@ public class AppsLibraryRep extends DefaultRepBase
     }
 
     /**
-     * Gets the list of compatible(*) virtual machine templates available in the provided enterprise and
-     * repository.
+     * Gets the list of compatible(*) virtual machine templates available in the provided enterprise
+     * and repository.
      * 
      * @param category null indicate all categories (no filter)
-     * @param hypervisor (*) null indicate no filter compatibles, else return templates compatibles or
-     *            with compatible conversions. @see {@link VirtualImageConversionDAO}
+     * @param hypervisor (*) null indicate no filter compatibles, else return templates compatibles
+     *            or with compatible conversions. @see {@link VirtualImageConversionDAO}
      */
     public List<VirtualMachineTemplate> findVirtualMachineTemplates(final Enterprise enterprise,
         final com.abiquo.server.core.infrastructure.Repository repository, final Category category,
@@ -252,9 +255,10 @@ public class AppsLibraryRep extends DefaultRepBase
 
         return virtualMachineTemplateDAO.findBy(enterprise, repository, category, hypervisor);
     }
-    
-    public List<VirtualMachineTemplate> findImportedVirtualMachineTemplates(Enterprise enterprise, Integer datacenterId,
-        Category category, HypervisorType hypervisor)
+
+    public List<VirtualMachineTemplate> findImportedVirtualMachineTemplates(
+        final Enterprise enterprise, final Integer datacenterId, final Category category,
+        final HypervisorType hypervisor)
     {
         if (category == null && hypervisor == null)
         {
@@ -281,15 +285,17 @@ public class AppsLibraryRep extends DefaultRepBase
         return virtualMachineTemplateDAO.findStatefuls();
     }
 
-    public List<VirtualMachineTemplate> findStatefulVirtualMachineTemplatesByDatacenter(final Datacenter datacenter)
+    public List<VirtualMachineTemplate> findStatefulVirtualMachineTemplatesByDatacenter(
+        final Datacenter datacenter, final StatefulInclusion stateful)
     {
-        return virtualMachineTemplateDAO.findStatefulsByDatacenter(datacenter);
+        return virtualMachineTemplateDAO.findStatefulsByDatacenter(datacenter, stateful);
     }
 
     public List<VirtualMachineTemplate> findStatefulVirtualMachineTemplatesByCategoryAndDatacenter(
-        final Category category, final Datacenter datacenter)
+        final Category category, final Datacenter datacenter, final StatefulInclusion stateful)
     {
-        return virtualMachineTemplateDAO.findStatefulsByCategoryAndDatacenter(category, datacenter);
+        return virtualMachineTemplateDAO.findStatefulsByCategoryAndDatacenter(category, datacenter,
+            stateful);
     }
 
     public boolean isMaster(final VirtualMachineTemplate vmtemplae)
@@ -297,7 +303,8 @@ public class AppsLibraryRep extends DefaultRepBase
         return virtualMachineTemplateDAO.isMaster(vmtemplae);
     }
 
-    public List<VirtualMachineTemplate> findVirtualMachineTemplatesByMaster(final VirtualMachineTemplate master)
+    public List<VirtualMachineTemplate> findVirtualMachineTemplatesByMaster(
+        final VirtualMachineTemplate master)
     {
         return virtualMachineTemplateDAO.findByMaster(master);
     }
@@ -306,13 +313,14 @@ public class AppsLibraryRep extends DefaultRepBase
      * @see com.abiquo.server.core.appslibrary.VirtualImageConversionDAO#compatilbeConversions(com.abiquo.server.core.cloud.VirtualMachineTemplate,
      *      com.abiquo.model.enumerator.HypervisorType)
      */
-    public List<VirtualImageConversion> compatilbeConversions(final VirtualMachineTemplate vmtemplate,
-        final HypervisorType hypervisorType)
+    public List<VirtualImageConversion> compatilbeConversions(
+        final VirtualMachineTemplate vmtemplate, final HypervisorType hypervisorType)
     {
         return conversionDAO.compatilbeConversions(vmtemplate, hypervisorType);
     }
 
-    public boolean isVirtualMachineTemplateConverted(final VirtualMachineTemplate vmtemplate, final DiskFormatType targetType)
+    public boolean isVirtualMachineTemplateConverted(final VirtualMachineTemplate vmtemplate,
+        final DiskFormatType targetType)
     {
         return conversionDAO.isConverted(vmtemplate, targetType);
     }
@@ -321,7 +329,5 @@ public class AppsLibraryRep extends DefaultRepBase
     {
         conversionDAO.persist(conversion);
     }
-
-
 
 }

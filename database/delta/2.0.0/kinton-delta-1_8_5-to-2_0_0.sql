@@ -251,10 +251,12 @@ ALTER TABLE `kinton`.`storage_device` ADD COLUMN `username` varchar(256) DEFAULT
 ALTER TABLE `kinton`.`storage_device` ADD COLUMN `password` varchar(256) DEFAULT NULL;
 
 -- reconfigures --
-ALTER TALBE `kinton`.`virtualmachine` ADD COLUMN `temporal` int(10) unsigned default NULL;
-ALTER TALBE `kinton`.`rasd_management` ADD COLUMN `temporal` int(10) unsigned default NULL;
-ALTER TALBE `kinton`.`rasd_management` ADD COLUMN `sequence` int(10) unsigned default NULL;
-
+ALTER TABLE `kinton`.`virtualmachine` ADD COLUMN `temporal` int(10) unsigned default NULL;
+ALTER TABLE `kinton`.`rasd_management` ADD COLUMN `temporal` int(10) unsigned default NULL; 
+ALTER TABLE `kinton`.`rasd_management` ADD COLUMN `sequence` int(10) unsigned default NULL; 
+-- Modify constraint --
+ALTER TABLE `kinton`.`rasd_management` DROP CONSTRAINT `idResource_FK`;
+ALTER TABLE `kinton`.`rasd_management` ADD  CONSTRAINT `idResource_FK2` FOREIGN KEY (`idResource`) REFERENCES `rasd` (`instanceID`) ON DELETE SET NULL
 -- ---------------------------------------------- --
 --   DATA CHANGES (insert, update, delete, etc)   --
 -- ---------------------------------------------- --

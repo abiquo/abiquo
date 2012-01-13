@@ -35,6 +35,7 @@ import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.nodecollector.constants.MessageValues;
 import com.abiquo.nodecollector.domain.Collector;
 import com.abiquo.nodecollector.domain.collectors.xenserver.SRType;
+import com.abiquo.nodecollector.domain.collectors.xenserver.SoftwareVersion;
 import com.abiquo.nodecollector.exception.CollectorException;
 import com.abiquo.nodecollector.exception.ConnectionException;
 import com.abiquo.nodecollector.exception.LoginException;
@@ -261,16 +262,8 @@ public class XenServerCollector extends AbstractCollector
         // Check if Linux Guest support package is installed
         LOGGER.debug("Checking Linux Guest support installation...");
 
-        String linuxInstallStatus = hostRecord.softwareVersion.get("package-linux");
-        String linuxDetails = hostRecord.softwareVersion.get("xs:linux");
-
-        if (linuxInstallStatus == null || linuxDetails == null)
-        {
-            LOGGER.debug(MessageValues.NOMAN_XEN_SERVER_I);
-            throw new NoManagedException(MessageValues.NOMAN_XEN_SERVER_I);
-        }
-
-        if (!linuxInstallStatus.equalsIgnoreCase("installed"))
+        SoftwareVersion version = SoftwareVersion.of(hostRecord);
+        if (!version.hasLinuxPack())
         {
             LOGGER.debug(MessageValues.NOMAN_XEN_SERVER_I);
             throw new NoManagedException(MessageValues.NOMAN_XEN_SERVER_I);
