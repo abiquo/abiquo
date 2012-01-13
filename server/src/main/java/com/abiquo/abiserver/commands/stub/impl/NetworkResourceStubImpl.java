@@ -1359,6 +1359,7 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
                 }
                 else
                 {
+                    uriIp = uriIp + "/ips";
                     externalIPlink.setRel("unmanagedip");
                 }
 

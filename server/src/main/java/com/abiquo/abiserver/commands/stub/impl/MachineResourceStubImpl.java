@@ -34,6 +34,8 @@ import org.apache.wink.common.internal.utils.UriHelper;
 import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.StateEnum;
 import com.abiquo.abiserver.commands.stub.AbstractAPIStub;
 import com.abiquo.abiserver.commands.stub.MachineResourceStub;
+import com.abiquo.abiserver.pojo.infrastructure.HyperVisor;
+import com.abiquo.abiserver.pojo.infrastructure.HyperVisorType;
 import com.abiquo.abiserver.pojo.infrastructure.HypervisorRemoteAccessInfo;
 import com.abiquo.abiserver.pojo.infrastructure.PhysicalMachine;
 import com.abiquo.abiserver.pojo.infrastructure.State;
@@ -42,6 +44,7 @@ import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.result.DataResult;
 import com.abiquo.abiserver.pojo.user.Enterprise;
 import com.abiquo.abiserver.pojo.user.User;
+import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.model.rest.RESTLink;
 import com.abiquo.server.core.cloud.VirtualMachineDto;
 import com.abiquo.server.core.cloud.VirtualMachinesDto;
@@ -193,6 +196,13 @@ public class MachineResourceStubImpl extends AbstractAPIStub implements MachineR
         vm.setUUID(virtualMachineDto.getUuid());
         vm.setVdrpIP(virtualMachineDto.getVdrpIP());
         vm.setVdrpPort(virtualMachineDto.getVdrpPort());
+
+        // Build the hypervisor with the information available.
+        // It will only be used to check the type.
+        RESTLink machineLink = virtualMachineDto.searchLink("machine");
+        HyperVisor hypervisor = new HyperVisor();
+        hypervisor.setType(new HyperVisorType(HypervisorType.valueOf(machineLink.getTitle())));
+        vm.setAssignedTo(hypervisor);
 
         RESTLink userLink = virtualMachineDto.searchLink("user");
         if (userLink != null)
