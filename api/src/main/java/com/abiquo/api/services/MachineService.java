@@ -41,9 +41,6 @@ import com.abiquo.api.services.stub.VsmServiceStub;
 import com.abiquo.api.tracer.TracerLogger;
 import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.server.core.cloud.Hypervisor;
-import com.abiquo.server.core.cloud.NodeVirtualImage;
-import com.abiquo.server.core.cloud.VirtualAppliance;
-import com.abiquo.server.core.cloud.VirtualApplianceState;
 import com.abiquo.server.core.cloud.VirtualDatacenterRep;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineState;
@@ -224,15 +221,8 @@ public class MachineService extends DefaultApiService
                 RemoteServiceType.VIRTUAL_SYSTEM_MONITOR);
 
         Hypervisor hypervisor = machine.getHypervisor();
-        try
-        {
-            vsm.shutdownMonitor(vsmRS, hypervisor);
-        }
-        catch (InternalServerErrorException e)
-        {
-            // we can ignore this error
-        }
 
+        // updating abiquo virtual machines and removing imported virtual machines
         Collection<VirtualMachine> virtualMachines =
             virtualMachineService.findByHypervisor(hypervisor);
 
@@ -240,32 +230,29 @@ public class MachineService extends DefaultApiService
         {
             for (VirtualMachine vm : virtualMachines)
             {
-                VirtualAppliance vapp =
-                    virtualDatacenterRep.findVirtualApplianceByVirtualMachine(vm);
-
-                VirtualApplianceState newState = VirtualApplianceState.NOT_DEPLOYED;
-                for (NodeVirtualImage node : vapp.getNodes())
+                if (vm.isManaged())
                 {
-                    if (node.getVirtualMachine().getState() != VirtualMachineState.NOT_ALLOCATED)
+                    if (vm.getState() != VirtualMachineState.NOT_ALLOCATED)
                     {
                         if (!force)
                         {
                             addConflictErrors(APIError.RACK_CANNOT_REMOVE_VMS);
                             flushErrors();
                         }
-                        else
-                        {
-                            newState = VirtualApplianceState.NEEDS_SYNC;
-                            break;
-                        }
                     }
+
+                    vm.setState(VirtualMachineState.NOT_ALLOCATED);
+                    vm.setDatastore(null);
+                    vm.setHypervisor(null);
+
+                    virtualMachineService.updateVirtualMachine(vm);
                 }
-
-                vm.setState(VirtualMachineState.NOT_ALLOCATED);
-                vm.setDatastore(null);
-                vm.setHypervisor(null);
-
-                virtualMachineService.updateVirtualMachine(vm);
+                // imported machines
+                else
+                {
+                    vsm.unsubscribe(vsmRS, vm);
+                    virtualDatacenterRep.deleteVirtualMachine(vm);
+                }
             }
         }
 
@@ -277,6 +264,16 @@ public class MachineService extends DefaultApiService
             {
                 repo.deleteDatastore(d);
             }
+        }
+
+        // unsuscribing physical machine
+        try
+        {
+            vsm.shutdownMonitor(vsmRS, hypervisor);
+        }
+        catch (InternalServerErrorException e)
+        {
+            // we can ignore this error
         }
 
         repo.deleteMachine(machine);
