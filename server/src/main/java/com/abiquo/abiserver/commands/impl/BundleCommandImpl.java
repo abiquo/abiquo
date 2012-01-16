@@ -230,7 +230,7 @@ public class BundleCommandImpl extends BasicCommand implements BundleCommand
 
         checkTransaction();
 
-        Collection<Node> nodes = prepareNodesToBundle(nodeIds, enterpriseId);
+        Collection<Node> nodes = prepareNodesToBundle(nodeIds, enterpriseId, user.getIdUser());
 
         VirtualAppliance virtualAppPojo = virtualApp.toPojo();
         virtualAppPojo.setNodes(nodes);
@@ -261,19 +261,19 @@ public class BundleCommandImpl extends BasicCommand implements BundleCommand
         factory.endConnection();
 
         return manageImagesAndUpdateAppliance(virtualApp, nodes, enterpriseId, StateEnum.DEPLOYED,
-            StateEnum.DEPLOYED);
+            StateEnum.DEPLOYED, user.getIdUser());
     }
 
     protected VirtualAppliance manageImagesAndUpdateAppliance(VirtualappHB virtualApp,
         final Collection<Node> nodes, final int idEnterprise, final StateEnum state,
-        final StateEnum subState) throws PersistenceException
+        final StateEnum subState, final int userId) throws PersistenceException
     {
         factory.beginConnection();
 
         for (Node node : nodes)
         {
             NodeVirtualImageHB nodeVirtualImageHB = (NodeVirtualImageHB) node.toPojoHB();
-            insertBundleVirtualImage((NodeVirtualImage) node, idEnterprise);
+            insertBundleVirtualImage((NodeVirtualImage) node, idEnterprise, userId);
         }
 
         factory.endConnection();
@@ -417,7 +417,7 @@ public class BundleCommandImpl extends BasicCommand implements BundleCommand
     }
 
     protected Collection<Node> prepareNodesToBundle(final Collection<Integer> nodeIds,
-        final int enterpriseId)
+        final int enterpriseId, final int user)
     {
         NodeVirtualImageDAO nodeDAO = factory.getNodeVirtualImageDAO();
 
@@ -455,7 +455,7 @@ public class BundleCommandImpl extends BasicCommand implements BundleCommand
     }
 
     protected VirtualimageHB insertBundleVirtualImage(final NodeVirtualImage node,
-        final int idEnterprise) throws PersistenceException
+        final int idEnterprise, final int userId) throws PersistenceException
     {
         VirtualImageDAO virtualImageDAO = factory.getVirtualImageDAO();
         RepositoryDAO repositoryDAO = factory.getRepositoryDAO();
