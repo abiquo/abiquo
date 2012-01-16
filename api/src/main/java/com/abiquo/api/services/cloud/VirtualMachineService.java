@@ -2245,19 +2245,26 @@ public class VirtualMachineService extends DefaultApiService
         {
             if (!resourceIntoNewList(ip, newVm.getIps()))
             {
-                if (ip.getVlanNetwork().getType().equals(NetworkType.UNMANAGED))
+                // if the machine is NOT_ALLOCATED, the values here are definitive,
+                // otherwise, it will be deleted in the handler
+                if (oldVm.getState() == VirtualMachineState.NOT_ALLOCATED)
                 {
-                    vdcRep.deleteIpPoolManagement(ip);
+                    if (ip.getVlanNetwork().getType().equals(NetworkType.UNMANAGED))
+                    {
+                        vdcRep.deleteIpPoolManagement(ip);
+                    }
+                    else
+                    {
+                        ip.detach();
+                        vdcRep.deleteRasd(ip.getRasd());
+                        vdcRep.updateIpManagement(ip);
+                    }
                 }
                 else
                 {
                     ip.detach();
                     vdcRep.updateIpManagement(ip);
                 }
-
-                ip.detach();
-                vdcRep.deleteRasd(ip.getRasd());
-                vdcRep.updateIpManagement(ip);
             }
             else
             {
@@ -2724,24 +2731,42 @@ public class VirtualMachineService extends DefaultApiService
      * Cleanup backup resources
      */
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public void deleteBackupResources(final VirtualMachine vm)
+    public void deleteBackupResources(final VirtualMachine backUpVm)
     {
 
         try
         {
             rasdDao.enableTemporalOnlyFilter();
 
-            List<RasdManagement> rasds = vm.getRasdManagements();
-
             // we need to first delete the vm (as it updates the rasd_man)
-            repo.deleteVirtualMachine(vm);
+            repo.deleteVirtualMachine(backUpVm);
+            
+            List<RasdManagement> rasds = backUpVm.getRasdManagements();
 
-            for (RasdManagement rasd : rasds)
+            for (RasdManagement rollbackRasd : rasds)
             {
+                if (rollbackRasd instanceof IpPoolManagement)
+                {
+                    IpPoolManagement originalRasd = (IpPoolManagement) rasdDao.findById(rollbackRasd.getTemporal());
+
+                    if (!originalRasd.isAttached())
+                    {
+                        // remove the rasd
+                        vdcRep.deleteRasd(originalRasd.getRasd());
+                        
+                        // unmanaged ips disappear when the are not assigned to a virtual machine.
+                        if (originalRasd.isUnmanagedIp())
+                        {
+                            rasdDao.remove(originalRasd);
+                        }
+                    }
+                }
+                
                 // refresh as the vm delete was updated the rasd
-                rasdDao.remove(rasdDao.findById(rasd.getId()));
+                rasdDao.remove(rasdDao.findById(rollbackRasd.getId()));
             }
 
+           
             rasdDao.flush();
         }
         finally
