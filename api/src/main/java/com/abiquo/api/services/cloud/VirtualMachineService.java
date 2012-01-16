@@ -338,10 +338,9 @@ public class VirtualMachineService extends DefaultApiService
     }
 
     /**
-     * Gets the DTO object and validates all of its parameters. Prepares the {@link VirtualMachine}
-     * object and sends the object to the method
-     * {@link VirtualMachineService#reconfigureVirtualMachine(VirtualDatacenter, VirtualAppliance, VirtualMachine, VirtualMachine)
-     * . This method also updates {@link NodeVirtualImage} names.
+     * updates the {@link NodeVirtualImage} name. <br>
+     * This method must persist the changes even if the reconfigure of the {@link VirtualMachine}
+     * fails.
      * 
      * @param vdcId identifier of the {@link VirtualDatacenter}
      * @param vappId identifier of the {@link VirtualAppliance}
@@ -349,16 +348,13 @@ public class VirtualMachineService extends DefaultApiService
      * @param dto input {@link VirtualMachineDto} object with all its links.
      * @return the link to the asnyncronous task.
      */
-    @Transactional(propagation = Propagation.REQUIRED)
-    public String reconfigureVirtualMachineAndNode(final Integer vdcId, final Integer vappId,
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void updateNodeVirtualImageInfo(final Integer vdcId, final Integer vappId,
         final Integer vmId, final VirtualMachineWithNodeDto dto)
     {
-        String task = this.reconfigureVirtualMachine(vdcId, vappId, vmId, dto);
         NodeVirtualImage nodeVirtualImage = getNodeVirtualImage(vdcId, vappId, vmId);
 
         nodeVirtualImage.setName(dto.getNodeName());
-
-        return task;
     }
 
     /**
@@ -638,12 +634,15 @@ public class VirtualMachineService extends DefaultApiService
 
     /**
      * updates the virtual machine template from node virtual image with the template given by the
-     * {@link VirtualMachineTemplate} param.
+     * {@link VirtualMachineTemplate} param. <br>
+     * This method must persist the changes even if the reconfigure of the {@link VirtualMachine}
+     * fails.
      * 
      * @param vm {@link VirtualMachine} Virtual machine where obtains the related
      *            {@link NodeVirtualImage}
      * @parem template {@link VirtualMachineTemplate} Virtual Machine Template to set
      */
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     private void updateNodeVirtualImage(final VirtualMachine vm,
         final VirtualMachineTemplate template)
     {
@@ -2246,19 +2245,26 @@ public class VirtualMachineService extends DefaultApiService
         {
             if (!resourceIntoNewList(ip, newVm.getIps()))
             {
-                if (ip.getVlanNetwork().getType().equals(NetworkType.UNMANAGED))
+                // if the machine is NOT_ALLOCATED, the values here are definitive,
+                // otherwise, it will be deleted in the handler
+                if (oldVm.getState() == VirtualMachineState.NOT_ALLOCATED)
                 {
-                    vdcRep.deleteIpPoolManagement(ip);
+                    if (ip.getVlanNetwork().getType().equals(NetworkType.UNMANAGED))
+                    {
+                        vdcRep.deleteIpPoolManagement(ip);
+                    }
+                    else
+                    {
+                        ip.detach();
+                        vdcRep.deleteRasd(ip.getRasd());
+                        vdcRep.updateIpManagement(ip);
+                    }
                 }
                 else
                 {
                     ip.detach();
                     vdcRep.updateIpManagement(ip);
                 }
-
-                ip.detach();
-                vdcRep.deleteRasd(ip.getRasd());
-                vdcRep.updateIpManagement(ip);
             }
             else
             {
@@ -2725,24 +2731,42 @@ public class VirtualMachineService extends DefaultApiService
      * Cleanup backup resources
      */
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public void deleteBackupResources(final VirtualMachine vm)
+    public void deleteBackupResources(final VirtualMachine backUpVm)
     {
 
         try
         {
             rasdDao.enableTemporalOnlyFilter();
 
-            List<RasdManagement> rasds = vm.getRasdManagements();
-
             // we need to first delete the vm (as it updates the rasd_man)
-            repo.deleteVirtualMachine(vm);
+            repo.deleteVirtualMachine(backUpVm);
+            
+            List<RasdManagement> rasds = backUpVm.getRasdManagements();
 
-            for (RasdManagement rasd : rasds)
+            for (RasdManagement rollbackRasd : rasds)
             {
+                if (rollbackRasd instanceof IpPoolManagement)
+                {
+                    IpPoolManagement originalRasd = (IpPoolManagement) rasdDao.findById(rollbackRasd.getTemporal());
+
+                    if (!originalRasd.isAttached())
+                    {
+                        // remove the rasd
+                        vdcRep.deleteRasd(originalRasd.getRasd());
+                        
+                        // unmanaged ips disappear when the are not assigned to a virtual machine.
+                        if (originalRasd.isUnmanagedIp())
+                        {
+                            rasdDao.remove(originalRasd);
+                        }
+                    }
+                }
+                
                 // refresh as the vm delete was updated the rasd
-                rasdDao.remove(rasdDao.findById(rasd.getId()));
+                rasdDao.remove(rasdDao.findById(rollbackRasd.getId()));
             }
 
+           
             rasdDao.flush();
         }
         finally
@@ -2809,7 +2833,6 @@ public class VirtualMachineService extends DefaultApiService
         List<RasdManagement> updatedResources = updatedVm.getRasdManagements();
         List<RasdManagement> rollbackResources = getBackupResources(rollbackVm);
 
-        repo.deleteVirtualMachine(rollbackVm);
         LOGGER.debug("removed backup virtual machine");
 
         for (RasdManagement updatedRasd : updatedResources)
@@ -2832,12 +2855,18 @@ public class VirtualMachineService extends DefaultApiService
                 // Re attach the resource to the virtual machine
                 LOGGER.trace("restore: attach resource " + originalRasd.getId());
                 originalRasd.attach(originalRasd.getSequence(), updatedVm);
-
+                // I dunno if it is necessary for the rest of resources,
+                // but for IPs it is.
+                if (originalRasd instanceof IpPoolManagement)
+                {
+                    VirtualAppliance vapp = vdcRep.findVirtualApplianceByVirtualMachine(updatedVm);
+                    originalRasd.setVirtualAppliance(vapp);
+                }
             }
 
-            rasdDao.remove(rasdDao.findById(rollbackRasd.getId())); // refresh as the vm was deleted
         }
 
+        repo.deleteVirtualMachine(rollbackVm);
         repo.update(updatedVm);
         rasdDao.flush();
         // update virtual machine resources

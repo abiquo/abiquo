@@ -1548,7 +1548,7 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
                         createVirtualMachineConfigurationLink(vdcId, vappId, vmId, dto.getId());
                     dto.setUsed(Boolean.FALSE);
                     response = put(uriConfig, dto);
-                    if (response.getStatusCode() == 200)
+                    if (response.getStatusCode() == 202 || response.getStatusCode() == 204)
                     {
                         result.setSuccess(Boolean.TRUE);
                     }
@@ -1572,7 +1572,7 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
                     dto.setUsed(Boolean.TRUE);
 
                     response = put(uriConfig, dto);
-                    if (response.getStatusCode() == 200)
+                    if (response.getStatusCode() == 202 || response.getStatusCode() == 204)
                     {
                         result.setSuccess(Boolean.TRUE);
                     }

@@ -142,21 +142,6 @@ public class DatacenterTaskBuilder
      * @param extraData map with extra data to add to the job.
      * @return The {@link DatacenterTaskBuilder} self
      */
-    public DatacenterTaskBuilder add(final VirtualMachineDefinition definition,
-        final HypervisorConnection hypervisor, final VirtualMachineStateTransition transition)
-    {
-        return add(definition, hypervisor, transition, null);
-    }
-
-    /**
-     * Add new {@link VirtualMachineStateTransition}. This method must be used to add transitions
-     * that only needs {@link VirtualMachineDefinition} and {@link HypervisorConnection} to be
-     * created.
-     * 
-     * @param transition The transition type to create
-     * @param extraData map with extra data to add to the job.
-     * @return The {@link DatacenterTaskBuilder} self
-     */
     public DatacenterTaskBuilder add(final VirtualMachineStateTransition transition,
         final Map<String, String> extraData)
     {
@@ -172,7 +157,7 @@ public class DatacenterTaskBuilder
      * @param extraData map to add to the job.
      * @return The {@link DatacenterTaskBuilder} self
      */
-    public DatacenterTaskBuilder add(final VirtualMachineDefinition definition,
+    protected DatacenterTaskBuilder add(final VirtualMachineDefinition definition,
         final HypervisorConnection hypervisor, final VirtualMachineStateTransition transition,
         final Map<String, String> extraData)
     {
@@ -214,15 +199,15 @@ public class DatacenterTaskBuilder
     /**
      * Adds a new {@link ReconfigureVirtualMachineOp} to the Jobs collection.
      * 
-     * @param newDefition The virtualmachine redefinition
+     * @param newDefinition The virtualmachine redefinition
      * @return The {@link DatacenterTaskBuilder} self
      */
-    public DatacenterTaskBuilder addReconfigure(final VirtualMachineDefinition newDefition)
+    public DatacenterTaskBuilder addReconfigure(final VirtualMachineDefinition newDefinition)
     {
         ReconfigureVirtualMachineOp job = new ReconfigureVirtualMachineOp();
         job.setVirtualMachine(definition);
         job.setHypervisorConnection(hypervisor);
-        job.setNewVirtualMachine(newDefition);
+        job.setNewVirtualMachine(newDefinition);
 
         this.tarantinoTask.addDatacenterJob(job);
         this.asyncTask.getJobs().add(createRedisJob(job.getId(), JobType.RECONFIGURE));

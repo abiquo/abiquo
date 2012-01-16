@@ -206,6 +206,9 @@
                     event.ipPoolManagement = virtualMachineNICsDataGrid.selectedItem as IPPoolManagement;
                     event.virtualMachine = _virtualMachine;
                     dispatchEvent(event);
+                    
+                    //Put the Virtual Appliance in LOCKED State to reconfigure it
+                    AbiCloudModel.getInstance().virtualApplianceManager.dispatchEvent(new Event("reconfigureVirtualApplianceEvent")); 
                 }
             }
 
@@ -291,6 +294,9 @@
                 event.virtualMachine = _virtualMachine;
                 event.gateway = virtualMachineGatewayInput.selectedIndex > -1 ? virtualMachineGatewayInput.selectedItem as IPAddress : null;
                 dispatchEvent(event);
+                
+                //Put the Virtual Appliance in LOCKED State to reconfigure it
+                AbiCloudModel.getInstance().virtualApplianceManager.dispatchEvent(new Event("reconfigureVirtualApplianceEvent")); 
             }
 
             protected function unassignGatewayFromVirtualMachine():void
@@ -301,6 +307,9 @@
                 event.virtualMachine = _virtualMachine;
                 event.gateway = null;
                 dispatchEvent(event);
+                
+                //Put the Virtual Appliance in LOCKED State to reconfigure it
+                AbiCloudModel.getInstance().virtualApplianceManager.dispatchEvent(new Event("reconfigureVirtualApplianceEvent")); 
             }
 
             private function onVirtualMachineGatewayChanged(event:NetworkingEvent):void
@@ -334,6 +343,9 @@
                 event.oldOrder = oldIndex;
                 event.newOrder = newIndex;
                 dispatchEvent(event);
+                
+                //Put the Virtual Appliance in LOCKED State to reconfigure it
+                AbiCloudModel.getInstance().virtualApplianceManager.dispatchEvent(new Event("reconfigureVirtualApplianceEvent")); 
             }
             
             private function onDragStart(event:DragEvent):void{

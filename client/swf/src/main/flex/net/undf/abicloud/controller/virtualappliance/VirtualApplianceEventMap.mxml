@@ -82,7 +82,7 @@
     <EventHandlers type="{VirtualApplianceEvent.GET_VIRTUAL_DATACENTERS_BY_ENTERPRISE_FASTER}">
 
         <!-- Blocking screen -->
-        <InlineInvoker method="ScreenBlocker.blockScreen"/>
+        <!--<InlineInvoker method="ScreenBlocker.blockScreen"/>-->
 
         <!-- Make call to the server here -->
 
