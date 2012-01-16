@@ -53,6 +53,8 @@ public class TaskResourceUtils extends AbstractResource
 
     public static final String TASKS_REL = "tasks";
 
+    public static final String TASK_NO_TRACKABLE = "no-trackable";
+
     public static TasksDto transform(final List<Task> tasks, final UriInfo uriInfo)
     {
         TasksDto dto = new TasksDto();

@@ -191,6 +191,14 @@ public class NetworkService extends DefaultApiService
                         new String(), OrderByEnum.IP, Boolean.TRUE).get(0);
                 break;
 
+            case UNMANAGED:
+
+                ip = new IpPoolManagement(vlan, "?", "?", "?", vlan.getName());
+                ip.setVirtualDatacenter(vdc);
+                repo.insertIpManagement(ip);
+
+                break;
+
             default:
                 DatacenterLimits dcLimits =
                     entRep.findLimitsByEnterpriseAndDatacenter(vdc.getEnterprise(),
@@ -462,7 +470,7 @@ public class NetworkService extends DefaultApiService
 
         addUnexpectedErrors(APIError.NON_EXISTENT_IP);
         flushErrors();
-        
+
         return null;
     }
 
