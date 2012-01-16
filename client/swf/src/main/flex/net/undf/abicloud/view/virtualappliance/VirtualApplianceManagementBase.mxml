@@ -800,6 +800,9 @@
 
             private function showVirtualApplianceBundleForm():void
             {
+                //Stop background process
+                stopBackgroundUpdates();
+                
                 PopUpManager.addPopUp(this._virtualApplianceBundleForm, Application.application as DisplayObject,
                                       true);
                 PopUpManager.centerPopUp(this._virtualApplianceBundleForm);
@@ -814,6 +817,9 @@
             {
                 PopUpManager.removePopUp(this._virtualApplianceBundleForm);
                 hideNodeInfoContainer();
+                
+                //restart background process
+                startBackgroundUpdates(AbiCloudModel.getInstance().configurationManager.config.client_virtual_virtualAppliancesUpdateInterval.value);
             }
 
             /**
