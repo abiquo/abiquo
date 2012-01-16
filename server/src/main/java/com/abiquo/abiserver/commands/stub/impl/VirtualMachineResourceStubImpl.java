@@ -21,15 +21,12 @@
 
 package com.abiquo.abiserver.commands.stub.impl;
 
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response.Status;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.wink.client.ClientConfig;
 import org.apache.wink.client.ClientResponse;
 import org.apache.wink.client.Resource;
@@ -38,6 +35,7 @@ import org.apache.wink.common.internal.utils.UriHelper;
 
 import com.abiquo.abiserver.abicloudws.AbiCloudConstants;
 import com.abiquo.abiserver.business.UserSessionException;
+import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.StateEnum;
 import com.abiquo.abiserver.commands.BasicCommand;
 import com.abiquo.abiserver.commands.stub.AbstractAPIStub;
 import com.abiquo.abiserver.commands.stub.VirtualMachineResourceStub;
@@ -46,16 +44,12 @@ import com.abiquo.abiserver.exception.NotEnoughResourcesException;
 import com.abiquo.abiserver.exception.SchedulerException;
 import com.abiquo.abiserver.exception.SoftLimitExceededException;
 import com.abiquo.abiserver.pojo.authentication.UserSession;
+import com.abiquo.abiserver.pojo.infrastructure.State;
 import com.abiquo.abiserver.pojo.infrastructure.VirtualMachine;
 import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.result.DataResult;
-import com.abiquo.abiserver.pojo.virtualappliance.Node;
-import com.abiquo.abiserver.pojo.virtualappliance.NodeVirtualImage;
-import com.abiquo.model.rest.RESTLink;
-import com.abiquo.model.transport.AcceptedRequestDto;
 import com.abiquo.model.transport.error.ErrorsDto;
 import com.abiquo.server.core.cloud.VirtualMachineDto;
-import com.abiquo.server.core.cloud.VirtualMachineInstanceDto;
 import com.abiquo.server.core.cloud.VirtualMachineState;
 import com.abiquo.server.core.cloud.VirtualMachineStateDto;
 import com.abiquo.tracer.ComponentType;
@@ -72,8 +66,16 @@ public class VirtualMachineResourceStubImpl extends AbstractAPIStub implements
 {
     /* Set the timeout to the double fo time of the set in the system properties */
     private final static Integer TIMEOUT = Integer.parseInt(System.getProperty(
-        "abiquo.nodecollector.timeout", "0")) * 2 * 2; // 3 minutes the second * 2 is due to the
-                                                       // synchronization on allocate
+        "abiquo.nodecollector.timeout", "0")) * 2 * 2; // 3
+
+    // minutes
+    // the
+    // second
+    // * 2 is
+    // due to
+    // the
+
+    // synchronization on allocate
 
     public VirtualMachineResourceStubImpl()
     {
@@ -342,8 +344,15 @@ public class VirtualMachineResourceStubImpl extends AbstractAPIStub implements
         if (response.getStatusCode() == Status.ACCEPTED.getStatusCode())
         {
             result.setSuccess(true);
-            AcceptedRequestDto acc = response.getEntity(AcceptedRequestDto.class);
-            result.setData(acc.getLinks());
+
+            // Retrieve the VirtualDatacenter to associate the new virtual appliance
+            org.jclouds.abiquo.domain.cloud.VirtualAppliance vapp =
+                getApiClient().getCloudService().getVirtualDatacenter(virtualDatacenterId)
+                    .getVirtualAppliance(virtualApplianceId);
+
+            org.jclouds.abiquo.domain.cloud.VirtualMachine vm =
+                vapp.getVirtualMachine(virtualMachine.getId());
+            result.setData(new State(StateEnum.valueOf(vm.getState().name())));
         }
         else
         {
@@ -375,47 +384,6 @@ public class VirtualMachineResourceStubImpl extends AbstractAPIStub implements
     {
         return editVirtualMachineState(virtualDatacenterId, virtualApplianceId, virtualMachine,
             VirtualMachineState.PAUSED);
-    }
-
-    @Override
-    public DataResult instanceVirtualMachines(final Integer virtualDatacenterId,
-        final Integer virtualApplianceId, final Collection<Node> nodes)
-    {
-        Collection<RESTLink> links = new HashSet<RESTLink>();
-        StringBuilder errors = new StringBuilder();
-        DataResult result = new DataResult();
-
-        for (Node node : nodes)
-        {
-            NodeVirtualImage nvi = (NodeVirtualImage) node;
-            Integer virtualMachineId = nvi.getVirtualMachine().getId();
-            String instanceName = node.getName();
-
-            String url =
-                createVirtualMachineInstanceUrl(virtualDatacenterId, virtualApplianceId,
-                    virtualMachineId);
-
-            VirtualMachineInstanceDto options = new VirtualMachineInstanceDto();
-            options.setSnapshotName(instanceName);
-
-            ClientResponse response = post(url, options);
-
-            if (response.getStatusCode() == 202)
-            {
-                AcceptedRequestDto entity = response.getEntity(AcceptedRequestDto.class);
-                links.addAll(entity.getLinks());
-            }
-            else
-            {
-                addErrors(result, errors, response, "instanceVirtualMachines");
-            }
-        }
-
-        result.setData(links);
-        result.setMessage(errors.toString());
-        result.setSuccess(StringUtils.isBlank(result.getMessage()));
-
-        return result;
     }
 
     private void addErrors(final DataResult result, final StringBuilder errors,

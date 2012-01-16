@@ -18,41 +18,51 @@
  * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
  * Boston, MA 02111-1307, USA.
  */
- 
-package net.undf.abicloud.vo.virtualappliance
+
+/**
+ * 
+ */
+package com.abiquo.abiserver.pojo.virtualappliance;
+
+/**
+ * @author jaume
+ *
+ */
+public class TaskStatus
 {
-	/**
-     * This class represents the status of a specifi task
-     */
+    private String uuid;
+    
+    private String statusName;
+      
+    private String message;
 
-    [RemoteClass(alias="com.abiquo.abiserver.pojo.virtualappliance.TaskStatus")]
-	[Bindable]
-	public class TaskStatus
-	{
-		/*******
-		 *  States
-		 * 
-		 *  FINISHED_SUCCESSFULLY,
-		 * 
-		 *  FINISHED_UNSUCCESSFULLY,
-		 *
-		 *  PENDING,
-		 * 
-		 *  STARTED,
-		 * 
-		 *  ABORTED
-		 * 
-		 * *****/
-        public var uuid:String;
-        public var statusName:String;
-        public var message:String;
+    public void setMessage(String message)
+    {
+        this.message = message;
+    }
 
-		public function TaskStatus()
-		{
-			uuid = "";
-			statusName = "";
-			message = "";
-		}
+    public String getMessage()
+    {
+        return message;
+    }
 
-	}
+    public void setStatusName(String statusName)
+    {
+        this.statusName = statusName;
+    }
+
+    public String getStatusName()
+    {
+        return statusName;
+    }
+
+    public void setUuid(String uuid)
+    {
+        this.uuid = uuid;
+    }
+
+    public String getUuid()
+    {
+        return uuid;
+    }
 }

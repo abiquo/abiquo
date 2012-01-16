@@ -21,7 +21,8 @@
 
 package com.abiquo.api.resources;
 
-import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
 
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -43,6 +44,8 @@ import com.abiquo.api.services.cloud.VirtualMachineService;
 import com.abiquo.api.spring.security.SecurityService;
 import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.model.enumerator.Privileges;
+import com.abiquo.server.core.cloud.NodeVirtualImage;
+import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachinesDto;
 import com.abiquo.server.core.enterprise.Enterprise;
@@ -63,16 +66,16 @@ public class UserResource extends AbstractResource
     public static final String USER_ACTION_GET_VIRTUALMACHINES_PATH = "action/virtualmachines";
 
     @Autowired
-    UserService service;
+    private UserService service;
 
     @Autowired
-    EnterpriseService enterpriseService;
+    private EnterpriseService enterpriseService;
 
     @Autowired
-    VirtualMachineService vmService;
+    private VirtualMachineService vmService;
 
     @Autowired
-    SecurityService securityService;
+    private SecurityService securityService;
 
     @GET
     public UserDto getUser(
@@ -136,14 +139,18 @@ public class UserResource extends AbstractResource
         @PathParam(UserResource.USER) final Integer userId, @Context final IRESTBuilder restBuilder)
         throws Exception
     {
-
         Enterprise enterprise = enterpriseService.getEnterprise(enterpriseId);
-
         User user = service.findUserByEnterprise(userId, enterprise);
 
-        Collection<VirtualMachine> vms = vmService.findVirtualMachinesByUser(enterprise, user);
+        List<VirtualMachine> vms = vmService.findVirtualMachinesByUser(enterprise, user);
+        List<VirtualDatacenter> vdcs = new LinkedList<VirtualDatacenter>();
+        for (VirtualMachine vm : vms)
+        {
+            NodeVirtualImage nvi = vmService.findNodeVirtualImage(vm);
+            vdcs.add(nvi.getVirtualAppliance().getVirtualDatacenter());
+        }
 
-        return VirtualMachinesResource.createTransferObjects(vms, restBuilder);
+        return VirtualMachinesResource.createTransferObjects(vms, vdcs, restBuilder);
     }
 
     private static UserDto addLinks(final IRESTBuilder restBuilder, final UserDto user,

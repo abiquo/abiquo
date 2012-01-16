@@ -21,13 +21,9 @@
 
 package com.abiquo.api.resources.cloud;
 
-import static com.abiquo.api.resources.EnterpriseResource.ENTERPRISE;
-import static com.abiquo.api.resources.appslibrary.VirtualMachineTemplateResource.VIRTUAL_MACHINE_TEMPLATE;
-import static com.abiquo.api.util.URIResolver.buildPath;
-
-import java.util.Collection;
 import java.util.List;
 
+import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -40,31 +36,20 @@ import org.apache.wink.common.annotations.Parent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
-import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.resources.AbstractResource;
-import com.abiquo.api.resources.EnterpriseResource;
-import com.abiquo.api.resources.EnterprisesResource;
-import com.abiquo.api.resources.appslibrary.DatacenterRepositoriesResource;
-import com.abiquo.api.resources.appslibrary.DatacenterRepositoryResource;
-import com.abiquo.api.resources.appslibrary.VirtualMachineTemplateResource;
-import com.abiquo.api.resources.appslibrary.VirtualMachineTemplatesResource;
 import com.abiquo.api.services.cloud.VirtualApplianceService;
+import com.abiquo.api.services.cloud.VirtualDatacenterService;
 import com.abiquo.api.services.cloud.VirtualMachineService;
 import com.abiquo.api.util.IRESTBuilder;
-import com.abiquo.model.util.ModelTransformer;
-import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
-import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.cloud.NodeVirtualImage;
 import com.abiquo.server.core.cloud.VirtualAppliance;
+import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineDto;
+import com.abiquo.server.core.cloud.VirtualMachineWithNodeDto;
 import com.abiquo.server.core.cloud.VirtualMachinesDto;
 import com.abiquo.server.core.cloud.VirtualMachinesWithNodeDto;
-import com.abiquo.server.core.enterprise.Enterprise;
-import com.abiquo.server.core.enterprise.User;
-import com.abiquo.server.core.infrastructure.Datacenter;
-import com.abiquo.server.core.infrastructure.Machine;
-import com.abiquo.server.core.infrastructure.Rack;
+import com.abiquo.server.core.cloud.VirtualMachinesWithNodeExtendedDto;
 
 @Parent(VirtualApplianceResource.class)
 @Path(VirtualMachinesResource.VIRTUAL_MACHINES_PATH)
@@ -78,6 +63,9 @@ public class VirtualMachinesResource extends AbstractResource
 
     @Autowired
     protected VirtualApplianceService vappService;
+
+    @Autowired
+    protected VirtualDatacenterService vdcService;
 
     @Produces(MediaType.APPLICATION_XML)
     @GET
@@ -95,49 +83,12 @@ public class VirtualMachinesResource extends AbstractResource
         {
             for (final VirtualMachine v : all)
             {
-                vappsDto.add(VirtualMachineResource.createTransferObject(v, vapp
-                    .getVirtualDatacenter().getId(), vapp.getId(), restBuilder, null, null, null));
+                vappsDto.add(VirtualMachineResource.createTransferObject(v,
+                    vapp.getVirtualDatacenter(), vapp.getId(), restBuilder, null, null, null));
             }
         }
 
         return vappsDto;
-    }
-
-    public static VirtualMachinesDto createAdminTransferObjects(
-        final Collection<VirtualMachine> vms, final IRESTBuilder restBuilder) throws Exception
-    {
-        final VirtualMachinesDto machines = new VirtualMachinesDto();
-        for (final VirtualMachine vm : vms)
-        {
-            machines.add(createAdminTransferObjects(vm, restBuilder));
-        }
-
-        return machines;
-    }
-
-    public static VirtualMachineDto createAdminTransferObjects(final VirtualMachine vm,
-        final IRESTBuilder restBuilder) throws Exception
-    {
-
-        final VirtualMachineDto vmDto =
-            VirtualMachineResource.createTransferObject(vm, restBuilder);
-
-        final Hypervisor hypervisor = vm.getHypervisor();
-        final Machine machine = hypervisor == null ? null : hypervisor.getMachine();
-        final Rack rack = machine == null ? null : machine.getRack();
-        final Datacenter dc = rack == null ? null : rack.getDatacenter();
-
-        final Enterprise enterprise = vm.getEnterprise() == null ? null : vm.getEnterprise();
-        final User user = vm.getUser() == null ? null : vm.getUser();
-
-        vmDto.addLinks(restBuilder.buildVirtualMachineAdminLinks(dc == null ? null : dc.getId(),
-            rack == null ? null : rack.getId(), machine == null ? null : machine.getId(),
-            enterprise == null ? null : enterprise.getId(), user == null ? null : user.getId()));
-
-        final VirtualMachineTemplate vmtemplate = vm.getVirtualMachineTemplate();
-        vmDto.addLink(restBuilder.buildVirtualMachineTemplateLink(vmtemplate.getEnterprise()
-            .getId(), vmtemplate.getRepository().getDatacenter().getId(), vmtemplate.getId()));
-        return vmDto;
     }
 
     /**
@@ -151,18 +102,49 @@ public class VirtualMachinesResource extends AbstractResource
      * @throws Exception
      */
     @POST
+    @Consumes(MediaType.APPLICATION_XML)
     public VirtualMachineDto createVirtualMachine(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
         final VirtualMachineDto virtualMachineDto, @Context final IRESTBuilder restBuilder)
         throws Exception
     {
-
         final VirtualMachine virtualMachine =
             service.createVirtualMachine(vdcId, vappId, virtualMachineDto);
 
+        VirtualDatacenter vdc = vdcService.getVirtualDatacenter(vdcId);
+
         final VirtualMachineDto vappsDto =
-            VirtualMachineResource.createTransferObject(virtualMachine, vdcId, vappId, restBuilder,
+            VirtualMachineResource.createTransferObject(virtualMachine, vdc, vappId, restBuilder,
+                null, null, null);
+
+        return vappsDto;
+    }
+
+    /**
+     * Creates a resource {@link VirtualMachine} under this root.
+     * 
+     * @param v virtual machine
+     * @param vdcId identifier of the virtual datacenter
+     * @param vappId identifier of the virtual appliance
+     * @param restBuilder {@link IRESTBuilder} object injected by context.
+     * @return the generate {@link VirtualMachineDto} object.
+     * @throws Exception
+     */
+    @POST
+    @Consumes(VirtualMachineResource.VM_NODE_MEDIA_TYPE)
+    public VirtualMachineDto createVirtualMachineWithNode(
+        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
+        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
+        final VirtualMachineWithNodeDto virtualMachineWithNodeDto,
+        @Context final IRESTBuilder restBuilder) throws Exception
+    {
+        final VirtualMachine virtualMachine =
+            service.createVirtualMachine(vdcId, vappId, virtualMachineWithNodeDto);
+        VirtualDatacenter vdc = vdcService.getVirtualDatacenter(vdcId);
+
+        final VirtualMachineDto vappsDto =
+            VirtualMachineResource.createTransferObject(virtualMachine, vdc, vappId, restBuilder,
                 null, null, null);
 
         return vappsDto;
@@ -189,14 +171,34 @@ public class VirtualMachinesResource extends AbstractResource
         return vappsDto;
     }
 
-    public static VirtualMachinesDto createTransferObjects(final Collection<VirtualMachine> vms,
-        final IRESTBuilder restBuilder)
+    @GET
+    @Produces(VirtualMachineResource.VM_NODE_EXTENDED_MEDIA_TYPE)
+    public VirtualMachinesWithNodeExtendedDto getVirtualMachinesWithNodeExtended(
+        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
+        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
+        @Context final IRESTBuilder restBuilder) throws Exception
     {
+        vappService.getVirtualAppliance(vdcId, vappId);
+        final List<NodeVirtualImage> all = service.getNodeVirtualImages(vdcId, vappId);
+        final VirtualMachinesWithNodeExtendedDto vmsDto = new VirtualMachinesWithNodeExtendedDto();
 
-        VirtualMachinesDto dtos = new VirtualMachinesDto();
-        for (VirtualMachine m : vms)
+        for (final NodeVirtualImage n : all)
         {
-            dtos.getCollection().add(VirtualMachineResource.createTransferObject(m, restBuilder));
+            vmsDto.add(VirtualMachineResource.createNodeExtendedTransferObject(n, vdcId, vappId,
+                restBuilder, null, null, null));
+        }
+
+        return vmsDto;
+    }
+
+    public static VirtualMachinesDto createTransferObjects(final List<VirtualMachine> vms,
+        final List<VirtualDatacenter> vdcs, final IRESTBuilder restBuilder)
+    {
+        VirtualMachinesDto dtos = new VirtualMachinesDto();
+        for (int i = 0; i < vms.size(); i++)
+        {
+            dtos.getCollection().add(
+                VirtualMachineResource.createTransferObject(vms.get(i), vdcs.get(i), restBuilder));
         }
         return dtos;
     }

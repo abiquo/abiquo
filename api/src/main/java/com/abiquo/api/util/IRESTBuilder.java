@@ -25,6 +25,7 @@ import java.util.List;
 
 import org.apache.wink.server.utils.LinkBuilders;
 
+import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.model.rest.RESTLink;
 import com.abiquo.server.core.appslibrary.Category;
 import com.abiquo.server.core.appslibrary.CategoryDto;
@@ -145,7 +146,7 @@ public interface IRESTBuilder
         Integer machineId, Datastore datastore);
 
     public List<RESTLink> buildVirtualMachineAdminLinks(Integer datacenterId, Integer rackId,
-        Integer machineId, Integer enterpriseId, Integer userId);
+        Integer machineId, Integer enterpriseId, Integer userId, HypervisorType machineType);
 
     public List<RESTLink> buildVirtualMachineCloudLinks(Integer vdcId, Integer vappId,
         Integer vmId, boolean chefEnabled, final Integer[] volumeIds, final Integer[] diskIds,
@@ -178,7 +179,7 @@ public interface IRESTBuilder
         final Integer vappId, final Integer vmId, final Integer datacenterId, final Integer rackId,
         final Integer machineId, final Integer enterpriseId, final Integer userId,
         boolean chefEnabled, Integer[] volumeIds, Integer[] diksIds,
-        final List<IpPoolManagement> ips);
+        final List<IpPoolManagement> ips, final HypervisorType vdcType);
 
     public List<RESTLink> buildEnterpriseExclusionRuleLinks(
         final EnterpriseExclusionRuleDto enterpriseExclusionDto,
@@ -248,5 +249,7 @@ public interface IRESTBuilder
     public RESTLink buildMovedVolumeLinks(VolumeManagement movedVolume);
 
     public RESTLink buildVirtualMachineLink(Integer vdc, Integer vapp, Integer vm);
+
+    public RESTLink buildVirtualMachineTasksLink(Integer vdc, Integer vapp, Integer vm);
 
 }

@@ -18,41 +18,10 @@
  * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
  * Boston, MA 02111-1307, USA.
  */
- 
-package net.undf.abicloud.vo.virtualappliance
+
+package com.abiquo.model.enumerator;
+
+public enum StatefulInclusion
 {
-	/**
-     * This class represents the status of a specifi task
-     */
-
-    [RemoteClass(alias="com.abiquo.abiserver.pojo.virtualappliance.TaskStatus")]
-	[Bindable]
-	public class TaskStatus
-	{
-		/*******
-		 *  States
-		 * 
-		 *  FINISHED_SUCCESSFULLY,
-		 * 
-		 *  FINISHED_UNSUCCESSFULLY,
-		 *
-		 *  PENDING,
-		 * 
-		 *  STARTED,
-		 * 
-		 *  ABORTED
-		 * 
-		 * *****/
-        public var uuid:String;
-        public var statusName:String;
-        public var message:String;
-
-		public function TaskStatus()
-		{
-			uuid = "";
-			statusName = "";
-			message = "";
-		}
-
-	}
+    ALL, USED, NOTUSED
 }

@@ -59,6 +59,7 @@ import com.abiquo.abiserver.pojo.infrastructure.PhysicalMachine;
 import com.abiquo.abiserver.pojo.infrastructure.Rack;
 import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.user.Enterprise;
+import com.abiquo.model.rest.RESTLink;
 import com.abiquo.model.transport.error.ErrorsDto;
 import com.abiquo.server.core.enterprise.User.AuthType;
 import com.abiquo.util.ErrorManager;
@@ -401,6 +402,10 @@ public class AbstractAPIStub
             {
                 result.setResultCode(BasicResult.HARD_LIMT_EXCEEDED);
             }
+            if (errors.getCollection().get(0).getCode().equals("VM-44"))
+            {
+                result.setResultCode(BasicResult.NOT_MANAGED_VIRTUAL_IMAGE);
+            }
         }
     }
 
@@ -438,7 +443,7 @@ public class AbstractAPIStub
         }
     }
 
-    protected String createEnterprisesLink(final String filter, Integer offset,
+    protected String createEnterprisesLink(final String filter, final Integer firstElem,
         final Integer numResults)
     {
         String uri = URIResolver.resolveURI(apiUri, "admin/enterprises", Collections.emptyMap());
@@ -447,11 +452,10 @@ public class AbstractAPIStub
         {
             queryParams.put("filter", new String[] {filter});
         }
-        if (offset != null && numResults != null)
+        if (firstElem != null && numResults != null)
         {
-            offset = offset / numResults;
 
-            queryParams.put("page", new String[] {offset.toString()});
+            queryParams.put("START_WITH", new String[] {firstElem.toString()});
             queryParams.put("numResults", new String[] {numResults.toString()});
         }
 
@@ -1942,5 +1946,28 @@ public class AbstractAPIStub
         return URIResolver.resolveURI(apiUri,
             "cloud/virtualdatacenters/{virtualDatacenter}/virtualappliances/{virtualApplianceId}",
             params, queryParams);
+    }
+
+    /**
+     * Returns the id, if exists, of a RESTLink. If not exists, returns {@code null}.
+     * 
+     * <pre>
+     * {@code
+     * http://localhost:80/api/admin/datacenters/2
+     * }
+     * Returns "2"
+     * </pre>
+     * 
+     * @param link
+     * @return string representing the id
+     */
+    protected String getIdFromLink(final RESTLink link)
+    {
+        if (link == null)
+        {
+            return null;
+        }
+
+        return link.getHref().substring(link.getHref().lastIndexOf("/") + 1);
     }
 }

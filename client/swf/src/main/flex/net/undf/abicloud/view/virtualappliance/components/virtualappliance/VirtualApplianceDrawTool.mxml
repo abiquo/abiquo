@@ -149,6 +149,7 @@
                     nodeRenderer = new NodeRenderer();
                     nodeRenderer.id = "node_container_" + i;
                     nodeRenderer.node = node;
+                    nodeRenderer.virtualAppliance = this._virtualAppliance;
                     var bounds:Rectangle = new Rectangle(nodesArea.x, nodesArea.y,
                                                          nodesArea.width - NodeRendererBase.NODERENDERER_SIZE,
                                                          nodesArea.height - NodeRendererBase.NODERENDERER_SIZE);
@@ -466,6 +467,7 @@
                         nodeRenderer = new NodeRenderer();
                         nodeRenderer.id = "node_container_" + i;
                         nodeRenderer.node = node;
+                        nodeRenderer.virtualAppliance = this._virtualAppliance;
                         nodeRenderer.bounds = bounds
                         this._nodeRenderers.addItem(nodeRenderer);
                     }
@@ -625,6 +627,7 @@
                     nodeRenderer = new NodeRenderer();
                     nodeRenderer.id = "node_container_" + (this._virtualAppliance.nodes.length + 1);
                     nodeRenderer.node = node;
+                    nodeRenderer.virtualAppliance = this._virtualAppliance;
                     var bounds:Rectangle = new Rectangle(nodesArea.x, nodesArea.y,
                                                          nodesArea.width - NodeRendererBase.NODERENDERER_SIZE,
                                                          nodesArea.height - NodeRendererBase.NODERENDERER_SIZE);

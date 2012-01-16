@@ -124,7 +124,8 @@
 	            			//Finally, must be a XenServer Image
 	            			if(this._virtualMachine.assignedTo){
 	            				if(HyperVisor(this._virtualMachine.assignedTo).type.id == HyperVisorType.XENSERVER){
-	            					_vncIconEnable = true;
+	            					//Disable due to security issue
+	            					//_vncIconEnable = true;
 	            				}
 	            			}
 	            		}
@@ -346,7 +347,8 @@
             {
                 event.stopImmediatePropagation();
 
-                if (HyperVisor(this._virtualMachine.assignedTo).type.id == HyperVisorType.HYPERV )
+                if (HyperVisor(this._virtualMachine.assignedTo).type.id == HyperVisorType.HYPERV
+                 || HyperVisor(this._virtualMachine.assignedTo).type.id == HyperVisorType.XENSERVER )
                 {
                     //This hypervisor type does not support graphical remote access
                     AbiCloudAlert.showError(ResourceManager.getInstance().getString("Common",
@@ -536,7 +538,7 @@
                 enabled="{this._vncIconEnable}"
                 includeInLayout="{AbiCloudModel.getInstance().configurationManager.config.client_virtual_allowVMRemoteAccess.value == 1 ? true:false}"
                 visible="{AbiCloudModel.getInstance().configurationManager.config.client_virtual_allowVMRemoteAccess.value == 1 ? true:false}"
-                click="onClickPreviousRemoteAccess(event)"/>
+                click="onClickAccessRemoteButton(event)"/>
         </mx:HBox>
 
     </mx:Canvas>

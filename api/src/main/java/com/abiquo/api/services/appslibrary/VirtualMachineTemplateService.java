@@ -29,6 +29,7 @@ import java.util.List;
 import javax.persistence.EntityManager;
 import javax.ws.rs.core.MultivaluedMap;
 
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,6 +55,7 @@ import com.abiquo.appliancemanager.client.ApplianceManagerResourceStubImpl;
 import com.abiquo.appliancemanager.client.ApplianceManagerResourceStubImpl.ApplianceManagerStubException;
 import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.model.enumerator.HypervisorType;
+import com.abiquo.model.enumerator.StatefulInclusion;
 import com.abiquo.model.rest.RESTLink;
 import com.abiquo.model.transport.error.CommonError;
 import com.abiquo.server.core.appslibrary.AppsLibraryRep;
@@ -75,8 +77,8 @@ import com.abiquo.tracer.SeverityType;
 public class VirtualMachineTemplateService extends DefaultApiServiceWithApplianceManagerClient
 {
 
-    final private static Logger logger =
-        LoggerFactory.getLogger(VirtualMachineTemplateService.class);
+    final private static Logger logger = LoggerFactory
+        .getLogger(VirtualMachineTemplateService.class);
 
     @Autowired
     private RepositoryDAO repositoryDao;
@@ -106,11 +108,12 @@ public class VirtualMachineTemplateService extends DefaultApiServiceWithApplianc
         this.categoryService = new CategoryService(em);
     }
 
+    /**
+     * Ignoring credentinals check
+     */
     @Transactional(readOnly = true)
-    public Repository getDatacenterRepository(final Integer dcId, final Integer enterpriseId)
+    public Repository getDatacenterRepositoryBySystem(final Integer dcId, final Integer enterpriseId)
     {
-        checkEnterpriseCanUseDatacenter(enterpriseId, dcId);
-
         Datacenter datacenter = infrastructureService.getDatacenter(dcId);
         Repository repo = repositoryDao.findByDatacenter(datacenter);
 
@@ -121,6 +124,13 @@ public class VirtualMachineTemplateService extends DefaultApiServiceWithApplianc
         }
 
         return repo;
+    }
+
+    @Transactional(readOnly = true)
+    public Repository getDatacenterRepository(final Integer dcId, final Integer enterpriseId)
+    {
+        checkEnterpriseCanUseDatacenter(enterpriseId, dcId);
+        return getDatacenterRepositoryBySystem(dcId, enterpriseId);
     }
 
     /**
@@ -429,7 +439,7 @@ public class VirtualMachineTemplateService extends DefaultApiServiceWithApplianc
 
         String viOvf = vmtemplateToDelete.getOvfid();
 
-        if (viOvf == null)
+        if (StringUtils.isEmpty(viOvf))
         {
             // this is a bundle of an imported virtual machine (it havent OVF)
             viOvf = codifyBundleImportedOVFid(vmtemplateToDelete.getPath());
@@ -472,17 +482,18 @@ public class VirtualMachineTemplateService extends DefaultApiServiceWithApplianc
 
     @Transactional(readOnly = true)
     public List<VirtualMachineTemplate> findStatefulVirtualMachineTemplatesByDatacenter(
-        final Integer enterpriseId, final Integer datacenterId)
+        final Integer enterpriseId, final Integer datacenterId, final StatefulInclusion stateful)
     {
         checkEnterpriseCanUseDatacenter(enterpriseId, datacenterId);
 
         Datacenter datacenter = infrastructureService.getDatacenter(datacenterId);
-        return appsLibraryRep.findStatefulVirtualMachineTemplatesByDatacenter(datacenter);
+        return appsLibraryRep.findStatefulVirtualMachineTemplatesByDatacenter(datacenter, stateful);
     }
 
     @Transactional(readOnly = true)
     public List<VirtualMachineTemplate> findStatefulVirtualMachineTemplatesByCategoryAndDatacenter(
-        final Integer enterpriseId, final Integer datacenterId, final String categoryName)
+        final Integer enterpriseId, final Integer datacenterId, final String categoryName,
+        final StatefulInclusion stateful)
     {
         checkEnterpriseCanUseDatacenter(enterpriseId, datacenterId);
 
@@ -490,7 +501,7 @@ public class VirtualMachineTemplateService extends DefaultApiServiceWithApplianc
         Category category = categoryService.getCategoryByName(categoryName);
 
         return appsLibraryRep.findStatefulVirtualMachineTemplatesByCategoryAndDatacenter(category,
-            datacenter);
+            datacenter, stateful);
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)

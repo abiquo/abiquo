@@ -37,6 +37,7 @@ import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
+import com.abiquo.server.core.common.persistence.JPAConfiguration;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.infrastructure.Datacenter;
@@ -216,18 +217,16 @@ public class VirtualMachineDAO extends DefaultDAOBase<Integer, VirtualMachine>
 
     public VirtualMachine findBackup(final VirtualMachine vmachine)
     {
-        Session session = getSession();
+
         try
         {
-            session.disableFilter(VirtualMachine.NOT_TEMP);
-            session.enableFilter(VirtualMachine.ONLY_TEMP);
+            JPAConfiguration.enableOnlyTemporalFilters(getEntityManager());
 
             return getSingleResult(temporalVirtualMachine(vmachine.getId()));
         }
         finally
         {
-            session.enableFilter(VirtualMachine.NOT_TEMP);
-            session.disableFilter(VirtualMachine.ONLY_TEMP);
+            JPAConfiguration.enableDefaultFilters(getEntityManager());
         }
     }
 

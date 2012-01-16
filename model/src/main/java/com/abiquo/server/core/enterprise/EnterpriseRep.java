@@ -150,9 +150,9 @@ public class EnterpriseRep extends DefaultRepBase
         return this.enterpriseDAO.findAll();
     }
 
-    public List<Enterprise> findAll(final Integer offset, final Integer numResults)
+    public List<Enterprise> findAll(final Integer startwith, final Integer numResults)
     {
-        return this.enterpriseDAO.findAll(offset, numResults);
+        return this.enterpriseDAO.findAll(startwith, numResults);
     }
 
     public List<Enterprise> findByPricingTemplate(final PricingTemplate pricingTempl,

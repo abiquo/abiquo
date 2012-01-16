@@ -47,6 +47,7 @@ import com.abiquo.api.exceptions.InternalServerErrorException;
 import com.abiquo.api.resources.AbstractResource;
 import com.abiquo.api.resources.TaskResourceUtils;
 import com.abiquo.api.services.TaskService;
+import com.abiquo.api.services.cloud.VirtualDatacenterService;
 import com.abiquo.api.services.cloud.VirtualMachineService;
 import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.model.transport.AcceptedRequestDto;
@@ -54,6 +55,8 @@ import com.abiquo.scheduler.SchedulerLock;
 import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
 import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.cloud.NodeVirtualImage;
+import com.abiquo.server.core.cloud.VirtualApplianceDto;
+import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineDto;
 import com.abiquo.server.core.cloud.VirtualMachineInstanceDto;
@@ -62,6 +65,7 @@ import com.abiquo.server.core.cloud.VirtualMachineStateDto;
 import com.abiquo.server.core.cloud.VirtualMachineStateTransition;
 import com.abiquo.server.core.cloud.VirtualMachineTaskDto;
 import com.abiquo.server.core.cloud.VirtualMachineWithNodeDto;
+import com.abiquo.server.core.cloud.VirtualMachineWithNodeExtendedDto;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.infrastructure.Machine;
@@ -104,6 +108,8 @@ public class VirtualMachineResource extends AbstractResource
 
     public static final String VM_NODE_MEDIA_TYPE = "application/vnd.vm-node+xml";
 
+    public static final String VM_NODE_EXTENDED_MEDIA_TYPE = "application/vnd.vm-node-extended+xml";
+
     public static final String VIRTUAL_MACHINE_ACTION_DEPLOY_REL = "deploy";
 
     public static final String VIRTUAL_MACHINE_ACTION_SNAPSHOT_REL = "instance";
@@ -118,6 +124,9 @@ public class VirtualMachineResource extends AbstractResource
 
     @Autowired
     private VirtualMachineService vmService;
+
+    @Autowired
+    private VirtualDatacenterService vdcService;
 
     @Autowired
     private TaskService taskService;
@@ -140,9 +149,10 @@ public class VirtualMachineResource extends AbstractResource
         @Context final IRESTBuilder restBuilder) throws Exception
     {
         VirtualMachine vm = vmService.getVirtualMachine(vdcId, vappId, vmId);
+        VirtualDatacenter vdc = vdcService.getVirtualDatacenter(vdcId);
 
-        return createTransferObject(vm, vdcId, vappId, restBuilder, getVolumeIds(vm),
-            getDiskIds(vm), vm.getIps());
+        return createTransferObject(vm, vdc, vappId, restBuilder, getVolumeIds(vm), getDiskIds(vm),
+            vm.getIps());
     }
 
     /***
@@ -154,6 +164,7 @@ public class VirtualMachineResource extends AbstractResource
      * @throws Exception AcceptedRequestDto
      */
     @PUT
+    @Consumes(MediaType.APPLICATION_XML)
     public AcceptedRequestDto<String> updateVirtualMachine(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) @NotNull @Min(1) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) @NotNull @Min(1) final Integer vappId,
@@ -186,22 +197,22 @@ public class VirtualMachineResource extends AbstractResource
      */
     @PUT
     @Consumes(VM_NODE_MEDIA_TYPE)
-    public VirtualMachineDto updateVirtualMachineNode(
+    public AcceptedRequestDto<String> updateVirtualMachineNode(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) @NotNull @Min(1) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) @NotNull @Min(1) final Integer vappId,
         @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) @NotNull @Min(1) final Integer vmId,
         final VirtualMachineDto dto, @Context final IRESTBuilder restBuilder,
         @Context final UriInfo uriInfo) throws Exception
     {
-        // TODO: validatePathParameters(vdcId, vappId, vmId);
+        String taskId = vmService.reconfigureVirtualMachine(vdcId, vappId, vmId, dto);
 
-        VirtualMachine modifiedVMachine = vmService.modifyVirtualMachine(vdcId, vappId, vmId);
+        if (taskId == null)
+        {
+            // If the link is null no Task was performed
+            return null;
+        }
 
-        final VirtualMachineDto modifiedVMachineDto =
-            VirtualMachineResource.createTransferObject(modifiedVMachine, vdcId, vappId,
-                restBuilder, null, null, null);
-
-        return modifiedVMachineDto;
+        return buildAcceptedRequestDtoWithTaskLink(taskId, uriInfo);
     }
 
     /**
@@ -490,7 +501,7 @@ public class VirtualMachineResource extends AbstractResource
         @Context final UriInfo uriInfo) throws Exception
     {
         String taskId =
-            vmService.snapshotVirtualMachine(vmId, vappId, vdcId, snapshotData.getSnapshotName());
+            vmService.instanceVirtualMachine(vmId, vappId, vdcId, snapshotData.getSnapshotName());
 
         if (taskId == null)
         {
@@ -549,6 +560,8 @@ public class VirtualMachineResource extends AbstractResource
         final VirtualMachineTemplate virtualImage =
             v.getVirtualImage() == null ? null : v.getVirtualImage();
 
+        final VirtualDatacenter vdc = v.getVirtualAppliance().getVirtualDatacenter();
+
         if (!v.getVirtualMachine().isImported())
         {
             dto.addLink(restBuilder.buildVirtualMachineTemplateLink(virtualImage.getEnterprise()
@@ -567,17 +580,34 @@ public class VirtualMachineResource extends AbstractResource
             .getVirtualMachine().getId(), rack == null ? null : rack.getDatacenter().getId(),
             rack == null ? null : rack.getId(), machine == null ? null : machine.getId(),
             enterprise == null ? null : enterprise.getId(), user == null ? null : user.getId(), v
-                .getVirtualMachine().isChefEnabled(), volumeIds, diskIds, ips));
+                .getVirtualMachine().isChefEnabled(), volumeIds, diskIds, ips, vdc
+                .getHypervisorType()));
 
         TaskResourceUtils.addTasksLink(dto, dto.getEditLink());
 
         return dto;
     }
 
+    public static VirtualMachineWithNodeExtendedDto createNodeExtendedTransferObject(
+        final NodeVirtualImage v, final Integer vdcId, final Integer vappId,
+        final IRESTBuilder restBuilder, final Integer[] volumeIds, final Integer[] diskIds,
+        final List<IpPoolManagement> ips) throws Exception
+    {
+        User userVm = v.getVirtualMachine().getUser();
+        VirtualMachineWithNodeDto dto =
+            createNodeTransferObject(v, vdcId, vappId, restBuilder, volumeIds, diskIds, ips);
+        VirtualMachineWithNodeExtendedDto extendedDto =
+            new VirtualMachineWithNodeExtendedDto(dto,
+                userVm.getName(),
+                userVm.getSurname(),
+                userVm.getEnterprise().getName());
+        return extendedDto;
+    }
+
     @Deprecated
     // use the integer based version
     public static VirtualMachineDto createTransferObject(final VirtualMachine v,
-        final IRESTBuilder restBuilder)
+        final VirtualDatacenter vdc, final IRESTBuilder restBuilder)
     {
         VirtualMachineDto dto = new VirtualMachineDto();
 
@@ -606,7 +636,7 @@ public class VirtualMachineResource extends AbstractResource
         dto.addLinks(restBuilder.buildVirtualMachineAdminLinks(rack == null ? null : rack
             .getDatacenter().getId(), rack == null ? null : rack.getId(), machine == null ? null
             : machine.getId(), enterprise == null ? null : enterprise.getId(), user == null ? null
-            : user.getId()));
+            : user.getId(), vdc.getHypervisorType()));
 
         final VirtualMachineTemplate vmtemplate = v.getVirtualMachineTemplate();
         if (vmtemplate.getRepository() != null)
@@ -628,7 +658,7 @@ public class VirtualMachineResource extends AbstractResource
     }
 
     public static VirtualMachineDto createTransferObject(final VirtualMachine v,
-        final Integer vdcId, final Integer vappId, final IRESTBuilder restBuilder,
+        final VirtualDatacenter vdc, final Integer vappId, final IRESTBuilder restBuilder,
         final Integer[] volumeIds, final Integer diskIds[], final List<IpPoolManagement> ips)
     {
 
@@ -664,11 +694,11 @@ public class VirtualMachineResource extends AbstractResource
         final Enterprise enterprise = v.getEnterprise() == null ? null : v.getEnterprise();
         final User user = v.getUser() == null ? null : v.getUser();
 
-        dto.addLinks(restBuilder.buildVirtualMachineCloudAdminLinks(vdcId, vappId, v.getId(),
+        dto.addLinks(restBuilder.buildVirtualMachineCloudAdminLinks(vdc.getId(), vappId, v.getId(),
             rack == null ? null : rack.getDatacenter().getId(), rack == null ? null : rack.getId(),
             machine == null ? null : machine.getId(),
             enterprise == null ? null : enterprise.getId(), user == null ? null : user.getId(),
-            v.isChefEnabled(), volumeIds, diskIds, ips));
+            v.isChefEnabled(), volumeIds, diskIds, ips, vdc.getHypervisorType()));
 
         final VirtualMachineTemplate vmtemplate = v.getVirtualMachineTemplate();
         if (vmtemplate.getRepository() != null)

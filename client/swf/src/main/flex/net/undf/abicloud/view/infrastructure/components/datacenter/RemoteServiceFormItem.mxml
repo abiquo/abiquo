@@ -115,7 +115,11 @@
                 {
                     protocolInput.text = _remoteServiceType.protocol;
                     portInput.text = _remoteServiceType.port;
+                    //TMP -> replace tarantino by virtualfactory
                     serviceMappingInput.text = _remoteServiceType.serviceMapping;
+                    if(_remoteServiceType.valueOf == RemoteServiceType.TARANTINO){
+                        serviceMappingInput.text = "virtualfactory";
+                    }
                 }
                 else
                 {
@@ -142,7 +146,7 @@
             	dispatchEvent(new Event('remoteServiceFormItemChange'));
             }
 
-            private function onClickCheckButton():void
+            public function onClickCheckButton():void
             {
                 //Checking the uri
                 var remoteService:RemoteService = new RemoteService();
@@ -150,7 +154,12 @@
                 remoteService.protocol = protocolInput.text;
                 remoteService.domainName = domainNameInput.text;
                 remoteService.port = Number(portInput.text);
+                //TMP -> replace tarantino by virtualfactory
                 remoteService.serviceMapping = serviceMappingInput.text;
+                if(serviceMappingInput.text == "virtualfactory"){
+                    remoteService.serviceMapping = "tarantino";
+                }
+                
 
                 var event:InfrastructureEvent = new InfrastructureEvent(InfrastructureEvent.CHECK_REMOTE_SERVICE_BY_URI);
                 event.remoteService = remoteService;

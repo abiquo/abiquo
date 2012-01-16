@@ -279,6 +279,8 @@ public class StorageRep extends DefaultRepBase
         return volumeDAO.getVolumesByVirtualDatacenter(vdc, filterOptions);
     }
 
+    @Deprecated
+    // use vm.getVolumes
     public List<VolumeManagement> getVolumesByVirtualMachine(final VirtualMachine vm)
     {
         return volumeDAO.getVolumesByVirtualMachine(vm);

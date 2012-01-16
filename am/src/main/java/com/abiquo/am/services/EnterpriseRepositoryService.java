@@ -30,22 +30,23 @@ import static com.abiquo.am.services.TemplateConventions.getBundleMasterOvfId;
 import static com.abiquo.am.services.TemplateConventions.getBundleSnapshot;
 import static com.abiquo.am.services.TemplateConventions.getMasterOVFPackage;
 import static com.abiquo.am.services.TemplateConventions.getOVFPackageName;
-import static com.abiquo.am.services.TemplateConventions.getTemplatePath;
 import static com.abiquo.am.services.TemplateConventions.getRelativeTemplatePath;
+import static com.abiquo.am.services.TemplateConventions.getTemplatePath;
 import static com.abiquo.am.services.TemplateConventions.isBundleOvfId;
 import static com.abiquo.am.services.TemplateConventions.isImportedBundleOvfId;
 import static com.abiquo.am.services.filesystem.EnterpriseRepositoryFileSystem.validateEnterpirseRepositoryPathFile;
 import static com.abiquo.am.services.filesystem.TemplateFileSystem.getEnvelope;
 import static com.abiquo.am.services.filesystem.TemplateFileSystem.getFileByPath;
 import static com.abiquo.am.services.filesystem.TemplateFileSystem.writeOVFEnvelopeToTemplateFolder;
-
+import static com.abiquo.am.services.TemplateConventions.getTemplatePath;
+import static com.abiquo.am.services.TemplateConventions.getRelativePackagePath;
+import org.dmtf.schemas.ovf.envelope._1.EnvelopeType;
+import org.dmtf.schemas.ovf.envelope._1.FileType;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.List;
 
-import org.dmtf.schemas.ovf.envelope._1.EnvelopeType;
-import org.dmtf.schemas.ovf.envelope._1.FileType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,6 +64,9 @@ import com.abiquo.ovfmanager.ovf.OVFReferenceUtils;
 import com.abiquo.ovfmanager.ovf.exceptions.IdNotFoundException;
 import com.abiquo.ovfmanager.ovf.exceptions.XMLException;
 import com.abiquo.ovfmanager.ovf.xml.OVFSerializer;
+import static com.abiquo.am.services.TemplateConventions.getTemplatePath;
+import org.dmtf.schemas.ovf.envelope._1.EnvelopeType;
+import org.dmtf.schemas.ovf.envelope._1.FileType;
 
 /**
  * Each enterprise have its own logical separation on the current physical Repository. This is
@@ -72,8 +76,8 @@ public class EnterpriseRepositoryService
 {
     private final static Logger LOG = LoggerFactory.getLogger(EnterpriseRepositoryService.class);
 
-    private final static String BASE_REPO_PATH =
-        AMConfigurationManager.getInstance().getAMConfiguration().getRepositoryPath();
+    private final static String BASE_REPO_PATH = AMConfigurationManager.getInstance()
+        .getAMConfiguration().getRepositoryPath();
 
     /** Repository path particular of the current enterprise. */
     private final String erepoPath;
@@ -239,11 +243,10 @@ public class EnterpriseRepositoryService
 
         final String ovfId = OVF_LOCATION_PREFIX + "bundle/" + name + '/' + name + ".ovf";
 
-        final String packPath = getTemplatePath(erepoPath, ovfId);
+        TemplateFileSystem.createTemplateFolder(erepoPath, ovfId);
 
-        TemplateFileSystem.createTemplateFolder(packPath, ovfId);
-
-        return ovfId;
+        // TODO @apuig must review it
+        return erId + "/" + getRelativePackagePath(ovfId);
     }
 
     public String createBundle(final String ovfId, final String snapshot,
@@ -332,7 +335,6 @@ public class EnterpriseRepositoryService
 
     public TemplateStateDto getTemplateStatus(final String ovfId)
     {
-
         return TemplateFileSystem.getTemplateStatus(erepoPath, ovfId);
     }
 

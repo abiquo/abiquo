@@ -51,6 +51,18 @@ public class ApplianceManagerResourceStub
     private final static Integer CLIENT_TIMEOUT_MS = Integer.parseInt(System.getProperty(
         "abiquo.appliancemanager.timeout", "5000")); // default 5seconds
 
+    /**
+     * WARNING: this property is intended to be setup in the ''remote services'', but we will add a
+     * check in case of monolitic installs.
+     */
+    private final static Integer REPOSITORY_FILE_MARK_CHECK_TIMEOUT_MS = Integer.valueOf(System
+        .getProperty("abiquo.repository.timeoutSeconds", "10")) * 1000;
+
+    /** Use the higher timeout */
+    private final static Integer EFFECTIVE_CLIENT_TIMEOUT =
+        REPOSITORY_FILE_MARK_CHECK_TIMEOUT_MS > CLIENT_TIMEOUT_MS
+            ? REPOSITORY_FILE_MARK_CHECK_TIMEOUT_MS : CLIENT_TIMEOUT_MS;
+
     public ApplianceManagerResourceStub(final String serviceUri)
     {
         super();
@@ -58,7 +70,7 @@ public class ApplianceManagerResourceStub
         this.client = new RestClient();
 
         ClientConfig confTimeout = new ClientConfig();
-        confTimeout.readTimeout(CLIENT_TIMEOUT_MS);
+        confTimeout.readTimeout(EFFECTIVE_CLIENT_TIMEOUT);
         this.clientTimeout = new RestClient(confTimeout);
     }
 
@@ -75,7 +87,8 @@ public class ApplianceManagerResourceStub
         params.put(REPOSITORY_PATH, idEnterprise);
         params.put(TEMPLATE_PATH, ovfid);
 
-        String url = URIResolver.resolveURI(serviceUri, "erepos/{erepo}/templates/{template}", params);
+        String url =
+            URIResolver.resolveURI(serviceUri, "erepos/{erepo}/templates/{template}", params);
 
         Resource resource = client.resource(url);
 

@@ -133,8 +133,7 @@
             
             private function returnStatus(object:NodeVirtualImage, column:DataGridColumn):String
             {
-                //return object.taskStatus.message;
-                return "In Progress";
+                return resourceManager.getString('VirtualAppliance','LABEL_STATUS_' + object.taskStatus.statusName);
             }
         ]]>
     </mx:Script>
@@ -275,17 +274,15 @@
         <mx:ProgressBar id="deployProgressBar"
             width="0"
             top="-1" bottom="-1"
-            barColor="#FE9608"
-            trackHeight="14"
+            styleName="CustomProgressBar"
             minWidth="0" indeterminate="true" mode="event"
             visible="{this._virtualAppliance.state.description != State.LOCKED.description}"/>
 
         <mx:ProgressBar id="indeterminateDeployProgressBar"
             width="100%"
             top="-1" bottom="-1"
-            barColor="#FE9608"
+            styleName="CustomProgressBar"
             indeterminateMoveInterval="30"
-            trackHeight="14"
             minWidth="0" label="" labelPlacement="center" indeterminate="true"
             visible="{this._virtualAppliance.state.description == State.LOCKED.description}"/>
     </mx:Canvas>

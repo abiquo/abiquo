@@ -463,8 +463,8 @@ public class NetworkService extends DefaultApiService
 
         addUnexpectedErrors(APIError.NON_EXISTENT_IP);
         flushErrors();
-
-        return vmService.reconfigureVirtualMachine(vdc, vapp, vm, newVm);
+        
+        return null;
     }
 
     /**

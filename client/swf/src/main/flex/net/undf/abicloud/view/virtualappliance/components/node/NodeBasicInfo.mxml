@@ -35,6 +35,7 @@
 
     <mx:Script>
         <![CDATA[
+        	import net.undf.abicloud.vo.virtualappliance.Node;
         	import net.undf.abicloud.vo.user.PrivilegeType;
         	import net.undf.abicloud.utils.SecuredPrivilegeAccess;
         	import net.undf.abicloud.vo.virtualappliance.VirtualAppliance;
@@ -128,6 +129,7 @@
                 	if(updatedNode)
                 	{
 	                	updatedNode.name = nameInput.text;
+	                	updatedNode.modified = Node.NODE_MODIFIED;
 	                	var virtualApplianceEvent:VirtualApplianceEvent = new VirtualApplianceEvent(VirtualApplianceEvent.EDIT_VIRTUALAPPLIANCE);
 	                    virtualApplianceEvent.virtualAppliance = _virtualAppliance;
 	                    dispatchEvent(virtualApplianceEvent);
@@ -248,8 +250,8 @@
             direction="horizontal">
             <mx:Label id="remoteAccessLabel"
                 text="{(this._virtualMachine.vdrpIP == null || 
-                        HyperVisor(this._virtualMachine.assignedTo).type.id == HyperVisorType.HYPERV || 
-                        HyperVisor(this._virtualMachine.assignedTo).type.id == HyperVisorType.XENSERVER) ? ResourceManager.getInstance().getString('Infrastructure', 'LABEL_NOT_AVAILABLE') :
+                        HyperVisor(this._virtualMachine.assignedTo).type.id == HyperVisorType.HYPERV
+                     || HyperVisor(this._virtualMachine.assignedTo).type.id == HyperVisorType.XENSERVER) ? ResourceManager.getInstance().getString('Infrastructure', 'LABEL_NOT_AVAILABLE') :
                                                                                                                            _virtualMachine.vdrpIP + ':' + _virtualMachine.vdrpPort.toString()}"
                 selectable="true"/>
 

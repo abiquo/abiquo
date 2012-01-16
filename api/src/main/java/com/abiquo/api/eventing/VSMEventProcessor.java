@@ -46,7 +46,6 @@ import com.abiquo.server.core.cloud.VirtualMachineRep;
 import com.abiquo.server.core.cloud.VirtualMachineState;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.RemoteService;
-import com.abiquo.server.core.task.enums.TaskOwnerType;
 import com.abiquo.tracer.ComponentType;
 import com.abiquo.tracer.EventType;
 import com.abiquo.tracer.SeverityType;
@@ -83,7 +82,7 @@ public class VSMEventProcessor implements VSMCallback
 
     @Autowired
     protected RemoteServiceService remoteService;
-    
+
     /** Event to virtual machine state translations */
     protected final Map<VMEventType, VirtualMachineState> stateByEvent =
         new HashMap<VMEventType, VirtualMachineState>()
@@ -251,12 +250,15 @@ public class VSMEventProcessor implements VSMCallback
     {
 
         // only apply the destroyedevent when there is and event not started by Abiquo
-        if (!virtualMachine.getState().equals(State.LOCKED) && !virtualMachine.getState().equals(State.NOT_ALLOCATED))
+        if (!State.LOCKED.equals(virtualMachine.getState())
+            && !State.NOT_ALLOCATED.equals(virtualMachine.getState())
+            && virtualMachine.getState().existsInHypervisor())
         {
             // Resources are freed
             // State NOT_ALLOCATED is set in this method too
             unsubscribeVMToVSM(virtualMachine);
-            final String lockMsg = "DESTROY event for virtualmachine '" + virtualMachine.getId() + "'";
+            final String lockMsg =
+                "DESTROY event for virtualmachine '" + virtualMachine.getId() + "'";
             try
             {
                 SchedulerLock.acquire(lockMsg);
@@ -274,8 +276,7 @@ public class VSMEventProcessor implements VSMCallback
     }
 
     /**
-     * TODO: Auxiliary methods to be included in Helper Class. Also in
-     * HighAvailabilityEventProcessor
+     * Performs an unsubscribe when a DESTROYED event is detected
      * 
      * @param vMachine
      * @return
@@ -293,12 +294,12 @@ public class VSMEventProcessor implements VSMCallback
         {
             LOGGER
                 .error(
-                    "HA Move task on virtual machine name {} failed: Unsubscribing to VSM with Exception {}",
+                    "There was a problem processing a DESTROY event  on Virtual Machine {}: Unsubscribing to VSM failed {}",
                     new Object[] {vMachine.getName(), e.getMessage()});
             tracer.systemLog(SeverityType.MAJOR, ComponentType.VIRTUAL_MACHINE,
-                EventType.VM_MOVING_BY_HA,
-                "HA Move Task on virtual machine name {} failed: Unsubscribing to VSM",
-                vMachine.getName());
+                EventType.VM_DESTROY, "virtualMachine.destroyed.unsubscribeFailed", new Object[] {
+                vMachine.getName(),
+                e.getMessage()});
             return false;
         }
     }
