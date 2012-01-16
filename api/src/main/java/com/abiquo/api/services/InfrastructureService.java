@@ -183,7 +183,8 @@ public class InfrastructureService extends DefaultApiService
         repo.insertRack(rack);
 
         tracer.log(SeverityType.INFO, ComponentType.RACK, EventType.RACK_CREATE,
-            "Rack '" + rack.getName() + "' has been created succesfully");
+ "rack.created",
+            rack.getName());
 
         return rack;
     }
