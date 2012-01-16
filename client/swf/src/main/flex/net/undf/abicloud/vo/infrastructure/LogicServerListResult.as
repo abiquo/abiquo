@@ -24,7 +24,7 @@ package net.undf.abicloud.vo.infrastructure
     import mx.collections.ArrayCollection;
 
     [Bindable]
-    [RemoteClass(alias="com.abiquo.abiserver.pojo.infrastructure.LogicServerListResult")]
+    [RemoteClass(alias="com.abiquo.abiserver.pojo.ucs.LogicServerListResult")]
     public class LogicServerListResult
     {
         //The total number of logic server
