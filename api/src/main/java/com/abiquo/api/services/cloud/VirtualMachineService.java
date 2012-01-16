@@ -2808,7 +2808,6 @@ public class VirtualMachineService extends DefaultApiService
         List<RasdManagement> updatedResources = updatedVm.getRasdManagements();
         List<RasdManagement> rollbackResources = getBackupResources(rollbackVm);
 
-        repo.deleteVirtualMachine(rollbackVm);
         LOGGER.debug("removed backup virtual machine");
 
         for (RasdManagement updatedRasd : updatedResources)
@@ -2831,12 +2830,18 @@ public class VirtualMachineService extends DefaultApiService
                 // Re attach the resource to the virtual machine
                 LOGGER.trace("restore: attach resource " + originalRasd.getId());
                 originalRasd.attach(originalRasd.getSequence(), updatedVm);
-
+                // I dunno if it is necessary for the rest of resources,
+                // but for IPs it is.
+                if (originalRasd instanceof IpPoolManagement)
+                {
+                    VirtualAppliance vapp = vdcRep.findVirtualApplianceByVirtualMachine(updatedVm);
+                    originalRasd.setVirtualAppliance(vapp);
+                }
             }
 
-            rasdDao.remove(rasdDao.findById(rollbackRasd.getId())); // refresh as the vm was deleted
         }
 
+        repo.deleteVirtualMachine(rollbackVm);
         repo.update(updatedVm);
         rasdDao.flush();
         // update virtual machine resources
