@@ -106,8 +106,8 @@ import com.abiquo.server.core.infrastructure.management.RasdDAO;
 import com.abiquo.server.core.infrastructure.management.RasdManagement;
 import com.abiquo.server.core.infrastructure.management.RasdManagementDAO;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
-import com.abiquo.server.core.infrastructure.network.VLANNetwork;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagement.Type;
+import com.abiquo.server.core.infrastructure.network.VLANNetwork;
 import com.abiquo.server.core.infrastructure.storage.DiskManagement;
 import com.abiquo.server.core.infrastructure.storage.StorageRep;
 import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
@@ -338,10 +338,9 @@ public class VirtualMachineService extends DefaultApiService
     }
 
     /**
-     * Gets the DTO object and validates all of its parameters. Prepares the {@link VirtualMachine}
-     * object and sends the object to the method
-     * {@link VirtualMachineService#reconfigureVirtualMachine(VirtualDatacenter, VirtualAppliance, VirtualMachine, VirtualMachine)
-     * . This method also updates {@link NodeVirtualImage} names.
+     * updates the {@link NodeVirtualImage} name. <br>
+     * This method must persist the changes even if the reconfigure of the {@link VirtualMachine}
+     * fails.
      * 
      * @param vdcId identifier of the {@link VirtualDatacenter}
      * @param vappId identifier of the {@link VirtualAppliance}
@@ -349,16 +348,13 @@ public class VirtualMachineService extends DefaultApiService
      * @param dto input {@link VirtualMachineDto} object with all its links.
      * @return the link to the asnyncronous task.
      */
-    @Transactional(propagation = Propagation.REQUIRED)
-    public String reconfigureVirtualMachineAndNode(final Integer vdcId, final Integer vappId,
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void updateNodeVirtualImageInfo(final Integer vdcId, final Integer vappId,
         final Integer vmId, final VirtualMachineWithNodeDto dto)
     {
-        String task = this.reconfigureVirtualMachine(vdcId, vappId, vmId, dto);
         NodeVirtualImage nodeVirtualImage = getNodeVirtualImage(vdcId, vappId, vmId);
 
         nodeVirtualImage.setName(dto.getNodeName());
-
-        return task;
     }
 
     /**
@@ -385,8 +381,8 @@ public class VirtualMachineService extends DefaultApiService
     public String reconfigureVirtualMachine(final VirtualDatacenter vdc,
         final VirtualAppliance vapp, final VirtualMachine vm, final VirtualMachine newValues)
     {
-        if (checkReconfigureTemplate(vm.getVirtualMachineTemplate(), newValues
-            .getVirtualMachineTemplate()))
+        if (checkReconfigureTemplate(vm.getVirtualMachineTemplate(),
+            newValues.getVirtualMachineTemplate()))
         {
             LOGGER.debug("Will reconfigure the vm template");
 
@@ -437,8 +433,8 @@ public class VirtualMachineService extends DefaultApiService
                     vmRequirements.createVirtualMachineRequirements(vm, newValues);
                 vmAllocatorService.checkAllocate(vapp.getId(), vm.getId(), requirements, false);
 
-                LOGGER.debug("Updated the hardware needs in DB for virtual machine {}", newValues
-                    .getId());
+                LOGGER.debug("Updated the hardware needs in DB for virtual machine {}",
+                    newValues.getId());
 
                 LOGGER
                     .debug("Creating the temporary register in Virtual Machine for rollback purposes");
@@ -638,12 +634,15 @@ public class VirtualMachineService extends DefaultApiService
 
     /**
      * updates the virtual machine template from node virtual image with the template given by the
-     * {@link VirtualMachineTemplate} param.
+     * {@link VirtualMachineTemplate} param. <br>
+     * This method must persist the changes even if the reconfigure of the {@link VirtualMachine}
+     * fails.
      * 
      * @param vm {@link VirtualMachine} Virtual machine where obtains the related
      *            {@link NodeVirtualImage}
      * @parem template {@link VirtualMachineTemplate} Virtual Machine Template to set
      */
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     private void updateNodeVirtualImage(final VirtualMachine vm,
         final VirtualMachineTemplate template)
     {
@@ -874,8 +873,8 @@ public class VirtualMachineService extends DefaultApiService
 
         // Does it has volumes? PREMIUM
         detachVolumesFromVirtualMachine(virtualMachine);
-        LOGGER.debug("Detached the virtual machine's volumes with UUID {}", virtualMachine
-            .getUuid());
+        LOGGER.debug("Detached the virtual machine's volumes with UUID {}",
+            virtualMachine.getUuid());
 
         detachIps(virtualMachine);
 
@@ -902,8 +901,8 @@ public class VirtualMachineService extends DefaultApiService
 
         // Does it has volumes? PREMIUM
         detachVolumesFromVirtualMachine(virtualMachine);
-        LOGGER.debug("Detached the virtual machine's volumes with UUID {}", virtualMachine
-            .getUuid());
+        LOGGER.debug("Detached the virtual machine's volumes with UUID {}",
+            virtualMachine.getUuid());
 
         detachIps(virtualMachine);
 
@@ -929,6 +928,10 @@ public class VirtualMachineService extends DefaultApiService
                 ip.setVirtualDatacenter(null);
                 ip.setMac(null);
                 ip.setName(null);
+            }
+            else if (Type.UNMANAGED == ip.getType())
+            {
+                vdcRep.deleteIpPoolManagement(ip);
             }
         }
     }
@@ -1091,8 +1094,8 @@ public class VirtualMachineService extends DefaultApiService
     private void createNodeVirtualImage(final VirtualMachine virtualMachine,
         final VirtualAppliance virtualAppliance, final String name)
     {
-        LOGGER.debug("Create node virtual image with name virtual machine: {}", virtualMachine
-            .getName());
+        LOGGER.debug("Create node virtual image with name virtual machine: {}",
+            virtualMachine.getName());
         NodeVirtualImage nodeVirtualImage =
             new NodeVirtualImage(name,
                 virtualAppliance,
@@ -1400,8 +1403,8 @@ public class VirtualMachineService extends DefaultApiService
         if (virtualMachine.isImported())
         {
             tracer.log(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
-                EventType.VM_RECONFIGURE, APIError.VIRTUAL_MACHINE_IMPORTED_CAN_NOT_RECONFIGURE
-                    .getMessage());
+                EventType.VM_RECONFIGURE,
+                APIError.VIRTUAL_MACHINE_IMPORTED_CAN_NOT_RECONFIGURE.getMessage());
 
             addConflictErrors(APIError.VIRTUAL_MACHINE_IMPORTED_CAN_NOT_RECONFIGURE);
             flushErrors();
@@ -1435,12 +1438,12 @@ public class VirtualMachineService extends DefaultApiService
             default:
             {
                 tracer.log(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
-                    EventType.VM_UNDEPLOY, APIError.VIRTUAL_MACHINE_INVALID_STATE_UNDEPLOY
-                        .getMessage());
+                    EventType.VM_UNDEPLOY,
+                    APIError.VIRTUAL_MACHINE_INVALID_STATE_UNDEPLOY.getMessage());
 
                 tracer.systemLog(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
-                    EventType.VM_UNDEPLOY, "virtualMachine.cannotUndeployed", virtualMachine
-                        .getName());
+                    EventType.VM_UNDEPLOY, "virtualMachine.cannotUndeployed",
+                    virtualMachine.getName());
                 addConflictErrors(APIError.VIRTUAL_MACHINE_INVALID_STATE_UNDEPLOY);
                 flushErrors();
 
@@ -1561,8 +1564,8 @@ public class VirtualMachineService extends DefaultApiService
 
             // For the Admin to know all errors
             tracer.systemLog(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
-                EventType.VM_UNDEPLOY, "virtualMachine.undeployError", e.toString(), virtualMachine
-                    .getName(), e.getMessage());
+                EventType.VM_UNDEPLOY, "virtualMachine.undeployError", e.toString(),
+                virtualMachine.getName(), e.getMessage());
             LOGGER
                 .error(
                     "Error undeploying setting the virtual machine to UNKNOWN virtual machine name {}: {}",
@@ -1646,8 +1649,8 @@ public class VirtualMachineService extends DefaultApiService
 
             // For the Admin to know all errors
             tracer.systemLog(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
-                EventType.VM_UNDEPLOY, "virtualMachine.undeployError", e.toString(), virtualMachine
-                    .getName(), e.getMessage());
+                EventType.VM_UNDEPLOY, "virtualMachine.undeployError", e.toString(),
+                virtualMachine.getName(), e.getMessage());
             LOGGER
                 .error(
                     "Error undeploying setting the virtual machine to UNKNOWN virtual machine name {}: {}",
@@ -1737,8 +1740,8 @@ public class VirtualMachineService extends DefaultApiService
 
             tracer
                 .systemError(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
-                    EventType.VM_INSTANCE, e, "virtualMachine.instanceFailed", virtualMachine
-                        .getName());
+                    EventType.VM_INSTANCE, e, "virtualMachine.instanceFailed",
+                    virtualMachine.getName());
 
             LOGGER.debug("Unlocking virtual machine {}", virtualMachine.getName());
             unlockVirtualMachineState(virtualMachine, originalState);
@@ -1753,8 +1756,8 @@ public class VirtualMachineService extends DefaultApiService
 
             tracer
                 .systemError(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
-                    EventType.VM_INSTANCE, e, "virtualMachine.instanceFailed", virtualMachine
-                        .getName());
+                    EventType.VM_INSTANCE, e, "virtualMachine.instanceFailed",
+                    virtualMachine.getName());
 
             unlockVirtualMachineState(virtualMachine, originalState);
 
@@ -1931,8 +1934,8 @@ public class VirtualMachineService extends DefaultApiService
                 "virtualMachine.resetVirtualMachineError", virtualMachine.getName());
 
             tracer.systemError(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
-                EventType.VM_DEPLOY, ex, "virtualMachine.resetVirtualMachineError", virtualMachine
-                    .getName());
+                EventType.VM_DEPLOY, ex, "virtualMachine.resetVirtualMachineError",
+                virtualMachine.getName());
 
             // Must unlock the virtual machine
             unlockVirtualMachineState(virtualMachine, originalState);
@@ -2031,8 +2034,8 @@ public class VirtualMachineService extends DefaultApiService
         for (RemoteService r : remoteServicesByDatacenter)
         {
             ErrorsDto checkRemoteServiceStatus =
-                remoteServiceService.checkRemoteServiceStatus(r.getDatacenter(), r.getType(), r
-                    .getUri());
+                remoteServiceService.checkRemoteServiceStatus(r.getDatacenter(), r.getType(),
+                    r.getUri());
             errors.addAll(checkRemoteServiceStatus);
         }
 
@@ -2242,6 +2245,16 @@ public class VirtualMachineService extends DefaultApiService
         {
             if (!resourceIntoNewList(ip, newVm.getIps()))
             {
+                if (ip.getVlanNetwork().getType().equals(NetworkType.UNMANAGED))
+                {
+                    vdcRep.deleteIpPoolManagement(ip);
+                }
+                else
+                {
+                    ip.detach();
+                    vdcRep.updateIpManagement(ip);
+                }
+
                 ip.detach();
                 vdcRep.deleteRasd(ip.getRasd());
                 vdcRep.updateIpManagement(ip);

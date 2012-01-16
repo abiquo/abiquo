@@ -1063,7 +1063,7 @@ public class UriTestResolver
     }
 
     public static String resolveStatefulVirtualMachineTemplatesURI(final Integer enterpriseId,
-        final Integer datacenterId)
+        final Integer datacenterId, final StatefulInclusion stateful)
     {
         String template =
             buildPath(EnterprisesResource.ENTERPRISES_PATH,
@@ -1080,13 +1080,14 @@ public class UriTestResolver
         Map<String, String[]> queryParams = new HashMap<String, String[]>();
         queryParams.put(
             VirtualMachineTemplatesResource.VIRTUAL_MACHINE_TEMPLATE_GET_STATEFUL_QUERY_PARAM,
-            new String[] {StatefulInclusion.ALL.name()});
+            new String[] {stateful.name()});
 
         return resolveURI(template, values, queryParams);
     }
 
     public static String resolveStatefulVirtualMachineTemplatesURIWithCategory(
-        final Integer enterpriseId, final Integer datacenterId, final String categoryName)
+        final Integer enterpriseId, final Integer datacenterId, final String categoryName,
+        final StatefulInclusion stateful)
     {
         String template =
             buildPath(EnterprisesResource.ENTERPRISES_PATH,
@@ -1106,7 +1107,7 @@ public class UriTestResolver
             new String[] {categoryName});
         queryParams.put(
             VirtualMachineTemplatesResource.VIRTUAL_MACHINE_TEMPLATE_GET_STATEFUL_QUERY_PARAM,
-            new String[] {StatefulInclusion.ALL.name()});
+            new String[] {stateful.name()});
 
         return resolveURI(template, values, queryParams);
     }
