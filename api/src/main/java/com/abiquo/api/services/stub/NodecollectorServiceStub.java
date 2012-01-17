@@ -643,6 +643,11 @@ public class NodecollectorServiceStub extends DefaultApiService
                 vi.setDiskFileSize(rt.getUnits());
                 vm.setVirtualMachineTemplate(vi);
                 vm.setHdInBytes(rt.getUnits());
+                
+                if (rt.getLabel() == null)
+                {
+                    break;
+                }
             }
             else
             {
