@@ -131,6 +131,7 @@ public class VirtualMachineTemplateResource extends AbstractResource
         dto.setShared(vmtemplate.isShared());
         dto.setDiskFormatType(vmtemplate.getDiskFormatType().name());
         dto.setCostCode(vmtemplate.getCostCode());
+        dto.setChefEnabled(vmtemplate.isChefEnabled());
         dto.setCreationDate(vmtemplate.getCreationDate());
         dto.setCreationUser(vmtemplate.getCreationUser());
 
