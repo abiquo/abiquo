@@ -275,30 +275,6 @@ public class InfrastructureService
     }
 
     /**
-     * Community or premium. XXX IoC do it yourselfe
-     */
-    private InfrastructureCommand getInfrastructureCommandImplementation()
-    {
-        final String premiumClass =
-            "com.abiquo.abiserver.commands.impl.InfrastructureCommandPremiumImpl";
-
-        InfrastructureCommand instance;
-        try
-        {
-            instance =
-                (InfrastructureCommand) Thread.currentThread().getContextClassLoader()
-                    .loadClass(premiumClass).newInstance();
-
-        }
-        catch (final Exception e)
-        {
-            instance = new InfrastructureCommandImpl();
-        }
-
-        return instance;
-    }
-
-    /**
      * Creates a new Data Center
      * 
      * @param session
@@ -595,7 +571,7 @@ public class InfrastructureService
     }
 
     public DataResult<HypervisorRemoteAccessInfo> getHypervisorRemoteAccessInfo(
-        UserSession userSession, PhysicalMachine machine)
+        final UserSession userSession, final PhysicalMachine machine)
     {
         MachineResourceStub proxy =
             APIStubFactory.getInstance(userSession, new MachineResourceStubImpl(),
