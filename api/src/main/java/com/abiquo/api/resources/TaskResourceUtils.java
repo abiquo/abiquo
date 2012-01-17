@@ -53,7 +53,7 @@ public class TaskResourceUtils extends AbstractResource
 
     public static final String TASKS_REL = "tasks";
 
-    public static final String TASK_NO_TRACKABLE = "no-trackable";
+    public static final String UNTRACEABLE_TASK = "untraceable";
 
     public static TasksDto transform(final List<Task> tasks, final UriInfo uriInfo)
     {
@@ -133,7 +133,7 @@ public class TaskResourceUtils extends AbstractResource
         return jobsDto;
     }
 
-    protected static String removeTaskSegments(final String path)
+    public static String removeTaskSegments(final String path)
     {
         String regex = String.format("%s.*", TASKS_PATH);
         return path.replaceAll(regex, "");

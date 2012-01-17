@@ -51,6 +51,7 @@ import com.abiquo.api.services.cloud.VirtualDatacenterService;
 import com.abiquo.api.services.cloud.VirtualMachineService;
 import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.model.transport.AcceptedRequestDto;
+import com.abiquo.model.transport.SeeOtherDto;
 import com.abiquo.scheduler.SchedulerLock;
 import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
 import com.abiquo.server.core.cloud.Hypervisor;
@@ -506,7 +507,6 @@ public class VirtualMachineResource extends AbstractResource
 
         if (taskId == null)
         {
-            // If the link is null no Task was performed
             throw new InternalServerErrorException(APIError.STATUS_INTERNAL_SERVER_ERROR);
         }
 
@@ -768,6 +768,12 @@ public class VirtualMachineResource extends AbstractResource
         @Context final UriInfo uriInfo) throws Exception
     {
         vmService.getVirtualMachine(vdcId, vappId, vmId);
+
+        if (taskId.equalsIgnoreCase(TaskResourceUtils.UNTRACEABLE_TASK))
+        {
+            return buildSeeOtherDto(uriInfo);
+        }
+
         Task task = taskService.findTask(vmId.toString(), taskId);
 
         return TaskResourceUtils.transform(task, uriInfo);
@@ -829,5 +835,17 @@ public class VirtualMachineResource extends AbstractResource
         a202.setEntity("You can keep track of the progress in the link");
 
         return a202;
+    }
+
+    protected SeeOtherDto buildSeeOtherDto(final UriInfo uriInfo)
+    {
+        // Build state link
+        String link = uriInfo.getRequestUri().toString();
+
+        link = TaskResourceUtils.removeTaskSegments(link);
+        link = link.concat("/").concat(VIRTUAL_MACHINE_STATE);
+
+        // Build SeeOtherDto
+        return new SeeOtherDto(link);
     }
 }
