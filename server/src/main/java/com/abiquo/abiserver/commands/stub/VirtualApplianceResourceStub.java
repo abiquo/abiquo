@@ -78,5 +78,5 @@ public interface VirtualApplianceResourceStub
     BasicResult deleteVirtualAppliance(VirtualAppliance virtualAppliance, boolean forceDelete);
 
     BasicResult applyChangesVirtualAppliance(VirtualAppliance virtualAppliance,
-        UserSession userSession);
+        UserSession userSession, final boolean force);
 }

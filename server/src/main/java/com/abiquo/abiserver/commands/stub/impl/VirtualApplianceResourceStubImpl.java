@@ -1134,7 +1134,7 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
 
     @Override
     public DataResult applyChangesVirtualAppliance(final VirtualAppliance virtualAppliance,
-        final UserSession userSession)
+        final UserSession userSession, final boolean force)
     {
         DataResult result = new DataResult();
         result.setSuccess(Boolean.TRUE);
@@ -1166,7 +1166,8 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
                         {
                             org.jclouds.abiquo.domain.cloud.VirtualMachine virtualMachine =
                                 appliance.getVirtualMachine(nvi.getVirtualMachine().getId());
-                            virtualMachine.deploy();
+
+                            virtualMachine.deploy(force);
                         }
                     }
                 }
