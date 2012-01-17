@@ -25,6 +25,7 @@ import static com.abiquo.api.resources.appslibrary.VirtualMachineTemplateResourc
 import static com.abiquo.api.util.URIResolver.buildPath;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -618,6 +619,7 @@ public class VirtualMachineService extends DefaultApiService
         List<Integer> usedNICslots = dellocateOldNICs(old, vmnew);
         allocateNewNICs(vapp, old, vmnew.getIps(), usedNICslots);
 
+        // never use the slot 0 for storage since it is the virtual image.
         List<Integer> usedStorageSlots = dellocateOldDisks(old, vmnew);
         usedStorageSlots.addAll(dellocateOldVolumes(old, vmnew));
 
@@ -1546,8 +1548,9 @@ public class VirtualMachineService extends DefaultApiService
             tracer.log(SeverityType.INFO, ComponentType.VIRTUAL_MACHINE, EventType.VM_UNDEPLOY,
                 "virtualMachine.enqueued", virtualMachine.getName());
             // For the Admin to know all errors
-            tracer.systemLog(SeverityType.INFO, ComponentType.VIRTUAL_MACHINE,
-                EventType.VM_UNDEPLOY, "virtualMachine.enqueuedTarantino");
+            tracer
+                .systemLog(SeverityType.INFO, ComponentType.VIRTUAL_MACHINE, EventType.VM_UNDEPLOY,
+                    "virtualMachine.enqueuedTarantino", virtualMachine.getName());
 
             return idAsyncTask;
 
@@ -2251,6 +2254,7 @@ public class VirtualMachineService extends DefaultApiService
                 {
                     if (ip.getVlanNetwork().getType().equals(NetworkType.UNMANAGED))
                     {
+                        vdcRep.deleteRasd(ip.getRasd());
                         vdcRep.deleteIpPoolManagement(ip);
                     }
                     else
@@ -2292,8 +2296,18 @@ public class VirtualMachineService extends DefaultApiService
         {
             if (!resourceIntoNewList(disk, newVm.getDisks()))
             {
-                disk.detach();
-                vdcRep.updateDisk(disk);
+                // if the machine is NOT_ALLOCATED, the values here are definitive,
+                // otherwise, it will be deleted in the handler
+                if (oldVm.getState() == VirtualMachineState.NOT_ALLOCATED)
+                {
+                    vdcRep.deleteRasd(disk.getRasd());
+                    vdcRep.removeHardDisk(disk);
+                }
+                else
+                {
+                    disk.detach();
+                    vdcRep.updateDisk(disk);
+                }
             }
             else
             {
@@ -2740,20 +2754,21 @@ public class VirtualMachineService extends DefaultApiService
 
             // we need to first delete the vm (as it updates the rasd_man)
             repo.deleteVirtualMachine(backUpVm);
-            
+
             List<RasdManagement> rasds = backUpVm.getRasdManagements();
 
             for (RasdManagement rollbackRasd : rasds)
             {
                 if (rollbackRasd instanceof IpPoolManagement)
                 {
-                    IpPoolManagement originalRasd = (IpPoolManagement) rasdDao.findById(rollbackRasd.getTemporal());
+                    IpPoolManagement originalRasd =
+                        (IpPoolManagement) rasdDao.findById(rollbackRasd.getTemporal());
 
                     if (!originalRasd.isAttached())
                     {
                         // remove the rasd
                         vdcRep.deleteRasd(originalRasd.getRasd());
-                        
+
                         // unmanaged ips disappear when the are not assigned to a virtual machine.
                         if (originalRasd.isUnmanagedIp())
                         {
@@ -2761,12 +2776,22 @@ public class VirtualMachineService extends DefaultApiService
                         }
                     }
                 }
-                
+                // DiskManagements always are deleted
+                if (rollbackRasd instanceof DiskManagement)
+                {
+                    DiskManagement originalRasd =
+                        (DiskManagement) rasdDao.findById(rollbackRasd.getTemporal());
+                    if (!originalRasd.isAttached())
+                    {
+                        vdcRep.deleteRasd(originalRasd.getRasd());
+                        rasdDao.remove(originalRasd);
+                    }
+                }
+
                 // refresh as the vm delete was updated the rasd
                 rasdDao.remove(rasdDao.findById(rollbackRasd.getId()));
             }
 
-           
             rasdDao.flush();
         }
         finally
@@ -2842,7 +2867,34 @@ public class VirtualMachineService extends DefaultApiService
             if (rollbackRasd == null)
             {
                 LOGGER.trace("restore: detach resource " + updatedRasd.getId());
-                updatedRasd.detach();
+
+                if (updatedRasd instanceof IpPoolManagement)
+                {
+                    IpPoolManagement originalRasd = (IpPoolManagement) updatedRasd;
+
+                    // remove the rasd
+                    vdcRep.deleteRasd(originalRasd.getRasd());
+
+                    // unmanaged ips disappear when the are not assigned to a virtual machine.
+                    if (originalRasd.isUnmanagedIp())
+                    {
+                        rasdDao.remove(originalRasd);
+                    }
+                }
+                // DiskManagements always are deleted
+                if (updatedRasd instanceof DiskManagement)
+                {
+                    DiskManagement originalRasd = (DiskManagement) updatedRasd;
+
+                    vdcRep.deleteRasd(originalRasd.getRasd());
+                    rasdDao.remove(originalRasd);
+                }
+                else
+                {
+                    // volumes only need to be dettached
+                    updatedRasd.detach();
+                }
+
             }
         }
 

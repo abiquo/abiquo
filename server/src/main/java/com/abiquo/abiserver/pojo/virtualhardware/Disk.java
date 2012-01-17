@@ -34,6 +34,8 @@ public class Disk
     private Boolean readOnly;
     
     private Integer diskId;
+    
+    private Integer sequence;
 
     public Long getDiskSizeInMb()
     {
@@ -63,6 +65,16 @@ public class Disk
     public Integer getDiskId()
     {
         return diskId;
+    }
+
+    public void setSequence(Integer sequence)
+    {
+        this.sequence = sequence;
+    }
+
+    public Integer getSequence()
+    {
+        return sequence;
     }
 
 }

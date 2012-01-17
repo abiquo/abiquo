@@ -217,7 +217,7 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
 
     public static final String BY_VIRTUAL_MACHINE = "SELECT ip "
         + "FROM IpPoolManagement ip INNER JOIN ip.virtualMachine vm " + "WHERE vm.id = :vm_id "
-        + "ORDER BY ip.rasd.configurationName";
+        + "ORDER BY ip.sequence";
 
     public static final String BY_VLAN = " SELECT ip FROM IpPoolManagement ip "
         + " left join ip.virtualMachine vm "

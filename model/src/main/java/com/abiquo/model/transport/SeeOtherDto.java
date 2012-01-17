@@ -19,42 +19,39 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package com.abiquo.server.core.infrastructure.storage;
+/**
+ * 
+ */
+package com.abiquo.model.transport;
 
 import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlType;
 
-import com.abiquo.model.transport.SingleResourceTransportDto;
+import com.abiquo.server.core.task.TaskDto;
 
-@XmlRootElement(name = "disk")
-@XmlType(propOrder = {"sequence", "sizeInMb"})
-public class DiskManagementDto extends SingleResourceTransportDto
+/**
+ * This Entity is the response of 303.
+ * 
+ * @author enric.ruiz@abiquo.com
+ */
+@XmlRootElement(name = "seeother")
+public class SeeOtherDto extends TaskDto
 {
-    public static final String DISK_MEDIA_TYPE = "application/disk+xml";
+    private static final long serialVersionUID = 4645761892464380938L;
 
-    private static final long serialVersionUID = 1L;
+    protected String location;
 
-    private Long sizeInMb;
-    
-    private Integer sequence;
-
-    public void setSizeInMb(final Long sizeInMb)
+    public SeeOtherDto(final String location)
     {
-        this.sizeInMb = sizeInMb;
-    }
-    
-    public Long getSizeInMb()
-    {
-        return this.sizeInMb;
+        setLocation(location);
     }
 
-    public void setSequence(Integer sequence)
+    public String getLocation()
     {
-        this.sequence = sequence;
+        return location;
     }
 
-    public Integer getSequence()
+    public void setLocation(String location)
     {
-        return sequence;
+        this.location = location;
     }
 }

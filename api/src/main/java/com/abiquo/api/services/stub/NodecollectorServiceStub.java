@@ -617,7 +617,7 @@ public class NodecollectorServiceStub extends DefaultApiService
         vm.setDisks(new ArrayList<DiskManagement>());
         for (ResourceType rt : vs.getResources())
         {
-            if (rt.getLabel().equals("SYSTEM DISK"))
+            if (rt.getLabel() == null || rt.getLabel().equals("SYSTEM DISK"))
             {
                 long bytesHD = rt.getUnits();
                 vm.setHdInBytes(bytesHD);

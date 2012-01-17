@@ -1746,6 +1746,7 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
         flexIp.setIdManagement(dto.getId());
         flexIp.setIp(dto.getIp());
         flexIp.setMac(dto.getMac());
+        flexIp.setSequence(dto.getSequence());
 
         for (RESTLink currentLink : dto.getLinks())
         {
