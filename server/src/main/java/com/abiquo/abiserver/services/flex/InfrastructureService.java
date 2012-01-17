@@ -269,9 +269,10 @@ public class InfrastructureService
      * @param user
      * @return a DataResult object, with an ArrayList of DataCenter
      */
-    public BasicResult getAllowedDataCenters(final UserSession session)
+    public BasicResult getAllowedDataCenters(final UserSession session,
+        final Integer effectiveEnterpriseId)
     {
-        return getDataCenters(session);
+        return proxyDatacentersStub(session).getDatacenters(effectiveEnterpriseId);
     }
 
     /**
