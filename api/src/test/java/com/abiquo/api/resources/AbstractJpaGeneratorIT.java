@@ -32,11 +32,13 @@ import org.apache.wink.client.ClientConfig;
 import org.apache.wink.client.ClientResponse;
 import org.apache.wink.client.Resource;
 import org.apache.wink.client.RestClient;
+import org.springframework.security.context.SecurityContextHolder;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.abiquo.api.common.AbstractGeneratorTest;
+import com.abiquo.api.common.SysadminAuthentication;
 
 @Test(groups = ALL_INTEGRATION_TESTS)
 public class AbstractJpaGeneratorIT extends AbstractGeneratorTest
@@ -224,5 +226,10 @@ public class AbstractJpaGeneratorIT extends AbstractGeneratorTest
     protected String basicAuth(final String username, final String password)
     {
         return new String(Base64.encodeBase64((username + ":" + password).getBytes()));
+    }
+
+    protected void loginAsSysAdmin()
+    {
+        SecurityContextHolder.getContext().setAuthentication(new SysadminAuthentication());
     }
 }

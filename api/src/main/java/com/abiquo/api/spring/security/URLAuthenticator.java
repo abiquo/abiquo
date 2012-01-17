@@ -21,22 +21,19 @@
 
 package com.abiquo.api.spring.security;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
-import javax.servlet.http.HttpServletRequest;
-
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.AccessDecisionManager;
-import org.springframework.security.AccessDeniedException;
 import org.springframework.security.Authentication;
 import org.springframework.security.ConfigAttributeDefinition;
 import org.springframework.security.context.SecurityContextHolder;
-import org.springframework.security.intercept.web.FilterInvocation;
+import org.springframework.security.intercept.web.DefaultFilterInvocationDefinitionSource;
 import org.springframework.security.intercept.web.FilterSecurityInterceptor;
+import org.springframework.security.vote.AccessDecisionVoter;
+import org.springframework.security.vote.AffirmativeBased;
 import org.springframework.stereotype.Service;
 
 import com.abiquo.model.rest.RESTLink;
@@ -44,11 +41,17 @@ import com.abiquo.model.rest.RESTLink;
 @Service
 public class URLAuthenticator
 {
+
     @Autowired
-    private AccessDecisionManager accessManager;
+    private AffirmativeBased accessManager;
 
     @Autowired
     private FilterSecurityInterceptor filterSecurityInterceptor;
+
+    private enum methods
+    {
+        GET, POST, PUT, DELETE, OPTIONS
+    };
 
     /**
      * Return only links allowed for logged user
@@ -56,17 +59,16 @@ public class URLAuthenticator
      * @param links to check
      * @return links allowed for logged user
      */
-    public List<RESTLink> checkAuthLinks(final List<RESTLink> links)
+    public List<RESTLink> checkAuthLinks(final List<RESTLink> links, final String baseUri)
     {
         List<RESTLink> authslinks = null;
-
         if (links != null)
         {
             authslinks = new ArrayList<RESTLink>();
 
             for (RESTLink link : links)
             {
-                if (checkPermissions(link.getHref()))
+                if (checkPermissions(new StringBuffer(link.getHref()), baseUri))
                 {
                     authslinks.add(link);
                 }
@@ -82,73 +84,52 @@ public class URLAuthenticator
      * @param url to check
      * @return true if is allowed, else false
      */
-    public boolean checkPermissions(final String url)
+    public boolean checkPermissions(final StringBuffer url, final String baseUri)
     {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-
-        String[] methods = {"GET", "POST", "PUT", "DELETE", "OPTIONS"};
-
-        boolean allowAccess = false;
-
-        for (String method : methods)
+        DefaultFilterInvocationDefinitionSource fids =
+            (DefaultFilterInvocationDefinitionSource) filterSecurityInterceptor
+                .getObjectDefinitionSource();
+        Iterator iter = accessManager.getDecisionVoters().iterator();
+        String path = parse(url, baseUri);
+        if (StringUtils.isBlank(path))
         {
-
-            FilterInvocation securedObject = mockFilterInvocation(url, method);
-            ConfigAttributeDefinition config =
-                filterSecurityInterceptor.getObjectDefinitionSource().getAttributes(securedObject);
-
+            return Boolean.TRUE;
+        }
+        for (methods m : methods.values())
+        {
+            ConfigAttributeDefinition config = fids.lookupAttributes(path, m.name());
             if (config != null)
             {
-                try
+                INNER_LOOP: while (iter.hasNext())
                 {
-                    accessManager.decide(auth, securedObject, config);
-                    allowAccess = true;
-                    break;
-                }
-                catch (AccessDeniedException accessDeniedException)
-                {
-                    continue;
+                    AccessDecisionVoter voter = (AccessDecisionVoter) iter.next();
+                    int result = voter.vote(auth, new Object(), config);
+                    switch (result)
+                    {
+                        case AccessDecisionVoter.ACCESS_GRANTED:
+                            return Boolean.TRUE;
+
+                        case AccessDecisionVoter.ACCESS_DENIED:
+                        default:
+                            continue INNER_LOOP;
+                    }
                 }
             }
-            else
-            {
-                // to pass it test
-                allowAccess = true;
-                break;
-            }
         }
-
-        return allowAccess;
+        return Boolean.FALSE;
     }
 
-    /**
-     * Creates a mock object of FilterInvocation class
-     * 
-     * @param url
-     * @param method
-     * @return mock object of FilterInvocation class
-     */
-    private static FilterInvocation mockFilterInvocation(final String url, final String method)
+    private static String parse(final StringBuffer url, final String baseUri)
     {
-        FilterInvocation mockFilterInvocation = mock(FilterInvocation.class);
-        HttpServletRequest mockRequest = mock(HttpServletRequest.class);
+        return StringUtils.substringAfterLast(url.toString(), baseUri);
 
-        when(mockRequest.getMethod()).thenReturn(method);
-        when(mockFilterInvocation.getRequestUrl()).thenReturn(parse(url));
-        when(mockFilterInvocation.getHttpRequest()).thenReturn(mockRequest);
-
-        return mockFilterInvocation;
+        // StringBuffer api = new StringBuffer("api");
+        // int i = url.lastIndexOf(api.toString());
+        // if (i > -1)
+        // {
+        // return new StringBuffer(url.substring(i + api.length()));
+        // }
+        // return url;
     }
-
-    private static String parse(final String url)
-    {
-        String api = "api";
-        int i = url.lastIndexOf(api);
-        if (i > -1)
-        {
-            return url.substring(i + api.length());
-        }
-        return url;
-    }
-
 }
