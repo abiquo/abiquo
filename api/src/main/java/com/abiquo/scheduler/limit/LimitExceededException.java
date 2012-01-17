@@ -49,7 +49,10 @@ public class LimitExceededException extends AllocatorException
 
     private final static Long BYTES_TO_MB = 1024l * 1024l;
 
-    public LimitExceededException(final Map<LimitResource, LimitStatus> resourcesStatus,
+    private boolean isHardLimit;
+
+    public LimitExceededException(final boolean isHardLimit,
+        final Map<LimitResource, LimitStatus> resourcesStatus,
         final DefaultEntityWithLimits entity, final VirtualMachineRequirements requirements,
         final DefaultEntityCurrentUsed actual, final String entityId)
     {
@@ -59,6 +62,7 @@ public class LimitExceededException extends AllocatorException
         this.requir = requirements;
         this.actual = actual;
         this.entityId = entityId;
+        this.isHardLimit = isHardLimit;
     }
 
     public String getEntityId()
@@ -132,5 +136,10 @@ public class LimitExceededException extends AllocatorException
             status.get(LimitResource.STORAGE), status.get(LimitResource.VLAN),
             status.get(LimitResource.PUBLICIP) //
             );
+    }
+
+    public boolean isHardLimit()
+    {
+        return isHardLimit;
     }
 }

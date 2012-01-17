@@ -147,7 +147,7 @@ public class VirtualMachineAllocatorService extends DefaultApiService
 
         try
         {
-            checkLimist(vapp, increaseRequirements, foreceEnterpriseSoftLimits);
+            checkLimist(vapp, increaseRequirements, foreceEnterpriseSoftLimits, true);
 
             boolean check =
                 allocationService.checkVirtualMachineResourceIncrease(machine,
@@ -172,7 +172,15 @@ public class VirtualMachineAllocatorService extends DefaultApiService
         }
         catch (LimitExceededException limite)
         {
-            addConflictErrors(new CommonError(APIError.LIMIT_EXCEEDED.name(), limite.toString()));
+            if (limite.isHardLimit())
+            {
+                addConflictErrors(new CommonError(APIError.LIMIT_EXCEEDED.name(), limite.toString()));
+            }
+            else
+            {
+                addConflictErrors(new CommonError(APIError.SOFT_LIMIT_EXCEEDED.name(),
+                    limite.toString()));
+            }
         }
         catch (AllocatorException e)
         {
@@ -242,7 +250,7 @@ public class VirtualMachineAllocatorService extends DefaultApiService
             final Integer idDatacenter = vapp.getVirtualDatacenter().getDatacenter().getId();
             final FitPolicy fitPolicy = getAllocationFitPolicyOnDatacenter(idDatacenter);
 
-            checkLimist(vapp, requirements, foreceEnterpriseSoftLimits);
+            checkLimist(vapp, requirements, foreceEnterpriseSoftLimits, true);
 
             VirtualMachine allocatedvm =
                 selectPhysicalMachineAndAllocateResources(vmachine, vapp, fitPolicy, requirements);
@@ -258,7 +266,15 @@ public class VirtualMachineAllocatorService extends DefaultApiService
         }
         catch (LimitExceededException limite)
         {
-            addConflictErrors(new CommonError(APIError.LIMIT_EXCEEDED.name(), limite.toString()));
+            if (limite.isHardLimit())
+            {
+                addConflictErrors(new CommonError(APIError.LIMIT_EXCEEDED.name(), limite.toString()));
+            }
+            else
+            {
+                addConflictErrors(new CommonError(APIError.SOFT_LIMIT_EXCEEDED.name(),
+                    limite.toString()));
+            }
         }
         catch (AllocatorException e)
         {
@@ -393,6 +409,10 @@ public class VirtualMachineAllocatorService extends DefaultApiService
     /**
      * Check the current allowed Enterprise resource utilization is not exceeded. Overloaded method
      * because en case of deploying VM is not necessary check VLAN limits.
+     * <p>
+     * The checks are performed on the specified order. Enterprise limits are higher than Datacenter
+     * limits, and Datacenter higher than VirtualDatacenter (this requirement is satisfied on the
+     * Limit creation)
      * 
      * @param vapp, the target virtual appliance.
      * @param required, the required resources.
@@ -408,11 +428,32 @@ public class VirtualMachineAllocatorService extends DefaultApiService
      */
     @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
     public void checkLimist(final VirtualAppliance vapp, final VirtualMachineRequirements required,
-        final Boolean force) throws LimitExceededException
+        final Boolean force)
     {
-
-        checkLimist(vapp, required, force, true);
-
+        try
+        {
+            checkLimist(vapp, required, force, true);
+        }
+        catch (LimitExceededException limite)
+        {
+            if (limite.isHardLimit())
+            {
+                addConflictErrors(new CommonError(APIError.LIMIT_EXCEEDED.name(), limite.toString()));
+            }
+            else
+            {
+                addConflictErrors(new CommonError(APIError.SOFT_LIMIT_EXCEEDED.name(),
+                    limite.toString()));
+            }
+        }
+        catch (Exception e)
+        {
+            addUnexpectedErrors(new CommonError(APIError.ALLOCATOR_ERROR.name(), e.toString()));
+        }
+        finally
+        {
+            flushErrors();
+        }
     }
 
     /**

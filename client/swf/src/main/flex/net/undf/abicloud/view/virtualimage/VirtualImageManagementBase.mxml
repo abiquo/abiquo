@@ -233,6 +233,7 @@
             protected function requestDatacenters():void
             {
                 var event:InfrastructureEvent = new InfrastructureEvent(InfrastructureEvent.GET_ALLOWED_DATACENTERS);
+                event.enterpriseId = AbiCloudModel.getInstance().loginManager.user.enterprise.id;
                 dispatchEvent(event);
             }
 

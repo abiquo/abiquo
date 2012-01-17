@@ -40,9 +40,11 @@ import com.abiquo.model.enumerator.ConversionState;
 import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.model.enumerator.RemoteServiceType;
+import com.abiquo.model.enumerator.StatefulInclusion;
+import com.abiquo.model.enumerator.VolumeState;
 import com.abiquo.server.core.appslibrary.Category;
-import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
 import com.abiquo.server.core.appslibrary.VirtualImageConversion;
+import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
 import com.abiquo.server.core.appslibrary.VirtualMachineTemplatesDto;
 import com.abiquo.server.core.enterprise.DatacenterLimits;
 import com.abiquo.server.core.enterprise.Enterprise;
@@ -59,8 +61,8 @@ public class VirtualMachineTemplatesResourceIT extends AbstractJpaGeneratorIT
 {
     private static final String SYSADMIN = "sysadmin";
 
-    private final static String AM_BASE_URI =
-        "http://localhost:" + String.valueOf(getEmbededServerPort()) + "/am";
+    private final static String AM_BASE_URI = "http://localhost:"
+        + String.valueOf(getEmbededServerPort()) + "/am";
 
     private Enterprise ent;
 
@@ -148,7 +150,9 @@ public class VirtualMachineTemplatesResourceIT extends AbstractJpaGeneratorIT
     @Test
     public void testGetStatefulVirtualMachineTemplatesRaises404WhenInvalidDatacenter()
     {
-        String uri = resolveStatefulVirtualMachineTemplatesURI(ent.getId(), datacenter.getId() + 100);
+        String uri =
+            resolveStatefulVirtualMachineTemplatesURI(ent.getId(), datacenter.getId() + 100,
+                StatefulInclusion.ALL);
         ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
         assertError(response, 404, APIError.NON_EXISTENT_DATACENTER);
     }
@@ -156,7 +160,9 @@ public class VirtualMachineTemplatesResourceIT extends AbstractJpaGeneratorIT
     @Test
     public void testGetStatefulVirtualMachineTemplatesRaises404WhenInvalidEnterprise()
     {
-        String uri = resolveStatefulVirtualMachineTemplatesURI(ent.getId() + 100, datacenter.getId());
+        String uri =
+            resolveStatefulVirtualMachineTemplatesURI(ent.getId() + 100, datacenter.getId(),
+                StatefulInclusion.ALL);
         ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
         assertError(response, 404, APIError.NON_EXISTENT_ENTERPRISE);
     }
@@ -164,7 +170,9 @@ public class VirtualMachineTemplatesResourceIT extends AbstractJpaGeneratorIT
     @Test
     public void testGetStatefulVirtualMachineTemplatesRaises404WhenNoDatacenterLimits()
     {
-        String uri = resolveStatefulVirtualMachineTemplatesURI(ent.getId(), datacenter.getId());
+        String uri =
+            resolveStatefulVirtualMachineTemplatesURI(ent.getId(), datacenter.getId(),
+                StatefulInclusion.ALL);
         ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
         assertError(response, 409, APIError.ENTERPRISE_NOT_ALLOWED_DATACENTER);
     }
@@ -177,7 +185,7 @@ public class VirtualMachineTemplatesResourceIT extends AbstractJpaGeneratorIT
 
         String uri =
             resolveStatefulVirtualMachineTemplatesURIWithCategory(ent.getId(), datacenter.getId(),
-                "nonexisting");
+                "nonexisting", StatefulInclusion.ALL);
         ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
         assertError(response, 404, APIError.NON_EXISTENT_CATEGORY);
     }
@@ -185,8 +193,10 @@ public class VirtualMachineTemplatesResourceIT extends AbstractJpaGeneratorIT
     @Test
     public void testGetVirtualMachineTemplates()
     {
-        VirtualMachineTemplate vi1 = virtualMachineTemplateGenerator.createInstance(ent, repository);
-        VirtualMachineTemplate vi2 = virtualMachineTemplateGenerator.createInstance(ent, repository);
+        VirtualMachineTemplate vi1 =
+            virtualMachineTemplateGenerator.createInstance(ent, repository);
+        VirtualMachineTemplate vi2 =
+            virtualMachineTemplateGenerator.createInstance(ent, repository);
         DatacenterLimits limits = datacenterLimitsGenerator.createInstance(ent, datacenter);
 
         setup(limits, vi1.getCategory(), vi2.getCategory(), vi1, vi2);
@@ -202,12 +212,15 @@ public class VirtualMachineTemplatesResourceIT extends AbstractJpaGeneratorIT
     @Test
     public void testGetStatefulVirtualMachineTemplatesWithoutResults()
     {
-        VirtualMachineTemplate vi1 = virtualMachineTemplateGenerator.createInstance(ent, repository);
+        VirtualMachineTemplate vi1 =
+            virtualMachineTemplateGenerator.createInstance(ent, repository);
         DatacenterLimits limits = datacenterLimitsGenerator.createInstance(ent, datacenter);
 
         setup(limits, vi1.getCategory(), vi1);
 
-        String uri = resolveStatefulVirtualMachineTemplatesURI(ent.getId(), datacenter.getId());
+        String uri =
+            resolveStatefulVirtualMachineTemplatesURI(ent.getId(), datacenter.getId(),
+                StatefulInclusion.ALL);
         ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
         assertEquals(response.getStatusCode(), 200);
 
@@ -218,14 +231,61 @@ public class VirtualMachineTemplatesResourceIT extends AbstractJpaGeneratorIT
     @Test
     public void testGetStatefulVirtualMachineTemplates()
     {
-        VirtualMachineTemplate vmtemplate = virtualMachineTemplateGenerator.createInstance(ent, repository);
+        VirtualMachineTemplate vmtemplate =
+            virtualMachineTemplateGenerator.createInstance(ent, repository);
         DatacenterLimits limits = datacenterLimitsGenerator.createInstance(ent, datacenter);
         setup(limits, vmtemplate.getCategory(), vmtemplate);
 
         volume.setVirtualMachineTemplate(vmtemplate);
         update(volume, vmtemplate);
 
-        String uri = resolveStatefulVirtualMachineTemplatesURI(ent.getId(), datacenter.getId());
+        String uri =
+            resolveStatefulVirtualMachineTemplatesURI(ent.getId(), datacenter.getId(),
+                StatefulInclusion.ALL);
+        ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
+        assertEquals(response.getStatusCode(), 200);
+
+        VirtualMachineTemplatesDto dto = response.getEntity(VirtualMachineTemplatesDto.class);
+        assertEquals(dto.getCollection().size(), 1);
+    }
+
+    @Test
+    public void testGetStatefulVirtualMachineTemplatesUsed()
+    {
+        VirtualMachineTemplate vmtemplate =
+            virtualMachineTemplateGenerator.createInstance(ent, repository);
+        DatacenterLimits limits = datacenterLimitsGenerator.createInstance(ent, datacenter);
+        setup(limits, vmtemplate.getCategory(), vmtemplate);
+
+        volume.setVirtualMachineTemplate(vmtemplate);
+        volume.setState(VolumeState.ATTACHED);
+        update(volume, vmtemplate);
+
+        String uri =
+            resolveStatefulVirtualMachineTemplatesURI(ent.getId(), datacenter.getId(),
+                StatefulInclusion.USED);
+        ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
+        assertEquals(response.getStatusCode(), 200);
+
+        VirtualMachineTemplatesDto dto = response.getEntity(VirtualMachineTemplatesDto.class);
+        assertEquals(dto.getCollection().size(), 1);
+    }
+
+    @Test
+    public void testGetStatefulVirtualMachineTemplatesNotUsed()
+    {
+        VirtualMachineTemplate vmtemplate =
+            virtualMachineTemplateGenerator.createInstance(ent, repository);
+        DatacenterLimits limits = datacenterLimitsGenerator.createInstance(ent, datacenter);
+        setup(limits, vmtemplate.getCategory(), vmtemplate);
+
+        volume.setVirtualMachineTemplate(vmtemplate);
+        volume.setState(VolumeState.DETACHED);
+        update(volume, vmtemplate);
+
+        String uri =
+            resolveStatefulVirtualMachineTemplatesURI(ent.getId(), datacenter.getId(),
+                StatefulInclusion.NOTUSED);
         ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
         assertEquals(response.getStatusCode(), 200);
 
@@ -236,7 +296,8 @@ public class VirtualMachineTemplatesResourceIT extends AbstractJpaGeneratorIT
     @Test
     public void testGetStatefulVirtualMachineTemplatesByCategory()
     {
-        VirtualMachineTemplate vmtemplate = virtualMachineTemplateGenerator.createInstance(ent, repository);
+        VirtualMachineTemplate vmtemplate =
+            virtualMachineTemplateGenerator.createInstance(ent, repository);
         DatacenterLimits limits = datacenterLimitsGenerator.createInstance(ent, datacenter);
         setup(limits, vmtemplate.getCategory(), vmtemplate);
 
@@ -244,8 +305,8 @@ public class VirtualMachineTemplatesResourceIT extends AbstractJpaGeneratorIT
         update(volume, vmtemplate);
 
         String uri =
-            resolveStatefulVirtualMachineTemplatesURIWithCategory(ent.getId(), datacenter.getId(), vmtemplate
-                .getCategory().getName());
+            resolveStatefulVirtualMachineTemplatesURIWithCategory(ent.getId(), datacenter.getId(),
+                vmtemplate.getCategory().getName(), StatefulInclusion.ALL);
         ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
         assertEquals(response.getStatusCode(), 200);
 
@@ -258,7 +319,8 @@ public class VirtualMachineTemplatesResourceIT extends AbstractJpaGeneratorIT
     {
         Category anotherCategory = categoryGenerator.createUniqueInstance();
 
-        VirtualMachineTemplate template = virtualMachineTemplateGenerator.createInstance(ent, repository);
+        VirtualMachineTemplate template =
+            virtualMachineTemplateGenerator.createInstance(ent, repository);
         DatacenterLimits limits = datacenterLimitsGenerator.createInstance(ent, datacenter);
         setup(limits, template.getCategory(), template, anotherCategory);
 
@@ -267,7 +329,7 @@ public class VirtualMachineTemplatesResourceIT extends AbstractJpaGeneratorIT
 
         String uri =
             resolveStatefulVirtualMachineTemplatesURIWithCategory(ent.getId(), datacenter.getId(),
-                anotherCategory.getName());
+                anotherCategory.getName(), StatefulInclusion.ALL);
         ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
         assertEquals(response.getStatusCode(), 200);
 
@@ -281,8 +343,8 @@ public class VirtualMachineTemplatesResourceIT extends AbstractJpaGeneratorIT
         DatacenterLimits limits = datacenterLimitsGenerator.createInstance(ent, datacenter);
 
         VirtualMachineTemplate vi1 =
-            virtualMachineTemplateGenerator.createInstance(ent, repository, DiskFormatType.VDI_FLAT,
-                "compatible-vbox");
+            virtualMachineTemplateGenerator.createInstance(ent, repository,
+                DiskFormatType.VDI_FLAT, "compatible-vbox");
         VirtualMachineTemplate vi2 =
             virtualMachineTemplateGenerator.createInstance(ent, repository,
                 DiskFormatType.VMDK_STREAM_OPTIMIZED, "No-compatible-vbox");

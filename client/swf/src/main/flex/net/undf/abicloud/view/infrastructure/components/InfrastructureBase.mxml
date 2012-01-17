@@ -369,7 +369,7 @@
                 if(event){
                 	
                 	var automaticOpen:SharedObject = SharedObject.getLocal("automaticOpenPhysicalMachine");
-                	if(event.infrastructureElement is Rack 
+                	if(!(event.infrastructureElement is UcsRack) 
                 	&& automaticOpen.data.value != null 
                 	&& automaticOpen.data.value == true){
                 		//automatic open physical machine form

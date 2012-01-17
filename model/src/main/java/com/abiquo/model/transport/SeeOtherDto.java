@@ -18,24 +18,40 @@
  * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
  * Boston, MA 02111-1307, USA.
  */
-package com.abiquo.abiserver.commands;
 
-import java.util.ArrayList;
-import java.util.Collection;
+/**
+ * 
+ */
+package com.abiquo.model.transport;
 
-import com.abiquo.abiserver.exception.PersistenceException;
-import com.abiquo.abiserver.pojo.authentication.UserSession;
-import com.abiquo.abiserver.pojo.result.DataResult;
-import com.abiquo.abiserver.pojo.virtualappliance.Node;
-import com.abiquo.abiserver.pojo.virtualappliance.VirtualAppliance;
+import javax.xml.bind.annotation.XmlRootElement;
 
-public interface BundleCommand
+import com.abiquo.server.core.task.TaskDto;
+
+/**
+ * This Entity is the response of 303.
+ * 
+ * @author enric.ruiz@abiquo.com
+ */
+@XmlRootElement(name = "seeother")
+public class SeeOtherDto extends TaskDto
 {
+    private static final long serialVersionUID = 4645761892464380938L;
 
-    public abstract DataResult<VirtualAppliance> bundleVirtualAppliance(
-        final UserSession userSession, final VirtualAppliance va, final ArrayList<Node> nodes);
+    protected String location;
 
-    public abstract VirtualAppliance bundleVirtualAppliance(final int idVirtualApp,
-        final Collection<Integer> nodeIds, final String userName) throws PersistenceException;
+    public SeeOtherDto(final String location)
+    {
+        setLocation(location);
+    }
 
+    public String getLocation()
+    {
+        return location;
+    }
+
+    public void setLocation(String location)
+    {
+        this.location = location;
+    }
 }

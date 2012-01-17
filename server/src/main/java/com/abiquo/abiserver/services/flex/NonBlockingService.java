@@ -213,7 +213,7 @@ public class NonBlockingService
         // VirtualApplianceCommand.class);
         //
         // return command.beforeStartVirtualAppliance(session, virtualAppliance, force);
-        return deployVirtualAppliance(session, virtualAppliance);
+        return deployVirtualAppliance(session, virtualAppliance, force);
     }
 
     /**
@@ -222,12 +222,11 @@ public class NonBlockingService
      * @return BasicResult
      */
     public DataResult deployVirtualAppliance(final UserSession session,
-        final VirtualAppliance virtualAppliance)
+        final VirtualAppliance virtualAppliance, final Boolean force)
     {
 
         return proxyVirtualApplianceResourceStub(session).deployVirtualAppliance(
-            virtualAppliance.getVirtualDataCenter().getId(), virtualAppliance.getId(),
-            Boolean.FALSE);
+            virtualAppliance.getVirtualDataCenter().getId(), virtualAppliance.getId(), force);
     }
 
     /**
@@ -242,8 +241,7 @@ public class NonBlockingService
         final VirtualAppliance virtualAppliance)
     {
         return proxyVirtualApplianceResourceStub(session).undeployVirtualAppliance(
-            virtualAppliance.getVirtualDataCenter().getId(), virtualAppliance.getId(),
-            Boolean.FALSE);
+            virtualAppliance.getVirtualDataCenter().getId(), virtualAppliance.getId(), true);
     }
 
     /**
@@ -254,14 +252,14 @@ public class NonBlockingService
      * @return a BasicResult object, containing success = true if the changes were applied
      *         successfully
      */
-    public BasicResult applyChangesVirtualAppliance(final UserSession session,
+    public DataResult<VirtualAppliance> applyChangesVirtualAppliance(final UserSession session,
         final VirtualAppliance virtualAppliance, final Boolean force)
     {
         // VirtualApplianceCommand command =
         // BusinessDelegateProxy.getInstance(session, virtualAppCommand,
         // VirtualApplianceCommand.class);
         VirtualApplianceResourceStub resourceStub = this.proxyVirtualApplianceResourceStub(session);
-        return resourceStub.applyChangesVirtualAppliance(virtualAppliance, session);
+        return resourceStub.applyChangesVirtualAppliance(virtualAppliance, session, force);
         // return command.applyChangesVirtualAppliance(session, virtualAppliance, force);
 
     }

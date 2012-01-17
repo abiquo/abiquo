@@ -348,11 +348,15 @@
         <security:intercept-url pattern="/cloud/virtualdatacenters/*/privatenetworks/*/ips" method="OPTIONS" access="ROLE_AUTHENTICATED" />
         <security:intercept-url pattern="/cloud/virtualdatacenters/*/privatenetworks/*/ips/*" method="GET" access="ROLE_PHYS_DC_RETRIEVE_DETAILS,ROLE_VDC_ENUMERATE" />
         <!-- VIRTUAL APPLIANCES -->
+        <security:intercept-url pattern="/cloud/virtualdatacenters/*/virtualappliances" method="OPTIONS" access="ROLE_VDC_ENUMERATE" />
         <security:intercept-url pattern="/cloud/virtualdatacenters/*/virtualappliances" method="POST" access="ROLE_VDC_MANAGE_VAPP" />
         <security:intercept-url pattern="/cloud/virtualdatacenters/*/virtualappliances" method="GET" access="ROLE_VDC_ENUMERATE" />
+        <security:intercept-url pattern="/cloud/virtualdatacenters/*/virtualappliances/*" method="OPTIONS" access="ROLE_VAPP_CUSTOMISE_SETTINGS" />
         <security:intercept-url pattern="/cloud/virtualdatacenters/*/virtualappliances/*" method="GET" access="ROLE_VAPP_CUSTOMISE_SETTINGS" />
         <security:intercept-url pattern="/cloud/virtualdatacenters/*/virtualappliances/*" method="DELETE" access="ROLE_VDC_MANAGE_VAPP" />
         <security:intercept-url pattern="/cloud/virtualdatacenters/*/virtualappliances/*" method="PUT" access="ROLE_VDC_MANAGE_VAPP" />
+        <security:intercept-url pattern="/cloud/virtualdatacenters/*/virtualappliances/*/state" method="OPTIONS" access="ROLE_VDC_MANAGE_VAPP" />
+        <security:intercept-url pattern="/cloud/virtualdatacenters/*/virtualappliances/*/state" method="GET" access="ROLE_VAPP_CUSTOMISE_SETTINGS" />
         <security:intercept-url pattern="/cloud/virtualdatacenters/*/virtualappliances/*/action/ips" method="GET" access="ROLE_VAPP_CUSTOMISE_SETTINGS" />
         <security:intercept-url pattern="/cloud/virtualdatacenters/*/virtualappliances/*/action/poweron" method="PUT" access="ROLE_VAPP_PERFORM_ACTIONS" />
         <security:intercept-url pattern="/cloud/virtualdatacenters/*/virtualappliances/*/action/undeploy" method="POST" access="ROLE_VAPP_PERFORM_ACTIONS" />

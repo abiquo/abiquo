@@ -409,7 +409,8 @@ public enum APIError
 
     // ALLOCATOR
     LIMITS_EXCEEDED("LIMIT-0", "The required resources exceed the allowed limits"), LIMIT_EXCEEDED(
-        "LIMIT-1", "The required resources exceed the allowed limits"), NOT_ENOUGH_RESOURCES(
+        "LIMIT-1", "The required resources exceed the allowed limits"), SOFT_LIMIT_EXCEEDED(
+        "LIMIT-2", "The required resources exceed the soft limits"), NOT_ENOUGH_RESOURCES(
         "ALLOC-0", "There are not enough resources to create the virtual machine"), //
     ALLOCATOR_ERROR("ALLOC-1", "Cannot create virtual machine"), //
 
@@ -672,8 +673,8 @@ public enum APIError
         // Outputs all errors in wiki table format
         for (APIError error : errors)
         {
-            System.out.println(String.format("| %s | %s | %s |", error.code, error.message, error
-                .name()));
+            System.out.println(String.format("| %s | %s | %s |", error.code, error.message,
+                error.name()));
         }
 
         System.out.println("\n ************ Flex client labels ************** \n");
