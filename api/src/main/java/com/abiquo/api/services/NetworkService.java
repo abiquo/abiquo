@@ -195,6 +195,8 @@ public class NetworkService extends DefaultApiService
 
                 ip = new IpPoolManagement(vlan, "?", "?", "?", vlan.getName());
                 ip.setVirtualDatacenter(vdc);
+                ip.setMac(IPNetworkRang.requestRandomMacAddress(vdc.getHypervisorType()));
+                ip.setName(ip.getMac() + "_host");
                 repo.insertIpManagement(ip);
 
                 break;
