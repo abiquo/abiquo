@@ -139,6 +139,11 @@
                 }
                 else
                 {
+                	//Update the automatic check
+                	if(automaticOpenCheck.selected)
+                	{
+                	   AbiCloudModel.getInstance().configurationManager.modifyRegisteredSharedObject("automaticOpenPhysicalMachine",true);	
+                	}
                     //Creating the rack
                     this._rack = new Rack();
                     this._rack.dataCenter = this._datacenter;
