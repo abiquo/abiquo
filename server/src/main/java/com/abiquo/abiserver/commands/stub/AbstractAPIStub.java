@@ -387,10 +387,20 @@ public class AbstractAPIStub
             if (errors.getCollection().get(0).getCode().equals("SOFT_LIMIT_EXCEEDED"))
             {
                 result.setResultCode(BasicResult.SOFT_LIMT_EXCEEDED);
+                // limit exceeded does not include the detail
+                if (result.getMessage().length() < 254)
+                {
+                    result.setResultCode(0);
+                }
             }
             else if (errors.getCollection().get(0).getCode().equals("LIMIT_EXCEEDED"))
             {
                 result.setResultCode(BasicResult.HARD_LIMT_EXCEEDED);
+                // limit exceeded does not include the detail
+                if (result.getMessage().length() < 254)
+                {
+                    result.setResultCode(0);
+                }
             }
             else if (errors.getCollection().get(0).getCode().equals("VM-44"))
             {
@@ -402,34 +412,58 @@ public class AbstractAPIStub
     protected void populateErrors(final Exception ex, final BasicResult result,
         final String methodName)
     {
-        result.setSuccess(false);
         if (ex instanceof AuthorizationException)
         {
-            ErrorManager.getInstance(AbiCloudConstants.ERROR_PREFIX).reportError(
-                new ResourceManager(BasicCommand.class), result,
-                "onFaultAuthorization.noPermission", methodName);
-            result.setMessage(ex.getMessage());
-            result.setResultCode(BasicResult.NOT_AUTHORIZED);
-            throw new UserSessionException(result);
+            populateErrors((AuthorizationException) ex, result, methodName);
         }
         else if (ex instanceof AbiquoException)
         {
-            AbiquoException abiquoException = (AbiquoException) ex;
-            result.setMessage(abiquoException.getMessage());
-            result.setErrorCode(abiquoException.getErrors().get(0).getCode());
-            if (abiquoException.hasError("LIMIT_EXCEEDED"))
-            {
-                result.setResultCode(BasicResult.HARD_LIMT_EXCEEDED);
-                // limit exceeded does not include the detail
-                if (result.getMessage().length() < 254)
-                {
-                    result.setResultCode(0);
-                }
-            }
+            populateErrors((AbiquoException) ex, result, methodName);
         }
         else
         {
+            result.setSuccess(false);
             result.setMessage(ex.getMessage());
+        }
+    }
+
+    protected void populateErrors(final AuthorizationException ex, final BasicResult result,
+        final String methodName)
+    {
+        result.setSuccess(false);
+        ErrorManager.getInstance(AbiCloudConstants.ERROR_PREFIX).reportError(
+            new ResourceManager(BasicCommand.class), result, "onFaultAuthorization.noPermission",
+            methodName);
+        result.setMessage(ex.getMessage());
+        result.setResultCode(BasicResult.NOT_AUTHORIZED);
+        throw new UserSessionException(result);
+    }
+
+    protected void populateErrors(final AbiquoException abiquoException, final BasicResult result,
+        final String methodName)
+    {
+
+        result.setSuccess(false);
+        result.setMessage(abiquoException.getMessage());
+        result.setErrorCode(abiquoException.getErrors().get(0).getCode());
+
+        if (abiquoException.hasError("SOFT_LIMIT_EXCEEDED"))
+        {
+            result.setResultCode(BasicResult.SOFT_LIMT_EXCEEDED);
+            // limit exceeded does not include the detail
+            if (result.getMessage().length() < 254)
+            {
+                result.setResultCode(0);
+            }
+        }
+        else if (abiquoException.hasError("LIMIT_EXCEEDED"))
+        {
+            result.setResultCode(BasicResult.HARD_LIMT_EXCEEDED);
+            // limit exceeded does not include the detail
+            if (result.getMessage().length() < 254)
+            {
+                result.setResultCode(0);
+            }
         }
     }
 

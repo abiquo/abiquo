@@ -252,7 +252,7 @@ public class NonBlockingService
      * @return a BasicResult object, containing success = true if the changes were applied
      *         successfully
      */
-    public BasicResult applyChangesVirtualAppliance(final UserSession session,
+    public DataResult<VirtualAppliance> applyChangesVirtualAppliance(final UserSession session,
         final VirtualAppliance virtualAppliance, final Boolean force)
     {
         // VirtualApplianceCommand command =

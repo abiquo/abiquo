@@ -139,7 +139,7 @@ public class VirtualMachineAllocatorService extends DefaultApiService
 
         try
         {
-            checkLimist(vapp, increaseRequirements, foreceEnterpriseSoftLimits);
+            checkLimist(vapp, increaseRequirements, foreceEnterpriseSoftLimits, true);
 
             boolean check =
                 allocationService.checkVirtualMachineResourceIncrease(machine,
@@ -242,7 +242,7 @@ public class VirtualMachineAllocatorService extends DefaultApiService
             final Integer idDatacenter = vapp.getVirtualDatacenter().getDatacenter().getId();
             final FitPolicy fitPolicy = getAllocationFitPolicyOnDatacenter(idDatacenter);
 
-            checkLimist(vapp, requirements, foreceEnterpriseSoftLimits);
+            checkLimist(vapp, requirements, foreceEnterpriseSoftLimits, true);
 
             VirtualMachine allocatedvm =
                 selectPhysicalMachineAndAllocateResources(vmachine, vapp, fitPolicy, requirements);
