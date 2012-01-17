@@ -121,17 +121,20 @@ public class VirtualMachineInfrastructureResource extends AbstractResource
             enterpriseId, userId, vm.getHypervisor().getType()));
 
         final VirtualMachineTemplate vmtemplate = vm.getVirtualMachineTemplate();
-        if (vmtemplate.getRepository() != null)
+        if (vmtemplate != null)
         {
-            vmDto.addLink(restBuilder.buildVirtualMachineTemplateLink(vmtemplate.getEnterprise()
-                .getId(), vmtemplate.getRepository().getDatacenter().getId(), vmtemplate.getId()));
-        }
-        else
-        {
-            // imported virtual machines
-            vmDto.addLink(restBuilder.buildVirtualMachineTemplateLink(vmtemplate.getEnterprise()
-                .getId(), vm.getHypervisor().getMachine().getRack().getDatacenter().getId(),
-                vmtemplate.getId()));
+            if (vmtemplate.getRepository() != null)
+            {
+                vmDto.addLink(restBuilder.buildVirtualMachineTemplateLink(vmtemplate.getEnterprise()
+                    .getId(), vmtemplate.getRepository().getDatacenter().getId(), vmtemplate.getId()));
+            }
+            else
+            {
+                // imported virtual machines
+                vmDto.addLink(restBuilder.buildVirtualMachineTemplateLink(vmtemplate.getEnterprise()
+                    .getId(), vm.getHypervisor().getMachine().getRack().getDatacenter().getId(),
+                    vmtemplate.getId()));
+            }
         }
         return vmDto;
     }
