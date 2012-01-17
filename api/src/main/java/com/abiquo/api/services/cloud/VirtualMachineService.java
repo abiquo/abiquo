@@ -2300,7 +2300,7 @@ public class VirtualMachineService extends DefaultApiService
                 if (oldVm.getState() == VirtualMachineState.NOT_ALLOCATED)
                 {
                     vdcRep.deleteRasd(disk.getRasd());
-                    vdcRep.removeHardDisk(disk);
+                    rasdDao.remove(disk);
                 }
                 else
                 {
