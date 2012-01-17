@@ -201,9 +201,10 @@ public class VirtualMachineResource extends AbstractResource
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) @NotNull @Min(1) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) @NotNull @Min(1) final Integer vappId,
         @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) @NotNull @Min(1) final Integer vmId,
-        final VirtualMachineDto dto, @Context final IRESTBuilder restBuilder,
+        final VirtualMachineWithNodeDto dto, @Context final IRESTBuilder restBuilder,
         @Context final UriInfo uriInfo) throws Exception
     {
+        vmService.updateNodeVirtualImageInfo(vdcId, vappId, vmId, dto);
         String taskId = vmService.reconfigureVirtualMachine(vdcId, vappId, vmId, dto);
 
         if (taskId == null)

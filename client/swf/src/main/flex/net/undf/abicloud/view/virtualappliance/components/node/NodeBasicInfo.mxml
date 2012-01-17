@@ -133,6 +133,9 @@
 	                	var virtualApplianceEvent:VirtualApplianceEvent = new VirtualApplianceEvent(VirtualApplianceEvent.EDIT_VIRTUALAPPLIANCE);
 	                    virtualApplianceEvent.virtualAppliance = _virtualAppliance;
 	                    dispatchEvent(virtualApplianceEvent);
+	                    
+	                    //Put the Virtual Appliance in LOCKED State to reconfigure it
+                        AbiCloudModel.getInstance().virtualApplianceManager.dispatchEvent(new Event("reconfigureVirtualApplianceEvent"));
                 	}
                 } 
                 
@@ -156,6 +159,9 @@
 	                infrastructureEvent.virtualDatacenter = this._virtualDatacenter;
 	                infrastructureEvent.virtualAppliance = this._virtualAppliance;
 	                dispatchEvent(infrastructureEvent);
+	                
+	                //Put the Virtual Appliance in LOCKED State to reconfigure it
+	                AbiCloudModel.getInstance().virtualApplianceManager.dispatchEvent(new Event("reconfigureVirtualApplianceEvent"));
                 }
             }
 
@@ -295,6 +301,7 @@
     <mx:HBox width="100%" horizontalAlign="center" id="saveBox">
         <mx:Button height="18" id="saveButton"
             label="@Resource(bundle='Common',key='BUTTON_SAVE')"
+            enabled="{this._isEditionAllowed}"
             click="editVirtualMachine()"/>
    </mx:HBox>
 </mx:VBox>
