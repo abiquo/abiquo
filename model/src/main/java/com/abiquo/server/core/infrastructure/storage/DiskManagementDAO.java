@@ -41,7 +41,7 @@ public class DiskManagementDAO extends DefaultDAOBase<Integer, DiskManagement>
 
     public static final String GET_DISKS_INTO_VIRTUALMACHINE =
         " SELECT disk FROM DiskManagement disk" + " WHERE disk.virtualMachine.id = :idVm "
-            + " ORDER BY disk.rasd.generation";
+            + " ORDER BY disk.sequence";
 
     public static final String GET_DISKS_INTO_VIRTUALDATACENTER =
         " SELECT disk FROM DiskManagement disk" + " WHERE disk.virtualDatacenter.id = :idVdc "
