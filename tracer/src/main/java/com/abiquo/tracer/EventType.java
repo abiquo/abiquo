@@ -104,7 +104,9 @@ public enum EventType implements Serializable
         "Virtual Image deleted from the Appliance Library"), DISK_CONVERSION(503,
         "DISK_CONVERSION", "Disc conversion started"), RAW_IMPORT_CONVERSION(504,
         "RAW_IMPORT_CONVERSION", "Raw import conversion started"), VI_UPDATE(505, "VI_UPDATE",
-        "Virtual Image updated"),
+        "Virtual Image updated"), CONVERSION_FAILED(506, "CONVERSION_FAILED",
+        "Virtual machine template conversion failed"), CONVERSION_FINISHED(507,
+        "CONVERSION_FINISHED", "Virtual machine template conversion finished"),
 
     // Stateful related events
     PERSISTENT_PROCESS_START(600, "PERSISTENT_PROCESS_START",

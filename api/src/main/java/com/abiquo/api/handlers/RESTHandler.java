@@ -42,6 +42,7 @@ import com.abiquo.api.util.AbiquoLinkBuildersFactory;
 import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.model.transport.AcceptedRequestDto;
 import com.abiquo.model.transport.MovedPermanentlyDto;
+import com.abiquo.model.transport.SeeOtherDto;
 import com.abiquo.model.transport.SingleResourceTransportDto;
 import com.abiquo.model.transport.WrapperDto;
 import com.google.common.collect.Iterables;
@@ -85,8 +86,21 @@ public class RESTHandler extends CheckLocationHeaderHandler
     @Override
     public void handleResponse(final MessageContext context) throws Throwable
     {
-        // If the entity is the appropriate we return a 202
         if (context.getResponseStatusCode() == HttpServletResponse.SC_OK
+            && context.getResponseEntity() != null
+            && context.getResponseEntity() instanceof SeeOtherDto)
+        {
+            SeeOtherDto dto = (SeeOtherDto) context.getResponseEntity();
+
+            ResponseBuilder builder = new ResponseBuilderImpl();
+            builder.location(new URI(dto.getLocation()));
+            builder.status(HttpServletResponse.SC_SEE_OTHER);
+
+            context.setResponseStatusCode(HttpServletResponse.SC_SEE_OTHER);
+            context.setResponseEntity(builder.build());
+        }
+        // If the entity is the appropriate we return a 202
+        else if (context.getResponseStatusCode() == HttpServletResponse.SC_OK
             && context.getResponseEntity() != null
             && context.getResponseEntity() instanceof AcceptedRequestDto)
         {

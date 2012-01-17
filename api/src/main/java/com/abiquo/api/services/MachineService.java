@@ -35,11 +35,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import com.abiquo.api.exceptions.APIError;
-import com.abiquo.api.exceptions.InternalServerErrorException;
+import com.abiquo.api.exceptions.APIException;
 import com.abiquo.api.services.cloud.VirtualMachineService;
 import com.abiquo.api.services.stub.VsmServiceStub;
 import com.abiquo.api.tracer.TracerLogger;
-import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.cloud.VirtualDatacenterRep;
 import com.abiquo.server.core.cloud.VirtualMachine;
@@ -216,13 +215,9 @@ public class MachineService extends DefaultApiService
     public void removeMachine(final Integer id, final boolean force)
     {
         Machine machine = repo.findMachineById(id);
-        RemoteService vsmRS =
-            remoteServiceService.getRemoteService(machine.getDatacenter().getId(),
-                RemoteServiceType.VIRTUAL_SYSTEM_MONITOR);
-
         Hypervisor hypervisor = machine.getHypervisor();
 
-        // updating abiquo virtual machines and removing imported virtual machines
+        // Update virtual machines and remove imported virtual machines
         Collection<VirtualMachine> virtualMachines =
             virtualMachineService.findByHypervisor(hypervisor);
 
@@ -247,10 +242,8 @@ public class MachineService extends DefaultApiService
 
                     virtualMachineService.updateVirtualMachine(vm);
                 }
-                // imported machines
-                else
+                else if (vm.isImported())
                 {
-                    vsm.unsubscribe(vsmRS, vm);
                     virtualDatacenterRep.deleteVirtualMachine(vm);
                 }
             }
@@ -266,17 +259,38 @@ public class MachineService extends DefaultApiService
             }
         }
 
-        // unsuscribing physical machine
-        try
+        repo.deleteMachine(machine);
+
+        // Update VSM state
+        RemoteService service = remoteServiceService.getVSMRemoteService(machine.getDatacenter());
+
+        if (virtualMachines != null)
         {
-            vsm.shutdownMonitor(vsmRS, hypervisor);
-        }
-        catch (InternalServerErrorException e)
-        {
-            // we can ignore this error
+            for (VirtualMachine vm : virtualMachines)
+            {
+                try
+                {
+                    vsm.unsubscribe(service, vm);
+                }
+                catch (APIException e)
+                {
+                    logger
+                        .error(
+                            "Trying to unsubscribe virtual machine {} when it is already unsubscribed.",
+                            vm.getName());
+                }
+            }
         }
 
-        repo.deleteMachine(machine);
+        try
+        {
+            vsm.shutdownMonitor(service, hypervisor);
+        }
+        catch (APIException e)
+        {
+            logger.error("Trying to stop monitor of machine {} when it is not monitored.",
+                hypervisor.getIp());
+        }
 
         tracer.log(SeverityType.INFO, ComponentType.MACHINE, EventType.MACHINE_DELETE,
             "machine.deleted", machine.getName(), machine.getHypervisor().getIp(), machine

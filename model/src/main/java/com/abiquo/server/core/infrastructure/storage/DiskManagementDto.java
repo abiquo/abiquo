@@ -27,7 +27,7 @@ import javax.xml.bind.annotation.XmlType;
 import com.abiquo.model.transport.SingleResourceTransportDto;
 
 @XmlRootElement(name = "disk")
-@XmlType(propOrder = {"sizeInMb"})
+@XmlType(propOrder = {"sequence", "sizeInMb"})
 public class DiskManagementDto extends SingleResourceTransportDto
 {
     public static final String DISK_MEDIA_TYPE = "application/disk+xml";
@@ -35,6 +35,8 @@ public class DiskManagementDto extends SingleResourceTransportDto
     private static final long serialVersionUID = 1L;
 
     private Long sizeInMb;
+    
+    private Integer sequence;
 
     public void setSizeInMb(final Long sizeInMb)
     {
@@ -44,5 +46,15 @@ public class DiskManagementDto extends SingleResourceTransportDto
     public Long getSizeInMb()
     {
         return this.sizeInMb;
+    }
+
+    public void setSequence(Integer sequence)
+    {
+        this.sequence = sequence;
+    }
+
+    public Integer getSequence()
+    {
+        return sequence;
     }
 }

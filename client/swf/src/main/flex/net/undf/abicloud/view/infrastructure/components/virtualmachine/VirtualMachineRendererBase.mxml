@@ -217,7 +217,7 @@
                 	if(this._virtualMachine.id != value.id){
 		                update = true;                		
                 	}else{
-                		if(!this._editMode){
+                		if(this._virtualMachine.state.id != value.state.id){
                 			update = true;
                 		}
                 	}
@@ -561,8 +561,6 @@
             {
                 if (this._virtualMachine.idType == VirtualMachine.VIRTUAL_MACHINE_MANAGED && this._virtualMachine.state.description != State.LOCKED.description)
                 {
-                    this._editMode = true;
-
                     //Setting the values that can be edited
                     nameInput.text = this._virtualMachine.name;
                     cpuInput.value = this._virtualMachine.cpu;
@@ -737,15 +735,6 @@
                     height="20"
                     maxWidth="300" maxChars="100" includeInLayout="false"
                     visible="false"/>
-
-                <!--<utils:SmoothImage
-                	id="virtualMachineEditButtonIcon"
-                    height="17"
-                    creationComplete="AbicloudUtils.getImageFromStyle('VirtualMachineEditButtonIcon',virtualMachineEditButtonIcon)"
-                    toolTip="@Resource(bundle='Common', key='BUTTON_EDIT_TOOLTIP')"
-                    includeInLayout="{! this._editMode}"
-                    visible="{! this._editMode}"
-                    click="onClickEdit()"/>-->
 
                 <mx:Button 
                     height="17"
