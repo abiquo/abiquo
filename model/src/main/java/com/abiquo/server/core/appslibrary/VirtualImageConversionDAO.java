@@ -57,6 +57,22 @@ public class VirtualImageConversionDAO extends DefaultDAOBase<Integer, VirtualIm
         return Restrictions.eq(VirtualImageConversion.VIRTUAL_MACHINE_TEMPLATE_PROPERTY, image);
     }
 
+    private static Criterion sameImage(final VirtualImageConversion conversion)
+    {
+        return Restrictions.eq(VirtualImageConversion.VIRTUAL_MACHINE_TEMPLATE_PROPERTY,
+            conversion.getVirtualMachineTemplate());
+    }
+
+    private static Criterion sameSourceFormat(final VirtualImageConversion image)
+    {
+        return Restrictions.eq(VirtualImageConversion.SOURCE_TYPE_PROPERTY, image.getSourceType());
+    }
+
+    private static Criterion sameTargetFormat(final VirtualImageConversion image)
+    {
+        return Restrictions.eq(VirtualImageConversion.TARGET_TYPE_PROPERTY, image.getTargetType());
+    }
+
     private static Criterion targetFormatIn(final DiskFormatType... formats)
     {
         return Restrictions.in(VirtualImageConversion.TARGET_TYPE_PROPERTY, formats);
@@ -80,8 +96,8 @@ public class VirtualImageConversionDAO extends DefaultDAOBase<Integer, VirtualIm
      *         the most suitable format.
      */
     @SuppressWarnings("unchecked")
-    public List<VirtualImageConversion> compatilbeConversions(final VirtualMachineTemplate virtualImage,
-        final HypervisorType hypervisorType)
+    public List<VirtualImageConversion> compatilbeConversions(
+        final VirtualMachineTemplate virtualImage, final HypervisorType hypervisorType)
     {
         final Criterion compat =
             Restrictions.and(sameImage(virtualImage),
@@ -142,7 +158,8 @@ public class VirtualImageConversionDAO extends DefaultDAOBase<Integer, VirtualIm
         return !createCriteria(compat).list().isEmpty();
     }
 
-    public Collection<VirtualImageConversion> findByVirtualImage(final VirtualMachineTemplate virtualImage)
+    public Collection<VirtualImageConversion> findByVirtualImage(
+        final VirtualMachineTemplate virtualImage)
     {
         final Criteria criteria = createCriteria().add(sameImage(virtualImage));
         return criteria.list();
@@ -171,5 +188,12 @@ public class VirtualImageConversionDAO extends DefaultDAOBase<Integer, VirtualIm
         query.setParameter("idVirtualImageConversion", idVirtualImageConversion);
 
         return (String) query.uniqueResult();
+    }
+
+    public boolean existDuplicatedConversion(final VirtualImageConversion conversion)
+    {
+        Criterion cri = Restrictions.and(sameImage(conversion), sameSourceFormat(conversion));
+        cri = Restrictions.and(cri, sameTargetFormat(conversion));
+        return existsAnyByCriterions(cri);
     }
 }
