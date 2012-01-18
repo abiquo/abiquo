@@ -25,8 +25,8 @@ import java.util.List;
 
 import com.abiquo.model.enumerator.ConversionState;
 import com.abiquo.model.enumerator.DiskFormatType;
-import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
 import com.abiquo.server.core.appslibrary.VirtualImageConversion;
+import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
 import com.abiquo.server.core.appslibrary.VirtualMachineTemplateGenerator;
 import com.abiquo.server.core.common.DefaultEntityGenerator;
 import com.softwarementors.commons.test.SeedGenerator;
@@ -77,6 +77,22 @@ public class VirtualImageConversionGenerator extends DefaultEntityGenerator<Virt
                 VirtualImageConversion.TARGET_PATH_LENGTH_MAX));
 
         virtualImageConversion.setState(ConversionState.FINISHED);
+        return virtualImageConversion;
+    }
+
+    /** ENQUEUED **/
+    public VirtualImageConversion createInstance(final VirtualMachineTemplate vimage,
+        final DiskFormatType targetFormat, final DiskFormatType sourceFormat)
+    {
+        VirtualImageConversion virtualImageConversion =
+            new VirtualImageConversion(vimage,
+                ConversionState.ENQUEUED,
+                sourceFormat,
+                targetFormat,
+                newString(nextSeed(), VirtualImageConversion.SOURCE_PATH_LENGTH_MIN,
+                    VirtualImageConversion.SOURCE_PATH_LENGTH_MAX), newString(nextSeed(),
+                    VirtualImageConversion.TARGET_PATH_LENGTH_MIN,
+                    VirtualImageConversion.TARGET_PATH_LENGTH_MAX));
         return virtualImageConversion;
     }
 
