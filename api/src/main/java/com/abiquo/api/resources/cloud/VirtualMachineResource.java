@@ -571,10 +571,20 @@ public class VirtualMachineResource extends AbstractResource
         }
         else
         {
-            // imported virtual machines
-            dto.addLink(restBuilder.buildVirtualMachineTemplateLink(virtualImage.getEnterprise()
-                .getId(), v.getVirtualMachine().getHypervisor().getMachine().getRack()
-                .getDatacenter().getId(), v.getVirtualImage().getId()));
+            if (v.getVirtualMachine().getState().equals(VirtualMachineState.NOT_ALLOCATED))
+            {
+                // captured and managed virtual machines but with pm removed
+                dto.addLink(restBuilder.buildVirtualMachineTemplateLink(virtualImage
+                    .getEnterprise().getId(), v.getVirtualAppliance().getVirtualDatacenter()
+                    .getDatacenter().getId(), v.getVirtualImage().getId()));
+            }
+            else
+            {
+                // captured virtual machines
+                dto.addLink(restBuilder.buildVirtualMachineTemplateLink(virtualImage
+                    .getEnterprise().getId(), v.getVirtualMachine().getHypervisor().getMachine()
+                    .getRack().getDatacenter().getId(), v.getVirtualImage().getId()));
+            }
         }
 
         dto.addLinks(restBuilder.buildVirtualMachineCloudAdminLinks(vdcId, vappId, v
