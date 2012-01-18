@@ -77,10 +77,12 @@
                 if (currentStatus == RemoteService.STATUS_OK)
                 {
                     statusImage.source = CommonAssets.genericOK;
+                    remoteServiceIsValid = true;
                 }
                 else
                 {
                     statusImage.source = CommonAssets.genericKO;
+                    remoteServiceIsValid = false;
                 }
 
             }
@@ -110,6 +112,7 @@
                                  checkStatusEnabled:Boolean = true, serviceMappingEnabled:Boolean = true):void
             {
                 _remoteServiceType = remoteServiceType;
+                remoteServiceIsValid = false;
                 
                 if (_remoteServiceType)
                 {
@@ -166,12 +169,16 @@
                 event.callback = updateStatus;
                 dispatchEvent(event);
             }
+            
+            //Flex Monkey optimization
+            public var remoteServiceIsValid:Boolean;
 
             /**
              * Method called externaly, to set the current status of the RemoteService
              */
             private function updateStatus(statusOK:Boolean):void
             {
+                remoteServiceIsValid = statusOK;
                 if (statusOK)
                 {
                     statusImage.source = CommonAssets.genericOK;
