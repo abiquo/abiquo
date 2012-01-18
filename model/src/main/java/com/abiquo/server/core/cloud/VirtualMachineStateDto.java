@@ -42,7 +42,7 @@ public class VirtualMachineStateDto extends SingleResourceTransportDto implement
     private static final long serialVersionUID = 7891496375111061310L;
 
     /**
-     * Machine power state. <br>
+     * Machine state state. <br>
      * Values
      * <ul>
      * <li><b>OFF</b></li>
@@ -50,10 +50,10 @@ public class VirtualMachineStateDto extends SingleResourceTransportDto implement
      * <li><b>PAUSED</b></li>
      * </ul>
      */
-    private VirtualMachineState power;
+    private VirtualMachineState state;
 
     /**
-     * Machine power state.
+     * Machine state state.
      * 
      * @return *
      *         <ul>
@@ -62,13 +62,13 @@ public class VirtualMachineStateDto extends SingleResourceTransportDto implement
      *         <li><b>PAUSED</b></li>
      *         </ul>
      */
-    public VirtualMachineState getPower()
+    public VirtualMachineState getState()
     {
-        return power;
+        return state;
     }
 
     /**
-     * Machine power state. <br>
+     * Machine state state. <br>
      * Values *
      * <ul>
      * <li><b>OFF</b></li>
@@ -76,7 +76,7 @@ public class VirtualMachineStateDto extends SingleResourceTransportDto implement
      * <li><b>PAUSED</b></li>
      * </ul>
      * 
-     * @param power *
+     * @param state *
      *            <ul>
      *            <li><b>OFF</b></li>
      *            <li><b>ON</b></li>
@@ -84,8 +84,8 @@ public class VirtualMachineStateDto extends SingleResourceTransportDto implement
      *            </ul>
      *            void
      */
-    public void setPower(final VirtualMachineState power)
+    public void setState(final VirtualMachineState state)
     {
-        this.power = power;
+        this.state = state;
     }
 }
