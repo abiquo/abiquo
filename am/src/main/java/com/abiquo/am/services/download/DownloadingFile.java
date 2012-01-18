@@ -37,6 +37,7 @@ import org.slf4j.LoggerFactory;
 import com.abiquo.am.data.AMRedisDao;
 import com.abiquo.am.services.ErepoFactory;
 import com.abiquo.am.services.notify.AMNotifier;
+import com.abiquo.appliancemanager.config.AMConfiguration;
 import com.abiquo.appliancemanager.transport.TemplateStatusEnumType;
 import com.ning.http.client.AsyncHandler;
 import com.ning.http.client.HttpResponseBodyPart;
@@ -71,8 +72,6 @@ public class DownloadingFile implements AsyncHandler<Boolean>
     protected volatile boolean isError = false;
 
     private final static Integer B_2_MB = 1048576;
-
-    private final static Integer NOTIFY_EVERY_X_SEC = 1; // TODO CONFIGURABLE
 
     private long lastNotifyMs = 0;
 
@@ -158,14 +157,20 @@ public class DownloadingFile implements AsyncHandler<Boolean>
     {
         final long now = System.currentTimeMillis();
 
-        if (now - lastNotifyMs > 100 * NOTIFY_EVERY_X_SEC)
+        if (now - lastNotifyMs > AMConfiguration.DOWNLOADING_PUBLISH_INTERVAL)
         {
             final Integer progress = (int) (currentBytes * 100 / expectedBytes);
             LOG.trace("{} {}", ovfId, progress);
 
             AMRedisDao dao = AMRedisDao.getDao();
-            dao.setDownloadProgress(erepoId, ovfId, progress);
-            AMRedisDao.returnDao(dao);
+            try
+            {
+                dao.setDownloadProgress(erepoId, ovfId, progress);
+            }
+            finally
+            {
+                AMRedisDao.returnDao(dao);
+            }
 
             lastNotifyMs = now;
         }
@@ -245,9 +250,15 @@ public class DownloadingFile implements AsyncHandler<Boolean>
         else
         {
             AMRedisDao dao = AMRedisDao.getDao();
-            dao.setDownloadProgress(erepoId, ovfId, 0);
-            dao.setState(erepoId, ovfId, TemplateStatusEnumType.NOT_DOWNLOAD);
-            AMRedisDao.returnDao(dao);
+            try
+            {
+                // dao.setDownloadProgress(erepoId, ovfId, 0);
+                dao.setState(erepoId, ovfId, TemplateStatusEnumType.NOT_DOWNLOAD);
+            }
+            finally
+            {
+                AMRedisDao.returnDao(dao);
+            }
         }
     }
 

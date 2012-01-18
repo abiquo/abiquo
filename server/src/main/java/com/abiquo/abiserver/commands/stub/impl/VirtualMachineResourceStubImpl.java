@@ -160,7 +160,7 @@ public class VirtualMachineResourceStubImpl extends AbstractAPIStub implements
             createEditVirtualMachineStateUrl(virtualDatacenterId, virtualApplianceId,
                 virtualMachine.getId());
         VirtualMachineStateDto dto = new VirtualMachineStateDto();
-        dto.setPower(virtualMachineState);
+        dto.setState(virtualMachineState);
         ClientResponse response = put(url, dto);
 
         if (response.getStatusCode() == Status.ACCEPTED.getStatusCode())

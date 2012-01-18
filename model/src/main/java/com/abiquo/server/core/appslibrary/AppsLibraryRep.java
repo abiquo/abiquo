@@ -330,4 +330,9 @@ public class AppsLibraryRep extends DefaultRepBase
         conversionDAO.persist(conversion);
     }
 
+    public boolean existDuplicatedConversion(final VirtualImageConversion conversion)
+    {
+        return conversionDAO.existDuplicatedConversion(conversion);
+    }
+
 }

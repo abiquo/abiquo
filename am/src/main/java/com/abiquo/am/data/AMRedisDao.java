@@ -42,8 +42,8 @@ public class AMRedisDao
     // TODO move to AMConfig
     public static final String REDIS_HOS = getProperty("abiquo.redis.host", "localhost");
 
-    public static final Integer REDIS_PORT =
-        Integer.parseInt(getProperty("abiquo.redis.port", "6379"));
+    public static final Integer REDIS_PORT = Integer.parseInt(getProperty("abiquo.redis.port",
+        "6379"));
 
     private static JedisPoolConfig REDIS_POOL_CONF;
 
@@ -59,11 +59,22 @@ public class AMRedisDao
     {
         REDIS_POOL_CONF = new JedisPoolConfig();
         REDIS_POOL_CONF.setTestOnBorrow(true);
+
+        // REDIS_POOL_CONF.setMaxIdle(4);
+        // REDIS_POOL_CONF.setMaxActive(4);
+        REDIS_POOL_CONF.setMaxWait(5000); // ms to obtain a redis client
+
         REDIS_POOL = new JedisPool(REDIS_POOL_CONF, REDIS_HOS, REDIS_PORT);
 
     }
 
     /** ########## ########## */
+
+    private final static String EREPOS_KEYS = "erepoKeys:";
+
+    private final static String EREPO = "erepo:";
+
+    private final static String TEMPLATE = "ovf:";
 
     private final static String STATE = "state";
 
@@ -96,6 +107,7 @@ public class AMRedisDao
     {
         for (String ovfKey : getOvfKeys(erId))
         {
+
             redis.del(ovfKey);
         }
 
@@ -139,8 +151,11 @@ public class AMRedisDao
 
         if (state == TemplateStatusEnumType.NOT_DOWNLOAD)
         {
-            redis.srem(key(erId), key(erId, ovfId));
-            redis.del(key(erId, ovfId));
+            synchronized (this)
+            {
+                redis.srem(key(erId), key(erId, ovfId));
+                redis.del(key(erId, ovfId));
+            }
         }
         else
         {
@@ -153,8 +168,11 @@ public class AMRedisDao
     {
         checkKeyIndex(erId, ovfId);
 
-        redis.hset(key(erId, ovfId), STATE, TemplateStatusEnumType.ERROR.name());
-        redis.hset(key(erId, ovfId), ERROR, error);
+        synchronized (this)
+        {
+            redis.hset(key(erId, ovfId), STATE, TemplateStatusEnumType.ERROR.name());
+            redis.hset(key(erId, ovfId), ERROR, error);
+        }
     }
 
     /** ########## GET ########## */
@@ -162,7 +180,14 @@ public class AMRedisDao
     public Integer getDownloadProgress(final String erId, final String ovfId)
     {
         final String current = redis.hget(key(erId, ovfId), PROGRESS);
-        return Integer.parseInt(current != null ? current : "0");
+        try
+        {
+            return Integer.parseInt(current != null ? current : "0");
+        }
+        catch (Exception e)
+        {
+            return 0;
+        }
     }
 
     /** return NOT_FOUND */
@@ -173,6 +198,11 @@ public class AMRedisDao
             return TemplateStatusEnumType.NOT_DOWNLOAD;
         }
 
+        // if (current == null)
+        // {
+        // redis.srem(key(erId), key(erId, ovfId));
+        // return TemplateStatusEnumType.NOT_DOWNLOAD;
+        // }
         final String current = redis.hget(key(erId, ovfId), STATE);
         return TemplateStatusEnumType.valueOf(current);
     }
@@ -227,16 +257,16 @@ public class AMRedisDao
 
     private static String key(final String erId)
     {
-        return "erepoKes:" + erId;
+        return EREPOS_KEYS + erId;
     }
 
     private static String key(final String erId, final String ovfId)
     {
-        return "erepo:" + erId + ":ovf:" + ovfId;
+        return EREPO + erId + ':' + TEMPLATE + ovfId;
     }
 
     private static String ovfId(final String keyOovfId)
     {
-        return keyOovfId.substring(keyOovfId.lastIndexOf("ovf:") + 4);
+        return keyOovfId.substring(keyOovfId.indexOf("http://"));
     }
 }

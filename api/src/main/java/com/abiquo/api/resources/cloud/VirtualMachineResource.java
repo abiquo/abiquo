@@ -284,7 +284,7 @@ public class VirtualMachineResource extends AbstractResource
         final VirtualMachine vm)
     {
         VirtualMachineStateDto stateDto = new VirtualMachineStateDto();
-        stateDto.setPower(vm.getState());
+        stateDto.setState(vm.getState());
         stateDto.addLinks(restBuilder.buildVirtualMachineStateLinks(vappId, vdcId, vmId));
         return stateDto;
     }
@@ -301,13 +301,13 @@ public class VirtualMachineResource extends AbstractResource
      */
     private VirtualMachineState validateState(final VirtualMachineStateDto state)
     {
-        if (!VirtualMachineState.ON.equals(state.getPower())
-            && !VirtualMachineState.OFF.equals(state.getPower())
-            && !VirtualMachineState.PAUSED.equals(state.getPower()))
+        if (!VirtualMachineState.ON.equals(state.getState())
+            && !VirtualMachineState.OFF.equals(state.getState())
+            && !VirtualMachineState.PAUSED.equals(state.getState()))
         {
             throw new BadRequestException(APIError.VIRTUAL_MACHINE_EDIT_STATE);
         }
-        return state.getPower();
+        return state.getState();
     }
 
     /**
@@ -563,7 +563,7 @@ public class VirtualMachineResource extends AbstractResource
 
         final VirtualDatacenter vdc = v.getVirtualAppliance().getVirtualDatacenter();
 
-        if (!v.getVirtualMachine().isImported())
+        if (!v.getVirtualMachine().isCaptured())
         {
             dto.addLink(restBuilder.buildVirtualMachineTemplateLink(virtualImage.getEnterprise()
                 .getId(), virtualImage.getRepository().getDatacenter().getId(), virtualImage
@@ -571,10 +571,20 @@ public class VirtualMachineResource extends AbstractResource
         }
         else
         {
-            // imported virtual machines
-            dto.addLink(restBuilder.buildVirtualMachineTemplateLink(virtualImage.getEnterprise()
-                .getId(), v.getVirtualMachine().getHypervisor().getMachine().getRack()
-                .getDatacenter().getId(), v.getVirtualImage().getId()));
+            if (v.getVirtualMachine().getState().equals(VirtualMachineState.NOT_ALLOCATED))
+            {
+                // captured and managed virtual machines but with pm removed
+                dto.addLink(restBuilder.buildVirtualMachineTemplateLink(virtualImage
+                    .getEnterprise().getId(), v.getVirtualAppliance().getVirtualDatacenter()
+                    .getDatacenter().getId(), v.getVirtualImage().getId()));
+            }
+            else
+            {
+                // captured virtual machines
+                dto.addLink(restBuilder.buildVirtualMachineTemplateLink(virtualImage
+                    .getEnterprise().getId(), v.getVirtualMachine().getHypervisor().getMachine()
+                    .getRack().getDatacenter().getId(), v.getVirtualImage().getId()));
+            }
         }
 
         dto.addLinks(restBuilder.buildVirtualMachineCloudAdminLinks(vdcId, vappId, v

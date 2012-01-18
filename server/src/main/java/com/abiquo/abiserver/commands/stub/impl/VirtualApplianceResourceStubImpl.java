@@ -31,6 +31,7 @@ import javax.ws.rs.core.Response.Status;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.wink.client.ClientResponse;
+import org.apache.wink.common.http.HttpStatus;
 import org.jclouds.abiquo.domain.DomainWrapper;
 import org.jclouds.abiquo.domain.cloud.VirtualDatacenter;
 import org.jclouds.abiquo.domain.exception.AbiquoException;
@@ -228,7 +229,8 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
 
                         ClientResponse put =
                             put(linkVirtualMachine, virtualMachineDto, VM_NODE_MEDIA_TYPE);
-                        if (put.getStatusCode() != Status.OK.getStatusCode())
+                        if (put.getStatusCode() != Status.OK.getStatusCode()
+                            && put.getStatusCode() != Status.NO_CONTENT.getStatusCode())
                         {
                             addErrors(result, errors, put, "updateVirtualApplianceNodes");
                             result.setSuccess(Boolean.FALSE);
@@ -698,6 +700,18 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
             image.setIcon(icon);
         }
 
+        // Retrieve the enterprise
+        RESTLink entLink = virtualImageDto.searchLink("enterprise");
+        if (entLink != null)
+        {
+            ClientResponse entResponse = get(entLink.getHref());
+            if (entResponse.getStatusCode() == Status.OK.getStatusCode())
+            {
+
+                EnterpriseDto entDto = entResponse.getEntity(EnterpriseDto.class);
+                image.setIdEnterprise(entDto.getId());
+            }
+        }
         // Captured images may not have a template definition
         RESTLink templateDefinitionLink = virtualImageDto.searchLink("templatedefinition");
         if (templateDefinitionLink != null)
@@ -748,6 +762,7 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
             {
                 populateErrors(entResponse, new BasicResult(), "getUser");
             }
+
         }
 
         UserDto userDto =
@@ -1261,7 +1276,10 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
 
             ClientResponse response = post(url, options);
 
-            if (response.getStatusCode() != 202)
+            int statusCode = response.getStatusCode();
+
+            if (statusCode != HttpStatus.ACCEPTED.getCode()
+                && statusCode != HttpStatus.SEE_OTHER.getCode())
             {
                 result.setSuccess(Boolean.FALSE);
                 addErrors(result, errors, response, "instanceVirtualApplianceNodes");

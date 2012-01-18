@@ -57,13 +57,13 @@ public enum EventType implements Serializable
         220, "VAPP_COPY", "Virtual Appliance copied"), VAPP_REFRESH(221, "VIRTUAL_APPLIANCE_STATE",
         "Virtual Appliance State Refreshed"), VAPP_CRASHED(222, "VAPP_CRASHED",
         "Virtual Appliance turned into 'crashed' state"), VAPP_UNKNOWN(223, "VAPP_UNKNOWN",
-        "Virtual Appliance turned into 'unknown' state"), VAPP_INSTANCE(224, "VAPP_INSTANCE",
-        "Virtual Appliance instance started"), VM_CREATE(225, "VM_CREATE",
-        "Created Virtual Machine"), VM_DELETE(226, "VM_DELETE", "Deleted Virtual Machine"), VM_UNDEPLOY(
-        227, "VM_UNDEPLOY", "Undeploy Virtual Machine"), VM_DEPLOY(228, "VM_DEPLOY",
-        "Deploy Virtual Machine"), VM_STATE(229, "VM_STATE", "Apply state Virtual Machine"), VM_RECONFIGURE(
-        230, "VM_RECONFIGURE", "Reconfigure Virtual Machine"), VM_INSTANCE(231, "VM_INSTANCE",
-        "Instance Virtual Machine"),
+        "Virtual Appliance turned into 'unknown' state"), VAPP_BUNDLE(224, "VAPP_BUNDLE",
+        "Virtual Appliance bundle started"), VM_CREATE(225, "VM_CREATE", "Created Virtual Machine"), VM_DELETE(
+        226, "VM_DELETE", "Deleted Virtual Machine"), VM_UNDEPLOY(227, "VM_UNDEPLOY",
+        "Undeploy Virtual Machine"), VM_DEPLOY(228, "VM_DEPLOY", "Deploy Virtual Machine"), VM_STATE(
+        229, "VM_STATE", "Apply state Virtual Machine"), VM_RECONFIGURE(230, "VM_RECONFIGURE",
+        "Reconfigure Virtual Machine"), VM_INSTANCE(231, "VM_INSTANCE", "Instance Virtual Machine"), 
+        VM_JOB(232, "VM_JOB", "Common Job for Virtual Machine"),
 
     // Infrastructure-related events
     DC_CREATE(300, "DC_CREATE", "Datacenter Created"), DC_MODIFY(301, "DC_MODIFY",

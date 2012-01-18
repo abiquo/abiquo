@@ -143,20 +143,30 @@ public class TemplateService
         state.setOvfId(ovfId);
 
         AMRedisDao dao = AMRedisDao.getDao();
-        TemplateStatusEnumType status = dao.getStatus(erId, ovfId);
-        state.setStatus(status);
-        switch (status)
+        try
         {
-            case DOWNLOADING:
-                state.setDownloadingProgress((double) dao.getDownloadProgress(erId, ovfId));
-                break;
+            TemplateStatusEnumType status = dao.getStatus(erId, ovfId);
+            state.setStatus(status);
+            switch (status)
+            {
+                case DOWNLOADING:
+                    state.setDownloadingProgress((double) dao.getDownloadProgress(erId, ovfId));
+                    break;
 
-            case ERROR:
-                state.setErrorCause(dao.getError(erId, ovfId));
-            default:
-                break;
+                case ERROR:
+                    state.setErrorCause(dao.getError(erId, ovfId));
+                default:
+                    break;
+            }
         }
-        AMRedisDao.returnDao(dao);
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+        finally
+        {
+            AMRedisDao.returnDao(dao);
+        }
 
         return state;
     }
