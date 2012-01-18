@@ -31,6 +31,7 @@ import javax.ws.rs.core.Response.Status;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.wink.client.ClientResponse;
+import org.apache.wink.common.http.HttpStatus;
 import org.jclouds.abiquo.domain.DomainWrapper;
 import org.jclouds.abiquo.domain.cloud.VirtualDatacenter;
 import org.jclouds.abiquo.domain.exception.AbiquoException;
@@ -1261,7 +1262,10 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
 
             ClientResponse response = post(url, options);
 
-            if (response.getStatusCode() != 202)
+            int statusCode = response.getStatusCode();
+
+            if (statusCode != HttpStatus.ACCEPTED.getCode()
+                && statusCode != HttpStatus.SEE_OTHER.getCode())
             {
                 result.setSuccess(Boolean.FALSE);
                 addErrors(result, errors, response, "instanceVirtualApplianceNodes");

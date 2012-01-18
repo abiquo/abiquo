@@ -284,7 +284,7 @@ public class VirtualMachineResource extends AbstractResource
         final VirtualMachine vm)
     {
         VirtualMachineStateDto stateDto = new VirtualMachineStateDto();
-        stateDto.setPower(vm.getState());
+        stateDto.setState(vm.getState());
         stateDto.addLinks(restBuilder.buildVirtualMachineStateLinks(vappId, vdcId, vmId));
         return stateDto;
     }
@@ -301,13 +301,13 @@ public class VirtualMachineResource extends AbstractResource
      */
     private VirtualMachineState validateState(final VirtualMachineStateDto state)
     {
-        if (!VirtualMachineState.ON.equals(state.getPower())
-            && !VirtualMachineState.OFF.equals(state.getPower())
-            && !VirtualMachineState.PAUSED.equals(state.getPower()))
+        if (!VirtualMachineState.ON.equals(state.getState())
+            && !VirtualMachineState.OFF.equals(state.getState())
+            && !VirtualMachineState.PAUSED.equals(state.getState()))
         {
             throw new BadRequestException(APIError.VIRTUAL_MACHINE_EDIT_STATE);
         }
-        return state.getPower();
+        return state.getState();
     }
 
     /**
