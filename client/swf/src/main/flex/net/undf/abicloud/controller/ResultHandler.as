@@ -146,21 +146,24 @@ package net.undf.abicloud.controller
                     	break;
 
                     default:
-                        //Default response -> BasicResult.STANDARD_RESULT
-                        //TEMP [ABICLOUDPREMIUM-440] -> catch the session expired error message to redirect it to the standard handleResult process
-                        var searchTimeOut:int = basicResult.message.search("The session is invalid");
-                        var searchInvalid:int = basicResult.message.search("The session has timed out");
-                        var newBasicResult:BasicResult = basicResult;
-                        if(searchTimeOut != -1){
-                        	newBasicResult.resultCode = BasicResult.SESSION_TIMEOUT;
-                        	handleResult(newBasicResult);
-                        	return;
+                        
+                        if(basicResult.message)
+                        {
+	                        var searchTimeOut:int = basicResult.message.search("The session is invalid");
+	                        var searchInvalid:int = basicResult.message.search("The session has timed out");
+	                        var newBasicResult:BasicResult = basicResult;
+	                        if(searchTimeOut != -1){
+	                        	newBasicResult.resultCode = BasicResult.SESSION_TIMEOUT;
+	                        	handleResult(newBasicResult);
+	                        	return;
+	                        }
+	                        if(searchInvalid != -1){
+	                        	newBasicResult.resultCode = BasicResult.SESSION_INVALID;
+	                        	handleResult(newBasicResult);
+	                        	return;
+	                        }
                         }
-                        if(searchInvalid != -1){
-                        	newBasicResult.resultCode = BasicResult.SESSION_INVALID;
-                        	handleResult(newBasicResult);
-                        	return;
-                        }
+                        //Show unexpected error when the server doesn't retrieve any message
                         AbiCloudAlert.showError(ResourceManager.getInstance().getString("Common",
                                                                                         "ALERT_ERROR_TITLE_LABEL"),
                                                 ResourceManager.getInstance().getString("Common",

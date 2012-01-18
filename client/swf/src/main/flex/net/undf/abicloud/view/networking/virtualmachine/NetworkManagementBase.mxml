@@ -393,15 +393,15 @@
             <mx:DataGrid id="virtualMachineNICsDataGrid"
                 width="100%" height="100%"
                 dataProvider="{virtualMachineNICs}"
-                dropEnabled="true"
-                dragMoveEnabled="true"
             	allowMultipleSelection="false"
-                dragEnabled="true"
                 sortableColumns="false"
                 dragComplete="onDragComplete()"
                 dragStart="onDragStart(event)"
                 dragDrop="onDragStop(event)"
                 mouseDown="onMouseDownUsersDataGrid()">
+                <!--dropEnabled="true"
+                dragMoveEnabled="true"
+                dragEnabled="true"-->
 
                 <mx:columns>
                     <mx:DataGridColumn 

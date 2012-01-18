@@ -31,7 +31,6 @@
         <testng.version>5.12.1</testng.version>
         <commonsamqp.version>2.0-tarantino-SNAPSHOT</commonsamqp.version>
         <guava.version>11.0.1</guava.version>
-        <jclouds.version>1.3.0</jclouds.version>
         <abiquo-jclouds.version>1.0-SNAPSHOT</abiquo-jclouds.version>
     </properties>
     <!-- Aggregations. Common modules -->

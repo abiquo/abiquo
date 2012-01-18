@@ -1548,8 +1548,9 @@ public class VirtualMachineService extends DefaultApiService
             tracer.log(SeverityType.INFO, ComponentType.VIRTUAL_MACHINE, EventType.VM_UNDEPLOY,
                 "virtualMachine.enqueued", virtualMachine.getName());
             // For the Admin to know all errors
-            tracer.systemLog(SeverityType.INFO, ComponentType.VIRTUAL_MACHINE,
-                EventType.VM_UNDEPLOY, "virtualMachine.enqueuedTarantino");
+            tracer
+                .systemLog(SeverityType.INFO, ComponentType.VIRTUAL_MACHINE, EventType.VM_UNDEPLOY,
+                    "virtualMachine.enqueuedTarantino", virtualMachine.getName());
 
             return idAsyncTask;
 
@@ -2300,7 +2301,7 @@ public class VirtualMachineService extends DefaultApiService
                 if (oldVm.getState() == VirtualMachineState.NOT_ALLOCATED)
                 {
                     vdcRep.deleteRasd(disk.getRasd());
-                    vdcRep.removeHardDisk(disk);
+                    rasdDao.remove(disk);
                 }
                 else
                 {
@@ -2753,20 +2754,21 @@ public class VirtualMachineService extends DefaultApiService
 
             // we need to first delete the vm (as it updates the rasd_man)
             repo.deleteVirtualMachine(backUpVm);
-            
+
             List<RasdManagement> rasds = backUpVm.getRasdManagements();
 
             for (RasdManagement rollbackRasd : rasds)
             {
                 if (rollbackRasd instanceof IpPoolManagement)
                 {
-                    IpPoolManagement originalRasd = (IpPoolManagement) rasdDao.findById(rollbackRasd.getTemporal());
+                    IpPoolManagement originalRasd =
+                        (IpPoolManagement) rasdDao.findById(rollbackRasd.getTemporal());
 
                     if (!originalRasd.isAttached())
                     {
                         // remove the rasd
                         vdcRep.deleteRasd(originalRasd.getRasd());
-                        
+
                         // unmanaged ips disappear when the are not assigned to a virtual machine.
                         if (originalRasd.isUnmanagedIp())
                         {
@@ -2777,19 +2779,19 @@ public class VirtualMachineService extends DefaultApiService
                 // DiskManagements always are deleted
                 if (rollbackRasd instanceof DiskManagement)
                 {
-                    DiskManagement  originalRasd = (DiskManagement) rasdDao.findById(rollbackRasd.getTemporal());
+                    DiskManagement originalRasd =
+                        (DiskManagement) rasdDao.findById(rollbackRasd.getTemporal());
                     if (!originalRasd.isAttached())
                     {
                         vdcRep.deleteRasd(originalRasd.getRasd());
                         rasdDao.remove(originalRasd);
                     }
                 }
-                
+
                 // refresh as the vm delete was updated the rasd
                 rasdDao.remove(rasdDao.findById(rollbackRasd.getId()));
             }
 
-           
             rasdDao.flush();
         }
         finally
@@ -2865,14 +2867,14 @@ public class VirtualMachineService extends DefaultApiService
             if (rollbackRasd == null)
             {
                 LOGGER.trace("restore: detach resource " + updatedRasd.getId());
-                
+
                 if (updatedRasd instanceof IpPoolManagement)
                 {
                     IpPoolManagement originalRasd = (IpPoolManagement) updatedRasd;
-                    
+
                     // remove the rasd
                     vdcRep.deleteRasd(originalRasd.getRasd());
-                        
+
                     // unmanaged ips disappear when the are not assigned to a virtual machine.
                     if (originalRasd.isUnmanagedIp())
                     {
@@ -2882,17 +2884,17 @@ public class VirtualMachineService extends DefaultApiService
                 // DiskManagements always are deleted
                 if (updatedRasd instanceof DiskManagement)
                 {
-                    DiskManagement  originalRasd = (DiskManagement) updatedRasd;
-                    
+                    DiskManagement originalRasd = (DiskManagement) updatedRasd;
+
                     vdcRep.deleteRasd(originalRasd.getRasd());
-                    rasdDao.remove(originalRasd);    
+                    rasdDao.remove(originalRasd);
                 }
                 else
                 {
                     // volumes only need to be dettached
                     updatedRasd.detach();
                 }
-                    
+
             }
         }
 

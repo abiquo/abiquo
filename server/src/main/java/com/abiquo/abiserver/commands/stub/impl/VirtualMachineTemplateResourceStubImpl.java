@@ -184,6 +184,7 @@ public class VirtualMachineTemplateResourceStubImpl extends AbstractAPIStub impl
         img.setDiskFormatType(createDiskFormatType(DiskFormatType.valueOf(vi.getDiskFormatType())));
         img.setCreationUser(vi.getCreationUser());
         img.setCreationDate(vi.getCreationDate());
+        img.setChefEnabled(vi.isChefEnabled());
 
         // img.setIdEnterprise(idEnterprise); // // XXX (in AppslLibraryService this value is set
         // properly)

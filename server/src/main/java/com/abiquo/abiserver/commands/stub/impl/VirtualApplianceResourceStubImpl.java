@@ -1133,10 +1133,10 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
     }
 
     @Override
-    public DataResult applyChangesVirtualAppliance(final VirtualAppliance virtualAppliance,
-        final UserSession userSession)
+    public DataResult<VirtualAppliance> applyChangesVirtualAppliance(
+        final VirtualAppliance virtualAppliance, final UserSession userSession, final boolean force)
     {
-        DataResult result = new DataResult();
+        DataResult<VirtualAppliance> result = new DataResult<VirtualAppliance>();
         result.setSuccess(Boolean.TRUE);
         StringBuilder errors = new StringBuilder();
         try
@@ -1166,12 +1166,14 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
                         {
                             org.jclouds.abiquo.domain.cloud.VirtualMachine virtualMachine =
                                 appliance.getVirtualMachine(nvi.getVirtualMachine().getId());
-                            virtualMachine.deploy();
+
+                            virtualMachine.deploy(force);
                         }
                     }
                 }
                 catch (Exception e)
                 {
+                    // populateErrors(e, result, "applyChangesVirtualAppliance");
                     this.populateErrors(e, result, errors, "applyChangesVirtualAppliance");
                 }
             }
@@ -1180,7 +1182,12 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
         {
             releaseApiClient();
         }
-        result.setMessage(errors.toString());
+        String errorsMsg = errors.toString();
+        if (!StringUtils.isEmpty(errorsMsg))
+        {
+            result.setMessage(errorsMsg);
+        }
+        // result.setData(virtualAppliance);
         return result;
 
     }
@@ -1191,20 +1198,32 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
         result.setSuccess(false);
         if (ex instanceof AuthorizationException)
         {
-            ErrorManager.getInstance(AbiCloudConstants.ERROR_PREFIX).reportError(
-                new ResourceManager(BasicCommand.class), result,
-                "onFaultAuthorization.noPermission", methodName);
-            result.setMessage(ex.getMessage());
-            result.setResultCode(BasicResult.NOT_AUTHORIZED);
-            throw new UserSessionException(result);
+            populateErrors((AuthorizationException) ex, result, methodName);
         }
         else if (ex instanceof AbiquoException)
         {
             AbiquoException abiquoException = (AbiquoException) ex;
-            if (abiquoException.hasError("LIMIT_EXCEEDED")
+
+            if (abiquoException.hasError("SOFT_LIMIT_EXCEEDED"))
+            {
+                result.setResultCode(BasicResult.SOFT_LIMT_EXCEEDED);
+                result.setMessage(abiquoException.getMessage());
+                // limit exceeded does not include the detail
+                if (result.getMessage().length() < 254)
+                {
+                    result.setResultCode(0);
+                }
+            }
+            else if (abiquoException.hasError("LIMIT_EXCEEDED")
                 || BasicResult.HARD_LIMT_EXCEEDED == result.getResultCode())
             {
                 result.setResultCode(BasicResult.HARD_LIMT_EXCEEDED);
+                result.setMessage(abiquoException.getMessage());
+                // limit exceeded does not include the detail
+                if (result.getMessage().length() < 254)
+                {
+                    result.setResultCode(0);
+                }
             }
             else
             {

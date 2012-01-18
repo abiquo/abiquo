@@ -21,10 +21,13 @@
 
 package com.abiquo.server.core.appslibrary;
 
+import java.util.Collections;
 import java.util.List;
 
 import javax.persistence.EntityManager;
 
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.ListUtils;
 import org.hibernate.Criteria;
 import org.hibernate.Query;
 import org.hibernate.criterion.Criterion;
@@ -38,8 +41,9 @@ import com.abiquo.server.core.common.persistence.DefaultDAOBase;
 public class TemplateDefinitionDAO extends DefaultDAOBase<Integer, TemplateDefinition>
 {
 
-    private final static String FIND_BY_ENTERPRISE = "SELECT temDef FROM TemplateDefinition temDef " //
-        + "WHERE temDef.appsLibrary.enterprise.id = :enterpriseId ";
+    private final static String FIND_BY_ENTERPRISE =
+        "SELECT temDef FROM TemplateDefinition temDef " //
+            + "WHERE temDef.appsLibrary.enterprise.id = :enterpriseId ";
 
     public TemplateDefinitionDAO()
     {
@@ -53,7 +57,9 @@ public class TemplateDefinitionDAO extends DefaultDAOBase<Integer, TemplateDefin
 
     public TemplateDefinition findByUrl(final String url)
     {
-        return findUniqueByProperty(TemplateDefinition.URL_PROPERTY, url);
+        List<TemplateDefinition> defs = getResultList(createCriteria(sameUrl(url)));
+
+        return CollectionUtils.isEmpty(defs) ? null : defs.get(0);
     }
 
     @SuppressWarnings("unchecked")
@@ -69,6 +75,11 @@ public class TemplateDefinitionDAO extends DefaultDAOBase<Integer, TemplateDefin
         Criteria criteria = createCriteria(sameAppsLibrary(appsLibrary));
         criteria.addOrder(Order.asc(TemplateDefinition.NAME_PROPERTY));
         return getResultList(criteria);
+    }
+
+    private static Criterion sameUrl(final String url)
+    {
+        return Restrictions.eq(TemplateDefinition.URL_PROPERTY, url);
     }
 
     private static Criterion sameAppsLibrary(final AppsLibrary appsLibrary)
