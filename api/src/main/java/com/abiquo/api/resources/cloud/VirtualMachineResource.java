@@ -563,7 +563,7 @@ public class VirtualMachineResource extends AbstractResource
 
         final VirtualDatacenter vdc = v.getVirtualAppliance().getVirtualDatacenter();
 
-        if (!v.getVirtualMachine().isImported())
+        if (!v.getVirtualMachine().isCaptured())
         {
             dto.addLink(restBuilder.buildVirtualMachineTemplateLink(virtualImage.getEnterprise()
                 .getId(), virtualImage.getRepository().getDatacenter().getId(), virtualImage
