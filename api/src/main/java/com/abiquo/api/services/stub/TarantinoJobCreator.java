@@ -149,6 +149,7 @@ public class TarantinoJobCreator extends DefaultApiService
 
         vmDesc.hardware(virtualMachine.getCpu(), virtualMachine.getRam());
         vmDesc.setRdPort(virtualMachine.getVdrpPort());
+        vmDesc.setRdPassword(virtualMachine.getPassword());
 
         logger.debug("Creating the network related configuration");
         addDhcpConfiguration(dcId, vmDesc);
@@ -185,6 +186,7 @@ public class TarantinoJobCreator extends DefaultApiService
         {
             final URI dhcpUri = new URI(dhcp.getUri());
             vmDesc.dhcp(dhcpUri.getHost(), dhcpUri.getPort());
+
         }
         catch (URISyntaxException e)
         {

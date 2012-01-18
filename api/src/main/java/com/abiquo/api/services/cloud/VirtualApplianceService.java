@@ -502,12 +502,13 @@ public class VirtualApplianceService extends DefaultApiService
      * @return List<String>
      */
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public Map<Integer, String> deployVirtualAppliance(final Integer vdcId, final Integer vappId)
+    public Map<Integer, String> deployVirtualAppliance(final Integer vdcId, final Integer vappId,
+        final boolean forceLimits)
     {
 
         VirtualAppliance virtualAppliance = getVirtualAppliance(vdcId, vappId);
 
-        allocateVirtualAppliance(virtualAppliance, Boolean.TRUE);
+        allocateVirtualAppliance(virtualAppliance, forceLimits);
 
         Map<Integer, String> dto = new HashMap<Integer, String>();
         for (NodeVirtualImage nodevi : virtualAppliance.getNodes())
@@ -549,7 +550,7 @@ public class VirtualApplianceService extends DefaultApiService
         {
             for (NodeVirtualImage node : virtualAppliance.getNodes())
             {
-                if (node.getVirtualMachine().isImported())
+                if (node.getVirtualMachine().isCaptured())
                 {
                     addConflictErrors(APIError.VIRTUAL_MACHINE_IMPORTED_WILL_BE_DELETED);
                     flushErrors();

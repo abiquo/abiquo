@@ -77,6 +77,38 @@ public class DatacentersResourceStubImpl extends AbstractAPIStub implements Data
     }
 
     @Override
+    public DataResult<ArrayList<DataCenter>> getDatacenters(final Integer enterpriseId)
+    {
+        DataResult<ArrayList<DataCenter>> result = new DataResult<ArrayList<DataCenter>>();
+        ArrayList<DataCenter> dcs = new ArrayList<DataCenter>();
+
+        try
+        {
+            Iterable<Datacenter> datacenters =
+                getApiClient().getAdministrationService().getEnterprise(enterpriseId)
+                    .listAllowedDatacenters();
+
+            for (Datacenter dc : datacenters)
+            {
+                dcs.add(fromDtoToPojo(dc));
+            }
+
+            result.setSuccess(true);
+            result.setData(dcs);
+        }
+        catch (Exception ex)
+        {
+            populateErrors(ex, result, "getDatacenters");
+        }
+        finally
+        {
+            releaseApiClient();
+        }
+
+        return result;
+    }
+
+    @Override
     public DataResult<DataCenter> getDatacenter(final Integer datacenterId)
     {
         DataResult<DataCenter> result = new DataResult<DataCenter>();

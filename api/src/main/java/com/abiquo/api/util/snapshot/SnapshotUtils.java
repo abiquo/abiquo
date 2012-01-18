@@ -67,7 +67,7 @@ public class SnapshotUtils
          */
         public static SnapshotType getSnapshotType(final VirtualMachine virtualMachine)
         {
-            if (virtualMachine.isImported())
+            if (virtualMachine.isCaptured())
             {
                 return SnapshotType.FROM_IMPORTED_VIRTUALMACHINE;
             }

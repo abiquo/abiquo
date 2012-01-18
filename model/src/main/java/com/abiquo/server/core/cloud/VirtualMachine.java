@@ -710,8 +710,16 @@ public class VirtualMachine extends DefaultEntityBase
     {
         return virtualMachineTemplate.isStateful();
     }
-    
+
+    // vm imported from PM (no more!)
     public boolean isImported()
+    {
+        return getVirtualMachineTemplate() == null;
+    }
+
+    // vm imported from a PM and added into a Vapp
+    // when vm isCaptured then isn't imported
+    public boolean isCaptured()
     {
         return getVirtualMachineTemplate().getRepository() == null;
     }

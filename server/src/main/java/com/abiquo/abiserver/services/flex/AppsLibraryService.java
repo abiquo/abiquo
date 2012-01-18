@@ -54,7 +54,6 @@ public class AppsLibraryService
     public DataResult<Repository> getDatacenterRepository(final UserSession userSession,
         final Integer idDatacenter, final Integer idEnterprise, final Boolean refresh)
     {
-        // TODO idEnterpise is not used
         DatacenterRepositoryResourceStub dcRepoStub =
             APIStubFactory.getInstance(userSession, new DatacenterRepositoryResourceStubImpl(),
                 DatacenterRepositoryResourceStub.class);

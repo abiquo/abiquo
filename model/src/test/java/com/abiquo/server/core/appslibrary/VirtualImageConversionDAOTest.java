@@ -31,9 +31,6 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.abiquo.model.enumerator.DiskFormatType;
-import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
-import com.abiquo.server.core.appslibrary.VirtualImageConversion;
-import com.abiquo.server.core.appslibrary.VirtualImageConversionDAO;
 import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.cloud.HypervisorGenerator;
 import com.abiquo.server.core.cloud.VirtualImageConversionGenerator;
@@ -120,7 +117,8 @@ public class VirtualImageConversionDAOTest extends
         Enterprise enterprise = enterpriseGenerator.createUniqueInstance();
         Role role = roleGenerator.createInstanceSysAdmin();
         User user = userGenerator.createInstance(enterprise, role);
-        VirtualMachineTemplate image = virtualImageGenerator.createVirtualMachineTemplateWithConversions(enterprise);
+        VirtualMachineTemplate image =
+            virtualImageGenerator.createVirtualMachineTemplateWithConversions(enterprise);
         Hypervisor hypervisor = hypervisorGenerator.createInstance(machine);
         VirtualMachine virtualMachine =
             virtualMachineGenerator.createInstance(image, enterprise, hypervisor, user, "name");
@@ -156,8 +154,8 @@ public class VirtualImageConversionDAOTest extends
 
         VirtualImageConversionDAO dao = createDaoForRollbackTransaction();
 
-        assertTrue(dao.isConverted(imageConversion.getVirtualMachineTemplate(), imageConversion
-            .getTargetType()));
+        assertTrue(dao.isConverted(imageConversion.getVirtualMachineTemplate(),
+            imageConversion.getTargetType()));
     }
 
     @Test
@@ -171,7 +169,74 @@ public class VirtualImageConversionDAOTest extends
 
         VirtualImageConversionDAO dao = createDaoForRollbackTransaction();
 
-        assertFalse(dao.isConverted(imageConversion.getVirtualMachineTemplate(), imageConversion
-            .getTargetType()));
+        assertFalse(dao.isConverted(imageConversion.getVirtualMachineTemplate(),
+            imageConversion.getTargetType()));
+    }
+
+    @Test
+    public void testExistsDuplicatedConversions()
+    {
+        VirtualMachineTemplate template = virtualImageGenerator.createUniqueInstance();
+
+        VirtualImageConversion imageConversion =
+            eg().createInstance(template, DiskFormatType.VHD_FLAT, DiskFormatType.VMDK_FLAT);
+
+        List<Object> entitiesToPersist = new ArrayList<Object>();
+
+        eg().addAuxiliaryEntitiesToPersist(imageConversion, entitiesToPersist);
+        entitiesToPersist.add(imageConversion);
+        ds().persistAll(entitiesToPersist.toArray());
+
+        VirtualImageConversionDAO dao = createDaoForRollbackTransaction();
+
+        assertTrue(dao.existDuplicatedConversion(imageConversion));
+    }
+
+    @Test
+    public void testNotExistsDuplicatedConversionsDiferentTemplate()
+    {
+        VirtualMachineTemplate template = virtualImageGenerator.createUniqueInstance();
+        VirtualMachineTemplate template2 = virtualImageGenerator.createUniqueInstance();
+
+        VirtualImageConversion imageConversion =
+            eg().createInstance(template, DiskFormatType.VHD_FLAT, DiskFormatType.VMDK_FLAT);
+
+        // same format diferents template
+        VirtualImageConversion imageConversionNotDuplicated =
+            eg().createInstance(template2, DiskFormatType.VHD_FLAT, DiskFormatType.VMDK_FLAT);
+
+        List<Object> entitiesToPersist = new ArrayList<Object>();
+
+        eg().addAuxiliaryEntitiesToPersist(imageConversion, entitiesToPersist);
+        eg().addAuxiliaryEntitiesToPersist(imageConversionNotDuplicated, entitiesToPersist);
+        entitiesToPersist.add(imageConversion);
+        ds().persistAll(entitiesToPersist.toArray());
+
+        VirtualImageConversionDAO dao = createDaoForRollbackTransaction();
+
+        assertFalse(dao.existDuplicatedConversion(imageConversionNotDuplicated));
+    }
+
+    @Test
+    public void testNotExistsDuplicatedConversionsDiferentFormat()
+    {
+        VirtualMachineTemplate template = virtualImageGenerator.createUniqueInstance();
+
+        VirtualImageConversion imageConversion =
+            eg().createInstance(template, DiskFormatType.VHD_FLAT, DiskFormatType.VMDK_FLAT);
+
+        // same format diferents template
+        VirtualImageConversion imageConversionNotDuplicated =
+            eg().createInstance(template, DiskFormatType.VDI_FLAT, DiskFormatType.VMDK_FLAT);
+
+        List<Object> entitiesToPersist = new ArrayList<Object>();
+
+        eg().addAuxiliaryEntitiesToPersist(imageConversion, entitiesToPersist);
+        entitiesToPersist.add(imageConversion);
+        ds().persistAll(entitiesToPersist.toArray());
+
+        VirtualImageConversionDAO dao = createDaoForRollbackTransaction();
+
+        assertFalse(dao.existDuplicatedConversion(imageConversionNotDuplicated));
     }
 }
