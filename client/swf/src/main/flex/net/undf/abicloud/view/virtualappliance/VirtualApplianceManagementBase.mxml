@@ -34,6 +34,7 @@
 
     <mx:Script>
         <![CDATA[
+        	import mx.events.FlexEvent;
         	import mx.collections.ArrayCollection;
         	import net.undf.abicloud.vo.virtualimage.Repository;
         	import net.undf.abicloud.view.virtualimage.components.virtualimage.VirtualImageListManagement;
@@ -136,6 +137,7 @@
                 this._virtualImageList.percentWidth = 100;
                 this._virtualImageList.percentHeight = 100;
                 this._virtualImageList.labelVisible = false;
+                this._virtualImageList.addEventListener(FlexEvent.SHOW,requestVirtualImages);
                 virtualResourcesToggledContainer.viewStack.setStyle("paddingLeft","0");
                 virtualResourcesToggledContainer.viewStack.setStyle("paddingRight","0");
                 
@@ -809,6 +811,17 @@
 
                 this._virtualApplianceBundleForm.init(this._virtualAppliance);
             }
+            
+            /**
+             * Retrieves virtual images
+             **/
+             private function requestVirtualImages(event:FlexEvent):void
+             {
+             	if(this._virtualImageList)
+             	{
+	             	this._virtualImageList.virtualImageList.requestVirtualImages();
+             	}
+             }
 
             /**
              * Closes the VirtualApplianceBundleForm when is Popped Up

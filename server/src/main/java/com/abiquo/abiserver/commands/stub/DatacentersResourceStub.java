@@ -33,6 +33,8 @@ public interface DatacentersResourceStub
 
     public DataResult<ArrayList<DataCenter>> getDatacenters();
 
+    public DataResult<ArrayList<DataCenter>> getDatacenters(final Integer enterpriseId);
+
     public DataResult<DataCenter> modifyDatacenter(DataCenter datacenter);
 
     public DataResult<DataCenter> deleteDatacenter(DataCenter datacenter);

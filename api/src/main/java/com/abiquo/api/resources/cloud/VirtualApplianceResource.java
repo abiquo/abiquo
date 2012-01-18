@@ -211,16 +211,21 @@ public class VirtualApplianceResource
     public AcceptedRequestDto<String> deploy(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
-        @Context final IRESTBuilder restBuilder, @Context final UriInfo uriInfo)
+        final VirtualMachineTaskDto taskOptions, @Context final IRESTBuilder restBuilder,
+        @Context final UriInfo uriInfo)
     {
         AcceptedRequestDto<String> dto = new AcceptedRequestDto<String>();
+
+        // by default force limits
+        final boolean forceLimits =
+            taskOptions != null ? taskOptions.isForceEnterpriseSoftLimits() : true;
 
         final String lockMsg = "Allocate vapp " + vappId;
         try
         {
             SchedulerLock.acquire(lockMsg);
 
-            Map<Integer, String> links = service.deployVirtualAppliance(vdcId, vappId);
+            Map<Integer, String> links = service.deployVirtualAppliance(vdcId, vappId, forceLimits);
             addStatusLinks(links, dto, uriInfo);
         }
         finally

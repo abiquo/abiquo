@@ -433,43 +433,6 @@ public class InfrastructureWS implements IInfrastructureWS
         return destination;
     }
 
-    /**
-     * Helper to refresh the virtual appliance in the virtualfactory
-     * 
-     * @param virtualAppliance the virtual factory to refresh
-     * @param virtualApplianceWs
-     * @param mustChangeState this flag indicates if the virtual machines should recover its state
-     * @deprecated
-     * @throws Exception
-     */
-    @Deprecated
-    private BasicResult refreshVirtualAppliance(final VirtualAppliance virtualAppliance,
-        final VirtualApplianceWS virtualApplianceWs, final boolean mustChangeState)
-        throws Exception
-    {
-        // Launching the refreshing operation for the virtual appliance
-
-        logger.info("Refreshing the Virtual Appliance in the virtual factory");
-
-        BasicResult basicResult = new BasicResult();
-        basicResult.setSuccess(true);
-
-        try
-        {
-            basicResult =
-                virtualApplianceWs.forceCreateVirtualAppliance(virtualAppliance, mustChangeState);
-        }
-        catch (Exception e)
-        {
-            String msg = "An error occurred when refreshing the virtual appliance";
-            logger.debug(msg, e);
-            basicResult.setSuccess(true);
-            throw new Exception(msg, e);
-        }
-
-        return basicResult;
-    }
-
     /*
      * (non-Javadoc)
      * @see

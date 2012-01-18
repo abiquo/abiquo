@@ -715,7 +715,6 @@ public class ESXiCollector extends AbstractCollector
         String directoryOnDatastore =
             String.format("%s %s%s", dsName, DATASTORE_UUID_MARK, folderUuidMark);
 
-
         return folderUuidMark;
     }
 
@@ -935,7 +934,7 @@ public class ESXiCollector extends AbstractCollector
         if (uuid == null)
         {
             LOGGER.info(String.format(
-                "Datastore %s on Host [%s] haven't any folder mark, creating it.", dsName,
+                "Datastore %s on Host [%s] hasn't any folder mark, creating it.", dsName,
                 getIpAddress()));
 
             uuid = createDatastoreFolderMark(dc, dsName);
