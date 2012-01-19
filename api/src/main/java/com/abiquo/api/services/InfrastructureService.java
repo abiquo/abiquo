@@ -113,7 +113,7 @@ public class InfrastructureService extends DefaultApiService
 
     @Autowired
     protected VsmServiceStub vsmServiceStub;
-    
+
     @Autowired
     protected VirtualDatacenterRep vdcRep;
 
@@ -182,8 +182,7 @@ public class InfrastructureService extends DefaultApiService
         validate(rack);
         repo.insertRack(rack);
 
-        tracer.log(SeverityType.INFO, ComponentType.RACK, EventType.RACK_CREATE,
- "rack.created",
+        tracer.log(SeverityType.INFO, ComponentType.RACK, EventType.RACK_CREATE, "rack.created",
             rack.getName());
 
         return rack;
@@ -549,151 +548,13 @@ public class InfrastructureService extends DefaultApiService
     public RemoteServiceDto modifyRemoteService(final Integer id, final RemoteServiceDto dto)
         throws URISyntaxException
     {
-        RemoteService old = getRemoteService(id);
-
-        ErrorsDto configurationErrors =
-            remoteServiceService.checkRemoteServiceStatus(old.getDatacenter(), dto.getType(),
-                dto.getUri());
-        int status = configurationErrors.isEmpty() ? STATUS_SUCCESS : STATUS_ERROR;
-        dto.setStatus(status);
-
-        if (dto.getType() == RemoteServiceType.APPLIANCE_MANAGER)
-        {
-            checkModifyApplianceManager(old, dto);
-        }
-
-        old.setUri(dto.getUri());
-        old.setType(dto.getType());
-        old.setStatus(dto.getStatus());
-
-        repo.updateRemoteService(old);
-
-        RemoteServiceDto responseDto = createTransferObject(old);
-
-        if (!configurationErrors.isEmpty())
-        {
-            responseDto.setConfigurationErrors(configurationErrors);
-        }
-
-        tracer.log(SeverityType.INFO, ComponentType.DATACENTER, EventType.REMOTE_SERVICES_UPDATE,
-            "remoteServices.updated", dto.getType().getName());
-
-        return responseDto;
+        return remoteServiceService.modifyRemoteService(id, dto);
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public void removeRemoteService(final Integer id)
     {
-        RemoteService remoteService = getRemoteService(id);
-
-        checkRemoteServiceStatusBeforeRemoving(remoteService);
-
-        repo.deleteRemoteService(remoteService);
-
-        tracer.log(SeverityType.INFO, ComponentType.DATACENTER, EventType.REMOTE_SERVICES_DELETE,
-            "remoteServices.deleted", remoteService.getType().getName());
-    }
-
-    protected void checkRemoteServiceStatusBeforeRemoving(final RemoteService remoteService)
-    {
-        if (remoteService.getType() == RemoteServiceType.APPLIANCE_MANAGER)
-        {
-            if (repo.isRepositoryBeingUsed(remoteService.getDatacenter()))
-            {
-                addConflictErrors(APIError.APPLIANCE_MANAGER_REPOSITORY_IN_USE);
-                flushErrors();
-            }
-        }
-        if (remoteService.getType() == RemoteServiceType.DHCP_SERVICE
-            || remoteService.getType() == RemoteServiceType.VIRTUAL_SYSTEM_MONITOR)
-        {
-            if (repo.existDeployedVirtualMachines(remoteService.getDatacenter()))
-            {
-                addConflictErrors(APIError.REMOTE_SERVICE_IS_BEING_USED);
-                flushErrors();
-            }
-        }
-    }
-
-    // PROTECTED METHODS
-    protected void checkUniqueness(final Datacenter datacenter, final RemoteServiceDto remoteService)
-    {
-        if (remoteService.getType().checkUniqueness())
-        {
-            try
-            {
-                if (repo.existAnyRemoteServiceWithUri(remoteService.getUri()))
-                {
-                    addConflictErrors(APIError.REMOTE_SERVICE_URL_ALREADY_EXISTS);
-                    flushErrors();
-                }
-            }
-            catch (URISyntaxException e)
-            {
-                addValidationErrors(APIError.REMOTE_SERVICE_MALFORMED_URL);
-                flushErrors();
-            }
-        }
-        else if (repo
-            .existAnyRemoteServiceWithTypeInDatacenter(datacenter, remoteService.getType()))
-        {
-            addConflictErrors(APIError.REMOTE_SERVICE_TYPE_EXISTS);
-            flushErrors();
-        }
-    }
-
-    /**
-     * Configure the Datacenter repository based on the ''repositoryLocation'' consulted from AM.
-     */
-    protected ErrorsDto createApplianceManager(final Datacenter datacenter,
-        final RemoteService remoteService)
-    {
-        int previousStatus = remoteService.getStatus();
-
-        ErrorsDto configurationErrors = new ErrorsDto();
-        if (repo.isRepositoryBeingUsed(datacenter))
-        {
-            remoteService.setStatus(STATUS_ERROR);
-
-            APIError error = APIError.APPLIANCE_MANAGER_REPOSITORY_IN_USE;
-            configurationErrors.add(new ErrorDto(error.getCode(), error.getMessage()));
-            return configurationErrors;
-        }
-
-        if (previousStatus == STATUS_SUCCESS)
-        {
-            String repositoryLocation = null;
-
-            try
-            {
-                ApplianceManagerResourceStubImpl amStub =
-                    new ApplianceManagerResourceStubImpl(remoteService.getUri());
-
-                repositoryLocation = amStub.getRepositoryConfiguration().getLocation();
-
-                if (repo.existRepositoryInOtherDatacenter(datacenter, repositoryLocation))
-                {
-                    remoteService.setStatus(STATUS_ERROR);
-
-                    APIError error = APIError.APPLIANCE_MANAGER_REPOSITORY_ALREADY_DEFINED;
-                    configurationErrors.add(new ErrorDto(error.getCode(), error.getMessage()));
-                    return configurationErrors;
-                }
-
-                repo.createRepository(datacenter, repositoryLocation);
-            }
-            catch (WebApplicationException e)
-            {
-                remoteService.setStatus(STATUS_ERROR);
-                APIError error = APIError.REMOTE_SERVICE_CONNECTION_FAILED;
-                configurationErrors.add(new ErrorDto(error.getCode(), remoteService.getType()
-                    .getName() + ", " + error.getMessage()));
-                return configurationErrors;
-            }
-        }
-
-        // we don't want to serialize the errors if they are empty
-        return configurationErrors;
+        remoteServiceService.removeRemoteService(id);
     }
 
     /*
@@ -712,64 +573,6 @@ public class InfrastructureService extends DefaultApiService
         }
 
         return datacenter;
-    }
-
-    /**
-     * If the current datacenter have a repository being used then the new appliance manager MUST
-     * use the same repository uri. Also updates the repository location (if the old isn't being
-     * used).
-     */
-    protected void checkModifyApplianceManager(final RemoteService old, final RemoteServiceDto dto)
-    {
-        ApplianceManagerResourceStubImpl amStub =
-            new ApplianceManagerResourceStubImpl(dto.getUri());
-
-        if (repo.isRepositoryBeingUsed(old.getDatacenter()))
-        {
-            if (dto.getStatus() == STATUS_SUCCESS)
-            {
-                try
-                {
-                    String newRepositoryLocation =
-                        amStub.getRepositoryConfiguration().getLocation();
-
-                    Repository oldRepository = repo.findRepositoryByDatacenter(old.getDatacenter());
-
-                    String oldRepositoryLocation = oldRepository.getUrl();
-
-                    if (!oldRepositoryLocation.equalsIgnoreCase(newRepositoryLocation))
-                    {
-                        addConflictErrors(APIError.APPLIANCE_MANAGER_REPOSITORY_IN_USE);
-                    }
-                }
-                catch (WebApplicationException e)
-                {
-                    addConflictErrors(APIError.APPLIANCE_MANAGER_REPOSITORY_IN_USE);
-                }
-            }
-            else
-            // STATUES_ERROR
-            {
-                addConflictErrors(APIError.APPLIANCE_MANAGER_REPOSITORY_IN_USE);
-            }
-        }
-        else if (dto.getStatus() == STATUS_SUCCESS)
-        {
-            String repositoryLocation = amStub.getRepositoryConfiguration().getLocation();
-
-            repo.updateRepositoryLocation(old.getDatacenter(), repositoryLocation);
-        }
-        else
-        // the old repository is not being used and the new am is not properly configured
-        {
-            repo.deleteRepository(old.getDatacenter());
-        }
-
-        // ABICLOUDPREMIUM-719 Do not allow the appliance manager modification if the repository is
-        // being used and it changes it location.
-
-        flushErrors();
-
     }
 
     @Transactional(readOnly = true, propagation = Propagation.REQUIRED)

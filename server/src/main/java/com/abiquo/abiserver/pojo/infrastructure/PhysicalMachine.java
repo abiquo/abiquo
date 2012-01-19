@@ -408,7 +408,7 @@ public class PhysicalMachine extends InfrastructureElement implements IPojo<Phys
         physicalMachine.setRamUsed(dto.getVirtualRamUsedInMb());
         physicalMachine.setIdState(dto.getState().ordinal());
         physicalMachine.setVswitchName(dto.getVirtualSwitch());
-        physicalMachine.setIpmiIp(dto.getIpmiIp());
+        physicalMachine.setIpmiIp(dto.getIpmiIP());
         physicalMachine.setIpmiPort(dto.getIpmiPort());
         physicalMachine.setIpmiUser(dto.getIpmiUser());
         physicalMachine.setIpmiPassword(dto.getIpmiPassword());
@@ -435,7 +435,7 @@ public class PhysicalMachine extends InfrastructureElement implements IPojo<Phys
         physicalMachine.setRamUsed(dto.getVirtualRamUsedInMb());
         physicalMachine.setIdState(dto.getState().ordinal());
         physicalMachine.setVswitchName(dto.getVirtualSwitch());
-        physicalMachine.setIpmiIp(dto.getIpmiIp());
+        physicalMachine.setIpmiIp(dto.getIpmiIP());
         physicalMachine.setIpmiPort(dto.getIpmiPort());
         physicalMachine.setIpmiUser(dto.getIpmiUser());
         physicalMachine.setIpmiPassword(dto.getIpmiPassword());
