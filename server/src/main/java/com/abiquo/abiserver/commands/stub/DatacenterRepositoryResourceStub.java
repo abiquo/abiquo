@@ -21,12 +21,17 @@
 
 package com.abiquo.abiserver.commands.stub;
 
+import java.util.ArrayList;
+
+import com.abiquo.abiserver.pojo.infrastructure.DataCenter;
 import com.abiquo.abiserver.pojo.result.DataResult;
 import com.abiquo.abiserver.pojo.virtualimage.Repository;
 
 public interface DatacenterRepositoryResourceStub
 {
 
-    public DataResult<Repository> getRepository(final Integer idDatacenter, final Integer idEnterprise,
-        final boolean refresh, final boolean includeUsage);
+    public DataResult<Repository> getRepository(final Integer idDatacenter,
+        final Integer idEnterprise, final boolean refresh, final boolean includeUsage);
+
+    DataResult<ArrayList<DataCenter>> getAllowedRepositories(final Integer idEnterprise);
 }

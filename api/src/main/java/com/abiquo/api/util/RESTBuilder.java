@@ -809,7 +809,7 @@ public class RESTBuilder implements IRESTBuilder
 
     @Override
     public List<RESTLink> buildDatacenterRepositoryLinks(final Integer enterpriseId,
-        final Integer dcId, final Integer repoId)
+        final Integer dcId, final String dcName, final Integer repoId)
     {
 
         List<RESTLink> links = new ArrayList<RESTLink>();
@@ -817,8 +817,12 @@ public class RESTBuilder implements IRESTBuilder
 
         Map<String, String> paramsDc = new HashMap<String, String>();
         paramsDc.put(DatacenterResource.DATACENTER, dcId.toString());
-        links.add(builder.buildRestLink(DatacenterResource.class, DatacenterResource.DATACENTER,
-            paramsDc));
+
+        RESTLink dclink =
+            builder
+                .buildRestLink(DatacenterResource.class, DatacenterResource.DATACENTER, paramsDc);
+        dclink.setTitle(dcName);
+        links.add(dclink);
 
         Map<String, String> params = new HashMap<String, String>();
         params.put(EnterpriseResource.ENTERPRISE, enterpriseId.toString());

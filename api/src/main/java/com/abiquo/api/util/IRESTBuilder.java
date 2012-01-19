@@ -125,7 +125,7 @@ public interface IRESTBuilder
         final VLANNetwork network);
 
     public List<RESTLink> buildDatacenterRepositoryLinks(final Integer enterpriseId,
-        final Integer dcId, final Integer repoId);
+        final Integer dcId, final String dcName, final Integer repoId);
 
     public List<RESTLink> buildVirtualMachineTemplateLinks(final Integer enterpriseId,
         final Integer dcId, final VirtualMachineTemplate template,

@@ -21,6 +21,8 @@
 
 package com.abiquo.abiserver.commands.stub.impl;
 
+import java.util.ArrayList;
+
 import org.apache.wink.client.ClientResponse;
 import org.apache.wink.client.Resource;
 
@@ -29,6 +31,7 @@ import com.abiquo.abiserver.commands.stub.DatacenterRepositoryResourceStub;
 import com.abiquo.abiserver.pojo.infrastructure.DataCenter;
 import com.abiquo.abiserver.pojo.result.DataResult;
 import com.abiquo.abiserver.pojo.virtualimage.Repository;
+import com.abiquo.server.core.appslibrary.DatacenterRepositoriesDto;
 import com.abiquo.server.core.appslibrary.DatacenterRepositoryDto;
 
 public class DatacenterRepositoryResourceStubImpl extends AbstractAPIStub implements
@@ -65,6 +68,51 @@ public class DatacenterRepositoryResourceStubImpl extends AbstractAPIStub implem
         }
 
         return result;
+    }
+
+    @Override
+    public DataResult<ArrayList<DataCenter>> getAllowedRepositories(final Integer idEnterprise)
+    {
+        DataResult<ArrayList<DataCenter>> result = new DataResult<ArrayList<DataCenter>>();
+
+        String uri = createDatacenterRepositoriesLink(idEnterprise);
+
+        ClientResponse response = resource(uri).get();
+
+        if (response.getStatusCode() / 200 == 1)
+        {
+            DatacenterRepositoriesDto repos = response.getEntity(DatacenterRepositoriesDto.class);
+
+            result.setSuccess(true);
+            result.setData(transformToFlex(repos));
+        }
+        else
+        {
+            populateErrors(response, result, "deleteNotManagedVirtualMachines");
+        }
+
+        return result;
+    }
+
+    private ArrayList<DataCenter> transformToFlex(final DatacenterRepositoriesDto repos)
+    {
+        ArrayList<DataCenter> datacenters = new ArrayList<DataCenter>();
+
+        for (DatacenterRepositoryDto repo : repos.getCollection())
+        {
+            datacenters.add(transformToFlexDc(repo));
+        }
+
+        return datacenters;
+    }
+
+    private DataCenter transformToFlexDc(final DatacenterRepositoryDto repo)
+    {
+        DataCenter datacenter = new DataCenter();
+        datacenter.setId(repo.getIdFromLink("datacenter"));
+        datacenter.setName(repo.searchLink("datacenter").getTitle());
+
+        return datacenter;
     }
 
     private Repository transformToFlex(final DatacenterRepositoryDto repo)

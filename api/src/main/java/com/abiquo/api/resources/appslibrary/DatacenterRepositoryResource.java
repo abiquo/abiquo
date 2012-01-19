@@ -144,16 +144,17 @@ public class DatacenterRepositoryResource extends AbstractResource
 
         // use datacenterId as self id
         final Integer dcId = repo.getDatacenter().getId();
-        dto = addLinks(builder, dto, enterpId, dcId, dcId, amUri);
+        final String dcName = repo.getDatacenter().getName();
+        dto = addLinks(builder, dto, enterpId, dcId, dcName, dcId, amUri);
 
         return dto;
     }
 
     private static DatacenterRepositoryDto addLinks(final IRESTBuilder builder,
         final DatacenterRepositoryDto dto, final Integer enterpriseId, final Integer dcId,
-        final Integer repoId, final String amUri)
+        final String dcName, final Integer repoId, final String amUri)
     {
-        dto.setLinks(builder.buildDatacenterRepositoryLinks(enterpriseId, dcId, repoId));
+        dto.setLinks(builder.buildDatacenterRepositoryLinks(enterpriseId, dcId, dcName, repoId));
         dto.addLink(applianceManagerRepositoryAddress(amUri, enterpriseId));
 
         return dto;
