@@ -203,8 +203,13 @@ public class VirtualMachineService extends DefaultApiService
 
     public Collection<VirtualMachine> findByHypervisor(final Hypervisor hypervisor)
     {
-        assert hypervisor != null;
         return repo.findByHypervisor(hypervisor);
+    }
+
+    public Collection<VirtualMachine> findNotAllocated(final Hypervisor hypervisor)
+    {
+        assert hypervisor != null;
+        return repo.findVirtualMachinesNotAllocatedCompatibleHypervisor(hypervisor);
     }
 
     public Collection<VirtualMachine> findByEnterprise(final Enterprise enterprise)

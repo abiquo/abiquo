@@ -82,8 +82,14 @@ public class VirtualMachineRep extends DefaultRepBase
 
     public Collection<VirtualMachine> findManagedByHypervisor(final Hypervisor hypervisor)
     {
-        assert hypervisor != null;
         return dao.findManagedVirtualMachines(hypervisor);
+    }
+
+    public Collection<VirtualMachine> findVirtualMachinesNotAllocatedCompatibleHypervisor(
+        final Hypervisor hypervisor)
+    {
+        assert hypervisor != null;
+        return dao.findVirtualMachinesNotAllocatedCompatibleHypervisor(hypervisor);
     }
 
     public Collection<VirtualMachine> findByEnterprise(final Enterprise enterprise)
