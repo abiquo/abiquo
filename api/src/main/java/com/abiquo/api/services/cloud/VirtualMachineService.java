@@ -316,7 +316,7 @@ public class VirtualMachineService extends DefaultApiService
             getVirtualApplianceAndCheckVirtualDatacenter(vdcId, vappId);
 
         // we currently don't allow to reconfigure imported virtual machines
-        if (virtualMachine.isImported())
+        if (virtualMachine.isCaptured())
         {
             addConflictErrors(APIError.VIRTUAL_MACHINE_IMPORTED_CAN_NOT_RECONFIGURE);
             flushErrors();
@@ -1269,7 +1269,7 @@ public class VirtualMachineService extends DefaultApiService
         VirtualAppliance virtualAppliance =
             getVirtualApplianceAndCheckVirtualDatacenter(vdcId, vappId);
 
-        if (!forceUndeploy && virtualMachine.isImported())
+        if (!forceUndeploy && virtualMachine.isCaptured())
         {
             addConflictErrors(APIError.VIRTUAL_MACHINE_IMPORTED_WILL_BE_DELETED);
             flushErrors();

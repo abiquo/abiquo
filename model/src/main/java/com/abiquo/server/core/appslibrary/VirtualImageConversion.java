@@ -161,9 +161,9 @@ public class VirtualImageConversion extends DefaultEntityBase
 
     private final static boolean SOURCE_PATH_REQUIRED = false;
 
-    private final static int SOURCE_PATH_LENGTH_MIN = 0;
+    public final static int SOURCE_PATH_LENGTH_MIN = 0;
 
-    private final static int SOURCE_PATH_LENGTH_MAX = 255;
+    public final static int SOURCE_PATH_LENGTH_MAX = 255;
 
     private final static boolean SOURCE_PATH_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
 

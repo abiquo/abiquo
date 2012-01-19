@@ -98,8 +98,14 @@ public class EnterpriseRepositoryService
             EnterpriseRepositoryFileSystem.getAllOVF(erepoPath, false);
 
         AMRedisDao dao = AMRedisDao.getDao();
-        dao.init(idEnterprise, availables);
-        AMRedisDao.returnDao(dao);
+        try
+        {
+            dao.init(idEnterprise, availables);
+        }
+        finally
+        {
+            AMRedisDao.returnDao(dao);
+        }
     }
 
     public List<TemplateStateDto> getTemplateStates()
@@ -107,8 +113,14 @@ public class EnterpriseRepositoryService
         final List<TemplateStateDto> states;
 
         AMRedisDao dao = AMRedisDao.getDao();
-        states = dao.getAll(erId);
-        AMRedisDao.returnDao(dao);
+        try
+        {
+            states = dao.getAll(erId);
+        }
+        finally
+        {
+            AMRedisDao.returnDao(dao);
+        }
 
         return states;
     }

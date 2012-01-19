@@ -549,7 +549,7 @@ public class VirtualApplianceService extends DefaultApiService
         {
             for (NodeVirtualImage node : virtualAppliance.getNodes())
             {
-                if (node.getVirtualMachine().isImported())
+                if (node.getVirtualMachine().isCaptured())
                 {
                     addConflictErrors(APIError.VIRTUAL_MACHINE_IMPORTED_WILL_BE_DELETED);
                     flushErrors();

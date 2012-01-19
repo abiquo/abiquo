@@ -37,7 +37,12 @@ public class AMConfiguration
 
     public final static int HTTP_REQUEST_TIMEOUT = 24 * 60 * 60 * 1000; // a day
 
-    public final static int HTTP_MAX_CONNECTIONS = 10;
+    public final static int HTTP_MAX_CONNECTIONS = Integer.valueOf(System.getProperty(
+        "abiquo.appliancemanager.downloads", "10"));
+
+    /** milliseconds */
+    public final static int DOWNLOADING_PUBLISH_INTERVAL = Integer.valueOf(System.getProperty(
+        "abiquo.appliancemanager.downloadingPublishInterval", "1500"));
 
     /**
      * Where the ''repositoryLocation'' file system is mounted. Base path on the machine local file
@@ -201,7 +206,7 @@ public class AMConfiguration
 
     public boolean isProxy()
     {
-        return (proxyHost != null && proxyPort != null);
+        return proxyHost != null && proxyPort != null;
     }
 
     /**

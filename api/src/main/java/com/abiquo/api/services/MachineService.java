@@ -169,6 +169,11 @@ public class MachineService extends DefaultApiService
         old.setVirtualCpusUsed(machineDto.getVirtualCpusUsed());
         old.setVirtualCpusPerCore(machineDto.getVirtualCpusPerCore());
 
+        old.setIpmiIP(machineDto.getIpmiIP());
+        old.setIpmiPort(machineDto.getIpmiPort());
+        old.setIpmiUser(machineDto.getIpmiUser());
+        old.setIpmiPassword(machineDto.getIpmiPassword());
+
         isValidMachine(old);
 
         // [ABICLOUDPREMIUM-1516] If ip service changes, must change the vrdp ip of the
@@ -217,6 +222,8 @@ public class MachineService extends DefaultApiService
         Machine machine = repo.findMachineById(id);
         Hypervisor hypervisor = machine.getHypervisor();
 
+        RemoteService service = remoteServiceService.getVSMRemoteService(machine.getDatacenter());
+
         // Update virtual machines and remove imported virtual machines
         Collection<VirtualMachine> virtualMachines =
             virtualMachineService.findByHypervisor(hypervisor);
@@ -244,6 +251,17 @@ public class MachineService extends DefaultApiService
                 }
                 else if (vm.isImported())
                 {
+                    try
+                    {
+                        vsm.unsubscribe(service, vm);
+                    }
+                    catch (APIException e)
+                    {
+                        logger
+                            .error(
+                                "Trying to unsubscribe virtual machine {} when it is already unsubscribed.",
+                                vm.getName());
+                    }
                     virtualDatacenterRep.deleteVirtualMachine(vm);
                 }
             }
@@ -262,22 +280,25 @@ public class MachineService extends DefaultApiService
         repo.deleteMachine(machine);
 
         // Update VSM state
-        RemoteService service = remoteServiceService.getVSMRemoteService(machine.getDatacenter());
 
         if (virtualMachines != null)
         {
             for (VirtualMachine vm : virtualMachines)
             {
-                try
+                // import yet unsubscribed from vsm
+                if (!vm.isImported())
                 {
-                    vsm.unsubscribe(service, vm);
-                }
-                catch (APIException e)
-                {
-                    logger
-                        .error(
-                            "Trying to unsubscribe virtual machine {} when it is already unsubscribed.",
-                            vm.getName());
+                    try
+                    {
+                        vsm.unsubscribe(service, vm);
+                    }
+                    catch (APIException e)
+                    {
+                        logger
+                            .error(
+                                "Trying to unsubscribe virtual machine {} when it is already unsubscribed.",
+                                vm.getName());
+                    }
                 }
             }
         }
