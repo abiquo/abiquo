@@ -21,6 +21,7 @@
 
 package com.abiquo.server.core.cloud;
 
+import java.util.Arrays;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -30,12 +31,12 @@ import javax.persistence.TypedQuery;
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.Criteria;
 import org.hibernate.Query;
-import org.hibernate.Session;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 
+import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
 import com.abiquo.server.core.common.persistence.JPAConfiguration;
 import com.abiquo.server.core.enterprise.Enterprise;
@@ -144,6 +145,21 @@ public class VirtualMachineDAO extends DefaultDAOBase<Integer, VirtualMachine>
         assert isManaged2(hypervisor);
 
         Criteria criteria = createCriteria(sameHypervisor(hypervisor));
+        criteria.addOrder(Order.asc(VirtualMachine.NAME_PROPERTY));
+        List<VirtualMachine> result = getResultList(criteria);
+        return result;
+    }
+
+    // without hypervisor
+    public List<VirtualMachine> findVirtualMachinesNotAllocatedCompatibleHypervisor(
+        final Hypervisor hypervisor)
+    {
+        Criteria criteria = createCriteria();
+        criteria.createAlias(VirtualMachine.VIRTUAL_MACHINE_TEMPLATE_PROPERTY, "template");
+        Restrictions.and(
+            Restrictions.eq(VirtualMachine.HYPERVISOR_PROPERTY, null),
+            Restrictions.in("template." + VirtualMachineTemplate.DISKFORMAT_TYPE_PROPERTY,
+                Arrays.asList(hypervisor.getType().compatibilityTable)));
         criteria.addOrder(Order.asc(VirtualMachine.NAME_PROPERTY));
         List<VirtualMachine> result = getResultList(criteria);
         return result;

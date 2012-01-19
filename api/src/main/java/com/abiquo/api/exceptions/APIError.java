@@ -186,7 +186,8 @@ public enum APIError
         "VAPP-1", "The virtual appliance is not deployed"), VIRTUALAPPLIANCE_NOT_RUNNING("VAPP-2",
         "The virtual appliance is not running"), VIRTUALAPPLIANCE_DEPLOYED("VAPP-1",
         "The virtual appliance is deployed"), VIRTUALAPPLIANCE_NON_MANAGED_IMAGES("VAPP-4",
-        "The virtual appliance has non managed images"),
+        "The virtual appliance has non managed images"), VIRTUALAPPLIANCE_INVALID_STATE_DELETE(
+        "VAPP-4", "The virtual appliance has non managed images"),
 
     // VIRTUAL CONVERSION
     NON_EXISTENT_VIRTUALAPPLIANCE_STATEFULCONVERSION("VASC-0",
