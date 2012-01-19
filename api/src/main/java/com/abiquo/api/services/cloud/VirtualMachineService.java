@@ -25,7 +25,6 @@ import static com.abiquo.api.resources.appslibrary.VirtualMachineTemplateResourc
 import static com.abiquo.api.util.URIResolver.buildPath;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -208,8 +207,13 @@ public class VirtualMachineService extends DefaultApiService
 
     public Collection<VirtualMachine> findByHypervisor(final Hypervisor hypervisor)
     {
-        assert hypervisor != null;
         return repo.findByHypervisor(hypervisor);
+    }
+
+    public Collection<VirtualMachine> findNotAllocated(final Hypervisor hypervisor)
+    {
+        assert hypervisor != null;
+        return repo.findVirtualMachinesNotAllocatedCompatibleHypervisor(hypervisor);
     }
 
     public Collection<VirtualMachine> findByEnterprise(final Enterprise enterprise)
