@@ -9,6 +9,8 @@
                 <entry key="nodecollectorServiceStub" value="nodecollectorServiceStubMock" />
                 <entry key="tarantinoService" value="tarantinoServiceMock" />
                 <entry key="virtualMachineService" value="virtualMachineServiceMock" />
+                <entry key="wink.customPropertiesFactory" value="wink.test.customPropertiesFactory" />
+                <entry key="wink.placeholderConfigurer" value="wink.test.placeholderConfigurer" />
             </map>
         </property>
     </bean>

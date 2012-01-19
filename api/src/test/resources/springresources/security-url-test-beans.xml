@@ -36,13 +36,16 @@
     <bean id="beanReplacementsTest" class="com.abiquo.api.spring.BeanReplacementProcessor">
         <property name="replacements">
             <map>
-            <!-- 
-                <entry key="virtualMachineAllocatorService" value="virtualMachineAllocatorTestService" />
-			-->
+                <entry key="vsmServiceStub" value="vsmServiceStubMock" />
+                <entry key="infrastructureService" value="infrastructureTestService" />
+                <entry key="nodecollectorServiceStub" value="nodecollectorServiceStubMock" />
+                <entry key="tarantinoService" value="tarantinoServiceMock" />
+                <entry key="virtualMachineService" value="virtualMachineServiceMock" />
+                <!-- <entry key="virtualMachineAllocatorService" value="virtualMachineAllocatorTestService" /> -->
             </map>
         </property>
     </bean>
     
     <import resource="security-beans.xml" />
-    
+    <import resource="redis-beans-test.xml" />
 </beans>
