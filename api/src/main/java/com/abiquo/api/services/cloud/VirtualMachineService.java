@@ -1399,12 +1399,11 @@ public class VirtualMachineService extends DefaultApiService
      */
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public String instanceVirtualMachine(final Integer vmId, final Integer vappId,
-        final Integer vdcId, final String instanceName)
+        final Integer vdcId, final String instanceName, final VirtualMachineState originalState)
     {
         // Retrieve entities
         VirtualMachine virtualMachine = getVirtualMachine(vdcId, vappId, vmId);
         VirtualAppliance virtualApp = getVirtualApplianceAndCheckVirtualDatacenter(vdcId, vappId);
-        VirtualMachineState originalState = virtualMachine.getState();
 
         LOGGER.debug("Starting the instance of the virtual machine {}", virtualMachine.getName());
 
