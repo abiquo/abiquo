@@ -1121,7 +1121,6 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
             VirtualDatacenter vdc =
                 getApiClient().getCloudService().getVirtualDatacenter(
                     virtualAppliance.getVirtualDataCenter().getId());
-
             VirtualApplianceDto dto =
                 getApiClient().getApi().getCloudClient()
                     .getVirtualAppliance(vdc.unwrap(), virtualAppliance.getId());
@@ -1129,6 +1128,21 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
             org.jclouds.abiquo.domain.cloud.VirtualAppliance vapp =
                 DomainWrapper.wrap(getApiClient(),
                     org.jclouds.abiquo.domain.cloud.VirtualAppliance.class, dto);
+
+            vapp.undeploy(Boolean.TRUE);
+
+            // The vapp state is DEPLOYED
+            vapp =
+                DomainWrapper.wrap(getApiClient(),
+                    org.jclouds.abiquo.domain.cloud.VirtualAppliance.class, dto);
+
+            // Blocking
+            getApiClient()
+                .getMonitoringService()
+                .getVirtualMachineMonitor()
+                .awaitCompletionUndeploy(
+                    vapp.listVirtualMachines().toArray(
+                        new org.jclouds.abiquo.domain.cloud.VirtualMachine[0]));
 
             // Here we actually perform the request to delete the virtual appliance
             vapp.delete();
