@@ -40,18 +40,19 @@ import org.springframework.stereotype.Controller;
 import com.abiquo.api.exceptions.mapper.APIExceptionMapper;
 import com.abiquo.api.resources.AbstractResource;
 import com.abiquo.api.services.NetworkService;
+import com.abiquo.api.services.cloud.VirtualMachineLock;
 import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.model.rest.RESTLink;
 import com.abiquo.model.transport.AcceptedRequestDto;
 import com.abiquo.model.transport.LinksDto;
 import com.abiquo.model.util.ModelTransformer;
+import com.abiquo.server.core.cloud.VirtualMachineState;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
 import com.abiquo.server.core.infrastructure.network.NicDto;
 import com.abiquo.server.core.infrastructure.network.NicsDto;
 import com.abiquo.server.core.infrastructure.network.VMNetworkConfiguration;
 import com.abiquo.server.core.infrastructure.network.VMNetworkConfigurationDto;
 import com.abiquo.server.core.infrastructure.network.VMNetworkConfigurationsDto;
-import com.abiquo.server.core.infrastructure.storage.DiskManagement;
 import com.abiquo.server.core.infrastructure.storage.DiskManagementDto;
 
 /**
@@ -98,16 +99,19 @@ public class VirtualMachineNetworkConfigurationResource extends AbstractResource
 
     /** edit relation to private ips. */
     public static final String PRIVATE_IP = "privateip";
-    
+
     /** edit relation to private ips. */
     public static final String PUBLIC_IP = "publicip";
-    
+
     /** edit relation to private ips. */
     public static final String EXTERNAL_IP = "externalip";
 
     /** Autowired business logic service. */
     @Autowired
     private NetworkService service;
+
+    @Autowired
+    protected VirtualMachineLock vmLock;
 
     /**
      * Returns all the posible network configurations that a machine can hold.
@@ -255,19 +259,33 @@ public class VirtualMachineNetworkConfigurationResource extends AbstractResource
         @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) @NotNull @Min(1) final Integer vmId,
         @NotNull final LinksDto nicRefs, @Context final IRESTBuilder restBuilder) throws Exception
     {
-        Object result = service.attachNICs(vdcId, vappId, vmId, nicRefs);
+        VirtualMachineState originalState =
+            vmLock.lockVirtualMachineBeforeReconfiguring(vdcId, vappId, vmId);
 
-        // The attach method may return a Tarantino task identifier if the operation requires a
-        // reconfigure. Otherwise it will return null.
-        if (result != null)
+        try
         {
-            AcceptedRequestDto<Object> response = new AcceptedRequestDto<Object>();
-            response.setStatusUrlLink("http://status");
-            response.setEntity(result);
-            return response;
-        }
+            Object result = service.attachNICs(vdcId, vappId, vmId, nicRefs, originalState);
 
-        return null;
+            // The attach method may return a Tarantino task identifier if the operation requires a
+            // reconfigure. Otherwise it will return null.
+            if (result != null)
+            {
+                AcceptedRequestDto<Object> response = new AcceptedRequestDto<Object>();
+                response.setStatusUrlLink("http://status");
+                response.setEntity(result);
+                return response;
+            }
+
+            // If there is no async task the VM must be unlocked here
+            vmLock.unlockVirtualMachine(vmId, originalState);
+            return null;
+        }
+        catch (Exception ex)
+        {
+            // Make sure virtual machine is unlocked if deploy fails
+            vmLock.unlockVirtualMachine(vmId, originalState);
+            throw ex;
+        }
     }
 
     /**
@@ -294,19 +312,33 @@ public class VirtualMachineNetworkConfigurationResource extends AbstractResource
         @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) @NotNull @Min(1) final Integer vmId,
         @NotNull final LinksDto nicRefs, @Context final IRESTBuilder restBuilder) throws Exception
     {
-        Object result = service.changeNICs(vdcId, vappId, vmId, nicRefs);
+        VirtualMachineState originalState =
+            vmLock.lockVirtualMachineBeforeReconfiguring(vdcId, vappId, vmId);
 
-        // The attach method may return a Tarantino task identifier if the operation requires a
-        // reconfigure. Otherwise it will return null.
-        if (result != null)
+        try
         {
-            AcceptedRequestDto<Object> response = new AcceptedRequestDto<Object>();
-            response.setStatusUrlLink("http://status");
-            response.setEntity(result);
-            return response;
-        }
+            Object result = service.changeNICs(vdcId, vappId, vmId, nicRefs, originalState);
 
-        return null;
+            // The attach method may return a Tarantino task identifier if the operation requires a
+            // reconfigure. Otherwise it will return null.
+            if (result != null)
+            {
+                AcceptedRequestDto<Object> response = new AcceptedRequestDto<Object>();
+                response.setStatusUrlLink("http://status");
+                response.setEntity(result);
+                return response;
+            }
+
+            // If there is no async task the VM must be unlocked here
+            vmLock.unlockVirtualMachine(vmId, originalState);
+            return null;
+        }
+        catch (Exception ex)
+        {
+            // Make sure virtual machine is unlocked if deploy fails
+            vmLock.unlockVirtualMachine(vmId, originalState);
+            throw ex;
+        }
     }
 
     /**
@@ -330,11 +362,12 @@ public class VirtualMachineNetworkConfigurationResource extends AbstractResource
         @PathParam(NIC) @NotNull @Min(0) final Integer nicId,
         @Context final IRESTBuilder restBuilder) throws Exception
     {
-        IpPoolManagement ip = service.getIpPoolManagementByVirtualMachine(vdcId, vappId, vmId, nicId);
+        IpPoolManagement ip =
+            service.getIpPoolManagementByVirtualMachine(vdcId, vappId, vmId, nicId);
 
         return createNICTransferObject(ip, restBuilder);
     }
-    
+
     /**
      * Remove a Virtual Machine NIC. Release the association between Private IP and NIC.
      * 
@@ -355,19 +388,33 @@ public class VirtualMachineNetworkConfigurationResource extends AbstractResource
         @PathParam(NIC) @NotNull @Min(0) final Integer nicId,
         @Context final IRESTBuilder restBuilder) throws Exception
     {
-        Object result = service.detachNIC(vdcId, vappId, vmId, nicId);
+        VirtualMachineState originalState =
+            vmLock.lockVirtualMachineBeforeReconfiguring(vdcId, vappId, vmId);
 
-        // The attach method may return a Tarantino task identifier if the operation requires a
-        // reconfigure. Otherwise it will return null.
-        if (result != null)
+        try
         {
-            AcceptedRequestDto<Object> response = new AcceptedRequestDto<Object>();
-            response.setStatusUrlLink("http://status");
-            response.setEntity(result);
-            return response;
-        }
+            Object result = service.detachNIC(vdcId, vappId, vmId, nicId, originalState);
 
-        return null;
+            // The attach method may return a Tarantino task identifier if the operation requires a
+            // reconfigure. Otherwise it will return null.
+            if (result != null)
+            {
+                AcceptedRequestDto<Object> response = new AcceptedRequestDto<Object>();
+                response.setStatusUrlLink("http://status");
+                response.setEntity(result);
+                return response;
+            }
+
+            // If there is no async task the VM must be unlocked here
+            vmLock.unlockVirtualMachine(vmId, originalState);
+            return null;
+        }
+        catch (Exception ex)
+        {
+            // Make sure virtual machine is unlocked if deploy fails
+            vmLock.unlockVirtualMachine(vmId, originalState);
+            throw ex;
+        }
     }
 
     /**
