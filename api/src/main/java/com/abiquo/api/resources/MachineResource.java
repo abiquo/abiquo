@@ -255,7 +255,7 @@ public class MachineResource extends AbstractResource
         dto.setVirtualRamInMb(machine.getVirtualRamInMb());
         dto.setVirtualRamUsedInMb(machine.getVirtualRamUsedInMb());
         dto.setVirtualSwitch(machine.getVirtualSwitch());
-        dto.setIpmiIp(machine.getIpmiIP());
+        dto.setIpmiIP(machine.getIpmiIP());
         dto.setIpmiPort(machine.getIpmiPort());
         dto.setIpmiUser(machine.getIpmiUser());
         dto.setIpmiPassword(machine.getIpmiPassword());

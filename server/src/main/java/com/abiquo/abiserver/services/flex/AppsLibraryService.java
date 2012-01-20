@@ -315,4 +315,13 @@ public class AppsLibraryService
         return proxyStub(userSession).deleteCategory(idCategory);
     }
 
+    public BasicResult getAllowedDataCenters(final UserSession session,
+        final Integer effectiveEnterpriseId)
+    {
+        DatacenterRepositoryResourceStub dcRepoStub =
+            APIStubFactory.getInstance(session, new DatacenterRepositoryResourceStubImpl(),
+                DatacenterRepositoryResourceStub.class);
+
+        return dcRepoStub.getAllowedRepositories(effectiveEnterpriseId);
+    }
 }

@@ -37,6 +37,7 @@ import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
 import com.abiquo.server.core.cloud.VirtualApplianceDto;
 import com.abiquo.server.core.cloud.VirtualApplianceStateDto;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
+import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.config.LicenseDto;
 import com.abiquo.server.core.config.SystemPropertyDto;
 import com.abiquo.server.core.enterprise.DatacenterLimitsDto;
@@ -127,7 +128,7 @@ public interface IRESTBuilder
         final VLANNetwork network);
 
     public List<RESTLink> buildDatacenterRepositoryLinks(final Integer enterpriseId,
-        final Integer dcId, final Integer repoId);
+        final Integer dcId, final String dcName, final Integer repoId);
 
     public List<RESTLink> buildVirtualMachineTemplateLinks(final Integer enterpriseId,
         final Integer dcId, final VirtualMachineTemplate template,
@@ -149,7 +150,7 @@ public interface IRESTBuilder
         Integer machineId, Integer enterpriseId, Integer userId, HypervisorType machineType);
 
     public List<RESTLink> buildVirtualMachineCloudLinks(Integer vdcId, Integer vappId,
-        Integer vmId, boolean chefEnabled, final Integer[] volumeIds, final Integer[] diskIds,
+        VirtualMachine vm, boolean chefEnabled, final Integer[] volumeIds, final Integer[] diskIds,
         final List<IpPoolManagement> ips);
 
     public List<RESTLink> buildSystemPropertyLinks(SystemPropertyDto systemProperty);
@@ -176,7 +177,7 @@ public interface IRESTBuilder
     public List<RESTLink> buildVolumeCloudLinks(final VolumeManagement volume);
 
     public List<RESTLink> buildVirtualMachineCloudAdminLinks(final Integer vdcId,
-        final Integer vappId, final Integer vmId, final Integer datacenterId, final Integer rackId,
+        final Integer vappId, final VirtualMachine vm, final Integer datacenterId, final Integer rackId,
         final Integer machineId, final Integer enterpriseId, final Integer userId,
         boolean chefEnabled, Integer[] volumeIds, Integer[] diksIds,
         final List<IpPoolManagement> ips, final HypervisorType vdcType);

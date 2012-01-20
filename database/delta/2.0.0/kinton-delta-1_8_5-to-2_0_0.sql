@@ -257,6 +257,16 @@ ALTER TABLE `kinton`.`rasd_management` ADD COLUMN `sequence` int(10) unsigned de
 -- Modify constraint --
 ALTER TABLE `kinton`.`rasd_management` DROP CONSTRAINT `idResource_FK`;
 ALTER TABLE `kinton`.`rasd_management` ADD  CONSTRAINT `idResource_FK2` FOREIGN KEY (`idResource`) REFERENCES `rasd` (`instanceID`) ON DELETE SET NULL
+
+
+ALTER TABLE `kinton`.`virtualmachine` ADD COLUMN `network_configuration_id` int(11) unsigned; 
+ALTER TABLE `kinton`.`virtualmachine` ADD KEY `virtualMachine_FK6`;
+ALTER TABLE `kinton`.`virtualmachine` ADD CONSTRAINT `virtualMachine_FK6` FOREIGN KEY (`network_configuration_id`) REFERENCES `network_configuration` (`network_configuration_id`) ON DELETE SET NULL; 
+
+update vlan_network vl, ip_pool_management ip, rasd_management rm, virtualmachine vm set vm.network_configuration_id = vl.network_configuration_id where ip.vlan_network_id = vl.vlan_network_id and ip.idManagement = rm.idManagement and configureGateway = 1 and rm.idvm = vm.idvm;
+
+ALTER TABLE `ip_pool_management` DROP COLUMN `configureGateway`;
+
 -- ---------------------------------------------- --
 --   DATA CHANGES (insert, update, delete, etc)   --
 -- ---------------------------------------------- --

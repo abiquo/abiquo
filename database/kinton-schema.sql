@@ -183,7 +183,8 @@ CREATE TABLE `kinton`.`network_configuration` (
 CREATE TABLE  `kinton`.`vlan_network` (
   `vlan_network_id` int(11) unsigned NOT NULL auto_increment,
   `network_id` int(11) unsigned NOT NULL,
-  `network_configuration_id` int(11) unsigned NOT NULL, `network_name` varchar(40) NOT NULL,
+  `network_configuration_id` int(11) unsigned NOT NULL, 
+  `network_name` varchar(40) NOT NULL,
   `vlan_tag` int(4) unsigned DEFAULT NULL,
   `networktype` varchar(15) NOT NULL DEFAULT 'internal',
   `version_c` integer NOT NULL DEFAULT 1,
@@ -756,7 +757,6 @@ CREATE TABLE  `kinton`.`ip_pool_management` (
   `mac` varchar(20),
   `name` varchar(30),
   `ip` varchar(20) NOT NULL,
-  `configureGateway` boolean NOT NULL default 0,
   `vlan_network_name` varchar(40),
   `vlan_network_id` int(11) unsigned,
   `quarantine` boolean NOT NULL default 0,
@@ -1152,6 +1152,7 @@ CREATE TABLE  `kinton`.`virtualmachine` (
   `idEnterprise` int(10) unsigned default NULL COMMENT 'Enterprise of the user',
   `idDatastore` int(10) unsigned default NULL,
   `password` varchar(32) default NULL,
+  `network_configuration_id` int(11) unsigned, 
   `temporal` int(10) unsigned default NULL,
   `version_c` int(11) default 0,
   PRIMARY KEY  (`idVM`),
@@ -1160,14 +1161,15 @@ CREATE TABLE  `kinton`.`virtualmachine` (
   KEY `virtualMachine_FK3` (`idImage`),
   KEY `virtualMachine_FK4` (`idUser`),
   KEY `virtualMachine_FK5` (`idEnterprise`),
+  KEY `virtualMachine_FK6` (`network_configuration_id`),
   CONSTRAINT `virtualMachine_FK1` FOREIGN KEY (`idHypervisor`) REFERENCES `hypervisor` (`id`) ON DELETE CASCADE,
   CONSTRAINT `virtualMachine_datastore_FK` FOREIGN KEY (`idDatastore`) REFERENCES `datastore` (`idDatastore`),
   CONSTRAINT `virtualMachine_FK3` FOREIGN KEY (`idImage`) REFERENCES `virtualimage` (`idImage`),
   CONSTRAINT `virtualmachine_conversion_FK` FOREIGN KEY `virtualmachine_conversion_FK` (`idConversion`) REFERENCES `virtualimage_conversions` (`id`),
   CONSTRAINT `virtualMachine_FK5` FOREIGN KEY (`idEnterprise`) REFERENCES `enterprise` (`idEnterprise`) ON DELETE SET NULL,
-  CONSTRAINT `virtualMachine_FK4` FOREIGN KEY (`idUser`) REFERENCES `user` (`idUser`) ON DELETE SET NULL
-  )
- ENGINE=InnoDB DEFAULT CHARSET=utf8;
+  CONSTRAINT `virtualMachine_FK4` FOREIGN KEY (`idUser`) REFERENCES `user` (`idUser`) ON DELETE SET NULL,
+  CONSTRAINT `virtualMachine_FK6` FOREIGN KEY (`network_configuration_id`) REFERENCES `network_configuration` (`network_configuration_id`) ON DELETE SET NULL  
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `kinton`.`virtualmachine`

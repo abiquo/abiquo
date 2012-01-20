@@ -21,16 +21,31 @@
 
 package com.abiquo.api.services.cloud;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.persistence.EntityManager;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.abiquo.api.exceptions.APIError;
+import com.abiquo.api.services.DefaultApiService;
+import com.abiquo.model.enumerator.HypervisorType;
+import com.abiquo.server.core.cloud.NodeVirtualImage;
+import com.abiquo.server.core.cloud.VirtualAppliance;
+import com.abiquo.server.core.cloud.VirtualApplianceState;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineRep;
 import com.abiquo.server.core.cloud.VirtualMachineState;
+import com.abiquo.server.core.cloud.VirtualMachineStateTransition;
+import com.abiquo.tracer.ComponentType;
+import com.abiquo.tracer.EventType;
+import com.abiquo.tracer.SeverityType;
 
 /**
  * {@link VirtualMachine} lock and unlock functionality.
@@ -42,15 +57,20 @@ import com.abiquo.server.core.cloud.VirtualMachineState;
  * @author Ignasi Barrera
  */
 
-// This class is only visible at package level. It should only be accessed from the
-// VirtualMachineService#lockVirtualMachine and VirtualMachineService#unlockVirtualMachine
-// methods
-
 @Service
-public class VirtualMachineLock
+public class VirtualMachineLock extends DefaultApiService
 {
+    /** The logger. **/
+    private final static Logger LOGGER = LoggerFactory.getLogger(VirtualMachineLock.class);
+
     @Autowired
-    private VirtualMachineRep repo;
+    private VirtualMachineRep vmRepo;
+
+    @Autowired
+    private VirtualMachineService vmService;
+
+    @Autowired
+    private VirtualApplianceService vappService;
 
     public VirtualMachineLock()
     {
@@ -59,41 +79,318 @@ public class VirtualMachineLock
 
     public VirtualMachineLock(final EntityManager em)
     {
-        this.repo = new VirtualMachineRep(em);
+        this.vmRepo = new VirtualMachineRep(em);
+        this.vmService = new VirtualMachineService(em);
+        this.vappService = new VirtualApplianceService(em);
     }
 
-    /**
-     * Lock the given virtual machine.
-     * <p>
-     * This method gets the ID of the virtual machine as a parameter instead of the object itself to
-     * force refreshing the VM from the database to avoid session issues due to objects loaded in
-     * different transactions.
-     * 
-     * @param vmId The ID of the virtual machine to lock.
-     */
     @Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
-    public void lock(final Integer vmId)
+    public VirtualMachineState lockVirtualMachineBeforeDeploying(final Integer vdcId,
+        final Integer vappId, final Integer vmId)
     {
-        VirtualMachine vm = repo.findVirtualMachineById(vmId);
+        VirtualMachine vm = vmService.getVirtualMachine(vdcId, vappId, vmId);
+        VirtualMachineState originalState = vm.getState();
+
+        if (!VirtualMachineState.NOT_ALLOCATED.equals(originalState))
+        {
+            tracer.log(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE, EventType.VM_DEPLOY,
+                APIError.VIRTUAL_MACHINE_INVALID_STATE_DEPLOY.getMessage());
+            tracer.systemLog(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
+                EventType.VM_DEPLOY, "virtualMachine.deployedOrAllocated");
+            addConflictErrors(APIError.VIRTUAL_MACHINE_INVALID_STATE_DEPLOY);
+            flushErrors();
+        }
+
+        LOGGER.debug("The virtual machine is in state {} and is valid for deploy. Locking it..."
+            + originalState.name());
+
+        lock(vm);
+
+        return originalState;
+    }
+
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
+    public VirtualMachineState lockVirtualMachineBeforeUndeploying(final Integer vdcId,
+        final Integer vappId, final Integer vmId)
+    {
+        VirtualMachine vm = vmService.getVirtualMachine(vdcId, vappId, vmId);
+        VirtualMachineState originalState = vm.getState();
+
+        switch (originalState)
+        {
+            case PAUSED:
+            case OFF:
+            case ON:
+                LOGGER.debug("The virtual machine is in state {} and is valid for undeploy. "
+                    + "Locking it..." + originalState.name());
+                break;
+            default:
+                tracer.log(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
+                    EventType.VM_UNDEPLOY,
+                    APIError.VIRTUAL_MACHINE_INVALID_STATE_UNDEPLOY.getMessage());
+                tracer.systemLog(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
+                    EventType.VM_UNDEPLOY, "virtualMachine.cannotUndeployed", vm.getName());
+                addConflictErrors(APIError.VIRTUAL_MACHINE_INVALID_STATE_UNDEPLOY);
+                flushErrors();
+                break;
+        }
+
+        lock(vm);
+
+        return originalState;
+    }
+
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
+    public VirtualMachineState lockVirtualMachineBeforeChangingState(final Integer vdcId,
+        final Integer vappId, final Integer vmId, final VirtualMachineState newState)
+    {
+        VirtualMachine vm = vmService.getVirtualMachine(vdcId, vappId, vmId);
+        VirtualMachineState originalState = vm.getState();
+
+        // Pause is not allowed in XEN
+        if (vm.getHypervisor().getType() == HypervisorType.XEN_3
+            && newState == VirtualMachineState.PAUSED)
+        {
+            addConflictErrors(APIError.VIRTUAL_MACHINE_PAUSE_UNSUPPORTED);
+            flushErrors();
+        }
+
+        // The change state applies on the hypervisor. Now there is a NOT_ALLOCATED to get rid of
+        // the if(!hypervisor)
+        if (!originalState.existsInHypervisor())
+        {
+            addConflictErrors(APIError.VIRTUAL_MACHINE_UNALLOCATED_STATE);
+            flushErrors();
+        }
+
+        // Validate the state transition
+        VirtualMachineStateTransition validTransition =
+            VirtualMachineStateTransition.getValidVmStateChangeTransition(originalState, newState);
+        if (validTransition == null)
+        {
+            addConflictErrors(APIError.VIRTUAL_MACHINE_STATE_CHANGE_ERROR);
+            flushErrors();
+        }
+
+        LOGGER.debug(
+            "The virtual machine is in state {} and is valid for changing its state to {}. "
+                + "Locking it..." + originalState.name(), newState.name());
+
+        lock(vm);
+
+        return originalState;
+    }
+
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
+    public VirtualMachineState lockVirtualMachineBeforeResetting(final Integer vdcId,
+        final Integer vappId, final Integer vmId)
+    {
+        VirtualMachine vm = vmService.getVirtualMachine(vdcId, vappId, vmId);
+        VirtualMachineState originalState = vm.getState();
+
+        // The change state applies on the hypervisor. Now there is a NOT_ALLOCATED to get rid of
+        // the if(!hypervisor)
+        if (!originalState.existsInHypervisor())
+        {
+            addConflictErrors(APIError.VIRTUAL_MACHINE_UNALLOCATED_STATE);
+            flushErrors();
+        }
+
+        if (originalState != VirtualMachineState.ON)
+        {
+            addConflictErrors(APIError.VIRTUAL_MACHINE_INVALID_STATE_RESET);
+            flushErrors();
+        }
+
+        LOGGER.debug("The virtual machine is in state {} and is valid for resetting. Locking it..."
+            + originalState.name());
+
+        lock(vm);
+
+        return originalState;
+    }
+
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
+    public VirtualMachineState lockVirtualMachineBeforeSnapshotting(final Integer vdcId,
+        final Integer vappId, final Integer vmId)
+    {
+        VirtualMachine vm = vmService.getVirtualMachine(vdcId, vappId, vmId);
+        VirtualMachineState originalState = vm.getState();
+
+        if (!originalState.isDeployed())
+        {
+            // TODO Add some more specific APIError here
+            addConflictErrors(APIError.VIRTUAL_MACHINE_NOT_DEPLOYED);
+            flushErrors();
+        }
+
+        LOGGER
+            .debug("The virtual machine is in state {} and is valid for snapshotting. Locking it..."
+                + originalState.name());
+
+        lock(vm);
+
+        return originalState;
+    }
+
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
+    public VirtualMachineState lockVirtualMachineBeforeReconfiguring(final Integer vdcId,
+        final Integer vappId, final Integer vmId)
+    {
+        VirtualMachine vm = vmService.getVirtualMachine(vdcId, vappId, vmId);
+        VirtualMachineState originalState = vm.getState();
+
+        if (!originalState.reconfigureAllowed())
+        {
+            final String current =
+                String.format("VirtualMachine %s in %s", vm.getUuid(), originalState.name());
+
+            tracer.log(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
+                EventType.VM_RECONFIGURE, APIError.VIRTUAL_MACHINE_INCOHERENT_STATE.getMessage());
+
+            tracer.systemLog(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
+                EventType.VM_RECONFIGURE, APIError.VIRTUAL_MACHINE_INCOHERENT_STATE.getMessage()
+                    + "\n" + current);
+
+            addConflictErrors(APIError.VIRTUAL_MACHINE_INCOHERENT_STATE);
+            flushErrors();
+        }
+
+        if (vm.isImported())
+        {
+            tracer.log(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
+                EventType.VM_RECONFIGURE,
+                APIError.VIRTUAL_MACHINE_IMPORTED_CAN_NOT_RECONFIGURE.getMessage());
+
+            addConflictErrors(APIError.VIRTUAL_MACHINE_IMPORTED_CAN_NOT_RECONFIGURE);
+            flushErrors();
+        }
+
+        LOGGER
+            .debug("The virtual machine is in state {} and is valid for reconfiguring. Locking it..."
+                + originalState.name());
+
+        lock(vm);
+
+        return originalState;
+    }
+
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
+    public VirtualMachineState lockVirtualMachineBeforeDeleting(final Integer vdcId,
+        final Integer vappId, final Integer vmId)
+    {
+        VirtualMachine vm = vmService.getVirtualMachine(vdcId, vappId, vmId);
+        VirtualMachineState originalState = vm.getState();
+
+        if (VirtualMachineState.LOCKED.equals(originalState))
+        {
+            LOGGER.error("Delete virtual machine error, the state is LOCKED");
+            tracer.log(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE, EventType.VM_DELETE,
+                "virtualMachine.deleteFailed", vm.getName(), originalState.name());
+            addConflictErrors(APIError.VIRTUAL_MACHINE_INVALID_STATE_DELETE);
+            flushErrors();
+        }
+
+        LOGGER.debug("The virtual machine is in state {} and is valid for deleting. Locking it..."
+            + originalState.name());
+
+        lock(vm);
+
+        return originalState;
+    }
+
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
+    public Map<Integer, VirtualMachineState> lockVirtualApplianceBeforeDeploying(
+        final Integer vdcId, final Integer vappId)
+    {
+        VirtualAppliance vapp = vappService.getVirtualAppliance(vdcId, vappId);
+
+        Map<Integer, VirtualMachineState> originalStates =
+            new HashMap<Integer, VirtualMachineState>();
+
+        for (NodeVirtualImage node : vapp.getNodes())
+        {
+            VirtualMachine vm = node.getVirtualMachine();
+            originalStates.put(vm.getId(), vm.getState());
+            lockVirtualMachineBeforeDeploying(vdcId, vappId, vm.getId());
+        }
+
+        return originalStates;
+    }
+
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
+    public Map<Integer, VirtualMachineState> lockVirtualApplianceBeforeUndeploying(
+        final Integer vdcId, final Integer vappId)
+    {
+        VirtualAppliance vapp = vappService.getVirtualAppliance(vdcId, vappId);
+
+        Map<Integer, VirtualMachineState> originalStates =
+            new HashMap<Integer, VirtualMachineState>();
+
+        for (NodeVirtualImage node : vapp.getNodes())
+        {
+            VirtualMachine vm = node.getVirtualMachine();
+            originalStates.put(vm.getId(), vm.getState());
+            lockVirtualMachineBeforeUndeploying(vdcId, vappId, vm.getId());
+        }
+
+        return originalStates;
+    }
+
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
+    public Map<Integer, VirtualMachineState> lockVirtualApplianceBeforeDeleting(
+        final Integer vdcId, final Integer vappId)
+    {
+        VirtualAppliance vapp = vappService.getVirtualAppliance(vdcId, vappId);
+
+        if (vapp.getState() != VirtualApplianceState.UNKNOWN
+            && vapp.getState() != VirtualApplianceState.NOT_DEPLOYED)
+        {
+            LOGGER.error("Delete virtual appliance error, the state is {}", vapp.getState());
+            tracer.log(SeverityType.CRITICAL, ComponentType.VIRTUAL_APPLIANCE,
+                EventType.VAPP_DELETE, "virtualAppliance.deleteFailed", vapp.getName(), vapp
+                    .getState().name());
+            addConflictErrors(APIError.VIRTUALAPPLIANCE_INVALID_STATE_DELETE);
+            flushErrors();
+        }
+
+        Map<Integer, VirtualMachineState> originalStates =
+            new HashMap<Integer, VirtualMachineState>();
+
+        for (NodeVirtualImage node : vapp.getNodes())
+        {
+            VirtualMachine vm = node.getVirtualMachine();
+            originalStates.put(vm.getId(), vm.getState());
+            lockVirtualMachineBeforeDeleting(vdcId, vappId, vm.getId());
+        }
+
+        return originalStates;
+    }
+
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
+    public void unlockVirtualMachine(final Integer vmId, final VirtualMachineState originalState)
+    {
+        VirtualMachine vm = vmRepo.findVirtualMachineById(vmId);
+        LOGGER
+            .debug("Unlocking virtual machine {}. Current state: {}", vm.getName(), vm.getState());
+        vm.setState(originalState);
+        vmRepo.update(vm);
+        LOGGER.debug("Virtual machine {} in state {} after unlock", vm.getName(), vm.getState());
+    }
+
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
+    public void unlockVirtualMachines(final Map<Integer, VirtualMachineState> originalStates)
+    {
+        for (Integer vmId : originalStates.keySet())
+        {
+            unlockVirtualMachine(vmId, originalStates.get(vmId));
+        }
+    }
+
+    private void lock(final VirtualMachine vm)
+    {
         vm.setState(VirtualMachineState.LOCKED);
-        repo.update(vm);
+        LOGGER.debug("The virtual machine is now in state {}." + vm.getState().name());
     }
 
-    /**
-     * Unlock the given virtual machine by restoring its original state.
-     * <p>
-     * This method gets the ID of the virtual machine as a parameter instead of the object itself to
-     * force refreshing the VM from the database to avoid session issues due to objects loaded in
-     * different transactions.
-     * 
-     * @param vmId The ID of the virtual machine to unlock.
-     * @param state The original state for the virtual machine.
-     */
-    @Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
-    public void unlock(final Integer vmId, final VirtualMachineState state)
-    {
-        VirtualMachine vm = repo.findVirtualMachineById(vmId);
-        vm.setState(state);
-        repo.update(vm);
-    }
 }

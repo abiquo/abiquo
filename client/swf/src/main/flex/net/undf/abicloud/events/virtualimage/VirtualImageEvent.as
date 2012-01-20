@@ -82,6 +82,8 @@ package net.undf.abicloud.events.virtualimage
         public static const VIRTUAL_IMAGE_UNCHECKED:String = "virtualImageUncheckedVirtualImageEvent";
         
         public static const VIRTUAL_IMAGE_UPLOAD_ERROR:String = "virtualImageUploadErrorVirtualImageEvent";
+        
+        public static const GET_ALLOWED_DATACENTERS:String = "virtualImageGetAllowedDatacentersVirtualImageEvent";
 
         /* ------------- Public atributes ------------- */
 
@@ -112,6 +114,8 @@ package net.undf.abicloud.events.virtualimage
         public var datacenterId:int;
         
         public var refresh:Boolean;
+        
+        public var enterpriseId:int;
 
         /* ------------- Constructor ------------- */
         public function VirtualImageEvent(type:String, bubbles:Boolean = true, cancelable:Boolean = false)

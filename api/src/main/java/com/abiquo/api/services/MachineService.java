@@ -255,6 +255,11 @@ public class MachineService extends DefaultApiService
         old.setVirtualCpusUsed(machineDto.getVirtualCpusUsed());
         old.setVirtualCpusPerCore(machineDto.getVirtualCpusPerCore());
 
+        old.setIpmiIP(machineDto.getIpmiIP());
+        old.setIpmiPort(machineDto.getIpmiPort());
+        old.setIpmiUser(machineDto.getIpmiUser());
+        old.setIpmiPassword(machineDto.getIpmiPassword());
+
         isValidMachine(old);
 
         // [ABICLOUDPREMIUM-1516] If ip service changes, must change the vrdp ip of the

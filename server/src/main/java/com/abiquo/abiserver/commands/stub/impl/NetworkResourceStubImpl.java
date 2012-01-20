@@ -1541,21 +1541,21 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
             // to update the gateway, search for the VMNetworkconfigurationDto object.
             if (gateway == null)
             {
-                for (VMNetworkConfigurationDto dto : dtos.getCollection())
+                // Here we have found the dto. Modify it to inform we want to use this
+                // configuration
+                // by default.
+                String gatewaysUri = createVirtualMachineConfigurationsLink(vdcId, vappId, vmId);
+                
+                // send an empty list of gateways to enable it means to disable the network configuration.
+                LinksDto linksDto = new LinksDto();
+                response = put(gatewaysUri, linksDto);
+                if (response.getStatusCode() == 202 || response.getStatusCode() == 204)
                 {
-
-                    String uriConfig =
-                        createVirtualMachineConfigurationLink(vdcId, vappId, vmId, dto.getId());
-                    dto.setUsed(Boolean.FALSE);
-                    response = put(uriConfig, dto);
-                    if (response.getStatusCode() == 202 || response.getStatusCode() == 204)
-                    {
-                        result.setSuccess(Boolean.TRUE);
-                    }
-                    else
-                    {
-                        populateErrors(response, result, "setGatewayForVirtualMachine");
-                    }
+                    result.setSuccess(Boolean.TRUE);
+                }
+                else
+                {
+                    populateErrors(response, result, "setGatewayForVirtualMachine");
                 }
                 return result;
             }
@@ -1567,11 +1567,17 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
                     // Here we have found the dto. Modify it to inform we want to use this
                     // configuration
                     // by default.
-                    String uriConfig =
+                    String gatewaysUri = createVirtualMachineConfigurationsLink(vdcId, vappId, vmId);
+                    
+                    String gatewayToEnable =
                         createVirtualMachineConfigurationLink(vdcId, vappId, vmId, dto.getId());
-                    dto.setUsed(Boolean.TRUE);
-
-                    response = put(uriConfig, dto);
+                    RESTLink linkGateway = new RESTLink();
+                    linkGateway.setHref(gatewayToEnable);
+                    linkGateway.setRel("network_configuration");
+                    
+                    LinksDto linksDto = new LinksDto();
+                    linksDto.addLink(linkGateway);
+                    response = put(gatewaysUri, linksDto);
                     if (response.getStatusCode() == 202 || response.getStatusCode() == 204)
                     {
                         result.setSuccess(Boolean.TRUE);
@@ -1671,7 +1677,6 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
         dto.setNetworkName(ip.getVlanNetworkName());
         dto.setQuarantine(ip.getQuarantine());
         dto.setAvailable(ip.getAvailable());
-        dto.setConfigureGateway(ip.getConfigureGateway());
         return dto;
     }
 
@@ -1685,7 +1690,7 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
         flexIp.setQuarantine(ip.getQuarantine());
         flexIp.setName(ip.getName());
         flexIp.setAvailable(ip.getAvailable());
-        flexIp.setConfigureGateway(ip.getConfigureGateway());
+        flexIp.setConfigureGateway(Boolean.FALSE);
         flexIp.setVlanNetworkName(ip.getNetworkName());
         if (ip.getLinks() != null)
         {

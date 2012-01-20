@@ -19,19 +19,20 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package com.abiquo.abiserver.commands.stub;
+package com.abiquo.api.services;
 
-import java.util.ArrayList;
+import org.springframework.stereotype.Service;
 
-import com.abiquo.abiserver.pojo.infrastructure.DataCenter;
-import com.abiquo.abiserver.pojo.result.DataResult;
-import com.abiquo.abiserver.pojo.virtualimage.Repository;
+import com.abiquo.server.core.infrastructure.RemoteService;
 
-public interface DatacenterRepositoryResourceStub
+@Service
+public class RemoteServiceTestService extends RemoteServiceService
 {
+    @Override
+    public void checkRemoteServiceStatusBeforeRemoving(final RemoteService remoteService)
+    {
+        // During tests the target remote service may not be up and running
+        // Do not return errors to simulate a normal behavior
+    }
 
-    public DataResult<Repository> getRepository(final Integer idDatacenter,
-        final Integer idEnterprise, final boolean refresh, final boolean includeUsage);
-
-    DataResult<ArrayList<DataCenter>> getAllowedRepositories(final Integer idEnterprise);
 }

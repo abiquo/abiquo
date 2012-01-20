@@ -301,7 +301,7 @@ public class VirtualMachineAllocatorService extends DefaultApiService
 
         Machine targetMachine = allocationService.findBestTarget(requirements, fitPolicy, vapp);
 
-        LOG.info("Attemp to use physical machine [{}] to allocate VirtualMachine [{}]",
+        LOG.info("Attempt to use physical machine [{}] to allocate VirtualMachine [{}]",
             targetMachine.getName(), vmachine.getName());
 
         // CREATE THE VIRTUAL MACHINE

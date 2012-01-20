@@ -127,7 +127,7 @@
                 else
                 {
                     protocolInput.text = "http://";
-                    portInput.text = "8080";
+                    portInput.text = "80";
                     serviceMappingInput.text = "";
                 }
 

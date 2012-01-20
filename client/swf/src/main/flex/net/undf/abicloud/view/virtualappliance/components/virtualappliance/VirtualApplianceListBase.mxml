@@ -44,6 +44,7 @@
 
     <mx:Script>
         <![CDATA[
+        	import net.undf.abicloud.utils.AbicloudUtils;
         	import net.undf.abicloud.vo.user.PrivilegeType;
         	import net.undf.abicloud.utils.SecuredPrivilegeAccess;
         	import mx.utils.ObjectUtil;
@@ -185,15 +186,19 @@
                 }
             }
 
+            private var _virtualDatacenter:VirtualDataCenter;
+            
             public function filterVirtualAppliancesByVirtualDataCenter(virtualDataCenter:VirtualDataCenter):void
             {
-                if (virtualDataCenter == null)
+                this._virtualDatacenter = virtualDataCenter;
+                
+                /* if (virtualDataCenter == null)
                 {
                     //Virtual Appliances are not filtered. Showing them all
                     this._virtualAppliancesFiltered = this._virtualAppliances;
                 }
                 else
-                {
+                { */
                     //Filtering virtualAppliances by virtualDataCenter
                     var virtualAppliancesFiltered:ArrayCollection = new ArrayCollection();
                     var virtualAppliance:VirtualAppliance;
@@ -202,7 +207,8 @@
                     for (i = 0; i < length; i++)
                     {
                         virtualAppliance = this._virtualAppliances.getItemAt(i) as VirtualAppliance;
-                        if (virtualAppliance.virtualDataCenter.id == virtualDataCenter.id)
+                        if ((!virtualDataCenter || virtualAppliance.virtualDataCenter.id == virtualDataCenter.id)
+                        && (vappsFilter.text == "" || virtualAppliance.name.toLowerCase().search(vappsFilter.text.toLowerCase()) != -1))
                         {
                             virtualAppliancesFiltered.addItem(virtualAppliance);
                         }
@@ -210,7 +216,7 @@
 
                     //Showing the filtered VirtualAppliances
                     this._virtualAppliancesFiltered = virtualAppliancesFiltered;
-                }
+                //}
 
                 //Update view if _virtualAppliancesFiltered is not null
                 if(this._virtualAppliancesFiltered){
@@ -261,6 +267,14 @@
             	
             	return ObjectUtil.stringCompare(virtualMachineState1, virtualMachineState2);
             }
+            
+            /**
+             * Filter Vapps
+             */
+             private function filterVappsList():void
+             {
+                filterVirtualAppliancesByVirtualDataCenter(this._virtualDatacenter);
+             }
         ]]>
     </mx:Script>
 
@@ -284,7 +298,20 @@
             toolTip="@Resource(bundle='Common', key='BUTTON_ICONSMODE_TOOLTIP')"
             click="onClickViewOptions('iconsMode')"/>
 
-        <mx:HBox id="vAHeaderMoreButtonsContainer"/>
+        <mx:HBox id="vAHeaderMoreButtonsContainer" width="100%"/>
+        
+        <mx:Image 
+                id="vappListMagnifier"
+                creationComplete="AbicloudUtils.getImageFromStyle('UserListMagnifier', vappListMagnifier)"
+                useHandCursor="true"
+                buttonMode="true"
+                mouseChildren="false"
+                click="filterVappsList()"/>
+
+        <mx:TextInput id="vappsFilter"
+            height="20"
+            toolTip="@Resource(bundle='Common', key='BUTTON_FILTER_TOOLTIP')"
+            change="filterVappsList()"/>
     </mx:HBox>
 
 
