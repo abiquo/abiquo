@@ -407,9 +407,7 @@ public class TarantinoService extends DefaultApiService
             HypervisorConnection conn =
                 jobCreator.hypervisorConnectionConfiguration(virtualMachine.getHypervisor());
             DatacenterTaskBuilder builder =
-                new DatacenterTaskBuilder(virtualMachineDesciptionBuilder.build(),
-                    conn,
-                    userService.getCurrentUser().getNick());
+                new DatacenterTaskBuilder(virtualMachineDesciptionBuilder.build(), conn, "SYSTEM");
 
             DatacenterTasks deployTask = null;
 
@@ -786,9 +784,9 @@ public class TarantinoService extends DefaultApiService
             EventType.VM_INSTANCE);
     }
 
-    public String changeVirtualMachineStateWhileStatefulInstance(VirtualAppliance virtualAppliance, VirtualMachine virtualMachine,
-        Map<String, String> data, VirtualMachineStateTransition transition, String creationUser,
-        boolean unsubscribe)
+    public String changeVirtualMachineStateWhileStatefulInstance(VirtualAppliance virtualAppliance,
+        VirtualMachine virtualMachine, Map<String, String> data,
+        VirtualMachineStateTransition transition, String creationUser, boolean unsubscribe)
     {
         return null;
     }
