@@ -236,26 +236,6 @@ public class RemoteServiceService extends DefaultApiService
                 {
                     infrastructureRepo.createRepository(datacenter, repositoryLocation);
                 }
-
-                // refresh for the current enterprise repository in background
-                final Enterprise currentEnterprise = userService.getCurrentUser().getEnterprise();
-                Executors.newSingleThreadExecutor().submit(new Runnable()
-                {
-                    @Override
-                    public void run()
-                    {
-                        try
-                        {
-                            dcRepositoryService.synchronizeDatacenterRepository(datacenter,
-                                currentEnterprise);
-                        }
-                        catch (Exception e)
-                        {
-                            LOG.warn("Can't initialize the appliance library in datacenter {}",
-                                datacenter.getName(), e);
-                        }
-                    }
-                });
             }
             catch (WebApplicationException e)
             {
@@ -341,6 +321,10 @@ public class RemoteServiceService extends DefaultApiService
         {
             responseDto.setConfigurationErrors(configurationErrors);
         }
+
+        tracer.log(SeverityType.INFO, ComponentType.DATACENTER, EventType.REMOTE_SERVICES_UPDATE,
+            "remoteServices.updated", dto.getType().getName());
+
         return responseDto;
     }
 
@@ -410,6 +394,10 @@ public class RemoteServiceService extends DefaultApiService
         checkRemoteServiceStatusBeforeRemoving(remoteService);
 
         infrastructureRepo.deleteRemoteService(remoteService);
+
+        tracer.log(SeverityType.INFO, ComponentType.DATACENTER, EventType.REMOTE_SERVICES_DELETE,
+            "remoteServices.deleted", remoteService.getType().getName());
+
     }
 
     protected void checkRemoteServiceStatusBeforeRemoving(final RemoteService remoteService)
@@ -421,6 +409,7 @@ public class RemoteServiceService extends DefaultApiService
                 addConflictErrors(APIError.APPLIANCE_MANAGER_REPOSITORY_IN_USE);
                 flushErrors();
             }
+            infrastructureRepo.deleteRepository(remoteService.getDatacenter());
         }
         if (remoteService.getType() == RemoteServiceType.DHCP_SERVICE
             || remoteService.getType() == RemoteServiceType.VIRTUAL_SYSTEM_MONITOR)

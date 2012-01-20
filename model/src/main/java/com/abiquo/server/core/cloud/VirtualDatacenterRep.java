@@ -671,11 +671,11 @@ public class VirtualDatacenterRep extends DefaultRepBase
         virtualApplianceDAO.flush();
     }
 
-    public void updateVirtualMachine(VirtualMachine vm)
+    public void updateVirtualMachine(final VirtualMachine vm)
     {
         vmDao.flush();
     }
-    
+
     public void updateVlan(final VLANNetwork vlan)
     {
         vlanDAO.flush();

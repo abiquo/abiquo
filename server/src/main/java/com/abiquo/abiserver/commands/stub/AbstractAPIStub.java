@@ -713,6 +713,18 @@ public class AbstractAPIStub
         return uri;
     }
 
+    protected String createDatacenterRepositoriesLink(final Integer enterpriseId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("enterprise", valueOf(enterpriseId));
+
+        String uri =
+            URIResolver.resolveURI(apiUri, "admin/enterprises/{enterprise}/"
+                + "datacenterrepositories", params);
+
+        return uri;
+    }
+
     protected String createTemplateDefinitionsLink(final String enterpriseId)
     {
         String uri =

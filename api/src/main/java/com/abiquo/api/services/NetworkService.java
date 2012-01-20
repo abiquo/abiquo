@@ -142,9 +142,6 @@ public class NetworkService extends DefaultApiService
     @Autowired
     protected VirtualMachineService vmService;
 
-    @Autowired
-    private EnterpriseService entService;
-
     /**
      * Default constructor. Needed by @Autowired injections
      */
@@ -269,7 +266,7 @@ public class NetworkService extends DefaultApiService
      */
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public Object attachNICs(final Integer vdcId, final Integer vappId, final Integer vmId,
-        final LinksDto nicRefs)
+        final LinksDto nicRefs, final VirtualMachineState originalState)
     {
         VirtualDatacenter vdc = getVirtualDatacenter(vdcId);
         VirtualAppliance vapp = getVirtualAppliance(vdc, vappId);
@@ -280,7 +277,7 @@ public class NetworkService extends DefaultApiService
 
         newvm.getIps().addAll(ips);
 
-        return vmService.reconfigureVirtualMachine(vdc, vapp, oldvm, newvm);
+        return vmService.reconfigureVirtualMachine(vdc, vapp, oldvm, newvm, originalState);
     }
 
     /**
@@ -332,7 +329,7 @@ public class NetworkService extends DefaultApiService
      */
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public Object changeNICs(final Integer vdcId, final Integer vappId, final Integer vmId,
-        final LinksDto nicRefs)
+        final LinksDto nicRefs, final VirtualMachineState originalState)
     {
         VirtualDatacenter vdc = getVirtualDatacenter(vdcId);
         VirtualAppliance vapp = getVirtualAppliance(vdc, vappId);
@@ -343,7 +340,7 @@ public class NetworkService extends DefaultApiService
 
         newvm.setIps(ips);
 
-        return vmService.reconfigureVirtualMachine(vdc, vapp, oldvm, newvm);
+        return vmService.reconfigureVirtualMachine(vdc, vapp, oldvm, newvm, originalState);
     }
 
     /**
@@ -494,7 +491,7 @@ public class NetworkService extends DefaultApiService
      */
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public Object detachNIC(final Integer vdcId, final Integer vappId, final Integer vmId,
-        final Integer nicId)
+        final Integer nicId, final VirtualMachineState originalState)
     {
         VirtualDatacenter vdc = getVirtualDatacenter(vdcId);
         VirtualAppliance vapp = getVirtualAppliance(vdc, vappId);
@@ -522,7 +519,7 @@ public class NetworkService extends DefaultApiService
             if (currentIp.getRasd().equals(ipToDetach.getRasd()))
             {
                 ipIterator.remove();
-                return vmService.reconfigureVirtualMachine(vdc, vapp, vm, newVm);
+                return vmService.reconfigureVirtualMachine(vdc, vapp, vm, newVm, originalState);
             }
         }
 
