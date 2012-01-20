@@ -196,7 +196,10 @@ public class VirtualMachineNetworkConfigurationResource extends AbstractResource
         @NotNull final LinksDto configurationRef, @Context final IRESTBuilder restBuilder)
         throws Exception
     {
-        Object result = service.changeNetworkConfiguration(vdcId, vappId, vmId, configurationRef);
+        VirtualMachineState originalState =
+            vmLock.lockVirtualMachineBeforeReconfiguring(vdcId, vappId, vmId);
+        
+        Object result = service.changeNetworkConfiguration(vdcId, vappId, vmId, configurationRef, originalState);
 
         // The attach method may return a Tarantino task identifier if the operation requires a
         // reconfigure. Otherwise it will return null.
@@ -208,6 +211,8 @@ public class VirtualMachineNetworkConfigurationResource extends AbstractResource
             return response;
         }
 
+        // If there is no async task the VM must be unlocked here
+        vmLock.unlockVirtualMachine(vmId, originalState);
         return null;
 
     }

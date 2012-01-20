@@ -585,7 +585,7 @@ public class VirtualMachine extends DefaultEntityBase
     private final static String CONFIGURATION_ID_COLUMN = "network_configuration_id";
 
     @JoinColumn(name = CONFIGURATION_ID_COLUMN)
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
     @ForeignKey(name = "FK_" + TABLE_NAME + "_configuration")
     private NetworkConfiguration networkConfiguration;
 

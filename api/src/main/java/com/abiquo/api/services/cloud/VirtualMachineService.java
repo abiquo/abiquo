@@ -767,14 +767,15 @@ public class VirtualMachineService extends DefaultApiService
         repo.deleteNodeVirtualImage(nodeVirtualImage);
         LOGGER.trace("Deleted node virtual image!");
 
+        repo.deleteVirtualMachine(virtualMachine);
+        
         // Does it has volumes? PREMIUM
         detachVolumesFromVirtualMachine(virtualMachine);
         LOGGER.debug("Detached the virtual machine's volumes with UUID {}",
             virtualMachine.getUuid());
 
-        detachIps(virtualMachine);
-
-        repo.deleteVirtualMachine(virtualMachine);
+        detachVirtualMachineIPs(virtualMachine);
+        
         tracer.log(SeverityType.INFO, ComponentType.VIRTUAL_MACHINE, EventType.VM_DELETE,
             "virtualMachine.delete");
     }
@@ -795,14 +796,15 @@ public class VirtualMachineService extends DefaultApiService
         repo.deleteNodeVirtualImage(nodeVirtualImage);
         LOGGER.trace("Deleted node virtual image!");
 
+        repo.deleteVirtualMachine(virtualMachine);
+        
         // Does it has volumes? PREMIUM
         detachVolumesFromVirtualMachine(virtualMachine);
         LOGGER.debug("Detached the virtual machine's volumes with UUID {}",
             virtualMachine.getUuid());
 
-        detachIps(virtualMachine);
-
-        repo.deleteVirtualMachine(virtualMachine);
+        detachVirtualMachineIPs(virtualMachine);
+        
         tracer.log(SeverityType.INFO, ComponentType.VIRTUAL_MACHINE, EventType.VM_DELETE,
             "virtualMachine.delete");
     }
@@ -812,8 +814,7 @@ public class VirtualMachineService extends DefaultApiService
      * 
      * @param virtualMachine void
      */
-    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public void detachIps(final VirtualMachine virtualMachine)
+    private void detachVirtualMachineIPs(final VirtualMachine virtualMachine)
     {
         for (IpPoolManagement ip : virtualMachine.getIps())
         {

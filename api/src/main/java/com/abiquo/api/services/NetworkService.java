@@ -298,8 +298,9 @@ public class NetworkService extends DefaultApiService
      * @return The id of the Tarantino task if the virtual machine is deployed, <code>null</code>
      *         otherwise.
      */
-    public Object changeNetworkConfiguration(Integer vdcId, Integer vappId, Integer vmId,
-        LinksDto configurationRef)
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    public Object changeNetworkConfiguration(final Integer vdcId, final Integer vappId, final Integer vmId,
+        final LinksDto configurationRef, final VirtualMachineState originalState)
     {
         VirtualDatacenter vdc = getVirtualDatacenter(vdcId);
         VirtualAppliance vapp = getVirtualAppliance(vdc, vappId);
@@ -310,7 +311,7 @@ public class NetworkService extends DefaultApiService
 
         newvm.setNetworkConfiguration(netconf);
 
-        return vmService.reconfigureVirtualMachine(vdc, vapp, oldvm, newvm);
+        return vmService.reconfigureVirtualMachine(vdc, vapp, oldvm, newvm, originalState);
     }
 
     /**
