@@ -232,7 +232,13 @@ public enum APIError
         "Invalid network configuration for the virtual datacenter"), NETWORK_WITHOUT_IPS("NET-8",
         "This network does not have IP addresses"), NETWORK_IP_FROM_BIGGER_THAN_IP_TO("NET-9",
         "Parameter IPFrom is greater than IPTo"), NETWORK_IP_FROM_ERROR("NET-10",
-        "Parameter IPFrom is invalid"), NETWORK_IP_TO_ERROR("NET-11", "Parameter IPTo is invalid"),
+        "Parameter IPFrom is invalid"), NETWORK_IP_TO_ERROR("NET-11", "Parameter IPTo is invalid"), NETWORK_INVALID_CONFIGURATION_LINK(
+        "NET-12", "Invalid link to configure the VirtualMachine's network"), NETWORK_LINK_INVALID_VDC(
+        "NET-13", "Invalid Virtual Datacenter identifier in the configuration link"), NETWORK_LINK_INVALID_VAPP(
+        "NET-14", "Invalid Virtual Appliance identifier in the configuration link"), NETWORK_LINK_INVALID_VM(
+        "NET-15", "Invalid Virtual Machine identifier in the configuration link"), NETWORK_LINK_INVALID_CONFIG(
+        "NET-16",
+        "Invalid Configuration identifier in the configuration link. Configuration Id it does not belong to any VLAN configuration used by this Virtual Machine"),
 
     // VIRTUAL MACHINE
     VIRTUAL_MACHINE_WITHOUT_HYPERVISOR("VM-0",

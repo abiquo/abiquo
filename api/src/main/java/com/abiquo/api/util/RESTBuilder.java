@@ -84,6 +84,7 @@ import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
 import com.abiquo.server.core.cloud.VirtualApplianceDto;
 import com.abiquo.server.core.cloud.VirtualApplianceStateDto;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
+import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.config.LicenseDto;
 import com.abiquo.server.core.config.SystemPropertyDto;
 import com.abiquo.server.core.enterprise.DatacenterLimitsDto;
@@ -724,19 +725,28 @@ public class RESTBuilder implements IRESTBuilder
 
     @Override
     public List<RESTLink> buildVirtualMachineCloudLinks(final Integer vdcId, final Integer vappId,
-        final Integer vmId, final boolean chefEnabled, final Integer[] volumeIds,
+        final VirtualMachine vm, final boolean chefEnabled, final Integer[] volumeIds,
         final Integer[] diskIds, final List<IpPoolManagement> ips)
     {
         List<RESTLink> links = new ArrayList<RESTLink>();
         Map<String, String> params = new HashMap<String, String>();
         params.put(VirtualDatacenterResource.VIRTUAL_DATACENTER, vdcId.toString());
         params.put(VirtualApplianceResource.VIRTUAL_APPLIANCE, vappId.toString());
-        params.put(VirtualMachineResource.VIRTUAL_MACHINE, vmId.toString());
+        params.put(VirtualMachineResource.VIRTUAL_MACHINE, vm.getId().toString());
 
         AbiquoLinkBuilder builder = AbiquoLinkBuilder.createBuilder(linkProcessor);
         links.add(builder.buildRestLink(VirtualMachineNetworkConfigurationResource.class,
             VirtualMachineNetworkConfigurationResource.CONFIGURATION_PATH,
             VirtualMachineNetworkConfigurationResource.CONFIGURATION_PATH, params));
+
+        if (vm.getNetworkConfiguration() != null)
+        {
+            params.put(VirtualMachineNetworkConfigurationResource.CONFIGURATION, vm.getNetworkConfiguration().getId().toString());
+            links.add(builder.buildRestLink(VirtualMachineNetworkConfigurationResource.class,
+            VirtualMachineNetworkConfigurationResource.CONFIGURATION_PATH + "/" + VirtualMachineNetworkConfigurationResource.CONFIGURATION_PARAM,            
+            VirtualMachineNetworkConfigurationResource.DEFAULT_CONFIGURATION, params));
+        }
+        
 
         links.add(builder.buildRestLink(VirtualMachineNetworkConfigurationResource.class,
             VirtualMachineNetworkConfigurationResource.NICS_PATH,
@@ -777,7 +787,7 @@ public class RESTBuilder implements IRESTBuilder
 
     @Override
     public List<RESTLink> buildVirtualMachineCloudAdminLinks(final Integer vdcId,
-        final Integer vappId, final Integer vmId, final Integer datacenterId, final Integer rackId,
+        final Integer vappId, final VirtualMachine vm, final Integer datacenterId, final Integer rackId,
         final Integer machineId, final Integer enterpriseId, final Integer userId,
         final boolean chefEnabled, final Integer[] volumeIds, final Integer[] diskIds,
         final List<IpPoolManagement> ips, final HypervisorType vdcType)
@@ -801,7 +811,7 @@ public class RESTBuilder implements IRESTBuilder
         links.add(builder.buildRestLink(VirtualApplianceResource.class,
             VirtualApplianceResource.VIRTUAL_APPLIANCE, params));
 
-        links.addAll(buildVirtualMachineCloudLinks(vdcId, vappId, vmId, chefEnabled, volumeIds,
+        links.addAll(buildVirtualMachineCloudLinks(vdcId, vappId, vm, chefEnabled, volumeIds,
             diskIds, ips));
 
         return links;
@@ -1203,7 +1213,7 @@ public class RESTBuilder implements IRESTBuilder
         params.put(VirtualDatacenterResource.VIRTUAL_DATACENTER, vdcId.toString());
         params.put(VirtualApplianceResource.VIRTUAL_APPLIANCE, vappId.toString());
         params.put(VirtualMachineResource.VIRTUAL_MACHINE, vmId.toString());
-        params.put(VirtualMachineNetworkConfigurationResource.CONFIGURATION_PATH, config.getId()
+        params.put(VirtualMachineNetworkConfigurationResource.CONFIGURATION, config.getId()
             .toString());
 
         AbiquoLinkBuilder builder = AbiquoLinkBuilder.createBuilder(linkProcessor);

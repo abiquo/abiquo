@@ -26,6 +26,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Enumerated;
@@ -59,6 +60,7 @@ import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.infrastructure.Datastore;
 import com.abiquo.server.core.infrastructure.management.RasdManagement;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
+import com.abiquo.server.core.infrastructure.network.NetworkConfiguration;
 import com.abiquo.server.core.infrastructure.storage.DiskManagement;
 import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
 import com.softwarementors.validation.constraints.LeadingOrTrailingWhitespace;
@@ -575,6 +577,28 @@ public class VirtualMachine extends DefaultEntityBase
     {
         this.password = password;
     }
+    
+    public final static String CONFIGURATION_PROPERTY = "networkConfiguration";
+
+    private final static boolean CONFIGURATION_REQUIRED = false;
+
+    private final static String CONFIGURATION_ID_COLUMN = "network_configuration_id";
+
+    @JoinColumn(name = CONFIGURATION_ID_COLUMN)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ForeignKey(name = "FK_" + TABLE_NAME + "_configuration")
+    private NetworkConfiguration networkConfiguration;
+
+    @Required(value = CONFIGURATION_REQUIRED)
+    public NetworkConfiguration getNetworkConfiguration()
+    {
+        return this.networkConfiguration;
+    }
+
+    public void setNetworkConfiguration(final NetworkConfiguration configuration)
+    {
+        this.networkConfiguration = configuration;
+    }
 
     public final static String TEMPORAL_PROPERTY = "temporal";
 
@@ -633,6 +657,7 @@ public class VirtualMachine extends DefaultEntityBase
     {
         this.volumes = volumes;
     }
+    
 
     /** List of ips */
     @OneToMany(targetEntity = IpPoolManagement.class)

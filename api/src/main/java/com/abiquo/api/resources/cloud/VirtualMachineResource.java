@@ -588,7 +588,7 @@ public class VirtualMachineResource extends AbstractResource
         }
 
         dto.addLinks(restBuilder.buildVirtualMachineCloudAdminLinks(vdcId, vappId, v
-            .getVirtualMachine().getId(), rack == null ? null : rack.getDatacenter().getId(),
+            .getVirtualMachine(), rack == null ? null : rack.getDatacenter().getId(),
             rack == null ? null : rack.getId(), machine == null ? null : machine.getId(),
             enterprise == null ? null : enterprise.getId(), user == null ? null : user.getId(), v
                 .getVirtualMachine().isChefEnabled(), volumeIds, diskIds, ips, vdc
@@ -705,7 +705,7 @@ public class VirtualMachineResource extends AbstractResource
         final Enterprise enterprise = v.getEnterprise() == null ? null : v.getEnterprise();
         final User user = v.getUser() == null ? null : v.getUser();
 
-        dto.addLinks(restBuilder.buildVirtualMachineCloudAdminLinks(vdc.getId(), vappId, v.getId(),
+        dto.addLinks(restBuilder.buildVirtualMachineCloudAdminLinks(vdc.getId(), vappId, v,
             rack == null ? null : rack.getDatacenter().getId(), rack == null ? null : rack.getId(),
             machine == null ? null : machine.getId(),
             enterprise == null ? null : enterprise.getId(), user == null ? null : user.getId(),
