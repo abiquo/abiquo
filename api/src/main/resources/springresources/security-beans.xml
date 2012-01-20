@@ -411,12 +411,12 @@
         <security:intercept-url pattern="/config/licenses/*" method="DELETE" access="ROLE_SYSCONFIG_ALLOW_MODIFY" />
         <security:intercept-url pattern="/config/licenses/*" method="OPTIONS" access="ROLE_AUTHENTICATED" />
         <!-- ICONS -->
-        <security:intercept-url pattern="/config/icons" method="POST" access="ROLE_SYSCONFIG_ALLOW_MODIFY" />
-        <security:intercept-url pattern="/config/icons" method="GET" access="ROLE_SYSCONFIG_VIEW,ROLE_PHYS_DC_MANAGE" />
+        <security:intercept-url pattern="/config/icons" method="POST" access="ROLE_APPLIB_ALLOW_MODIFY,ROLE_SYSCONFIG_ALLOW_MODIFY" />
+        <security:intercept-url pattern="/config/icons" method="GET" access="ROLE_APPLIB_VIEW,ROLE_SYSCONFIG_VIEW,ROLE_PHYS_DC_MANAGE" />
         <security:intercept-url pattern="/config/icons" method="OPTIONS" access="ROLE_AUTHENTICATED" />
-        <security:intercept-url pattern="/config/icons/*" method="GET" access="ROLE_SYSCONFIG_VIEW" />
-        <security:intercept-url pattern="/config/icons/*" method="DELETE" access="ROLE_SYSCONFIG_ALLOW_MODIFY" />
-        <security:intercept-url pattern="/config/icons/*" method="PUT" access="ROLE_SYSCONFIG_ALLOW_MODIFY" />
+        <security:intercept-url pattern="/config/icons/*" method="GET" access="ROLE_APPLIB_VIEW,ROLE_SYSCONFIG_VIEW" />
+        <security:intercept-url pattern="/config/icons/*" method="DELETE" access="ROLE_APPLIB_ALLOW_MODIFY,ROLE_SYSCONFIG_ALLOW_MODIFY" />
+        <security:intercept-url pattern="/config/icons/*" method="PUT" access="ROLE_APPLIB_ALLOW_MODIFY,ROLE_SYSCONFIG_ALLOW_MODIFY" />
         <security:intercept-url pattern="/config/icons/*" method="OPTIONS" access="ROLE_AUTHENTICATED" />
         <!-- PRIVILEGES -->
         <security:intercept-url pattern="/config/privileges" method="GET" access="ROLE_SYSCONFIG_VIEW,ROLE_USERS_VIEW" />
@@ -433,13 +433,13 @@
         <security:intercept-url pattern="/config/properties/*" method="OPTIONS" access="ROLE_AUTHENTICATED" />
         <security:intercept-url pattern="/config/properties/*" method="PUT" access="ROLE_SYSCONFIG_ALLOW_MODIFY" />
         <!-- CATEGORIES -->
-        <security:intercept-url pattern="/config/categories" method="POST" access="ROLE_SYSCONFIG_ALLOW_MODIFY" />
-        <security:intercept-url pattern="/config/categories" method="GET" access="ROLE_SYSCONFIG_VIEW,ROLE_AUTHENTICATED" />
+        <security:intercept-url pattern="/config/categories" method="POST" access="ROLE_APPLIB_ALLOW_MODIFY,ROLE_SYSCONFIG_ALLOW_MODIFY" />
+        <security:intercept-url pattern="/config/categories" method="GET" access="ROLE_APPLIB_VIEW,ROLE_SYSCONFIG_VIEW,ROLE_AUTHENTICATED" />
         <security:intercept-url pattern="/config/categories" method="OPTIONS" access="ROLE_AUTHENTICATED" />
-        <security:intercept-url pattern="/config/categories/*" method="GET" access="ROLE_SYSCONFIG_VIEW" />
-        <security:intercept-url pattern="/config/categories/*" method="DELETE" access="ROLE_SYSCONFIG_ALLOW_MODIFY" />
+        <security:intercept-url pattern="/config/categories/*" method="GET" access="ROLE_APPLIB_VIEW,ROLE_SYSCONFIG_VIEW" />
+        <security:intercept-url pattern="/config/categories/*" method="DELETE" access="ROLE_APPLIB_ALLOW_MODIFY,ROLE_SYSCONFIG_ALLOW_MODIFY" />
         <security:intercept-url pattern="/config/categories/*" method="OPTIONS" access="ROLE_AUTHENTICATED" />
-        <security:intercept-url pattern="/config/categories/*" method="PUT" access="ROLE_SYSCONFIG_ALLOW_MODIFY" />
+        <security:intercept-url pattern="/config/categories/*" method="PUT" access="ROLE_APPLIB_ALLOW_MODIFY,ROLE_SYSCONFIG_ALLOW_MODIFY" />
         <!-- DISK FORMAT TYPES -->
         <security:intercept-url pattern="/config/diskformattypes" method="GET" access="ROLE_SYSCONFIG_VIEW,ROLE_AUTHENTICATED" />
         <security:intercept-url pattern="/config/diskformattypes" method="OPTIONS" access="ROLE_AUTHENTICATED" />
