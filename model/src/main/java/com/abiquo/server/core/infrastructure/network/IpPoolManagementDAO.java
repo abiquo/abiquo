@@ -654,13 +654,13 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
     }
 
     public List<IpPoolManagement> findIpsByVirtualMachineWithConfigurationId(
-        final VirtualMachine vm, final Integer vmConfigId)
+        final VirtualMachine vm)
     {
         List<IpPoolManagement> ips = findIpsByVirtualMachine(vm);
         List<IpPoolManagement> resultIps = new ArrayList<IpPoolManagement>();
         for (IpPoolManagement ip : ips)
         {
-            if (ip.getVlanNetwork().getConfiguration().getId().equals(vmConfigId))
+            if (ip.getVlanNetwork().getConfiguration().getId().equals(vm.getNetworkConfiguration().getId()))
             {
                 resultIps.add(ip);
             }

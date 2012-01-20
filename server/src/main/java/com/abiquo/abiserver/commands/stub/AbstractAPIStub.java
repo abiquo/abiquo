@@ -186,13 +186,25 @@ public class AbstractAPIStub
     protected ClientResponse post(final String uri, final Object dto, final String user,
         final String password)
     {
-        return resource(uri, user, password).contentType(MediaType.APPLICATION_XML).post(dto);
+        Resource resource = resource(uri, user, password);
+        if (dto != null)
+        {
+            // Only add the headers if the request has a body
+            resource.contentType(MediaType.APPLICATION_XML);
+        }
+        return resource.post(dto);
     }
 
     protected ClientResponse put(final String uri, final Object dto, final String user,
         final String password)
     {
-        return resource(uri, user, password).contentType(MediaType.APPLICATION_XML).put(dto);
+        Resource resource = resource(uri, user, password);
+        if (dto != null)
+        {
+            // Only add the headers if the request has a body
+            resource.contentType(MediaType.APPLICATION_XML);
+        }
+        return resource.put(dto);
     }
 
     protected ClientResponse put(final String uri, final Object dto, final String user,
@@ -227,8 +239,13 @@ public class AbstractAPIStub
     protected ClientResponse post(final String uri, final Object dto)
     {
         UserHB user = getCurrentUserCredentials();
-        return resource(uri, user.getUser(), user.getPassword()).contentType(
-            MediaType.APPLICATION_XML).post(dto);
+        Resource resource = resource(uri, user.getUser(), user.getPassword());
+        if (dto != null)
+        {
+            // Only add the headers if the request has a body
+            resource.contentType(MediaType.APPLICATION_XML);
+        }
+        return resource.post(dto);
     }
 
     protected ClientResponse post(final String uri, final Object dto, final String mediaType)
@@ -255,15 +272,14 @@ public class AbstractAPIStub
     protected ClientResponse put(final String uri, final Object dto)
     {
         UserHB user = getCurrentUserCredentials();
-        return resource(uri, user.getUser(), user.getPassword()).contentType(
-            MediaType.APPLICATION_XML).put(dto);
+        Resource resource = resource(uri, user.getUser(), user.getPassword());
+        if (dto != null)
+        {
+            // Only add the headers if the request has a body
+            resource.contentType(MediaType.APPLICATION_XML);
+        }
+        return resource.put(dto);
     }
-
-    // protected ClientResponse put(final String uri, final Object dto, String mediaType)
-    // {
-    // UserHB user = getCurrentUser();
-    // return resource(uri, user.getUser(), user.getPassword()).contentType(mediaType).put(dto);
-    // }
 
     protected ClientResponse put(final String uri, final Object dto, final String mediaType)
     {
@@ -709,6 +725,18 @@ public class AbstractAPIStub
         String uri =
             URIResolver.resolveURI(apiUri, "admin/enterprises/{enterprise}/"
                 + "datacenterrepositories/{datacenterrepository}", params);
+
+        return uri;
+    }
+
+    protected String createDatacenterRepositoriesLink(final Integer enterpriseId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("enterprise", valueOf(enterpriseId));
+
+        String uri =
+            URIResolver.resolveURI(apiUri, "admin/enterprises/{enterprise}/"
+                + "datacenterrepositories", params);
 
         return uri;
     }
@@ -1605,6 +1633,21 @@ public class AbstractAPIStub
             .resolveURI(
                 apiUri,
                 "cloud/virtualdatacenters/{virtualDatacenter}/virtualappliances/{virtualApplianceId}/virtualmachines/{virtualMachineId}/action/instance",
+                params);
+    }
+
+    protected String createVirtualMachineResetUrl(final Integer virtualDatacenterId,
+        final Integer virtualApplianceId, final Integer virtualMachineId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("virtualDatacenter", String.valueOf(virtualDatacenterId));
+        params.put("virtualApplianceId", String.valueOf(virtualApplianceId));
+        params.put("virtualMachineId", String.valueOf(virtualMachineId));
+
+        return URIResolver
+            .resolveURI(
+                apiUri,
+                "cloud/virtualdatacenters/{virtualDatacenter}/virtualappliances/{virtualApplianceId}/virtualmachines/{virtualMachineId}/action/reset",
                 params);
     }
 

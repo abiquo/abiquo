@@ -94,7 +94,7 @@ public class PhysicalMachineCreation
 
         dto.setId(pm.getId());
         dto.setDescription(pm.getDescription());
-        dto.setIpmiIp(pm.getIpmiIp());
+        dto.setIpmiIP(pm.getIpmiIp());
         dto.setIpmiPassword(pm.getIpmiPassword());
         dto.setIpmiPort(pm.getIpmiPort());
         dto.setIpmiUser(pm.getIpmiUser());
@@ -140,7 +140,7 @@ public class PhysicalMachineCreation
 
         machine.setId(dto.getId());
         machine.setDescription(dto.getDescription());
-        machine.setIpmiIp(dto.getIpmiIp());
+        machine.setIpmiIp(dto.getIpmiIP());
         machine.setIpmiPassword(dto.getIpmiPassword());
         machine.setIpmiPort(dto.getIpmiPort());
         machine.setIpmiUser(dto.getIpmiUser());

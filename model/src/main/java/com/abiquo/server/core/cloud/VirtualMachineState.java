@@ -123,12 +123,6 @@ public enum VirtualMachineState
         return null;
     }
 
-    @Override
-    public String toString()
-    {
-        return "";
-    }
-
     public boolean isDeployed()
     {
         switch (this)
