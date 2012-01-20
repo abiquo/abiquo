@@ -43,6 +43,13 @@ package net.undf.abicloud.vo.virtualappliance
 		 *  ABORTED
 		 * 
 		 * *****/
+		 public static const FINISHED_SUCCESSFULLY:String = "FINISHED_SUCCESSFULLY";
+		 public static const FINISHED_UNSUCCESSFULLY:String = "FINISHED_UNSUCCESSFULLY";
+		 public static const PENDING:String = "PENDING";
+		 public static const STARTED:String = "STARTED";
+		 public static const ABORTED:String = "ABORTED";
+		 
+		 
         public var uuid:String;
         public var statusName:String;
         public var message:String;
