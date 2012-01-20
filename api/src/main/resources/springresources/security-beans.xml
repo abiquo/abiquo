@@ -67,18 +67,18 @@
         <!-- REPOSITORY -->
         <!-- Repositories and Virtual Machine Templates can be listed by the same people who can create Virtual Apps -->
         <!-- Repositories can be refreshed by the same people who can create Virtual Apps and the Enterprise Admin -->
-        <security:intercept-url pattern="/admin/enterprises/*/datacenterrepositories" method="GET" access="ROLE_VDC_MANAGE_VAPP" />
+        <security:intercept-url pattern="/admin/enterprises/*/datacenterrepositories" method="GET" access="ROLE_VDC_MANAGE_VAPP,ROLE_APPLIB_VIEW" />
         <security:intercept-url pattern="/admin/enterprises/*/datacenterrepositories" method="OPTIONS" access="ROLE_AUTHENTICATED" />
-        <security:intercept-url pattern="/admin/enterprises/*/datacenterrepositories/*" method="GET" access="ROLE_VDC_MANAGE_VAPP" />
+        <security:intercept-url pattern="/admin/enterprises/*/datacenterrepositories/*" method="GET" access="ROLE_VDC_MANAGE_VAPP,ROLE_APPLIB_VIEW" />
         <security:intercept-url pattern="/admin/enterprises/*/datacenterrepositories/*" method="DELETE" access="ROLE_VDC_MANAGE_VAPP" />
         <security:intercept-url pattern="/admin/enterprises/*/datacenterrepositories/*" method="OPTIONS" access="ROLE_AUTHENTICATED" />
-        <security:intercept-url pattern="/admin/enterprises/*/datacenterrepositories/*/actions/refresh" method="PUT" access="ROLE_USERS_MANAGE_ENTERPRISE,ROLE_VDC_MANAGE_VAPP" />
+        <security:intercept-url pattern="/admin/enterprises/*/datacenterrepositories/*/actions/refresh" method="PUT" access="ROLE_USERS_MANAGE_ENTERPRISE,ROLE_VDC_MANAGE_VAPP,ROLE_APPLIB_ALLOW_MODIFY" />
         <!-- VIRTUAL MACHINE TEMPLATES -->
-        <security:intercept-url pattern="/admin/enterprises/*/datacenterrepositories/*/virtualmachinetemplates" method="GET" access="ROLE_VDC_MANAGE_VAPP" />
+        <security:intercept-url pattern="/admin/enterprises/*/datacenterrepositories/*/virtualmachinetemplates" method="GET" access="ROLE_APPLIB_VIEW,ROLE_VDC_MANAGE_VAPP" />
         <security:intercept-url pattern="/admin/enterprises/*/datacenterrepositories/*/virtualmachinetemplates" method="OPTIONS" access="ROLE_AUTHENTICATED" />
-        <security:intercept-url pattern="/admin/enterprises/*/datacenterrepositories/*/virtualmachinetemplates/*" method="GET" access="ROLE_VDC_MANAGE_VAPP" />
-        <security:intercept-url pattern="/admin/enterprises/*/datacenterrepositories/*/virtualmachinetemplates/*" method="PUT" access="ROLE_VDC_MANAGE_VAPP" />
-        <security:intercept-url pattern="/admin/enterprises/*/datacenterrepositories/*/virtualmachinetemplates/*" method="DELETE" access="ROLE_VDC_MANAGE_VAPP" />
+        <security:intercept-url pattern="/admin/enterprises/*/datacenterrepositories/*/virtualmachinetemplates/*" method="GET" access="ROLE_APPLIB_VIEW,ROLE_VDC_MANAGE_VAPP" />
+        <security:intercept-url pattern="/admin/enterprises/*/datacenterrepositories/*/virtualmachinetemplates/*" method="PUT" access="ROLE_APPLIB_ALLOW_MODIFY,ROLE_VDC_MANAGE_VAPP" />
+        <security:intercept-url pattern="/admin/enterprises/*/datacenterrepositories/*/virtualmachinetemplates/*" method="DELETE" access="ROLE_APPLIB_ALLOW_MODIFY,ROLE_VDC_MANAGE_VAPP" />
         <security:intercept-url pattern="/admin/enterprises/*/datacenterrepositories/*/virtualmachinetemplates/*" method="OPTIONS" access="ROLE_AUTHENTICATED" />
         <!-- ENTERPRISE PROPERTIES -->
         <security:intercept-url pattern="/admin/enterprises/*/properties" method="GET" access="ROLE_ENTERPRISE_ADMINISTER_ALL" />

@@ -21,6 +21,8 @@
 
 package com.abiquo.abiserver.commands.stub.impl;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 
 import org.apache.wink.client.ClientResponse;
@@ -108,11 +110,40 @@ public class DatacenterRepositoryResourceStubImpl extends AbstractAPIStub implem
 
     private DataCenter transformToFlexDc(final DatacenterRepositoryDto repo)
     {
+        final Integer idDataCenter = repo.getIdFromLink("datacenter");
         DataCenter datacenter = new DataCenter();
-        datacenter.setId(repo.getIdFromLink("datacenter"));
+        datacenter.setId(idDataCenter);
         datacenter.setName(repo.searchLink("datacenter").getTitle());
 
+        // we only need the appliance manager address
+        try
+        {
+            URI amLink = new URI(repo.searchLink("applianceManagerRepositoryUri").getHref());
+            com.abiquo.abiserver.pojo.service.RemoteService am =
+                new com.abiquo.abiserver.pojo.service.RemoteService();
+            am.setIdDataCenter(idDataCenter);
+            am.setUri(amLink.toASCIIString());
+            am.setDomainName(amLink.getHost());
+            am.setPort(amLink.getPort());
+            am.setProtocol("http://");
+
+            ArrayList<com.abiquo.abiserver.pojo.service.RemoteService> rss =
+                new ArrayList<com.abiquo.abiserver.pojo.service.RemoteService>();
+            rss.add(am);
+            datacenter.setRemoteServices(rss);
+        }
+        catch (URISyntaxException e)
+        {
+            e.printStackTrace();
+        }
+
         return datacenter;
+    }
+
+    public static void main(final String[] args)
+    {
+        final String tal = "http://..../am/ereos/1";
+        System.err.println("http://..../am/ereos/1".substring(0, tal.indexOf("/am/") + 4));
     }
 
     private Repository transformToFlex(final DatacenterRepositoryDto repo)
