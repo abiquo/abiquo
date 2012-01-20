@@ -97,7 +97,7 @@ public class VirtualMachineResource extends AbstractResource
 
     public static final String VIRTUAL_MACHINE_ACTION_RESET = "action/reset";
 
-    public static final String VIRTUAL_MACHINE_STATE = "state";
+    public static final String VIRTUAL_MACHINE_STATE_PATH = "state";
 
     // Chef constants to help link builders. Method implementation are premium.
     public static final String VIRTUAL_MACHINE_RUNLIST_PATH = "config/runlist";
@@ -243,7 +243,7 @@ public class VirtualMachineResource extends AbstractResource
      * @throws Exception
      */
     @PUT
-    @Path(VIRTUAL_MACHINE_STATE)
+    @Path(VIRTUAL_MACHINE_STATE_PATH)
     public AcceptedRequestDto<String> powerStateVirtualMachine(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
@@ -289,7 +289,7 @@ public class VirtualMachineResource extends AbstractResource
      * @throws Exception
      */
     @GET
-    @Path(VIRTUAL_MACHINE_STATE)
+    @Path(VIRTUAL_MACHINE_STATE_PATH)
     public VirtualMachineStateDto stateVirtualMachine(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
@@ -562,7 +562,7 @@ public class VirtualMachineResource extends AbstractResource
         {
             String taskId =
                 vmService.instanceVirtualMachine(vmId, vappId, vdcId,
-                    snapshotData.getSnapshotName());
+                    snapshotData.getSnapshotName(), originalState);
             if (taskId == null)
             {
                 throw new InternalServerErrorException(APIError.STATUS_INTERNAL_SERVER_ERROR);
@@ -652,7 +652,7 @@ public class VirtualMachineResource extends AbstractResource
         }
 
         dto.addLinks(restBuilder.buildVirtualMachineCloudAdminLinks(vdcId, vappId, v
-            .getVirtualMachine().getId(), rack == null ? null : rack.getDatacenter().getId(),
+            .getVirtualMachine(), rack == null ? null : rack.getDatacenter().getId(),
             rack == null ? null : rack.getId(), machine == null ? null : machine.getId(),
             enterprise == null ? null : enterprise.getId(), user == null ? null : user.getId(), v
                 .getVirtualMachine().isChefEnabled(), volumeIds, diskIds, ips, vdc
@@ -769,7 +769,7 @@ public class VirtualMachineResource extends AbstractResource
         final Enterprise enterprise = v.getEnterprise() == null ? null : v.getEnterprise();
         final User user = v.getUser() == null ? null : v.getUser();
 
-        dto.addLinks(restBuilder.buildVirtualMachineCloudAdminLinks(vdc.getId(), vappId, v.getId(),
+        dto.addLinks(restBuilder.buildVirtualMachineCloudAdminLinks(vdc.getId(), vappId, v,
             rack == null ? null : rack.getDatacenter().getId(), rack == null ? null : rack.getId(),
             machine == null ? null : machine.getId(),
             enterprise == null ? null : enterprise.getId(), user == null ? null : user.getId(),
@@ -928,7 +928,7 @@ public class VirtualMachineResource extends AbstractResource
         String link = uriInfo.getRequestUri().toString();
 
         link = TaskResourceUtils.removeTaskSegments(link);
-        link = link.concat("/").concat(VIRTUAL_MACHINE_STATE);
+        link = link.concat("/").concat(VIRTUAL_MACHINE_STATE_PATH);
 
         // Build SeeOtherDto
         return new SeeOtherDto(link);

@@ -26,9 +26,7 @@ import java.util.Map;
 
 import javax.ws.rs.core.Response.Status;
 
-import org.apache.wink.client.ClientConfig;
 import org.apache.wink.client.ClientResponse;
-import org.apache.wink.client.RestClient;
 
 import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.StateEnum;
 import com.abiquo.abiserver.commands.stub.AbstractAPIStub;
@@ -179,6 +177,38 @@ public class VirtualMachineResourceStubImpl extends AbstractAPIStub implements
         else
         {
             populateErrors(response, result, "editVirtualMachineState");
+        }
+
+        return result;
+    }
+
+    @Override
+    public DataResult rebootVirtualMachine(final Integer virtualDatacenterId,
+        final Integer virtualApplianceId, final VirtualMachine virtualMachine)
+    {
+        DataResult result = new DataResult();
+        String url =
+            createVirtualMachineResetUrl(virtualDatacenterId, virtualApplianceId,
+                virtualMachine.getId());
+
+        ClientResponse response = post(url, null);
+
+        if (response.getStatusCode() == Status.ACCEPTED.getStatusCode())
+        {
+            result.setSuccess(true);
+
+            // Retrieve the VirtualDatacenter to associate the new virtual appliance
+            org.jclouds.abiquo.domain.cloud.VirtualAppliance vapp =
+                getApiClient().getCloudService().getVirtualDatacenter(virtualDatacenterId)
+                    .getVirtualAppliance(virtualApplianceId);
+
+            org.jclouds.abiquo.domain.cloud.VirtualMachine vm =
+                vapp.getVirtualMachine(virtualMachine.getId());
+            result.setData(new State(StateEnum.valueOf(vm.getState().name())));
+        }
+        else
+        {
+            populateErrors(response, result, "rebootVirtualMachine");
         }
 
         return result;

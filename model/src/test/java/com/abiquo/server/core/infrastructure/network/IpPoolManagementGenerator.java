@@ -67,8 +67,7 @@ public class IpPoolManagementGenerator extends DefaultEntityGenerator<IpPoolMana
     public void assertAllPropertiesEqual(final IpPoolManagement obj1, final IpPoolManagement obj2)
     {
         AssertEx.assertPropertiesEqualSilent(obj1, obj2, IpPoolManagement.NAME_PROPERTY,
-            IpPoolManagement.MAC_PROPERTY, IpPoolManagement.CONFIGURATION_GATEWAY_PROPERTY,
-            IpPoolManagement.QUARANTINE_PROPERTY, IpPoolManagement.IP_PROPERTY);
+            IpPoolManagement.MAC_PROPERTY, IpPoolManagement.QUARANTINE_PROPERTY, IpPoolManagement.IP_PROPERTY);
 
         vlanNetworkGenerator.assertAllPropertiesEqual(obj1.getVlanNetwork(), obj2.getVlanNetwork());
         rasdmGenerator.assertAllPropertiesEqual(obj1, obj2);

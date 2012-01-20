@@ -805,7 +805,7 @@ public class UriTestResolver
                 VirtualApplianceResource.VIRTUAL_APPLIANCE_PARAM,
                 VirtualMachinesResource.VIRTUAL_MACHINES_PATH,
                 VirtualMachineResource.VIRTUAL_MACHINE_PARAM,
-                VirtualMachineResource.VIRTUAL_MACHINE_STATE);
+                VirtualMachineResource.VIRTUAL_MACHINE_STATE_PATH);
 
         Map<String, String> values = new HashMap<String, String>();
         values.put(VirtualDatacenterResource.VIRTUAL_DATACENTER, vdcId.toString());

@@ -112,16 +112,4 @@ public class IpPoolManagementDto extends SingleResourceTransportDto
         this.available = available;
     }
 
-    private boolean configureGateway;
-
-    public boolean getConfigureGateway()
-    {
-        return configureGateway;
-    }
-
-    public void setConfigureGateway(final boolean configureGateway)
-    {
-        this.configureGateway = configureGateway;
-    }
-
 }

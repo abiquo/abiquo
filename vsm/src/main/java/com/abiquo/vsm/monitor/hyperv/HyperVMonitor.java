@@ -38,8 +38,6 @@ import com.abiquo.vsm.monitor.Monitor.Type;
 import com.abiquo.vsm.monitor.executor.AbstractTask;
 import com.abiquo.vsm.monitor.executor.PeriodicalExecutor;
 import com.abiquo.vsm.monitor.hyperv.util.HyperVUtils;
-import com.abiquo.vsm.redis.dao.RedisDao;
-import com.abiquo.vsm.redis.dao.RedisDaoFactory;
 import com.hyper9.jwbem.msvm.virtualsystem.MsvmComputerSystem;
 
 /**
@@ -59,9 +57,6 @@ public class HyperVMonitor extends AbstractMonitor
     /** HyperV WMI based connector */
     private HyperVWMIConnector hyperv;
 
-    /** The dao used to access stored data. */
-    private RedisDao dao;
-
     // Polling stuff
 
     /** The executor */
@@ -76,7 +71,6 @@ public class HyperVMonitor extends AbstractMonitor
     public HyperVMonitor()
     {
         hyperv = new HyperVWMIConnector();
-        dao = RedisDaoFactory.getInstance();
         poller = new Poller();
         executor = createExecutor(poller, Poller.POLLING_INTERVAL);
     }

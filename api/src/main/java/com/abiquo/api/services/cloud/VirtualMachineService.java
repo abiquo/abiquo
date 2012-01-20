@@ -57,8 +57,13 @@ import com.abiquo.api.resources.cloud.DisksResource;
 import com.abiquo.api.resources.cloud.IpAddressesResource;
 import com.abiquo.api.resources.cloud.PrivateNetworkResource;
 import com.abiquo.api.resources.cloud.PrivateNetworksResource;
+import com.abiquo.api.resources.cloud.VirtualApplianceResource;
+import com.abiquo.api.resources.cloud.VirtualAppliancesResource;
 import com.abiquo.api.resources.cloud.VirtualDatacenterResource;
 import com.abiquo.api.resources.cloud.VirtualDatacentersResource;
+import com.abiquo.api.resources.cloud.VirtualMachineNetworkConfigurationResource;
+import com.abiquo.api.resources.cloud.VirtualMachineResource;
+import com.abiquo.api.resources.cloud.VirtualMachinesResource;
 import com.abiquo.api.services.DefaultApiService;
 import com.abiquo.api.services.NetworkService;
 import com.abiquo.api.services.RemoteServiceService;
@@ -73,6 +78,7 @@ import com.abiquo.commons.amqp.impl.tarantino.domain.builder.VirtualMachineDescr
 import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.model.enumerator.NetworkType;
 import com.abiquo.model.rest.RESTLink;
+import com.abiquo.model.transport.LinksDto;
 import com.abiquo.model.transport.SingleResourceTransportDto;
 import com.abiquo.model.transport.error.CommonError;
 import com.abiquo.model.transport.error.ErrorDto;
@@ -107,7 +113,9 @@ import com.abiquo.server.core.infrastructure.management.RasdManagement;
 import com.abiquo.server.core.infrastructure.management.RasdManagementDAO;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagement.Type;
+import com.abiquo.server.core.infrastructure.network.NetworkConfiguration;
 import com.abiquo.server.core.infrastructure.network.VLANNetwork;
+import com.abiquo.server.core.infrastructure.network.VMNetworkConfiguration;
 import com.abiquo.server.core.infrastructure.storage.DiskManagement;
 import com.abiquo.server.core.infrastructure.storage.StorageRep;
 import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
@@ -595,6 +603,7 @@ public class VirtualMachineService extends DefaultApiService
         old.setCpu(vmnew.getCpu());
         old.setDescription(vmnew.getDescription());
         old.setRam(vmnew.getRam());
+        old.setNetworkConfiguration(vmnew.getNetworkConfiguration());
 
         old.setPassword(vmnew.getPassword());
         old.setVirtualMachineTemplate(vmnew.getVirtualMachineTemplate());
@@ -758,14 +767,15 @@ public class VirtualMachineService extends DefaultApiService
         repo.deleteNodeVirtualImage(nodeVirtualImage);
         LOGGER.trace("Deleted node virtual image!");
 
+        repo.deleteVirtualMachine(virtualMachine);
+        
         // Does it has volumes? PREMIUM
         detachVolumesFromVirtualMachine(virtualMachine);
         LOGGER.debug("Detached the virtual machine's volumes with UUID {}",
             virtualMachine.getUuid());
 
-        detachIps(virtualMachine);
-
-        repo.deleteVirtualMachine(virtualMachine);
+        detachVirtualMachineIPs(virtualMachine);
+        
         tracer.log(SeverityType.INFO, ComponentType.VIRTUAL_MACHINE, EventType.VM_DELETE,
             "virtualMachine.delete");
     }
@@ -786,14 +796,15 @@ public class VirtualMachineService extends DefaultApiService
         repo.deleteNodeVirtualImage(nodeVirtualImage);
         LOGGER.trace("Deleted node virtual image!");
 
+        repo.deleteVirtualMachine(virtualMachine);
+        
         // Does it has volumes? PREMIUM
         detachVolumesFromVirtualMachine(virtualMachine);
         LOGGER.debug("Detached the virtual machine's volumes with UUID {}",
             virtualMachine.getUuid());
 
-        detachIps(virtualMachine);
-
-        repo.deleteVirtualMachine(virtualMachine);
+        detachVirtualMachineIPs(virtualMachine);
+        
         tracer.log(SeverityType.INFO, ComponentType.VIRTUAL_MACHINE, EventType.VM_DELETE,
             "virtualMachine.delete");
     }
@@ -803,22 +814,23 @@ public class VirtualMachineService extends DefaultApiService
      * 
      * @param virtualMachine void
      */
-    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public void detachIps(final VirtualMachine virtualMachine)
+    private void detachVirtualMachineIPs(final VirtualMachine virtualMachine)
     {
         for (IpPoolManagement ip : virtualMachine.getIps())
         {
             vdcRep.deleteRasd(ip.getRasd());
-            ip.detach();
-            if (Type.EXTERNAL == ip.getType())
+            switch (ip.getType())
             {
-                ip.setVirtualDatacenter(null);
-                ip.setMac(null);
-                ip.setName(null);
-            }
-            else if (Type.UNMANAGED == ip.getType())
-            {
-                vdcRep.deleteIpPoolManagement(ip);
+                case UNMANAGED:
+                    rasdDao.remove(ip);
+                    break;
+                case EXTERNAL:
+                    ip.setVirtualDatacenter(null);
+                    ip.setMac(null);
+                    ip.setName(null);
+                default:
+                    ip.detach();
+
             }
         }
     }
@@ -1252,7 +1264,7 @@ public class VirtualMachineService extends DefaultApiService
         }
     }
 
-    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
     public String undeployVirtualMachine(final Integer vmId, final Integer vappId,
         final Integer vdcId, final Boolean forceUndeploy, final VirtualMachineState originalState)
     {
@@ -1399,12 +1411,11 @@ public class VirtualMachineService extends DefaultApiService
      */
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public String instanceVirtualMachine(final Integer vmId, final Integer vappId,
-        final Integer vdcId, final String instanceName)
+        final Integer vdcId, final String instanceName, final VirtualMachineState originalState)
     {
         // Retrieve entities
         VirtualMachine virtualMachine = getVirtualMachine(vdcId, vappId, vmId);
         VirtualAppliance virtualApp = getVirtualApplianceAndCheckVirtualDatacenter(vdcId, vappId);
-        VirtualMachineState originalState = virtualMachine.getState();
 
         LOGGER.debug("Starting the instance of the virtual machine {}", virtualMachine.getName());
 
@@ -1737,6 +1748,10 @@ public class VirtualMachineService extends DefaultApiService
         vm.setIps(ips);
         vm.setDisks(disks);
 
+        // we need to get the configuration value ALWAYS after to set the ips of the new virtual machine
+        // since it depends to it to check if the configuration of the network is valid
+        vm.setNetworkConfiguration(getNetworkConfigurationFromDto(vapp, vm, dto));
+        
         vm.setPassword(dto.getPassword());
         return vm;
     }
@@ -1841,7 +1856,7 @@ public class VirtualMachineService extends DefaultApiService
      * @param newVm {@link VirtualMachine} with the 'new' configuration.
      * @return the list of attachment order still in oldVm
      */
-    protected List<Integer> dellocateOldNICs(final VirtualMachine oldVm, final VirtualMachine newVm)
+    protected List<Integer> dellocateOldNICs(VirtualMachine oldVm, final VirtualMachine newVm)
     {
         List<Integer> oldNicsAttachments = new ArrayList<Integer>();
 
@@ -1871,6 +1886,15 @@ public class VirtualMachineService extends DefaultApiService
                     ip.detach();
                     vdcRep.updateIpManagement(ip);
                 }
+
+                // if the dellocated ip is the one with the default configuration,
+                // and it is the last one, set the default configuration to null
+                if (ip.itHasTheDefaultConfiguration(oldVm)
+                    && (vdcRep.findIpsWithConfigurationIdInVirtualMachine(oldVm).size() == 0))
+                {
+                    oldVm.setNetworkConfiguration(null);
+                }
+
             }
             else
             {
@@ -2121,6 +2145,91 @@ public class VirtualMachineService extends DefaultApiService
     }
 
     /**
+     * Extracts the proper network configuration from the "network_configuration" link.
+     * 
+     * @param vapp VirtualAppliance We need it to check it the link os correct.
+     * @param newvm VirtualMachine new. We need to check if the configuration is correct for the
+     *            current virtualmachine's NICs.
+     * @param configurationRef reference to configuration.
+     * @return the {@link NetworkConfiguration} object to set to VirtualMachine.
+     */
+    public NetworkConfiguration getNetworkConfigurationFromDto(VirtualAppliance vapp,
+        VirtualMachine newvm, SingleResourceTransportDto dto)
+    {
+        RESTLink link =
+            dto.searchLink(VirtualMachineNetworkConfigurationResource.DEFAULT_CONFIGURATION);
+        if (link == null)
+        {
+            // we disable the default network configuration.
+            return null;
+        }
+        String networkConfigurationTemplate =
+            buildPath(VirtualDatacentersResource.VIRTUAL_DATACENTERS_PATH,
+                VirtualDatacenterResource.VIRTUAL_DATACENTER_PARAM,
+                VirtualAppliancesResource.VIRTUAL_APPLIANCES_PATH,
+                VirtualApplianceResource.VIRTUAL_APPLIANCE_PARAM,
+                VirtualMachinesResource.VIRTUAL_MACHINES_PATH,
+                VirtualMachineResource.VIRTUAL_MACHINE_PARAM,
+                VirtualMachineNetworkConfigurationResource.NETWORK,
+                VirtualMachineNetworkConfigurationResource.CONFIGURATION_PATH,
+                VirtualMachineNetworkConfigurationResource.CONFIGURATION_PARAM);
+
+        MultivaluedMap<String, String> configurationValues =
+            URIResolver.resolveFromURI(networkConfigurationTemplate, link.getHref());
+
+        // URI needs to have an identifier to a VDC, another one to a Private Network
+        // and another one to Private IP
+        if (configurationValues == null
+            || !configurationValues.containsKey(VirtualDatacenterResource.VIRTUAL_DATACENTER)
+            || !configurationValues.containsKey(VirtualApplianceResource.VIRTUAL_APPLIANCE)
+            || !configurationValues.containsKey(VirtualMachineResource.VIRTUAL_MACHINE)
+            || !configurationValues
+                .containsKey(VirtualMachineNetworkConfigurationResource.CONFIGURATION))
+        {
+            throw new BadRequestException(APIError.NETWORK_INVALID_CONFIGURATION_LINK);
+        }
+
+        // Get the identifiers of the link
+        Integer vdcId =
+            Integer.parseInt(configurationValues
+                .getFirst(VirtualDatacenterResource.VIRTUAL_DATACENTER));
+        Integer vappId =
+            Integer.parseInt(configurationValues
+                .getFirst(VirtualApplianceResource.VIRTUAL_APPLIANCE));
+        Integer vmId =
+            Integer.parseInt(configurationValues.getFirst(VirtualMachineResource.VIRTUAL_MACHINE));
+        Integer configId =
+            Integer.parseInt(configurationValues
+                .getFirst(VirtualMachineNetworkConfigurationResource.CONFIGURATION));
+
+        // Check the identifiers
+        if (!vdcId.equals(vapp.getVirtualDatacenter().getId()))
+        {
+            throw new BadRequestException(APIError.NETWORK_LINK_INVALID_VDC);
+        }
+        if (!vappId.equals(vapp.getId()))
+        {
+            throw new BadRequestException(APIError.NETWORK_LINK_INVALID_VAPP);
+        }
+        if (!vmId.equals(newvm.getTemporal())) // it is the new resource, the id it is in the 'temporal'
+        {
+            throw new BadRequestException(APIError.NETWORK_LINK_INVALID_VM);
+        }
+
+        List<IpPoolManagement> ips = newvm.getIps();
+        for (IpPoolManagement ip : ips)
+        {
+            if (ip.getVlanNetwork().getConfiguration().getId().equals(configId))
+            {
+                return ip.getVlanNetwork().getConfiguration();
+            }
+        }
+
+        // if we have reached this point, it means the configuratin id is not valid
+        throw new BadRequestException(APIError.NETWORK_LINK_INVALID_CONFIG);
+    }
+
+    /**
      * Get the object {@link VirtualMachineTemplate} from the input dto.
      * 
      * @param dto the object that should have the link to a virtual machine template.
@@ -2241,6 +2350,7 @@ public class VirtualMachineService extends DefaultApiService
         tmp.setVdrpPort(vm.getVdrpPort());
         tmp.setVirtualImageConversion(vm.getVirtualImageConversion());
         tmp.setVirtualMachineTemplate(vm.getVirtualMachineTemplate());
+        tmp.setNetworkConfiguration(vm.getNetworkConfiguration());
         tmp.setTemporal(vm.getId());
 
         return tmp;
@@ -2291,7 +2401,6 @@ public class VirtualMachineService extends DefaultApiService
             ipTmp.setName(ip.getName());
             ipTmp.setVlanNetwork(ip.getVlanNetwork());
             ipTmp.setMac(ip.getMac());
-            ipTmp.setConfigureGateway(ip.getConfigureGateway());
             ipTmp.setAvailable(ip.getAvailable());
             ipTmp.setNetworkName(ip.getNetworkName());
             ipTmp.setQuarantine(ip.getQuarantine());
@@ -2456,6 +2565,7 @@ public class VirtualMachineService extends DefaultApiService
         updatedVm.setVdrpPort(rollbackVm.getVdrpPort());
         updatedVm.setVirtualImageConversion(rollbackVm.getVirtualImageConversion());
         updatedVm.setVirtualMachineTemplate(rollbackVm.getVirtualMachineTemplate());
+        updatedVm.setNetworkConfiguration(rollbackVm.getNetworkConfiguration());
 
         List<RasdManagement> updatedResources = updatedVm.getRasdManagements();
         List<RasdManagement> rollbackResources = getBackupResources(rollbackVm);
