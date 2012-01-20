@@ -505,7 +505,6 @@ public class VirtualApplianceService extends DefaultApiService
     public Map<Integer, String> deployVirtualAppliance(final Integer vdcId, final Integer vappId,
         final boolean forceLimits)
     {
-
         VirtualAppliance virtualAppliance = getVirtualAppliance(vdcId, vappId);
 
         allocateVirtualAppliance(virtualAppliance, forceLimits);
@@ -541,7 +540,7 @@ public class VirtualApplianceService extends DefaultApiService
 
     @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
     public Map<Integer, String> undeployVirtualAppliance(final Integer vdcId, final Integer vappId,
-        final Boolean forceUndeploy)
+        final Boolean forceUndeploy, final Map<Integer, VirtualMachineState> originalStates)
     {
         VirtualAppliance virtualAppliance = getVirtualAppliance(vdcId, vappId);
 
@@ -561,11 +560,12 @@ public class VirtualApplianceService extends DefaultApiService
         Map<Integer, String> dto = new HashMap<Integer, String>();
         for (NodeVirtualImage machine : virtualAppliance.getNodes())
         {
+            Integer vmId = machine.getVirtualMachine().getId();
             try
             {
                 String link =
-                    vmService.undeployVirtualMachine(machine.getVirtualMachine().getId(), vappId,
-                        vdcId, forceUndeploy);
+                    vmService.undeployVirtualMachine(vmId, vappId, vdcId, forceUndeploy,
+                        originalStates.get(vmId));
                 dto.put(machine.getVirtualMachine().getId(), link);
             }
             catch (Exception e)
@@ -588,30 +588,21 @@ public class VirtualApplianceService extends DefaultApiService
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public void deleteVirtualAppliance(final Integer vdcId, final Integer vappId)
+    public void deleteVirtualAppliance(final Integer vdcId, final Integer vappId,
+        final Map<Integer, VirtualMachineState> originalStates)
     {
         VirtualAppliance virtualAppliance = getVirtualAppliance(vdcId, vappId);
         userService.checkCurrentEnterpriseForPostMethods(virtualAppliance.getEnterprise());
         logger.debug("Deleting the virtual appliance name {} ", virtualAppliance.getName());
-        if (!virtualApplianceStateAllowsDelete(virtualAppliance))
-        {
-            logger.error(
-                "Delete virtual appliance error, the State must be NOT_DEPLOYED but was {}",
-                virtualAppliance.getState().name());
-            tracer.log(SeverityType.CRITICAL, ComponentType.VIRTUAL_APPLIANCE,
-                EventType.VAPP_DELETE, "virtualAppliance.deleteError", virtualAppliance.getName(),
-                virtualAppliance.getState().name());
-            addConflictErrors(APIError.VIRTUALAPPLIANCE_NOT_RUNNING);
-            flushErrors();
-        }
 
         // We must delete all of its virtual machines
         for (NodeVirtualImage n : virtualAppliance.getNodes())
         {
+            Integer vmId = n.getVirtualMachine().getId();
             logger.trace("Deleting the virtual machine with name {}", n.getVirtualMachine()
                 .getName());
-            vmService.deleteVirtualMachine(n.getVirtualMachine().getId(), virtualAppliance.getId(),
-                n.getVirtualAppliance().getVirtualDatacenter().getId());
+            vmService.deleteVirtualMachine(vmId, virtualAppliance.getId(), n.getVirtualAppliance()
+                .getVirtualDatacenter().getId(), originalStates.get(vmId));
             logger.trace("Deleting the virtual machine with name {}", n.getVirtualMachine()
                 .getName() + " successful!");
         }
@@ -619,24 +610,6 @@ public class VirtualApplianceService extends DefaultApiService
         logger.debug("Deleting the virtual appliance name {} ok!", virtualAppliance.getName());
         tracer.log(SeverityType.INFO, ComponentType.VIRTUAL_APPLIANCE, EventType.VAPP_DELETE,
             "virtualAppliance.deleted", virtualAppliance.getName());
-    }
-
-    private boolean virtualApplianceStateAllowsDelete(final VirtualAppliance virtualAppliance)
-    {
-        switch (virtualAppliance.getState())
-        {
-            case LOCKED:
-            case UNKNOWN:
-            case DEPLOYED:
-            case NEEDS_SYNC:
-            {
-                return false;
-            }
-            default:
-            {
-                return true;
-            }
-        }
     }
 
 }

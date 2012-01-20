@@ -64,10 +64,12 @@ import org.springframework.stereotype.Controller;
 import com.abiquo.api.exceptions.mapper.APIExceptionMapper;
 import com.abiquo.api.resources.AbstractResource;
 import com.abiquo.api.services.StorageService;
+import com.abiquo.api.services.cloud.VirtualMachineLock;
 import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.model.transport.AcceptedRequestDto;
 import com.abiquo.model.transport.LinksDto;
 import com.abiquo.model.util.ModelTransformer;
+import com.abiquo.server.core.cloud.VirtualMachineState;
 import com.abiquo.server.core.infrastructure.storage.DiskManagement;
 import com.abiquo.server.core.infrastructure.storage.DiskManagementDto;
 import com.abiquo.server.core.infrastructure.storage.DisksManagementDto;
@@ -102,6 +104,9 @@ public class VirtualMachineStorageConfigurationResource extends AbstractResource
     /** Autowired business logic service. */
     @Autowired
     protected StorageService service;
+
+    @Autowired
+    protected VirtualMachineLock vmLock;
 
     /**
      * Returns all the defined disks in the virtual machine.
@@ -154,20 +159,33 @@ public class VirtualMachineStorageConfigurationResource extends AbstractResource
         @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) @NotNull @Min(1) final Integer vmId,
         final LinksDto hdRefs, @Context final IRESTBuilder restBuilder) throws Exception
     {
+        VirtualMachineState originalState =
+            vmLock.lockVirtualMachineBeforeReconfiguring(vdcId, vappId, vmId);
 
-        Object result = service.attachHardDisks(vdcId, vappId, vmId, hdRefs);
-
-        // The attach method may return a Tarantino task identifier if the operation requires a
-        // reconfigure. Otherwise it will return null.
-        if (result != null)
+        try
         {
-            AcceptedRequestDto<Object> response = new AcceptedRequestDto<Object>();
-            response.setStatusUrlLink("http://status");
-            response.setEntity(result);
-            return response;
-        }
+            Object result = service.attachHardDisks(vdcId, vappId, vmId, hdRefs, originalState);
 
-        return null;
+            // The attach method may return a Tarantino task identifier if the operation requires a
+            // reconfigure. Otherwise it will return null.
+            if (result != null)
+            {
+                AcceptedRequestDto<Object> response = new AcceptedRequestDto<Object>();
+                response.setStatusUrlLink("http://status");
+                response.setEntity(result);
+                return response;
+            }
+
+            // If there is no async task the VM must be unlocked here
+            vmLock.unlockVirtualMachine(vmId, originalState);
+            return null;
+        }
+        catch (Exception ex)
+        {
+            // Make sure virtual machine is unlocked if deploy fails
+            vmLock.unlockVirtualMachine(vmId, originalState);
+            throw ex;
+        }
     }
 
     /**
@@ -190,20 +208,33 @@ public class VirtualMachineStorageConfigurationResource extends AbstractResource
         @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) @NotNull @Min(1) final Integer vmId,
         @Context final IRESTBuilder restBuilder) throws Exception
     {
+        VirtualMachineState originalState =
+            vmLock.lockVirtualMachineBeforeReconfiguring(vdcId, vappId, vmId);
 
-        Object result = service.detachHardDisks(vdcId, vappId, vmId);
-
-        // The attach method may return a Tarantino task identifier if the operation requires a
-        // reconfigure. Otherwise it will return null.
-        if (result != null)
+        try
         {
-            AcceptedRequestDto<Object> response = new AcceptedRequestDto<Object>();
-            response.setStatusUrlLink("http://status");
-            response.setEntity(result);
-            return response;
-        }
+            Object result = service.detachHardDisks(vdcId, vappId, vmId, originalState);
 
-        return null;
+            // The attach method may return a Tarantino task identifier if the operation requires a
+            // reconfigure. Otherwise it will return null.
+            if (result != null)
+            {
+                AcceptedRequestDto<Object> response = new AcceptedRequestDto<Object>();
+                response.setStatusUrlLink("http://status");
+                response.setEntity(result);
+                return response;
+            }
+
+            // If there is no async task the VM must be unlocked here
+            vmLock.unlockVirtualMachine(vmId, originalState);
+            return null;
+        }
+        catch (Exception ex)
+        {
+            // Make sure virtual machine is unlocked if deploy fails
+            vmLock.unlockVirtualMachine(vmId, originalState);
+            throw ex;
+        }
     }
 
     /**
@@ -227,19 +258,33 @@ public class VirtualMachineStorageConfigurationResource extends AbstractResource
         @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) @NotNull @Min(1) final Integer vmId,
         @NotNull final LinksDto hdRefs, @Context final IRESTBuilder restBuilder) throws Exception
     {
-        Object result = service.changeHardDisks(vdcId, vappId, vmId, hdRefs);
+        VirtualMachineState originalState =
+            vmLock.lockVirtualMachineBeforeReconfiguring(vdcId, vappId, vmId);
 
-        // The attach method may return a Tarantino task identifier if the operation requires a
-        // reconfigure. Otherwise it will return null.
-        if (result != null)
+        try
         {
-            AcceptedRequestDto<Object> response = new AcceptedRequestDto<Object>();
-            response.setStatusUrlLink("http://status");
-            response.setEntity(result);
-            return response;
-        }
+            Object result = service.changeHardDisks(vdcId, vappId, vmId, hdRefs, originalState);
 
-        return null;
+            // The attach method may return a Tarantino task identifier if the operation requires a
+            // reconfigure. Otherwise it will return null.
+            if (result != null)
+            {
+                AcceptedRequestDto<Object> response = new AcceptedRequestDto<Object>();
+                response.setStatusUrlLink("http://status");
+                response.setEntity(result);
+                return response;
+            }
+
+            // If there is no async task the VM must be unlocked here
+            vmLock.unlockVirtualMachine(vmId, originalState);
+            return null;
+        }
+        catch (Exception ex)
+        {
+            // Make sure virtual machine is unlocked if deploy fails
+            vmLock.unlockVirtualMachine(vmId, originalState);
+            throw ex;
+        }
     }
 
     /**
@@ -290,19 +335,33 @@ public class VirtualMachineStorageConfigurationResource extends AbstractResource
         @PathParam(DISK) @NotNull @Min(0) final Integer diskId,
         @Context final IRESTBuilder restBuilder) throws Exception
     {
-        Object result = service.detachHardDisk(vdcId, vappId, vmId, diskId);
+        VirtualMachineState originalState =
+            vmLock.lockVirtualMachineBeforeReconfiguring(vdcId, vappId, vmId);
 
-        // The attach method may return a Tarantino task identifier if the operation requires a
-        // reconfigure. Otherwise it will return null.
-        if (result != null)
+        try
         {
-            AcceptedRequestDto<Object> response = new AcceptedRequestDto<Object>();
-            response.setStatusUrlLink("http://status");
-            response.setEntity(result);
-            return response;
-        }
+            Object result = service.detachHardDisk(vdcId, vappId, vmId, diskId, originalState);
 
-        return null;
+            // The attach method may return a Tarantino task identifier if the operation requires a
+            // reconfigure. Otherwise it will return null.
+            if (result != null)
+            {
+                AcceptedRequestDto<Object> response = new AcceptedRequestDto<Object>();
+                response.setStatusUrlLink("http://status");
+                response.setEntity(result);
+                return response;
+            }
+
+            // If there is no async task the VM must be unlocked here
+            vmLock.unlockVirtualMachine(vmId, originalState);
+            return null;
+        }
+        catch (Exception ex)
+        {
+            // Make sure virtual machine is unlocked if deploy fails
+            vmLock.unlockVirtualMachine(vmId, originalState);
+            throw ex;
+        }
     }
 
     /**

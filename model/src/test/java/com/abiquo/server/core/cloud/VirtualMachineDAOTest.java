@@ -31,9 +31,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.abiquo.server.core.common.persistence.DefaultDAOTestBase;
-import com.softwarementors.bzngine.entities.test.PersistentEntityTestHelper;
 import com.softwarementors.bzngine.entities.test.PersistentInstanceTester;
-import com.softwarementors.commons.collections.ListUtils;
 
 @Test
 public class VirtualMachineDAOTest extends DefaultDAOTestBase<VirtualMachineDAO, VirtualMachine>
@@ -130,6 +128,26 @@ public class VirtualMachineDAOTest extends DefaultDAOTestBase<VirtualMachineDAO,
             ((Session) dao.getEntityManager().getDelegate())
                 .disableFilter(VirtualMachine.ONLY_TEMP);
         }
+    }
+
+    @Test
+    public void findVirtualMachinesNotAllocatedCompatibleHypervisor()
+    {
+        VirtualMachine vm = eg().createUniqueInstance();
+        // used for posterior search
+        Hypervisor hyp = vm.getHypervisor();
+        vm.setHypervisor(null);
+
+        vm.setState(VirtualMachineState.NOT_ALLOCATED);
+        List<Object> vmlist = new ArrayList<Object>();
+        eg().addAuxiliaryEntitiesToPersist(vm, vmlist);
+        vmlist.add(vm);
+
+        ds().persistAll(vmlist.toArray());
+
+        VirtualMachineDAO dao = createDaoForRollbackTransaction();
+        List<VirtualMachine> vms = dao.findVirtualMachinesNotAllocatedCompatibleHypervisor(hyp);
+        assertEquals(vms.size(), 1);
     }
 
     /**

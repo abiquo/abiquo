@@ -210,10 +210,10 @@
 
             public function set virtualMachine(value:VirtualMachine):void
             {
-                var update:Boolean;
+                /*var update:Boolean = true;
                 
                 
-                if(this._virtualMachine){
+                 if(this._virtualMachine){
                 	if(this._virtualMachine.id != value.id){
 		                update = true;                		
                 	}else{
@@ -223,14 +223,14 @@
                 	}
                 }else{
                 	update = true;	       
-                }
+                } 
                 
-                if(update){
+                if(update){*/
                 	this._virtualMachine = value;
 	                nodeName = null;
 	                dispatchEvent(new Event("virtualMachineChange"));
 	                setVNCIconEnable(); 
-                }
+                //}
             }
             
             private function setVNCIconEnable():void{
