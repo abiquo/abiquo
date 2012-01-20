@@ -490,14 +490,17 @@ public class TarantinoService extends DefaultApiService
             {
                 builder.add(VirtualMachineStateTransition.POWEROFF);
             }
-            DatacenterTasks deployTask =
+
+            DatacenterTasks tarantinoTask =
                 builder.add(VirtualMachineStateTransition.DECONFIGURE).buildTarantinoTask();
 
-            enqueueTask(datacenter,
-                builder.buildAsyncTask(String.valueOf(virtualMachine.getId()), TaskType.UNDEPLOY),
-                deployTask, EventType.VM_UNDEPLOY);
+            Task redisTask =
+                builder.buildAsyncTask(String.valueOf(virtualMachine.getId()), TaskType.UNDEPLOY);
 
-            return deployTask.getId();
+            unsubscribeVirtualMachineAndEnqueueTask(virtualMachine, redisTask, tarantinoTask,
+                EventType.VM_UNDEPLOY);
+
+            return tarantinoTask.getId();
         }
         catch (NotFoundException e)
         {
@@ -556,15 +559,19 @@ public class TarantinoService extends DefaultApiService
 
             Map<String, String> extraData = new HashMap<String, String>();
             extraData.put("delete", Boolean.TRUE.toString());
-            DatacenterTasks deployTask =
+
+            DatacenterTasks tarantinoTask =
                 builder.add(VirtualMachineStateTransition.DECONFIGURE, extraData)
                     .buildTarantinoTask();
 
-            enqueueTask(datacenter,
-                builder.buildAsyncTask(String.valueOf(virtualMachine.getId()), TaskType.UNDEPLOY),
-                deployTask, EventType.VM_UNDEPLOY);
+            Task redisTask =
+                builder.buildAsyncTask(String.valueOf(virtualMachine.getId()), TaskType.UNDEPLOY);
 
-            return deployTask.getId();
+            unsubscribeVirtualMachineAndEnqueueTask(virtualMachine, redisTask, tarantinoTask,
+                EventType.VM_UNDEPLOY);
+
+            return tarantinoTask.getId();
+
         }
         catch (NotFoundException e)
         {

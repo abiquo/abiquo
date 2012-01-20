@@ -90,7 +90,7 @@ public class DatacentersResourceStubImpl extends AbstractAPIStub implements Data
 
             for (Datacenter dc : datacenters)
             {
-                dcs.add(fromDtoToPojo(dc));
+                dcs.add(fromDtoToPojo(dc, false));
             }
 
             result.setSuccess(true);
@@ -300,13 +300,21 @@ public class DatacentersResourceStubImpl extends AbstractAPIStub implements Data
 
     public DataCenter fromDtoToPojo(final Datacenter datacenter)
     {
+        return fromDtoToPojo(datacenter, true);
+    }
+
+    public DataCenter fromDtoToPojo(final Datacenter datacenter, final boolean includeRS)
+    {
         DataCenter dc = DataCenter.create(datacenter.unwrap());
         dc.setRemoteServices(new ArrayList<RemoteService>());
 
-        for (org.jclouds.abiquo.domain.infrastructure.RemoteService rs : datacenter
-            .listRemoteServices())
+        if (includeRS)
         {
-            dc.getRemoteServices().add(RemoteService.create(rs.unwrap(), dc.getId()));
+            for (org.jclouds.abiquo.domain.infrastructure.RemoteService rs : datacenter
+                .listRemoteServices())
+            {
+                dc.getRemoteServices().add(RemoteService.create(rs.unwrap(), dc.getId()));
+            }
         }
 
         return dc;

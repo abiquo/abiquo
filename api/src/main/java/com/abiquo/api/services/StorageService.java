@@ -122,7 +122,7 @@ public class StorageService extends DefaultApiService
      */
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public Object attachHardDisks(final Integer vdcId, final Integer vappId, final Integer vmId,
-        final LinksDto hdRefs)
+        final LinksDto hdRefs, final VirtualMachineState originalState)
     {
         VirtualDatacenter vdc = getVirtualDatacenter(vdcId);
         VirtualAppliance vapp = getVirtualAppliance(vdc, vappId);
@@ -130,10 +130,10 @@ public class StorageService extends DefaultApiService
 
         VirtualMachine newvm = vmService.createBackUpObject(oldvm);
         List<DiskManagement> disks = vmService.getHardDisksFromDto(vdc, hdRefs);
-        
+
         newvm.getDisks().addAll(disks);
 
-        return vmService.reconfigureVirtualMachine(vdc, vapp, oldvm, newvm);
+        return vmService.reconfigureVirtualMachine(vdc, vapp, oldvm, newvm, originalState);
     }
 
     /**
@@ -151,7 +151,7 @@ public class StorageService extends DefaultApiService
      */
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public Object changeHardDisks(final Integer vdcId, final Integer vappId, final Integer vmId,
-        final LinksDto hdRefs)
+        final LinksDto hdRefs, final VirtualMachineState originalState)
     {
         VirtualDatacenter vdc = getVirtualDatacenter(vdcId);
         VirtualAppliance vapp = getVirtualAppliance(vdc, vappId);
@@ -159,10 +159,10 @@ public class StorageService extends DefaultApiService
 
         VirtualMachine newvm = vmService.createBackUpObject(vm);
         List<DiskManagement> disks = vmService.getHardDisksFromDto(vdc, hdRefs);
-        
+
         newvm.setDisks(disks);
 
-        return vmService.reconfigureVirtualMachine(vdc, vapp, vm, newvm);
+        return vmService.reconfigureVirtualMachine(vdc, vapp, vm, newvm, originalState);
     }
 
     /**
@@ -270,13 +270,14 @@ public class StorageService extends DefaultApiService
      *         otherwise.
      */
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public Object detachHardDisk(Integer vdcId, Integer vappId, Integer vmId, Integer diskId)
+    public Object detachHardDisk(final Integer vdcId, final Integer vappId, final Integer vmId,
+        final Integer diskId, final VirtualMachineState originalState)
     {
         VirtualDatacenter vdc = getVirtualDatacenter(vdcId);
         VirtualAppliance vapp = getVirtualAppliance(vdc, vappId);
         VirtualMachine vm = getVirtualMachine(vapp, vmId);
         DiskManagement disk = vdcRepo.findHardDiskByVirtualMachine(vm, diskId);
-        
+
         if (disk == null)
         {
             addNotFoundErrors(APIError.HD_NON_EXISTENT_HARD_DISK);
@@ -291,13 +292,13 @@ public class StorageService extends DefaultApiService
             if (currentDisk.getRasd().equals(disk.getRasd()))
             {
                 diskIterator.remove();
-                return vmService.reconfigureVirtualMachine(vdc, vapp, vm, newVm);
+                return vmService.reconfigureVirtualMachine(vdc, vapp, vm, newVm, originalState);
             }
         }
-        
+
         addUnexpectedErrors(APIError.HD_NON_EXISTENT_HARD_DISK);
         flushErrors();
-        
+
         return null;
     }
 
@@ -315,7 +316,8 @@ public class StorageService extends DefaultApiService
      *         otherwise.
      */
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public Object detachHardDisks(final Integer vdcId, final Integer vappId, final Integer vmId)
+    public Object detachHardDisks(final Integer vdcId, final Integer vappId, final Integer vmId,
+        final VirtualMachineState originalState)
     {
         VirtualDatacenter vdc = getVirtualDatacenter(vdcId);
         VirtualAppliance vapp = getVirtualAppliance(vdc, vappId);
@@ -324,7 +326,7 @@ public class StorageService extends DefaultApiService
         VirtualMachine newVm = vmService.createBackUpObject(vm);
         newVm.getDisks().clear();
 
-        return vmService.reconfigureVirtualMachine(vdc, vapp, vm, newVm);
+        return vmService.reconfigureVirtualMachine(vdc, vapp, vm, newVm, originalState);
     }
 
     /**
@@ -478,8 +480,8 @@ public class StorageService extends DefaultApiService
         if (tracer != null)
         {
             tracer.log(SeverityType.INFO, ComponentType.VIRTUAL_MACHINE,
-                EventType.HARD_DISK_ASSIGN, "hardDisk.assigned", createdDisk.getId(), createdDisk
-                    .getSizeInMb(), vm.getName());
+                EventType.HARD_DISK_ASSIGN, "hardDisk.assigned", createdDisk.getId(),
+                createdDisk.getSizeInMb(), vm.getName());
         }
 
         return createdDisk;
@@ -547,8 +549,8 @@ public class StorageService extends DefaultApiService
         // creating volumes in other enterprises VDC
         Enterprise enterprise = vdc.getEnterprise();
 
-        LOGGER.debug("Checking limits for enterprise {} to a locate a volume of {}MB", enterprise
-            .getName(), sizeInMB);
+        LOGGER.debug("Checking limits for enterprise {} to a locate a volume of {}MB",
+            enterprise.getName(), sizeInMB);
 
         DatacenterLimits dcLimits =
             datacenterRepo.findDatacenterLimits(enterprise, vdc.getDatacenter());

@@ -29,10 +29,12 @@
     paddingTop="15"
     styleName="VirtualApplianceDeployingSkin"
     show="checkVirtualApplianceState()"
+    creationComplete="onCreationComplete()"
     xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:info="net.undf.abicloud.view.general.components.info.*" xmlns:general="net.undf.abicloud.view.general.*">
 
     <mx:Script>
         <![CDATA[
+        	import mx.collections.ArrayCollection;
         	import mx.controls.dataGridClasses.DataGridColumn;
         	import net.undf.abicloud.model.AbiCloudModel;
         	import net.undf.abicloud.controller.ThemeHandler;
@@ -67,17 +69,32 @@
 
             [ResourceBundle("VirtualAppliance")]
             private var rb2:ResourceBundle;
+            
+            private function onCreationComplete():void
+            {
+            	AbiCloudModel.getInstance().virtualApplianceManager.addEventListener("nodesUpdates",updateNodes);
+            }
+            
+            //Force updating node task status
+            private function updateNodes(event:Event):void
+            {
+            	if(nodesList && this._virtualAppliance)
+            	{
+	            	nodesList.dataProvider = this._virtualAppliance.nodes;
+            	}
+            }
 
             public function set virtualAppliance(value:VirtualAppliance):void
             {
                 this._virtualAppliance = value;
+                nodesList.dataProvider = this._virtualAppliance.nodes;
 
                 if (visible)
                 {
                     checkVirtualApplianceState();
                 }
             }
-
+            
             private function checkVirtualApplianceState():void
             {
                 //Cleaning things
@@ -249,8 +266,7 @@
         title="Nodes Statuses">
 
         <mx:DataGrid id="nodesList"
-            width="100%" height="190"
-            dataProvider="{this._virtualAppliance.nodes}">
+            width="100%" height="190">
             <mx:columns>
                 <mx:DataGridColumn 
                 	headerText="Node"

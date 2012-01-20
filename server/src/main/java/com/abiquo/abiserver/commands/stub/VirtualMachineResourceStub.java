@@ -38,4 +38,7 @@ public interface VirtualMachineResourceStub
     DataResult editVirtualMachineState(final Integer virtualDatacenterId,
         final Integer virtualApplianceId, VirtualMachine virtualMachine,
         VirtualMachineState virtualMachineState);
+
+    public DataResult rebootVirtualMachine(final Integer virtualDatacenterId,
+        final Integer virtualApplianceId, final VirtualMachine virtualMachine);
 }
