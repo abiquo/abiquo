@@ -37,8 +37,6 @@ import com.abiquo.vsm.monitor.Monitor;
 import com.abiquo.vsm.monitor.Monitor.Type;
 import com.abiquo.vsm.monitor.executor.AbstractTask;
 import com.abiquo.vsm.monitor.executor.PeriodicalExecutor;
-import com.abiquo.vsm.redis.dao.RedisDao;
-import com.abiquo.vsm.redis.dao.RedisDaoFactory;
 import com.vmware.vim25.ObjectContent;
 import com.vmware.vim25.VirtualMachineConfigInfo;
 
@@ -59,9 +57,6 @@ public class ExecutorBasedESXiPoller extends AbstractMonitor
     /** HyperV WMI based connector */
     private ESXiConnector esx;
 
-    /** The dao used to access stored data. */
-    private RedisDao dao;
-
     // Polling stuff
 
     /** The executor */
@@ -79,7 +74,6 @@ public class ExecutorBasedESXiPoller extends AbstractMonitor
             Integer.valueOf(System.getProperty("abiquo.vsm.esx.pollinginterval", "5000"));
 
         esx = new ESXiConnector();
-        dao = RedisDaoFactory.getInstance();
         poller = new Poller();
         executor = createExecutor(poller, pollingInterval);
     }
