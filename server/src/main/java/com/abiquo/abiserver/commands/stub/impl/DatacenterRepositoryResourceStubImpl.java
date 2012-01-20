@@ -32,6 +32,7 @@ import com.abiquo.abiserver.commands.stub.AbstractAPIStub;
 import com.abiquo.abiserver.commands.stub.DatacenterRepositoryResourceStub;
 import com.abiquo.abiserver.pojo.infrastructure.DataCenter;
 import com.abiquo.abiserver.pojo.result.DataResult;
+import com.abiquo.abiserver.pojo.service.RemoteServiceType;
 import com.abiquo.abiserver.pojo.virtualimage.Repository;
 import com.abiquo.server.core.appslibrary.DatacenterRepositoriesDto;
 import com.abiquo.server.core.appslibrary.DatacenterRepositoryDto;
@@ -122,6 +123,7 @@ public class DatacenterRepositoryResourceStubImpl extends AbstractAPIStub implem
             com.abiquo.abiserver.pojo.service.RemoteService am =
                 new com.abiquo.abiserver.pojo.service.RemoteService();
             am.setIdDataCenter(idDataCenter);
+            am.setRemoteServiceType(new RemoteServiceType(com.abiquo.model.enumerator.RemoteServiceType.APPLIANCE_MANAGER));
             am.setUri(amLink.toASCIIString());
             am.setDomainName(amLink.getHost());
             am.setPort(amLink.getPort());
