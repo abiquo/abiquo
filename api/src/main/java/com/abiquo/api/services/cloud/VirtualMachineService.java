@@ -25,7 +25,6 @@ import static com.abiquo.api.resources.appslibrary.VirtualMachineTemplateResourc
 import static com.abiquo.api.util.URIResolver.buildPath;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -1486,7 +1485,7 @@ public class VirtualMachineService extends DefaultApiService
         }
     }
 
-    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
     public String undeployVirtualMachine(final Integer vmId, final Integer vappId,
         final Integer vdcId, final Boolean forceUndeploy)
     {

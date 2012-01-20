@@ -539,7 +539,7 @@ public class VirtualApplianceService extends DefaultApiService
         return virtualAppliance.getState();
     }
 
-    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
     public Map<Integer, String> undeployVirtualAppliance(final Integer vdcId, final Integer vappId,
         final Boolean forceUndeploy)
     {
