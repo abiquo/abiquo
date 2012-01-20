@@ -751,7 +751,7 @@ public class RESTBuilder implements IRESTBuilder
             IpAddressesResource.IP_ADDRESSES, params));
 
         links.add(builder.buildRestLink(VirtualMachineResource.class,
-            VirtualMachineResource.VIRTUAL_MACHINE_STATE,
+            VirtualMachineResource.VIRTUAL_MACHINE_STATE_PATH,
             VirtualMachineResource.VIRTUAL_MACHINE_STATE_REL, params));
 
         links.add(builder.buildRestLink(VirtualMachineResource.class,
@@ -1235,7 +1235,7 @@ public class RESTBuilder implements IRESTBuilder
         links.add(builder.buildRestLink(VirtualMachineResource.class, "parent", params));
 
         links.add(builder.buildRestLink(VirtualMachineResource.class,
-            VirtualMachineResource.VIRTUAL_MACHINE_STATE, REL_EDIT, params));
+            VirtualMachineResource.VIRTUAL_MACHINE_STATE_PATH, REL_EDIT, params));
         return links;
     }
 

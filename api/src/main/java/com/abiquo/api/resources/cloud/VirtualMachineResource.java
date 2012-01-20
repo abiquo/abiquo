@@ -97,7 +97,7 @@ public class VirtualMachineResource extends AbstractResource
 
     public static final String VIRTUAL_MACHINE_ACTION_RESET = "action/reset";
 
-    public static final String VIRTUAL_MACHINE_STATE = "state";
+    public static final String VIRTUAL_MACHINE_STATE_PATH = "state";
 
     // Chef constants to help link builders. Method implementation are premium.
     public static final String VIRTUAL_MACHINE_RUNLIST_PATH = "config/runlist";
@@ -243,7 +243,7 @@ public class VirtualMachineResource extends AbstractResource
      * @throws Exception
      */
     @PUT
-    @Path(VIRTUAL_MACHINE_STATE)
+    @Path(VIRTUAL_MACHINE_STATE_PATH)
     public AcceptedRequestDto<String> powerStateVirtualMachine(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
@@ -289,7 +289,7 @@ public class VirtualMachineResource extends AbstractResource
      * @throws Exception
      */
     @GET
-    @Path(VIRTUAL_MACHINE_STATE)
+    @Path(VIRTUAL_MACHINE_STATE_PATH)
     public VirtualMachineStateDto stateVirtualMachine(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
@@ -928,7 +928,7 @@ public class VirtualMachineResource extends AbstractResource
         String link = uriInfo.getRequestUri().toString();
 
         link = TaskResourceUtils.removeTaskSegments(link);
-        link = link.concat("/").concat(VIRTUAL_MACHINE_STATE);
+        link = link.concat("/").concat(VIRTUAL_MACHINE_STATE_PATH);
 
         // Build SeeOtherDto
         return new SeeOtherDto(link);
