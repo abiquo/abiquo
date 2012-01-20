@@ -33,6 +33,8 @@ package net.undf.abicloud.business.managers
     import net.undf.abicloud.view.general.AbiCloudAlert;
     import net.undf.abicloud.vo.infrastructure.State;
     import net.undf.abicloud.vo.virtualappliance.Log;
+    import net.undf.abicloud.vo.virtualappliance.NodeVirtualImage;
+    import net.undf.abicloud.vo.virtualappliance.TaskStatus;
     import net.undf.abicloud.vo.virtualappliance.VirtualAppliance;
     import net.undf.abicloud.vo.virtualappliance.VirtualDataCenter;
 
@@ -345,6 +347,8 @@ package net.undf.abicloud.business.managers
 	
 	            if (vaToUpdate)
 	            {
+	                vaToUpdate.nodes = updateNodesStatus(vaToUpdate);
+	                dispatchEvent(new Event("nodesUpdates"));
 	                vaToUpdate.state = new State(10, State.LOCKED.description);
 	            }            	
             }
@@ -442,5 +446,24 @@ package net.undf.abicloud.business.managers
                 dispatchEvent(virtualApplianceEvent);
             }
         }
+        
+         /**
+         * When a Virtual Appliance is started, we update nodes task status
+         */
+        public function updateNodesStatus(virtualAppliance:VirtualAppliance):ArrayCollection
+        {
+        	if(virtualAppliance.nodes)
+        	{
+        	   var taskStatus:TaskStatus;
+        	   for(var i:int = 0 ; i < virtualAppliance.nodes.length ; i++)
+        	   {
+        	   	   taskStatus = NodeVirtualImage(virtualAppliance.nodes.getItemAt(i)).taskStatus;
+        	   	   taskStatus.statusName = TaskStatus.STARTED;
+        	   }
+        	}
+        	
+        	return virtualAppliance.nodes;
+        }
+        
     }
 }
