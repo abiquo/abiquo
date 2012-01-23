@@ -2631,7 +2631,7 @@ CREATE TRIGGER `kinton`.`create_volume_management_update_stats` AFTER INSERT ON 
         DECLARE limitResourceObj BIGINT;
         DECLARE idResourceObj VARCHAR(50);
         DECLARE idResourceTypeObj VARCHAR(5);
-	   DECLARE idStorageTier INTEGER;
+	DECLARE idStorageTier INTEGER;
         DECLARE resourceName VARCHAR(255);
         SELECT vdc.idDataCenter, vdc.idEnterprise, vdc.idVirtualDataCenter INTO idDataCenterObj, idThisEnterprise, idVirtualDataCenterObj
         FROM virtualdatacenter vdc, rasd_management rm
@@ -3170,7 +3170,7 @@ CREATE TRIGGER `kinton`.`update_rasd_update_stats` AFTER UPDATE ON `kinton`.`ras
                     WHERE idVirtualDataCenter = idThisVirtualDataCenter;
                 END IF;        
                 IF EXISTS( SELECT * FROM `information_schema`.ROUTINES WHERE ROUTINE_SCHEMA='kinton' AND ROUTINE_TYPE='PROCEDURE' AND ROUTINE_NAME='AccountingStorageRegisterEvents' ) THEN
-                    CALL AccountingStorageRegisterEvents('UPDATE_STORAGE', NEW.instanceID, NEW.elementName, idThisVirtualDataCenter, idThisEnterprise, NEW.limitResource);
+                    CALL AccountingStorageRegisterEvents('UPDATE_STORAGE', NEW.instanceID, NEW.elementName, 0, idThisVirtualDataCenter, idThisEnterprise, NEW.limitResource);
                 END IF;
             END IF;
         END IF;
