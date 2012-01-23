@@ -32,7 +32,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
-
 import javax.ws.rs.core.Context;
 
 import org.apache.wink.common.annotations.Parent;
@@ -87,6 +86,8 @@ public class MachineResource extends AbstractResource
     public static final String MACHINE_ACTION_LED_ON_REL = "ledon";
 
     public static final String MACHINE_ACTION_LS = "logicserver";
+    
+    public static final String MACHINE_ACTION_GET_VIRTUALMACHINES = "action/virtualmachines";
 
     public static final String MACHINE_ACTION_LED_OFF = "action/ledoff";
 

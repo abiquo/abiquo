@@ -33,6 +33,7 @@ import com.abiquo.abiserver.pojo.result.DataResult;
 import com.abiquo.abiserver.pojo.result.ListRequest;
 import com.abiquo.abiserver.pojo.ucs.Fsm;
 import com.abiquo.abiserver.pojo.ucs.LogicServer;
+import com.abiquo.abiserver.pojo.ucs.LogicServerListResult;
 import com.abiquo.abiserver.pojo.ucs.Organization;
 import com.abiquo.model.enumerator.HypervisorType;
 
@@ -101,7 +102,7 @@ public interface RacksResourceStub
      * @return wrapper which contains the list of {@link LogicServer} in the {@link UcsRack}. Or in
      *         case of error the appropiate object.
      */
-    public DataResult<List<LogicServer>> getLogicServers(UcsRack ucsRack,
+    public DataResult<LogicServerListResult> getLogicServers(UcsRack ucsRack,
         final ListRequest listRequest);
 
     /**

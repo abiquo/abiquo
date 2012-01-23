@@ -56,8 +56,8 @@ import com.abiquo.server.core.appslibrary.VirtualMachineTemplateDto;
 import com.abiquo.server.core.cloud.VirtualMachineDto;
 import com.abiquo.server.core.cloud.VirtualMachinesDto;
 import com.abiquo.server.core.enterprise.EnterpriseDto;
-import com.abiquo.server.core.enterprise.UserDto;
 import com.abiquo.server.core.enterprise.User.AuthType;
+import com.abiquo.server.core.enterprise.UserDto;
 import com.abiquo.server.core.infrastructure.MachineDto;
 
 public class MachineResourceStubImpl extends AbstractAPIStub implements MachineResourceStub
@@ -158,46 +158,11 @@ public class MachineResourceStubImpl extends AbstractAPIStub implements MachineR
         // PREMIUM
         return null;
     }
-
     /**
      * @see com.abiquo.abiserver.commands.stub.MachineResourceStub#bladeLocatorLED(PhysicalMachine)
      */
     @Override
     public BasicResult bladeLocatorLED(final PhysicalMachine machine)
-    {
-        // PREMIUM
-        return null;
-    }
-
-    /**
-     * Returns teh {@link LogicServer} in blade.
-     * 
-     * @param ucsRack ucsRack.
-     * @return wrapper which contains the {@link LogicServer} which is the blade. Or in case of
-     *         error the appropiate object.
-     */
-    @Override
-    public DataResult<LogicServer> getBladeLogicServer(final PhysicalMachine machine)
-    {
-        // PREMIUM
-        return null;
-    }
-
-    /**
-     * @see com.abiquo.abiserver.commands.stub.MachineResourceStub#bladeLocatorLEDoff(com.abiquo.abiserver.pojo.infrastructure.PhysicalMachine)
-     */
-    @Override
-    public BasicResult bladeLocatorLEDoff(final PhysicalMachine machine)
-    {
-        // PREMIUM
-        return null;
-    }
-
-    /**
-     * @see com.abiquo.abiserver.commands.stub.MachineResourceStub#getBladeLocatorLed(com.abiquo.abiserver.pojo.infrastructure.PhysicalMachine)
-     */
-    @Override
-    public DataResult<BladeLocatorLed> getBladeLocatorLed(final PhysicalMachine machine)
     {
         // PREMIUM
         return null;
@@ -403,6 +368,39 @@ public class MachineResourceStubImpl extends AbstractAPIStub implements MachineR
         }
 
         return image;
+    }
 
+    /**
+     * Returns teh {@link LogicServer} in blade.
+     * 
+     * @param ucsRack ucsRack.
+     * @return wrapper which contains the {@link LogicServer} which is the blade. Or in case of
+     *         error the appropiate object.
+     */
+    @Override
+    public DataResult<LogicServer> getBladeLogicServer(final PhysicalMachine machine)
+    {
+        // PREMIUM
+        return null;
+    }
+
+    /**
+     * @see com.abiquo.abiserver.commands.stub.MachineResourceStub#bladeLocatorLEDoff(com.abiquo.abiserver.pojo.infrastructure.PhysicalMachine)
+     */
+    @Override
+    public BasicResult bladeLocatorLEDoff(final PhysicalMachine machine)
+    {
+        // PREMIUM
+        return null;
+    }
+
+    /**
+     * @see com.abiquo.abiserver.commands.stub.MachineResourceStub#getBladeLocatorLed(com.abiquo.abiserver.pojo.infrastructure.PhysicalMachine)
+     */
+    @Override
+    public DataResult<BladeLocatorLed> getBladeLocatorLed(final PhysicalMachine machine)
+    {
+        // PREMIUM
+        return null;
     }
 }

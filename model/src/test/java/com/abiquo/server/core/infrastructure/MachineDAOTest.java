@@ -562,10 +562,10 @@ public class MachineDAOTest extends DefaultDAOTestBase<MachineDAO, Machine>
         machine2_1.setEnterprise(e);
         machine2_2.setEnterprise(e);
 
-        machine1_1.setState(MachineState.MANAGED);
-        machine1_2.setState(MachineState.MANAGED);
-        machine2_1.setState(MachineState.MANAGED);
-        machine2_2.setState(MachineState.MANAGED);
+        machine1_1.setState(com.abiquo.model.enumerator.MachineState.MANAGED);
+        machine1_2.setState(com.abiquo.model.enumerator.MachineState.MANAGED);
+        machine2_1.setState(com.abiquo.model.enumerator.MachineState.MANAGED);
+        machine2_2.setState(com.abiquo.model.enumerator.MachineState.MANAGED);
 
         Datastore ds11 = dsGenerator.createInstance(machine1_1);
         Datastore ds12 = dsGenerator.createInstance(machine1_2);
@@ -649,10 +649,10 @@ public class MachineDAOTest extends DefaultDAOTestBase<MachineDAO, Machine>
         machine2_1.setEnterprise(null);
         machine2_2.setEnterprise(null);
 
-        machine1_1.setState(MachineState.MANAGED);
-        machine1_2.setState(MachineState.MANAGED);
-        machine2_1.setState(MachineState.MANAGED);
-        machine2_2.setState(MachineState.MANAGED);
+        machine1_1.setState(com.abiquo.model.enumerator.MachineState.MANAGED);
+        machine1_2.setState(com.abiquo.model.enumerator.MachineState.MANAGED);
+        machine2_1.setState(com.abiquo.model.enumerator.MachineState.MANAGED);
+        machine2_2.setState(com.abiquo.model.enumerator.MachineState.MANAGED);
 
         Datastore ds11 = dsGenerator.createInstance(machine1_1);
         Datastore ds12 = dsGenerator.createInstance(machine1_2);

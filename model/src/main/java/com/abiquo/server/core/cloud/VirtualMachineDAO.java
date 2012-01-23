@@ -207,6 +207,26 @@ public class VirtualMachineDAO extends DefaultDAOBase<Integer, VirtualMachine>
         return vmList;
     }
 
+    public List<VirtualMachine> findByVirtualMachineTemplate(final Integer virtualMachineTemplateId)
+    {
+        List<VirtualMachine> vmList = null;
+        TypedQuery<VirtualMachine> query =
+            getEntityManager().createNamedQuery("VIRTUAL_MACHINE.BY_VMT", VirtualMachine.class);
+        query.setParameter("virtualMachineTplId", virtualMachineTemplateId);
+        vmList = query.getResultList();
+
+        return vmList;
+    }
+
+    public boolean hasVirtualMachineTemplate(final Integer virtualMachineTemplateId)
+    {
+
+        TypedQuery<Long> query =
+            getEntityManager().createNamedQuery("VIRTUAL_MACHINE.HAS_VMT", Long.class);
+        query.setParameter("virtualMachineTplId", virtualMachineTemplateId);
+        return query.getResultList().get(0) > 0;
+    }
+
     public void updateVirtualMachineState(final Integer vmachineId, final VirtualMachineState state)
     {
         VirtualMachine vmachine = findById(vmachineId);

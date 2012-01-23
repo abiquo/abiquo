@@ -39,6 +39,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.abiquo.api.services.InfrastructureService;
 import com.abiquo.model.enumerator.FitPolicy;
 import com.abiquo.scheduler.workload.NotEnoughResourcesException;
 import com.abiquo.server.core.cloud.HypervisorDAO;
@@ -88,6 +89,9 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
 
     @Autowired
     private HypervisorDAO hypervisorDao;
+
+    @Autowired
+    private InfrastructureService infrastructureService;
 
     @Autowired
     private FitPolicyRuleDAO fitPolicyDao;
@@ -207,6 +211,13 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
             throw new ResourceUpgradeUseException("Can not update resource use" + e.getMessage());
         }
 
+        if (getAllocationFitPolicyOnDatacenter(
+            virtualMachine.getHypervisor().getMachine().getDatacenter().getId()).equals(
+            FitPolicy.PROGRESSIVE))
+        {
+            infrastructureService.adjustPoweredMachinesInRack(virtualMachine.getHypervisor()
+                .getMachine().getRack());
+        }
     }
 
     /**

@@ -94,7 +94,7 @@ public class VirtualMachineTemplate extends DefaultEntityBase
         this.creationUser = creationUser;
     }
 
-    private final static String ID_COLUMN = "idImage";
+    public final static String ID_COLUMN = "idImage";
 
     @Id
     @GeneratedValue
@@ -111,7 +111,7 @@ public class VirtualMachineTemplate extends DefaultEntityBase
     {
         this.id = id;
     }
-
+    
     public final static String DISKFORMAT_TYPE_PROPERTY = "diskFormatType";
 
     private final static boolean DISKFORMAT_TYPE_REQUIRED = true;

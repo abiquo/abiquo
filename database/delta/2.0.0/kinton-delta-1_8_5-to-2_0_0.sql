@@ -204,6 +204,12 @@ CREATE TABLE `kinton`.`pricingTier` (
 --         CONSTRAINTS (alter table, etc)         --
 -- ---------------------------------------------- --
 
+ALTER TABLE `kinton`.`physicalmachine` MODIFY COLUMN `vswitchName` varchar(200) NOT NULL;
+
+-- UCS default template
+ALTER TABLE `kinton`.`ucs_rack` ADD COLUMN `defaultTemplate` varchar(200);
+ALTER TABLE `kinton`.`ucs_rack` ADD COLUMN `maxMachinesOn` int(4) DEFAULT 0;
+
 ALTER TABLE `kinton`.`virtualimage` DROP COLUMN `treaty`;
 ALTER TABLE `kinton`.`virtualimage` DROP COLUMN `deleted`;
 
@@ -278,6 +284,8 @@ INSERT INTO `kinton`.`system_properties` (`name`, `value`, `description`) VALUES
 -- UPDATE `kinton`.`virtualdatacenter` vdc, `kinton`.`vlan_network` v set vdc.default_vlan_network_id = v.vlan_network_id WHERE vdc.networktypeID = v.network_id and v.default_network = 1;
 -- ALTER TABLE `kinton`.`vlan_network` DROP COLUMN `default_network`;
 
+ ("client.infra.ucsManagerLink","/ucsm/ucsm.jnlp","URL to display UCS Manager Interface");
+ 
 -- PRICING --
 -- Dumping data for table `kinton`.`privilege`
 

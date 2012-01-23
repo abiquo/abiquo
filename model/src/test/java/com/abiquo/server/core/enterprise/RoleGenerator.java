@@ -72,7 +72,8 @@ public class RoleGenerator extends DefaultEntityGenerator<Role>
         Privilege p12 = new Privilege(Privileges.USERS_MANAGE_ROLES);
         Privilege p13 = new Privilege(Privileges.PRICING_VIEW);
         Privilege p14 = new Privilege(Privileges.PRICING_MANAGE);
-        return createInstance(p1, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14);
+        Privilege p15 = new Privilege(Privileges.VDC_MANAGE_VAPP);
+        return createInstance(p1, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15);
     }
 
     public Role createInstanceSysAdmin(final String name)
@@ -90,17 +91,19 @@ public class RoleGenerator extends DefaultEntityGenerator<Role>
         Privilege p12 = new Privilege(Privileges.USERS_MANAGE_ROLES);
         Privilege p13 = new Privilege(Privileges.PRICING_VIEW);
         Privilege p14 = new Privilege(Privileges.PRICING_MANAGE);
-        return createInstance(name, p1, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14);
+        Privilege p15 = new Privilege(Privileges.VDC_MANAGE_VAPP);
+        return createInstance(name, p1, p3, p4, p5, p6, p7, p8, p9, p10, p11, p13, p14, p15);
     }
 
     public Role createInstanceEnterpriseAdmin()
     {
-        Privilege p3 = new Privilege(Privileges.USERS_VIEW);
-        Privilege p4 = new Privilege(Privileges.USERS_VIEW_PRIVILEGES);
-        Privilege p5 = new Privilege(Privileges.USERS_MANAGE_USERS);
-        Privilege p8 = new Privilege(Privileges.USERS_PROHIBIT_VDC_RESTRICTION);
-        Privilege p11 = new Privilege(Privileges.VDC_ENUMERATE);
-        return createInstance(p3, p4, p5, p8, p11);
+        Privilege p1 = new Privilege(Privileges.USERS_VIEW);
+        Privilege p2 = new Privilege(Privileges.USERS_VIEW_PRIVILEGES);
+        Privilege p3 = new Privilege(Privileges.USERS_MANAGE_USERS);
+        Privilege p4 = new Privilege(Privileges.USERS_PROHIBIT_VDC_RESTRICTION);
+        Privilege p5 = new Privilege(Privileges.VDC_ENUMERATE);
+        Privilege p6 = new Privilege(Privileges.VDC_MANAGE_VAPP);
+        return createInstance(p1, p2, p3, p4, p5, p6);
     }
 
     public Role createInstance(final Enterprise enterprise)

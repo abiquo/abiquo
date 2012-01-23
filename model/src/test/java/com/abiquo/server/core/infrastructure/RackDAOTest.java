@@ -185,6 +185,30 @@ public class RackDAOTest extends DefaultDAOTestBase<RackDAO, Rack>
         Assert.assertEquals(result.size(), 2);
     }
 
+    @Test
+    public void test_findUsedVrdpPorts()
+    {
+        VirtualMachine vm1 = vmgenerator.createUniqueInstance();
+        VirtualMachine vm2 =
+            vmgenerator.createInstance(vm1.getVirtualMachineTemplate(), vm1.getEnterprise(),
+                vm1.getHypervisor(), vm1.getUser(), "test");
+
+        // FIXME: Fix virtual image fields until we have the changes in the VirtualImage API
+        Category category = new Category("test-category");
+        vm1.getVirtualMachineTemplate().setCategory(category);
+
+        List<Object> entitiesToPersist = new ArrayList<Object>();
+        vmgenerator.addAuxiliaryEntitiesToPersist(vm1, entitiesToPersist);
+        persistAll(ds(), entitiesToPersist, vm1, vm2);
+
+        Rack rack = vm1.getHypervisor().getMachine().getRack();
+
+        RackDAO dao = createDaoForRollbackTransaction();
+        List<Integer> usedPorts = dao.findUsedVrdpPorts(rack);
+
+        assertEquals(usedPorts.size(), 2);
+    }
+        
     /**
      * Returns any machine that is in the rack in MANAGED.
      * 
@@ -264,29 +288,5 @@ public class RackDAOTest extends DefaultDAOTestBase<RackDAO, Rack>
         List<Machine> machines =
             createDaoForRollbackTransaction().getRandomMachinesToStartFromRack(ucsRack.getId(), 4);
         Assert.assertEquals(machines.size(), 4);
-    }
-
-    @Test
-    public void test_findUsedVrdpPorts()
-    {
-        VirtualMachine vm1 = vmgenerator.createUniqueInstance();
-        VirtualMachine vm2 =
-            vmgenerator.createInstance(vm1.getVirtualMachineTemplate(), vm1.getEnterprise(),
-                vm1.getHypervisor(), vm1.getUser(), "test");
-
-        // FIXME: Fix virtual image fields until we have the changes in the VirtualImage API
-        Category category = new Category("test-category");
-        vm1.getVirtualMachineTemplate().setCategory(category);
-
-        List<Object> entitiesToPersist = new ArrayList<Object>();
-        vmgenerator.addAuxiliaryEntitiesToPersist(vm1, entitiesToPersist);
-        persistAll(ds(), entitiesToPersist, vm1, vm2);
-
-        Rack rack = vm1.getHypervisor().getMachine().getRack();
-
-        RackDAO dao = createDaoForRollbackTransaction();
-        List<Integer> usedPorts = dao.findUsedVrdpPorts(rack);
-
-        assertEquals(usedPorts.size(), 2);
     }
 }

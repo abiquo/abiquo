@@ -95,14 +95,6 @@ public class ObjectFactory
     }
 
     /**
-     * Create an instance of {@link HostDto }
-     */
-    public HostDto createHostDto()
-    {
-        return new HostDto();
-    }
-
-    /**
      * Create an instance of {@link HostsDto }
      */
     public HostsDto createHostsDto()
@@ -119,11 +111,11 @@ public class ObjectFactory
     }
 
     /**
-     * Create an instance of {@link VirtualSystemDto }
+     * Create an instance of {@link HostDto }
      */
-    public VirtualSystemDto createVirtualSystemDto()
+    public HostDto createHostDto()
     {
-        return new VirtualSystemDto();
+        return new HostDto();
     }
 
     /**
@@ -132,6 +124,14 @@ public class ObjectFactory
     public VirtualSystemCollectionDto createVirtualSystemCollectionDto()
     {
         return new VirtualSystemCollectionDto();
+    }
+
+    /**
+     * Create an instance of {@link VirtualSystemDto }
+     */
+    public VirtualSystemDto createVirtualSystemDto()
+    {
+        return new VirtualSystemDto();
     }
 
     /**

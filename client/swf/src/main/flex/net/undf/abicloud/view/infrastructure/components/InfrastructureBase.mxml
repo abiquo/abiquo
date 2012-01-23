@@ -114,7 +114,6 @@
                 //Listening for udpates in racks list
                 AbiCloudModel.getInstance().infrastructureManager.addEventListener(InfrastructureManager.RACKS_UPDATED,
                                                                                    getRacksByDatacenter);
-                                                                                   
                 //To automatically open physical machine form if requested
                 AbiCloudModel.getInstance().infrastructureManager.addEventListener(InfrastructureEvent.RACK_CREATED,
                                                                                    addPhysicalMachine);                                                                                   

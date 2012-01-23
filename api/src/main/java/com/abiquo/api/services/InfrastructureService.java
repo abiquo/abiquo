@@ -21,10 +21,6 @@
 
 package com.abiquo.api.services;
 
-import static com.abiquo.api.resources.RemoteServiceResource.createTransferObject;
-import static com.abiquo.server.core.infrastructure.RemoteService.STATUS_ERROR;
-import static com.abiquo.server.core.infrastructure.RemoteService.STATUS_SUCCESS;
-
 import java.beans.PropertyDescriptor;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -36,7 +32,6 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.persistence.EntityManager;
-import javax.ws.rs.WebApplicationException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,12 +47,10 @@ import com.abiquo.api.services.cloud.VirtualMachineService;
 import com.abiquo.api.services.stub.NodecollectorServiceStub;
 import com.abiquo.api.services.stub.VsmServiceStub;
 import com.abiquo.api.tracer.TracerLogger;
-import com.abiquo.appliancemanager.client.ApplianceManagerResourceStubImpl;
 import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.model.enumerator.MachineState;
 import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.model.transport.error.CommonError;
-import com.abiquo.model.transport.error.ErrorDto;
 import com.abiquo.model.transport.error.ErrorsDto;
 import com.abiquo.model.util.AddressingUtils;
 import com.abiquo.server.core.cloud.Hypervisor;
@@ -461,8 +454,8 @@ public class InfrastructureService extends DefaultApiService
         repo.updateRack(old);
 
         tracer.log(SeverityType.INFO, ComponentType.RACK, EventType.RACK_MODIFY, "rack.updated",
-            old.getName(), rack.getName(), rack.getShortDescription(), (rack.isHaEnabled() ? "yes"
-                : "no"));
+            old.getName(), rack.getName(), rack.getShortDescription(), rack.isHaEnabled() ? "yes"
+                : "no");
 
         return old;
     }
@@ -1002,6 +995,30 @@ public class InfrastructureService extends DefaultApiService
             vsmServiceStub.unsubscribe(vsm, vm);
             vdcRep.deleteVirtualMachine(vm);
         }
+    }
+
+
+    /**
+     * We check how many empty machines are in a rack. Then we power on or off to fit the
+     * configuration. In 2.0 only in {@link UcsRack}.
+     * 
+     * @param Rack we are deploy void
+     * @since 2.0
+     */
+    public void adjustPoweredMachinesInRack(final Rack rack)
+    {
+        // PREMIUM
+    }
+
+    protected void powerOnMachine(final List<Machine> machines)
+    {
+        // PREMIUM
+    }
+
+    protected void shutDownMachine(final List<Machine> machines)
+    {
+        // PREMIUM
+
     }
 
     public Machine powerOn(final int machineId)

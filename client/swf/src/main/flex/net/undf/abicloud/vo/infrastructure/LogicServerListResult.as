@@ -19,46 +19,25 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package com.abiquo.model.enumerator;
-
-/**
- * Existing privileges in the platform
- * 
- * @author dlopez
- */
-public enum Privileges
+package net.undf.abicloud.vo.infrastructure
 {
-    ENTERPRISE_ADMINISTER_ALL,
+    import mx.collections.ArrayCollection;
 
-    PHYS_DC_ENUMERATE,
+    [Bindable]
+    [RemoteClass(alias="com.abiquo.abiserver.pojo.ucs.LogicServerListResult")]
+    public class LogicServerListResult
+    {
+        //The total number of logic server
+        public var totalLogicServer:int;
 
-    USERS_MANAGE_OTHER_ENTERPRISES,
+        //The List of Logic Server
+        public var logicServerList:ArrayCollection;
 
-    USERS_MANAGE_ROLES,
+        public function LogicServerListResult()
+        {
+            totalLogicServer = 0;
+            logicServerList = new ArrayCollection();
+        }
 
-    USERS_MANAGE_ROLES_OTHER_ENTERPRISES,
-
-    USERS_MANAGE_SYSTEM_ROLES,
-
-    USERS_MANAGE_USERS,
-
-    USERS_VIEW,
-
-    USERS_VIEW_PRIVILEGES,
-
-    USERS_PROHIBIT_VDC_RESTRICTION,
-
-    USERS_MANAGE_LDAP_GROUP,
-
-    VDC_ENUMERATE,
-
-    VDC_MANAGE_VAPP,
-
-    PRICING_VIEW,
-
-    AUTHENTICATED,
-
-    PRICING_MANAGE,
-
-    ENTERPRISE_ENUMERATE;
+    }
 }

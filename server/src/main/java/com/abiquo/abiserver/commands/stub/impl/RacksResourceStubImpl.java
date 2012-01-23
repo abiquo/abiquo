@@ -38,6 +38,7 @@ import com.abiquo.abiserver.pojo.result.DataResult;
 import com.abiquo.abiserver.pojo.result.ListRequest;
 import com.abiquo.abiserver.pojo.ucs.Fsm;
 import com.abiquo.abiserver.pojo.ucs.LogicServer;
+import com.abiquo.abiserver.pojo.ucs.LogicServerListResult;
 import com.abiquo.abiserver.pojo.ucs.Organization;
 import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.server.core.infrastructure.RackDto;
@@ -283,7 +284,7 @@ public class RacksResourceStubImpl extends AbstractAPIStub implements RacksResou
      *      com.abiquo.abiserver.pojo.result.ListRequest)
      */
     @Override
-    public DataResult<List<LogicServer>> getLogicServers(final UcsRack ucsRack,
+    public DataResult<LogicServerListResult> getLogicServers(final UcsRack ucsRack,
         final ListRequest listRequest)
     {
         // PREMIUM

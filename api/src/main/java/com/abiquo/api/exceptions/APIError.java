@@ -204,11 +204,10 @@ public enum APIError
         "Machines in this rack cannot be discovered"), NON_UCS_RACK("RACK-6",
         "This rack is not a UCS Rack"), RACK_DUPLICATED_IP("RACK-7",
         "There is already a managed rack with this IP defined"), RACK_CONFIG_ERROR("RACK-8",
-        "There is a problem with the details of the UCS Rack"), RACK_DEFAULT_TEMPLATE_ERROR(
-        "RACK-9",
-        "This UCS Rack has no default Service Profile Template. You must either select one from the list or add a default Service Profile Template"), RACK_CANNOT_REMOVE_VMS(
-        "RACK-10",
+        "There is a problem with the details of the UCS Rack"), RACK_CANNOT_REMOVE_VMS("RACK-9",
         "Can not remove this rack because there are some virtual machines deployed on it"),
+         RACK_DEFAULT_TEMPLATE_ERROR(
+        "RACK-10", "This UCS Rack has no default Service Profile Template. You must either select one from the list or add a default Service Profile Template"),
 
     // MACHINE
     NON_EXISTENT_MACHINE("MACHINE-0", "The requested machine does not exist"), NOT_ASSIGNED_MACHINE_DATACENTER_RACK(
@@ -377,7 +376,9 @@ public enum APIError
         "The requested virtual image is a master image, master images cannot be deleted"), VMTEMPLATE_STATEFUL_TEMPLATE_CANNOT_BE_DELETED(
         "VIMAGE-8", "Cannot delete a stateful image"), VMTEMPLATE_SHARED_TEMPLATE_FROM_OTHER_ENTERPRISE(
         "VIMAGE-9",
-        "Cannot delete the requested shared virtual image, because it belongs to another enterprise"),
+        "Cannot delete the requested shared virtual image, because it belongs to another enterprise"), VMTEMPLATE_TEMPLATE_USED_BY_VIRTUAL_MACHINES_CANNOT_BE_DELETED(
+        "VIMAGE-10",
+        "The Virtual Machine Template is being used by some Virtual Machines and cannot be deleted"),
 
     // NODE COLLECTOR
     NON_EXISTENT_IP("NC-0", "The requested IP does not exist"), MISSING_IP_PARAMETER("NC-1",

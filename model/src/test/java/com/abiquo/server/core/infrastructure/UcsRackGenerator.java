@@ -31,7 +31,7 @@ import com.softwarementors.commons.testng.AssertEx;
 public class UcsRackGenerator extends DefaultEntityGenerator<UcsRack>
 {
 
-    private DatacenterGenerator datacenterGenerator;
+    private final DatacenterGenerator datacenterGenerator;
 
     public UcsRackGenerator(final SeedGenerator seed)
     {
@@ -62,13 +62,14 @@ public class UcsRackGenerator extends DefaultEntityGenerator<UcsRack>
         final String longDescription =
             newString(seed, Rack.LONG_DESCRIPTION_LENGTH_MIN, Rack.LONG_DESCRIPTION_LENGTH_MAX);
 
-        Integer vlan_id_min = 2;
-        Integer vlan_id_max = 4096;
-        Integer nrsq = 80;
+        int vlan_id_min = 2;
+        int vlan_id_max = 4096;
+        int nrsq = 80;
         String vlans_id_avoided =
             newString(this.nextSeed(), Rack.VLANS_ID_AVOIDED_LENGTH_MIN,
                 Rack.VLANS_ID_AVOIDED_LENGTH_MAX);
-        Integer vlan_per_vdc_expected = 8;
+        int vlan_per_vdc_expected = 8;
+        int vlan_per_vdc_reserved = 1024;
 
         UcsRack ucsRack =
             new UcsRack("rack" + new Random().nextInt(),
@@ -76,6 +77,7 @@ public class UcsRackGenerator extends DefaultEntityGenerator<UcsRack>
                 vlan_id_min,
                 vlan_id_max,
                 vlan_per_vdc_expected,
+                vlan_per_vdc_reserved,
                 nrsq,
                 "10.60.1.28",
                 80,

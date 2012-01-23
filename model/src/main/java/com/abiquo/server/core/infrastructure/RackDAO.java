@@ -245,15 +245,26 @@ import com.softwarementors.bzngine.entities.PersistentEntity;
         return q.list();
     }
 
-    private final static String HQL_EMPTY_OFF_MACHINES_IN_RACK =
-        "select h.machine " + "from Hypervisor h " + "where h.machine.rack.id = :rackId "
-            + "and h.machine.state = " + MachineState.HALTED_FOR_SAVE.ordinal();
+    private final String QUERY_USED_VDRP = "SELECT vm.vdrpPort " + //
+        "FROM com.abiquo.server.core.cloud.VirtualMachine vm " + //
+        "WHERE vm.hypervisor.machine.rack = :rack ";
 
-    private final static String HQL_EMPTY_ON_MACHINES_IN_RACK =
-        "select h.machine "
-            + "from Hypervisor h inner join h.machine m where m.rack.id = :rackId and h not in "
-            + "(select vm.hypervisor from VirtualMachine vm) " + "and h.machine.state = "
-            + MachineState.MANAGED.ordinal();
+    @SuppressWarnings("unchecked")
+    public List<Integer> findUsedVrdpPorts(final Rack rack)
+    {
+        Query query = getSession().createQuery(QUERY_USED_VDRP);
+        query.setParameter("rack", rack);
+        return query.list();
+    }
+    
+    private final static String HQL_EMPTY_OFF_MACHINES_IN_RACK = "select h.machine "
+        + "from Hypervisor h " + "where h.machine.rack.id = :rackId " + "and h.machine.state = "
+        + MachineState.HALTED_FOR_SAVE.ordinal();
+
+    private final static String HQL_EMPTY_ON_MACHINES_IN_RACK = "select h.machine "
+        + "from Hypervisor h inner join h.machine m where m.rack.id = :rackId and h not in "
+        + "(select vm.hypervisor from VirtualMachine vm) " + "and h.machine.state = "
+        + MachineState.MANAGED.ordinal();
 
     /**
      * Return all machines in a rack that are empty of VM and powered off.
@@ -324,17 +335,5 @@ import com.softwarementors.bzngine.entities.PersistentEntity;
             return null;
         }
         return machines.subList(0, howMany < machines.size() ? howMany : machines.size() - 1);
-    }
-
-    private final String QUERY_USED_VDRP = "SELECT vm.vdrpPort " + //
-        "FROM com.abiquo.server.core.cloud.VirtualMachine vm " + //
-        "WHERE vm.hypervisor.machine.rack = :rack ";
-
-    @SuppressWarnings("unchecked")
-    public List<Integer> findUsedVrdpPorts(final Rack rack)
-    {
-        Query query = getSession().createQuery(QUERY_USED_VDRP);
-        query.setParameter("rack", rack);
-        return query.list();
     }
 }
