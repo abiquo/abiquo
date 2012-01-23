@@ -64,6 +64,7 @@ import com.abiquo.server.core.appslibrary.Icon;
 import com.abiquo.server.core.appslibrary.VirtualImageConversionDAO;
 import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
 import com.abiquo.server.core.appslibrary.VirtualMachineTemplateDto;
+import com.abiquo.server.core.cloud.VirtualMachineRep;
 import com.abiquo.server.core.enterprise.DatacenterLimits;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.infrastructure.Datacenter;
@@ -93,6 +94,9 @@ public class VirtualMachineTemplateService extends DefaultApiServiceWithApplianc
     private AppsLibraryRep appsLibraryRep;
 
     @Autowired
+    private VirtualMachineRep virtualMachineRep;
+
+    @Autowired
     private CategoryService categoryService;
 
     public VirtualMachineTemplateService()
@@ -105,6 +109,7 @@ public class VirtualMachineTemplateService extends DefaultApiServiceWithApplianc
         this.infrastructureService = new InfrastructureService(em);
         this.enterpriseService = new EnterpriseService(em);
         this.appsLibraryRep = new AppsLibraryRep(em);
+        this.virtualMachineRep = new VirtualMachineRep(em);
         this.categoryService = new CategoryService(em);
     }
 
@@ -411,7 +416,12 @@ public class VirtualMachineTemplateService extends DefaultApiServiceWithApplianc
 
         // all the checks to delete the virtual machine template
 
-        // TODO check if any virtual appliance is using the template
+        // check if any virtual appliance is using the template
+        if (virtualMachineRep.hasVirtualMachineTemplate(virtualMachineTemplateId))
+        {
+            addConflictErrors(APIError.VMTEMPLATE_TEMPLATE_USED_BY_VIRTUAL_MACHINES_CANNOT_BE_DELETED);
+            flushErrors();
+        }
 
         if (appsLibraryRep.isMaster(vmtemplateToDelete))
         {
