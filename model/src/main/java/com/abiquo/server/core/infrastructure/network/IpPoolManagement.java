@@ -202,26 +202,6 @@ public class IpPoolManagement extends RasdManagement
         }
     }
 
-    public final static String CONFIGURATION_GATEWAY_PROPERTY = "configureGateway";
-
-    private final static String CONFIGURATION_GATEWAY_COLUMN = "configureGateway";
-
-    private final static boolean CONFIGURATION_GATEWAY_REQUIRED = true;
-
-    @Column(name = CONFIGURATION_GATEWAY_COLUMN, nullable = false)
-    private boolean configureGateway;
-
-    @Required(value = CONFIGURATION_GATEWAY_REQUIRED)
-    public boolean getConfigureGateway()
-    {
-        return this.configureGateway;
-    }
-
-    public void setConfigureGateway(final boolean configurareGateway)
-    {
-        this.configureGateway = configurareGateway;
-    }
-
     public final static String QUARANTINE_PROPERTY = "quarantine";
 
     private final static String QUARANTINE_COLUMN = "quarantine";
@@ -408,6 +388,13 @@ public class IpPoolManagement extends RasdManagement
     public boolean isAttached()
     {
         return getVirtualMachine() != null;
+    }
+
+    public boolean itHasTheDefaultConfiguration(VirtualMachine vm)
+    {
+        return vm.getNetworkConfiguration() != null
+            && getVlanNetwork().getConfiguration().getId()
+                .equals(vm.getNetworkConfiguration().getId());
     }
 
 }

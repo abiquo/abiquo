@@ -78,6 +78,21 @@ public class AbstractAPIStub
     public static final String LINK_MEDIA_TYPE = "application/link+xml";
 
     protected RestClient client;
+    public static final String START_WITH = "startwith";
+
+    public static final String BY = "by";
+
+    public static final String FILTER = "has";
+
+    public static final String LIMIT = "limit";
+
+    public static final String ASC = "asc";
+
+    public static final Integer DEFAULT_PAGE_LENGTH = 25;
+
+    public static final String DEFAULT_PAGE_LENGTH_STRING = "25";
+
+
 
     protected final String apiUri;
 
@@ -186,13 +201,25 @@ public class AbstractAPIStub
     protected ClientResponse post(final String uri, final Object dto, final String user,
         final String password)
     {
-        return resource(uri, user, password).contentType(MediaType.APPLICATION_XML).post(dto);
+        Resource resource = resource(uri, user, password);
+        if (dto != null)
+        {
+            // Only add the headers if the request has a body
+            resource.contentType(MediaType.APPLICATION_XML);
+        }
+        return resource.post(dto);
     }
 
     protected ClientResponse put(final String uri, final Object dto, final String user,
         final String password)
     {
-        return resource(uri, user, password).contentType(MediaType.APPLICATION_XML).put(dto);
+        Resource resource = resource(uri, user, password);
+        if (dto != null)
+        {
+            // Only add the headers if the request has a body
+            resource.contentType(MediaType.APPLICATION_XML);
+        }
+        return resource.put(dto);
     }
 
     protected ClientResponse put(final String uri, final Object dto, final String user,
@@ -227,8 +254,13 @@ public class AbstractAPIStub
     protected ClientResponse post(final String uri, final Object dto)
     {
         UserHB user = getCurrentUserCredentials();
-        return resource(uri, user.getUser(), user.getPassword()).contentType(
-            MediaType.APPLICATION_XML).post(dto);
+        Resource resource = resource(uri, user.getUser(), user.getPassword());
+        if (dto != null)
+        {
+            // Only add the headers if the request has a body
+            resource.contentType(MediaType.APPLICATION_XML);
+        }
+        return resource.post(dto);
     }
 
     protected ClientResponse post(final String uri, final Object dto, final String mediaType)
@@ -255,15 +287,14 @@ public class AbstractAPIStub
     protected ClientResponse put(final String uri, final Object dto)
     {
         UserHB user = getCurrentUserCredentials();
-        return resource(uri, user.getUser(), user.getPassword()).contentType(
-            MediaType.APPLICATION_XML).put(dto);
+        Resource resource = resource(uri, user.getUser(), user.getPassword());
+        if (dto != null)
+        {
+            // Only add the headers if the request has a body
+            resource.contentType(MediaType.APPLICATION_XML);
+        }
+        return resource.put(dto);
     }
-
-    // protected ClientResponse put(final String uri, final Object dto, String mediaType)
-    // {
-    // UserHB user = getCurrentUser();
-    // return resource(uri, user.getUser(), user.getPassword()).contentType(mediaType).put(dto);
-    // }
 
     protected ClientResponse put(final String uri, final Object dto, final String mediaType)
     {
@@ -1620,6 +1651,21 @@ public class AbstractAPIStub
                 params);
     }
 
+    protected String createVirtualMachineResetUrl(final Integer virtualDatacenterId,
+        final Integer virtualApplianceId, final Integer virtualMachineId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("virtualDatacenter", String.valueOf(virtualDatacenterId));
+        params.put("virtualApplianceId", String.valueOf(virtualApplianceId));
+        params.put("virtualMachineId", String.valueOf(virtualMachineId));
+
+        return URIResolver
+            .resolveURI(
+                apiUri,
+                "cloud/virtualdatacenters/{virtualDatacenter}/virtualappliances/{virtualApplianceId}/virtualmachines/{virtualMachineId}/action/reset",
+                params);
+    }
+
     protected String createVirtualApplianceUrl(final Integer virtualDatacenterId,
         final Integer virtualApplianceId)
     {
@@ -1852,5 +1898,154 @@ public class AbstractAPIStub
         }
 
         return link.getHref().substring(link.getHref().lastIndexOf("/") + 1);
+    }
+        
+    protected String createRackOrganizationsLink(final Integer datacenterId, final Integer rackId,
+        final Map<String, String[]> queryParams)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("datacenter", datacenterId.toString());
+        params.put("rack", rackId.toString());
+        return resolveURI(apiUri, "admin/datacenters/{datacenter}/racks/{rack}/organizations",
+            params, queryParams);
+    }
+
+    protected String createRackLogicServersLink(final Integer datacenterId, final Integer rackId,
+        final Map<String, String[]> queryParams)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("datacenter", datacenterId.toString());
+        params.put("rack", rackId.toString());
+        return resolveURI(apiUri, "admin/datacenters/{datacenter}/racks/{rack}/logicServers",
+            params, queryParams);
+    }
+
+    protected String createRackLogicServerTemplatesLink(final Integer datacenterId,
+        final Integer rackId, final Map<String, String[]> queryParams)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("datacenter", datacenterId.toString());
+        params.put("rack", rackId.toString());
+
+        return resolveURI(apiUri, "admin/datacenters/{datacenter}/racks/{rack}/lsTemplates",
+            params, queryParams);
+    }
+
+    protected String createRackCloneLogicServerLink(final Integer datacenterId,
+        final Integer rackId, final Map<String, String[]> queryParams)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("datacenter", datacenterId.toString());
+        params.put("rack", rackId.toString());
+        return resolveURI(apiUri, "admin/datacenters/{datacenter}/racks/{rack}/logicServers/clone",
+            params, queryParams);
+    }
+
+    protected String createRackAssociateLogicServerLink(final Integer datacenterId,
+        final Integer rackId, final Map<String, String[]> queryParams)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("datacenter", datacenterId.toString());
+        params.put("rack", rackId.toString());
+        return resolveURI(apiUri,
+            "admin/datacenters/{datacenter}/racks/{rack}/logicServers/associate", params,
+            queryParams);
+    }
+
+    protected String createRackDissociateLogicServerLink(final Integer datacenterId,
+        final Integer rackId, final Map<String, String[]> queryParams)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("datacenter", datacenterId.toString());
+        params.put("rack", rackId.toString());
+        return resolveURI(apiUri,
+            "admin/datacenters/{datacenter}/racks/{rack}/logicServers/dissociate", params,
+            queryParams);
+    }
+
+    protected String createRackDeleteLogicServerLink(final Integer datacenterId,
+        final Integer rackId, final Map<String, String[]> queryParams)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("datacenter", datacenterId.toString());
+        params.put("rack", rackId.toString());
+        return resolveURI(apiUri,
+            "admin/datacenters/{datacenter}/racks/{rack}/logicServers/delete", params, queryParams);
+    }
+
+    protected String createMachineBladeLedOnLink(final Integer datacenterId, final Integer rackId,
+        final Integer machineId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("datacenter", datacenterId.toString());
+        params.put("rack", rackId.toString());
+        params.put("machine", machineId.toString());
+        return resolveURI(apiUri,
+            "admin/datacenters/{datacenter}/racks/{rack}/machines/{machine}/action/ledOn", params);
+    }
+
+    protected String createMachineBladeLsLink(final Integer datacenterId, final Integer rackId,
+        final Integer machineId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("datacenter", datacenterId.toString());
+        params.put("rack", rackId.toString());
+        params.put("machine", machineId.toString());
+        return resolveURI(apiUri,
+            "admin/datacenters/{datacenter}/racks/{rack}/machines/{machine}/logicServer", params);
+    }
+
+    protected String createRackAssociateLogicServerTemplateLink(final Integer datacenterId,
+        final Integer rackId, final Map<String, String[]> queryParams)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("datacenter", datacenterId.toString());
+        params.put("rack", rackId.toString());
+        return resolveURI(apiUri,
+            "admin/datacenters/{datacenter}/racks/{rack}/logicServers/assocTemplate", params,
+            queryParams);
+    }
+
+    protected String createRackAssociateLogicServerCloneLink(final Integer datacenterId,
+        final Integer rackId, final Map<String, String[]> queryParams)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("datacenter", datacenterId.toString());
+        params.put("rack", rackId.toString());
+        return resolveURI(apiUri,
+            "admin/datacenters/{datacenter}/racks/{rack}/logicServers/assocClone", params,
+            queryParams);
+    }
+
+    protected String createObjectFsmLink(final Integer datacenterId, final Integer rackId,
+        final Map<String, String[]> queryParams)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("datacenter", datacenterId.toString());
+        params.put("rack", rackId.toString());
+        return resolveURI(apiUri, "admin/datacenters/{datacenter}/racks/{rack}/fsm", params,
+            queryParams);
+    }
+
+    protected String createMachineBladeLedOffLink(final Integer datacenterId, final Integer rackId,
+        final Integer machineId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("datacenter", datacenterId.toString());
+        params.put("rack", rackId.toString());
+        params.put("machine", machineId.toString());
+        return resolveURI(apiUri,
+            "admin/datacenters/{datacenter}/racks/{rack}/machines/{machine}/action/ledOff", params);
+    }
+
+    protected String createMachineBladeLedLink(final Integer datacenterId, final Integer rackId,
+        final Integer machineId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("datacenter", datacenterId.toString());
+        params.put("rack", rackId.toString());
+        params.put("machine", machineId.toString());
+        return resolveURI(apiUri,
+            "admin/datacenters/{datacenter}/racks/{rack}/machines/{machine}/led", params);
     }
 }

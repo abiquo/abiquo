@@ -86,7 +86,10 @@ public class VirtualMachineNetworkConfigurationResource extends AbstractResource
     public static final String CONFIGURATION = "configuration";
 
     /** Param to map the input values related to configuration. */
-    public static final String CONFIGURATION_PARAM = "{" + CONFIGURATION_PATH + "}";
+    public static final String CONFIGURATION_PARAM = "{" + CONFIGURATION + "}";
+    
+    /** Param to set the link to default configuration */
+    public static final String DEFAULT_CONFIGURATION = "network_configuration";
 
     /** Path to access to 'nics' section. */
     public static final String NICS_PATH = "nics";
@@ -158,8 +161,8 @@ public class VirtualMachineNetworkConfigurationResource extends AbstractResource
      *             {@link APIExceptionMapper} exception mapper.
      */
     @GET
-    @Path(CONFIGURATION_PATH + "/" + CONFIGURATION_PARAM)
-    public VMNetworkConfigurationDto getVirtualMachineConfigurations(
+    @Path(CONFIGURATION_PATH + "/" + CONFIGURATION)
+    public VMNetworkConfigurationDto getVirtualMachineConfiguration(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) @NotNull @Min(1) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) @NotNull @Min(1) final Integer vappId,
         @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) @NotNull @Min(1) final Integer vmId,
@@ -185,20 +188,31 @@ public class VirtualMachineNetworkConfigurationResource extends AbstractResource
      *             {@link APIExceptionMapper} exception mapper.
      */
     @PUT
-    @Path(CONFIGURATION_PATH + "/" + CONFIGURATION_PARAM)
-    public AcceptedRequestDto< ? > updateVirtualMachineConfigurations(
+    @Path(CONFIGURATION_PATH)
+    public AcceptedRequestDto< ? > changeVirtualMachineNetworkConfiguration(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) @NotNull @Min(1) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) @NotNull @Min(1) final Integer vappId,
         @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) @NotNull @Min(1) final Integer vmId,
-        @PathParam(CONFIGURATION_PATH) @NotNull @Min(1) final Integer vmConfigId,
-        final VMNetworkConfigurationDto vmConfig, @Context final IRESTBuilder restBuilder)
+        @NotNull final LinksDto configurationRef, @Context final IRESTBuilder restBuilder)
         throws Exception
     {
-        VMNetworkConfiguration configuration =
-            service.updateVirtualMachineConfiguration(vdcId, vappId, vmId, vmConfigId,
-                createPersistentObject(vmConfig));
+        VirtualMachineState originalState =
+            vmLock.lockVirtualMachineBeforeReconfiguring(vdcId, vappId, vmId);
+        
+        Object result = service.changeNetworkConfiguration(vdcId, vappId, vmId, configurationRef, originalState);
 
-        // TODO: apply Albert's configuration update changes
+        // The attach method may return a Tarantino task identifier if the operation requires a
+        // reconfigure. Otherwise it will return null.
+        if (result != null)
+        {
+            AcceptedRequestDto<Object> response = new AcceptedRequestDto<Object>();
+            response.setStatusUrlLink("http://status");
+            response.setEntity(result);
+            return response;
+        }
+
+        // If there is no async task the VM must be unlocked here
+        vmLock.unlockVirtualMachine(vmId, originalState);
         return null;
 
     }

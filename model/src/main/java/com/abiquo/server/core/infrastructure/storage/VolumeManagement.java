@@ -108,7 +108,7 @@ public class VolumeManagement extends RasdManagement
             + "WHERE vm.id = :vmId AND vol.state = :state "
             + "AND (vol.rasd.elementName like :filterLike " + "OR vm.name like :filterLike "
             + "OR vapp.name like :filterLike " + "OR vol.virtualDatacenter.name like :filterLike "
-            + "OR vol.storagePool.tier.name like :filterLike)";
+            + "OR vol.storagePool.tier.name like :filterLike)" + " AND vol.virtualMachineTemplate IS NULL";
 
     public static final String AVAILABLES =
         "SELECT vol FROM VolumeManagement vol LEFT JOIN vol.virtualMachine vm "

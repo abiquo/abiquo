@@ -207,6 +207,8 @@ public enum APIError
         "There is already a managed rack with this IP defined"), RACK_CONFIG_ERROR("RACK-8",
         "There is a problem with the details of the UCS Rack"), RACK_CANNOT_REMOVE_VMS("RACK-9",
         "Can not remove this rack because there are some virtual machines deployed on it"),
+         RACK_DEFAULT_TEMPLATE_ERROR(
+        "RACK-10", "This UCS Rack has no default Service Profile Template. You must either select one from the list or add a default Service Profile Template"),
 
     // MACHINE
     NON_EXISTENT_MACHINE("MACHINE-0", "The requested machine does not exist"), NOT_ASSIGNED_MACHINE_DATACENTER_RACK(
@@ -233,7 +235,13 @@ public enum APIError
         "Invalid network configuration for the virtual datacenter"), NETWORK_WITHOUT_IPS("NET-8",
         "This network does not have IP addresses"), NETWORK_IP_FROM_BIGGER_THAN_IP_TO("NET-9",
         "Parameter IPFrom is greater than IPTo"), NETWORK_IP_FROM_ERROR("NET-10",
-        "Parameter IPFrom is invalid"), NETWORK_IP_TO_ERROR("NET-11", "Parameter IPTo is invalid"),
+        "Parameter IPFrom is invalid"), NETWORK_IP_TO_ERROR("NET-11", "Parameter IPTo is invalid"), NETWORK_INVALID_CONFIGURATION_LINK(
+        "NET-12", "Invalid link to configure the VirtualMachine's network"), NETWORK_LINK_INVALID_VDC(
+        "NET-13", "Invalid Virtual Datacenter identifier in the configuration link"), NETWORK_LINK_INVALID_VAPP(
+        "NET-14", "Invalid Virtual Appliance identifier in the configuration link"), NETWORK_LINK_INVALID_VM(
+        "NET-15", "Invalid Virtual Machine identifier in the configuration link"), NETWORK_LINK_INVALID_CONFIG(
+        "NET-16",
+        "Invalid Configuration identifier in the configuration link. Configuration Id it does not belong to any VLAN configuration used by this Virtual Machine"),
 
     // VIRTUAL MACHINE
     VIRTUAL_MACHINE_WITHOUT_HYPERVISOR("VM-0",
@@ -365,7 +373,9 @@ public enum APIError
         "The requested virtual image is a master image, master images cannot be deleted"), VMTEMPLATE_STATEFUL_TEMPLATE_CANNOT_BE_DELETED(
         "VIMAGE-8", "Cannot delete a stateful image"), VMTEMPLATE_SHARED_TEMPLATE_FROM_OTHER_ENTERPRISE(
         "VIMAGE-9",
-        "Cannot delete the requested shared virtual image, because it belongs to another enterprise"),
+        "Cannot delete the requested shared virtual image, because it belongs to another enterprise"), VMTEMPLATE_TEMPLATE_USED_BY_VIRTUAL_MACHINES_CANNOT_BE_DELETED(
+        "VIMAGE-10",
+        "The Virtual Machine Template is being used by some Virtual Machines and cannot be deleted"),
 
     // NODE COLLECTOR
     NON_EXISTENT_IP("NC-0", "The requested IP does not exist"), MISSING_IP_PARAMETER("NC-1",

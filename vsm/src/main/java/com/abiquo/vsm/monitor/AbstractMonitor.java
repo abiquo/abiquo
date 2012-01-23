@@ -88,8 +88,23 @@ public abstract class AbstractMonitor
      * @param virtualMachineName The name of the virtual machine.
      * @throws MonitorException If an error occurs while getting the state of the virtual machine.
      */
-    public void publishState(String physicalMachineAddress, String virtualMachineName)
+    public void publishState(final String physicalMachineAddress, final String virtualMachineName)
         throws MonitorException
+    {
+        invalidateLastKnownState(physicalMachineAddress, virtualMachineName);
+    }
+
+    /**
+     * Invalidates the last known state for a given virtual machine.
+     * 
+     * @param physicalMachineAddress The monitored physical machine where the virtual machine is
+     *            deployed.
+     * @param virtualMachineName The name of the virtual machine.
+     * @throws MonitorException If an error occurs while invalidating the last known state of the
+     *             virtual machine.
+     */
+    public void invalidateLastKnownState(final String physicalMachineAddress,
+        final String virtualMachineName) throws MonitorException
     {
         // Update the last known state to UNKNOWN in order to force the event notification
         VirtualMachine virtualMachine = dao.findVirtualMachineByName(virtualMachineName);
@@ -118,7 +133,7 @@ public abstract class AbstractMonitor
         synchronized (monitoredMachines)
         {
             int max = getMaxNumberOfHypervisors();
-            return (max == 0) ? true : max > monitoredMachines.size();
+            return max == 0 ? true : max > monitoredMachines.size();
         }
     }
 
@@ -128,7 +143,7 @@ public abstract class AbstractMonitor
      * @param physicalMachineAddress The physical machine address to be monitored.
      * @throws MonitorException If the physical machine can not be added.
      */
-    public void addPhysicalMachine(String physicalMachineAddress) throws MonitorException
+    public void addPhysicalMachine(final String physicalMachineAddress) throws MonitorException
     {
         synchronized (monitoredMachines)
         {
@@ -145,7 +160,7 @@ public abstract class AbstractMonitor
      *            list.
      * @throws MonitorException If the physical machine can not be removed.
      */
-    public void removePhysicalMachine(String physicalMachineAddress) throws MonitorException
+    public void removePhysicalMachine(final String physicalMachineAddress) throws MonitorException
     {
         synchronized (monitoredMachines)
         {
@@ -167,7 +182,7 @@ public abstract class AbstractMonitor
      * @param physicalMachineAddress The physical machine.
      * @return Boolean indicating if the current monitor is monitoring the given physical machine.
      */
-    public boolean monitors(String physicalMachineAddress)
+    public boolean monitors(final String physicalMachineAddress)
     {
         synchronized (monitoredMachines)
         {
@@ -180,7 +195,7 @@ public abstract class AbstractMonitor
      * 
      * @param event The event to propagate.
      */
-    public void notify(VMEvent event)
+    public void notify(final VMEvent event)
     {
         try
         {
@@ -210,7 +225,7 @@ public abstract class AbstractMonitor
      * @return The physical machine.
      * @throws MonitorException If the physical machine is not found.
      */
-    protected PhysicalMachine getPhysicalMachine(String physicalMachineAddress)
+    protected PhysicalMachine getPhysicalMachine(final String physicalMachineAddress)
         throws MonitorException
     {
         PhysicalMachine pm = dao.findPhysicalMachineByAddress(physicalMachineAddress);

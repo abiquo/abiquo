@@ -25,6 +25,8 @@ import com.abiquo.abiserver.pojo.infrastructure.HypervisorRemoteAccessInfo;
 import com.abiquo.abiserver.pojo.infrastructure.PhysicalMachine;
 import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.result.DataResult;
+import com.abiquo.abiserver.pojo.ucs.BladeLocatorLed;
+import com.abiquo.abiserver.pojo.ucs.LogicServer;
 
 public interface MachineResourceStub
 {
@@ -63,4 +65,33 @@ public interface MachineResourceStub
     public BasicResult getVirtualMachinesFromMachine(final Integer datacenterId,
         final Integer rackId, final Integer machineId);
 
+    /**
+     * Light the LED.
+     * 
+     * @param PhysicalMachine machine.
+     */
+    public BasicResult bladeLocatorLED(final PhysicalMachine machine);
+
+    /**
+     * Returns teh {@link LogicServer} in blade.
+     * 
+     * @param ucsRack ucsRack.
+     * @return wrapper which contains the {@link LogicServer} which is the blade. Or in case of
+     *         error the appropiate object.
+     */
+    public DataResult<LogicServer> getBladeLogicServer(final PhysicalMachine machine);
+
+    /**
+     * Light the LED. off.
+     * 
+     * @param PhysicalMachine machine.
+     */
+    public BasicResult bladeLocatorLEDoff(final PhysicalMachine machine);
+
+    /**
+     * Retrieve the LED. off.
+     * 
+     * @param PhysicalMachine machine.
+     */
+    public DataResult<BladeLocatorLed> getBladeLocatorLed(PhysicalMachine machine);
 }

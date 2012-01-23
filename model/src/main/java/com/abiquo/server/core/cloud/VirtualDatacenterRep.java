@@ -390,9 +390,9 @@ public class VirtualDatacenterRep extends DefaultRepBase
     }
 
     public List<IpPoolManagement> findIpsWithConfigurationIdInVirtualMachine(
-        final VirtualMachine vm, final Integer vmConfigId)
+        final VirtualMachine vm)
     {
-        return ipManagementDAO.findIpsByVirtualMachineWithConfigurationId(vm, vmConfigId);
+        return ipManagementDAO.findIpsByVirtualMachineWithConfigurationId(vm);
     }
 
     public Collection<NodeVirtualImage> findNodeVirtualImageByEnterprise(final Enterprise enterprise)
@@ -680,5 +680,7 @@ public class VirtualDatacenterRep extends DefaultRepBase
     {
         vlanDAO.flush();
     }
+
+
 
 }

@@ -21,6 +21,8 @@
 
 package com.abiquo.api.services;
 
+import java.util.List;
+
 import javax.jms.ResourceAllocationException;
 import javax.persistence.EntityManager;
 
@@ -33,6 +35,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.model.enumerator.FitPolicy;
+import com.abiquo.model.enumerator.MachineState;
 import com.abiquo.model.transport.error.CommonError;
 import com.abiquo.scheduler.ResourceUpgradeUse;
 import com.abiquo.scheduler.ResourceUpgradeUseException;
@@ -52,6 +55,8 @@ import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineDAO;
 import com.abiquo.server.core.cloud.VirtualMachineState;
 import com.abiquo.server.core.infrastructure.Machine;
+import com.abiquo.server.core.infrastructure.Rack;
+import com.abiquo.server.core.infrastructure.UcsRack;
 import com.abiquo.server.core.scheduler.VirtualMachineRequirements;
 
 /**
@@ -95,6 +100,9 @@ public class VirtualMachineAllocatorService extends DefaultApiService
 
     @Autowired
     protected ResourceUpgradeUse upgradeUse;
+
+    @Autowired
+    protected InfrastructureService infrastructureService;
 
     public VirtualMachineAllocatorService()
     {
@@ -459,4 +467,117 @@ public class VirtualMachineAllocatorService extends DefaultApiService
         return FitPolicy.PROGRESSIVE; // community fix the fit policy
     }
 
+    /**
+     * We check how many empty machines are in a rack. Then we power on or off to fit the
+     * configuration. In 2.0 only in {@link UcsRack}.
+     * 
+     * @param targetMachine machine we are deploy void
+     * @since 2.0
+     */
+    public void adjustPoweredMachinesInRack(final Rack rack)
+    {
+
+        if (!(rack instanceof UcsRack))
+        {
+            LOG.debug("We can only adjust max machines on in UCS");
+            return;
+        }
+        Integer max = ((UcsRack) rack).getMaxMachinesOn();
+        if (max == null || max == 0)
+        {
+            LOG.debug("Max machines on feature is disabled for rack: {}", rack.getId());
+            return;
+        }
+
+        Integer emptyMachinesOn = this.allocationService.getEmptyOnMachines(rack.getId());
+        if (max > emptyMachinesOn)
+        {
+            LOG.debug("Not enough machines on rack: {} should be {} but there are {}",
+                new Object[] {rack.getId(), max, emptyMachinesOn});
+            Integer howMany = max - emptyMachinesOn;
+            List<Machine> machines =
+                this.allocationService.getRandomMachinesToStartFromRack(rack.getId(), howMany);
+            if (machines != null && !machines.isEmpty())
+            {
+                LOG.debug("Requesting {} machines to boot , retrieved {}", new Object[] {howMany,
+                machines.size()});
+                powerOnMachine(machines);
+                return;
+            }
+            LOG.debug("There are no machines available to start up on rack: {}", rack.getId());
+        }
+        else if (max < emptyMachinesOn)
+        {
+            // If there is more than one machine to power off
+
+            LOG.debug("Too many machines rack: {} should be {} but there are {}", new Object[] {
+            rack.getId(), max, emptyMachinesOn});
+
+            Integer howMany = emptyMachinesOn - max;
+            List<Machine> machines =
+                this.allocationService.getRandomMachinesToShutDownFromRack(rack.getId(), howMany);
+            if (machines != null && !machines.isEmpty())
+            {
+                LOG.debug("Requesting {} machines to shut , retrieved {}", new Object[] {howMany,
+                machines.size()});
+                shutDownMachine(machines);
+                return;
+            }
+            LOG.debug("There are no machines available to shut down on rack: {}", rack.getId());
+        }
+        else
+        {
+            LOG.debug("Enough machines rack: {}", rack.getId());
+        }
+    }
+
+    /**
+     * There are special requirements for this method to be ok. Most of those prerequisites can not
+     * be satisfied by Abiquo. The machine must be associated with a Logic Server in UCS.
+     * 
+     * @see com.abiquo.scheduler.Allocator#powerOnMachine(java.util.List)
+     */
+    protected void powerOnMachine(final List<Machine> machines)
+    {
+        LOG.debug("Starting {} machines", machines.size());
+        for (Machine machine : machines)
+        {
+            try
+            {
+                infrastructureService.powerOn(machine.getId());
+            }
+            catch (Exception e)
+            {
+                LOG.error(
+                    "Could not power on the machine id {} name {} the error: {}: {}",
+                    new Object[] {machine.getId(), machine.getName(), e.getClass().getName(),
+                    e.getMessage()});
+            }
+        }
+    }
+
+    /**
+     * There are special requirements for this method to be ok. Most of those prerequisites can not
+     * be satisfied by Abiquo. The machine must be associated with a Logic Server in UCS.
+     * 
+     * @see com.abiquo.scheduler.Allocator#shutDownMachine(java.util.List)
+     */
+    protected void shutDownMachine(final List<Machine> machines)
+    {
+        LOG.debug("Stopping {} machines", machines.size());
+        for (Machine machine : machines)
+        {
+            try
+            {
+                infrastructureService.powerOff(machine.getId(), MachineState.HALTED_FOR_SAVE);
+            }
+            catch (Exception e)
+            {
+                LOG.error(
+                    "Could not power off the machine id {} name {} the error: {}: {}",
+                    new Object[] {machine.getId(), machine.getName(), e.getClass().getName(),
+                    e.getMessage()});
+            }
+        }
+    }
 }

@@ -52,6 +52,8 @@ public enum Privileges
 
     VDC_ENUMERATE,
 
+    VDC_MANAGE_VAPP,
+
     PRICING_VIEW,
 
     AUTHENTICATED,
