@@ -74,7 +74,9 @@ import com.softwarementors.validation.constraints.Required;
 @Table(name = VirtualMachine.TABLE_NAME)
 @org.hibernate.annotations.Table(appliesTo = VirtualMachine.TABLE_NAME)
 @NamedQueries({@NamedQuery(name = "VIRTUAL_MACHINE.BY_VAPP", query = VirtualMachine.BY_VAPP),
-@NamedQuery(name = "VIRTUAL_MACHINE.BY_DC", query = VirtualMachine.BY_DC)})
+@NamedQuery(name = "VIRTUAL_MACHINE.BY_DC", query = VirtualMachine.BY_DC),
+@NamedQuery(name = "VIRTUAL_MACHINE.BY_VMT", query = VirtualMachine.BY_VMT),
+@NamedQuery(name = "VIRTUAL_MACHINE.HAS_VMT", query = VirtualMachine.HAS_VMT)})
 public class VirtualMachine extends DefaultEntityBase
 {
     public static final String TABLE_NAME = "virtualmachine";
@@ -86,6 +88,12 @@ public class VirtualMachine extends DefaultEntityBase
         + "FROM VirtualMachine vm, Hypervisor hy, Machine pm "
         + " WHERE vm.hypervisor.id = hy.id and hy.machine = pm.id "
         + " AND pm.datacenter.id = :datacenterId";
+
+    public static final String BY_VMT = "SELECT vm " + "FROM VirtualMachine vm "
+        + "WHERE vm.virtualMachineTemplate.id = :virtualMachineTplId";
+
+    public static final String HAS_VMT = "SELECT COUNT(*) " + "FROM VirtualMachine vm "
+        + "WHERE vm.virtualMachineTemplate.id = :virtualMachineTplId";
 
     public static final int MANAGED = 1;
 

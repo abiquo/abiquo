@@ -450,7 +450,7 @@ public class TarantinoJobCreator extends DefaultApiService
                     .getFenceMode(), configuration.getAddress(), configuration.getGateway(),
                     configuration.getNetMask(), configuration.getPrimaryDNS(), configuration
                         .getSecondaryDNS(), configuration.getSufixDNS(), i.getSequence(),
-                    toDchpOptionCom(dhcplist), Boolean.TRUE);
+                    toDchpOptionCom(dhcplist), Boolean.TRUE, i.isUnmanagedIp());
                 
                 defaultConfigurationFound = Boolean.TRUE;
                 
@@ -463,7 +463,7 @@ public class TarantinoJobCreator extends DefaultApiService
             vmDesc.addNetwork(i.getMac(), i.getIp(), virtualMachine.getHypervisor().getMachine()
                 .getVirtualSwitch(), i.getNetworkName(), tag, i.getName(), null, null, null, null,
                 null, null, null, i.getSequence(), toDchpOptionCom(dhcplist),
-                Boolean.FALSE);
+                Boolean.FALSE, i.isUnmanagedIp());
 
         }
     }

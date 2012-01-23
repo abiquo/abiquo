@@ -407,9 +407,7 @@ public class TarantinoService extends DefaultApiService
             HypervisorConnection conn =
                 jobCreator.hypervisorConnectionConfiguration(virtualMachine.getHypervisor());
             DatacenterTaskBuilder builder =
-                new DatacenterTaskBuilder(virtualMachineDesciptionBuilder.build(),
-                    conn,
-                    userService.getCurrentUser().getNick());
+                new DatacenterTaskBuilder(virtualMachineDesciptionBuilder.build(), conn, "SYSTEM");
 
             DatacenterTasks deployTask = null;
 

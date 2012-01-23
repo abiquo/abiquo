@@ -371,7 +371,9 @@ public enum APIError
         "The requested virtual image is a master image, master images cannot be deleted"), VMTEMPLATE_STATEFUL_TEMPLATE_CANNOT_BE_DELETED(
         "VIMAGE-8", "Cannot delete a stateful image"), VMTEMPLATE_SHARED_TEMPLATE_FROM_OTHER_ENTERPRISE(
         "VIMAGE-9",
-        "Cannot delete the requested shared virtual image, because it belongs to another enterprise"),
+        "Cannot delete the requested shared virtual image, because it belongs to another enterprise"), VMTEMPLATE_TEMPLATE_USED_BY_VIRTUAL_MACHINES_CANNOT_BE_DELETED(
+        "VIMAGE-10",
+        "The Virtual Machine Template is being used by some Virtual Machines and cannot be deleted"),
 
     // NODE COLLECTOR
     NON_EXISTENT_IP("NC-0", "The requested IP does not exist"), MISSING_IP_PARAMETER("NC-1",
