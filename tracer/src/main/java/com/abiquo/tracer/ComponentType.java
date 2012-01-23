@@ -86,7 +86,10 @@ public enum ComponentType implements Serializable
     STORAGE_DEVICE(5242888, "Storage device"),
 
     // INSTANCE_CONVERTER
-    INSTANCE_CONVERTER(33554432 | VIRTUAL_APPLIANCE.getValue(), "Instance converter");
+    INSTANCE_CONVERTER(33554432 | VIRTUAL_APPLIANCE.getValue(), "Instance converter"),
+
+    // Abiquo's UCS
+    UCS(67108864, "UCS");
 
     private final int component;
 

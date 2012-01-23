@@ -27,6 +27,7 @@ package net.undf.abicloud.vo.result
      * @author Oliver
      *
      */
+    [Bindable]
     [RemoteClass(alias="com.abiquo.abiserver.pojo.result.ListRequest")]
     public class ListRequest
     {

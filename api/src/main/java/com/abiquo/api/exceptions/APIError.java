@@ -207,6 +207,8 @@ public enum APIError
         "There is already a managed rack with this IP defined"), RACK_CONFIG_ERROR("RACK-8",
         "There is a problem with the details of the UCS Rack"), RACK_CANNOT_REMOVE_VMS("RACK-9",
         "Can not remove this rack because there are some virtual machines deployed on it"),
+         RACK_DEFAULT_TEMPLATE_ERROR(
+        "RACK-10", "This UCS Rack has no default Service Profile Template. You must either select one from the list or add a default Service Profile Template"),
 
     // MACHINE
     NON_EXISTENT_MACHINE("MACHINE-0", "The requested machine does not exist"), NOT_ASSIGNED_MACHINE_DATACENTER_RACK(
