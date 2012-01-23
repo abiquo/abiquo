@@ -1199,7 +1199,7 @@ DROP TRIGGER IF EXISTS `KINTON`.`DELETE_VIRTUALMACHINE_UPDATE_STATS`;
 DROP TRIGGER IF EXISTS `KINTON`.`UPDATE_VIRTUALMACHINE_UPDATE_STATS`;
 DROP TRIGGER IF EXISTS `KINTON`.`CREATE_NODEVIRTUALIMAGE_UPDATE_STATS`;
 DROP TRIGGER IF EXISTS `KINTON`.`DELETE_NODEVIRTUALIMAGE_UPDATE_STATS`;
-
+DROP TRIGGER IF EXISTS `kinton`.`update_rasd_update_stats`;
 
 DELIMITER |
 
@@ -1899,5 +1899,47 @@ CREATE TRIGGER `KINTON`.`DELETE_NODEVIRTUALIMAGE_UPDATE_STATS` AFTER DELETE ON `
 --
 |
 --
-
+CREATE TRIGGER `kinton`.`update_rasd_update_stats` AFTER UPDATE ON `kinton`.`rasd`
+    FOR EACH ROW BEGIN
+        DECLARE idDataCenterObj INTEGER;
+        DECLARE idThisEnterprise INTEGER;
+        DECLARE idThisVirtualDataCenter INTEGER;
+        DECLARE isReserved INTEGER;
+        IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN                                   
+            --
+            IF OLD.limitResource != NEW.limitResource THEN
+                SELECT vdc.idDataCenter, vdc.idVirtualDataCenter, vdc.idEnterprise INTO idDataCenterObj, idThisVirtualDataCenter, idThisEnterprise
+                FROM rasd_management rm, virtualdatacenter vdc
+                WHERE rm.idResource = NEW.instanceID
+                AND vdc.idVirtualDataCenter=rm.idVirtualDataCenter;
+                -- check if this is reserved
+                SELECT count(*) INTO isReserved
+                FROM volume_management vm, rasd_management rm
+                WHERE vm.idManagement  = rm.idManagement
+                AND NEW.instanceID = rm.idResource
+                AND (vm.state = 1 OR vm.state = 2);
+                UPDATE IGNORE cloud_usage_stats SET storageTotal = storageTotal+ NEW.limitResource - OLD.limitResource WHERE idDataCenter = idDataCenterObj;                
+                IF isReserved != 0 THEN
+                -- si hay volAttached se debe actualizar el storageUsed
+                    UPDATE IGNORE cloud_usage_stats SET storageUsed = storageUsed +  NEW.limitResource - OLD.limitResource WHERE idDataCenter = idDataCenterObj;                    
+                    UPDATE IGNORE enterprise_resources_stats 
+                    SET     extStorageUsed = extStorageUsed +  NEW.limitResource - OLD.limitResource 
+                    WHERE idEnterprise = idThisEnterprise;
+                    UPDATE IGNORE dc_enterprise_stats 
+                    SET     extStorageUsed = extStorageUsed +  NEW.limitResource - OLD.limitResource 
+                    WHERE idDataCenter = idDataCenterObj AND idEnterprise = idThisEnterprise;
+                    UPDATE IGNORE vdc_enterprise_stats 
+                    SET     volCreated = volCreated - 1,
+                        extStorageUsed = extStorageUsed +  NEW.limitResource - OLD.limitResource 
+                    WHERE idVirtualDataCenter = idThisVirtualDataCenter;
+                END IF;        
+                IF EXISTS( SELECT * FROM `information_schema`.ROUTINES WHERE ROUTINE_SCHEMA='kinton' AND ROUTINE_TYPE='PROCEDURE' AND ROUTINE_NAME='AccountingStorageRegisterEvents' ) THEN
+                    CALL AccountingStorageRegisterEvents('UPDATE_STORAGE', NEW.instanceID, NEW.elementName, 0, idThisVirtualDataCenter, idThisEnterprise, NEW.limitResource);
+                END IF;
+            END IF;
+        END IF;
+    END;
+--
+|
+--
 DELIMITER ;
