@@ -483,7 +483,7 @@ public class VirtualMachineService extends DefaultApiService
 
             // A datacenter task is a set of jobs and datacenter task. This is, the deploy of a
             // VirtualMachine is the definition of the VirtualMachine and the job, power on
-            return tarantino.reconfigureVirtualMachine(newValues, virtualMachineTarantino,
+            return tarantino.reconfigureVirtualMachine(vm, virtualMachineTarantino,
                 newVirtualMachineTarantino);
         }
         catch (APIException e)
