@@ -265,7 +265,10 @@
 
             private function showAllOVFPackages():void
             {
-                ovfPackagesDP = _ovfPackageList.ovfpackages.toArray();
+                if(_ovfPackageList)
+                {
+	                ovfPackagesDP = _ovfPackageList.ovfpackages.toArray();
+                }
             }
 
             private function showOVFPackagesByCategory(categoryName:String):void

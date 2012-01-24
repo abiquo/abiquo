@@ -351,7 +351,7 @@
 
 
                     //Notifying Javascript to send information to server
-                    var applianceManagerAddress:String = StringUtil.substitute("{0}{1}:{2}/am/erepos/{3}/ovfs",
+                    var applianceManagerAddress:String = StringUtil.substitute("{0}{1}:{2}/am/erepos/{3}/templates",
                                                                                applianceManager.protocol,
                                                                                applianceManager.domainName,
                                                                                applianceManager.port,

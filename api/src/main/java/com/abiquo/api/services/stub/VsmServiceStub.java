@@ -267,4 +267,32 @@ public class VsmServiceStub extends DefaultApiService
             returnClientToPool(client);
         }
     }
+
+    /**
+     * Invalidate the last known state of the given virtual machine.
+     * 
+     * @param service The VSM uri.
+     * @param virtualMachine The virtual machine to query.
+     */
+    public void invalidateLastKnownVirtualMachineState(final RemoteService service,
+        final VirtualMachine virtualMachine)
+    {
+        VSMClient client = getClientFromPool(service);
+
+        try
+        {
+            client.invalidateLastKnownState(buildHypervisorURI(virtualMachine.getHypervisor()),
+                virtualMachine.getName());
+        }
+        catch (VSMClientException e)
+        {
+            LOGGER.error(APIError.INVALIDATE_STATE_PROBLEM.getMessage(), e);
+            addUnexpectedErrors(APIError.INVALIDATE_STATE_PROBLEM);
+            flushErrors();
+        }
+        finally
+        {
+            returnClientToPool(client);
+        }
+    }
 }

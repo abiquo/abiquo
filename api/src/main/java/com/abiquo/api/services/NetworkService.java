@@ -273,7 +273,7 @@ public class NetworkService extends DefaultApiService
         VirtualAppliance vapp = getVirtualAppliance(vdc, vappId);
         VirtualMachine oldvm = getVirtualMachine(vapp, vmId);
 
-        VirtualMachine newvm = vmService.createBackUpObject(oldvm);
+        VirtualMachine newvm = vmService.duplicateVirtualMachineObject(oldvm);
         List<IpPoolManagement> ips = vmService.getNICsFromDto(vdc, nicRefs);
 
         newvm.getIps().addAll(ips);
@@ -307,7 +307,7 @@ public class NetworkService extends DefaultApiService
         VirtualAppliance vapp = getVirtualAppliance(vdc, vappId);
         VirtualMachine oldvm = getVirtualMachine(vapp, vmId);
 
-        VirtualMachine newvm = vmService.createBackUpObject(oldvm);
+        VirtualMachine newvm = vmService.duplicateVirtualMachineObject(oldvm);
         NetworkConfiguration netconf = vmService.getNetworkConfigurationFromDto(vapp, newvm, configurationRef);
 
         newvm.setNetworkConfiguration(netconf);
@@ -337,7 +337,7 @@ public class NetworkService extends DefaultApiService
         VirtualAppliance vapp = getVirtualAppliance(vdc, vappId);
         VirtualMachine oldvm = getVirtualMachine(vapp, vmId);
 
-        VirtualMachine newvm = vmService.createBackUpObject(oldvm);
+        VirtualMachine newvm = vmService.duplicateVirtualMachineObject(oldvm);
         List<IpPoolManagement> ips = vmService.getNICsFromDto(vdc, nicRefs);
 
         newvm.setIps(ips);
@@ -513,7 +513,7 @@ public class NetworkService extends DefaultApiService
             flushErrors();
         }
 
-        VirtualMachine newVm = vmService.createBackUpObject(vm);
+        VirtualMachine newVm = vmService.duplicateVirtualMachineObject(vm);
         Iterator<IpPoolManagement> ipIterator = newVm.getIps().iterator();
         while (ipIterator.hasNext())
         {

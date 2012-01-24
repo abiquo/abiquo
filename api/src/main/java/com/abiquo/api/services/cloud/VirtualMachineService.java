@@ -334,6 +334,12 @@ public class VirtualMachineService extends DefaultApiService
 
         VirtualMachine newvm = buildVirtualMachineFromDto(vdc, virtualAppliance, dto);
         newvm.setTemporal(virtualMachine.getId()); // we set the id to temporal since we are trying
+        
+        // we need to get the configuration value ALWAYS after to set the ips of the new virtual machine
+        // since it depends to it to check if the configuration of the network is valid
+        // And also we need to set AFTER to set the 'temporal' value from this DTO.
+        newvm.setNetworkConfiguration(getNetworkConfigurationFromDto(virtualAppliance, newvm, dto));
+        
         // to update the virtualMachine.
 
         // allocated resources not present in the requested reconfiguration
@@ -386,7 +392,7 @@ public class VirtualMachineService extends DefaultApiService
      */
     @Transactional(propagation = Propagation.REQUIRED)
     public String reconfigureVirtualMachine(final VirtualDatacenter vdc,
-        final VirtualAppliance vapp, final VirtualMachine vm, final VirtualMachine newValues,
+        final VirtualAppliance vapp, VirtualMachine vm, final VirtualMachine newValues,
         final VirtualMachineState originalState)
     {
         if (checkReconfigureTemplate(vm.getVirtualMachineTemplate(),
@@ -1747,6 +1753,7 @@ public class VirtualMachineService extends DefaultApiService
         // we need to get the configuration value ALWAYS after to set the ips of the new virtual
         // machine
         // since it depends to it to check if the configuration of the network is valid
+        // XXX: This line was present in master but not in api-deploy during merge
         vm.setNetworkConfiguration(getNetworkConfigurationFromDto(vapp, vm, dto));
 
         vm.setPassword(dto.getPassword());
@@ -2311,9 +2318,11 @@ public class VirtualMachineService extends DefaultApiService
      * @param vm original {@link VirtualMachine} obj.
      * @return the backup object.
      */
-    public VirtualMachine createBackUpObject(final VirtualMachine vm)
+    public VirtualMachine duplicateVirtualMachineObject(final VirtualMachine vm)
     {
         VirtualMachine backUpVm = createBackUpMachine(vm);
+        // set the 'real' name
+        backUpVm.setName(vm.getName());
         createBackUpResources(vm, backUpVm);
         return backUpVm;
     }

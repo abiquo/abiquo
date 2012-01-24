@@ -31,6 +31,7 @@ import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.result.DataResult;
 import com.abiquo.abiserver.pojo.user.Enterprise;
 import com.abiquo.abiserver.pojo.virtualappliance.Node;
+import com.abiquo.abiserver.pojo.virtualappliance.TaskStatus;
 import com.abiquo.abiserver.pojo.virtualappliance.VirtualAppliance;
 import com.abiquo.util.ErrorManager;
 
@@ -79,4 +80,6 @@ public interface VirtualApplianceResourceStub
 
     DataResult<VirtualAppliance> applyChangesVirtualAppliance(VirtualAppliance virtualAppliance,
         UserSession userSession, final boolean force);
+
+    public DataResult<List<TaskStatus>> updateTask(final TaskStatus task);
 }

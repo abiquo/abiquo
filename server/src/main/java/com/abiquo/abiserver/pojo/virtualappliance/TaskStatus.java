@@ -24,45 +24,56 @@
  */
 package com.abiquo.abiserver.pojo.virtualappliance;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import com.abiquo.server.core.task.Task;
+
 /**
  * @author jaume
- *
+ * @author <a href="mailto:serafin.sedano@abiquo.com">Serafin Sedano</a>
  */
 public class TaskStatus
 {
-    private String uuid;
-    
-    private String statusName;
-      
-    private String message;
+    private List<Task> tasks;
 
-    public void setMessage(String message)
+    private List<String> uris;
+
+    public List<Task> getTasks()
     {
-        this.message = message;
+        if (tasks == null)
+        {
+            tasks = new ArrayList<Task>();
+        }
+        return tasks;
     }
 
-    public String getMessage()
+    public void setTasks(final List<Task> tasks)
     {
-        return message;
+        this.tasks = tasks;
     }
 
-    public void setStatusName(String statusName)
+    public void addTask(final Task task)
     {
-        this.statusName = statusName;
+        this.getTasks().add(task);
     }
 
-    public String getStatusName()
+    public List<String> getUris()
     {
-        return statusName;
+        if (uris == null)
+        {
+            uris = new ArrayList<String>();
+        }
+        return uris;
     }
 
-    public void setUuid(String uuid)
+    public void setUris(final List<String> uris)
     {
-        this.uuid = uuid;
+        this.uris = uris;
     }
 
-    public String getUuid()
+    public void addUri(final String uri)
     {
-        return uuid;
+        this.getUris().add(uri);
     }
 }

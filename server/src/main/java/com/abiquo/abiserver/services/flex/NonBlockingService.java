@@ -22,6 +22,7 @@
 package com.abiquo.abiserver.services.flex;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import com.abiquo.abiserver.business.BusinessDelegateProxy;
 import com.abiquo.abiserver.commands.InfrastructureCommand;
@@ -40,6 +41,7 @@ import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.result.DataResult;
 import com.abiquo.abiserver.pojo.user.Enterprise;
 import com.abiquo.abiserver.pojo.virtualappliance.Node;
+import com.abiquo.abiserver.pojo.virtualappliance.TaskStatus;
 import com.abiquo.abiserver.pojo.virtualappliance.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualMachineState;
 
@@ -350,4 +352,16 @@ public class NonBlockingService
             virtualAppliance.getVirtualDataCenter().getId(), virtualAppliance.getId(),
             Boolean.FALSE);
     }
+
+    /**
+     * @param session
+     * @param virtualAppliance
+     * @return BasicResult
+     */
+    public DataResult<List<TaskStatus>> updateTask(final UserSession session, final TaskStatus task)
+    {
+
+        return proxyVirtualApplianceResourceStub(session).updateTask(task);
+    }
+
 }

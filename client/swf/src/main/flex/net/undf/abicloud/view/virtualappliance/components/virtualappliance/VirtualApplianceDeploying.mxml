@@ -34,6 +34,9 @@
 
     <mx:Script>
         <![CDATA[
+        	import net.undf.abicloud.vo.virtualappliance.Timestamp;
+        	import net.undf.abicloud.vo.virtualappliance.Task;
+        	import net.undf.abicloud.vo.virtualappliance.Job;
         	import mx.collections.ArrayCollection;
         	import mx.controls.dataGridClasses.DataGridColumn;
         	import net.undf.abicloud.model.AbiCloudModel;
@@ -148,9 +151,81 @@
                 return object.name;
             }
             
+            
             private function returnStatus(object:NodeVirtualImage, column:DataGridColumn):String
             {
-                return resourceManager.getString('VirtualAppliance','LABEL_STATUS_' + object.taskStatus.statusName);
+                if(!this._virtualAppliance)
+                {
+                    return '';	
+                }
+                /***
+                * We return for each node the state and the description of the action perfomed
+                * Check order:
+                *   - if any task is retrieved -> Processing
+                *   - if a task is retrieved:
+                *       - if the Virtual Appliance have a timestamp:
+                *           -  if the Virtual Appliance timestamp > Task timestamp -> Processing
+                *           -  if the Virtual Appliance timestamp < Task timestamp -> *Check Flow* 
+                *       - if the Virtual Appliance doesn't have timestamp -> *Check Flow*
+                * 
+                * *Check Flow*
+                *   - if task FINISHED_SUCCESSFULLY o FINISHED_UNSUCCESSFULLY o ABORTED -> task.state 
+                *   - if a job as a different state that DONE and FAILED -> job.type + job.description
+                *  
+                * **/
+                
+                if(object.taskStatus.tasks.length == 0)
+                {
+                    return "Processing (no task)";	
+                }
+                else
+                {
+                	var timestamp:Timestamp = AbiCloudModel.getInstance().virtualApplianceManager.isTimestampUsed('virtualAppliance',this._virtualAppliance.id);
+                	var task:Task = object.taskStatus.tasks.getItemAt(0) as Task;
+                	if(timestamp)
+                	{
+                	   if(timestamp.timestamp > task.timestamp)
+                	   {
+                	   	   return "Processing (old timestamp)";
+                	   }	
+                	}
+                	
+                	if(task.state == Task.FINISHED_SUCCESSFULLY || task.state == Task.FINISHED_UNSUCCESSFULLY || task.state == Task.ABORTED)
+                	{
+                		return task.state;
+                	}
+                	else
+                	{
+                		var job:Job = returnNodeState(task.jobs);
+	                    if(job)
+	                    {
+	                        return job.type + "(" + job.description + ")";
+	                    }
+	                    return "Finishing";
+                	}
+                	
+                }
+                
+                return "Algo no va bien";
+                
+                //return resourceManager.getString('VirtualAppliance','LABEL_STATUS_' + object.taskStatus.statusName);
+                
+                
+                //return Job(Task(object.taskStatus.tasks.getItemAt(0)).jobs.getItemAt(0)).type;
+            }
+            
+            private function returnNodeState(jobs:ArrayCollection):Job
+            {
+                var job:Job;
+                for(var i:int = 0 ; i < jobs.length ; i++)
+                {
+                    job = jobs.getItemAt(i) as Job;
+                    if(job.state != Job.DONE && job.state != Job.FAILED)
+                    {
+                    	return job;
+                    }	
+                }
+                return null;
             }
         ]]>
     </mx:Script>

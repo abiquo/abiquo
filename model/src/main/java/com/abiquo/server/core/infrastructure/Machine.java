@@ -603,7 +603,6 @@ public class Machine extends DefaultEntityBase
         {
             this.setBelongsToManagedRack(Boolean.TRUE);
         }
-
     }
 
     public boolean rackIsInDatacenter(final Rack rack)

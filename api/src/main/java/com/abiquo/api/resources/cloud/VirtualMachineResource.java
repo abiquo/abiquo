@@ -195,7 +195,7 @@ public class VirtualMachineResource extends AbstractResource
         }
         catch (Exception ex)
         {
-            // Make sure virtual machine is unlocked if deploy fails
+            // Make sure virtual machine is unlocked if reconfigure fails
             vmLock.unlockVirtualMachine(vmId, originalState);
             throw ex;
         }
@@ -272,7 +272,7 @@ public class VirtualMachineResource extends AbstractResource
         }
         catch (Exception ex)
         {
-            // Make sure virtual machine is unlocked if deploy fails
+            // Make sure virtual machine is unlocked if power state change fails
             vmLock.unlockVirtualMachine(vmId, originalState);
             throw ex;
         }
@@ -529,7 +529,7 @@ public class VirtualMachineResource extends AbstractResource
         }
         catch (Exception ex)
         {
-            // Make sure virtual machine is unlocked if deploy fails
+            // Make sure virtual machine is unlocked if undeploy fails
             vmLock.unlockVirtualMachine(vmId, originalState);
             throw ex;
         }
@@ -571,7 +571,7 @@ public class VirtualMachineResource extends AbstractResource
         }
         catch (Exception ex)
         {
-            // Make sure virtual machine is unlocked if deploy fails
+            // Make sure virtual machine is unlocked if snapshot fails
             vmLock.unlockVirtualMachine(vmId, originalState);
             throw ex;
         }
@@ -629,9 +629,18 @@ public class VirtualMachineResource extends AbstractResource
 
         if (!v.getVirtualMachine().isCaptured())
         {
-            dto.addLink(restBuilder.buildVirtualMachineTemplateLink(virtualImage.getEnterprise()
-                .getId(), virtualImage.getRepository().getDatacenter().getId(), virtualImage
-                .getId()));
+            if (v.getVirtualMachine().isStateful())
+            {
+                dto.addLink(restBuilder.buildVirtualMachineTemplateLink(virtualImage
+                    .getEnterprise().getId(), v.getVirtualAppliance().getVirtualDatacenter()
+                    .getDatacenter().getId(), virtualImage.getId()));
+            }
+            else
+            {
+                dto.addLink(restBuilder.buildVirtualMachineTemplateLink(virtualImage
+                    .getEnterprise().getId(), virtualImage.getRepository().getDatacenter().getId(),
+                    virtualImage.getId()));
+            }
         }
         else
         {
@@ -652,11 +661,10 @@ public class VirtualMachineResource extends AbstractResource
         }
 
         dto.addLinks(restBuilder.buildVirtualMachineCloudAdminLinks(vdcId, vappId, v
-            .getVirtualMachine(), rack == null ? null : rack.getDatacenter().getId(),
-            rack == null ? null : rack.getId(), machine == null ? null : machine.getId(),
-            enterprise == null ? null : enterprise.getId(), user == null ? null : user.getId(), v
-                .getVirtualMachine().isChefEnabled(), volumeIds, diskIds, ips, vdc
-                .getHypervisorType()));
+            .getVirtualMachine(), rack == null ? null : rack.getDatacenter().getId(), rack == null
+            ? null : rack.getId(), machine == null ? null : machine.getId(), enterprise == null
+            ? null : enterprise.getId(), user == null ? null : user.getId(), v.getVirtualMachine()
+            .isChefEnabled(), volumeIds, diskIds, ips, vdc.getHypervisorType()));
 
         TaskResourceUtils.addTasksLink(dto, dto.getEditLink());
 
@@ -898,7 +906,7 @@ public class VirtualMachineResource extends AbstractResource
         }
         catch (Exception ex)
         {
-            // Make sure virtual machine is unlocked if deploy fails
+            // Make sure virtual machine is unlocked if reset fails
             vmLock.unlockVirtualMachine(vmId, originalState);
             throw ex;
         }

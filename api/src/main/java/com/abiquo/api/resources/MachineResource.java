@@ -87,6 +87,8 @@ public class MachineResource extends AbstractResource
 
     public static final String MACHINE_ACTION_LS = "logicserver";
     
+    public static final String SHOW_CREDENTIALS_QUERY_PARAM = "credentials";
+
     public static final String MACHINE_ACTION_GET_VIRTUALMACHINES = "action/virtualmachines";
 
     public static final String MACHINE_ACTION_LED_OFF = "action/ledoff";
@@ -194,8 +196,8 @@ public class MachineResource extends AbstractResource
             Hypervisor h = m.getHypervisor();
 
             MachineState state =
-                infraService.checkMachineState(datacenterId, h.getIp(), h.getType(), h.getUser(), h
-                    .getPassword(), h.getPort());
+                infraService.checkMachineState(datacenterId, h.getIp(), h.getType(), h.getUser(),
+                    h.getPassword(), h.getPort());
 
             if (sync)
             {
@@ -260,6 +262,7 @@ public class MachineResource extends AbstractResource
         dto.setIpmiPort(machine.getIpmiPort());
         dto.setIpmiUser(machine.getIpmiUser());
         dto.setIpmiPassword(machine.getIpmiPassword());
+        dto.setInitiatorIQN(machine.getInitiatorIQN());
 
         if (machine.getHypervisor() != null)
         {

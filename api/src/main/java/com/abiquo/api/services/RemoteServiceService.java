@@ -68,7 +68,6 @@ public class RemoteServiceService extends DefaultApiService
     @Autowired
     private InfrastructureRep infrastructureRepo;
 
-
     public RemoteServiceService()
     {
 
@@ -287,6 +286,13 @@ public class RemoteServiceService extends DefaultApiService
     {
         RemoteService old = getRemoteService(id);
 
+        // check new uri
+        if (org.apache.commons.lang.StringUtils.isBlank(dto.getUri()))
+        {
+            addValidationErrors(APIError.REMOTE_SERVICE_MALFORMED_URL);
+            flushErrors();
+        }
+
         if (old.getUri().equals(dto.getUri()))
         {
             // no other checks to determine if its of the same type etc
@@ -309,7 +315,7 @@ public class RemoteServiceService extends DefaultApiService
             addConflictErrors(APIError.REMOTE_SERVICE_CANNOT_BE_CHECKED);
             flushErrors();
         }
-        
+
         old.setUri(dto.getUri());
         old.setType(dto.getType());
         old.setStatus(STATUS_SUCCESS);

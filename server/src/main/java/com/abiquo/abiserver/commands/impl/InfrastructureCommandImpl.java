@@ -723,6 +723,18 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
                 return dataResult;
             }
 
+            if (pm.getAssignedTo() instanceof UcsRack)
+            {
+                dataResult.setSuccess(false);
+                dataResult.setMessage("The Machine is managed and its name cannot change");
+                // Log the event
+                traceLog(SeverityType.CRITICAL, ComponentType.MACHINE, EventType.MACHINE_MODIFY,
+                    userSession, physicalMachineCreation.getPhysicalMachine().getDataCenter(),
+                    null, "The Machine is managed and its name cannot change", null,
+                    (Rack) physicalMachineCreation.getPhysicalMachine().getAssignedTo(),
+                    physicalMachineHb.toPojo(), null, null);
+                return dataResult;
+            }
             final String ipService = pm.getHypervisor().getIpService();
 
             // Updating the other attributes

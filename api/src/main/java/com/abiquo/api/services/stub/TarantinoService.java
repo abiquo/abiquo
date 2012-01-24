@@ -299,8 +299,8 @@ public class TarantinoService extends DefaultApiService
         }
         catch (RuntimeException e)
         {
-            logger.error("Error enqueuing the deploy task dto to the virtual factory with error: "
-                + e.getMessage());
+            logger.error("Error enqueuing the deploy task dto to the virtual factory with error ",
+                e);
 
             tracer.log(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE, EventType.VM_DEPLOY,
                 APIError.GENERIC_OPERATION_ERROR.getMessage());
@@ -613,6 +613,15 @@ public class TarantinoService extends DefaultApiService
         Datacenter datacenter = virtualMachine.getHypervisor().getMachine().getDatacenter();
         // ignoreVSMEventsIfNecessary(datacenter, virtualMachine);
 
+        // Some hypervisors may keep the virtual machine in ON state during the reset operation.
+        // This means that the VSM will not notify any state change event. To prevent this, we
+        // invalidate the last known state for the virtual machine in the VSM to force it to notify
+        // the next state change event.
+        if (machineStateTransition == VirtualMachineStateTransition.RESET)
+        {
+            invalidateLastKnownState(virtualMachine);
+        }
+
         try
         {
             HypervisorConnection conn =
@@ -791,9 +800,10 @@ public class TarantinoService extends DefaultApiService
             EventType.VM_INSTANCE);
     }
 
-    public String changeVirtualMachineStateWhileStatefulInstance(VirtualAppliance virtualAppliance,
-        VirtualMachine virtualMachine, Map<String, String> data,
-        VirtualMachineStateTransition transition, String creationUser, boolean unsubscribe)
+    public String changeVirtualMachineStateWhileStatefulInstance(
+        final VirtualAppliance virtualAppliance, final VirtualMachine virtualMachine,
+        final Map<String, String> data, final VirtualMachineStateTransition transition,
+        final String creationUser, final boolean unsubscribe)
     {
         return null;
     }
@@ -853,5 +863,24 @@ public class TarantinoService extends DefaultApiService
             }
                 return null;
         }
+    }
+
+    /**
+     * Invalidates the last known state of the given virtual machine in the VSM.
+     * <p>
+     * This method will force the VSM to notify the state of the virtual machine the next time an
+     * event is produced in a virtual machine.
+     * 
+     * @param virtualMachine The virtual machine.
+     */
+    protected void invalidateLastKnownState(final VirtualMachine virtualMachine)
+    {
+        Datacenter datacenter = virtualMachine.getHypervisor().getMachine().getDatacenter();
+        RemoteService service = remoteServiceService.getVSMRemoteService(datacenter);
+
+        logger.debug("Invalidating last known state for virtual machine {} in VSM",
+            virtualMachine.getName());
+        vsm.invalidateLastKnownVirtualMachineState(service, virtualMachine);
+        logger.debug("State for virtual machine {} invalidated in VSM", virtualMachine.getName());
     }
 }

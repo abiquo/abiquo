@@ -25,6 +25,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.annotation.PostConstruct;
+
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.Authentication;
@@ -34,16 +36,27 @@ import org.springframework.security.intercept.web.DefaultFilterInvocationDefinit
 import org.springframework.security.intercept.web.FilterSecurityInterceptor;
 import org.springframework.security.vote.AccessDecisionVoter;
 import org.springframework.security.vote.AffirmativeBased;
+import org.springframework.security.vote.RoleVoter;
 import org.springframework.stereotype.Service;
 
 import com.abiquo.model.rest.RESTLink;
 
+/**
+ * This class eliminates from the dto the links that the user who made the request have no
+ * permission to see.
+ * 
+ * @author sergi.castro@abiquo.com
+ * @author serafin.sedano@abiquo.com
+ * @author ignasi.barrera@abiquo.com
+ */
 @Service
 public class URLAuthenticator
 {
 
     @Autowired
     private AffirmativeBased accessManager;
+
+    private RoleVoter roleVoter;
 
     @Autowired
     private FilterSecurityInterceptor filterSecurityInterceptor;
@@ -52,6 +65,19 @@ public class URLAuthenticator
     {
         GET, POST, PUT, DELETE, OPTIONS
     };
+
+    @PostConstruct
+    private void setRoleVoter()
+    {
+        for (Object o : accessManager.getDecisionVoters())
+        {
+            if (o instanceof RoleVoter)
+            {
+                roleVoter = (RoleVoter) o;
+                break;
+            }
+        }
+    }
 
     /**
      * Return only links allowed for logged user
@@ -79,41 +105,43 @@ public class URLAuthenticator
     }
 
     /**
-     * Check if a url is allowed for logged user
+     * Check if a url is allowed for logged user. If there is no roleVoter then always show the
+     * links.
      * 
      * @param url to check
      * @return true if is allowed, else false
      */
     public boolean checkPermissions(final StringBuffer url, final String baseUri)
     {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        DefaultFilterInvocationDefinitionSource fids =
-            (DefaultFilterInvocationDefinitionSource) filterSecurityInterceptor
-                .getObjectDefinitionSource();
-        Iterator iter = accessManager.getDecisionVoters().iterator();
-        String path = parse(url, baseUri);
-        if (StringUtils.isBlank(path))
+        if (roleVoter == null) // No role based security
         {
             return Boolean.TRUE;
         }
-        for (methods m : methods.values())
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+        DefaultFilterInvocationDefinitionSource fids =
+            (DefaultFilterInvocationDefinitionSource) filterSecurityInterceptor
+                .getObjectDefinitionSource();
+
+        String path = parse(url, baseUri);
+        if (StringUtils.isBlank(path)) // The uri is not Abiquo
+        {
+            return Boolean.TRUE;
+        }
+        OUTER_LOOP: for (methods m : methods.values())
         {
             ConfigAttributeDefinition config = fids.lookupAttributes(path, m.name());
             if (config != null)
             {
-                INNER_LOOP: while (iter.hasNext())
+                int result = roleVoter.vote(auth, new Object(), config);
+                switch (result)
                 {
-                    AccessDecisionVoter voter = (AccessDecisionVoter) iter.next();
-                    int result = voter.vote(auth, new Object(), config);
-                    switch (result)
-                    {
-                        case AccessDecisionVoter.ACCESS_GRANTED:
-                            return Boolean.TRUE;
+                    case AccessDecisionVoter.ACCESS_GRANTED:
+                        return Boolean.TRUE;
 
-                        case AccessDecisionVoter.ACCESS_DENIED:
-                        default:
-                            continue INNER_LOOP;
-                    }
+                    case AccessDecisionVoter.ACCESS_DENIED:
+                    default:
+                        continue OUTER_LOOP;
                 }
             }
         }
@@ -123,13 +151,5 @@ public class URLAuthenticator
     private static String parse(final StringBuffer url, final String baseUri)
     {
         return StringUtils.substringAfterLast(url.toString(), baseUri);
-
-        // StringBuffer api = new StringBuffer("api");
-        // int i = url.lastIndexOf(api.toString());
-        // if (i > -1)
-        // {
-        // return new StringBuffer(url.substring(i + api.length()));
-        // }
-        // return url;
     }
 }
