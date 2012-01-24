@@ -26,6 +26,7 @@ import java.util.Map;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.WordUtils;
 
 import com.abiquo.commons.amqp.impl.tarantino.domain.DiskSnapshot;
 import com.abiquo.commons.amqp.impl.tarantino.domain.HypervisorConnection;
@@ -117,7 +118,29 @@ public class DatacenterTaskBuilder
         this.asyncTask.setOwnerId(ownerId);
         this.asyncTask.setType(taskType);
 
+        for (Job job : this.asyncTask.getJobs())
+        {
+            String jobName = format(job.getType().name(), false);
+            String taskName = format(this.asyncTask.getType().name(), true);
+            String ownerName = format(this.asyncTask.getType().getOwnerType().name(), false);
+
+            job.setDescription(String.format("%s task's %s on %s with id %s", taskName, jobName,
+                ownerName, ownerId));
+        }
+
         return this.asyncTask;
+    }
+
+    private String format(final String name, boolean capitalize)
+    {
+        String formatted = name.toLowerCase();
+
+        if (capitalize)
+        {
+            formatted = WordUtils.capitalize(formatted);
+        }
+
+        return formatted.replace("_", " ");
     }
 
     /**
