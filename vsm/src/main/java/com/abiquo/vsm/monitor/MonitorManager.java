@@ -94,8 +94,8 @@ public class MonitorManager
      * @return The physical machine details.
      * @throws MonitorException If the monitor cannot be created.
      */
-    public PhysicalMachine monitor(String physicalMachineAddress, Type type, String username,
-        String password) throws MonitorException
+    public PhysicalMachine monitor(final String physicalMachineAddress, final Type type,
+        final String username, final String password) throws MonitorException
     {
         PhysicalMachine pm = null;
 
@@ -151,8 +151,8 @@ public class MonitorManager
      * @param password The password used to connect to the physical machine.
      * @throws MonitorException If the monitor cannot be created.
      */
-    public void createAndStartMonitor(String physicalMachineAddress, Type type, String username,
-        String password) throws MonitorException
+    public void createAndStartMonitor(final String physicalMachineAddress, final Type type,
+        final String username, final String password) throws MonitorException
     {
         LOGGER.info("Start monitoring {} of type {}", physicalMachineAddress, type.name());
 
@@ -181,7 +181,8 @@ public class MonitorManager
      * @param type The hypervisor type of the physical machine.
      * @throws MonitorException If the shutdown operation cannot be performed.
      */
-    public void shutdown(String physicalMachineAddress, Type type) throws MonitorException
+    public void shutdown(final String physicalMachineAddress, final Type type)
+        throws MonitorException
     {
         AbstractMonitor monitor = findRunningMonitor(physicalMachineAddress, type);
 
@@ -228,8 +229,8 @@ public class MonitorManager
      * @return The subscription details.
      * @throws MonitorException If the subscription cannot be performed.
      */
-    public VirtualMachine subscribe(String physicalMachineAddress, Type type,
-        String virtualMachineName) throws MonitorException
+    public VirtualMachine subscribe(final String physicalMachineAddress, final Type type,
+        final String virtualMachineName) throws MonitorException
     {
         LOGGER.info("Subscribing to {} on {}", virtualMachineName, physicalMachineAddress);
 
@@ -260,8 +261,8 @@ public class MonitorManager
      * @param virtualMachineName The virtual machine to unsubscribe from.
      * @throws MonitorException If the unsubscription cannot be performed.
      */
-    public void unsubscribe(String physicalMachineAddress, Type type, String virtualMachineName)
-        throws MonitorException
+    public void unsubscribe(final String physicalMachineAddress, final Type type,
+        final String virtualMachineName) throws MonitorException
     {
         LOGGER.info("Unsubscribing from {} on {}", virtualMachineName, physicalMachineAddress);
 
@@ -285,8 +286,8 @@ public class MonitorManager
      * @param virtualMachineName The virtual machine to get the state from.
      * @throws MonitorException If the state cannot be retrieved.
      */
-    public void getState(String physicalMachineAddress, Type type, String virtualMachineName)
-        throws MonitorException
+    public void getState(final String physicalMachineAddress, final Type type,
+        final String virtualMachineName) throws MonitorException
     {
         AbstractMonitor monitor = findRunningMonitor(physicalMachineAddress, type);
 
@@ -305,13 +306,41 @@ public class MonitorManager
     }
 
     /**
+     * invalidate the last known state of the given virtual machine.
+     * 
+     * @param physicalMachineAddress The address of the physical machine where the virtual machine
+     *            is deployed.
+     * @param type The hypervisor type of the physical machine.
+     * @param virtualMachineName The virtual machine to invalidate the last known state from.
+     * @throws MonitorException If the slast known tate cannot be invalidated.
+     */
+    public void invalidateLastKnownState(final String physicalMachineAddress, final Type type,
+        final String virtualMachineName) throws MonitorException
+    {
+        AbstractMonitor monitor = findRunningMonitor(physicalMachineAddress, type);
+
+        if (monitor != null)
+        {
+            LOGGER.info("Invalidating last known state of virtual machine {} on {}",
+                virtualMachineName, physicalMachineAddress);
+
+            monitor.invalidateLastKnownState(physicalMachineAddress, virtualMachineName);
+        }
+        else
+        {
+            throw new MonitorException(String.format("Machine %s doesn't have a running monitor",
+                physicalMachineAddress));
+        }
+    }
+
+    /**
      * Find a running monitor with free slots for the given hypervisor type. Return
      * <code>null</code> if no monitors are available.
      * 
      * @param type The type of the hypervisor to monitor.
      * @return A monitor with available slots, or <code>null</code> if none is available.
      */
-    protected AbstractMonitor findAvailableMonitor(Type type)
+    protected AbstractMonitor findAvailableMonitor(final Type type)
     {
         List< ? extends AbstractMonitor> candidates = runningMonitors.get(type);
 
@@ -337,7 +366,8 @@ public class MonitorManager
      * @param type The type of the hypervisor to monitor.
      * @return The monitor that monitors the given physical machine.
      */
-    protected AbstractMonitor findRunningMonitor(String physicalMachineAddress, Type type)
+    protected AbstractMonitor findRunningMonitor(final String physicalMachineAddress,
+        final Type type)
     {
         List< ? extends AbstractMonitor> candidates = runningMonitors.get(type);
 
@@ -362,7 +392,7 @@ public class MonitorManager
      * @return The monitor.
      * @throws MonitorException If the monitor cannot be created.
      */
-    protected AbstractMonitor createMonitor(Type type) throws MonitorException
+    protected AbstractMonitor createMonitor(final Type type) throws MonitorException
     {
         try
         {
@@ -388,7 +418,7 @@ public class MonitorManager
      * 
      * @param monitorClass The monitor class to add.
      */
-    protected void registerMonitor(Class< ? extends AbstractMonitor> monitorClass)
+    protected void registerMonitor(final Class< ? extends AbstractMonitor> monitorClass)
     {
         Monitor config = monitorClass.getAnnotation(Monitor.class);
 
@@ -409,7 +439,7 @@ public class MonitorManager
      * @param monitor The monitor to add.
      * @param type The type of the hypervisor that the monitor monitors.
      */
-    private void addRunningMonitor(AbstractMonitor monitor, Type type)
+    private void addRunningMonitor(final AbstractMonitor monitor, final Type type)
     {
         List<AbstractMonitor> currentMonitors = runningMonitors.get(type);
         if (currentMonitors == null)
@@ -427,7 +457,7 @@ public class MonitorManager
      * @param monitor The monitor to remove.
      * @param type The type of the hypervisor that the monitor monitors.
      */
-    private void removeRunningMonitor(AbstractMonitor monitor, Type type)
+    private void removeRunningMonitor(final AbstractMonitor monitor, final Type type)
     {
         List<AbstractMonitor> currentMonitors = runningMonitors.get(type);
 
@@ -446,7 +476,7 @@ public class MonitorManager
      * @return The physical machine.
      * @throws MonitorException If the physical machine is not found.
      */
-    private PhysicalMachine getPhysicalMachine(String physicalMachineAddress)
+    private PhysicalMachine getPhysicalMachine(final String physicalMachineAddress)
         throws MonitorException
     {
         PhysicalMachine pm = dao.findPhysicalMachineByAddress(physicalMachineAddress);

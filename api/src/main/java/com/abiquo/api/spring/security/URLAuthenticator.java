@@ -21,34 +21,61 @@
 
 package com.abiquo.api.spring.security;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.servlet.http.HttpServletRequest;
+import javax.annotation.PostConstruct;
 
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.AccessDecisionManager;
-import org.springframework.security.AccessDeniedException;
 import org.springframework.security.Authentication;
 import org.springframework.security.ConfigAttributeDefinition;
 import org.springframework.security.context.SecurityContextHolder;
-import org.springframework.security.intercept.web.FilterInvocation;
+import org.springframework.security.intercept.web.DefaultFilterInvocationDefinitionSource;
 import org.springframework.security.intercept.web.FilterSecurityInterceptor;
+import org.springframework.security.vote.AccessDecisionVoter;
+import org.springframework.security.vote.AffirmativeBased;
+import org.springframework.security.vote.RoleVoter;
 import org.springframework.stereotype.Service;
 
 import com.abiquo.model.rest.RESTLink;
 
+/**
+ * This class eliminates from the dto the links that the user who made the request have no
+ * permission to see.
+ * 
+ * @author sergi.castro@abiquo.com
+ * @author serafin.sedano@abiquo.com
+ * @author ignasi.barrera@abiquo.com
+ */
 @Service
 public class URLAuthenticator
 {
     @Autowired
-    private AccessDecisionManager accessManager;
+    private AffirmativeBased accessManager;
+
+    private RoleVoter roleVoter;
 
     @Autowired
     private FilterSecurityInterceptor filterSecurityInterceptor;
+
+    private enum methods
+    {
+        GET, POST, PUT, DELETE, OPTIONS
+    };
+
+    @PostConstruct
+    private void setRoleVoter()
+    {
+        for (Object o : accessManager.getDecisionVoters())
+        {
+            if (o instanceof RoleVoter)
+            {
+                roleVoter = (RoleVoter) o;
+                break;
+            }
+        }
+    }
 
     /**
      * Return only links allowed for logged user
@@ -56,17 +83,16 @@ public class URLAuthenticator
      * @param links to check
      * @return links allowed for logged user
      */
-    public List<RESTLink> checkAuthLinks(final List<RESTLink> links)
+    public List<RESTLink> checkAuthLinks(final List<RESTLink> links, final String baseUri)
     {
         List<RESTLink> authslinks = null;
-
         if (links != null)
         {
             authslinks = new ArrayList<RESTLink>();
 
             for (RESTLink link : links)
             {
-                if (checkPermissions(link.getHref()))
+                if (checkPermissions(new StringBuffer(link.getHref()), baseUri))
                 {
                     authslinks.add(link);
                 }
@@ -77,78 +103,52 @@ public class URLAuthenticator
     }
 
     /**
-     * Check if a url is allowed for logged user
+     * Check if a url is allowed for logged user. If there is no roleVoter then always show the
+     * links.
      * 
      * @param url to check
      * @return true if is allowed, else false
      */
-    public boolean checkPermissions(final String url)
+    public boolean checkPermissions(final StringBuffer url, final String baseUri)
     {
+
+        if (roleVoter == null) // No role based security
+        {
+            return Boolean.TRUE;
+        }
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
-        String[] methods = {"GET", "POST", "PUT", "DELETE", "OPTIONS"};
+        DefaultFilterInvocationDefinitionSource fids =
+            (DefaultFilterInvocationDefinitionSource) filterSecurityInterceptor
+                .getObjectDefinitionSource();
 
-        boolean allowAccess = false;
-
-        for (String method : methods)
+        String path = parse(url, baseUri);
+        if (StringUtils.isBlank(path)) // The uri is not Abiquo
         {
-
-            FilterInvocation securedObject = mockFilterInvocation(url, method);
-            ConfigAttributeDefinition config =
-                filterSecurityInterceptor.getObjectDefinitionSource().getAttributes(securedObject);
-
+            return Boolean.TRUE;
+        }
+        OUTER_LOOP: for (methods m : methods.values())
+        {
+            ConfigAttributeDefinition config = fids.lookupAttributes(path, m.name());
             if (config != null)
             {
-                try
+                int result = roleVoter.vote(auth, new Object(), config);
+                switch (result)
                 {
-                    accessManager.decide(auth, securedObject, config);
-                    allowAccess = true;
-                    break;
-                }
-                catch (AccessDeniedException accessDeniedException)
-                {
-                    continue;
+                    case AccessDecisionVoter.ACCESS_GRANTED:
+                        return Boolean.TRUE;
+
+                    case AccessDecisionVoter.ACCESS_DENIED:
+                    default:
+                        continue OUTER_LOOP;
                 }
             }
-            else
-            {
-                // to pass it test
-                allowAccess = true;
-                break;
-            }
         }
-
-        return allowAccess;
+        return Boolean.FALSE;
     }
 
-    /**
-     * Creates a mock object of FilterInvocation class
-     * 
-     * @param url
-     * @param method
-     * @return mock object of FilterInvocation class
-     */
-    private static FilterInvocation mockFilterInvocation(final String url, final String method)
+    private static String parse(final StringBuffer url, final String baseUri)
     {
-        FilterInvocation mockFilterInvocation = mock(FilterInvocation.class);
-        HttpServletRequest mockRequest = mock(HttpServletRequest.class);
-
-        when(mockRequest.getMethod()).thenReturn(method);
-        when(mockFilterInvocation.getRequestUrl()).thenReturn(parse(url));
-        when(mockFilterInvocation.getHttpRequest()).thenReturn(mockRequest);
-
-        return mockFilterInvocation;
+        return StringUtils.substringAfterLast(url.toString(), baseUri);
     }
-
-    private static String parse(final String url)
-    {
-        String api = "api";
-        int i = url.lastIndexOf(api);
-        if (i > -1)
-        {
-            return url.substring(i + api.length());
-        }
-        return url;
-    }
-
 }
