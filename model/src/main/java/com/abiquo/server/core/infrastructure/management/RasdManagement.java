@@ -253,6 +253,11 @@ public class RasdManagement extends DefaultEntityBase
 
     // **************************** Rasd delegating methods ***************************
 
+    public String getInstanceId()
+    {
+        return getRasd().getId();
+    }
+
     public String getDescription()
     {
         return getRasd().getDescription();

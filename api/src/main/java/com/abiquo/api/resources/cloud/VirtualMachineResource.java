@@ -629,9 +629,18 @@ public class VirtualMachineResource extends AbstractResource
 
         if (!v.getVirtualMachine().isCaptured())
         {
-            dto.addLink(restBuilder.buildVirtualMachineTemplateLink(virtualImage.getEnterprise()
-                .getId(), virtualImage.getRepository().getDatacenter().getId(), virtualImage
-                .getId()));
+            if (v.getVirtualMachine().isStateful())
+            {
+                dto.addLink(restBuilder.buildVirtualMachineTemplateLink(virtualImage
+                    .getEnterprise().getId(), v.getVirtualAppliance().getVirtualDatacenter()
+                    .getDatacenter().getId(), virtualImage.getId()));
+            }
+            else
+            {
+                dto.addLink(restBuilder.buildVirtualMachineTemplateLink(virtualImage
+                    .getEnterprise().getId(), virtualImage.getRepository().getDatacenter().getId(),
+                    virtualImage.getId()));
+            }
         }
         else
         {

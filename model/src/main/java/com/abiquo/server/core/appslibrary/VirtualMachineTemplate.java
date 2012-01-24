@@ -111,7 +111,7 @@ public class VirtualMachineTemplate extends DefaultEntityBase
     {
         this.id = id;
     }
-    
+
     public final static String DISKFORMAT_TYPE_PROPERTY = "diskFormatType";
 
     private final static boolean DISKFORMAT_TYPE_REQUIRED = true;
@@ -604,7 +604,7 @@ public class VirtualMachineTemplate extends DefaultEntityBase
 
     public boolean isManaged()
     {
-        return getRepository() != null;
+        return getRepository() != null || isStateful();
     }
 
     public boolean isMaster()

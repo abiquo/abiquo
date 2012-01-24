@@ -585,7 +585,7 @@ public class VirtualMachine extends DefaultEntityBase
     {
         this.password = password;
     }
-    
+
     public final static String CONFIGURATION_PROPERTY = "networkConfiguration";
 
     private final static boolean CONFIGURATION_REQUIRED = false;
@@ -665,7 +665,6 @@ public class VirtualMachine extends DefaultEntityBase
     {
         this.volumes = volumes;
     }
-    
 
     /** List of ips */
     @OneToMany(targetEntity = IpPoolManagement.class)
@@ -754,7 +753,7 @@ public class VirtualMachine extends DefaultEntityBase
     // when vm isCaptured then isn't imported
     public boolean isCaptured()
     {
-        return getVirtualMachineTemplate().getRepository() == null;
+        return getVirtualMachineTemplate().getRepository() == null && !isStateful();
     }
 
     public VirtualMachine(final String name, final Enterprise enterprise, final User user,

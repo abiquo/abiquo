@@ -223,6 +223,8 @@ public enum APIError
         "MACHINE-8", "Invalid IPMI configuration."), MACHINE_INVALID_IP_RANGE("MACHINE-9",
         "Invalid ip range"), MACHINE_IQN_MISSING("MACHINE-10",
         "The IQN of the target Physical Machine is not set"),
+ MANAGED_MACHINE_CANNOT_CHANGE_NAME(
+        "MACHINE-11", "The Machine is in a managed Rack and the name can not be changed."),
 
     HYPERVISOR_EXIST_IP("HYPERVISOR-1",
         "Invalid hypervisor IP. A hypervisor with that IP already exists"), HYPERVISOR_EXIST_SERVICE_IP(
