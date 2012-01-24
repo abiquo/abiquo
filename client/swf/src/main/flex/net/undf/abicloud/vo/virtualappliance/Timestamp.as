@@ -18,28 +18,27 @@
  * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
  * Boston, MA 02111-1307, USA.
  */
- 
+
 package net.undf.abicloud.vo.virtualappliance
 {
-	import mx.collections.ArrayCollection;
-	
-	/**
-     * This class represents the status of a specifi task
-     */
 
-    [RemoteClass(alias="com.abiquo.abiserver.pojo.virtualappliance.TaskStatus")]
-	[Bindable]
-	public class TaskStatus
-	{
-		 
-        public var tasks:ArrayCollection
-        public var uris:ArrayCollection;
+    [Bindable]
+    public class Timestamp
+    {
+        public var id:int;
 
-		public function TaskStatus()
-		{
-			tasks = new ArrayCollection();
-            uris = new ArrayCollection();
-		}
+        public var timestamp:Number;
 
-	}
+        public function Timestamp()
+        {
+            id = 0;
+            timestamp = 0;
+        }
+        
+        public function setTimestamp():void
+        {
+        	timestamp = Math.round(new Date().getTime()/1000);
+        }
+
+    }
 }

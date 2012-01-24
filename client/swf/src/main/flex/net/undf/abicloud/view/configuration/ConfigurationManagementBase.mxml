@@ -62,9 +62,9 @@
                 toggledContainer.addContent(this._registrationForm, ResourceManager.getInstance().getString("Configuration",
                                                                                                             "LABEL_REGISTRATION"));
 
-                this._heartbeatManagement = new HeartbeatManagement();
+                /* this._heartbeatManagement = new HeartbeatManagement();
                 toggledContainer.addContent(this._heartbeatManagement, ResourceManager.getInstance().getString("Configuration",
-                                                                                                               "LABEL_HEARTBEATING"));
+                                                                                                               "LABEL_HEARTBEATING")); */
             }
 
             /**

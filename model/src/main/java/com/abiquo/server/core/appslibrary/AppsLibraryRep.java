@@ -75,8 +75,16 @@ public class AppsLibraryRep extends DefaultRepBase
         categoryDAO.flush();
     }
 
+    /**
+     * If if being used by any {@link VirtualMachineTemplate} its changed to the DEFAULT category;
+     * */
     public void deleteCategory(final Category category)
     {
+        for (VirtualMachineTemplate templ : virtualMachineTemplateDAO.findBy(category))
+        {
+            templ.setCategory(categoryDAO.findDefault());
+        }
+
         categoryDAO.remove(category);
     }
 

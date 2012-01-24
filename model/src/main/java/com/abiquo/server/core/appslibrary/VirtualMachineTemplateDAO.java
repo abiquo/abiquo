@@ -110,6 +110,16 @@ import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
         List<VirtualMachineTemplate> result = getResultList(criteria);
         return distinct(result);
     }
+    
+    public List<VirtualMachineTemplate> findBy(final Category category)
+    {
+        Criteria criteria=createCriteria(sameCategory(category));
+        criteria.addOrder(Order.asc(VirtualMachineTemplate.NAME_PROPERTY));
+
+        List<VirtualMachineTemplate> result = getResultList(criteria);
+        return result;
+    }
+    
 
     private List<VirtualMachineTemplate> distinct(final List<VirtualMachineTemplate> ins)
     {

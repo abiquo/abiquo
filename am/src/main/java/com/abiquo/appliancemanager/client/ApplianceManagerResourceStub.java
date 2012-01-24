@@ -85,10 +85,13 @@ public class ApplianceManagerResourceStub
         Map<String, String> params;
         params = new HashMap<String, String>();
         params.put(REPOSITORY_PATH, idEnterprise);
-        params.put(TEMPLATE_PATH, ovfid);
+        // XXX calling from server encode the ''ovfid''
+        // params.put(TEMPLATE_PATH, ovfid);
 
         String url =
-            URIResolver.resolveURI(serviceUri, "erepos/{erepo}/templates/{template}", params);
+        // XXX calling from server encode the ''ovfid''
+        // URIResolver.resolveURI(serviceUri, "erepos/{erepo}/templates/{template}", params);
+            URIResolver.resolveURI(serviceUri, "erepos/{erepo}/templates", params) + '/' + ovfid;
 
         Resource resource = client.resource(url);
 
