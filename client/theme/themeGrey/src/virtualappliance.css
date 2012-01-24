@@ -263,10 +263,6 @@
 	background-color: "#ff0000";
 }
 
-.VirtualApplianceMiniatureAlertIcon { /**custom property**/
-	source: Embed("assets/application/icons/loading_small.swf");
-}
-
 .VirtualApplianceDrawToolSeparator { /**custom property**/
 	source: Embed("/assets/application/icons/separator.png");
 }

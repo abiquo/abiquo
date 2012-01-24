@@ -429,7 +429,8 @@ public enum APIError
         "VSM-2", "An error occurred when subscribing the virtual machine"), UNSUBSCRIPTION_PROBLEM(
         "VSM-3", "An error occurred when unsubscribing the virtual machine"), REFRESH_STATE_PROBLEM(
         "VSM-4", "An error occurred when refreshing the virtual machine state"), VSMCLIENTFROMPOOL_PROBLEM(
-        "VSM-5", "A VSMClient instance cannot be returned from connection pool."),
+        "VSM-5", "A VSMClient instance cannot be returned from connection pool."), INVALIDATE_STATE_PROBLEM(
+        "VSM-6", "An error occurred when invalidating the last known state of the virtual machine"),
 
     // LICENSE
     LICENSE_UNEXISTING("LICENSE-0", "The requested license does not exist"), LICENSE_INVALID(

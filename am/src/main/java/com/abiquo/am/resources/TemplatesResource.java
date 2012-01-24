@@ -194,6 +194,8 @@ public class TemplatesResource
          */
 
         diskInfo.setDiskFileSize(diskFile.length());
+        diskInfo.setEnterpriseRepositoryId(Integer.valueOf(erId));
+        
         templateService.upload(diskInfo, diskFile, errorMsg);
 
         return Response.created(URI.create(diskInfo.getUrl())).build();
@@ -237,7 +239,7 @@ public class TemplatesResource
     @Deprecated
     private String temporalJsonNameHack(final String jsonin)
     {
-        return jsonin.replaceAll("ovfPackageInstanceDto", "template").replaceAll("ovfUrl", "ovfId");
+        return jsonin.replaceAll("ovfPackageInstanceDto", "template").replaceAll("ovfUrl", "url");
     }
 
     /**

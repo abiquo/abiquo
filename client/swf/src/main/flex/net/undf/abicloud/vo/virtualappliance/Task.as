@@ -18,28 +18,40 @@
  * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
  * Boston, MA 02111-1307, USA.
  */
- 
+
 package net.undf.abicloud.vo.virtualappliance
 {
 	import mx.collections.ArrayCollection;
 	
-	/**
-     * This class represents the status of a specifi task
-     */
 
-    [RemoteClass(alias="com.abiquo.abiserver.pojo.virtualappliance.TaskStatus")]
-	[Bindable]
-	public class TaskStatus
-	{
-		 
-        public var tasks:ArrayCollection
-        public var uris:ArrayCollection;
+    [RemoteClass(alias="com.abiquo.server.core.task.Task")]
+    [Bindable]
+    public class Task
+    {
+        public static const FINISHED_SUCCESSFULLY:String = "FINISHED_SUCCESSFULLY";
+        public static const FINISHED_UNSUCCESSFULLY:String = "FINISHED_UNSUCCESSFULLY";
+        public static const PENDING:String = "PENDING";
+        public static const STARTED:String = "STARTED";
+        public static const ABORTED:String = "ABORTED";
+        
+        public var ownerId:String;
+	    public var taskId:String;
+	    public var userId:String;
+	    public var type:String;
+	    public var timestamp:Number;
+	    public var state:String;
+	    public var jobs:ArrayCollection;
 
-		public function TaskStatus()
-		{
-			tasks = new ArrayCollection();
-            uris = new ArrayCollection();
-		}
+        public function Task()
+        {
+            ownerId = "";
+	        taskId = "";
+	        userId = "";
+	        type = "";
+	        timestamp = 0;
+	        state = "";
+	        jobs =  new ArrayCollection();
+        }
 
-	}
+    }
 }

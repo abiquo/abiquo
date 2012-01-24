@@ -480,8 +480,8 @@ public class StorageService extends DefaultApiService
         if (tracer != null)
         {
             tracer.log(SeverityType.INFO, ComponentType.VIRTUAL_MACHINE,
-                EventType.HARD_DISK_ASSIGN, "hardDisk.assigned", createdDisk.getId(),
-                createdDisk.getSizeInMb(), vm.getName());
+                EventType.HARD_DISK_ASSIGN, "hardDisk.assigned", createdDisk.getId(), createdDisk
+                    .getSizeInMb(), vm.getName());
         }
 
         return createdDisk;
@@ -549,8 +549,8 @@ public class StorageService extends DefaultApiService
         // creating volumes in other enterprises VDC
         Enterprise enterprise = vdc.getEnterprise();
 
-        LOGGER.debug("Checking limits for enterprise {} to a locate a volume of {}MB",
-            enterprise.getName(), sizeInMB);
+        LOGGER.debug("Checking limits for enterprise {} to a locate a volume of {}MB", enterprise
+            .getName(), sizeInMB);
 
         DatacenterLimits dcLimits =
             datacenterRepo.findDatacenterLimits(enterprise, vdc.getDatacenter());

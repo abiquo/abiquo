@@ -64,7 +64,7 @@ public class VsmServiceStub extends DefaultApiService
      * 
      * @return VSMClient instance
      */
-    protected VSMClient getClientFromPool(RemoteService service)
+    protected VSMClient getClientFromPool(final RemoteService service)
     {
         VSMClient client = null;
 
@@ -87,7 +87,7 @@ public class VsmServiceStub extends DefaultApiService
      * 
      * @param client instance to return to the pool
      */
-    protected void returnClientToPool(VSMClient client)
+    protected void returnClientToPool(final VSMClient client)
     {
         try
         {
@@ -168,7 +168,8 @@ public class VsmServiceStub extends DefaultApiService
      * @param username The username used to connect to the hypervisor.
      * @param password The password used to connect to the hypervisor.
      */
-    public void subscribe(final RemoteService service, final VirtualMachine virtualMachine, final boolean logError)
+    public void subscribe(final RemoteService service, final VirtualMachine virtualMachine,
+        final boolean logError)
     {
         VSMClient client = getClientFromPool(service);
 
@@ -193,7 +194,7 @@ public class VsmServiceStub extends DefaultApiService
             returnClientToPool(client);
         }
     }
-    
+
     /**
      * Monitors the physical machine
      * 
@@ -259,6 +260,34 @@ public class VsmServiceStub extends DefaultApiService
         {
             LOGGER.error(APIError.REFRESH_STATE_PROBLEM.getMessage(), e);
             addUnexpectedErrors(APIError.REFRESH_STATE_PROBLEM);
+            flushErrors();
+        }
+        finally
+        {
+            returnClientToPool(client);
+        }
+    }
+
+    /**
+     * Invalidate the last known state of the given virtual machine.
+     * 
+     * @param service The VSM uri.
+     * @param virtualMachine The virtual machine to query.
+     */
+    public void invalidateLastKnownVirtualMachineState(final RemoteService service,
+        final VirtualMachine virtualMachine)
+    {
+        VSMClient client = getClientFromPool(service);
+
+        try
+        {
+            client.invalidateLastKnownState(buildHypervisorURI(virtualMachine.getHypervisor()),
+                virtualMachine.getName());
+        }
+        catch (VSMClientException e)
+        {
+            LOGGER.error(APIError.INVALIDATE_STATE_PROBLEM.getMessage(), e);
+            addUnexpectedErrors(APIError.INVALIDATE_STATE_PROBLEM);
             flushErrors();
         }
         finally
