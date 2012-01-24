@@ -140,8 +140,8 @@ public class PhysicalMachineResource extends AbstractResource
      * @return The monitored physical machine.
      */
     @POST
-    public PhysicalMachineDto monitor(PhysicalMachineDto physicalMachine,
-        @HeaderParam(AUTH_HEADER) String auth)
+    public PhysicalMachineDto monitor(final PhysicalMachineDto physicalMachine,
+        @HeaderParam(AUTH_HEADER) final String auth)
     {
         checkSystem();
 
@@ -186,7 +186,7 @@ public class PhysicalMachineResource extends AbstractResource
     }
 
     /**
-     * Get the current state of the given physical machine.
+     * Get the current state of the given virtual machine.
      * 
      * @param physicalMachineId The id of the physical machine
      * @param virtualMachineName The name of the virtual machine.
@@ -209,5 +209,32 @@ public class PhysicalMachineResource extends AbstractResource
         }
 
         vsmService.getState(pm.getAddress(), pm.getType(), virtualMachineName);
+    }
+
+    /**
+     * invalidate the last known state of the given physical machine.
+     * 
+     * @param physicalMachineId The id of the physical machine
+     * @param virtualMachineName The name of the virtual machine.
+     */
+    @DELETE
+    @Path(VIRTUALMACHINE_PATH)
+    public void invalidateLastKnownState(
+        @PathParam(PHYSICALMACHINE_PARAM) String physicalMachineId,
+        @PathParam(VIRTUALMACHINE_PARAM) String virtualMachineName)
+    {
+        checkSystem();
+
+        physicalMachineId = decodeParameter(physicalMachineId);
+        virtualMachineName = decodeParameter(virtualMachineName);
+
+        PhysicalMachine pm = dao.getPhysicalMachine(Integer.valueOf(physicalMachineId));
+        if (pm == null)
+        {
+            throw new VSMException(Status.NOT_FOUND, "There is no monitored machine with id "
+                + physicalMachineId);
+        }
+
+        vsmService.invalidateLastKnownState(pm.getAddress(), pm.getType(), virtualMachineName);
     }
 }

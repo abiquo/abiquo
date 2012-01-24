@@ -169,7 +169,12 @@ public abstract class SingleResourceTransportDto implements Serializable
 
     public Integer getIdFromLink(final String rel)
     {
-        String href = this.searchLink(rel).getHref();
+        RESTLink restLink = this.searchLink(rel);
+        if (restLink == null)
+        {
+            return null;
+        }
+        String href = restLink.getHref();
         // Maybe URIs don't have a trailing slash
         String id =
             href.substring(href.lastIndexOf("/") + 1,

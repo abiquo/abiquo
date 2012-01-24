@@ -462,8 +462,7 @@ public class VirtualMachineResourceIT extends AbstractJpaGeneratorIT
         assertNotNull(vmDto);
 
         // Check again the valid value of vm Id but with an invalid vapp Id
-        response =
-            get(resolveVirtualMachineURI(vdc.getId(), new Random().nextInt(1000), vm.getId()));
+        response = get(resolveVirtualMachineURI(vdc.getId(), vapp.getId() + 1, vm.getId()));
         assertEquals(response.getStatusCode(), Status.NOT_FOUND.getStatusCode());
     }
 
@@ -625,8 +624,7 @@ public class VirtualMachineResourceIT extends AbstractJpaGeneratorIT
         setup(entitiesToSetup.toArray());
 
         ClientResponse response =
-            get(resolveVirtualMachineActionGetIPsURI(new Random().nextInt(1000), vapp.getId(),
-                vm.getId()));
+            get(resolveVirtualMachineActionGetIPsURI(vdc.getId() + 1, vapp.getId(), vm.getId()));
         assertEquals(response.getStatusCode(), Status.NOT_FOUND.getStatusCode());
     }
 

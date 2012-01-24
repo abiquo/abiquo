@@ -87,6 +87,10 @@ import com.abiquo.server.core.enterprise.EnterpriseDto;
 import com.abiquo.server.core.enterprise.User.AuthType;
 import com.abiquo.server.core.enterprise.UserDto;
 import com.abiquo.server.core.infrastructure.network.VLANNetworkDto;
+import com.abiquo.server.core.task.Job;
+import com.abiquo.server.core.task.JobDto;
+import com.abiquo.server.core.task.JobsDto;
+import com.abiquo.server.core.task.Task;
 import com.abiquo.server.core.task.TaskDto;
 import com.abiquo.server.core.task.TasksDto;
 import com.abiquo.util.ErrorManager;
@@ -639,15 +643,8 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
             if (!tasks.isEmpty())
             {
                 TaskDto lastTask = tasks.getCollection().get(0);
-                currentTask.setUuid(lastTask.getTaskId());
-                currentTask.setStatusName(lastTask.getState().name());
-                currentTask.setMessage("");
-            }
-            else
-            {
-                currentTask.setUuid("");
-                currentTask.setStatusName("");
-                currentTask.setMessage("");
+                currentTask.addUri(lastTask.searchLink("self").getHref());
+                currentTask.addTask(dtoToTask(lastTask));
             }
 
             nodeVirtualImage.setTaskStatus(currentTask);
@@ -656,6 +653,44 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
         }
 
         return nodeVirtualImages;
+    }
+
+    private Task dtoToTask(final TaskDto dto)
+    {
+        Task task = new Task();
+
+        task.setOwnerId(dto.getOwnerId());
+        task.setState(dto.getState());
+        task.setTaskId(dto.getTaskId());
+        task.setTimestamp(dto.getTimestamp());
+        task.setType(dto.getType());
+        task.setUserId(dto.getUserId());
+        task.getJobs().addAll(dtosToJob(dto.getJobs()));
+
+        return task;
+    }
+
+    private List<Job> dtosToJob(final JobsDto dtos)
+    {
+        List<Job> jobs = new ArrayList<Job>();
+        for (JobDto dto : dtos.getCollection())
+        {
+            Job job = dtoToJob(dto);
+            jobs.add(job);
+        }
+        return jobs;
+    }
+
+    private Job dtoToJob(final JobDto dto)
+    {
+        Job job = new Job();
+        job.setId(dto.getId());
+        job.setParentTaskId(dto.getParentTaskId());
+        job.setRollbackState(dto.getRollbackState());
+        job.setState(dto.getState());
+        job.setTimestamp(dto.getTimestamp());
+        job.setType(dto.getType());
+        return job;
     }
 
     private VirtualImage dtoToVirtualImage(final VirtualMachineTemplateDto virtualImageDto)
@@ -700,18 +735,8 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
             image.setIcon(icon);
         }
 
-        // Retrieve the enterprise
-        RESTLink entLink = virtualImageDto.searchLink("enterprise");
-        if (entLink != null)
-        {
-            ClientResponse entResponse = get(entLink.getHref());
-            if (entResponse.getStatusCode() == Status.OK.getStatusCode())
-            {
+        image.setIdEnterprise(virtualImageDto.getIdFromLink("enterprise"));
 
-                EnterpriseDto entDto = entResponse.getEntity(EnterpriseDto.class);
-                image.setIdEnterprise(entDto.getId());
-            }
-        }
         // Captured images may not have a template definition
         RESTLink templateDefinitionLink = virtualImageDto.searchLink("templatedefinition");
         if (templateDefinitionLink != null)
@@ -1121,7 +1146,6 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
             VirtualDatacenter vdc =
                 getApiClient().getCloudService().getVirtualDatacenter(
                     virtualAppliance.getVirtualDataCenter().getId());
-
             VirtualApplianceDto dto =
                 getApiClient().getApi().getCloudClient()
                     .getVirtualAppliance(vdc.unwrap(), virtualAppliance.getId());
@@ -1129,6 +1153,21 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
             org.jclouds.abiquo.domain.cloud.VirtualAppliance vapp =
                 DomainWrapper.wrap(getApiClient(),
                     org.jclouds.abiquo.domain.cloud.VirtualAppliance.class, dto);
+
+            vapp.undeploy(Boolean.TRUE);
+
+            // The vapp state is DEPLOYED
+            vapp =
+                DomainWrapper.wrap(getApiClient(),
+                    org.jclouds.abiquo.domain.cloud.VirtualAppliance.class, dto);
+
+            // Blocking
+            getApiClient()
+                .getMonitoringService()
+                .getVirtualMachineMonitor()
+                .awaitCompletionUndeploy(
+                    vapp.listVirtualMachines().toArray(
+                        new org.jclouds.abiquo.domain.cloud.VirtualMachine[0]));
 
             // Here we actually perform the request to delete the virtual appliance
             vapp.delete();
@@ -1300,5 +1339,34 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
         {
             return virtualAppData;
         }
+    }
+
+    @Override
+    public DataResult<List<TaskStatus>> updateTask(final TaskStatus task)
+    {
+        StringBuilder errors = new StringBuilder();
+        DataResult<List<TaskStatus>> result = new DataResult<List<TaskStatus>>();
+        result.setSuccess(Boolean.TRUE);
+
+        List<TaskStatus> tasks = new ArrayList<TaskStatus>();
+        for (String link : task.getUris())
+        {
+            ClientResponse clientResponse = get(link);
+            if (clientResponse.getStatusCode() == Status.OK.getStatusCode()
+                || clientResponse.getStatusCode() == Status.SEE_OTHER.getStatusCode())
+            {
+                addErrors(result, errors, clientResponse, "updateTask");
+            }
+            else
+            {
+                TaskDto dto = clientResponse.getEntity(TaskDto.class);
+                TaskStatus currentTask = new TaskStatus();
+                currentTask.addUri(link);
+                currentTask.addTask(dtoToTask(dto));
+                tasks.add(currentTask);
+            }
+        }
+        result.setData(tasks);
+        return result;
     }
 }
