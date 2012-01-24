@@ -158,6 +158,14 @@ public class MachineService extends DefaultApiService
     {
         Machine old = getMachine(machineId);
 
+        if (old.getBelongsToManagedRack())
+        {
+            if (!old.getName().equalsIgnoreCase(machineDto.getName()))
+            {
+                addValidationErrors(APIError.MANAGED_MACHINE_CANNOT_CHANGE_NAME);
+                flushErrors();
+            }
+        }
         old.setName(machineDto.getName());
         old.setDescription(machineDto.getDescription());
         old.setState(machineDto.getState());
