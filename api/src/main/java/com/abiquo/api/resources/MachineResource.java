@@ -105,8 +105,6 @@ public class MachineResource extends AbstractResource
 
     public static final String MACHINE_CHECK = "checkState";
 
-    public static final String SHOW_CREDENTIALS_QUERY_PARAM = "credentials";
-
     @Autowired
     MachineService service;
 
