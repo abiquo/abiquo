@@ -56,6 +56,8 @@ public enum Privileges
 
     PRICING_VIEW,
 
+    AUTHENTICATED,
+
     PRICING_MANAGE,
 
     ENTERPRISE_ENUMERATE;
