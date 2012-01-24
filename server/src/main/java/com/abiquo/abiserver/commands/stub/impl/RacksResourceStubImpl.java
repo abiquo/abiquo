@@ -30,10 +30,16 @@ import com.abiquo.abiserver.commands.stub.AbstractAPIStub;
 import com.abiquo.abiserver.commands.stub.RacksResourceStub;
 import com.abiquo.abiserver.networking.IPAddress;
 import com.abiquo.abiserver.pojo.infrastructure.DataCenter;
+import com.abiquo.abiserver.pojo.infrastructure.PhysicalMachine;
 import com.abiquo.abiserver.pojo.infrastructure.Rack;
 import com.abiquo.abiserver.pojo.infrastructure.UcsRack;
 import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.result.DataResult;
+import com.abiquo.abiserver.pojo.result.ListRequest;
+import com.abiquo.abiserver.pojo.ucs.Fsm;
+import com.abiquo.abiserver.pojo.ucs.LogicServer;
+import com.abiquo.abiserver.pojo.ucs.LogicServerListResult;
+import com.abiquo.abiserver.pojo.ucs.Organization;
 import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.server.core.infrastructure.RackDto;
 import com.abiquo.server.core.infrastructure.RacksDto;
@@ -260,4 +266,122 @@ public class RacksResourceStubImpl extends AbstractAPIStub implements RacksResou
 
         return null;
     }
+
+    /**
+     * @see com.abiquo.abiserver.commands.stub.RacksResourceStub#getOrganizations(UcsRack,
+     *      ListRequest)
+     */
+    @Override
+    public DataResult<List<Organization>> getOrganizations(final UcsRack ucsRack,
+        final ListRequest listRequest)
+    {
+        // PREMIUM
+        return null;
+    }
+
+    /**
+     * @see com.abiquo.abiserver.commands.stub.RacksResourceStub#getLogicServers(UcsRack,
+     *      com.abiquo.abiserver.pojo.result.ListRequest)
+     */
+    @Override
+    public DataResult<LogicServerListResult> getLogicServers(final UcsRack ucsRack,
+        final ListRequest listRequest)
+    {
+        // PREMIUM
+        return null;
+    }
+
+    /**
+     * @see com.abiquo.abiserver.commands.stub.RacksResourceStub#getLogicServerTemplates(UcsRack,
+     *      com.abiquo.abiserver.pojo.result.ListRequest)
+     */
+    @Override
+    public DataResult<List<LogicServer>> getLogicServerTemplates(final UcsRack ucsRack,
+        final ListRequest listRequest)
+    {
+        // PREMIUM
+        return null;
+    }
+
+    /**
+     * @see com.abiquo.abiserver.commands.stub.RacksResourceStub#cloneLogicServer(com.abiquo.abiserver.pojo.infrastructure.UcsRack,
+     *      java.lang.String, java.lang.String, java.lang.String)
+     */
+    @Override
+    public BasicResult cloneLogicServer(final UcsRack ucsRack, final String lsName,
+        final String org, final String newName)
+    {
+        // PREMIUM
+        return null;
+    }
+
+    /**
+     * @see com.abiquo.abiserver.commands.stub.RacksResourceStub#associateLogicServer(com.abiquo.abiserver.pojo.infrastructure.PhysicalMachine,
+     *      String)
+     */
+    @Override
+    public BasicResult associateLogicServer(final PhysicalMachine machine, final String lsName)
+    {
+        // PREMIUM
+        return null;
+    }
+
+    /**
+     * @see com.abiquo.abiserver.commands.stub.RacksResourceStub#dissociateLogicServer(PhysicalMachine,
+     *      String)
+     */
+    @Override
+    public BasicResult dissociateLogicServer(final Rack rack, final String machineDn,
+        final String lsName)
+    {
+        // PREMIUM
+        return null;
+    }
+
+    /**
+     * @see com.abiquo.abiserver.commands.stub.RacksResourceStub#deleteLogicServer(com.abiquo.abiserver.pojo.infrastructure.UcsRack,
+     *      java.lang.String)
+     */
+    @Override
+    public BasicResult deleteLogicServer(final UcsRack ucsRack, final String lsName)
+    {
+        // PREMIUM
+        return null;
+    }
+
+    /**
+     * @see com.abiquo.abiserver.commands.stub.RacksResourceStub#assignLogicServerTemplate(com.abiquo.abiserver.pojo.infrastructure.UcsRack,
+     *      java.lang.String)
+     */
+    @Override
+    public BasicResult assignLogicServerTemplate(final PhysicalMachine machine,
+        final String lsName, final String org, final String newName)
+    {
+        // PREMIUM
+        return null;
+    }
+
+    /**
+     * @see com.abiquo.abiserver.commands.stub.RacksResourceStub#assignLogicServerClone(com.abiquo.abiserver.pojo.infrastructure.PhysicalMachine,
+     *      java.lang.String, java.lang.String, java.lang.String)
+     */
+    @Override
+    public BasicResult assignLogicServerClone(final PhysicalMachine machine, final String lsName,
+        final String org, final String newName)
+    {
+        // PREMIUM
+        return null;
+    }
+
+    /**
+     * @see com.abiquo.abiserver.commands.stub.RacksResourceStub#objectUcsCurrentTask(UcsRack,
+     *      String)
+     */
+    @Override
+    public DataResult<Fsm> objectUcsCurrentTask(final UcsRack ucsRack, final String dn)
+    {
+        // PREMIUM
+        return null;
+    }
+
 }

@@ -22,7 +22,7 @@
 
 -->
 
-<mx:Form 
+<mx:VBox 
     width="100%" height="100%"
     fontSize="11"
     paddingBottom="6"
@@ -30,6 +30,7 @@
     paddingRight="6"
     paddingTop="6"
     verticalGap="1"
+    verticalAlign="middle"
     verticalScrollPolicy="off" horizontalScrollPolicy="off"
     xmlns:mx="http://www.adobe.com/2006/mxml"
     xmlns:utils="net.undf.abicloud.utils.*">
@@ -358,4 +359,4 @@
             restrict="0-9"
             visible="{_editMode}"/>
     </mx:FormItem>
-</mx:Form>
+</mx:VBox>

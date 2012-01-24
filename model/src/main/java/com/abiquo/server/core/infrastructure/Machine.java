@@ -788,7 +788,11 @@ public class Machine extends DefaultEntityBase
 
     public Boolean getBelongsToManagedRack()
     {
-        return belongsToManagedRack;
+        if (getRack() != null)
+        {
+            return getRack() instanceof UcsRack;
+        }
+        return this.belongsToManagedRack;
     }
 
 }
