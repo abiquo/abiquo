@@ -350,10 +350,10 @@ package net.undf.abicloud.business.managers
 	
 	            if (vaToUpdate)
 	            {
-	                /* vaToUpdate.nodes = updateNodesStatus(vaToUpdate);
-	                dispatchEvent(new Event("nodesUpdates")); */
-	                vaToUpdate.state = new State(10, State.LOCKED.description);
 	                setTimestamp('virtualAppliance',vaToUpdate.id);
+	                vaToUpdate.nodes = updateNodesStatus(vaToUpdate);
+	                vaToUpdate.state = new State(10, State.LOCKED.description);
+	                dispatchEvent(new Event("nodesUpdates")); 
 	            }            	
             }
         }
@@ -462,6 +462,7 @@ package net.undf.abicloud.business.managers
         	   for(var i:int = 0 ; i < virtualAppliance.nodes.length ; i++)
         	   {
         	   	   taskStatus = NodeVirtualImage(virtualAppliance.nodes.getItemAt(i)).taskStatus;
+        	   	   taskStatus.tasks = new ArrayCollection();
         	   	   //taskStatus.statusName = TaskStatus.STARTED;
         	   }
         	}

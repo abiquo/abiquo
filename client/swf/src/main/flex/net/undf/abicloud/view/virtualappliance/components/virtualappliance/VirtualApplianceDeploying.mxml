@@ -154,6 +154,10 @@
             
             private function returnStatus(object:NodeVirtualImage, column:DataGridColumn):String
             {
+                if(!this._virtualAppliance)
+                {
+                    return '';	
+                }
                 /***
                 * We return for each node the state and the description of the action perfomed
                 * Check order:
@@ -165,10 +169,9 @@
                 *       - if the Virtual Appliance doesn't have timestamp -> *Check Flow*
                 * 
                 * *Check Flow*
-                *   - if a job as a different state that DONE -> job.type + job.description
-                *   - if all jobs are DONE:
-                *       - if the task is PENDING or STARTED -> Finishing
-                *       - if not -> task.state
+                *   - if task FINISHED_SUCCESSFULLY o FINISHED_UNSUCCESSFULLY o ABORTED -> task.state 
+                *   - if a job as a different state that DONE and FAILED -> job.type + job.description
+                *  
                 * **/
                 
                 if(object.taskStatus.tasks.length == 0)
@@ -186,23 +189,21 @@
                 	   	   return "Processing (old timestamp)";
                 	   }	
                 	}
-                	//No Virtual Appliance timestamp
-                	var job:Job = returnNodeState(task.jobs);
-	                if(job)
-	                {
-	                    return job.type + "(" + job.description + ")";
-	                }
-	                else
-	                {
-	                    if(task.state == Task.PENDING || task.state == Task.STARTED)
+                	
+                	if(task.state == Task.FINISHED_SUCCESSFULLY || task.state == Task.FINISHED_UNSUCCESSFULLY || task.state == Task.ABORTED)
+                	{
+                		return task.state;
+                	}
+                	else
+                	{
+                		var job:Job = returnNodeState(task.jobs);
+	                    if(job)
 	                    {
-	                        return "Finishing";
+	                        return job.type + "(" + job.description + ")";
 	                    }
-	                    else
-	                    {
-	                        return task.state;
-	                    }
-	                }
+	                    return "Finishing";
+                	}
+                	
                 }
                 
                 return "Algo no va bien";
@@ -219,7 +220,7 @@
                 for(var i:int = 0 ; i < jobs.length ; i++)
                 {
                     job = jobs.getItemAt(i) as Job;
-                    if(job.state != Job.DONE)
+                    if(job.state != Job.DONE && job.state != Job.FAILED)
                     {
                     	return job;
                     }	
