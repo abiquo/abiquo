@@ -301,7 +301,96 @@ public final class MessageValues
     public static final String UCS_LS_ERROR =
         "Cannot change the state if the blade is not associated with any Logic Server";
 
+    /**
+     * Invalid blade DN.
+     */
     public static final String UCS_BLADE_DN_ERROR = "Invalid blade dn";
+
+    /**
+     * The Logic Server is already associated to a LS.
+     */
+    public static final String UCS_LS_ASSOC_ERROR =
+        "Cannot associate the Service Profile because it is already associated";
+
+    /**
+     * The Logic Server is already unassociated.
+     */
+    public static final String UCS_LS_UNASSOC_ERROR =
+        "Cannot disassociate the Service Profile because it is already unassociated";
+
+    /**
+     * The Logic Server is wan not associated to a LS due to an unknown error.
+     */
+    public static final String UCS_LS_ASSOC_GEN_ERROR =
+        "Cannot associate the Service Profile due to an unknown error. Please see the log for more info.";
+
+    /**
+     * The Logic Server was not unassociated due unknown error.
+     */
+    public static final String UCS_LS_UNASSOC_GEN_ERROR =
+        "Cannot disassociate the Service Profile due to an unknown error. Please see the log for more info.";
+
+    /**
+     * The Logic Server does not exists.
+     */
+
+    public static final String UCS_LS_NO_EXISTS_ERROR = "The Service Profile does not exists";
+
+    /**
+     * The Organization does not exists.
+     */
+    public static final String UCS_ORGANIZATION_NO_EXISTS_ERROR =
+        "The Organization does not exists";
+
+    /** The Logic Server already exists. */
+    public static final String UCS_LS_EXISTS_ERROR = "The Service Profile already exists";
+
+    /**
+     * The UCS could not be reached.
+     */
+    public static final String UCS_COMM_ERROR =
+        "There was a problem with UCS. Review your network configuration and check that UCS Manager is working";
+
+    /**
+     * The Logic Server is not a template.
+     */
+    public static final String UCS_LS_NO_TEMPLATE_ERROR = "The Service Profile is not a template";
+
+    /**
+     * No instance.
+     */
+    public static final String UCS_LS_TEMPLATE_INSTANTIATION_ERROR =
+        "Cannot instantiate the Service Profile due to an unknown error. Please see the log for more info.";
+
+    /**
+     * The Logic Server is already unassociated.
+     */
+    public static final String UCS_BLADE_ASSOC_ERROR =
+        "Cannot associate the Blade because it is already associated";
+
+    /**
+     * The UCS XML could not be parsed.
+     */
+    public static final String UCS_XML_ERROR =
+        "There was a problem with UCS response. Review the logs of the application for more information";
+
+    /**
+     * No assoc.
+     */
+    public static final String UCS_LS_ASSOCIATION_SEE_LOGS_ERROR =
+        "Cannot associate the Service Profile due to an unknown error. Review the logs of the application for more information";
+
+    /**
+     * Task ongoing.
+     */
+    public static final String UCS_ONGOING_SEE_LOGS_ERROR =
+        "Cannot complete the request. The is an ongoing task performed by the object. Try again in a few minutes. Review the logs of the application, or the UCS Manager, for more information";
+
+    /**
+     * Task ongoing.
+     */
+    public static final String UCS_ERROR_SEE_LOGS_ERROR =
+        "Cannot complete the request. The is an unknown error. Try again in a few minutes. Review the logs of the application for more information";
 
     /**
      * Private constructor due it is an utility class.

@@ -373,10 +373,14 @@ public class VirtualMachineTemplateDAOTest extends
 
         VirtualImageConversion conversion1 =
             conversionGenerator.createInstance(vi1, DiskFormatType.VMDK_STREAM_OPTIMIZED);
-
+        VirtualImageConversion conversion2 =
+            conversionGenerator.createInstance(vi1, DiskFormatType.UNKNOWN);
+        VirtualImageConversion conversion3 =
+            conversionGenerator.createInstance(vi1, DiskFormatType.UNKNOWN);
+        
         List<Object> entitiesToPersist = new ArrayList<Object>();
         eg().addAuxiliaryEntitiesToPersist(vi1, entitiesToPersist);
-        persistAll(ds(), entitiesToPersist, vi1, conversion1);
+        persistAll(ds(), entitiesToPersist, vi1, conversion1, conversion2, conversion3);
 
         VirtualMachineTemplateDAO dao = createDaoForRollbackTransaction();
 

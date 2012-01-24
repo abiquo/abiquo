@@ -36,6 +36,8 @@ public class UcsRack extends Rack
 
     private String user;
 
+    private String defaultTemplate;
+
     private final String type = "UCS Rack";
 
     /* ------------- Constructor ------------- */
@@ -88,6 +90,16 @@ public class UcsRack extends Rack
         this.user = user;
     }
 
+    public String getDefaultTemplate()
+    {
+        return this.defaultTemplate;
+    }
+
+    public void setDefaultTemplate(final String defaultTemplate)
+    {
+        this.defaultTemplate = defaultTemplate;
+    }
+
     @Override
     public UcsRackHB toPojoHB()
     {
@@ -110,6 +122,8 @@ public class UcsRack extends Rack
             rackPojo.setNRSQ(getVlanNetworkParameters().getNRSQ());
             rackPojo.setVlans_id_avoided(getVlanNetworkParameters().getVlans_id_avoided());
         }
+
+        rackPojo.setDefaultTemplate(getDefaultTemplate());
         return rackPojo;
     }
 
@@ -133,6 +147,7 @@ public class UcsRack extends Rack
                 dto.getVlanPerVdcReserved());
         rack.setVlanNetworkParameters(vlanNetworkParameters);
         rack.setHaEnabled(dto.isHaEnabled());
+        rack.setDefaultTemplate(dto.getDefaultTemplate());
         return rack;
     }
 }
