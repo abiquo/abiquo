@@ -100,6 +100,7 @@ public class PhysicalMachineCreation
         dto.setIpmiUser(pm.getIpmiUser());
         dto.setName(pm.getName());
         dto.setState(PhysicalmachineHB.transportIntegerToState(pm.getIdState()));
+        dto.setInitiatorIQN(pm.getInitiatorIQN());
 
         if (h != null)
         {
@@ -152,6 +153,7 @@ public class PhysicalMachineCreation
         machine.setCpuUsed(dto.getVirtualCpusUsed());
         machine.setRam(dto.getVirtualRamInMb());
         machine.setRamUsed(dto.getVirtualRamUsedInMb());
+        machine.setInitiatorIQN(dto.getInitiatorIQN());
 
         HyperVisor hypervisor = new HyperVisor();
         hypervisor.setIp(dto.getIp());
