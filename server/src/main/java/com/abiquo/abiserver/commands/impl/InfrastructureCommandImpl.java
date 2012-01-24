@@ -82,6 +82,7 @@ import com.abiquo.abiserver.pojo.infrastructure.PhysicalMachine;
 import com.abiquo.abiserver.pojo.infrastructure.PhysicalMachineCreation;
 import com.abiquo.abiserver.pojo.infrastructure.Rack;
 import com.abiquo.abiserver.pojo.infrastructure.State;
+import com.abiquo.abiserver.pojo.infrastructure.UcsRack;
 import com.abiquo.abiserver.pojo.infrastructure.VirtualMachine;
 import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.result.DataResult;
@@ -709,6 +710,18 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
 
             PhysicalMachine physicalMachineAux = physicalMachineHb.toPojo();
 
+            if (pm.getAssignedTo() instanceof UcsRack)
+            {
+                dataResult.setSuccess(false);
+                dataResult.setMessage("The Machine is managed and its name cannot change");
+                // Log the event
+                traceLog(SeverityType.CRITICAL, ComponentType.MACHINE, EventType.MACHINE_MODIFY,
+                    userSession, physicalMachineCreation.getPhysicalMachine().getDataCenter(),
+                    null, "The Machine is managed and its name cannot change", null,
+                    (Rack) physicalMachineCreation.getPhysicalMachine().getAssignedTo(),
+                    physicalMachineHb.toPojo(), null, null);
+                return dataResult;
+            }
             final String ipService = pm.getHypervisor().getIpService();
 
             // Updating the other attributes
