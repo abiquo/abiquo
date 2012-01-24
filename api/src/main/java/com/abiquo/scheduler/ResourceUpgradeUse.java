@@ -39,7 +39,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.abiquo.api.services.InfrastructureService;
+import com.abiquo.model.enumerator.FitPolicy;
 import com.abiquo.scheduler.workload.NotEnoughResourcesException;
+import com.abiquo.scheduler.workload.VirtualimageAllocationService;
 import com.abiquo.server.core.cloud.HypervisorDAO;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
@@ -56,6 +59,8 @@ import com.abiquo.server.core.infrastructure.network.NetworkAssignment;
 import com.abiquo.server.core.infrastructure.network.NetworkAssignmentDAO;
 import com.abiquo.server.core.infrastructure.network.VLANNetwork;
 import com.abiquo.server.core.infrastructure.network.VLANNetworkDAO;
+import com.abiquo.server.core.scheduler.FitPolicyRule;
+import com.abiquo.server.core.scheduler.FitPolicyRuleDAO;
 import com.abiquo.server.core.scheduler.VirtualMachineRequirements;
 
 /**
@@ -85,6 +90,15 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
 
     @Autowired
     private HypervisorDAO hypervisorDao;
+
+    @Autowired
+    private VirtualimageAllocationService allocationService;
+
+    @Autowired
+    private InfrastructureService infrastructureService;
+
+    @Autowired
+    private FitPolicyRuleDAO fitPolicyDao;
 
     public ResourceUpgradeUse()
     {
@@ -198,6 +212,14 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
         catch (final Exception e)
         {
             throw new ResourceUpgradeUseException("Can not update resource use" + e.getMessage());
+        }
+
+        if (getAllocationFitPolicyOnDatacenter(
+            virtualMachine.getHypervisor().getMachine().getDatacenter().getId()).equals(
+            FitPolicy.PROGRESSIVE))
+        {
+            infrastructureService.adjustPoweredMachinesInRack(virtualMachine.getHypervisor()
+                .getMachine().getRack());
         }
     }
 
@@ -547,5 +569,15 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
         }
 
         return publicIdsList;
+    }
+
+    /**
+     * By datacenter
+     */
+    protected FitPolicy getAllocationFitPolicyOnDatacenter(final Integer idDatacenter)
+    {
+        FitPolicyRule fit = fitPolicyDao.getFitPolicyForDatacenter(idDatacenter);
+
+        return fit != null ? fit.getFitPolicy() : fitPolicyDao.getGlobalFitPolicy().getFitPolicy();
     }
 }
