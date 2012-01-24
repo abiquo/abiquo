@@ -188,30 +188,16 @@ public class XenServerMonitor extends AbstractMonitor
                             String vmName = vm.getNameLabel(connector.getConnection());
                             currentVMs.add(vmName);
 
-                            if (connector.isBeingRebooted(vm))
-                            {
-                                // When XenServer reboots a VM, its state is always RUNNING
-                                // If we detect a reboot, just invalidate the last known state, so
-                                // we can notify the power on when reboot finishes
-                                LOGGER.trace(
-                                    "VM {} is being rebooted. Invalidating last known state",
-                                    vmName);
-                                invalidateLastKnownState(physicalMachineAddress, vmName);
-                            }
-                            else
-                            {
-                                // Get the new state of the VM
-                                VMEventType state =
-                                    XenServerUtils.translateEvent(vm.getPowerState(connector
-                                        .getConnection()));
-                                LOGGER.trace("Found VM {} in state {}", vmName, state.name());
+                            VMEventType state =
+                                XenServerUtils.translateEvent(vm.getPowerState(connector
+                                    .getConnection()));
+                            LOGGER.trace("Found VM {} in state {}", vmName, state.name());
 
-                                VMEvent event = new VMEvent(state, physicalMachineAddress, vmName);
+                            VMEvent event = new VMEvent(state, physicalMachineAddress, vmName);
 
-                                // Propagate the event. RedisSubscriber will decide if it must be
-                                // notified, based on subscription information
-                                XenServerMonitor.this.notify(event);
-                            }
+                            // Propagate the event. RedisSubscriber will decide if it must be
+                            // notified, based on subscription information
+                            XenServerMonitor.this.notify(event);
                         }
 
                         if (LOGGER.isTraceEnabled())
