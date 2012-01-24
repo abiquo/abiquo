@@ -87,7 +87,7 @@ public class VirtualMachineNetworkConfigurationResource extends AbstractResource
 
     /** Param to map the input values related to configuration. */
     public static final String CONFIGURATION_PARAM = "{" + CONFIGURATION + "}";
-    
+
     /** Param to set the link to default configuration */
     public static final String DEFAULT_CONFIGURATION = "network_configuration";
 
@@ -198,23 +198,33 @@ public class VirtualMachineNetworkConfigurationResource extends AbstractResource
     {
         VirtualMachineState originalState =
             vmLock.lockVirtualMachineBeforeReconfiguring(vdcId, vappId, vmId);
-        
-        Object result = service.changeNetworkConfiguration(vdcId, vappId, vmId, configurationRef, originalState);
 
-        // The attach method may return a Tarantino task identifier if the operation requires a
-        // reconfigure. Otherwise it will return null.
-        if (result != null)
+        try
         {
-            AcceptedRequestDto<Object> response = new AcceptedRequestDto<Object>();
-            response.setStatusUrlLink("http://status");
-            response.setEntity(result);
-            return response;
+            Object result =
+                service.changeNetworkConfiguration(vdcId, vappId, vmId, configurationRef,
+                    originalState);
+
+            // The attach method may return a Tarantino task identifier if the operation requires a
+            // reconfigure. Otherwise it will return null.
+            if (result != null)
+            {
+                AcceptedRequestDto<Object> response = new AcceptedRequestDto<Object>();
+                response.setStatusUrlLink("http://status");
+                response.setEntity(result);
+                return response;
+            }
+
+            // If there is no async task the VM must be unlocked here
+            vmLock.unlockVirtualMachine(vmId, originalState);
+            return null;
         }
-
-        // If there is no async task the VM must be unlocked here
-        vmLock.unlockVirtualMachine(vmId, originalState);
-        return null;
-
+        catch (Exception ex)
+        {
+            // Make sure virtual machine is unlocked if reconfigure fails
+            vmLock.unlockVirtualMachine(vmId, originalState);
+            throw ex;
+        }
     }
 
     /**
@@ -296,7 +306,7 @@ public class VirtualMachineNetworkConfigurationResource extends AbstractResource
         }
         catch (Exception ex)
         {
-            // Make sure virtual machine is unlocked if deploy fails
+            // Make sure virtual machine is unlocked if reconfigure fails
             vmLock.unlockVirtualMachine(vmId, originalState);
             throw ex;
         }
@@ -349,7 +359,7 @@ public class VirtualMachineNetworkConfigurationResource extends AbstractResource
         }
         catch (Exception ex)
         {
-            // Make sure virtual machine is unlocked if deploy fails
+            // Make sure virtual machine is unlocked if reconfigure fails
             vmLock.unlockVirtualMachine(vmId, originalState);
             throw ex;
         }
@@ -425,7 +435,7 @@ public class VirtualMachineNetworkConfigurationResource extends AbstractResource
         }
         catch (Exception ex)
         {
-            // Make sure virtual machine is unlocked if deploy fails
+            // Make sure virtual machine is unlocked if reconfigure fails
             vmLock.unlockVirtualMachine(vmId, originalState);
             throw ex;
         }

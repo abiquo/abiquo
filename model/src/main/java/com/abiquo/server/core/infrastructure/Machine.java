@@ -599,6 +599,10 @@ public class Machine extends DefaultEntityBase
     public void setRack(final Rack rack)
     {
         this.rack = rack;
+        if (rack instanceof UcsRack)
+        {
+            this.setBelongsToManagedRack(Boolean.TRUE);
+        }
     }
 
     public boolean rackIsInDatacenter(final Rack rack)

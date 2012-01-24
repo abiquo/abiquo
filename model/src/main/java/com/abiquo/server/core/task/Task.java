@@ -61,7 +61,7 @@ public class Task extends RedisEntityBase
         return ownerId;
     }
 
-    public void setOwnerId(String ownerId)
+    public void setOwnerId(final String ownerId)
     {
         this.ownerId = ownerId;
     }
@@ -71,7 +71,7 @@ public class Task extends RedisEntityBase
         return taskId;
     }
 
-    public void setTaskId(String taskId)
+    public void setTaskId(final String taskId)
     {
         this.taskId = taskId;
     }
@@ -81,12 +81,17 @@ public class Task extends RedisEntityBase
         return jobs;
     }
 
+    public void setJobs(final List<Job> jobs)
+    {
+        this.jobs = jobs;
+    }
+
     public String getUserId()
     {
         return userId;
     }
 
-    public void setUserId(String userId)
+    public void setUserId(final String userId)
     {
         this.userId = userId;
     }
@@ -96,7 +101,7 @@ public class Task extends RedisEntityBase
         return timestamp;
     }
 
-    public void setTimestamp(long timestamp)
+    public void setTimestamp(final long timestamp)
     {
         this.timestamp = timestamp;
     }
@@ -106,7 +111,7 @@ public class Task extends RedisEntityBase
         return type;
     }
 
-    public void setType(TaskType type)
+    public void setType(final TaskType type)
     {
         this.type = type;
     }
@@ -116,7 +121,7 @@ public class Task extends RedisEntityBase
         return state;
     }
 
-    public void setState(TaskState state)
+    public void setState(final TaskState state)
     {
         this.state = state;
     }

@@ -37,6 +37,7 @@
     
     <!-- load the configuration file -->
     <import resource="persistencebeans.xml" />
+    <import resource="wink-test-beans.xml" />
     <import resource="mock-beans.xml" />
     <import resource="security-abiquo-beans.xml" />
     <import resource="security-beans-test.xml" />

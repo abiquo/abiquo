@@ -37,6 +37,8 @@ import org.slf4j.LoggerFactory;
 
 import com.abiquo.abiserver.commands.stub.AbstractAPIStub;
 import com.abiquo.abiserver.config.AbiConfigManager;
+import com.abiquo.abiserver.persistence.DAOFactory;
+import com.abiquo.abiserver.persistence.hibernate.HibernateDAOFactory;
 import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.result.DataResult;
 import com.abiquo.abiserver.pojo.virtualimage.Category;
@@ -44,6 +46,7 @@ import com.abiquo.abiserver.pojo.virtualimage.Icon;
 import com.abiquo.abiserver.pojo.virtualimage.OVFPackage;
 import com.abiquo.abiserver.pojo.virtualimage.OVFPackageInstanceStatus;
 import com.abiquo.abiserver.pojo.virtualimage.OVFPackageList;
+import com.abiquo.appliancemanager.client.ApplianceManagerResourceStubImpl;
 import com.abiquo.appliancemanager.transport.TemplateStateDto;
 import com.abiquo.appliancemanager.transport.TemplatesStateDto;
 import com.abiquo.model.enumerator.DiskFormatType;
@@ -210,6 +213,36 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
         final Integer templateDefinitionId =
             getTemplateDefinitionIdByUrl(templateDefinitionUrl, idEnterprise);
 
+        if (templateDefinitionId == null) // uploading
+        {
+            final String amUrl;
+            DAOFactory factory = HibernateDAOFactory.instance();
+            factory.beginConnection();
+            try
+            {
+                amUrl =
+                    factory
+                        .getRemoteServiceDAO()
+                        .getRemoteServiceUriByType(
+                            datacenterId,
+                            com.abiquo.abiserver.business.hibernate.pojohb.service.RemoteServiceType.APPLIANCE_MANAGER);
+            }
+            finally
+            {
+                factory.endConnection();
+            }
+
+            final ApplianceManagerResourceStubImpl amClient =
+                new ApplianceManagerResourceStubImpl(amUrl);
+
+            TemplateStateDto uploadState =
+                amClient.getTemplateStatus(String.valueOf(idEnterprise), templateDefinitionUrl);
+
+            result.setSuccess(Boolean.TRUE);
+            result.setData(createFlexOVFPackageListObject(uploadState));
+            return result;
+        }
+        
         final String uri =
             createTemplateStateLink(String.valueOf(idEnterprise),
                 String.valueOf(templateDefinitionId));

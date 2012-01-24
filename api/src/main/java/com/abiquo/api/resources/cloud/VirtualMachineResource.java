@@ -195,7 +195,7 @@ public class VirtualMachineResource extends AbstractResource
         }
         catch (Exception ex)
         {
-            // Make sure virtual machine is unlocked if deploy fails
+            // Make sure virtual machine is unlocked if reconfigure fails
             vmLock.unlockVirtualMachine(vmId, originalState);
             throw ex;
         }
@@ -272,7 +272,7 @@ public class VirtualMachineResource extends AbstractResource
         }
         catch (Exception ex)
         {
-            // Make sure virtual machine is unlocked if deploy fails
+            // Make sure virtual machine is unlocked if power state change fails
             vmLock.unlockVirtualMachine(vmId, originalState);
             throw ex;
         }
@@ -529,7 +529,7 @@ public class VirtualMachineResource extends AbstractResource
         }
         catch (Exception ex)
         {
-            // Make sure virtual machine is unlocked if deploy fails
+            // Make sure virtual machine is unlocked if undeploy fails
             vmLock.unlockVirtualMachine(vmId, originalState);
             throw ex;
         }
@@ -571,7 +571,7 @@ public class VirtualMachineResource extends AbstractResource
         }
         catch (Exception ex)
         {
-            // Make sure virtual machine is unlocked if deploy fails
+            // Make sure virtual machine is unlocked if snapshot fails
             vmLock.unlockVirtualMachine(vmId, originalState);
             throw ex;
         }
@@ -906,7 +906,7 @@ public class VirtualMachineResource extends AbstractResource
         }
         catch (Exception ex)
         {
-            // Make sure virtual machine is unlocked if deploy fails
+            // Make sure virtual machine is unlocked if reset fails
             vmLock.unlockVirtualMachine(vmId, originalState);
             throw ex;
         }

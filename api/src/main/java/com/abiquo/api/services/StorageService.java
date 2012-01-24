@@ -128,7 +128,7 @@ public class StorageService extends DefaultApiService
         VirtualAppliance vapp = getVirtualAppliance(vdc, vappId);
         VirtualMachine oldvm = getVirtualMachine(vapp, vmId);
 
-        VirtualMachine newvm = vmService.createBackUpObject(oldvm);
+        VirtualMachine newvm = vmService.duplicateVirtualMachineObject(oldvm);
         List<DiskManagement> disks = vmService.getHardDisksFromDto(vdc, hdRefs);
 
         newvm.getDisks().addAll(disks);
@@ -157,7 +157,7 @@ public class StorageService extends DefaultApiService
         VirtualAppliance vapp = getVirtualAppliance(vdc, vappId);
         VirtualMachine vm = getVirtualMachine(vapp, vmId);
 
-        VirtualMachine newvm = vmService.createBackUpObject(vm);
+        VirtualMachine newvm = vmService.duplicateVirtualMachineObject(vm);
         List<DiskManagement> disks = vmService.getHardDisksFromDto(vdc, hdRefs);
 
         newvm.setDisks(disks);
@@ -284,7 +284,7 @@ public class StorageService extends DefaultApiService
             flushErrors();
         }
 
-        VirtualMachine newVm = vmService.createBackUpObject(vm);
+        VirtualMachine newVm = vmService.duplicateVirtualMachineObject(vm);
         Iterator<DiskManagement> diskIterator = newVm.getDisks().iterator();
         while (diskIterator.hasNext())
         {
@@ -323,7 +323,7 @@ public class StorageService extends DefaultApiService
         VirtualAppliance vapp = getVirtualAppliance(vdc, vappId);
         VirtualMachine vm = getVirtualMachine(vapp, vmId);
 
-        VirtualMachine newVm = vmService.createBackUpObject(vm);
+        VirtualMachine newVm = vmService.duplicateVirtualMachineObject(vm);
         newVm.getDisks().clear();
 
         return vmService.reconfigureVirtualMachine(vdc, vapp, vm, newVm, originalState);
@@ -480,8 +480,8 @@ public class StorageService extends DefaultApiService
         if (tracer != null)
         {
             tracer.log(SeverityType.INFO, ComponentType.VIRTUAL_MACHINE,
-                EventType.HARD_DISK_ASSIGN, "hardDisk.assigned", createdDisk.getId(),
-                createdDisk.getSizeInMb(), vm.getName());
+                EventType.HARD_DISK_ASSIGN, "hardDisk.assigned", createdDisk.getId(), createdDisk
+                    .getSizeInMb(), vm.getName());
         }
 
         return createdDisk;
@@ -549,8 +549,8 @@ public class StorageService extends DefaultApiService
         // creating volumes in other enterprises VDC
         Enterprise enterprise = vdc.getEnterprise();
 
-        LOGGER.debug("Checking limits for enterprise {} to a locate a volume of {}MB",
-            enterprise.getName(), sizeInMB);
+        LOGGER.debug("Checking limits for enterprise {} to a locate a volume of {}MB", enterprise
+            .getName(), sizeInMB);
 
         DatacenterLimits dcLimits =
             datacenterRepo.findDatacenterLimits(enterprise, vdc.getDatacenter());
