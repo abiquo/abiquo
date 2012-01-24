@@ -72,6 +72,7 @@ public class URLAuthenticator
             if (o instanceof RoleVoter)
             {
                 roleVoter = (RoleVoter) o;
+                break;
             }
         }
     }
