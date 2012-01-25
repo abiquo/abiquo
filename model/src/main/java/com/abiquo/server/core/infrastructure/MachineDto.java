@@ -69,6 +69,8 @@ public class MachineDto extends SingleResourceTransportDto implements Serializab
 
     private String ipmiPassword;
 
+    private String initiatorIQN;
+
     /**
      * @return the port
      */
@@ -333,5 +335,15 @@ public class MachineDto extends SingleResourceTransportDto implements Serializab
     public void setIpmiPassword(final String ipmiPassword)
     {
         this.ipmiPassword = ipmiPassword;
+    }
+
+    public String getInitiatorIQN()
+    {
+        return initiatorIQN;
+    }
+
+    public void setInitiatorIQN(String initiatorIQN)
+    {
+        this.initiatorIQN = initiatorIQN;
     }
 }

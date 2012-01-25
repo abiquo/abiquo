@@ -32,7 +32,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
-
 import javax.ws.rs.core.Context;
 
 import org.apache.wink.common.annotations.Parent;
@@ -87,20 +86,20 @@ public class MachineResource extends AbstractResource
     public static final String MACHINE_CHECK = "checkState";
 
     public static final String SHOW_CREDENTIALS_QUERY_PARAM = "credentials";
-    
+
     public static final String MACHINE_ACTION_GET_VIRTUALMACHINES = "action/virtualmachines";
 
-    public static final String MACHINE_ACTION_LED_ON = "action/ledOn";
+    public static final String MACHINE_ACTION_LED_ON = "action/ledon";
 
-    public static final String MACHINE_ACTION_LED_ON_REL = "ledOn";
+    public static final String MACHINE_ACTION_LED_ON_REL = "ledon";
 
-    public static final String MACHINE_ACTION_LS = "logicServer";
+    public static final String MACHINE_ACTION_LS = "logicserver";
 
-    public static final String MACHINE_ACTION_LED_OFF = "action/ledOff";
+    public static final String MACHINE_ACTION_LED_OFF = "action/ledoff";
 
-    public static final String MACHINE_ACTION_LED_OFF_REL = "ledOff";
+    public static final String MACHINE_ACTION_LED_OFF_REL = "ledoff";
 
-    public static final String MACHINE_ACTION_LS__REL = "logicServer";
+    public static final String MACHINE_ACTION_LS__REL = "logicserver";
 
     public static final String MACHINE_LOCATOR_LED = "led";
 
@@ -195,8 +194,8 @@ public class MachineResource extends AbstractResource
             Hypervisor h = m.getHypervisor();
 
             MachineState state =
-                infraService.checkMachineState(datacenterId, h.getIp(), h.getType(), h.getUser(), h
-                    .getPassword(), h.getPort());
+                infraService.checkMachineState(datacenterId, h.getIp(), h.getType(), h.getUser(),
+                    h.getPassword(), h.getPort());
 
             if (sync)
             {
@@ -261,6 +260,7 @@ public class MachineResource extends AbstractResource
         dto.setIpmiPort(machine.getIpmiPort());
         dto.setIpmiUser(machine.getIpmiUser());
         dto.setIpmiPassword(machine.getIpmiPassword());
+        dto.setInitiatorIQN(machine.getInitiatorIQN());
 
         if (machine.getHypervisor() != null)
         {

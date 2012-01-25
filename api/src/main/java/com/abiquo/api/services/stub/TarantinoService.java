@@ -299,8 +299,8 @@ public class TarantinoService extends DefaultApiService
         }
         catch (RuntimeException e)
         {
-            logger.error("Error enqueuing the deploy task dto to the virtual factory with error: "
-                + e.getMessage());
+            logger.error("Error enqueuing the deploy task dto to the virtual factory with error ",
+                e);
 
             tracer.log(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE, EventType.VM_DEPLOY,
                 APIError.GENERIC_OPERATION_ERROR.getMessage());

@@ -95,7 +95,7 @@ public class HyperVisorType
     public static HyperVisorType create(HypervisorType type, DiskFormatType baseFormat)
     {
         HyperVisorType hyperVisorType = new HyperVisorType();
-        hyperVisorType.setId(type.ordinal());
+        hyperVisorType.setId(type.id());
         hyperVisorType.setName(type.name());
         hyperVisorType.setDefaultPort(type.defaultPort);
         hyperVisorType.setBaseFormat(baseFormat);

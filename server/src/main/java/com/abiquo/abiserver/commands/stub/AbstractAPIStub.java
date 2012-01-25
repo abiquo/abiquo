@@ -78,6 +78,7 @@ public class AbstractAPIStub
     public static final String LINK_MEDIA_TYPE = "application/link+xml";
 
     protected RestClient client;
+
     public static final String START_WITH = "startwith";
 
     public static final String BY = "by";
@@ -91,8 +92,6 @@ public class AbstractAPIStub
     public static final Integer DEFAULT_PAGE_LENGTH = 25;
 
     public static final String DEFAULT_PAGE_LENGTH_STRING = "25";
-
-
 
     protected final String apiUri;
 
@@ -1162,7 +1161,7 @@ public class AbstractAPIStub
         params.put("machine", machineId.toString());
 
         return resolveURI(apiUri,
-            "admin/datacenters/{datacenter}/racks/{rack}/machines/{machine}/action/powerOn", params);
+            "admin/datacenters/{datacenter}/racks/{rack}/machines/{machine}/action/poweron", params);
 
     }
 
@@ -1175,7 +1174,7 @@ public class AbstractAPIStub
         params.put("machine", machineId.toString());
 
         return resolveURI(apiUri,
-            "admin/datacenters/{datacenter}/racks/{rack}/machines/{machine}/action/powerOff",
+            "admin/datacenters/{datacenter}/racks/{rack}/machines/{machine}/action/poweroff",
             params);
     }
 
@@ -1899,7 +1898,7 @@ public class AbstractAPIStub
 
         return link.getHref().substring(link.getHref().lastIndexOf("/") + 1);
     }
-        
+
     protected String createRackOrganizationsLink(final Integer datacenterId, final Integer rackId,
         final Map<String, String[]> queryParams)
     {
@@ -1916,7 +1915,7 @@ public class AbstractAPIStub
         Map<String, String> params = new HashMap<String, String>();
         params.put("datacenter", datacenterId.toString());
         params.put("rack", rackId.toString());
-        return resolveURI(apiUri, "admin/datacenters/{datacenter}/racks/{rack}/logicServers",
+        return resolveURI(apiUri, "admin/datacenters/{datacenter}/racks/{rack}/logicservers",
             params, queryParams);
     }
 
@@ -1927,7 +1926,7 @@ public class AbstractAPIStub
         params.put("datacenter", datacenterId.toString());
         params.put("rack", rackId.toString());
 
-        return resolveURI(apiUri, "admin/datacenters/{datacenter}/racks/{rack}/lsTemplates",
+        return resolveURI(apiUri, "admin/datacenters/{datacenter}/racks/{rack}/lstemplates",
             params, queryParams);
     }
 
@@ -1937,7 +1936,7 @@ public class AbstractAPIStub
         Map<String, String> params = new HashMap<String, String>();
         params.put("datacenter", datacenterId.toString());
         params.put("rack", rackId.toString());
-        return resolveURI(apiUri, "admin/datacenters/{datacenter}/racks/{rack}/logicServers/clone",
+        return resolveURI(apiUri, "admin/datacenters/{datacenter}/racks/{rack}/logicservers/clone",
             params, queryParams);
     }
 
@@ -1948,7 +1947,7 @@ public class AbstractAPIStub
         params.put("datacenter", datacenterId.toString());
         params.put("rack", rackId.toString());
         return resolveURI(apiUri,
-            "admin/datacenters/{datacenter}/racks/{rack}/logicServers/associate", params,
+            "admin/datacenters/{datacenter}/racks/{rack}/logicservers/associate", params,
             queryParams);
     }
 
@@ -1959,7 +1958,7 @@ public class AbstractAPIStub
         params.put("datacenter", datacenterId.toString());
         params.put("rack", rackId.toString());
         return resolveURI(apiUri,
-            "admin/datacenters/{datacenter}/racks/{rack}/logicServers/dissociate", params,
+            "admin/datacenters/{datacenter}/racks/{rack}/logicservers/dissociate", params,
             queryParams);
     }
 
@@ -1970,7 +1969,7 @@ public class AbstractAPIStub
         params.put("datacenter", datacenterId.toString());
         params.put("rack", rackId.toString());
         return resolveURI(apiUri,
-            "admin/datacenters/{datacenter}/racks/{rack}/logicServers/delete", params, queryParams);
+            "admin/datacenters/{datacenter}/racks/{rack}/logicservers/delete", params, queryParams);
     }
 
     protected String createMachineBladeLedOnLink(final Integer datacenterId, final Integer rackId,
@@ -1981,7 +1980,7 @@ public class AbstractAPIStub
         params.put("rack", rackId.toString());
         params.put("machine", machineId.toString());
         return resolveURI(apiUri,
-            "admin/datacenters/{datacenter}/racks/{rack}/machines/{machine}/action/ledOn", params);
+            "admin/datacenters/{datacenter}/racks/{rack}/machines/{machine}/action/ledon", params);
     }
 
     protected String createMachineBladeLsLink(final Integer datacenterId, final Integer rackId,
@@ -1992,7 +1991,7 @@ public class AbstractAPIStub
         params.put("rack", rackId.toString());
         params.put("machine", machineId.toString());
         return resolveURI(apiUri,
-            "admin/datacenters/{datacenter}/racks/{rack}/machines/{machine}/logicServer", params);
+            "admin/datacenters/{datacenter}/racks/{rack}/machines/{machine}/logicserver", params);
     }
 
     protected String createRackAssociateLogicServerTemplateLink(final Integer datacenterId,
@@ -2002,7 +2001,7 @@ public class AbstractAPIStub
         params.put("datacenter", datacenterId.toString());
         params.put("rack", rackId.toString());
         return resolveURI(apiUri,
-            "admin/datacenters/{datacenter}/racks/{rack}/logicServers/assocTemplate", params,
+            "admin/datacenters/{datacenter}/racks/{rack}/logicservers/assoctemplate", params,
             queryParams);
     }
 
@@ -2013,7 +2012,7 @@ public class AbstractAPIStub
         params.put("datacenter", datacenterId.toString());
         params.put("rack", rackId.toString());
         return resolveURI(apiUri,
-            "admin/datacenters/{datacenter}/racks/{rack}/logicServers/assocClone", params,
+            "admin/datacenters/{datacenter}/racks/{rack}/logicservers/assocclone", params,
             queryParams);
     }
 
@@ -2035,7 +2034,7 @@ public class AbstractAPIStub
         params.put("rack", rackId.toString());
         params.put("machine", machineId.toString());
         return resolveURI(apiUri,
-            "admin/datacenters/{datacenter}/racks/{rack}/machines/{machine}/action/ledOff", params);
+            "admin/datacenters/{datacenter}/racks/{rack}/machines/{machine}/action/ledoff", params);
     }
 
     protected String createMachineBladeLedLink(final Integer datacenterId, final Integer rackId,
