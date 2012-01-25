@@ -229,7 +229,7 @@ public enum EventType implements Serializable
         1805, "INSTANCE_PROCESS_FAILED", "A Instance conversion process has failed"),
     
     // Asynch handlers
-    ASYNC_HANDLER_RESPONSE(1900, "ASYNC_HANDLER_RESPONSE", "Asynchronous hander response");
+    ASYNC_HANDLER_RESPONSE(1900, "ASYNC_HANDLER_RESPONSE", "Asynchronous hander response"),
 
     // UCS
     UCS_COMMUNICATION(
