@@ -160,7 +160,7 @@
                 //if the virtual appliance is modified, avoid
                 //the automatic AbiCloudBlind closing
                 //if (this._virtualApplianceManagement.isVirtualApplianceModified && VirtualAppliance(this._virtualApplianceManagement.virtualAppliance).state.description != State.UNKNOWN.description)
-                if (this._virtualApplianceManagement.isVirtualApplianceModified && VirtualAppliance(this._virtualApplianceManagement.virtualAppliance).state.description != State.UNKNOWN.description)
+                if (this._virtualApplianceManagement.isVirtualApplianceModified)
                 {
                     event.stopPropagation();
 
@@ -172,20 +172,6 @@
                                             ResourceManager.getInstance().getString("VirtualAppliance",
                                                                                     "ALERT_UNSAVED_CHANGES_VIRTUALAPPLIANCE_TEXT"),
                                             Alert.YES | Alert.NO | Alert.CANCEL,
-                                            askUserSaveVirtualApplianceResponse);
-                //}else if(VirtualAppliance(this._virtualApplianceManagement.virtualAppliance).state.description == State.UNKNOWN.description && this._virtualApplianceManagement.isVirtualApplianceModified){
-                }else if(VirtualAppliance(this._virtualApplianceManagement.virtualAppliance).state.description == State.UNKNOWN.description && this._virtualApplianceManagement.isVirtualApplianceModified){
-                	
-                	event.stopPropagation();
-
-                    //Inform that changes will be discared because of the UNKNOWN status of the virtual applaince
-                    AbiCloudAlert.showAlert(ResourceManager.getInstance().getString("Common",
-                                                                                    "ALERT_TITLE_LABEL"),
-                                            ResourceManager.getInstance().getString("VirtualAppliance",
-                                                                                    "ALERT_UNSAVED_CHANGES_UNKNOWN_HEADER"),
-                                            ResourceManager.getInstance().getString("VirtualAppliance",
-                                                                                    "ALERT_UNSAVED_CHANGES_UNKNOWN_TEXT"),
-                                            Alert.OK,
                                             askUserSaveVirtualApplianceResponse);
                 }
             }
