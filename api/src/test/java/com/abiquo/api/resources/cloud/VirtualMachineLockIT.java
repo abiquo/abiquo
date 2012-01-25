@@ -208,8 +208,7 @@ public class VirtualMachineLockIT extends AbstractJpaGeneratorIT
         ClientResponse response =
             post(uri, dto, EnvironmentGenerator.SYSADMIN, EnvironmentGenerator.SYSADMIN);
 
-        Assert.assertSame(APIError.VIRTUAL_MACHINE_INVALID_STATE_UNDEPLOY.getMessage(),
-            response.getStatusCode(), 202);
+        Assert.assertEquals(response.getStatusCode(), 202);
     }
 
     @Test
@@ -411,8 +410,7 @@ public class VirtualMachineLockIT extends AbstractJpaGeneratorIT
         ClientResponse response =
             post(uri, dto, EnvironmentGenerator.SYSADMIN, EnvironmentGenerator.SYSADMIN);
 
-        Assert.assertSame(APIError.VIRTUAL_MACHINE_INVALID_STATE_UNDEPLOY.getMessage(),
-            response.getStatusCode(), 202);
+        Assert.assertEquals(response.getStatusCode(), 202);
     }
 
     @Test
