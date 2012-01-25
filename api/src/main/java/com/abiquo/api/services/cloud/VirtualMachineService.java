@@ -2396,7 +2396,6 @@ public class VirtualMachineService extends DefaultApiService
             ipTmp.setSequence(ip.getSequence());
             ipTmp.setTemporal(ip.getId());
             ipTmp.setIdResourceType(ip.getIdResourceType());
-            Hibernate.initialize(ip.getRasd());
             ipTmp.setRasd(ip.getRasd());
             ipTmp.setVirtualAppliance(ip.getVirtualAppliance());
             ipTmp.setVirtualDatacenter(ip.getVirtualDatacenter());

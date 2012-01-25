@@ -791,10 +791,19 @@ public class VirtualMachineResource extends AbstractResource
         }
         else
         {
-            // imported virtual machines
-            dto.addLink(restBuilder.buildVirtualMachineTemplateLink(vmtemplate.getEnterprise()
-                .getId(), v.getHypervisor().getMachine().getRack().getDatacenter().getId(),
-                vmtemplate.getId()));
+            if (vmtemplate.isStateful())
+            {
+                // stateful virtual machines (template hasn't got repository)
+                dto.addLink(restBuilder.buildVirtualMachineTemplateLink(vmtemplate.getEnterprise()
+                    .getId(), vdc.getDatacenter().getId(), vmtemplate.getId()));
+            }
+            else
+            {
+                // imported virtual machines
+                dto.addLink(restBuilder.buildVirtualMachineTemplateLink(vmtemplate.getEnterprise()
+                    .getId(), v.getHypervisor().getMachine().getRack().getDatacenter().getId(),
+                    vmtemplate.getId()));
+            }
         }
 
         return dto;
