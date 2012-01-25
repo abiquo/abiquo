@@ -227,6 +227,9 @@ public enum EventType implements Serializable
         "A Intance conversion process has started"), INSTANCE_PROCESS_FINISHED(1804,
         "INSTANCE_PROCESS_FINISHED", "A Instance conversion process has finished succesfuly"), INSTANCE_PROCESS_FAILED(
         1805, "INSTANCE_PROCESS_FAILED", "A Instance conversion process has failed"),
+    
+    // Asynch handlers
+    ASYNC_HANDLER_RESPONSE(1900, "ASYNC_HANDLER_RESPONSE", "Asynchronous hander response"),
 
     // UCS
     UCS_COMMUNICATION(
@@ -238,10 +241,7 @@ public enum EventType implements Serializable
         "Blade disassociation with a Service Profile in UCS"), UCS_DELETED(1703,
         "SERVICE_PROFILE_DELETED", "Service Profile deletion in UCS"), UCS_BLADE_POWEROFF(1704,
         "UCS_BLADE_POWER_OFF", "Blade powered off in UCS"), UCS_BLADE_POWERON(1705,
-        "UCS_BLADE_POWER_ON", "Blade powered on in UCS"),
-        
-        // Asynch handlers
-        ASYNC_HANDLER_RESPONSE(1900, "ASYNC_HANDLER_RESPONSE", "Asynchronous hander response");
+        "UCS_BLADE_POWER_ON", "Blade powered on in UCS");
 
     private final int event;
 

@@ -115,27 +115,20 @@ public class VirtualMachineLock extends DefaultApiService
     {
         VirtualMachine vm = vmService.getVirtualMachine(vdcId, vappId, vmId);
         VirtualMachineState originalState = vm.getState();
-
-        switch (originalState)
+        if (originalState == VirtualMachineState.LOCKED)
         {
-            case PAUSED:
-            case OFF:
-            case ON:
-                LOGGER.debug("The virtual machine is in state {} and is valid for undeploy. "
-                    + "Locking it..." + originalState.name());
-                break;
-            default:
-                tracer.log(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
-                    EventType.VM_UNDEPLOY,
-                    APIError.VIRTUAL_MACHINE_INVALID_STATE_UNDEPLOY.getMessage());
-                tracer.systemLog(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
-                    EventType.VM_UNDEPLOY, "virtualMachine.cannotUndeployed", vm.getName());
-                addConflictErrors(APIError.VIRTUAL_MACHINE_INVALID_STATE_UNDEPLOY);
-                flushErrors();
-                break;
-        }
+            tracer.log(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE, EventType.VM_UNDEPLOY,
+                APIError.VIRTUAL_MACHINE_INVALID_STATE_UNDEPLOY.getMessage());
+            tracer.systemLog(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
+                EventType.VM_UNDEPLOY, "virtualMachine.cannotUndeployed", vm.getName());
+            addConflictErrors(APIError.VIRTUAL_MACHINE_INVALID_STATE_UNDEPLOY);
+            flushErrors();
 
-        lock(vm);
+        }
+        if (originalState.existsInHypervisor())
+        {
+            lock(vm);
+        }
 
         return originalState;
     }

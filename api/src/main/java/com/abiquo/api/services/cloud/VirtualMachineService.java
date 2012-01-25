@@ -48,6 +48,7 @@ import com.abiquo.api.exceptions.APIException;
 import com.abiquo.api.exceptions.BadRequestException;
 import com.abiquo.api.resources.EnterpriseResource;
 import com.abiquo.api.resources.EnterprisesResource;
+import com.abiquo.api.resources.TaskResourceUtils;
 import com.abiquo.api.resources.appslibrary.DatacenterRepositoriesResource;
 import com.abiquo.api.resources.appslibrary.DatacenterRepositoryResource;
 import com.abiquo.api.resources.appslibrary.VirtualMachineTemplateResource;
@@ -334,12 +335,13 @@ public class VirtualMachineService extends DefaultApiService
 
         VirtualMachine newvm = buildVirtualMachineFromDto(vdc, virtualAppliance, dto);
         newvm.setTemporal(virtualMachine.getId()); // we set the id to temporal since we are trying
-        
-        // we need to get the configuration value ALWAYS after to set the ips of the new virtual machine
+
+        // we need to get the configuration value ALWAYS after to set the ips of the new virtual
+        // machine
         // since it depends to it to check if the configuration of the network is valid
         // And also we need to set AFTER to set the 'temporal' value from this DTO.
         newvm.setNetworkConfiguration(getNetworkConfigurationFromDto(virtualAppliance, newvm, dto));
-        
+
         // to update the virtualMachine.
 
         // allocated resources not present in the requested reconfiguration
@@ -392,7 +394,7 @@ public class VirtualMachineService extends DefaultApiService
      */
     @Transactional(propagation = Propagation.REQUIRED)
     public String reconfigureVirtualMachine(final VirtualDatacenter vdc,
-        final VirtualAppliance vapp, VirtualMachine vm, final VirtualMachine newValues,
+        final VirtualAppliance vapp, final VirtualMachine vm, final VirtualMachine newValues,
         final VirtualMachineState originalState)
     {
         if (checkReconfigureTemplate(vm.getVirtualMachineTemplate(),
@@ -1275,6 +1277,10 @@ public class VirtualMachineService extends DefaultApiService
         // those VirtualAppliance and VirtualDatacenter
         VirtualMachine virtualMachine = getVirtualMachine(vdcId, vappId, vmId);
 
+        if (!originalState.existsInHypervisor())
+        {
+            return TaskResourceUtils.UNTRACEABLE_TASK;
+        }
         LOGGER.debug("Check for permissions");
         // The user must have the proper permission
         userService.checkCurrentEnterpriseForPostMethods(virtualMachine.getEnterprise());

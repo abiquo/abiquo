@@ -32,6 +32,7 @@ import static com.abiquo.api.common.UriTestResolver.resolveVirtualMachineStateUR
 import static com.abiquo.api.common.UriTestResolver.resolveVirtualMachineURI;
 import static com.abiquo.api.common.UriTestResolver.resolveVirtualMachineUndeployURI;
 import static org.testng.Assert.assertEquals;
+import junit.framework.Assert;
 
 import org.apache.wink.client.ClientResponse;
 import org.testng.annotations.BeforeMethod;
@@ -194,7 +195,7 @@ public class VirtualMachineLockIT extends AbstractJpaGeneratorIT
     }
 
     @Test
-    public void testUndeployVirtualMachineReturns409IfInvalidState()
+    public void testUndeployVirtualMachineReturns202IfNotInHypervisor()
     {
         vm.setState(VirtualMachineState.NOT_ALLOCATED);
         update(vm);
@@ -207,7 +208,7 @@ public class VirtualMachineLockIT extends AbstractJpaGeneratorIT
         ClientResponse response =
             post(uri, dto, EnvironmentGenerator.SYSADMIN, EnvironmentGenerator.SYSADMIN);
 
-        assertErrors(response, 409, APIError.VIRTUAL_MACHINE_INVALID_STATE_UNDEPLOY);
+        Assert.assertEquals(response.getStatusCode(), 202);
     }
 
     @Test
@@ -396,7 +397,7 @@ public class VirtualMachineLockIT extends AbstractJpaGeneratorIT
     }
 
     @Test
-    public void testUndeployVirtualApplianceReturns409IfInvalidState()
+    public void testUndeployVirtualApplianceReturns202IfNotInHypervisor()
     {
         vm.setState(VirtualMachineState.NOT_ALLOCATED);
         update(vm);
@@ -409,7 +410,7 @@ public class VirtualMachineLockIT extends AbstractJpaGeneratorIT
         ClientResponse response =
             post(uri, dto, EnvironmentGenerator.SYSADMIN, EnvironmentGenerator.SYSADMIN);
 
-        assertErrors(response, 409, APIError.VIRTUAL_MACHINE_INVALID_STATE_UNDEPLOY);
+        Assert.assertEquals(response.getStatusCode(), 202);
     }
 
     @Test

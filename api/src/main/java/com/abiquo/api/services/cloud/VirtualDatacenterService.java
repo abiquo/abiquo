@@ -22,6 +22,7 @@
 package com.abiquo.api.services.cloud;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.UUID;
 
 import javax.persistence.EntityManager;
@@ -39,7 +40,6 @@ import com.abiquo.api.services.DefaultApiService;
 import com.abiquo.api.services.NetworkService;
 import com.abiquo.api.services.UserService;
 import com.abiquo.api.spring.security.SecurityService;
-import com.abiquo.api.spring.security.SecurityService;
 import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.model.transport.error.CommonError;
 import com.abiquo.server.core.cloud.NodeVirtualImage;
@@ -53,6 +53,7 @@ import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.InfrastructureRep;
+import com.abiquo.server.core.infrastructure.network.DhcpOption;
 import com.abiquo.server.core.infrastructure.network.Network;
 import com.abiquo.server.core.infrastructure.network.VLANNetwork;
 import com.abiquo.server.core.infrastructure.network.VLANNetworkDto;
@@ -267,6 +268,16 @@ public class VirtualDatacenterService extends DefaultApiService
         if (repo.containsResources(vdc, VolumeManagement.DISCRIMINATOR))
         {
             addConflictErrors(APIError.VIRTUAL_DATACENTER_CONTAINS_RESOURCES);
+        }
+
+        // delete dhcpOption
+        if (vdc.getDefaultVlan() != null)
+        {
+            List<DhcpOption> dhcpList = vdc.getDefaultVlan().getDhcpOption();
+            if (!dhcpList.isEmpty())
+            {
+                datacenterRepo.deleteAllDhcpOption(dhcpList);
+            }
         }
 
         flushErrors();
