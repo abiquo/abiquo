@@ -1186,6 +1186,35 @@ public class UriTestResolver
         return resolveURI(template, values, queryParams);
     }
 
+    public static String resolveStatefulVirtualMachineTemplatesURIWithCategoryAndVirtualDatacenter(
+        final Integer enterpriseId, final Integer datacenterId, final String categoryName,
+        final Integer virtualDatacenterId, final StatefulInclusion stateful)
+    {
+        String template =
+            buildPath(EnterprisesResource.ENTERPRISES_PATH,
+                EnterpriseResource.ENTERPRISE_PARAM, //
+                DatacenterRepositoriesResource.DATACENTER_REPOSITORIES_PATH,
+                DatacenterRepositoryResource.DATACENTER_REPOSITORY_PARAM, //
+                VirtualMachineTemplatesResource.VIRTUAL_MACHINE_TEMPLATES_PATH);
+
+        Map<String, String> values = new HashMap<String, String>();
+        values.put(EnterpriseResource.ENTERPRISE, String.valueOf(enterpriseId));
+        values
+            .put(DatacenterRepositoryResource.DATACENTER_REPOSITORY, String.valueOf(datacenterId));
+        values.put(VirtualMachineTemplatesResource.VIRTUAL_MACHINE_TEMPLATE_GET_VDC_QUERY_PARAM,
+            String.valueOf(virtualDatacenterId));
+
+        Map<String, String[]> queryParams = new HashMap<String, String[]>();
+        queryParams.put(
+            VirtualMachineTemplatesResource.VIRTUAL_MACHINE_TEMPLATE_GET_CATEGORY_QUERY_PARAM,
+            new String[] {categoryName});
+        queryParams.put(
+            VirtualMachineTemplatesResource.VIRTUAL_MACHINE_TEMPLATE_GET_STATEFUL_QUERY_PARAM,
+            new String[] {stateful.name()});
+
+        return resolveURI(template, values, queryParams);
+    }
+
     public static String resolveVirtualMachineTemplateURI(final Integer enterpriseId,
         final Integer datacenterId, final Integer virtualMachineTemplateId)
     {

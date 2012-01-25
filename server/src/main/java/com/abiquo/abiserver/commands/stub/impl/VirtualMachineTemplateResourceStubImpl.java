@@ -54,6 +54,8 @@ public class VirtualMachineTemplateResourceStubImpl extends AbstractAPIStub impl
     public final static String VIRTUAL_MACHINE_TEMPLATE_GET_HYPERVISOR_COMATIBLE_QUERY_PARAM =
         "hypervisorTypeName";
 
+    public final static String VIRTUAL_MACHINE_TEMPLATE_GET_VDC_QUERY_PARAM = "virtualdatacenter";
+
     public final static String VIRTUAL_MACHINE_TEMPLATE_GET_STATEFUL_QUERY_PARAM = "stateful";
 
     /**
@@ -67,7 +69,7 @@ public class VirtualMachineTemplateResourceStubImpl extends AbstractAPIStub impl
         final String hypervisorTypeName = null;
 
         return getVirtualMachineTemplateByCategoryAndHypervisorCompatible(idEnterprise,
-            datacenterId, categoryName, hypervisorTypeName, false);
+            datacenterId, null, categoryName, hypervisorTypeName, false);
     }
 
     /**
@@ -76,8 +78,8 @@ public class VirtualMachineTemplateResourceStubImpl extends AbstractAPIStub impl
      */
     @Override
     public DataResult<List<VirtualImage>> getVirtualMachineTemplateByCategoryAndHypervisorCompatible(
-        final Integer idEnterprise, final Integer datacenterId, final String categoryName,
-        final String hypervisorTypeName, final Boolean includeStateful)
+        final Integer idEnterprise, final Integer datacenterId, final Integer virtualDatacenterId,
+        final String categoryName, final String hypervisorTypeName, final Boolean includeStateful)
 
     {
         final DataResult<List<VirtualImage>> result = new DataResult<List<VirtualImage>>();
@@ -92,6 +94,13 @@ public class VirtualMachineTemplateResourceStubImpl extends AbstractAPIStub impl
                     VIRTUAL_MACHINE_TEMPLATE_GET_HYPERVISOR_COMATIBLE_QUERY_PARAM,
                     valueOf(hypervisorTypeName));
 
+        }
+
+        if (virtualDatacenterId != null)
+        {
+            vmtemplatesResource =
+                vmtemplatesResource.queryParam(VIRTUAL_MACHINE_TEMPLATE_GET_VDC_QUERY_PARAM,
+                    valueOf(virtualDatacenterId));
         }
 
         if (StringUtils.isNotEmpty(categoryName))

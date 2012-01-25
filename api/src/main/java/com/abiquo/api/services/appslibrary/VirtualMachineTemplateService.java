@@ -64,6 +64,8 @@ import com.abiquo.server.core.appslibrary.Icon;
 import com.abiquo.server.core.appslibrary.VirtualImageConversionDAO;
 import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
 import com.abiquo.server.core.appslibrary.VirtualMachineTemplateDto;
+import com.abiquo.server.core.cloud.VirtualDatacenter;
+import com.abiquo.server.core.cloud.VirtualDatacenterRep;
 import com.abiquo.server.core.cloud.VirtualMachineRep;
 import com.abiquo.server.core.enterprise.DatacenterLimits;
 import com.abiquo.server.core.enterprise.Enterprise;
@@ -99,6 +101,9 @@ public class VirtualMachineTemplateService extends DefaultApiServiceWithApplianc
     @Autowired
     private CategoryService categoryService;
 
+    @Autowired
+    private VirtualDatacenterRep virtualDatacenterRep;
+
     public VirtualMachineTemplateService()
     {
     }
@@ -111,6 +116,7 @@ public class VirtualMachineTemplateService extends DefaultApiServiceWithApplianc
         this.appsLibraryRep = new AppsLibraryRep(em);
         this.virtualMachineRep = new VirtualMachineRep(em);
         this.categoryService = new CategoryService(em);
+        this.virtualDatacenterRep = new VirtualDatacenterRep(em);
     }
 
     /**
@@ -494,10 +500,32 @@ public class VirtualMachineTemplateService extends DefaultApiServiceWithApplianc
     public List<VirtualMachineTemplate> findStatefulVirtualMachineTemplatesByDatacenter(
         final Integer enterpriseId, final Integer datacenterId, final StatefulInclusion stateful)
     {
+        return findStatefulVirtualMachineTemplatesByDatacenter(enterpriseId, datacenterId, null,
+            stateful);
+    }
+
+    @Transactional(readOnly = true)
+    public List<VirtualMachineTemplate> findStatefulVirtualMachineTemplatesByDatacenter(
+        final Integer enterpriseId, final Integer datacenterId, final Integer virtualdatacenterId,
+        final StatefulInclusion stateful)
+    {
         checkEnterpriseCanUseDatacenter(enterpriseId, datacenterId);
 
         Datacenter datacenter = infrastructureService.getDatacenter(datacenterId);
-        return appsLibraryRep.findStatefulVirtualMachineTemplatesByDatacenter(datacenter, stateful);
+
+        if (virtualdatacenterId == null)
+        {
+            return appsLibraryRep.findStatefulVirtualMachineTemplatesByDatacenter(datacenter,
+                stateful);
+        }
+        else
+        {
+            VirtualDatacenter virtualdatacenter =
+                virtualDatacenterRep.findById(virtualdatacenterId);
+            return appsLibraryRep
+                .findStatefulVirtualMachineTemplatesByDatacenterAndVirtualDatacenter(datacenter,
+                    virtualdatacenter, stateful);
+        }
     }
 
     @Transactional(readOnly = true)
@@ -505,13 +533,34 @@ public class VirtualMachineTemplateService extends DefaultApiServiceWithApplianc
         final Integer enterpriseId, final Integer datacenterId, final String categoryName,
         final StatefulInclusion stateful)
     {
+        return findStatefulVirtualMachineTemplatesByCategoryAndDatacenter(enterpriseId,
+            datacenterId, null, categoryName, stateful);
+    }
+
+    @Transactional(readOnly = true)
+    public List<VirtualMachineTemplate> findStatefulVirtualMachineTemplatesByCategoryAndDatacenter(
+        final Integer enterpriseId, final Integer datacenterId, final Integer virtualdatacenterId,
+        final String categoryName, final StatefulInclusion stateful)
+    {
+
         checkEnterpriseCanUseDatacenter(enterpriseId, datacenterId);
 
         Datacenter datacenter = infrastructureService.getDatacenter(datacenterId);
         Category category = categoryService.getCategoryByName(categoryName);
 
-        return appsLibraryRep.findStatefulVirtualMachineTemplatesByCategoryAndDatacenter(category,
-            datacenter, stateful);
+        if (virtualdatacenterId == null)
+        {
+            return appsLibraryRep.findStatefulVirtualMachineTemplatesByCategoryAndDatacenter(
+                category, datacenter, stateful);
+        }
+        else
+        {
+            VirtualDatacenter virtualdatacenter =
+                virtualDatacenterRep.findById(virtualdatacenterId);
+            return appsLibraryRep
+                .findStatefulVirtualMachineTemplatesByCategoryAndDatacenterandVirutalDatacenter(
+                    category, datacenter, virtualdatacenter, stateful);
+        }
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
