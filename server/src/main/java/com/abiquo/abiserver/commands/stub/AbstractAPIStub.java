@@ -79,6 +79,20 @@ public class AbstractAPIStub
 
     protected RestClient client;
 
+    public static final String START_WITH = "startwith";
+
+    public static final String BY = "by";
+
+    public static final String FILTER = "has";
+
+    public static final String LIMIT = "limit";
+
+    public static final String ASC = "asc";
+
+    public static final Integer DEFAULT_PAGE_LENGTH = 25;
+
+    public static final String DEFAULT_PAGE_LENGTH_STRING = "25";
+
     protected final String apiUri;
 
     protected UserSession currentSession;
@@ -117,21 +131,15 @@ public class AbstractAPIStub
             // Do not retry methods that fail with 5xx error codes
             props.put("jclouds.max-retries", "0");
             // Custom timeouts in ms
-            props.put("jclouds.timeouts.CloudClient.deployVirtualApplianceAction", "90000");
-            props.put("jclouds.timeouts.CloudClient.deployVirtualMachine", "90000");
+            // props.put("jclouds.timeouts.CloudClient.deployVirtualApplianceAction", "90000");
+            // props.put("jclouds.timeouts.CloudClient.deployVirtualMachine", "90000");
 
             context =
-                new AbiquoContextFactory().createContext(token, ImmutableSet
-                    .<Module> of(new NullLoggingModule()), props);
+                new AbiquoContextFactory().createContext(token,
+                    ImmutableSet.<Module> of(new NullLoggingModule()), props);
         }
 
         return context;
-    }
-
-    /* Set the timeout to the double fo time of the set in the system properties */
-    private Integer nodecollectorTimeout()
-    {
-        return Integer.parseInt(System.getProperty("abiquo.nodecollector.timeout", "90000"));
     }
 
     protected void releaseApiClient()
@@ -192,13 +200,25 @@ public class AbstractAPIStub
     protected ClientResponse post(final String uri, final Object dto, final String user,
         final String password)
     {
-        return resource(uri, user, password).contentType(MediaType.APPLICATION_XML).post(dto);
+        Resource resource = resource(uri, user, password);
+        if (dto != null)
+        {
+            // Only add the headers if the request has a body
+            resource.contentType(MediaType.APPLICATION_XML);
+        }
+        return resource.post(dto);
     }
 
     protected ClientResponse put(final String uri, final Object dto, final String user,
         final String password)
     {
-        return resource(uri, user, password).contentType(MediaType.APPLICATION_XML).put(dto);
+        Resource resource = resource(uri, user, password);
+        if (dto != null)
+        {
+            // Only add the headers if the request has a body
+            resource.contentType(MediaType.APPLICATION_XML);
+        }
+        return resource.put(dto);
     }
 
     protected ClientResponse put(final String uri, final Object dto, final String user,
@@ -233,15 +253,20 @@ public class AbstractAPIStub
     protected ClientResponse post(final String uri, final Object dto)
     {
         UserHB user = getCurrentUserCredentials();
-        return resource(uri, user.getUser(), user.getPassword()).contentType(
-            MediaType.APPLICATION_XML).post(dto);
+        Resource resource = resource(uri, user.getUser(), user.getPassword());
+        if (dto != null)
+        {
+            // Only add the headers if the request has a body
+            resource.contentType(MediaType.APPLICATION_XML);
+        }
+        return resource.post(dto);
     }
 
     protected ClientResponse post(final String uri, final Object dto, final String mediaType)
     {
         UserHB user = getCurrentUserCredentials();
-        return resource(uri, user.getUser(), user.getPassword()).contentType(mediaType).accept(
-            mediaType).post(dto);
+        return resource(uri, user.getUser(), user.getPassword()).contentType(mediaType)
+            .accept(mediaType).post(dto);
     }
 
     protected Resource resource(final String uri)
@@ -261,15 +286,14 @@ public class AbstractAPIStub
     protected ClientResponse put(final String uri, final Object dto)
     {
         UserHB user = getCurrentUserCredentials();
-        return resource(uri, user.getUser(), user.getPassword()).contentType(
-            MediaType.APPLICATION_XML).put(dto);
+        Resource resource = resource(uri, user.getUser(), user.getPassword());
+        if (dto != null)
+        {
+            // Only add the headers if the request has a body
+            resource.contentType(MediaType.APPLICATION_XML);
+        }
+        return resource.put(dto);
     }
-
-    // protected ClientResponse put(final String uri, final Object dto, String mediaType)
-    // {
-    // UserHB user = getCurrentUser();
-    // return resource(uri, user.getUser(), user.getPassword()).contentType(mediaType).put(dto);
-    // }
 
     protected ClientResponse put(final String uri, final Object dto, final String mediaType)
     {
@@ -292,8 +316,8 @@ public class AbstractAPIStub
     protected ClientResponse delete(final String uri, final String mediaType)
     {
         UserHB user = getCurrentUserCredentials();
-        return resource(uri, user.getUser(), user.getPassword()).accept(mediaType).contentType(
-            mediaType).delete();
+        return resource(uri, user.getUser(), user.getPassword()).accept(mediaType)
+            .contentType(mediaType).delete();
     }
 
     private Resource resource(final String uri, final String user, final String password)
@@ -384,11 +408,25 @@ public class AbstractAPIStub
             ErrorsDto errors = response.getEntity(ErrorsDto.class);
             result.setMessage(errors.toString());
             result.setErrorCode(errors.getCollection().get(0).getCode());
-            if (errors.getCollection().get(0).getCode().equals("LIMIT_EXCEEDED"))
+            if (errors.getCollection().get(0).getCode().equals("SOFT_LIMIT_EXCEEDED"))
+            {
+                result.setResultCode(BasicResult.SOFT_LIMT_EXCEEDED);
+                // limit exceeded does not include the detail
+                if (result.getMessage().length() < 254)
+                {
+                    result.setResultCode(0);
+                }
+            }
+            else if (errors.getCollection().get(0).getCode().equals("LIMIT_EXCEEDED"))
             {
                 result.setResultCode(BasicResult.HARD_LIMT_EXCEEDED);
+                // limit exceeded does not include the detail
+                if (result.getMessage().length() < 254)
+                {
+                    result.setResultCode(0);
+                }
             }
-            if (errors.getCollection().get(0).getCode().equals("VM-44"))
+            else if (errors.getCollection().get(0).getCode().equals("VM-44"))
             {
                 result.setResultCode(BasicResult.NOT_MANAGED_VIRTUAL_IMAGE);
             }
@@ -398,34 +436,58 @@ public class AbstractAPIStub
     protected void populateErrors(final Exception ex, final BasicResult result,
         final String methodName)
     {
-        result.setSuccess(false);
         if (ex instanceof AuthorizationException)
         {
-            ErrorManager.getInstance(AbiCloudConstants.ERROR_PREFIX).reportError(
-                new ResourceManager(BasicCommand.class), result,
-                "onFaultAuthorization.noPermission", methodName);
-            result.setMessage(ex.getMessage());
-            result.setResultCode(BasicResult.NOT_AUTHORIZED);
-            throw new UserSessionException(result);
+            populateErrors((AuthorizationException) ex, result, methodName);
         }
         else if (ex instanceof AbiquoException)
         {
-            AbiquoException abiquoException = (AbiquoException) ex;
-            result.setMessage(abiquoException.getMessage());
-            result.setErrorCode(abiquoException.getErrors().get(0).getCode());
-            if (abiquoException.hasError("LIMIT_EXCEEDED"))
-            {
-                result.setResultCode(BasicResult.HARD_LIMT_EXCEEDED);
-                // limit exceeded does not include the detail
-                if (result.getMessage().length() < 254)
-                {
-                    result.setResultCode(0);
-                }
-            }
+            populateErrors((AbiquoException) ex, result, methodName);
         }
         else
         {
+            result.setSuccess(false);
             result.setMessage(ex.getMessage());
+        }
+    }
+
+    protected void populateErrors(final AuthorizationException ex, final BasicResult result,
+        final String methodName)
+    {
+        result.setSuccess(false);
+        ErrorManager.getInstance(AbiCloudConstants.ERROR_PREFIX).reportError(
+            new ResourceManager(BasicCommand.class), result, "onFaultAuthorization.noPermission",
+            methodName);
+        result.setMessage(ex.getMessage());
+        result.setResultCode(BasicResult.NOT_AUTHORIZED);
+        throw new UserSessionException(result);
+    }
+
+    protected void populateErrors(final AbiquoException abiquoException, final BasicResult result,
+        final String methodName)
+    {
+
+        result.setSuccess(false);
+        result.setMessage(abiquoException.getMessage());
+        result.setErrorCode(abiquoException.getErrors().get(0).getCode());
+
+        if (abiquoException.hasError("SOFT_LIMIT_EXCEEDED"))
+        {
+            result.setResultCode(BasicResult.SOFT_LIMT_EXCEEDED);
+            // limit exceeded does not include the detail
+            if (result.getMessage().length() < 254)
+            {
+                result.setResultCode(0);
+            }
+        }
+        else if (abiquoException.hasError("LIMIT_EXCEEDED"))
+        {
+            result.setResultCode(BasicResult.HARD_LIMT_EXCEEDED);
+            // limit exceeded does not include the detail
+            if (result.getMessage().length() < 254)
+            {
+                result.setResultCode(0);
+            }
         }
     }
 
@@ -451,8 +513,8 @@ public class AbstractAPIStub
 
     protected String createEnterpriseLink(final int enterpriseId)
     {
-        return URIResolver.resolveURI(apiUri, "admin/enterprises/{enterprise}", Collections
-            .singletonMap("enterprise", valueOf(enterpriseId)));
+        return URIResolver.resolveURI(apiUri, "admin/enterprises/{enterprise}",
+            Collections.singletonMap("enterprise", valueOf(enterpriseId)));
     }
 
     protected String createEnterpriseIPsLink(final int enterpriseId)
@@ -545,8 +607,8 @@ public class AbstractAPIStub
 
     protected String createRoleLink(final int roleId)
     {
-        return URIResolver.resolveURI(apiUri, "admin/roles/{role}", Collections.singletonMap(
-            "role", valueOf(roleId)));
+        return URIResolver.resolveURI(apiUri, "admin/roles/{role}",
+            Collections.singletonMap("role", valueOf(roleId)));
     }
 
     protected String createRolesLink()
@@ -573,8 +635,8 @@ public class AbstractAPIStub
 
     protected String createPrivilegeLink(final int privilegeId)
     {
-        return URIResolver.resolveURI(apiUri, "config/privileges/{privilege}", Collections
-            .singletonMap("privilege", valueOf(privilegeId)));
+        return URIResolver.resolveURI(apiUri, "config/privileges/{privilege}",
+            Collections.singletonMap("privilege", valueOf(privilegeId)));
     }
 
     protected String createRoleActionGetPrivilegesURI(final Integer entId)
@@ -606,8 +668,8 @@ public class AbstractAPIStub
 
     protected String createRoleLdapLink(final int roleLdapId)
     {
-        return URIResolver.resolveURI(apiUri, "admin/rolesldap/{roleldap}", Collections
-            .singletonMap("roleldap", valueOf(roleLdapId)));
+        return URIResolver.resolveURI(apiUri, "admin/rolesldap/{roleldap}",
+            Collections.singletonMap("roleldap", valueOf(roleLdapId)));
     }
 
     protected String createUsersLink(final String enterpriseId)
@@ -619,8 +681,8 @@ public class AbstractAPIStub
         final Integer numResults)
     {
         String uri =
-            URIResolver.resolveURI(apiUri, "admin/enterprises/{enterprise}/users", Collections
-                .singletonMap("enterprise", enterpriseId));
+            URIResolver.resolveURI(apiUri, "admin/enterprises/{enterprise}/users",
+                Collections.singletonMap("enterprise", enterpriseId));
 
         Map<String, String[]> queryParams = new HashMap<String, String[]>();
         if (offset != null && numResults != null)
@@ -681,12 +743,24 @@ public class AbstractAPIStub
         return uri;
     }
 
+    protected String createDatacenterRepositoriesLink(final Integer enterpriseId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("enterprise", valueOf(enterpriseId));
+
+        String uri =
+            URIResolver.resolveURI(apiUri, "admin/enterprises/{enterprise}/"
+                + "datacenterrepositories", params);
+
+        return uri;
+    }
+
     protected String createTemplateDefinitionsLink(final String enterpriseId)
     {
         String uri =
             URIResolver.resolveURI(apiUri,
-                "admin/enterprises/{enterprise}/appslib/templateDefinitions", Collections
-                    .singletonMap("enterprise", enterpriseId));
+                "admin/enterprises/{enterprise}/appslib/templateDefinitions",
+                Collections.singletonMap("enterprise", enterpriseId));
         return uri;
     }
 
@@ -1087,7 +1161,7 @@ public class AbstractAPIStub
         params.put("machine", machineId.toString());
 
         return resolveURI(apiUri,
-            "admin/datacenters/{datacenter}/racks/{rack}/machines/{machine}/action/powerOn", params);
+            "admin/datacenters/{datacenter}/racks/{rack}/machines/{machine}/action/poweron", params);
 
     }
 
@@ -1100,7 +1174,7 @@ public class AbstractAPIStub
         params.put("machine", machineId.toString());
 
         return resolveURI(apiUri,
-            "admin/datacenters/{datacenter}/racks/{rack}/machines/{machine}/action/powerOff",
+            "admin/datacenters/{datacenter}/racks/{rack}/machines/{machine}/action/poweroff",
             params);
     }
 
@@ -1576,6 +1650,21 @@ public class AbstractAPIStub
                 params);
     }
 
+    protected String createVirtualMachineResetUrl(final Integer virtualDatacenterId,
+        final Integer virtualApplianceId, final Integer virtualMachineId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("virtualDatacenter", String.valueOf(virtualDatacenterId));
+        params.put("virtualApplianceId", String.valueOf(virtualApplianceId));
+        params.put("virtualMachineId", String.valueOf(virtualMachineId));
+
+        return URIResolver
+            .resolveURI(
+                apiUri,
+                "cloud/virtualdatacenters/{virtualDatacenter}/virtualappliances/{virtualApplianceId}/virtualmachines/{virtualMachineId}/action/reset",
+                params);
+    }
+
     protected String createVirtualApplianceUrl(final Integer virtualDatacenterId,
         final Integer virtualApplianceId)
     {
@@ -1604,8 +1693,8 @@ public class AbstractAPIStub
 
     protected String createCurrencyLink(final int currencyId)
     {
-        return URIResolver.resolveURI(apiUri, "config/currencies/{currency}", Collections
-            .singletonMap("currency", valueOf(currencyId)));
+        return URIResolver.resolveURI(apiUri, "config/currencies/{currency}",
+            Collections.singletonMap("currency", valueOf(currencyId)));
     }
 
     protected String createPricingTemplateLink(final int templateId)
@@ -1679,16 +1768,16 @@ public class AbstractAPIStub
 
     protected String createCostCodeLink(final int costCodeId)
     {
-        return URIResolver.resolveURI(apiUri, "config/costcodes/{costcode}", Collections
-            .singletonMap("costcode", valueOf(costCodeId)));
+        return URIResolver.resolveURI(apiUri, "config/costcodes/{costcode}",
+            Collections.singletonMap("costcode", valueOf(costCodeId)));
     }
 
     protected String createCostCodeCurrenciesLink(final String costCodeId, Integer offset,
         final Integer numResults)
     {
         String uri =
-            URIResolver.resolveURI(apiUri, "config/costcodes/{costcode}/currencies", Collections
-                .singletonMap("costcode", valueOf(costCodeId)));
+            URIResolver.resolveURI(apiUri, "config/costcodes/{costcode}/currencies",
+                Collections.singletonMap("costcode", valueOf(costCodeId)));
 
         Map<String, String[]> queryParams = new HashMap<String, String[]>();
         if (offset != null && numResults != null)
@@ -1808,5 +1897,154 @@ public class AbstractAPIStub
         }
 
         return link.getHref().substring(link.getHref().lastIndexOf("/") + 1);
+    }
+
+    protected String createRackOrganizationsLink(final Integer datacenterId, final Integer rackId,
+        final Map<String, String[]> queryParams)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("datacenter", datacenterId.toString());
+        params.put("rack", rackId.toString());
+        return resolveURI(apiUri, "admin/datacenters/{datacenter}/racks/{rack}/organizations",
+            params, queryParams);
+    }
+
+    protected String createRackLogicServersLink(final Integer datacenterId, final Integer rackId,
+        final Map<String, String[]> queryParams)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("datacenter", datacenterId.toString());
+        params.put("rack", rackId.toString());
+        return resolveURI(apiUri, "admin/datacenters/{datacenter}/racks/{rack}/logicservers",
+            params, queryParams);
+    }
+
+    protected String createRackLogicServerTemplatesLink(final Integer datacenterId,
+        final Integer rackId, final Map<String, String[]> queryParams)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("datacenter", datacenterId.toString());
+        params.put("rack", rackId.toString());
+
+        return resolveURI(apiUri, "admin/datacenters/{datacenter}/racks/{rack}/lstemplates",
+            params, queryParams);
+    }
+
+    protected String createRackCloneLogicServerLink(final Integer datacenterId,
+        final Integer rackId, final Map<String, String[]> queryParams)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("datacenter", datacenterId.toString());
+        params.put("rack", rackId.toString());
+        return resolveURI(apiUri, "admin/datacenters/{datacenter}/racks/{rack}/logicservers/clone",
+            params, queryParams);
+    }
+
+    protected String createRackAssociateLogicServerLink(final Integer datacenterId,
+        final Integer rackId, final Map<String, String[]> queryParams)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("datacenter", datacenterId.toString());
+        params.put("rack", rackId.toString());
+        return resolveURI(apiUri,
+            "admin/datacenters/{datacenter}/racks/{rack}/logicservers/associate", params,
+            queryParams);
+    }
+
+    protected String createRackDissociateLogicServerLink(final Integer datacenterId,
+        final Integer rackId, final Map<String, String[]> queryParams)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("datacenter", datacenterId.toString());
+        params.put("rack", rackId.toString());
+        return resolveURI(apiUri,
+            "admin/datacenters/{datacenter}/racks/{rack}/logicservers/dissociate", params,
+            queryParams);
+    }
+
+    protected String createRackDeleteLogicServerLink(final Integer datacenterId,
+        final Integer rackId, final Map<String, String[]> queryParams)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("datacenter", datacenterId.toString());
+        params.put("rack", rackId.toString());
+        return resolveURI(apiUri,
+            "admin/datacenters/{datacenter}/racks/{rack}/logicservers/delete", params, queryParams);
+    }
+
+    protected String createMachineBladeLedOnLink(final Integer datacenterId, final Integer rackId,
+        final Integer machineId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("datacenter", datacenterId.toString());
+        params.put("rack", rackId.toString());
+        params.put("machine", machineId.toString());
+        return resolveURI(apiUri,
+            "admin/datacenters/{datacenter}/racks/{rack}/machines/{machine}/action/ledon", params);
+    }
+
+    protected String createMachineBladeLsLink(final Integer datacenterId, final Integer rackId,
+        final Integer machineId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("datacenter", datacenterId.toString());
+        params.put("rack", rackId.toString());
+        params.put("machine", machineId.toString());
+        return resolveURI(apiUri,
+            "admin/datacenters/{datacenter}/racks/{rack}/machines/{machine}/logicserver", params);
+    }
+
+    protected String createRackAssociateLogicServerTemplateLink(final Integer datacenterId,
+        final Integer rackId, final Map<String, String[]> queryParams)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("datacenter", datacenterId.toString());
+        params.put("rack", rackId.toString());
+        return resolveURI(apiUri,
+            "admin/datacenters/{datacenter}/racks/{rack}/logicservers/assoctemplate", params,
+            queryParams);
+    }
+
+    protected String createRackAssociateLogicServerCloneLink(final Integer datacenterId,
+        final Integer rackId, final Map<String, String[]> queryParams)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("datacenter", datacenterId.toString());
+        params.put("rack", rackId.toString());
+        return resolveURI(apiUri,
+            "admin/datacenters/{datacenter}/racks/{rack}/logicservers/assocclone", params,
+            queryParams);
+    }
+
+    protected String createObjectFsmLink(final Integer datacenterId, final Integer rackId,
+        final Map<String, String[]> queryParams)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("datacenter", datacenterId.toString());
+        params.put("rack", rackId.toString());
+        return resolveURI(apiUri, "admin/datacenters/{datacenter}/racks/{rack}/fsm", params,
+            queryParams);
+    }
+
+    protected String createMachineBladeLedOffLink(final Integer datacenterId, final Integer rackId,
+        final Integer machineId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("datacenter", datacenterId.toString());
+        params.put("rack", rackId.toString());
+        params.put("machine", machineId.toString());
+        return resolveURI(apiUri,
+            "admin/datacenters/{datacenter}/racks/{rack}/machines/{machine}/action/ledoff", params);
+    }
+
+    protected String createMachineBladeLedLink(final Integer datacenterId, final Integer rackId,
+        final Integer machineId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("datacenter", datacenterId.toString());
+        params.put("rack", rackId.toString());
+        params.put("machine", machineId.toString());
+        return resolveURI(apiUri,
+            "admin/datacenters/{datacenter}/racks/{rack}/machines/{machine}/led", params);
     }
 }

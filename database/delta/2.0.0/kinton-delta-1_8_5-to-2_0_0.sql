@@ -205,6 +205,12 @@ CREATE TABLE `kinton`.`pricingTier` (
 --         CONSTRAINTS (alter table, etc)         --
 -- ---------------------------------------------- --
 
+ALTER TABLE `kinton`.`physicalmachine` MODIFY COLUMN `vswitchName` varchar(200) NOT NULL;
+
+-- UCS default template
+ALTER TABLE `kinton`.`ucs_rack` ADD COLUMN `defaultTemplate` varchar(200);
+ALTER TABLE `kinton`.`ucs_rack` ADD COLUMN `maxMachinesOn` int(4) DEFAULT 0;
+
 ALTER TABLE `kinton`.`virtualimage` DROP COLUMN `treaty`;
 ALTER TABLE `kinton`.`virtualimage` DROP COLUMN `deleted`;
 
@@ -257,10 +263,23 @@ ALTER TABLE `kinton`.`rasd_management` ADD COLUMN `sequence` int(10) unsigned de
 -- Modify constraint --
 ALTER TABLE `kinton`.`rasd_management` DROP CONSTRAINT `idResource_FK`;
 ALTER TABLE `kinton`.`rasd_management` ADD  CONSTRAINT `idResource_FK2` FOREIGN KEY (`idResource`) REFERENCES `rasd` (`instanceID`) ON DELETE SET NULL
+
+
+ALTER TABLE `kinton`.`virtualmachine` ADD COLUMN `network_configuration_id` int(11) unsigned; 
+ALTER TABLE `kinton`.`virtualmachine` ADD KEY `virtualMachine_FK6`;
+ALTER TABLE `kinton`.`virtualmachine` ADD CONSTRAINT `virtualMachine_FK6` FOREIGN KEY (`network_configuration_id`) REFERENCES `network_configuration` (`network_configuration_id`) ON DELETE SET NULL; 
+
+update vlan_network vl, ip_pool_management ip, rasd_management rm, virtualmachine vm set vm.network_configuration_id = vl.network_configuration_id where ip.vlan_network_id = vl.vlan_network_id and ip.idManagement = rm.idManagement and configureGateway = 1 and rm.idvm = vm.idvm;
+
+ALTER TABLE `ip_pool_management` DROP COLUMN `configureGateway`;
+
 -- ---------------------------------------------- --
 --   DATA CHANGES (insert, update, delete, etc)   --
 -- ---------------------------------------------- --
 
+INSERT INTO `kinton`.`system_properties` (`name`, `value`, `description`) VALUES
+ ("client.infra.ucsManagerLink","/ucsm/ucsm.jnlp","URL to display UCS Manager Interface");
+ 
 -- PRICING --
 -- Dumping data for table `kinton`.`privilege`
 
@@ -308,6 +327,7 @@ UNLOCK TABLES;
 -- ALTER TABLE `kinton`.`vlan_network` DROP COLUMN `default_network`;
 
 UPDATE `kinton`.`virtualimage` set creation_user = 'ABIQUO-BEFORE-2.0', creation_date = CURRENT_TIMESTAMP;
+UPDATE `kinton`.`virtualimage` set idRepository = null where stateful = 1;
 
 /* ABICLOUDPREMIUM-2878 - For consistency porpouse, changed vharchar(30) to varchar(256) */
 ALTER TABLE `kinton`.`metering` MODIFY COLUMN `physicalmachine` VARCHAR(256)  CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL;

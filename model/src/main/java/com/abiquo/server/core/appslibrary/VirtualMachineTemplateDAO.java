@@ -22,7 +22,10 @@
 package com.abiquo.server.core.appslibrary;
 
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import javax.persistence.EntityManager;
 
@@ -99,10 +102,40 @@ import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
             criteria.add(compatibleOrConversions(hypervisor, criteria));
         }
 
-        criteria.addOrder(Order.asc(VirtualMachine.NAME_PROPERTY));
+        // TODO 
+        // criteria.setProjection(Projections.distinct(Projections.id()));
+        // criteria.setResultTransformer(DistinctResultTransformer.INSTANCE);
+        criteria.addOrder(Order.asc(VirtualMachineTemplate.NAME_PROPERTY));
+
+        List<VirtualMachineTemplate> result = getResultList(criteria);
+        return distinct(result);
+    }
+    
+    public List<VirtualMachineTemplate> findBy(final Category category)
+    {
+        Criteria criteria=createCriteria(sameCategory(category));
+        criteria.addOrder(Order.asc(VirtualMachineTemplate.NAME_PROPERTY));
+
         List<VirtualMachineTemplate> result = getResultList(criteria);
         return result;
     }
+    
+
+    private List<VirtualMachineTemplate> distinct(final List<VirtualMachineTemplate> ins)
+    {
+        List<VirtualMachineTemplate> outs = new LinkedList<VirtualMachineTemplate>();
+        Set<Integer> ids = new HashSet<Integer>();
+        for(VirtualMachineTemplate in : ins)
+        {
+            if(!ids.contains(in.getId()))
+            {
+                ids.add(in.getId());
+                outs.add(in);
+            }
+        }
+        return outs;
+    }
+    
 
     public List<VirtualMachineTemplate> findImportedBy(final Enterprise enterprise,
         final Category category, final HypervisorType hypervisor)
@@ -242,10 +275,13 @@ import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
         return Restrictions.eq(VirtualMachineTemplate.ENTERPRISE_PROPERTY, enterprise);
     }
 
-    private static Criterion sameRepository(
+    private static Criterion sameRepositoryAndNotStatefull(
         final com.abiquo.server.core.infrastructure.Repository repository)
     {
+//        return Restrictions.and(Restrictions.eq(VirtualMachineTemplate.STATEFUL_PROPERTY, false),
+//            Restrictions.eq(VirtualMachineTemplate.REPOSITORY_PROPERTY, repository));
         return Restrictions.eq(VirtualMachineTemplate.REPOSITORY_PROPERTY, repository);
+
     }
 
     private static Criterion repositoryNull()
@@ -289,7 +325,7 @@ import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
     private static Criterion sameEnterpriseOrSharedInRepo(final Enterprise enterprise,
         final com.abiquo.server.core.infrastructure.Repository repository)
     {
-        return Restrictions.and(sameRepository(repository),
+        return Restrictions.and(sameRepositoryAndNotStatefull(repository),
             Restrictions.or(sameEnterprise(enterprise), sharedVirtualMachineTemplate()));
     }
 
@@ -297,7 +333,7 @@ import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
         final com.abiquo.server.core.infrastructure.Repository repository, final String path)
     {
         Criterion sameEnterpriseOrSharedInRepo =
-            Restrictions.and(sameRepository(repository),
+            Restrictions.and(sameRepositoryAndNotStatefull(repository),
                 Restrictions.or(sameEnterprise(enterprise), sharedVirtualMachineTemplate()));
 
         return Restrictions.and(Restrictions.eq(VirtualMachineTemplate.PATH_PROPERTY, path),

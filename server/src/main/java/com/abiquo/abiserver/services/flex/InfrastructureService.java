@@ -269,33 +269,10 @@ public class InfrastructureService
      * @param user
      * @return a DataResult object, with an ArrayList of DataCenter
      */
-    public BasicResult getAllowedDataCenters(final UserSession session)
+    public BasicResult getAllowedDataCenters(final UserSession session,
+        final Integer effectiveEnterpriseId)
     {
-        return getDataCenters(session);
-    }
-
-    /**
-     * Community or premium. XXX IoC do it yourselfe
-     */
-    private InfrastructureCommand getInfrastructureCommandImplementation()
-    {
-        final String premiumClass =
-            "com.abiquo.abiserver.commands.impl.InfrastructureCommandPremiumImpl";
-
-        InfrastructureCommand instance;
-        try
-        {
-            instance =
-                (InfrastructureCommand) Thread.currentThread().getContextClassLoader()
-                    .loadClass(premiumClass).newInstance();
-
-        }
-        catch (final Exception e)
-        {
-            instance = new InfrastructureCommandImpl();
-        }
-
-        return instance;
+        return proxyDatacentersStub(session).getDatacenters(effectiveEnterpriseId);
     }
 
     /**
@@ -595,7 +572,7 @@ public class InfrastructureService
     }
 
     public DataResult<HypervisorRemoteAccessInfo> getHypervisorRemoteAccessInfo(
-        UserSession userSession, PhysicalMachine machine)
+        final UserSession userSession, final PhysicalMachine machine)
     {
         MachineResourceStub proxy =
             APIStubFactory.getInstance(userSession, new MachineResourceStubImpl(),

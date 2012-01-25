@@ -217,7 +217,7 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
 
     public static final String BY_VIRTUAL_MACHINE = "SELECT ip "
         + "FROM IpPoolManagement ip INNER JOIN ip.virtualMachine vm " + "WHERE vm.id = :vm_id "
-        + "ORDER BY ip.rasd.configurationName";
+        + "ORDER BY ip.sequence";
 
     public static final String BY_VLAN = " SELECT ip FROM IpPoolManagement ip "
         + " left join ip.virtualMachine vm "
@@ -654,13 +654,13 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
     }
 
     public List<IpPoolManagement> findIpsByVirtualMachineWithConfigurationId(
-        final VirtualMachine vm, final Integer vmConfigId)
+        final VirtualMachine vm)
     {
         List<IpPoolManagement> ips = findIpsByVirtualMachine(vm);
         List<IpPoolManagement> resultIps = new ArrayList<IpPoolManagement>();
         for (IpPoolManagement ip : ips)
         {
-            if (ip.getVlanNetwork().getConfiguration().getId().equals(vmConfigId))
+            if (ip.getVlanNetwork().getConfiguration().getId().equals(vm.getNetworkConfiguration().getId()))
             {
                 resultIps.add(ip);
             }

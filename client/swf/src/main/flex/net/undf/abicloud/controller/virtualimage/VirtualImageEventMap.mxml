@@ -29,6 +29,7 @@
 
     <mx:Script>
         <![CDATA[
+        	import net.undf.abicloud.controller.infrastructure.InfrastructureResultHandler;
             import mx.rpc.remoting.mxml.RemoteObject;
 
             import net.undf.abicloud.business.Services;
@@ -545,6 +546,42 @@
 
                 <!-- Unblock screen -->
                 <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </faultHandlers>
+
+        </RemoteObjectInvoker>
+
+    </EventHandlers>
+    
+     <!-- VirtualImageEvent.GET_ALLOWED_DATACENTERS ________________________________________________________________________ -->
+    <EventHandlers type="{VirtualImageEvent.GET_ALLOWED_DATACENTERS}">
+
+        <!-- Blocking screen -->
+        <InlineInvoker method="ScreenBlocker.blockScreen"/>
+
+        <!-- Make call to the server here -->
+
+        <RemoteObjectInvoker instance="{services.appsLibraryService}"
+            method="getAllowedDataCenters"
+            arguments="{[AbiCloudModel.getInstance().loginManager.session,
+            event.enterpriseId]}">
+
+            <resultHandlers>
+                <MethodInvoker generator="{InfrastructureResultHandler}"
+                    method="handleGetAllowedDataCenters"
+                    arguments="{[resultObject]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </resultHandlers>
+
+            <faultHandlers>
+                <MethodInvoker generator="{FaultHandler}"
+                    method="handleFault"
+                    arguments="{[fault]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+
             </faultHandlers>
 
         </RemoteObjectInvoker>

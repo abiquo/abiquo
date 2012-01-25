@@ -26,6 +26,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Enumerated;
@@ -59,6 +60,7 @@ import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.infrastructure.Datastore;
 import com.abiquo.server.core.infrastructure.management.RasdManagement;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
+import com.abiquo.server.core.infrastructure.network.NetworkConfiguration;
 import com.abiquo.server.core.infrastructure.storage.DiskManagement;
 import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
 import com.softwarementors.validation.constraints.LeadingOrTrailingWhitespace;
@@ -72,7 +74,9 @@ import com.softwarementors.validation.constraints.Required;
 @Table(name = VirtualMachine.TABLE_NAME)
 @org.hibernate.annotations.Table(appliesTo = VirtualMachine.TABLE_NAME)
 @NamedQueries({@NamedQuery(name = "VIRTUAL_MACHINE.BY_VAPP", query = VirtualMachine.BY_VAPP),
-@NamedQuery(name = "VIRTUAL_MACHINE.BY_DC", query = VirtualMachine.BY_DC)})
+@NamedQuery(name = "VIRTUAL_MACHINE.BY_DC", query = VirtualMachine.BY_DC),
+@NamedQuery(name = "VIRTUAL_MACHINE.BY_VMT", query = VirtualMachine.BY_VMT),
+@NamedQuery(name = "VIRTUAL_MACHINE.HAS_VMT", query = VirtualMachine.HAS_VMT)})
 public class VirtualMachine extends DefaultEntityBase
 {
     public static final String TABLE_NAME = "virtualmachine";
@@ -84,6 +88,12 @@ public class VirtualMachine extends DefaultEntityBase
         + "FROM VirtualMachine vm, Hypervisor hy, Machine pm "
         + " WHERE vm.hypervisor.id = hy.id and hy.machine = pm.id "
         + " AND pm.datacenter.id = :datacenterId";
+
+    public static final String BY_VMT = "SELECT vm " + "FROM VirtualMachine vm "
+        + "WHERE vm.virtualMachineTemplate.id = :virtualMachineTplId";
+
+    public static final String HAS_VMT = "SELECT COUNT(*) " + "FROM VirtualMachine vm "
+        + "WHERE vm.virtualMachineTemplate.id = :virtualMachineTplId";
 
     public static final int MANAGED = 1;
 
@@ -576,6 +586,28 @@ public class VirtualMachine extends DefaultEntityBase
         this.password = password;
     }
 
+    public final static String CONFIGURATION_PROPERTY = "networkConfiguration";
+
+    private final static boolean CONFIGURATION_REQUIRED = false;
+
+    private final static String CONFIGURATION_ID_COLUMN = "network_configuration_id";
+
+    @JoinColumn(name = CONFIGURATION_ID_COLUMN)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
+    @ForeignKey(name = "FK_" + TABLE_NAME + "_configuration")
+    private NetworkConfiguration networkConfiguration;
+
+    @Required(value = CONFIGURATION_REQUIRED)
+    public NetworkConfiguration getNetworkConfiguration()
+    {
+        return this.networkConfiguration;
+    }
+
+    public void setNetworkConfiguration(final NetworkConfiguration configuration)
+    {
+        this.networkConfiguration = configuration;
+    }
+
     public final static String TEMPORAL_PROPERTY = "temporal";
 
     private final static String TEMPORAL_COLUMN = "temporal";
@@ -710,10 +742,18 @@ public class VirtualMachine extends DefaultEntityBase
     {
         return virtualMachineTemplate.isStateful();
     }
-    
+
+    // vm imported from PM (no more!)
     public boolean isImported()
     {
-        return getVirtualMachineTemplate().getRepository() == null;
+        return getVirtualMachineTemplate() == null;
+    }
+
+    // vm imported from a PM and added into a Vapp
+    // when vm isCaptured then isn't imported
+    public boolean isCaptured()
+    {
+        return getVirtualMachineTemplate().getRepository() == null && !isStateful();
     }
 
     public VirtualMachine(final String name, final Enterprise enterprise, final User user,

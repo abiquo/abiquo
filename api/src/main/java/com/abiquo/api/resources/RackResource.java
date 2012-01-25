@@ -59,7 +59,49 @@ public class RackResource extends AbstractResource
 
     public static final String RACK_PARAM = "{" + RACK + "}";
 
-    // Define its service. It should only have ONE service!
+    public static final String RACK_ACTION_LOGICSERVERS_ASSOCIATE = "logicservers/associate";
+
+    public static final String RACK_ACTION_LOGICSERVERS_DISSOCIATE = "logicservers/dissociate";
+
+    public static final String RACK_ACTION_LOGICSERVERS = "logicservers";
+
+    public static final String RACK_ACTION_LOGICSERVERS_DELETE = "logicservers/delete";
+
+    public static final String RACK_ACTION_LOGICSERVERS_CLONE = "logicservers/clone";
+
+    public static final String RACK_ACTION_ORGANIZATIONS = "organizations";
+
+    public static final String RACK_ACTION_FSM = "fsm";
+
+    public static final String RACK_ACTION_LOGICSERVERS_TEMPLATES = "lstemplates";
+
+    public static final String RACK_ACTION_LOGICSERVERS_ASSOCIATE_TEMPLATE =
+        "logicservers/assoctemplate";
+
+    public static final String RACK_ACTION_LOGICSERVERS_ASSOCIATE_CLONE = "logicservers/assocclone";
+
+    public static final String RACK_ACTION_LOGICSERVERS_ASSOCIATE_REL = "ls-associate";
+
+    public static final String RACK_ACTION_LOGICSERVERS_DISSOCIATE_REL = "ls-dissociate";
+
+    public static final String RACK_ACTION_LOGICSERVERS_REL = "logicservers";
+
+    public static final String RACK_ACTION_LOGICSERVERS_DELETE_REL = "ls-delete";
+
+    public static final String RACK_ACTION_LOGICSERVERS_CLONE_REL = "ls-clone";
+
+    public static final String RACK_ACTION_ORGANIZATIONS_REL = "organizations";
+
+    public static final String RACK_ACTION_LOGICSERVERS_TEMPLATES_REL = "ls-templates";
+
+    public static final String RACK_ACTION_FSM_REL = "fsm";
+
+    public static final String RACK_ACTION_LOGICSERVERS_ASSOCIATE_TEMPLATE_REL =
+        "ls-associatetemplate";
+
+    public static final String RACK_ACTION_LOGICSERVERS_ASSOCIATE_CLONE_REL = "ls-associateclone";
+
+    // Define its service. It should only have ONE
     @Autowired
     private InfrastructureService service;
 

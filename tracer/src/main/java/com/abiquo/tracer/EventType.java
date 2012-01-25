@@ -62,7 +62,8 @@ public enum EventType implements Serializable
         226, "VM_DELETE", "Deleted Virtual Machine"), VM_UNDEPLOY(227, "VM_UNDEPLOY",
         "Undeploy Virtual Machine"), VM_DEPLOY(228, "VM_DEPLOY", "Deploy Virtual Machine"), VM_STATE(
         229, "VM_STATE", "Apply state Virtual Machine"), VM_RECONFIGURE(230, "VM_RECONFIGURE",
-        "Reconfigure Virtual Machine"), VM_INSTANCE(231, "VM_INSTANCE", "Instance Virtual Machine"),
+        "Reconfigure Virtual Machine"), VM_INSTANCE(231, "VM_INSTANCE", "Instance Virtual Machine"), VM_JOB(
+        232, "VM_JOB", "Common Job for Virtual Machine"),
 
     // Infrastructure-related events
     DC_CREATE(300, "DC_CREATE", "Datacenter Created"), DC_MODIFY(301, "DC_MODIFY",
@@ -104,7 +105,9 @@ public enum EventType implements Serializable
         "Virtual Image deleted from the Appliance Library"), DISK_CONVERSION(503,
         "DISK_CONVERSION", "Disc conversion started"), RAW_IMPORT_CONVERSION(504,
         "RAW_IMPORT_CONVERSION", "Raw import conversion started"), VI_UPDATE(505, "VI_UPDATE",
-        "Virtual Image updated"),
+        "Virtual Image updated"), CONVERSION_FAILED(506, "CONVERSION_FAILED",
+        "Virtual machine template conversion failed"), CONVERSION_FINISHED(507,
+        "CONVERSION_FINISHED", "Virtual machine template conversion finished"),
 
     // Stateful related events
     PERSISTENT_PROCESS_START(600, "PERSISTENT_PROCESS_START",
@@ -183,9 +186,9 @@ public enum EventType implements Serializable
         1602, "PRICING_TEMPLATE_DELETED", "Pricing Template deleted"),
 
     // COSTCODE_CURRENCY
-    COSTCODE_CURRENCY_CREATED(1700, "COSTCODE_CURRENCY_CREATED", "Cost Code -Currency created"), COSTCODE_CURRENCY_MODIFIED(
-        1701, "COSTCODE_CURRENCY_MODIFIED", "Cost Code -Currency updated"), COSTCODE_CURRENCY_DELETED(
-        1702, "COSTCODE_CURRENCY_DELETED", "Cost Code -Currency deleted"),
+    COSTCODE_CURRENCY_CREATED(1900, "COSTCODE_CURRENCY_CREATED", "Cost Code -Currency created"), COSTCODE_CURRENCY_MODIFIED(
+        1901, "COSTCODE_CURRENCY_MODIFIED", "Cost Code -Currency updated"), COSTCODE_CURRENCY_DELETED(
+        1902, "COSTCODE_CURRENCY_DELETED", "Cost Code -Currency deleted"),
 
     // COSTCODE_CURRENCY
     COSTCODE_CREATED(1800, "COSTCODE_CREATED", "Cost Code  created"), COSTCODE_MODIFIED(1801,
@@ -227,6 +230,18 @@ public enum EventType implements Serializable
     
     // Asynch handlers
     ASYNC_HANDLER_RESPONSE(1900, "ASYNC_HANDLER_RESPONSE", "Asynchronous hander response");
+
+    // UCS
+    UCS_COMMUNICATION(
+        1700,
+        "UCS_COMMUNICATION_PROBLEM",
+        "There is a problem accessing to UCS. Might be due to several causes. Check that UCS is working, reacheable, and the credentials"), UCS_ASSOCIATE(
+        1701, "UCS_BLADE_ASSOCIATION", "Blade association with a Service Profile in UCS"), UCS_DISSOCIATE(
+        1702, "Blade disassociation with a Service Profile in UCS",
+        "Blade disassociation with a Service Profile in UCS"), UCS_DELETED(1703,
+        "SERVICE_PROFILE_DELETED", "Service Profile deletion in UCS"), UCS_BLADE_POWEROFF(1704,
+        "UCS_BLADE_POWER_OFF", "Blade powered off in UCS"), UCS_BLADE_POWERON(1705,
+        "UCS_BLADE_POWER_ON", "Blade powered on in UCS");
 
     private final int event;
 

@@ -27,7 +27,6 @@ import static com.abiquo.server.core.infrastructure.RemoteService.STATUS_SUCCESS
 
 import java.net.URISyntaxException;
 import java.util.List;
-import java.util.concurrent.Executors;
 
 import javax.persistence.EntityManager;
 import javax.ws.rs.WebApplicationException;
@@ -37,8 +36,6 @@ import org.apache.wink.client.ClientResponse;
 import org.apache.wink.client.Resource;
 import org.apache.wink.client.RestClient;
 import org.apache.wink.common.internal.utils.UriHelper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -46,14 +43,12 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import com.abiquo.api.exceptions.APIError;
-import com.abiquo.api.services.appslibrary.DatacenterRepositoryService;
 import com.abiquo.appliancemanager.client.ApplianceManagerResourceStubImpl;
 import com.abiquo.appliancemanager.client.ApplianceManagerResourceStubImpl.ApplianceManagerStubException;
 import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.model.transport.SingleResourceTransportDto;
 import com.abiquo.model.transport.error.ErrorDto;
 import com.abiquo.model.transport.error.ErrorsDto;
-import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.InfrastructureRep;
 import com.abiquo.server.core.infrastructure.RemoteService;
@@ -68,18 +63,10 @@ import com.abiquo.tracer.SeverityType;
 public class RemoteServiceService extends DefaultApiService
 {
 
-    private final static Logger LOG = LoggerFactory.getLogger(RemoteServiceService.class);
-
     public static final String CHECK_RESOURCE = "check";
 
     @Autowired
-    InfrastructureRep infrastructureRepo;
-
-    @Autowired
-    private DatacenterRepositoryService dcRepositoryService;
-
-    @Autowired
-    private UserService userService;
+    private InfrastructureRep infrastructureRepo;
 
     public RemoteServiceService()
     {
@@ -236,26 +223,6 @@ public class RemoteServiceService extends DefaultApiService
                 {
                     infrastructureRepo.createRepository(datacenter, repositoryLocation);
                 }
-
-                // refresh for the current enterprise repository in background
-                final Enterprise currentEnterprise = userService.getCurrentUser().getEnterprise();
-                Executors.newSingleThreadExecutor().submit(new Runnable()
-                {
-                    @Override
-                    public void run()
-                    {
-                        try
-                        {
-                            dcRepositoryService.synchronizeDatacenterRepository(datacenter,
-                                currentEnterprise);
-                        }
-                        catch (Exception e)
-                        {
-                            LOG.warn("Can't initialize the appliance library in datacenter {}",
-                                datacenter.getName(), e);
-                        }
-                    }
-                });
             }
             catch (WebApplicationException e)
             {
@@ -319,28 +286,55 @@ public class RemoteServiceService extends DefaultApiService
     {
         RemoteService old = getRemoteService(id);
 
-        ErrorsDto configurationErrors =
+        // check new uri
+        if (org.apache.commons.lang.StringUtils.isBlank(dto.getUri()))
+        {
+            addValidationErrors(APIError.REMOTE_SERVICE_MALFORMED_URL);
+            flushErrors();
+        }
+
+        if (old.getUri().equals(dto.getUri()))
+        {
+            // no other checks to determine if its of the same type etc
+            return dto;
+        }
+
+        if (dto.getType().checkUniqueness())
+        {
+            if (infrastructureRepo.existAnyRemoteServiceWithUri(dto.getUri()))
+            {
+                addConflictErrors(APIError.REMOTE_SERVICE_URL_ALREADY_EXISTS);
+                flushErrors();
+            }
+        }
+
+        final ErrorsDto checkError =
             checkRemoteServiceStatus(old.getDatacenter(), dto.getType(), dto.getUri());
-        int status = configurationErrors.isEmpty() ? STATUS_SUCCESS : STATUS_ERROR;
-        dto.setStatus(status);
+        if (!checkError.isEmpty())
+        {
+            addConflictErrors(APIError.REMOTE_SERVICE_CANNOT_BE_CHECKED);
+            flushErrors();
+        }
+
+        old.setUri(dto.getUri());
+        old.setType(dto.getType());
+        old.setStatus(STATUS_SUCCESS);
+        dto.setStatus(STATUS_SUCCESS);
 
         if (dto.getType() == RemoteServiceType.APPLIANCE_MANAGER)
         {
             checkModifyApplianceManager(old, dto);
         }
 
-        old.setUri(dto.getUri());
-        old.setType(dto.getType());
-        old.setStatus(dto.getStatus());
+        flushErrors();
 
         infrastructureRepo.updateRemoteService(old);
 
         RemoteServiceDto responseDto = createTransferObject(old);
 
-        if (!configurationErrors.isEmpty())
-        {
-            responseDto.setConfigurationErrors(configurationErrors);
-        }
+        tracer.log(SeverityType.INFO, ComponentType.DATACENTER, EventType.REMOTE_SERVICES_UPDATE,
+            "remoteServices.updated", dto.getType().getName());
+
         return responseDto;
     }
 
@@ -386,9 +380,27 @@ public class RemoteServiceService extends DefaultApiService
         }
         else if (dto.getStatus() == STATUS_SUCCESS)
         {
-            String repositoryLocation = amStub.getRepositoryConfiguration().getLocation();
+            String repositoryLocation;
+            try
+            {
+                repositoryLocation = amStub.getRepositoryConfiguration().getLocation();
+            }
+            catch (ApplianceManagerStubException amEx)
+            {
+                addConflictErrors(APIError.REMOTE_SERVICE_CONNECTION_FAILED);
+                return;
+            }
 
-            infrastructureRepo.updateRepositoryLocation(old.getDatacenter(), repositoryLocation);
+            if (infrastructureRepo.existRepositoryInOtherDatacenter(old.getDatacenter(),
+                repositoryLocation))
+            {
+                addConflictErrors(APIError.APPLIANCE_MANAGER_REPOSITORY_ALREADY_DEFINED);
+            }
+            else
+            {
+                infrastructureRepo
+                    .updateRepositoryLocation(old.getDatacenter(), repositoryLocation);
+            }
         }
         else
         // the old repository is not being used and the new am is not properly configured
@@ -410,6 +422,10 @@ public class RemoteServiceService extends DefaultApiService
         checkRemoteServiceStatusBeforeRemoving(remoteService);
 
         infrastructureRepo.deleteRemoteService(remoteService);
+
+        tracer.log(SeverityType.INFO, ComponentType.DATACENTER, EventType.REMOTE_SERVICES_DELETE,
+            "remoteServices.deleted", remoteService.getType().getName());
+
     }
 
     protected void checkRemoteServiceStatusBeforeRemoving(final RemoteService remoteService)
@@ -421,6 +437,7 @@ public class RemoteServiceService extends DefaultApiService
                 addConflictErrors(APIError.APPLIANCE_MANAGER_REPOSITORY_IN_USE);
                 flushErrors();
             }
+            infrastructureRepo.deleteRepository(remoteService.getDatacenter());
         }
         if (remoteService.getType() == RemoteServiceType.DHCP_SERVICE
             || remoteService.getType() == RemoteServiceType.VIRTUAL_SYSTEM_MONITOR)

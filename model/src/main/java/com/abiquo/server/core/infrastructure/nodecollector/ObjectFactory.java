@@ -62,20 +62,36 @@ public class ObjectFactory
     private final static QName _VirtualSystem_QNAME =
         new QName("http://abiquo.com/server/core/infrastructure/nodecollector", "VirtualSystem");
 
+    private final static QName _LogicServer_QNAME =
+        new QName("http://abiquo.com/server/core/infrastructure/nodecollector", "LogicServer");
+
+    private final static QName _LogicServers_QNAME =
+        new QName("http://abiquo.com/server/core/infrastructure/nodecollector", "LogicServers");
+
+    private final static QName _Organization_QNAME =
+        new QName("http://abiquo.com/server/core/infrastructure/nodecollector", "Organization");
+
+    private final static QName _Organizations_QNAME =
+        new QName("http://abiquo.com/server/core/infrastructure/nodecollector", "Organizations");
+
+    private final static QName _Fsm_QNAME =
+        new QName("http://abiquo.com/server/core/infrastructure/nodecollector", "Fsm");
+
+    private final static QName _Fsms_QNAME =
+        new QName("http://abiquo.com/server/core/infrastructure/nodecollector", "Fsms");
+
+    private final static QName _BladeLocatorLed_QNAME =
+        new QName("http://abiquo.com/server/core/infrastructure/nodecollector", "BladeLocatorLed");
+
+    private final static QName _LogicServerPolicy_QNAME =
+        new QName("http://abiquo.com/server/core/infrastructure/nodecollector", "LogicServerPolicy");
+
     /**
      * Create a new ObjectFactory that can be used to create new instances of schema derived classes
      * for package: com.abiquo.server.core.infrastructure.nodecollector
      */
     public ObjectFactory()
     {
-    }
-
-    /**
-     * Create an instance of {@link HostDto }
-     */
-    public HostDto createHostDto()
-    {
-        return new HostDto();
     }
 
     /**
@@ -95,11 +111,11 @@ public class ObjectFactory
     }
 
     /**
-     * Create an instance of {@link VirtualSystemDto }
+     * Create an instance of {@link HostDto }
      */
-    public VirtualSystemDto createVirtualSystemDto()
+    public HostDto createHostDto()
     {
-        return new VirtualSystemDto();
+        return new HostDto();
     }
 
     /**
@@ -108,6 +124,79 @@ public class ObjectFactory
     public VirtualSystemCollectionDto createVirtualSystemCollectionDto()
     {
         return new VirtualSystemCollectionDto();
+    }
+
+    /**
+     * Create an instance of {@link VirtualSystemDto }
+     */
+    public VirtualSystemDto createVirtualSystemDto()
+    {
+        return new VirtualSystemDto();
+    }
+
+
+    /**
+     * Create an instance of {@link LogicServerDto }
+     */
+    public LogicServerDto createLogicServerDto()
+    {
+        return new LogicServerDto();
+    }
+
+    /**
+     * Create an instance of {@link LogicServersDto }
+     */
+    public LogicServersDto createLogicServersDto()
+    {
+        return new LogicServersDto();
+    }
+
+    /**
+     * Create an instance of {@link OrganizationDto }
+     */
+    public OrganizationDto createOrganizationDto()
+    {
+        return new OrganizationDto();
+    }
+
+    /**
+     * Create an instance of {@link OrganizationsDto }
+     */
+    public OrganizationsDto createOrganizationsDto()
+    {
+        return new OrganizationsDto();
+    }
+
+    /**
+     * Create an instance of {@link FsmDto }
+     */
+    public FsmDto createFsmDto()
+    {
+        return new FsmDto();
+    }
+
+    /**
+     * Create an instance of {@link FsmsDto }
+     */
+    public FsmsDto createFsmsDto()
+    {
+        return new FsmsDto();
+    }
+
+    /**
+     * Create an instance of {@link BladeLocatorLedDto }
+     */
+    public BladeLocatorLedDto createBladeLocatorLedDto()
+    {
+        return new BladeLocatorLedDto();
+    }
+
+    /**
+     * Create an instance of {@link LogicServerPolicyDto }
+     */
+    public LogicServerPolicyDto createLogicServerPolicyDto()
+    {
+        return new LogicServerPolicyDto();
     }
 
     /**
@@ -165,4 +254,94 @@ public class ObjectFactory
             value);
     }
 
+    /**
+     * Create an instance of {@link JAXBElement }{@code <}{@link LogicServerDto }{@code >}
+     */
+    @XmlElementDecl(namespace = "http://abiquo.com/server/core/infrastructure/nodecollector", name = "LogicServer")
+    public JAXBElement<LogicServerDto> createLogicServer(final LogicServerDto value)
+    {
+        return new JAXBElement<LogicServerDto>(_LogicServer_QNAME,
+            LogicServerDto.class,
+            null,
+            value);
+    }
+
+    /**
+     * Create an instance of {@link JAXBElement }{@code <}{@link LogicServersDto }{@code >}
+     */
+    @XmlElementDecl(namespace = "http://abiquo.com/server/core/infrastructure/nodecollector", name = "LogicServers")
+    public JAXBElement<LogicServersDto> createLogicServers(final LogicServersDto value)
+    {
+        return new JAXBElement<LogicServersDto>(_LogicServers_QNAME,
+            LogicServersDto.class,
+            null,
+            value);
+    }
+
+    /**
+     * Create an instance of {@link JAXBElement }{@code <}{@link OrganizationDto }{@code >}
+     */
+    @XmlElementDecl(namespace = "http://abiquo.com/server/core/infrastructure/nodecollector", name = "Organization")
+    public JAXBElement<OrganizationDto> createOrganization(final OrganizationDto value)
+    {
+        return new JAXBElement<OrganizationDto>(_Organization_QNAME,
+            OrganizationDto.class,
+            null,
+            value);
+    }
+
+    /**
+     * Create an instance of {@link JAXBElement }{@code <}{@link OrganizationsDto }{@code >}
+     */
+    @XmlElementDecl(namespace = "http://abiquo.com/server/core/infrastructure/nodecollector", name = "Organizations")
+    public JAXBElement<OrganizationsDto> createOrganizations(final OrganizationsDto value)
+    {
+        return new JAXBElement<OrganizationsDto>(_Organizations_QNAME,
+            OrganizationsDto.class,
+            null,
+            value);
+    }
+
+    /**
+     * Create an instance of {@link JAXBElement }{@code <}{@link FsmDto }{@code >}
+     */
+    @XmlElementDecl(namespace = "http://abiquo.com/server/core/infrastructure/nodecollector", name = "Fsm")
+    public JAXBElement<FsmDto> createFsm(final FsmDto value)
+    {
+        return new JAXBElement<FsmDto>(_Fsm_QNAME, FsmDto.class, null, value);
+    }
+
+    /**
+     * Create an instance of {@link JAXBElement }{@code <}{@link FsmsDto }{@code >}
+     */
+    @XmlElementDecl(namespace = "http://abiquo.com/server/core/infrastructure/nodecollector", name = "Fsms")
+    public JAXBElement<FsmsDto> createFsms(final FsmsDto value)
+    {
+        return new JAXBElement<FsmsDto>(_Fsms_QNAME, FsmsDto.class, null, value);
+    }
+
+    /**
+     * Create an instance of {@link JAXBElement }{@code <}{@link LogicServerPolicyDto }{@code >}
+     */
+    @XmlElementDecl(namespace = "http://abiquo.com/server/core/infrastructure/nodecollector", name = "LogicServerPolicy")
+    public JAXBElement<LogicServerPolicyDto> createLogicServerPolicy(
+        final LogicServerPolicyDto value)
+    {
+        return new JAXBElement<LogicServerPolicyDto>(_LogicServerPolicy_QNAME,
+            LogicServerPolicyDto.class,
+            null,
+            value);
+    }
+
+    /**
+     * Create an instance of {@link JAXBElement }{@code <}{@link BladeLocatorLedDto }{@code >}
+     */
+    @XmlElementDecl(namespace = "http://abiquo.com/server/core/infrastructure/nodecollector", name = "BladeLocatorLed")
+    public JAXBElement<BladeLocatorLedDto> createBladeLocatorLed(final BladeLocatorLedDto value)
+    {
+        return new JAXBElement<BladeLocatorLedDto>(_BladeLocatorLed_QNAME,
+            BladeLocatorLedDto.class,
+            null,
+            value);
+    }
 }

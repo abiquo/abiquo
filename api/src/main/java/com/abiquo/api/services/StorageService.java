@@ -122,18 +122,18 @@ public class StorageService extends DefaultApiService
      */
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public Object attachHardDisks(final Integer vdcId, final Integer vappId, final Integer vmId,
-        final LinksDto hdRefs)
+        final LinksDto hdRefs, final VirtualMachineState originalState)
     {
         VirtualDatacenter vdc = getVirtualDatacenter(vdcId);
         VirtualAppliance vapp = getVirtualAppliance(vdc, vappId);
         VirtualMachine oldvm = getVirtualMachine(vapp, vmId);
 
-        VirtualMachine newvm = vmService.createBackUpObject(oldvm);
+        VirtualMachine newvm = vmService.duplicateVirtualMachineObject(oldvm);
         List<DiskManagement> disks = vmService.getHardDisksFromDto(vdc, hdRefs);
-        
+
         newvm.getDisks().addAll(disks);
 
-        return vmService.reconfigureVirtualMachine(vdc, vapp, oldvm, newvm);
+        return vmService.reconfigureVirtualMachine(vdc, vapp, oldvm, newvm, originalState);
     }
 
     /**
@@ -151,18 +151,18 @@ public class StorageService extends DefaultApiService
      */
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public Object changeHardDisks(final Integer vdcId, final Integer vappId, final Integer vmId,
-        final LinksDto hdRefs)
+        final LinksDto hdRefs, final VirtualMachineState originalState)
     {
         VirtualDatacenter vdc = getVirtualDatacenter(vdcId);
         VirtualAppliance vapp = getVirtualAppliance(vdc, vappId);
         VirtualMachine vm = getVirtualMachine(vapp, vmId);
 
-        VirtualMachine newvm = vmService.createBackUpObject(vm);
+        VirtualMachine newvm = vmService.duplicateVirtualMachineObject(vm);
         List<DiskManagement> disks = vmService.getHardDisksFromDto(vdc, hdRefs);
-        
+
         newvm.setDisks(disks);
 
-        return vmService.reconfigureVirtualMachine(vdc, vapp, vm, newvm);
+        return vmService.reconfigureVirtualMachine(vdc, vapp, vm, newvm, originalState);
     }
 
     /**
@@ -270,20 +270,21 @@ public class StorageService extends DefaultApiService
      *         otherwise.
      */
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public Object detachHardDisk(Integer vdcId, Integer vappId, Integer vmId, Integer diskId)
+    public Object detachHardDisk(final Integer vdcId, final Integer vappId, final Integer vmId,
+        final Integer diskId, final VirtualMachineState originalState)
     {
         VirtualDatacenter vdc = getVirtualDatacenter(vdcId);
         VirtualAppliance vapp = getVirtualAppliance(vdc, vappId);
         VirtualMachine vm = getVirtualMachine(vapp, vmId);
         DiskManagement disk = vdcRepo.findHardDiskByVirtualMachine(vm, diskId);
-        
+
         if (disk == null)
         {
             addNotFoundErrors(APIError.HD_NON_EXISTENT_HARD_DISK);
             flushErrors();
         }
 
-        VirtualMachine newVm = vmService.createBackUpObject(vm);
+        VirtualMachine newVm = vmService.duplicateVirtualMachineObject(vm);
         Iterator<DiskManagement> diskIterator = newVm.getDisks().iterator();
         while (diskIterator.hasNext())
         {
@@ -291,13 +292,13 @@ public class StorageService extends DefaultApiService
             if (currentDisk.getRasd().equals(disk.getRasd()))
             {
                 diskIterator.remove();
-                return vmService.reconfigureVirtualMachine(vdc, vapp, vm, newVm);
+                return vmService.reconfigureVirtualMachine(vdc, vapp, vm, newVm, originalState);
             }
         }
-        
+
         addUnexpectedErrors(APIError.HD_NON_EXISTENT_HARD_DISK);
         flushErrors();
-        
+
         return null;
     }
 
@@ -315,16 +316,17 @@ public class StorageService extends DefaultApiService
      *         otherwise.
      */
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public Object detachHardDisks(final Integer vdcId, final Integer vappId, final Integer vmId)
+    public Object detachHardDisks(final Integer vdcId, final Integer vappId, final Integer vmId,
+        final VirtualMachineState originalState)
     {
         VirtualDatacenter vdc = getVirtualDatacenter(vdcId);
         VirtualAppliance vapp = getVirtualAppliance(vdc, vappId);
         VirtualMachine vm = getVirtualMachine(vapp, vmId);
 
-        VirtualMachine newVm = vmService.createBackUpObject(vm);
+        VirtualMachine newVm = vmService.duplicateVirtualMachineObject(vm);
         newVm.getDisks().clear();
 
-        return vmService.reconfigureVirtualMachine(vdc, vapp, vm, newVm);
+        return vmService.reconfigureVirtualMachine(vdc, vapp, vm, newVm, originalState);
     }
 
     /**

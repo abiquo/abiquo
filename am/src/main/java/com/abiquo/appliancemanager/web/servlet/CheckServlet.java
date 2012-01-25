@@ -51,7 +51,7 @@ public class CheckServlet extends AbstractCheckServlet
         return true;
     }
 
-    public static boolean checkRedis()
+    public synchronized boolean checkRedis()
     {
         Jedis redis = null;
         try

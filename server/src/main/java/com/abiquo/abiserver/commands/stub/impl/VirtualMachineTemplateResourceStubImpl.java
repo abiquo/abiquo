@@ -26,6 +26,8 @@ import static java.lang.String.valueOf;
 import java.util.LinkedList;
 import java.util.List;
 
+import javax.ws.rs.core.Response.Status;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.wink.client.ClientResponse;
 import org.apache.wink.client.Resource;
@@ -184,17 +186,27 @@ public class VirtualMachineTemplateResourceStubImpl extends AbstractAPIStub impl
         img.setDiskFormatType(createDiskFormatType(DiskFormatType.valueOf(vi.getDiskFormatType())));
         img.setCreationUser(vi.getCreationUser());
         img.setCreationDate(vi.getCreationDate());
+        img.setChefEnabled(vi.isChefEnabled());
 
         // img.setIdEnterprise(idEnterprise); // // XXX (in AppslLibraryService this value is set
         // properly)
 
-        final String master = getMasterIdFromLink(getLink("master", vi.getLinks()));
-
-        if (master != null)
+        RESTLink masterLink = getLink("master", vi.getLinks());
+        if (masterLink != null)
         {
-            VirtualImage vmaster = new VirtualImage();
-            vmaster.setId(Integer.valueOf(master));
-            img.setMaster(vmaster);
+            ClientResponse masterResponse = get(masterLink.getHref());
+            if (masterResponse.getStatusCode() == Status.OK.getStatusCode())
+            {
+                VirtualMachineTemplateDto vmtDto =
+                    masterResponse.getEntity(VirtualMachineTemplateDto.class);
+
+                VirtualImage vmaster = new VirtualImage();
+                vmaster.setId(vmtDto.getId());
+                vmaster
+                    .setDiskFormatType(new com.abiquo.abiserver.pojo.virtualimage.DiskFormatType(DiskFormatType
+                        .fromValue(vmtDto.getDiskFormatType())));
+                img.setMaster(vmaster);
+            }
         }
 
         return img;

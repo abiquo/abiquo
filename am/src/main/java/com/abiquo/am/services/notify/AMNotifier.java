@@ -61,8 +61,6 @@ public class AMNotifier extends AMProducer
     public void setTemplateStatus(final String erId, final String ovfId,
         final TemplateStatusEnumType status)
     {
-        assert status != TemplateStatusEnumType.ERROR;
-
         final String enterpriseRepositoryPath = ErepoFactory.getRepo(erId).path();
 
         TemplateFileSystem.createTemplateStatusMarks(enterpriseRepositoryPath, ovfId, status, null);
@@ -82,8 +80,6 @@ public class AMNotifier extends AMProducer
     public void setTemplateStatusError(final String erId, final String ovfId,
         final String errorMessage)
     {
-        assert errorMessage != null;
-
         final String enterpriseRepositoryPath = ErepoFactory.getRepo(erId).path();
 
         TemplateFileSystem.createTemplateStatusMarks(enterpriseRepositoryPath, ovfId,
@@ -95,18 +91,22 @@ public class AMNotifier extends AMProducer
     private void notifyOVFStatusEvent(final String erId, final String ovfId,
         final TemplateStatusEnumType status, final String errorMsg)
     {
-        assert status != TemplateStatusEnumType.ERROR || errorMsg != null;
-
         AMRedisDao dao = AMRedisDao.getDao();
-        if (status == TemplateStatusEnumType.ERROR)
+        try
         {
-            dao.setError(erId, ovfId, errorMsg);
+            if (status == TemplateStatusEnumType.ERROR)
+            {
+                dao.setError(erId, ovfId, errorMsg);
+            }
+            else
+            {
+                dao.setState(erId, ovfId, status);
+            }
         }
-        else
+        finally
         {
-            dao.setState(erId, ovfId, status);
+            AMRedisDao.returnDao(dao);
         }
-        AMRedisDao.returnDao(dao);
 
         OVFPackageInstanceStatusEvent event = new OVFPackageInstanceStatusEvent();
         event.setOvfId(ovfId);

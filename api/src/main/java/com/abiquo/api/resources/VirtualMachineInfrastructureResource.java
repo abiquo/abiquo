@@ -39,6 +39,7 @@ import com.abiquo.api.services.InfrastructureService;
 import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.model.rest.RESTLink;
 import com.abiquo.model.util.ModelTransformer;
+import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineDto;
 
@@ -61,8 +62,8 @@ public class VirtualMachineInfrastructureResource extends AbstractResource
     public static final String VIRTUAL_MACHINE_INFRASTRUCTURE = "virtualmachine";
 
     /** Param to map the input values related to the virtual machine. */
-    public static final String VIRTUAL_MACHINE_INFRASTRUCTURE_PARAM = "{"
-        + VIRTUAL_MACHINE_INFRASTRUCTURE + "}";
+    public static final String VIRTUAL_MACHINE_INFRASTRUCTURE_PARAM =
+        "{" + VIRTUAL_MACHINE_INFRASTRUCTURE + "}";
 
     @Autowired
     private InfrastructureService service;
@@ -118,6 +119,23 @@ public class VirtualMachineInfrastructureResource extends AbstractResource
         }
         vmDto.setLinks(restBuilder.buildVirtualMachineAdminLinks(datacenterId, rackId, machineId,
             enterpriseId, userId, vm.getHypervisor().getType()));
+
+        final VirtualMachineTemplate vmtemplate = vm.getVirtualMachineTemplate();
+        if (vmtemplate != null)
+        {
+            if (vmtemplate.getRepository() != null)
+            {
+                vmDto.addLink(restBuilder.buildVirtualMachineTemplateLink(vmtemplate.getEnterprise()
+                    .getId(), vmtemplate.getRepository().getDatacenter().getId(), vmtemplate.getId()));
+            }
+            else
+            {
+                // imported virtual machines
+                vmDto.addLink(restBuilder.buildVirtualMachineTemplateLink(vmtemplate.getEnterprise()
+                    .getId(), vm.getHypervisor().getMachine().getRack().getDatacenter().getId(),
+                    vmtemplate.getId()));
+            }
+        }
         return vmDto;
     }
 }

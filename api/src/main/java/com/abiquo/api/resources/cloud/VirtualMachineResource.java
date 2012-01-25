@@ -48,9 +48,11 @@ import com.abiquo.api.resources.AbstractResource;
 import com.abiquo.api.resources.TaskResourceUtils;
 import com.abiquo.api.services.TaskService;
 import com.abiquo.api.services.cloud.VirtualDatacenterService;
+import com.abiquo.api.services.cloud.VirtualMachineLock;
 import com.abiquo.api.services.cloud.VirtualMachineService;
 import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.model.transport.AcceptedRequestDto;
+import com.abiquo.model.transport.SeeOtherDto;
 import com.abiquo.scheduler.SchedulerLock;
 import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
 import com.abiquo.server.core.cloud.Hypervisor;
@@ -95,7 +97,7 @@ public class VirtualMachineResource extends AbstractResource
 
     public static final String VIRTUAL_MACHINE_ACTION_RESET = "action/reset";
 
-    public static final String VIRTUAL_MACHINE_STATE = "state";
+    public static final String VIRTUAL_MACHINE_STATE_PATH = "state";
 
     // Chef constants to help link builders. Method implementation are premium.
     public static final String VIRTUAL_MACHINE_RUNLIST_PATH = "config/runlist";
@@ -130,6 +132,9 @@ public class VirtualMachineResource extends AbstractResource
 
     @Autowired
     private TaskService taskService;
+
+    @Autowired
+    private VirtualMachineLock vmLock;
 
     /**
      * Return the virtual appliance if exists.
@@ -172,15 +177,28 @@ public class VirtualMachineResource extends AbstractResource
         final VirtualMachineDto dto, @Context final IRESTBuilder restBuilder,
         @Context final UriInfo uriInfo) throws Exception
     {
-        String taskId = vmService.reconfigureVirtualMachine(vdcId, vappId, vmId, dto);
+        VirtualMachineState originalState =
+            vmLock.lockVirtualMachineBeforeReconfiguring(vdcId, vappId, vmId);
 
-        if (taskId == null)
+        try
         {
-            // If the link is null no Task was performed
-            return null;
+            String taskId =
+                vmService.reconfigureVirtualMachine(vdcId, vappId, vmId, dto, originalState);
+            if (taskId == null)
+            {
+                // If there is no async task the VM must be unlocked here
+                vmLock.unlockVirtualMachine(vmId, originalState);
+                // If the link is null no Task was performed
+                return null;
+            }
+            return buildAcceptedRequestDtoWithTaskLink(taskId, uriInfo);
         }
-
-        return buildAcceptedRequestDtoWithTaskLink(taskId, uriInfo);
+        catch (Exception ex)
+        {
+            // Make sure virtual machine is unlocked if reconfigure fails
+            vmLock.unlockVirtualMachine(vmId, originalState);
+            throw ex;
+        }
     }
 
     /**
@@ -201,18 +219,11 @@ public class VirtualMachineResource extends AbstractResource
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) @NotNull @Min(1) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) @NotNull @Min(1) final Integer vappId,
         @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) @NotNull @Min(1) final Integer vmId,
-        final VirtualMachineDto dto, @Context final IRESTBuilder restBuilder,
+        final VirtualMachineWithNodeDto dto, @Context final IRESTBuilder restBuilder,
         @Context final UriInfo uriInfo) throws Exception
     {
-        String taskId = vmService.reconfigureVirtualMachine(vdcId, vappId, vmId, dto);
-
-        if (taskId == null)
-        {
-            // If the link is null no Task was performed
-            return null;
-        }
-
-        return buildAcceptedRequestDtoWithTaskLink(taskId, uriInfo);
+        vmService.updateNodeVirtualImageInfo(vdcId, vappId, vmId, dto);
+        return updateVirtualMachine(vdcId, vappId, vmId, dto, restBuilder, uriInfo);
     }
 
     /**
@@ -232,7 +243,7 @@ public class VirtualMachineResource extends AbstractResource
      * @throws Exception
      */
     @PUT
-    @Path(VIRTUAL_MACHINE_STATE)
+    @Path(VIRTUAL_MACHINE_STATE_PATH)
     public AcceptedRequestDto<String> powerStateVirtualMachine(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
@@ -241,15 +252,30 @@ public class VirtualMachineResource extends AbstractResource
         @Context final UriInfo uriInfo) throws Exception
     {
         VirtualMachineState newState = validateState(state);
-        String taskId = vmService.applyVirtualMachineState(vmId, vappId, vdcId, newState);
 
-        // If the link is null no Task was performed
-        if (taskId == null)
+        // Lock the virtual machine
+        VirtualMachineState originalState =
+            vmLock.lockVirtualMachineBeforeChangingState(vdcId, vappId, vmId, newState);
+
+        VirtualMachineStateTransition transition =
+            VirtualMachineStateTransition.getValidVmStateChangeTransition(originalState, newState);
+
+        try
         {
-            throw new InternalServerErrorException(APIError.STATUS_INTERNAL_SERVER_ERROR);
+            String taskId = vmService.applyVirtualMachineState(vmId, vappId, vdcId, transition);
+            // If the link is null no Task was performed
+            if (taskId == null)
+            {
+                throw new InternalServerErrorException(APIError.STATUS_INTERNAL_SERVER_ERROR);
+            }
+            return buildAcceptedRequestDtoWithTaskLink(taskId, uriInfo);
         }
-
-        return buildAcceptedRequestDtoWithTaskLink(taskId, uriInfo);
+        catch (Exception ex)
+        {
+            // Make sure virtual machine is unlocked if power state change fails
+            vmLock.unlockVirtualMachine(vmId, originalState);
+            throw ex;
+        }
     }
 
     /**
@@ -263,7 +289,7 @@ public class VirtualMachineResource extends AbstractResource
      * @throws Exception
      */
     @GET
-    @Path(VIRTUAL_MACHINE_STATE)
+    @Path(VIRTUAL_MACHINE_STATE_PATH)
     public VirtualMachineStateDto stateVirtualMachine(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
@@ -282,7 +308,7 @@ public class VirtualMachineResource extends AbstractResource
         final VirtualMachine vm)
     {
         VirtualMachineStateDto stateDto = new VirtualMachineStateDto();
-        stateDto.setPower(vm.getState());
+        stateDto.setState(vm.getState());
         stateDto.addLinks(restBuilder.buildVirtualMachineStateLinks(vappId, vdcId, vmId));
         return stateDto;
     }
@@ -299,13 +325,13 @@ public class VirtualMachineResource extends AbstractResource
      */
     private VirtualMachineState validateState(final VirtualMachineStateDto state)
     {
-        if (!VirtualMachineState.ON.equals(state.getPower())
-            && !VirtualMachineState.OFF.equals(state.getPower())
-            && !VirtualMachineState.PAUSED.equals(state.getPower()))
+        if (!VirtualMachineState.ON.equals(state.getState())
+            && !VirtualMachineState.OFF.equals(state.getState())
+            && !VirtualMachineState.PAUSED.equals(state.getState()))
         {
             throw new BadRequestException(APIError.VIRTUAL_MACHINE_EDIT_STATE);
         }
-        return state.getPower();
+        return state.getState();
     }
 
     /**
@@ -330,7 +356,23 @@ public class VirtualMachineResource extends AbstractResource
         @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) final Integer vmId,
         @Context final IRESTBuilder restBuilder) throws Exception
     {
-        vmService.deleteVirtualMachine(vmId, vappId, vdcId);
+        // Check virtual machine state and lock it before starting
+        VirtualMachineState originalState =
+            vmLock.lockVirtualMachineBeforeDeleting(vdcId, vappId, vmId);
+
+        try
+        {
+            vmService.deleteVirtualMachine(vmId, vappId, vdcId, originalState);
+
+            // If everything goes fine, there is no need to unlock the VM since it will be deleted
+            // by the handler or here if it was not deployed
+        }
+        catch (Exception ex)
+        {
+            // Make sure virtual machine is unlocked if deploy fails
+            vmLock.unlockVirtualMachine(vmId, originalState);
+            throw ex;
+        }
     }
 
     /**
@@ -368,6 +410,11 @@ public class VirtualMachineResource extends AbstractResource
         @Context final UriInfo uriInfo) throws Exception
     {
         final String lockMsg = "Allocate vm " + vmId;
+
+        // Check virtual machine state and lock it before starting
+        VirtualMachineState originalState =
+            vmLock.lockVirtualMachineBeforeDeploying(vdcId, vappId, vmId);
+
         try
         {
             SchedulerLock.acquire(lockMsg);
@@ -378,11 +425,16 @@ public class VirtualMachineResource extends AbstractResource
 
             return buildAcceptedRequestDtoWithTaskLink(taskId, uriInfo);
         }
+        catch (Exception ex)
+        {
+            // Make sure virtual machine is unlocked if deploy fails
+            vmLock.unlockVirtualMachine(vmId, originalState);
+            throw ex;
+        }
         finally
         {
             SchedulerLock.release(lockMsg);
         }
-
     }
 
     /**
@@ -416,19 +468,9 @@ public class VirtualMachineResource extends AbstractResource
         @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) final Integer vmId,
         @Context final IRESTBuilder restBuilder, @Context final UriInfo uriInfo) throws Exception
     {
-        final String lockMsg = "Allocate vm " + vmId;
-        try
-        {
-            SchedulerLock.acquire(lockMsg);
-
-            String taskId = vmService.deployVirtualMachine(vmId, vappId, vdcId, false);
-
-            return buildAcceptedRequestDtoWithTaskLink(taskId, uriInfo);
-        }
-        finally
-        {
-            SchedulerLock.release(lockMsg);
-        }
+        VirtualMachineTaskDto force = new VirtualMachineTaskDto();
+        force.setForceEnterpriseSoftLimits(false);
+        return deployVirtualMachine(vdcId, vappId, vmId, force, restBuilder, uriInfo);
     }
 
     /**
@@ -469,15 +511,28 @@ public class VirtualMachineResource extends AbstractResource
         {
             forceUndeploy = taskOptions.getForceUndeploy();
         }
-        String taskId = vmService.undeployVirtualMachine(vmId, vappId, vdcId, forceUndeploy);
 
-        // If the link is null no Task was performed
-        if (taskId == null)
+        // Lock the virtual machine before undeploying
+        VirtualMachineState originalState =
+            vmLock.lockVirtualMachineBeforeUndeploying(vdcId, vappId, vmId);
+
+        try
         {
-            throw new InternalServerErrorException(APIError.STATUS_INTERNAL_SERVER_ERROR);
+            String taskId =
+                vmService.undeployVirtualMachine(vmId, vappId, vdcId, forceUndeploy, originalState);
+            // If the link is null no Task was performed
+            if (taskId == null)
+            {
+                throw new InternalServerErrorException(APIError.STATUS_INTERNAL_SERVER_ERROR);
+            }
+            return buildAcceptedRequestDtoWithTaskLink(taskId, uriInfo);
         }
-
-        return buildAcceptedRequestDtoWithTaskLink(taskId, uriInfo);
+        catch (Exception ex)
+        {
+            // Make sure virtual machine is unlocked if undeploy fails
+            vmLock.unlockVirtualMachine(vmId, originalState);
+            throw ex;
+        }
     }
 
     /**
@@ -500,16 +555,26 @@ public class VirtualMachineResource extends AbstractResource
         final VirtualMachineInstanceDto snapshotData, @Context final IRESTBuilder restBuilder,
         @Context final UriInfo uriInfo) throws Exception
     {
-        String taskId =
-            vmService.instanceVirtualMachine(vmId, vappId, vdcId, snapshotData.getSnapshotName());
+        VirtualMachineState originalState =
+            vmLock.lockVirtualMachineBeforeSnapshotting(vdcId, vappId, vmId);
 
-        if (taskId == null)
+        try
         {
-            // If the link is null no Task was performed
-            throw new InternalServerErrorException(APIError.STATUS_INTERNAL_SERVER_ERROR);
+            String taskId =
+                vmService.instanceVirtualMachine(vmId, vappId, vdcId,
+                    snapshotData.getSnapshotName(), originalState);
+            if (taskId == null)
+            {
+                throw new InternalServerErrorException(APIError.STATUS_INTERNAL_SERVER_ERROR);
+            }
+            return buildAcceptedRequestDtoWithTaskLink(taskId, uriInfo);
         }
-
-        return buildAcceptedRequestDtoWithTaskLink(taskId, uriInfo);
+        catch (Exception ex)
+        {
+            // Make sure virtual machine is unlocked if snapshot fails
+            vmLock.unlockVirtualMachine(vmId, originalState);
+            throw ex;
+        }
     }
 
     /**
@@ -535,7 +600,7 @@ public class VirtualMachineResource extends AbstractResource
         dto.setHdInBytes(v.getVirtualMachine().getHdInBytes());
         dto.setHighDisponibility(v.getVirtualMachine().getHighDisponibility());
         dto.setId(v.getVirtualMachine().getId());
-        // dto.setIdState(v.getidState)
+        dto.setIdState(v.getVirtualMachine().getState().id());
         dto.setIdType(v.getVirtualMachine().getIdType());
 
         dto.setName(v.getVirtualMachine().getName());
@@ -562,26 +627,44 @@ public class VirtualMachineResource extends AbstractResource
 
         final VirtualDatacenter vdc = v.getVirtualAppliance().getVirtualDatacenter();
 
-        if (!v.getVirtualMachine().isImported())
+        if (!v.getVirtualMachine().isCaptured())
         {
-            dto.addLink(restBuilder.buildVirtualMachineTemplateLink(virtualImage.getEnterprise()
-                .getId(), virtualImage.getRepository().getDatacenter().getId(), virtualImage
-                .getId()));
+            if (v.getVirtualMachine().isStateful())
+            {
+                dto.addLink(restBuilder.buildVirtualMachineTemplateLink(virtualImage
+                    .getEnterprise().getId(), v.getVirtualAppliance().getVirtualDatacenter()
+                    .getDatacenter().getId(), virtualImage.getId()));
+            }
+            else
+            {
+                dto.addLink(restBuilder.buildVirtualMachineTemplateLink(virtualImage
+                    .getEnterprise().getId(), virtualImage.getRepository().getDatacenter().getId(),
+                    virtualImage.getId()));
+            }
         }
         else
         {
-            // imported virtual machines
-            dto.addLink(restBuilder.buildVirtualMachineTemplateLink(virtualImage.getEnterprise()
-                .getId(), v.getVirtualMachine().getHypervisor().getMachine().getRack()
-                .getDatacenter().getId(), v.getVirtualImage().getId()));
+            if (v.getVirtualMachine().getState().equals(VirtualMachineState.NOT_ALLOCATED))
+            {
+                // captured and managed virtual machines but with pm removed
+                dto.addLink(restBuilder.buildVirtualMachineTemplateLink(virtualImage
+                    .getEnterprise().getId(), v.getVirtualAppliance().getVirtualDatacenter()
+                    .getDatacenter().getId(), v.getVirtualImage().getId()));
+            }
+            else
+            {
+                // captured virtual machines
+                dto.addLink(restBuilder.buildVirtualMachineTemplateLink(virtualImage
+                    .getEnterprise().getId(), v.getVirtualMachine().getHypervisor().getMachine()
+                    .getRack().getDatacenter().getId(), v.getVirtualImage().getId()));
+            }
         }
 
         dto.addLinks(restBuilder.buildVirtualMachineCloudAdminLinks(vdcId, vappId, v
-            .getVirtualMachine().getId(), rack == null ? null : rack.getDatacenter().getId(),
-            rack == null ? null : rack.getId(), machine == null ? null : machine.getId(),
-            enterprise == null ? null : enterprise.getId(), user == null ? null : user.getId(), v
-                .getVirtualMachine().isChefEnabled(), volumeIds, diskIds, ips, vdc
-                .getHypervisorType()));
+            .getVirtualMachine(), rack == null ? null : rack.getDatacenter().getId(), rack == null
+            ? null : rack.getId(), machine == null ? null : machine.getId(), enterprise == null
+            ? null : enterprise.getId(), user == null ? null : user.getId(), v.getVirtualMachine()
+            .isChefEnabled(), volumeIds, diskIds, ips, vdc.getHypervisorType()));
 
         TaskResourceUtils.addTasksLink(dto, dto.getEditLink());
 
@@ -616,7 +699,7 @@ public class VirtualMachineResource extends AbstractResource
         dto.setHdInBytes(v.getHdInBytes());
         dto.setHighDisponibility(v.getHighDisponibility());
         dto.setId(v.getId());
-        // dto.setIdState(v.getidState)
+        dto.setIdState(v.getState().id());
         dto.setIdType(v.getIdType());
 
         dto.setName(v.getName());
@@ -670,7 +753,7 @@ public class VirtualMachineResource extends AbstractResource
         dto.setHdInBytes(v.getHdInBytes());
         dto.setHighDisponibility(v.getHighDisponibility());
         dto.setId(v.getId());
-        // dto.setIdState(v.getidState)
+        dto.setIdState(v.getState().id());
         if (v.getIdType() == 0)
         {
             dto.setIdType(com.abiquo.server.core.cloud.VirtualMachine.NOT_MANAGED);
@@ -694,7 +777,7 @@ public class VirtualMachineResource extends AbstractResource
         final Enterprise enterprise = v.getEnterprise() == null ? null : v.getEnterprise();
         final User user = v.getUser() == null ? null : v.getUser();
 
-        dto.addLinks(restBuilder.buildVirtualMachineCloudAdminLinks(vdc.getId(), vappId, v.getId(),
+        dto.addLinks(restBuilder.buildVirtualMachineCloudAdminLinks(vdc.getId(), vappId, v,
             rack == null ? null : rack.getDatacenter().getId(), rack == null ? null : rack.getId(),
             machine == null ? null : machine.getId(),
             enterprise == null ? null : enterprise.getId(), user == null ? null : user.getId(),
@@ -708,10 +791,19 @@ public class VirtualMachineResource extends AbstractResource
         }
         else
         {
-            // imported virtual machines
-            dto.addLink(restBuilder.buildVirtualMachineTemplateLink(vmtemplate.getEnterprise()
-                .getId(), v.getHypervisor().getMachine().getRack().getDatacenter().getId(),
-                vmtemplate.getId()));
+            if (vmtemplate.isStateful())
+            {
+                // stateful virtual machines (template hasn't got repository)
+                dto.addLink(restBuilder.buildVirtualMachineTemplateLink(vmtemplate.getEnterprise()
+                    .getId(), vdc.getDatacenter().getId(), vmtemplate.getId()));
+            }
+            else
+            {
+                // imported virtual machines
+                dto.addLink(restBuilder.buildVirtualMachineTemplateLink(vmtemplate.getEnterprise()
+                    .getId(), v.getHypervisor().getMachine().getRack().getDatacenter().getId(),
+                    vmtemplate.getId()));
+            }
         }
 
         return dto;
@@ -767,6 +859,12 @@ public class VirtualMachineResource extends AbstractResource
         @Context final UriInfo uriInfo) throws Exception
     {
         vmService.getVirtualMachine(vdcId, vappId, vmId);
+
+        if (taskId.equalsIgnoreCase(TaskResourceUtils.UNTRACEABLE_TASK))
+        {
+            return buildSeeOtherDto(uriInfo);
+        }
+
         Task task = taskService.findTask(vmId.toString(), taskId);
 
         return TaskResourceUtils.transform(task, uriInfo);
@@ -800,16 +898,27 @@ public class VirtualMachineResource extends AbstractResource
         @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) final Integer vmId,
         @Context final IRESTBuilder restBuilder, @Context final UriInfo uriInfo) throws Exception
     {
-        String taskId =
-            vmService.resetVirtualMachine(vmId, vappId, vdcId, VirtualMachineStateTransition.RESET);
+        VirtualMachineState originalState =
+            vmLock.lockVirtualMachineBeforeResetting(vdcId, vappId, vmId);
 
-        // If the link is null no Task was performed
-        if (taskId == null)
+        try
         {
-            throw new InternalServerErrorException(APIError.STATUS_INTERNAL_SERVER_ERROR);
+            String taskId =
+                vmService.resetVirtualMachine(vmId, vappId, vdcId,
+                    VirtualMachineStateTransition.RESET);
+            // If the link is null no Task was performed
+            if (taskId == null)
+            {
+                throw new InternalServerErrorException(APIError.STATUS_INTERNAL_SERVER_ERROR);
+            }
+            return buildAcceptedRequestDtoWithTaskLink(taskId, uriInfo);
         }
-
-        return buildAcceptedRequestDtoWithTaskLink(taskId, uriInfo);
+        catch (Exception ex)
+        {
+            // Make sure virtual machine is unlocked if reset fails
+            vmLock.unlockVirtualMachine(vmId, originalState);
+            throw ex;
+        }
     }
 
     protected AcceptedRequestDto<String> buildAcceptedRequestDtoWithTaskLink(final String taskId,
@@ -828,5 +937,17 @@ public class VirtualMachineResource extends AbstractResource
         a202.setEntity("You can keep track of the progress in the link");
 
         return a202;
+    }
+
+    protected SeeOtherDto buildSeeOtherDto(final UriInfo uriInfo)
+    {
+        // Build state link
+        String link = uriInfo.getRequestUri().toString();
+
+        link = TaskResourceUtils.removeTaskSegments(link);
+        link = link.concat("/").concat(VIRTUAL_MACHINE_STATE_PATH);
+
+        // Build SeeOtherDto
+        return new SeeOtherDto(link);
     }
 }

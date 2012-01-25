@@ -31,6 +31,7 @@ import javax.ws.rs.core.Response.Status;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.wink.client.ClientResponse;
+import org.apache.wink.common.http.HttpStatus;
 import org.jclouds.abiquo.domain.DomainWrapper;
 import org.jclouds.abiquo.domain.cloud.VirtualDatacenter;
 import org.jclouds.abiquo.domain.exception.AbiquoException;
@@ -86,6 +87,10 @@ import com.abiquo.server.core.enterprise.EnterpriseDto;
 import com.abiquo.server.core.enterprise.User.AuthType;
 import com.abiquo.server.core.enterprise.UserDto;
 import com.abiquo.server.core.infrastructure.network.VLANNetworkDto;
+import com.abiquo.server.core.task.Job;
+import com.abiquo.server.core.task.JobDto;
+import com.abiquo.server.core.task.JobsDto;
+import com.abiquo.server.core.task.Task;
 import com.abiquo.server.core.task.TaskDto;
 import com.abiquo.server.core.task.TasksDto;
 import com.abiquo.util.ErrorManager;
@@ -228,7 +233,8 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
 
                         ClientResponse put =
                             put(linkVirtualMachine, virtualMachineDto, VM_NODE_MEDIA_TYPE);
-                        if (put.getStatusCode() != Status.OK.getStatusCode())
+                        if (put.getStatusCode() != Status.OK.getStatusCode()
+                            && put.getStatusCode() != Status.NO_CONTENT.getStatusCode())
                         {
                             addErrors(result, errors, put, "updateVirtualApplianceNodes");
                             result.setSuccess(Boolean.FALSE);
@@ -637,15 +643,8 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
             if (!tasks.isEmpty())
             {
                 TaskDto lastTask = tasks.getCollection().get(0);
-                currentTask.setUuid(lastTask.getTaskId());
-                currentTask.setStatusName(lastTask.getState().name());
-                currentTask.setMessage("");
-            }
-            else
-            {
-                currentTask.setUuid("");
-                currentTask.setStatusName("");
-                currentTask.setMessage("");
+                currentTask.addUri(lastTask.searchLink("self").getHref());
+                currentTask.addTask(dtoToTask(lastTask));
             }
 
             nodeVirtualImage.setTaskStatus(currentTask);
@@ -654,6 +653,44 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
         }
 
         return nodeVirtualImages;
+    }
+
+    private Task dtoToTask(final TaskDto dto)
+    {
+        Task task = new Task();
+
+        task.setOwnerId(dto.getOwnerId());
+        task.setState(dto.getState());
+        task.setTaskId(dto.getTaskId());
+        task.setTimestamp(dto.getTimestamp());
+        task.setType(dto.getType());
+        task.setUserId(dto.getUserId());
+        task.getJobs().addAll(dtosToJob(dto.getJobs()));
+
+        return task;
+    }
+
+    private List<Job> dtosToJob(final JobsDto dtos)
+    {
+        List<Job> jobs = new ArrayList<Job>();
+        for (JobDto dto : dtos.getCollection())
+        {
+            Job job = dtoToJob(dto);
+            jobs.add(job);
+        }
+        return jobs;
+    }
+
+    private Job dtoToJob(final JobDto dto)
+    {
+        Job job = new Job();
+        job.setId(dto.getId());
+        job.setParentTaskId(dto.getParentTaskId());
+        job.setRollbackState(dto.getRollbackState());
+        job.setState(dto.getState());
+        job.setTimestamp(dto.getTimestamp());
+        job.setType(dto.getType());
+        return job;
     }
 
     private VirtualImage dtoToVirtualImage(final VirtualMachineTemplateDto virtualImageDto)
@@ -697,6 +734,8 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
             icon.setPath(iconlLink.getTitle());
             image.setIcon(icon);
         }
+
+        image.setIdEnterprise(virtualImageDto.getIdFromLink("enterprise"));
 
         // Captured images may not have a template definition
         RESTLink templateDefinitionLink = virtualImageDto.searchLink("templatedefinition");
@@ -748,6 +787,7 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
             {
                 populateErrors(entResponse, new BasicResult(), "getUser");
             }
+
         }
 
         UserDto userDto =
@@ -1106,7 +1146,6 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
             VirtualDatacenter vdc =
                 getApiClient().getCloudService().getVirtualDatacenter(
                     virtualAppliance.getVirtualDataCenter().getId());
-
             VirtualApplianceDto dto =
                 getApiClient().getApi().getCloudClient()
                     .getVirtualAppliance(vdc.unwrap(), virtualAppliance.getId());
@@ -1114,6 +1153,21 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
             org.jclouds.abiquo.domain.cloud.VirtualAppliance vapp =
                 DomainWrapper.wrap(getApiClient(),
                     org.jclouds.abiquo.domain.cloud.VirtualAppliance.class, dto);
+
+            vapp.undeploy(Boolean.TRUE);
+
+            // The vapp state is DEPLOYED
+            vapp =
+                DomainWrapper.wrap(getApiClient(),
+                    org.jclouds.abiquo.domain.cloud.VirtualAppliance.class, dto);
+
+            // Blocking
+            getApiClient()
+                .getMonitoringService()
+                .getVirtualMachineMonitor()
+                .awaitCompletionUndeploy(
+                    vapp.listVirtualMachines().toArray(
+                        new org.jclouds.abiquo.domain.cloud.VirtualMachine[0]));
 
             // Here we actually perform the request to delete the virtual appliance
             vapp.delete();
@@ -1133,10 +1187,10 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
     }
 
     @Override
-    public DataResult applyChangesVirtualAppliance(final VirtualAppliance virtualAppliance,
-        final UserSession userSession)
+    public DataResult<VirtualAppliance> applyChangesVirtualAppliance(
+        final VirtualAppliance virtualAppliance, final UserSession userSession, final boolean force)
     {
-        DataResult result = new DataResult();
+        DataResult<VirtualAppliance> result = new DataResult<VirtualAppliance>();
         result.setSuccess(Boolean.TRUE);
         StringBuilder errors = new StringBuilder();
         try
@@ -1166,12 +1220,14 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
                         {
                             org.jclouds.abiquo.domain.cloud.VirtualMachine virtualMachine =
                                 appliance.getVirtualMachine(nvi.getVirtualMachine().getId());
-                            virtualMachine.deploy();
+
+                            virtualMachine.deploy(force);
                         }
                     }
                 }
                 catch (Exception e)
                 {
+                    // populateErrors(e, result, "applyChangesVirtualAppliance");
                     this.populateErrors(e, result, errors, "applyChangesVirtualAppliance");
                 }
             }
@@ -1180,7 +1236,12 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
         {
             releaseApiClient();
         }
-        result.setMessage(errors.toString());
+        String errorsMsg = errors.toString();
+        if (!StringUtils.isEmpty(errorsMsg))
+        {
+            result.setMessage(errorsMsg);
+        }
+        // result.setData(virtualAppliance);
         return result;
 
     }
@@ -1191,20 +1252,32 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
         result.setSuccess(false);
         if (ex instanceof AuthorizationException)
         {
-            ErrorManager.getInstance(AbiCloudConstants.ERROR_PREFIX).reportError(
-                new ResourceManager(BasicCommand.class), result,
-                "onFaultAuthorization.noPermission", methodName);
-            result.setMessage(ex.getMessage());
-            result.setResultCode(BasicResult.NOT_AUTHORIZED);
-            throw new UserSessionException(result);
+            populateErrors((AuthorizationException) ex, result, methodName);
         }
         else if (ex instanceof AbiquoException)
         {
             AbiquoException abiquoException = (AbiquoException) ex;
-            if (abiquoException.hasError("LIMIT_EXCEEDED")
+
+            if (abiquoException.hasError("SOFT_LIMIT_EXCEEDED"))
+            {
+                result.setResultCode(BasicResult.SOFT_LIMT_EXCEEDED);
+                result.setMessage(abiquoException.getMessage());
+                // limit exceeded does not include the detail
+                if (result.getMessage().length() < 254)
+                {
+                    result.setResultCode(0);
+                }
+            }
+            else if (abiquoException.hasError("LIMIT_EXCEEDED")
                 || BasicResult.HARD_LIMT_EXCEEDED == result.getResultCode())
             {
                 result.setResultCode(BasicResult.HARD_LIMT_EXCEEDED);
+                result.setMessage(abiquoException.getMessage());
+                // limit exceeded does not include the detail
+                if (result.getMessage().length() < 254)
+                {
+                    result.setResultCode(0);
+                }
             }
             else
             {
@@ -1242,7 +1315,10 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
 
             ClientResponse response = post(url, options);
 
-            if (response.getStatusCode() != 202)
+            int statusCode = response.getStatusCode();
+
+            if (statusCode != HttpStatus.ACCEPTED.getCode()
+                && statusCode != HttpStatus.SEE_OTHER.getCode())
             {
                 result.setSuccess(Boolean.FALSE);
                 addErrors(result, errors, response, "instanceVirtualApplianceNodes");
@@ -1263,5 +1339,34 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
         {
             return virtualAppData;
         }
+    }
+
+    @Override
+    public DataResult<List<TaskStatus>> updateTask(final TaskStatus task)
+    {
+        StringBuilder errors = new StringBuilder();
+        DataResult<List<TaskStatus>> result = new DataResult<List<TaskStatus>>();
+        result.setSuccess(Boolean.TRUE);
+
+        List<TaskStatus> tasks = new ArrayList<TaskStatus>();
+        for (String link : task.getUris())
+        {
+            ClientResponse clientResponse = get(link);
+            if (clientResponse.getStatusCode() == Status.OK.getStatusCode()
+                || clientResponse.getStatusCode() == Status.SEE_OTHER.getStatusCode())
+            {
+                addErrors(result, errors, clientResponse, "updateTask");
+            }
+            else
+            {
+                TaskDto dto = clientResponse.getEntity(TaskDto.class);
+                TaskStatus currentTask = new TaskStatus();
+                currentTask.addUri(link);
+                currentTask.addTask(dtoToTask(dto));
+                tasks.add(currentTask);
+            }
+        }
+        result.setData(tasks);
+        return result;
     }
 }

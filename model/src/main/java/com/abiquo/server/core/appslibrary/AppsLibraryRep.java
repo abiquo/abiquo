@@ -75,8 +75,16 @@ public class AppsLibraryRep extends DefaultRepBase
         categoryDAO.flush();
     }
 
+    /**
+     * If if being used by any {@link VirtualMachineTemplate} its changed to the DEFAULT category;
+     * */
     public void deleteCategory(final Category category)
     {
+        for (VirtualMachineTemplate templ : virtualMachineTemplateDAO.findBy(category))
+        {
+            templ.setCategory(categoryDAO.findDefault());
+        }
+
         categoryDAO.remove(category);
     }
 
@@ -328,6 +336,11 @@ public class AppsLibraryRep extends DefaultRepBase
     public void addConversion(final VirtualImageConversion conversion)
     {
         conversionDAO.persist(conversion);
+    }
+
+    public boolean existDuplicatedConversion(final VirtualImageConversion conversion)
+    {
+        return conversionDAO.existDuplicatedConversion(conversion);
     }
 
 }

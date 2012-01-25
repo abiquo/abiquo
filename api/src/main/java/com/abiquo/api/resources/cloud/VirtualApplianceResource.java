@@ -26,13 +26,11 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import javax.ws.rs.DELETE;
-import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.UriInfo;
 
@@ -42,8 +40,8 @@ import org.springframework.stereotype.Controller;
 
 import com.abiquo.api.resources.TaskResourceUtils;
 import com.abiquo.api.services.NetworkService;
-import com.abiquo.api.services.UserService;
 import com.abiquo.api.services.cloud.VirtualApplianceService;
+import com.abiquo.api.services.cloud.VirtualMachineLock;
 import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.model.rest.RESTLink;
 import com.abiquo.model.transport.AcceptedRequestDto;
@@ -54,6 +52,7 @@ import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualApplianceDto;
 import com.abiquo.server.core.cloud.VirtualApplianceState;
 import com.abiquo.server.core.cloud.VirtualApplianceStateDto;
+import com.abiquo.server.core.cloud.VirtualMachineState;
 import com.abiquo.server.core.cloud.VirtualMachineTaskDto;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
 import com.abiquo.server.core.infrastructure.network.IpsPoolManagementDto;
@@ -88,13 +87,13 @@ public class VirtualApplianceResource
     public static final String VIRTUAL_APPLIANCE_STATE_REL = "state";
 
     @Autowired
-    VirtualApplianceService service;
+    private VirtualApplianceService service;
 
     @Autowired
-    NetworkService netService;
+    private NetworkService netService;
 
     @Autowired
-    UserService userService;
+    private VirtualMachineLock vmLock;
 
     /**
      * Return the virtual appliance if exists.
@@ -211,17 +210,32 @@ public class VirtualApplianceResource
     public AcceptedRequestDto<String> deploy(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
-        @Context final IRESTBuilder restBuilder, @Context final UriInfo uriInfo)
+        final VirtualMachineTaskDto taskOptions, @Context final IRESTBuilder restBuilder,
+        @Context final UriInfo uriInfo) throws Exception
     {
         AcceptedRequestDto<String> dto = new AcceptedRequestDto<String>();
+
+        // by default force limits
+        final boolean forceLimits =
+            taskOptions != null ? taskOptions.isForceEnterpriseSoftLimits() : true;
+
+        // Lock all virtual machines in the vapp
+        Map<Integer, VirtualMachineState> originalStates =
+            vmLock.lockVirtualApplianceBeforeDeploying(vdcId, vappId);
 
         final String lockMsg = "Allocate vapp " + vappId;
         try
         {
             SchedulerLock.acquire(lockMsg);
 
-            Map<Integer, String> links = service.deployVirtualAppliance(vdcId, vappId);
+            Map<Integer, String> links = service.deployVirtualAppliance(vdcId, vappId, forceLimits);
             addStatusLinks(links, dto, uriInfo);
+        }
+        catch (Exception ex)
+        {
+            // Make sure all virtual machines are unlocked if deploy fails
+            vmLock.unlockVirtualMachines(originalStates);
+            throw ex;
         }
         finally
         {
@@ -237,7 +251,7 @@ public class VirtualApplianceResource
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
         final VirtualMachineTaskDto taskOptions, @Context final IRESTBuilder restBuilder,
-        @Context final UriInfo uriInfo)
+        @Context final UriInfo uriInfo) throws Exception
     {
         Boolean forceUndeploy;
         if (taskOptions.getForceUndeploy() == null)
@@ -248,10 +262,25 @@ public class VirtualApplianceResource
         {
             forceUndeploy = taskOptions.getForceUndeploy();
         }
-        Map<Integer, String> links = service.undeployVirtualAppliance(vdcId, vappId, forceUndeploy);
-        AcceptedRequestDto<String> dto = new AcceptedRequestDto<String>();
-        addStatusLinks(links, dto, uriInfo);
-        return dto;
+
+        // Lock all virtual machines in the vapp
+        Map<Integer, VirtualMachineState> originalStates =
+            vmLock.lockVirtualApplianceBeforeUndeploying(vdcId, vappId);
+
+        try
+        {
+            Map<Integer, String> links =
+                service.undeployVirtualAppliance(vdcId, vappId, forceUndeploy, originalStates);
+            AcceptedRequestDto<String> dto = new AcceptedRequestDto<String>();
+            addStatusLinks(links, dto, uriInfo);
+            return dto;
+        }
+        catch (Exception ex)
+        {
+            // Make sure all virtual machines are unlocked if deploy fails
+            vmLock.unlockVirtualMachines(originalStates);
+            throw ex;
+        }
     }
 
     private VirtualApplianceStateDto virtualApplianceStateToDto(final Integer vdcId,
@@ -289,8 +318,22 @@ public class VirtualApplianceResource
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId)
         throws Exception
     {
-        service.deleteVirtualAppliance(vdcId, vappId);
+        // Lock all virtual machines in the vapp
+        Map<Integer, VirtualMachineState> originalStates =
+            vmLock.lockVirtualApplianceBeforeDeleting(vdcId, vappId);
 
+        try
+        {
+            service.deleteVirtualAppliance(vdcId, vappId, originalStates);
+
+            // TODO: Should return a task list if the vapp is going to be undeployed?
+        }
+        catch (Exception ex)
+        {
+            // Make sure all virtual machines are unlocked if deploy fails
+            vmLock.unlockVirtualMachines(originalStates);
+            throw ex;
+        }
     }
 
     @GET

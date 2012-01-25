@@ -21,6 +21,8 @@
  
 package net.undf.abicloud.vo.virtualappliance
 {
+	import mx.collections.ArrayCollection;
+	
 	/**
      * This class represents the status of a specifi task
      */
@@ -29,29 +31,14 @@ package net.undf.abicloud.vo.virtualappliance
 	[Bindable]
 	public class TaskStatus
 	{
-		/*******
-		 *  States
-		 * 
-		 *  FINISHED_SUCCESSFULLY,
-		 * 
-		 *  FINISHED_UNSUCCESSFULLY,
-		 *
-		 *  PENDING,
-		 * 
-		 *  STARTED,
-		 * 
-		 *  ABORTED
-		 * 
-		 * *****/
-        public var uuid:String;
-        public var statusName:String;
-        public var message:String;
+		 
+        public var tasks:ArrayCollection
+        public var uris:ArrayCollection;
 
 		public function TaskStatus()
 		{
-			uuid = "";
-			statusName = "";
-			message = "";
+			tasks = new ArrayCollection();
+            uris = new ArrayCollection();
 		}
 
 	}

@@ -18,24 +18,26 @@
  * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
  * Boston, MA 02111-1307, USA.
  */
-package com.abiquo.abiserver.commands;
 
-import java.util.ArrayList;
-import java.util.Collection;
-
-import com.abiquo.abiserver.exception.PersistenceException;
-import com.abiquo.abiserver.pojo.authentication.UserSession;
-import com.abiquo.abiserver.pojo.result.DataResult;
-import com.abiquo.abiserver.pojo.virtualappliance.Node;
-import com.abiquo.abiserver.pojo.virtualappliance.VirtualAppliance;
-
-public interface BundleCommand
+package net.undf.abicloud.vo.infrastructure
 {
+    import mx.collections.ArrayCollection;
 
-    public abstract DataResult<VirtualAppliance> bundleVirtualAppliance(
-        final UserSession userSession, final VirtualAppliance va, final ArrayList<Node> nodes);
+    [Bindable]
+    [RemoteClass(alias="com.abiquo.abiserver.pojo.ucs.LogicServerListResult")]
+    public class LogicServerListResult
+    {
+        //The total number of logic server
+        public var totalLogicServer:int;
 
-    public abstract VirtualAppliance bundleVirtualAppliance(final int idVirtualApp,
-        final Collection<Integer> nodeIds, final String userName) throws PersistenceException;
+        //The List of Logic Server
+        public var logicServerList:ArrayCollection;
 
+        public function LogicServerListResult()
+        {
+            totalLogicServer = 0;
+            logicServerList = new ArrayCollection();
+        }
+
+    }
 }

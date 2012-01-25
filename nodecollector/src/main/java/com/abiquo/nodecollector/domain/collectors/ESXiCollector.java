@@ -715,7 +715,6 @@ public class ESXiCollector extends AbstractCollector
         String directoryOnDatastore =
             String.format("%s %s%s", dsName, DATASTORE_UUID_MARK, folderUuidMark);
 
-
         return folderUuidMark;
     }
 
@@ -935,7 +934,7 @@ public class ESXiCollector extends AbstractCollector
         if (uuid == null)
         {
             LOGGER.info(String.format(
-                "Datastore %s on Host [%s] haven't any folder mark, creating it.", dsName,
+                "Datastore %s on Host [%s] hasn't any folder mark, creating it.", dsName,
                 getIpAddress()));
 
             uuid = createDatastoreFolderMark(dc, dsName);
@@ -997,27 +996,30 @@ public class ESXiCollector extends AbstractCollector
 
         // Network resouces
         HostNetworkInfo network = config.getNetwork();
-        for (HostVirtualSwitch vswitch : network.getVswitch())
+        if (network.getVswitch() != null)
         {
-            if (vswitch.pnic != null)
+            for (HostVirtualSwitch vswitch : network.getVswitch())
             {
-                ResourceType resource = new ResourceType();
-                resource.setResourceType(ResourceEnumType.NETWORK_INTERFACE);
-                String[] pnics = vswitch.getPnic();
-                String address = "";
-                if (pnics.length > 0)
+                if (vswitch.pnic != null)
                 {
-                    for (PhysicalNic nic : network.getPnic())
+                    ResourceType resource = new ResourceType();
+                    resource.setResourceType(ResourceEnumType.NETWORK_INTERFACE);
+                    String[] pnics = vswitch.getPnic();
+                    String address = "";
+                    if (pnics.length > 0)
                     {
-                        if (nic.getKey().equalsIgnoreCase(pnics[0]))
+                        for (PhysicalNic nic : network.getPnic())
                         {
-                            address = nic.getMac();
+                            if (nic.getKey().equalsIgnoreCase(pnics[0]))
+                            {
+                                address = nic.getMac();
+                            }
                         }
                     }
+                    resource.setAddress(address);
+                    resource.setElementName(vswitch.getName());
+                    resources.add(resource);
                 }
-                resource.setAddress(address);
-                resource.setElementName(vswitch.getName());
-                resources.add(resource);
             }
         }
 

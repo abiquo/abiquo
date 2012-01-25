@@ -54,7 +54,6 @@ public class AppsLibraryService
     public DataResult<Repository> getDatacenterRepository(final UserSession userSession,
         final Integer idDatacenter, final Integer idEnterprise, final Boolean refresh)
     {
-        // TODO idEnterpise is not used
         DatacenterRepositoryResourceStub dcRepoStub =
             APIStubFactory.getInstance(userSession, new DatacenterRepositoryResourceStubImpl(),
                 DatacenterRepositoryResourceStub.class);
@@ -316,4 +315,13 @@ public class AppsLibraryService
         return proxyStub(userSession).deleteCategory(idCategory);
     }
 
+    public BasicResult getAllowedDataCenters(final UserSession session,
+        final Integer effectiveEnterpriseId)
+    {
+        DatacenterRepositoryResourceStub dcRepoStub =
+            APIStubFactory.getInstance(session, new DatacenterRepositoryResourceStubImpl(),
+                DatacenterRepositoryResourceStub.class);
+
+        return dcRepoStub.getAllowedRepositories(effectiveEnterpriseId);
+    }
 }

@@ -186,7 +186,8 @@ public enum APIError
         "VAPP-1", "The virtual appliance is not deployed"), VIRTUALAPPLIANCE_NOT_RUNNING("VAPP-2",
         "The virtual appliance is not running"), VIRTUALAPPLIANCE_DEPLOYED("VAPP-1",
         "The virtual appliance is deployed"), VIRTUALAPPLIANCE_NON_MANAGED_IMAGES("VAPP-4",
-        "The virtual appliance has non managed images"),
+        "The virtual appliance has non managed images"), VIRTUALAPPLIANCE_INVALID_STATE_DELETE(
+        "VAPP-4", "The virtual appliance has non managed images"),
 
     // VIRTUAL CONVERSION
     NON_EXISTENT_VIRTUALAPPLIANCE_STATEFULCONVERSION("VASC-0",
@@ -206,6 +207,8 @@ public enum APIError
         "There is already a managed rack with this IP defined"), RACK_CONFIG_ERROR("RACK-8",
         "There is a problem with the details of the UCS Rack"), RACK_CANNOT_REMOVE_VMS("RACK-9",
         "Can not remove this rack because there are some virtual machines deployed on it"),
+         RACK_DEFAULT_TEMPLATE_ERROR(
+        "RACK-10", "This UCS Rack has no default Service Profile Template. You must either select one from the list or add a default Service Profile Template"),
 
     // MACHINE
     NON_EXISTENT_MACHINE("MACHINE-0", "The requested machine does not exist"), NOT_ASSIGNED_MACHINE_DATACENTER_RACK(
@@ -220,6 +223,8 @@ public enum APIError
         "MACHINE-8", "Invalid IPMI configuration."), MACHINE_INVALID_IP_RANGE("MACHINE-9",
         "Invalid ip range"), MACHINE_IQN_MISSING("MACHINE-10",
         "The IQN of the target Physical Machine is not set"),
+ MANAGED_MACHINE_CANNOT_CHANGE_NAME(
+        "MACHINE-11", "The Machine is in a managed Rack and the name can not be changed."),
 
     HYPERVISOR_EXIST_IP("HYPERVISOR-1",
         "Invalid hypervisor IP. A hypervisor with that IP already exists"), HYPERVISOR_EXIST_SERVICE_IP(
@@ -232,7 +237,13 @@ public enum APIError
         "Invalid network configuration for the virtual datacenter"), NETWORK_WITHOUT_IPS("NET-8",
         "This network does not have IP addresses"), NETWORK_IP_FROM_BIGGER_THAN_IP_TO("NET-9",
         "Parameter IPFrom is greater than IPTo"), NETWORK_IP_FROM_ERROR("NET-10",
-        "Parameter IPFrom is invalid"), NETWORK_IP_TO_ERROR("NET-11", "Parameter IPTo is invalid"),
+        "Parameter IPFrom is invalid"), NETWORK_IP_TO_ERROR("NET-11", "Parameter IPTo is invalid"), NETWORK_INVALID_CONFIGURATION_LINK(
+        "NET-12", "Invalid link to configure the VirtualMachine's network"), NETWORK_LINK_INVALID_VDC(
+        "NET-13", "Invalid Virtual Datacenter identifier in the configuration link"), NETWORK_LINK_INVALID_VAPP(
+        "NET-14", "Invalid Virtual Appliance identifier in the configuration link"), NETWORK_LINK_INVALID_VM(
+        "NET-15", "Invalid Virtual Machine identifier in the configuration link"), NETWORK_LINK_INVALID_CONFIG(
+        "NET-16",
+        "Invalid Configuration identifier in the configuration link. Configuration Id it does not belong to any VLAN configuration used by this Virtual Machine"),
 
     // VIRTUAL MACHINE
     VIRTUAL_MACHINE_WITHOUT_HYPERVISOR("VM-0",
@@ -364,7 +375,9 @@ public enum APIError
         "The requested virtual image is a master image, master images cannot be deleted"), VMTEMPLATE_STATEFUL_TEMPLATE_CANNOT_BE_DELETED(
         "VIMAGE-8", "Cannot delete a stateful image"), VMTEMPLATE_SHARED_TEMPLATE_FROM_OTHER_ENTERPRISE(
         "VIMAGE-9",
-        "Cannot delete the requested shared virtual image, because it belongs to another enterprise"),
+        "Cannot delete the requested shared virtual image, because it belongs to another enterprise"), VMTEMPLATE_TEMPLATE_USED_BY_VIRTUAL_MACHINES_CANNOT_BE_DELETED(
+        "VIMAGE-10",
+        "The Virtual Machine Template is being used by some Virtual Machines and cannot be deleted"),
 
     // NODE COLLECTOR
     NON_EXISTENT_IP("NC-0", "The requested IP does not exist"), MISSING_IP_PARAMETER("NC-1",
@@ -403,7 +416,8 @@ public enum APIError
 
     // ALLOCATOR
     LIMITS_EXCEEDED("LIMIT-0", "The required resources exceed the allowed limits"), LIMIT_EXCEEDED(
-        "LIMIT-1", "The required resources exceed the allowed limits"), NOT_ENOUGH_RESOURCES(
+        "LIMIT-1", "The required resources exceed the allowed limits"), SOFT_LIMIT_EXCEEDED(
+        "LIMIT-2", "The required resources exceed the soft limits"), NOT_ENOUGH_RESOURCES(
         "ALLOC-0", "There are not enough resources to create the virtual machine"), //
     ALLOCATOR_ERROR("ALLOC-1", "Cannot create virtual machine"), //
 
@@ -417,7 +431,8 @@ public enum APIError
         "VSM-2", "An error occurred when subscribing the virtual machine"), UNSUBSCRIPTION_PROBLEM(
         "VSM-3", "An error occurred when unsubscribing the virtual machine"), REFRESH_STATE_PROBLEM(
         "VSM-4", "An error occurred when refreshing the virtual machine state"), VSMCLIENTFROMPOOL_PROBLEM(
-        "VSM-5", "A VSMClient instance cannot be returned from connection pool."),
+        "VSM-5", "A VSMClient instance cannot be returned from connection pool."), INVALIDATE_STATE_PROBLEM(
+        "VSM-6", "An error occurred when invalidating the last known state of the virtual machine"),
 
     // LICENSE
     LICENSE_UNEXISTING("LICENSE-0", "The requested license does not exist"), LICENSE_INVALID(
@@ -662,8 +677,8 @@ public enum APIError
         // Outputs all errors in wiki table format
         for (APIError error : errors)
         {
-            System.out.println(String.format("| %s | %s | %s |", error.code, error.message, error
-                .name()));
+            System.out.println(String.format("| %s | %s | %s |", error.code, error.message,
+                error.name()));
         }
 
         System.out.println("\n ************ Flex client labels ************** \n");

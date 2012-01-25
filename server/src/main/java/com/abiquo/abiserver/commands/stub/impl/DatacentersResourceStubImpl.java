@@ -77,6 +77,38 @@ public class DatacentersResourceStubImpl extends AbstractAPIStub implements Data
     }
 
     @Override
+    public DataResult<ArrayList<DataCenter>> getDatacenters(final Integer enterpriseId)
+    {
+        DataResult<ArrayList<DataCenter>> result = new DataResult<ArrayList<DataCenter>>();
+        ArrayList<DataCenter> dcs = new ArrayList<DataCenter>();
+
+        try
+        {
+            Iterable<Datacenter> datacenters =
+                getApiClient().getAdministrationService().getEnterprise(enterpriseId)
+                    .listAllowedDatacenters();
+
+            for (Datacenter dc : datacenters)
+            {
+                dcs.add(fromDtoToPojo(dc, false));
+            }
+
+            result.setSuccess(true);
+            result.setData(dcs);
+        }
+        catch (Exception ex)
+        {
+            populateErrors(ex, result, "getDatacenters");
+        }
+        finally
+        {
+            releaseApiClient();
+        }
+
+        return result;
+    }
+
+    @Override
     public DataResult<DataCenter> getDatacenter(final Integer datacenterId)
     {
         DataResult<DataCenter> result = new DataResult<DataCenter>();
@@ -268,13 +300,21 @@ public class DatacentersResourceStubImpl extends AbstractAPIStub implements Data
 
     public DataCenter fromDtoToPojo(final Datacenter datacenter)
     {
+        return fromDtoToPojo(datacenter, true);
+    }
+
+    public DataCenter fromDtoToPojo(final Datacenter datacenter, final boolean includeRS)
+    {
         DataCenter dc = DataCenter.create(datacenter.unwrap());
         dc.setRemoteServices(new ArrayList<RemoteService>());
 
-        for (org.jclouds.abiquo.domain.infrastructure.RemoteService rs : datacenter
-            .listRemoteServices())
+        if (includeRS)
         {
-            dc.getRemoteServices().add(RemoteService.create(rs.unwrap(), dc.getId()));
+            for (org.jclouds.abiquo.domain.infrastructure.RemoteService rs : datacenter
+                .listRemoteServices())
+            {
+                dc.getRemoteServices().add(RemoteService.create(rs.unwrap(), dc.getId()));
+            }
         }
 
         return dc;

@@ -29,10 +29,12 @@ import com.abiquo.appliancemanager.transport.EnterpriseRepositoryDto;
 import com.abiquo.appliancemanager.transport.RepositoryConfigurationDto;
 import com.abiquo.appliancemanager.transport.TemplateDto;
 import com.abiquo.appliancemanager.transport.TemplateStateDto;
+import com.abiquo.appliancemanager.transport.TemplateStatusEnumType;
 import com.abiquo.appliancemanager.transport.TemplatesStateDto;
 import com.abiquo.model.transport.error.ErrorsDto;
 import org.dmtf.schemas.ovf.envelope._1.EnvelopeType;
 import com.abiquo.model.transport.error.ErrorDto;
+
 public class ApplianceManagerResourceStubImpl extends ApplianceManagerResourceStub
 {
 
@@ -185,15 +187,16 @@ public class ApplianceManagerResourceStubImpl extends ApplianceManagerResourceSt
 
         ClientResponse response = resource.accept(MEDIA_TYPE).queryParam(FORAMT, "status").get();
 
-        checkResponse(response, 200);
+        if (response.getStatusCode() == 404) // not found == not download
+        {
+            TemplateStateDto notFound = new TemplateStateDto();
+            notFound.setOvfId(ovfId);
+            notFound.setStatus(TemplateStatusEnumType.NOT_DOWNLOAD);
+            return notFound;
+        }
 
+        checkResponse(response, 200);
         return response.getEntity(TemplateStateDto.class);
-        // final int httpStatus = response.getStatusCode();
-        // if (httpStatus == 404)
-        // {
-        // return uploading(ovfId);
-        // }
-        // checkErrorStatusResponse(response, httpStatus);
     }
 
     public String preBundleTemplate(final String idEnterprise, final String name)

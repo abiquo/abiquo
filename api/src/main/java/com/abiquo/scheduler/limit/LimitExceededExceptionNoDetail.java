@@ -25,10 +25,10 @@ public class LimitExceededExceptionNoDetail extends LimitExceededException
 {
     private static final long serialVersionUID = 7377142657394476370L;
 
-    public LimitExceededExceptionNoDetail(LimitExceededException e)
+    public LimitExceededExceptionNoDetail(final LimitExceededException e)
     {
-        super(e.getResourcesStatus(), e.getEntity(), e.getRequirements(), e.getActual(), e
-            .getEntityId());
+        super(e.isHardLimit(), e.getResourcesStatus(), e.getEntity(), e.getRequirements(), e
+            .getActual(), e.getEntityId());
     }
 
     @Override
@@ -36,5 +36,4 @@ public class LimitExceededExceptionNoDetail extends LimitExceededException
     {
         return String.format("Not enough resources on %s ", this.getEntityId());
     }
-
 }

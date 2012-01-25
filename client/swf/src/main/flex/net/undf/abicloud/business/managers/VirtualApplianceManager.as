@@ -33,6 +33,9 @@ package net.undf.abicloud.business.managers
     import net.undf.abicloud.view.general.AbiCloudAlert;
     import net.undf.abicloud.vo.infrastructure.State;
     import net.undf.abicloud.vo.virtualappliance.Log;
+    import net.undf.abicloud.vo.virtualappliance.NodeVirtualImage;
+    import net.undf.abicloud.vo.virtualappliance.TaskStatus;
+    import net.undf.abicloud.vo.virtualappliance.Timestamp;
     import net.undf.abicloud.vo.virtualappliance.VirtualAppliance;
     import net.undf.abicloud.vo.virtualappliance.VirtualDataCenter;
 
@@ -47,6 +50,8 @@ package net.undf.abicloud.business.managers
         {
             this._virtualAppliances = new ArrayCollection();
             this._virtualDataCenters = new ArrayCollection();
+            this._virtualAppliancesTimestamps = new ArrayCollection();
+            this._virtualMachinesTimestamps = new ArrayCollection();
         }
 
 
@@ -345,7 +350,10 @@ package net.undf.abicloud.business.managers
 	
 	            if (vaToUpdate)
 	            {
+	                setTimestamp('virtualAppliance',vaToUpdate.id);
+	                vaToUpdate.nodes = updateNodesStatus(vaToUpdate);
 	                vaToUpdate.state = new State(10, State.LOCKED.description);
+	                dispatchEvent(new Event("nodesUpdates")); 
 	            }            	
             }
         }
@@ -442,5 +450,65 @@ package net.undf.abicloud.business.managers
                 dispatchEvent(virtualApplianceEvent);
             }
         }
+        
+         /**
+         * When a Virtual Appliance is started, we update nodes task status
+         */
+        public function updateNodesStatus(virtualAppliance:VirtualAppliance):ArrayCollection
+        {
+        	if(virtualAppliance.nodes)
+        	{
+        	   var taskStatus:TaskStatus;
+        	   for(var i:int = 0 ; i < virtualAppliance.nodes.length ; i++)
+        	   {
+        	   	   taskStatus = NodeVirtualImage(virtualAppliance.nodes.getItemAt(i)).taskStatus;
+        	   	   taskStatus.tasks = new ArrayCollection();
+        	   	   //taskStatus.statusName = TaskStatus.STARTED;
+        	   }
+        	}
+        	
+        	return virtualAppliance.nodes;
+        }
+        
+        ///////////////////////////////////////////////////////////////////////////
+        //
+        // Virtual Appliances and Virtual Machines Timestamp actions
+        //
+        ///////////////////////////////////////////////////////////////////////////
+        
+        private var _virtualAppliancesTimestamps:ArrayCollection;
+        private var _virtualMachinesTimestamps:ArrayCollection;
+        
+        /**
+         * Associate a Virtual Appliance / Virtual Machine to a timestamp when an action is performed
+         */
+        private function setTimestamp(type:String, id:int):void
+        {
+        	var timestamp:Timestamp = isTimestampUsed(type, id);
+        	if( !timestamp )
+        	{
+        	   timestamp = new Timestamp();
+        	   timestamp.id = id;
+        	}
+
+        	timestamp.setTimestamp();        	   	
+        }
+        
+        /**
+         * Check if the timestamp is associated with the Virtual Appliance / Virtual Machine
+         */
+        public function isTimestampUsed(type:String, id:int):Timestamp
+        {
+        	var collection:ArrayCollection = type == 'virtualAppliance' ? this._virtualAppliancesTimestamps:this._virtualMachinesTimestamps;
+        	for(var i:int = 0 ; i < collection.length ; i++)
+        	{
+        	   if(Timestamp(collection.getItemAt(i)).id == id)
+        	   {
+        	   	   return Timestamp(collection.getItemAt(i));
+        	   }	
+        	}
+        	return null;
+        }
+        
     }
 }

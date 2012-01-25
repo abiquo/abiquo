@@ -30,10 +30,9 @@ import org.hibernate.Session;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
 import com.abiquo.server.core.common.persistence.DefaultDAOTestBase;
-import com.softwarementors.bzngine.entities.test.PersistentEntityTestHelper;
 import com.softwarementors.bzngine.entities.test.PersistentInstanceTester;
-import com.softwarementors.commons.collections.ListUtils;
 
 @Test
 public class VirtualMachineDAOTest extends DefaultDAOTestBase<VirtualMachineDAO, VirtualMachine>
@@ -78,6 +77,38 @@ public class VirtualMachineDAOTest extends DefaultDAOTestBase<VirtualMachineDAO,
 
         List<VirtualMachine> all = dao.findAll();
         assertEquals(all.size(), 2);
+    }
+
+    /**
+     * Create five machines with same Virtual Machine Template and retrieve the list of Virtual
+     * Machines using the Virtual Machine Template related. Check if the size list value is correct.
+     */
+    @Test
+    public void findAllByVirtualMachineTemplate()
+    {
+        Integer virtualMachineTemplateId =
+            createFiveMachinesWithSameVirtualMachineTemplateAndPersistThem();
+
+        VirtualMachineDAO dao = createDaoForRollbackTransaction();
+
+        List<VirtualMachine> all = dao.findByVirtualMachineTemplate(virtualMachineTemplateId);
+        assertEquals(all.size(), 5);
+    }
+
+    /**
+     * Create five machines with same Virtual Machine Template and check if true value is retrieved
+     * when querying if this Virtual Machine Template has any Virtual Machine using it.
+     */
+    @Test
+    public void checkIfVirtualMachineTemplateIsBeingUsedByVirtualMachines()
+    {
+        Integer virtualMachineTemplateId =
+            createFiveMachinesWithSameVirtualMachineTemplateAndPersistThem();
+
+        VirtualMachineDAO dao = createDaoForRollbackTransaction();
+
+        boolean result = dao.hasVirtualMachineTemplate(virtualMachineTemplateId);
+        assertEquals(result, true);
     }
 
     /**
@@ -132,6 +163,26 @@ public class VirtualMachineDAOTest extends DefaultDAOTestBase<VirtualMachineDAO,
         }
     }
 
+    @Test
+    public void findVirtualMachinesNotAllocatedCompatibleHypervisor()
+    {
+        VirtualMachine vm = eg().createUniqueInstance();
+        // used for posterior search
+        Hypervisor hyp = vm.getHypervisor();
+        vm.setHypervisor(null);
+
+        vm.setState(VirtualMachineState.NOT_ALLOCATED);
+        List<Object> vmlist = new ArrayList<Object>();
+        eg().addAuxiliaryEntitiesToPersist(vm, vmlist);
+        vmlist.add(vm);
+
+        ds().persistAll(vmlist.toArray());
+
+        VirtualMachineDAO dao = createDaoForRollbackTransaction();
+        List<VirtualMachine> vms = dao.findVirtualMachinesNotAllocatedCompatibleHypervisor(hyp);
+        assertEquals(vms.size(), 1);
+    }
+
     /**
      * Create five machines, three with the temporal value set, and two without the temporal values
      * set.
@@ -158,5 +209,35 @@ public class VirtualMachineDAOTest extends DefaultDAOTestBase<VirtualMachineDAO,
         eg().addAuxiliaryEntitiesToPersist(vm5, vmlist);
 
         persistAll(ds(), vmlist, vm1, vm2, vm3, vm4, vm5);
+    }
+
+    private Integer createFiveMachinesWithSameVirtualMachineTemplateAndPersistThem()
+    {
+        List<Object> vmlist = new ArrayList<Object>();
+
+        VirtualMachine vm1 = eg().createUniqueInstance();
+        eg().addAuxiliaryEntitiesToPersist(vm1, vmlist);
+
+        VirtualMachineTemplate vmt = vm1.getVirtualMachineTemplate();
+
+        VirtualMachine vm2 = eg().createUniqueInstance();
+        vm2.setVirtualMachineTemplate(vmt);
+        eg().addAuxiliaryEntitiesToPersist(vm2, vmlist);
+
+        VirtualMachine vm3 = eg().createUniqueInstance();
+        vm3.setVirtualMachineTemplate(vmt);
+        eg().addAuxiliaryEntitiesToPersist(vm3, vmlist);
+
+        VirtualMachine vm4 = eg().createUniqueInstance();
+        vm4.setVirtualMachineTemplate(vmt);
+        eg().addAuxiliaryEntitiesToPersist(vm4, vmlist);
+
+        VirtualMachine vm5 = eg().createUniqueInstance();
+        vm5.setVirtualMachineTemplate(vmt);
+        eg().addAuxiliaryEntitiesToPersist(vm5, vmlist);
+
+        persistAll(ds(), vmlist, vm1, vm2, vm3, vm4, vm5);
+
+        return vmt.getId();
     }
 }

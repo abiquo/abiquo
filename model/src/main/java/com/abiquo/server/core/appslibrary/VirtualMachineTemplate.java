@@ -94,7 +94,7 @@ public class VirtualMachineTemplate extends DefaultEntityBase
         this.creationUser = creationUser;
     }
 
-    private final static String ID_COLUMN = "idImage";
+    public final static String ID_COLUMN = "idImage";
 
     @Id
     @GeneratedValue
@@ -604,7 +604,7 @@ public class VirtualMachineTemplate extends DefaultEntityBase
 
     public boolean isManaged()
     {
-        return getRepository() != null;
+        return getRepository() != null || isStateful();
     }
 
     public boolean isMaster()

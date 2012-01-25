@@ -82,8 +82,14 @@ public class VirtualMachineRep extends DefaultRepBase
 
     public Collection<VirtualMachine> findManagedByHypervisor(final Hypervisor hypervisor)
     {
-        assert hypervisor != null;
         return dao.findManagedVirtualMachines(hypervisor);
+    }
+
+    public Collection<VirtualMachine> findVirtualMachinesNotAllocatedCompatibleHypervisor(
+        final Hypervisor hypervisor)
+    {
+        assert hypervisor != null;
+        return dao.findVirtualMachinesNotAllocatedCompatibleHypervisor(hypervisor);
     }
 
     public Collection<VirtualMachine> findByEnterprise(final Enterprise enterprise)
@@ -101,6 +107,16 @@ public class VirtualMachineRep extends DefaultRepBase
     public List<VirtualMachine> findVirtualMachinesByVirtualAppliance(final Integer vappId)
     {
         return dao.findVirtualMachinesByVirtualAppliance(vappId);
+    }
+
+    public List<VirtualMachine> findByVirtualMachineTemplate(final Integer virtualMachineTemplateId)
+    {
+        return dao.findByVirtualMachineTemplate(virtualMachineTemplateId);
+    }
+
+    public boolean hasVirtualMachineTemplate(final Integer virtualMachineTemplateId)
+    {
+        return dao.hasVirtualMachineTemplate(virtualMachineTemplateId);
     }
 
     public VirtualMachine findByUUID(final String uuid)

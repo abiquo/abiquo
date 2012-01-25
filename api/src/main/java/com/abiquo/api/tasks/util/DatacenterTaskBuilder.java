@@ -26,6 +26,7 @@ import java.util.Map;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.WordUtils;
 
 import com.abiquo.commons.amqp.impl.tarantino.domain.DiskSnapshot;
 import com.abiquo.commons.amqp.impl.tarantino.domain.HypervisorConnection;
@@ -117,7 +118,29 @@ public class DatacenterTaskBuilder
         this.asyncTask.setOwnerId(ownerId);
         this.asyncTask.setType(taskType);
 
+        for (Job job : this.asyncTask.getJobs())
+        {
+            String jobName = format(job.getType().name(), false);
+            String taskName = format(this.asyncTask.getType().name(), true);
+            String ownerName = format(this.asyncTask.getType().getOwnerType().name(), false);
+
+            job.setDescription(String.format("%s task's %s on %s with id %s", taskName, jobName,
+                ownerName, ownerId));
+        }
+
         return this.asyncTask;
+    }
+
+    private String format(final String name, boolean capitalize)
+    {
+        String formatted = name.toLowerCase();
+
+        if (capitalize)
+        {
+            formatted = WordUtils.capitalize(formatted);
+        }
+
+        return formatted.replace("_", " ");
     }
 
     /**
@@ -131,21 +154,6 @@ public class DatacenterTaskBuilder
     public DatacenterTaskBuilder add(final VirtualMachineStateTransition transition)
     {
         return add(this.definition, this.hypervisor, transition, null);
-    }
-
-    /**
-     * Add new {@link VirtualMachineStateTransition}. This method must be used to add transitions
-     * that only needs {@link VirtualMachineDefinition} and {@link HypervisorConnection} to be
-     * created.
-     * 
-     * @param transition The transition type to create
-     * @param extraData map with extra data to add to the job.
-     * @return The {@link DatacenterTaskBuilder} self
-     */
-    public DatacenterTaskBuilder add(final VirtualMachineDefinition definition,
-        final HypervisorConnection hypervisor, final VirtualMachineStateTransition transition)
-    {
-        return add(definition, hypervisor, transition, null);
     }
 
     /**
@@ -172,7 +180,7 @@ public class DatacenterTaskBuilder
      * @param extraData map to add to the job.
      * @return The {@link DatacenterTaskBuilder} self
      */
-    public DatacenterTaskBuilder add(final VirtualMachineDefinition definition,
+    protected DatacenterTaskBuilder add(final VirtualMachineDefinition definition,
         final HypervisorConnection hypervisor, final VirtualMachineStateTransition transition,
         final Map<String, String> extraData)
     {
@@ -214,15 +222,15 @@ public class DatacenterTaskBuilder
     /**
      * Adds a new {@link ReconfigureVirtualMachineOp} to the Jobs collection.
      * 
-     * @param newDefition The virtualmachine redefinition
+     * @param newDefinition The virtualmachine redefinition
      * @return The {@link DatacenterTaskBuilder} self
      */
-    public DatacenterTaskBuilder addReconfigure(final VirtualMachineDefinition newDefition)
+    public DatacenterTaskBuilder addReconfigure(final VirtualMachineDefinition newDefinition)
     {
         ReconfigureVirtualMachineOp job = new ReconfigureVirtualMachineOp();
         job.setVirtualMachine(definition);
         job.setHypervisorConnection(hypervisor);
-        job.setNewVirtualMachine(newDefition);
+        job.setNewVirtualMachine(newDefinition);
 
         this.tarantinoTask.addDatacenterJob(job);
         this.asyncTask.getJobs().add(createRedisJob(job.getId(), JobType.RECONFIGURE));
