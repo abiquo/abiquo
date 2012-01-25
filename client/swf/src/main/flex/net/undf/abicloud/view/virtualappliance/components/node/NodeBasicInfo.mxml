@@ -196,7 +196,8 @@
 
         <mx:FormItem 
             label="@Resource(bundle='Common', key='TEXTINPUT_LABEL_NAME')">
-            <mx:TextInput id="nameInput" 
+            <mx:TextInput id="nameInput"
+            	enabled="{this._isEditionAllowed}" 
             	text="{_name}"/>
         </mx:FormItem>
 
