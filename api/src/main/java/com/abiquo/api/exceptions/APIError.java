@@ -206,9 +206,9 @@ public enum APIError
         "This rack is not a UCS Rack"), RACK_DUPLICATED_IP("RACK-7",
         "There is already a managed rack with this IP defined"), RACK_CONFIG_ERROR("RACK-8",
         "There is a problem with the details of the UCS Rack"), RACK_CANNOT_REMOVE_VMS("RACK-9",
-        "Can not remove this rack because there are some virtual machines deployed on it"),
-         RACK_DEFAULT_TEMPLATE_ERROR(
-        "RACK-10", "This UCS Rack has no default Service Profile Template. You must either select one from the list or add a default Service Profile Template"),
+        "Can not remove this rack because there are some virtual machines deployed on it"), RACK_DEFAULT_TEMPLATE_ERROR(
+        "RACK-10",
+        "This UCS Rack has no default Service Profile Template. You must either select one from the list or add a default Service Profile Template"),
 
     // MACHINE
     NON_EXISTENT_MACHINE("MACHINE-0", "The requested machine does not exist"), NOT_ASSIGNED_MACHINE_DATACENTER_RACK(
@@ -222,8 +222,7 @@ public enum APIError
         "Machine cannot be removed because it is managed by the high availability engine. Manually re-enable it to recover managed state."), MACHINE_INVALID_IPMI_CONF(
         "MACHINE-8", "Invalid IPMI configuration."), MACHINE_INVALID_IP_RANGE("MACHINE-9",
         "Invalid ip range"), MACHINE_IQN_MISSING("MACHINE-10",
-        "The IQN of the target Physical Machine is not set"),
- MANAGED_MACHINE_CANNOT_CHANGE_NAME(
+        "The IQN of the target Physical Machine is not set"), MANAGED_MACHINE_CANNOT_CHANGE_NAME(
         "MACHINE-11", "The Machine is in a managed Rack and the name can not be changed."),
 
     HYPERVISOR_EXIST_IP("HYPERVISOR-1",
@@ -260,7 +259,8 @@ public enum APIError
         "The Virtual Machine is in a state that does not allow the request, therefore can't be modified"), VIRTUAL_MACHINE_UNALLOCATED_STATE(
         "VM-11",
         "The Virtual Machine is not in any Hypervisor. Therefore the change of the state cannot be applied"), VIRTUAL_MACHINE_INVALID_STATE_UNDEPLOY(
-        "VM-12", "The allowed power states for Virtual Machines is ON, OFF, PAUSED  or ALLOCATED"), VIRTUAL_MACHINE_INCOHERENT_STATE(
+        "VM-12",
+        "The allowed power states for Virtual Machine's deploy are ON, OFF, PAUSED, UNKNOWN  or ALLOCATED"), VIRTUAL_MACHINE_INCOHERENT_STATE(
         "VM-13",
         "Virtual Machine configuration actions can only be performed when the Virtual Machine is NOT-DEPLOYED or POWER-OFF"), VIRTUAL_MACHINE_NETWORK_CONFIGURATION_CAN_NOT_BE_CHANGED(
         "VM-14",

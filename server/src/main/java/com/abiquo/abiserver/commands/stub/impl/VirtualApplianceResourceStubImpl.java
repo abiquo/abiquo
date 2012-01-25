@@ -640,7 +640,7 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
             TaskStatus currentTask = new TaskStatus();
 
             TasksDto tasks = getApiClient().getApi().getTaskClient().listTasks(dto);
-            if (!tasks.isEmpty())
+            if (tasks != null && !tasks.isEmpty())
             {
                 TaskDto lastTask = tasks.getCollection().get(0);
                 currentTask.addUri(lastTask.searchLink("self").getHref());
@@ -1154,21 +1154,25 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
                 DomainWrapper.wrap(getApiClient(),
                     org.jclouds.abiquo.domain.cloud.VirtualAppliance.class, dto);
 
-            vapp.undeploy(Boolean.TRUE);
+            List<org.jclouds.abiquo.domain.cloud.VirtualMachine> virtualMachines =
+                vapp.listVirtualMachines();
+            if (virtualMachines != null && !virtualMachines.isEmpty())
+            {
+                vapp.undeploy(Boolean.TRUE);
 
-            // The vapp state is DEPLOYED
-            vapp =
-                DomainWrapper.wrap(getApiClient(),
-                    org.jclouds.abiquo.domain.cloud.VirtualAppliance.class, dto);
+                // The vapp state is DEPLOYED
+                vapp =
+                    DomainWrapper.wrap(getApiClient(),
+                        org.jclouds.abiquo.domain.cloud.VirtualAppliance.class, dto);
 
-            // Blocking
-            getApiClient()
-                .getMonitoringService()
-                .getVirtualMachineMonitor()
-                .awaitCompletionUndeploy(
-                    vapp.listVirtualMachines().toArray(
-                        new org.jclouds.abiquo.domain.cloud.VirtualMachine[0]));
-
+                // Blocking
+                getApiClient()
+                    .getMonitoringService()
+                    .getVirtualMachineMonitor()
+                    .awaitCompletionUndeploy(
+                        virtualMachines
+                            .toArray(new org.jclouds.abiquo.domain.cloud.VirtualMachine[0]));
+            }
             // Here we actually perform the request to delete the virtual appliance
             vapp.delete();
 
