@@ -28,11 +28,11 @@ package net.undf.abicloud.view.virtualimage.components.virtualimage
     import mx.containers.Tile;
     import mx.core.Application;
     import mx.events.FlexEvent;
-    import mx.resources.ResourceManager;
     
     import net.undf.abicloud.events.virtualimage.VirtualImageEvent;
     import net.undf.abicloud.model.AbiCloudModel;
     import net.undf.abicloud.vo.infrastructure.HyperVisorType;
+    import net.undf.abicloud.vo.virtualappliance.VirtualDataCenter;
     import net.undf.abicloud.vo.virtualimage.Category;
     import net.undf.abicloud.vo.virtualimage.Repository;
     import net.undf.abicloud.vo.virtualimage.VirtualImage;
@@ -115,6 +115,13 @@ package net.undf.abicloud.view.virtualimage.components.virtualimage
          * Flag that indicates that the VirtualImage renderers must be built
          */
         private var needBuildMiniatures:Boolean = false;
+        
+        private var _virtualDatacenter:VirtualDataCenter;
+        
+        public function set virtualDatacenter(value:VirtualDataCenter):void
+        {
+        	this._virtualDatacenter = value;
+        }
 
         
         public function VirtualImageList():void{
@@ -185,6 +192,7 @@ package net.undf.abicloud.view.virtualimage.components.virtualimage
                     //Request the VirtualImages for this category and Hypervisor type
                     event = new VirtualImageEvent(VirtualImageEvent.GET_VIRTUAL_IMAGES_BY_CATEGORY_AND_HYPERVISOR_TYPE);
                     event.hypervisorType = hypervisorType;
+	                event.virtualDatacenter = this._virtualDatacenter; 
                 }
                 else
                 {

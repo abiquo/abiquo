@@ -231,7 +231,12 @@
                 if (this._virtualAppliance)
                 {
                     _currentVirtualDataCenter = virtualAppliance.virtualDataCenter;
-
+                    
+                    if(this._virtualImageList && this._virtualImageList.virtualImageList)
+                    {
+	                    this._virtualImageList.virtualImageList.virtualDatacenter = _currentVirtualDataCenter;
+                    }
+                    
                     //Starting BackgroundUpdates. Time interval depends on the state of VirtualAppliance
                     if (this._virtualAppliance.state.description == State.LOCKED.description)
                         startBackgroundUpdates(AbiCloudModel.getInstance().configurationManager.config.client_virtual_virtualApplianceDeployingUpdateInterval.value);

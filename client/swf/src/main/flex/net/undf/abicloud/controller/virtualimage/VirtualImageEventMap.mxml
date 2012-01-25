@@ -418,7 +418,8 @@
             event.repository.id, 
             event.category.name, 
             event.hypervisorType.name,
-            event.datacenter.id]}">
+            event.datacenter.id,
+            event.virtualDatacenter.id]}">
 
             <resultHandlers>
                 <MethodInvoker generator="{VirtualImageResultHandler}"

@@ -35,8 +35,8 @@ public interface VirtualMachineTemplateResourceStub
      * @param categoryName, null indicate return all the categories
      */
     public DataResult<List<VirtualImage>> getVirtualMachineTemplateByCategoryAndHypervisorCompatible(
-        final Integer idEnterprise, final Integer datacenterId, final String categoryName,
-        final String hypervisorTypeName, final Boolean includeStateful);
+        final Integer idEnterprise, final Integer datacenterId, final Integer virtualDatacenterId,
+        final String categoryName, final String hypervisorTypeName, final Boolean includeStateful);
 
     /**
      * @param datacenterId, null indicate stateful templates
@@ -50,4 +50,5 @@ public interface VirtualMachineTemplateResourceStub
 
     public BasicResult deleteVirtualMachineTemplate(final Integer enterpriseId,
         final Integer datacenterId, final Integer virtualimageId);
+
 }

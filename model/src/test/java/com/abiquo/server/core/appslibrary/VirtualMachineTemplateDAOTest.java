@@ -35,6 +35,8 @@ import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.model.enumerator.StatefulInclusion;
 import com.abiquo.model.enumerator.VolumeState;
+import com.abiquo.server.core.cloud.VirtualDatacenter;
+import com.abiquo.server.core.cloud.VirtualDatacenterGenerator;
 import com.abiquo.server.core.cloud.VirtualImageConversionGenerator;
 import com.abiquo.server.core.common.persistence.DefaultDAOTestBase;
 import com.abiquo.server.core.common.persistence.TestDataAccessManager;
@@ -64,6 +66,8 @@ public class VirtualMachineTemplateDAOTest extends
 
     private CategoryGenerator categoryGenerator;
 
+    private VirtualDatacenterGenerator virtualDatacenterGenerator;
+
     @Override
     @BeforeMethod
     protected void methodSetUp()
@@ -75,6 +79,7 @@ public class VirtualMachineTemplateDAOTest extends
         volumeGenerator = new VolumeManagementGenerator(getSeed());
         datacenterGenerator = new DatacenterGenerator(getSeed());
         categoryGenerator = new CategoryGenerator(getSeed());
+        virtualDatacenterGenerator = new VirtualDatacenterGenerator(getSeed());
     }
 
     @Override
@@ -377,7 +382,7 @@ public class VirtualMachineTemplateDAOTest extends
             conversionGenerator.createInstance(vi1, DiskFormatType.UNKNOWN);
         VirtualImageConversion conversion3 =
             conversionGenerator.createInstance(vi1, DiskFormatType.UNKNOWN);
-        
+
         List<Object> entitiesToPersist = new ArrayList<Object>();
         eg().addAuxiliaryEntitiesToPersist(vi1, entitiesToPersist);
         persistAll(ds(), entitiesToPersist, vi1, conversion1, conversion2, conversion3);
@@ -507,6 +512,27 @@ public class VirtualMachineTemplateDAOTest extends
     }
 
     @Test
+    public void testFindStatefulsByCategoryAndDatacenterAndVirtualDatacenter()
+    {
+        VolumeManagement statefulVolume = volumeGenerator.createStatefulInstance();
+        VolumeManagement anotherStatefulVolume = volumeGenerator.createStatefulInstance();
+
+        List<Object> entitiesToPersist = new ArrayList<Object>();
+        volumeGenerator.addAuxiliaryEntitiesToPersist(statefulVolume, entitiesToPersist);
+        volumeGenerator.addAuxiliaryEntitiesToPersist(anotherStatefulVolume, entitiesToPersist);
+        persistAll(ds(), entitiesToPersist, statefulVolume, anotherStatefulVolume);
+
+        Datacenter datacenter = statefulVolume.getStoragePool().getDevice().getDatacenter();
+        Category category = statefulVolume.getVirtualMachineTemplate().getCategory();
+
+        VirtualMachineTemplateDAO dao = createDaoForRollbackTransaction();
+        List<VirtualMachineTemplate> templates =
+            dao.findStatefulsByCategoryAndDatacenter(category, datacenter,
+                statefulVolume.getVirtualDatacenter(), StatefulInclusion.ALL);
+        assertEquals(templates.size(), 1);
+    }
+
+    @Test
     public void testFindStatefulsByCategoryAndDatacenterWithDifferentDatacenter()
     {
         VolumeManagement statefulVolume = volumeGenerator.createStatefulInstance();
@@ -559,6 +585,28 @@ public class VirtualMachineTemplateDAOTest extends
         List<VirtualMachineTemplate> templates =
             dao.findStatefulsByCategoryAndDatacenter(anotherCategory, anotherDatacenter,
                 StatefulInclusion.ALL);
+        assertEquals(templates.size(), 0);
+    }
+
+    @Test
+    public void testFindStatefulsByCategoryAndDatacenterAndVirtualDatacenterWithDifferentVirtualDatacenter()
+    {
+        VolumeManagement statefulVolume = volumeGenerator.createStatefulInstance();
+        VirtualDatacenter anotherVirtualDatacenter =
+            virtualDatacenterGenerator.createUniqueInstance();
+
+        List<Object> entitiesToPersist = new ArrayList<Object>();
+        volumeGenerator.addAuxiliaryEntitiesToPersist(statefulVolume, entitiesToPersist);
+        virtualDatacenterGenerator.addAuxiliaryEntitiesToPersist(anotherVirtualDatacenter,
+            entitiesToPersist);
+        persistAll(ds(), entitiesToPersist, statefulVolume, anotherVirtualDatacenter);
+
+        Datacenter datacenter = statefulVolume.getStoragePool().getDevice().getDatacenter();
+
+        VirtualMachineTemplateDAO dao = createDaoForRollbackTransaction();
+        List<VirtualMachineTemplate> templates =
+            dao.findStatefulsByCategoryAndDatacenter(statefulVolume.getVirtualMachineTemplate()
+                .getCategory(), datacenter, anotherVirtualDatacenter, StatefulInclusion.ALL);
         assertEquals(templates.size(), 0);
     }
 

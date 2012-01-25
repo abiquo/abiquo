@@ -37,6 +37,7 @@
 
     <mx:Script>
         <![CDATA[
+        	import net.undf.abicloud.vo.virtualappliance.VirtualDataCenter;
         	import net.undf.abicloud.vo.user.PrivilegeType;
         	import net.undf.abicloud.utils.SecuredPrivilegeAccess;
         	import net.undf.abicloud.vo.user.Role;
@@ -87,6 +88,13 @@
             public var hasSlaveImage:Boolean;
             
             private var _resizeEffect:Resize;
+            
+            private var _virtualDatacenter:VirtualDataCenter;
+            
+            public function set virtualDatacenter(value:VirtualDataCenter):void
+            {
+            	this._virtualDatacenter = value;
+            }
             
 
             //The selected Datacenter
@@ -662,6 +670,7 @@
             	width="100%" height="100%"
             	borderStyle="solid">
 	            <virtualimage:VirtualImageList 
+	            	virtualDatacenter="{this._virtualDatacenter}"
 	            	id="virtualImageList"
 	            	width="100%" height="100%"
 	            	visible="{datacenterList.selectedIndex != -1}"
