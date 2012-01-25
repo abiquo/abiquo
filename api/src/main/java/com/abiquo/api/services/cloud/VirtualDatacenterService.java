@@ -271,10 +271,13 @@ public class VirtualDatacenterService extends DefaultApiService
         }
 
         // delete dhcpOption
-        List<DhcpOption> dhcpList = vdc.getDefaultVlan().getDhcpOption();
-        if (!dhcpList.isEmpty())
+        if (vdc.getDefaultVlan() != null)
         {
-            datacenterRepo.deleteAllDhcpOption(dhcpList);
+            List<DhcpOption> dhcpList = vdc.getDefaultVlan().getDhcpOption();
+            if (!dhcpList.isEmpty())
+            {
+                datacenterRepo.deleteAllDhcpOption(dhcpList);
+            }
         }
 
         flushErrors();
