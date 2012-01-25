@@ -541,8 +541,7 @@
 	
 	        <mx:Button id="deleteVirtualApplianceButton"
 	            enabled="{this._selectedVirtualAppliance != null &amp;&amp; 
-					   			 this._selectedVirtualAppliance.state.description != State.LOCKED.description &amp;&amp;
-					   			 this._selectedVirtualAppliance.state.description != State.UNKNOWN.description}"
+					   			 this._selectedVirtualAppliance.state.description != State.LOCKED.description}"
 	            styleName="RemoveButton"
 	            toolTip="@Resource(bundle='Common', key='BUTTON_DEL_TOOLTIP')"
 	            click="deleteVirtualAppliance()"/>

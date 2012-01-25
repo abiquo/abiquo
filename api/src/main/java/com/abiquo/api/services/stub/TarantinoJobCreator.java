@@ -436,14 +436,14 @@ public class TarantinoJobCreator extends DefaultApiService
         for (IpPoolManagement i : virtualMachine.getIps())
         {
             List<DhcpOption> dhcplist = i.getVlanNetwork().getDhcpOption();
-
+            NetworkConfiguration configuration = i.getVlanNetwork().getConfiguration();
+            
             if (i.itHasTheDefaultConfiguration(virtualMachine) && !defaultConfigurationFound)
             {
                 // This interface is the one that configures the Network parameters.
                 // We force the forward mode to BRIDGED
                 logger.debug("Network configuration with gateway");
 
-                NetworkConfiguration configuration = i.getVlanNetwork().getConfiguration();
                 vmDesc.addNetwork(i.getMac(), i.getIp(), virtualMachine.getHypervisor()
                     .getMachine().getVirtualSwitch(), i.getNetworkName(), i.getVlanNetwork()
                     .getTag() == null ? 0 : i.getVlanNetwork().getTag(), i.getName(), configuration
@@ -461,7 +461,7 @@ public class TarantinoJobCreator extends DefaultApiService
             // configureNetwork parameter
             Integer tag = i.getVlanNetwork().getTag();
             vmDesc.addNetwork(i.getMac(), i.getIp(), virtualMachine.getHypervisor().getMachine()
-                .getVirtualSwitch(), i.getNetworkName(), tag, i.getName(), null, null, null, null,
+                .getVirtualSwitch(), i.getNetworkName(), tag, i.getName(), null, null, null, configuration.getNetMask(),
                 null, null, null, i.getSequence(), toDchpOptionCom(dhcplist), Boolean.FALSE,
                 i.isUnmanagedIp());
 
