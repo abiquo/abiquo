@@ -214,6 +214,7 @@
             	enabled="{this._isEditionAllowed}"
                 width="75"
                 fontSize="10"
+                value="{this._virtualMachine.cpu}"
                 minimum="1" maximum="32" stepSize="1"/>
         </mx:FormItem>
 
