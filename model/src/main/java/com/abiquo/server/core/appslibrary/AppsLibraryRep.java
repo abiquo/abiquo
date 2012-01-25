@@ -30,6 +30,7 @@ import org.springframework.stereotype.Repository;
 import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.model.enumerator.StatefulInclusion;
+import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.common.DefaultRepBase;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.infrastructure.Datacenter;
@@ -77,7 +78,7 @@ public class AppsLibraryRep extends DefaultRepBase
 
     /**
      * If if being used by any {@link VirtualMachineTemplate} its changed to the DEFAULT category;
-     * */
+     */
     public void deleteCategory(final Category category)
     {
         for (VirtualMachineTemplate templ : virtualMachineTemplateDAO.findBy(category))
@@ -299,11 +300,27 @@ public class AppsLibraryRep extends DefaultRepBase
         return virtualMachineTemplateDAO.findStatefulsByDatacenter(datacenter, stateful);
     }
 
+    public List<VirtualMachineTemplate> findStatefulVirtualMachineTemplatesByDatacenterAndVirtualDatacenter(
+        final Datacenter datacenter, final VirtualDatacenter virtualDatacenter,
+        final StatefulInclusion stateful)
+    {
+        return virtualMachineTemplateDAO.findStatefulsByDatacenter(datacenter, virtualDatacenter,
+            stateful);
+    }
+
     public List<VirtualMachineTemplate> findStatefulVirtualMachineTemplatesByCategoryAndDatacenter(
         final Category category, final Datacenter datacenter, final StatefulInclusion stateful)
     {
         return virtualMachineTemplateDAO.findStatefulsByCategoryAndDatacenter(category, datacenter,
             stateful);
+    }
+
+    public List<VirtualMachineTemplate> findStatefulVirtualMachineTemplatesByCategoryAndDatacenterandVirutalDatacenter(
+        final Category category, final Datacenter datacenter,
+        final VirtualDatacenter virtualdatacenter, final StatefulInclusion stateful)
+    {
+        return virtualMachineTemplateDAO.findStatefulsByCategoryAndDatacenter(category, datacenter,
+            virtualdatacenter, stateful);
     }
 
     public boolean isMaster(final VirtualMachineTemplate vmtemplae)

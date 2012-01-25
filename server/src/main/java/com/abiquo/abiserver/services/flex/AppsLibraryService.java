@@ -71,7 +71,8 @@ public class AppsLibraryService
      */
     public DataResult<List<VirtualImage>> getVirtualImageByCategoryAndHypervisorCompatible(
         final UserSession userSession, final Integer idEnterprise, final Integer idRepo,
-        final String categoryName, final String hypervisorTypeName, final Integer idDatacenter)
+        final String categoryName, final String hypervisorTypeName, final Integer idDatacenter,
+        final Integer idVirtualDatacenter)
     {
         final VirtualMachineTemplateResourceStub vimageStub =
             APIStubFactory.getInstance(userSession, new VirtualMachineTemplateResourceStubImpl(),
@@ -82,7 +83,8 @@ public class AppsLibraryService
 
         DataResult<List<VirtualImage>> listImages =
             vimageStub.getVirtualMachineTemplateByCategoryAndHypervisorCompatible(idEnterprise,
-                idDatacenter, categoryName, hypervisorTypeName, includeStateful);
+                idDatacenter, idVirtualDatacenter, categoryName, hypervisorTypeName,
+                includeStateful);
 
         return fixVirtaulImageRepositroyAndEnterprise(listImages, idEnterprise, idRepo);
     }

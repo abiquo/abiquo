@@ -24,6 +24,7 @@ package com.abiquo.api.resources.appslibrary;
 import static com.abiquo.api.common.Assert.assertError;
 import static com.abiquo.api.common.UriTestResolver.resolveStatefulVirtualMachineTemplatesURI;
 import static com.abiquo.api.common.UriTestResolver.resolveStatefulVirtualMachineTemplatesURIWithCategory;
+import static com.abiquo.api.common.UriTestResolver.resolveStatefulVirtualMachineTemplatesURIWithCategoryAndVirtualDatacenter;
 import static com.abiquo.api.common.UriTestResolver.resolveVirtualMachineTemplatesURI;
 import static org.testng.Assert.assertEquals;
 
@@ -307,6 +308,28 @@ public class VirtualMachineTemplatesResourceIT extends AbstractJpaGeneratorIT
         String uri =
             resolveStatefulVirtualMachineTemplatesURIWithCategory(ent.getId(), datacenter.getId(),
                 vmtemplate.getCategory().getName(), StatefulInclusion.ALL);
+        ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
+        assertEquals(response.getStatusCode(), 200);
+
+        VirtualMachineTemplatesDto dto = response.getEntity(VirtualMachineTemplatesDto.class);
+        assertEquals(dto.getCollection().size(), 1);
+    }
+
+    @Test
+    public void testGetStatefulVirtualMachineTemplatesByCategoryAndVirtualDatacenter()
+    {
+        VirtualMachineTemplate vmtemplate =
+            virtualMachineTemplateGenerator.createInstance(ent, repository);
+        DatacenterLimits limits = datacenterLimitsGenerator.createInstance(ent, datacenter);
+        setup(limits, vmtemplate.getCategory(), vmtemplate);
+
+        volume.setVirtualMachineTemplate(vmtemplate);
+        update(volume, vmtemplate);
+
+        String uri =
+            resolveStatefulVirtualMachineTemplatesURIWithCategoryAndVirtualDatacenter(ent.getId(),
+                datacenter.getId(), vmtemplate.getCategory().getName(), volume
+                    .getVirtualDatacenter().getId(), StatefulInclusion.ALL);
         ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
         assertEquals(response.getStatusCode(), 200);
 

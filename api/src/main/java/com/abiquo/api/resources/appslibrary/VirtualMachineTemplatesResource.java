@@ -60,6 +60,8 @@ public class VirtualMachineTemplatesResource extends AbstractResource
     public final static String VIRTUAL_MACHINE_TEMPLATE_GET_HYPERVISOR_COMATIBLE_QUERY_PARAM =
         "hypervisorTypeName";
 
+    public final static String VIRTUAL_MACHINE_TEMPLATE_GET_VDC_QUERY_PARAM = "virtualdatacenter";
+
     public final static String VIRTUAL_MACHINE_TEMPLATE_GET_STATEFUL_QUERY_PARAM = "stateful";
 
     public final static String VIRTUAL_MACHINE_TEMPLATE_IMPORTED = "imported";
@@ -76,6 +78,7 @@ public class VirtualMachineTemplatesResource extends AbstractResource
         @PathParam(DatacenterRepositoryResource.DATACENTER_REPOSITORY) final Integer datacenterId,
         @QueryParam(VIRTUAL_MACHINE_TEMPLATE_GET_CATEGORY_QUERY_PARAM) final String categoryName,
         @QueryParam(VIRTUAL_MACHINE_TEMPLATE_GET_HYPERVISOR_COMATIBLE_QUERY_PARAM) final String hypervisorTypeName,
+        @QueryParam(VIRTUAL_MACHINE_TEMPLATE_GET_VDC_QUERY_PARAM) final Integer virtualdatacenterId,
         @QueryParam(VIRTUAL_MACHINE_TEMPLATE_GET_STATEFUL_QUERY_PARAM) @IncludeStateful(required = false) final String stateful,
         @QueryParam(VIRTUAL_MACHINE_TEMPLATE_IMPORTED) @DefaultValue("false") final Boolean imported,
         @Context final IRESTBuilder restBuilder) throws Exception
@@ -100,14 +103,15 @@ public class VirtualMachineTemplatesResource extends AbstractResource
             {
                 all =
                     service.findStatefulVirtualMachineTemplatesByCategoryAndDatacenter(
-                        enterpriseId, datacenterId, categoryName,
+                        enterpriseId, datacenterId, virtualdatacenterId, categoryName,
                         StatefulInclusion.valueOf(stateful.toUpperCase()));
             }
             else
             {
                 all =
                     service.findStatefulVirtualMachineTemplatesByDatacenter(enterpriseId,
-                        datacenterId, StatefulInclusion.valueOf(stateful.toUpperCase()));
+                        datacenterId, virtualdatacenterId,
+                        StatefulInclusion.valueOf(stateful.toUpperCase()));
             }
         }
 
