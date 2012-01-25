@@ -125,8 +125,10 @@ public class VirtualMachineLock extends DefaultApiService
             flushErrors();
 
         }
-
-        lock(vm);
+        if (originalState.existsInHypervisor())
+        {
+            lock(vm);
+        }
 
         return originalState;
     }
