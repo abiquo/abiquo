@@ -1750,12 +1750,6 @@ public class VirtualMachineService extends DefaultApiService
         vm.setIps(ips);
         vm.setDisks(disks);
 
-        // we need to get the configuration value ALWAYS after to set the ips of the new virtual
-        // machine
-        // since it depends to it to check if the configuration of the network is valid
-        // XXX: This line was present in master but not in api-deploy during merge
-        vm.setNetworkConfiguration(getNetworkConfigurationFromDto(vapp, vm, dto));
-
         vm.setPassword(dto.getPassword());
         return vm;
     }
