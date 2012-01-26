@@ -645,6 +645,13 @@ public class TarantinoService extends DefaultApiService
                 .debug("Error enqueuing the state change task dto to the virtual factory with error: "
                     + e.getMessage() + " machine: " + virtualMachine.getName());
 
+            // If we invalidated the last known state and something fails, ask VSM for the state of
+            // the virtual machine to recover it.
+            if (machineStateTransition == VirtualMachineStateTransition.RESET)
+            {
+                refreshState(virtualMachine);
+            }
+
             throw e;
         }
         catch (RuntimeException e)
@@ -659,6 +666,13 @@ public class TarantinoService extends DefaultApiService
             // For the Admin to know all errors
             tracer.systemLog(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
                 EventType.VM_DEPLOY, "tarantino.applyChangesVMError", e.getMessage());
+
+            // If we invalidated the last known state and something fails, ask VSM for the state of
+            // the virtual machine to recover it.
+            if (machineStateTransition == VirtualMachineStateTransition.RESET)
+            {
+                refreshState(virtualMachine);
+            }
 
             // There is no point in continue
             addUnexpectedErrors(APIError.GENERIC_OPERATION_ERROR);
@@ -882,5 +896,22 @@ public class TarantinoService extends DefaultApiService
             virtualMachine.getName());
         vsm.invalidateLastKnownVirtualMachineState(service, virtualMachine);
         logger.debug("State for virtual machine {} invalidated in VSM", virtualMachine.getName());
+    }
+
+    /**
+     * Refreshes the state of the given virtual machine in the VSM.
+     * <p>
+     * This method will force the VSM to notify the state of the virtual machine.
+     * 
+     * @param virtualMachine The virtual machine.
+     */
+    protected void refreshState(final VirtualMachine virtualMachine)
+    {
+        Datacenter datacenter = virtualMachine.getHypervisor().getMachine().getDatacenter();
+        RemoteService service = remoteServiceService.getVSMRemoteService(datacenter);
+
+        logger.debug("Refreshing state for virtual machine {} in VSM", virtualMachine.getName());
+        vsm.refreshVirtualMachineState(service, virtualMachine);
+        logger.debug("State for virtual machine {} refreshed in VSM", virtualMachine.getName());
     }
 }
