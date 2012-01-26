@@ -286,46 +286,49 @@
             
             private function checkSingleSignOn(languages:ArrayCollection):void{ 
        	
-				var urlString:String = ExternalInterface.call('window.location.href.toString');
-
-				//we save the current URL, for the logout process
-				AbiCloudModel.getInstance().configurationManager.config.currentUrl = urlString;
-				
-				//First, try the secure way of loading the token (cookie)
-				var token:String = ExternalInterface.call("checkAuthentication");	
-				
-				//If token doesn't exist in cookie, load the URL method
-		            
-				var parameterList:Object = URLUtil.stringToObject(token, "&"); 
-				var language:Language;
-				if(token == ''){
-					var parameters:Array = urlString.split("?");
-					AbiCloudModel.getInstance().configurationManager.config.currentUrl = parameters[0];
-					if(parameters.length != 1){
-						parameterList = URLUtil.stringToObject(parameters[1], "&");
-						token = parameterList.auth;
-						language = new Language('',parameterList.lang);         
-					}
-				}else{
-					parameterList = URLUtil.stringToObject(token, "&");
-					token = parameterList.auth;  
-						language = new Language('',parameterList.lang);         
-				}			
-				
-				
-            	//we check if the selected language is passed in the URL
-            	if(language){          		
-            		this._tokenLanguage = loginView.returnLanguage(language);
-            		
-            	}
-            	//if the token exists, we try an automatic loggin
-            	if(token != ""){
-            		this._isTokenUsed = true;
-            		singleSignOnlogin(token);
-            	}else{
-            		this._isTokenUsed = false;
-            		showLoginform();
-            	}
+				if(languages)
+                {
+                    var urlString:String = ExternalInterface.call('window.location.href.toString');
+    
+                    //we save the current URL, for the logout process
+                    AbiCloudModel.getInstance().configurationManager.config.currentUrl = urlString;
+                    
+                    //First, try the secure way of loading the token (cookie)
+                    var token:String = ExternalInterface.call("checkAuthentication");   
+                    
+                    //If token doesn't exist in cookie, load the URL method
+                        
+                    var parameterList:Object = URLUtil.stringToObject(token, "&"); 
+                    var language:Language;
+                    if(token == ''){
+                        var parameters:Array = urlString.split("?");
+                        AbiCloudModel.getInstance().configurationManager.config.currentUrl = parameters[0];
+                        if(parameters.length != 1){
+                            parameterList = URLUtil.stringToObject(parameters[1], "&");
+                            token = parameterList.auth;
+                            language = new Language('',parameterList.lang);         
+                        }
+                    }else{
+                        parameterList = URLUtil.stringToObject(token, "&");
+                        token = parameterList.auth;  
+                            language = new Language('',parameterList.lang);         
+                    }           
+                    
+                    
+                    //we check if the selected language is passed in the URL
+                    if(language){               
+                        this._tokenLanguage = loginView.returnLanguage(language);
+                        
+                    }
+                    //if the token exists, we try an automatic loggin
+                    if(token != ""){
+                        this._isTokenUsed = true;
+                        singleSignOnlogin(token);
+                    }else{
+                        this._isTokenUsed = false;
+                        showLoginform();
+                    }
+               }
             	
             }
             
