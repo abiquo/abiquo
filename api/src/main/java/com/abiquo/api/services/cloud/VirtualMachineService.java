@@ -252,6 +252,7 @@ public class VirtualMachineService extends DefaultApiService
         VirtualMachine vm = repo.findVirtualMachineById(vmId);
 
         VirtualAppliance vapp = getVirtualApplianceAndCheckVirtualDatacenter(vdcId, vappId);
+        VirtualDatacenter vdc = vdcRep.findById(vdcId);
 
         if (vm == null || !isAssignedTo(vmId, vapp.getId()))
         {
@@ -260,6 +261,21 @@ public class VirtualMachineService extends DefaultApiService
             flushErrors();
         }
         LOGGER.debug("Virtual machine {} found", vmId);
+        
+        // if the ips are external, we need to set the limitID in order to return the
+        // proper info.
+        for (IpPoolManagement ip : vm.getIps())
+        {
+            if (ip.getVlanNetwork().getEnterprise() != null)
+            {
+                // needed for REST links.
+                DatacenterLimits dl =
+                    infRep.findDatacenterLimits(ip.getVlanNetwork().getEnterprise(),
+                        vdc.getDatacenter());
+                ip.getVlanNetwork().setLimitId(dl.getId());
+            }
+        }
+        
         return vm;
     }
 
@@ -1671,8 +1687,8 @@ public class VirtualMachineService extends DefaultApiService
         final Integer vmId)
     {
         VirtualMachine vm = repo.findVirtualMachineById(vmId);
-
         VirtualAppliance vapp = getVirtualApplianceAndCheckVirtualDatacenter(vdcId, vappId);
+        VirtualDatacenter vdc = vdcRep.findById(vdcId);
 
         if (vm == null || !isAssignedTo(vmId, vapp.getId()))
         {
@@ -1690,6 +1706,21 @@ public class VirtualMachineService extends DefaultApiService
             addNotFoundErrors(APIError.NODE_VIRTUAL_MACHINE_IMAGE_NOT_EXISTS);
             flushErrors();
         }
+        
+        // if the ips are external, we need to set the limitID in order to return the
+        // proper info.
+        for (IpPoolManagement ip : vm.getIps())
+        {
+            if (ip.getVlanNetwork().getEnterprise() != null)
+            {
+                // needed for REST links.
+                DatacenterLimits dl =
+                    infRep.findDatacenterLimits(ip.getVlanNetwork().getEnterprise(),
+                        vdc.getDatacenter());
+                ip.getVlanNetwork().setLimitId(dl.getId());
+            }
+        }
+        
         return nodeVirtualImage;
     }
 
@@ -1778,33 +1809,42 @@ public class VirtualMachineService extends DefaultApiService
 
         for (RasdManagement resource : resources)
         {
-            boolean allocated =
-                allocateResource(vm, vapp, resource, getFreeAttachmentSlot(blackList));
-            if (allocated)
+            // Stateful volumes should not be trated as additional VM resources
+            if (!isStatefulVolume(resource))
             {
-                // In Hyper-v only 2 attached volumes are allowed
-                if (vm.getHypervisor() != null
-                    && vm.getHypervisor().getType() == HypervisorType.HYPERV_301
-                    && blackList.size() >= 2)
+                boolean allocated =
+                    allocateResource(vm, vapp, resource, getFreeAttachmentSlot(blackList));
+                if (allocated)
                 {
-                    addConflictErrors(APIError.VOLUME_TOO_MUCH_ATTACHMENTS);
-                    flushErrors();
-                }
+                    // In Hyper-v only 2 attached volumes are allowed
+                    if (vm.getHypervisor() != null
+                        && vm.getHypervisor().getType() == HypervisorType.HYPERV_301
+                        && blackList.size() >= 2)
+                    {
+                        addConflictErrors(APIError.VOLUME_TOO_MUCH_ATTACHMENTS);
+                        flushErrors();
+                    }
 
-                // if it is new allocated, we set the integer into the 'blacklisted' list.
-                Integer blacklisted = resource.getSequence();
-                blackList.add(blacklisted);
+                    // if it is new allocated, we set the integer into the 'blacklisted' list.
+                    Integer blacklisted = resource.getSequence();
+                    blackList.add(blacklisted);
 
-                if (resource instanceof DiskManagement)
-                {
-                    vdcRep.updateDisk((DiskManagement) resource);
-                }
-                else
-                {
-                    storageRep.updateVolume((VolumeManagement) resource);
+                    if (resource instanceof DiskManagement)
+                    {
+                        vdcRep.updateDisk((DiskManagement) resource);
+                    }
+                    else
+                    {
+                        storageRep.updateVolume((VolumeManagement) resource);
+                    }
                 }
             }
         }
+    }
+
+    private boolean isStatefulVolume(final RasdManagement resource)
+    {
+        return resource instanceof VolumeManagement && ((VolumeManagement) resource).isStateful();
     }
 
     /**
@@ -1964,19 +2004,23 @@ public class VirtualMachineService extends DefaultApiService
         // dellocate the old disks that are not in the new virtual machine.
         for (VolumeManagement vol : oldVm.getVolumes())
         {
-            if (!resourceIntoNewList(vol, newVm.getVolumes()))
+            // Stateful volumes should not be trated as additional VM resources
+            if (!vol.isStateful())
             {
-                if (!vol.isAttached())
+                if (!resourceIntoNewList(vol, newVm.getVolumes()))
                 {
-                    addConflictErrors(APIError.VOLUME_NOT_ATTACHED);
-                    flushErrors();
+                    if (!vol.isAttached())
+                    {
+                        addConflictErrors(APIError.VOLUME_NOT_ATTACHED);
+                        flushErrors();
+                    }
+                    vol.detach();
+                    storageRep.updateVolume(vol);
                 }
-                vol.detach();
-                storageRep.updateVolume(vol);
-            }
-            else
-            {
-                oldVolumesAttachments.add(vol.getSequence());
+                else
+                {
+                    oldVolumesAttachments.add(vol.getSequence());
+                }
             }
         }
         return oldVolumesAttachments;
@@ -2420,22 +2464,26 @@ public class VirtualMachineService extends DefaultApiService
         List<VolumeManagement> volsTemp = new ArrayList<VolumeManagement>();
         for (VolumeManagement vol : vm.getVolumes())
         {
-            VolumeManagement volTmp = new VolumeManagement();
-            volTmp.setSequence(vol.getSequence());
-            volTmp.setTemporal(vol.getId());
-            volTmp.setIdResourceType(vol.getIdResourceType());
-            volTmp.setRasd(vol.getRasd());
-            volTmp.setVirtualAppliance(vol.getVirtualAppliance());
-            volTmp.setVirtualDatacenter(vol.getVirtualDatacenter());
-            volTmp.setVirtualMachine(tmp);
+            // Stateful volumes should not be trated as VM attached resources
+            if (!vol.isStateful())
+            {
+                VolumeManagement volTmp = new VolumeManagement();
+                volTmp.setSequence(vol.getSequence());
+                volTmp.setTemporal(vol.getId());
+                volTmp.setIdResourceType(vol.getIdResourceType());
+                volTmp.setRasd(vol.getRasd());
+                volTmp.setVirtualAppliance(vol.getVirtualAppliance());
+                volTmp.setVirtualDatacenter(vol.getVirtualDatacenter());
+                volTmp.setVirtualMachine(tmp);
 
-            volTmp.setStoragePool(vol.getStoragePool());
-            volTmp.setVirtualMachineTemplate(vol.getVirtualMachineTemplate());
-            volTmp.setIdScsi(vol.getIdScsi());
-            volTmp.setState(vol.getState());
-            volTmp.setUsedSizeInMB(vol.getUsedSizeInMB());
+                volTmp.setStoragePool(vol.getStoragePool());
+                volTmp.setVirtualMachineTemplate(vol.getVirtualMachineTemplate());
+                volTmp.setIdScsi(vol.getIdScsi());
+                volTmp.setState(vol.getState());
+                volTmp.setUsedSizeInMB(vol.getUsedSizeInMB());
 
-            volsTemp.add(volTmp);
+                volsTemp.add(volTmp);
+            }
         }
         tmp.setVolumes(volsTemp);
     }
@@ -2610,7 +2658,10 @@ public class VirtualMachineService extends DefaultApiService
                 else
                 {
                     // volumes only need to be dettached
-                    updatedRasd.detach();
+                    if (!isStatefulVolume(updatedRasd))
+                    {
+                        updatedRasd.detach();
+                    }
                 }
 
             }

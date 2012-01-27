@@ -28,24 +28,24 @@ import javax.xml.bind.annotation.XmlRootElement;
 import com.abiquo.model.transport.SingleResourceTransportDto;
 
 /**
- * DTO for snapshot parameters of the virtual machine.
+ * DTO for instance parameters of the virtual machine.
  * 
- * @author eruiz@abiquo.com 
+ * @author eruiz@abiquo.com
  */
-@XmlRootElement(name = "virtualMachineSnapshot")
+@XmlRootElement(name = "virtualmachineinstance")
 public class VirtualMachineInstanceDto extends SingleResourceTransportDto implements Serializable
 {
     private static final long serialVersionUID = -372239566628574960L;
-    
-    protected String snapshotName;
 
-    public String getSnapshotName()
+    protected String instanceName;
+
+    public String getInstanceName()
     {
-        return snapshotName;
+        return instanceName;
     }
 
-    public void setSnapshotName(String snapshotName)
+    public void setInstanceName(String snapshotName)
     {
-        this.snapshotName = snapshotName;
+        this.instanceName = snapshotName;
     }
 }

@@ -32,6 +32,7 @@ import org.springframework.stereotype.Repository;
 import com.abiquo.server.core.cloud.chef.RunlistElement;
 import com.abiquo.server.core.cloud.chef.RunlistElementDAO;
 import com.abiquo.server.core.common.DefaultRepBase;
+import com.abiquo.server.core.common.persistence.JPAConfiguration;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.infrastructure.management.RasdManagement;
@@ -261,5 +262,10 @@ public class VirtualMachineRep extends DefaultRepBase
     public void deleteNotManagedVirtualMachines(final Hypervisor hypervisor)
     {
         dao.deleteNotManagedVirtualMachines(hypervisor);
+    }
+
+    public void setDefaultFilters()
+    {
+        JPAConfiguration.enableDefaultFilters(this.entityManager);
     }
 }

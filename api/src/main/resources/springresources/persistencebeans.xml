@@ -13,6 +13,18 @@
         <property name="dataSource" ref="dataSource" />
         <property name="failEarlyOnGlobalRollbackOnly" value="true" />
     </bean>
+    <bean id="openEntityManagerInterceptor"
+        class="com.abiquo.api.spring.jpa.OpenEntityManagerInterceptorWithFilters">
+        <property name="entityManagerFactory" ref="entityManagerFactory" />
+    </bean>
+    <bean id="abstractInterceptedBean" class="org.springframework.aop.framework.ProxyFactoryBean"
+        abstract="true">
+        <property name="interceptorNames">
+            <list>
+                <value>openEntityManagerInterceptor</value>
+            </list>
+        </property>
+    </bean>
     <!-- provide annotation driven transactions in methods -->
     <tx:annotation-driven />
     <bean id="resourceRegistrar" class="org.apache.wink.spring.Registrar">

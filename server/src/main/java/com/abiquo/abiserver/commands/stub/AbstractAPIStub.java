@@ -1261,7 +1261,6 @@ public class AbstractAPIStub
         params.put("ip", ip);
         params.put("user", user);
         params.put("password", password);
-        params.put("port", port.toString());
 
         String uri = "admin/datacenters/{datacenter}/";
         if (includeMachineId)
@@ -1270,7 +1269,11 @@ public class AbstractAPIStub
         }
         else
         {
-            uri += "action/checkmachineipmi?ip={ip}&user={user}&password={password}&port={port}";
+            uri += "action/checkmachineipmi?ip={ip}&user={user}&password={password}";
+            if (port != null)
+            {
+                uri += "&port={port}";
+            }
         }
 
         return resolveURI(apiUri, uri, params);
