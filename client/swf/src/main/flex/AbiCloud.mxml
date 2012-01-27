@@ -298,9 +298,9 @@
 	                
 	                //If token doesn't exist in cookie, load the URL method
 	                    
-	                var parameterList:Object = URLUtil.stringToObject(token, "&"); 
+	                var parameterList:Object; 
 	                var language:Language;
-	                if(token == ''){
+	                if(!token || token == ''){
 	                    var parameters:Array = urlString.split("?");
 	                    AbiCloudModel.getInstance().configurationManager.config.currentUrl = parameters[0];
 	                    if(parameters.length != 1){
@@ -321,7 +321,7 @@
 	                    
 	                }
 	                //if the token exists, we try an automatic loggin
-	                if(token != ""){
+	                if(token != null && token != ""){
 	                    this._isTokenUsed = true;
 	                    singleSignOnlogin(token);
 	                }else{
