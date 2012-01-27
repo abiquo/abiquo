@@ -1315,7 +1315,7 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
                     virtualMachineId);
 
             VirtualMachineInstanceDto options = new VirtualMachineInstanceDto();
-            options.setSnapshotName(instanceName);
+            options.setInstanceName(instanceName);
 
             ClientResponse response = post(url, options);
 
