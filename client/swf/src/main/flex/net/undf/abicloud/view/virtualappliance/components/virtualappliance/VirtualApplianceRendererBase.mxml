@@ -250,7 +250,7 @@
                 var virtualApplianceEvent:VirtualApplianceEvent = new VirtualApplianceEvent(VirtualApplianceEvent.MARK_LOG_AS_DELETED);
                 virtualApplianceEvent.log = log;
                 virtualApplianceEvent.virtualAppliance = this._virtualAppliance;
-                dispatchEvent(virtualApplianceEvent);
+                //dispatchEvent(virtualApplianceEvent);
             }
 
             private function dateLabelFunction(item:Object, column:DataGridColumn):String
@@ -358,6 +358,8 @@
         <mx:VRule 
             width="1" height="100%"
             horizontalCenter="0"
+            visible="false"
+            includeInLayout="false"
             styleName="VirtualApplianceRendererVRule1"
             />
 
@@ -367,6 +369,8 @@
             paddingBottom="10"
             paddingRight="10"
             paddingTop="10"
+            visible="false"
+            includeInLayout="false"
             verticalGap="3">
 
             <mx:HBox 
