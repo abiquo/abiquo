@@ -252,6 +252,7 @@ public class VirtualMachineService extends DefaultApiService
         VirtualMachine vm = repo.findVirtualMachineById(vmId);
 
         VirtualAppliance vapp = getVirtualApplianceAndCheckVirtualDatacenter(vdcId, vappId);
+        VirtualDatacenter vdc = vdcRep.findById(vdcId);
 
         if (vm == null || !isAssignedTo(vmId, vapp.getId()))
         {
@@ -260,6 +261,21 @@ public class VirtualMachineService extends DefaultApiService
             flushErrors();
         }
         LOGGER.debug("Virtual machine {} found", vmId);
+        
+        // if the ips are external, we need to set the limitID in order to return the
+        // proper info.
+        for (IpPoolManagement ip : vm.getIps())
+        {
+            if (ip.getVlanNetwork().getEnterprise() != null)
+            {
+                // needed for REST links.
+                DatacenterLimits dl =
+                    infRep.findDatacenterLimits(ip.getVlanNetwork().getEnterprise(),
+                        vdc.getDatacenter());
+                ip.getVlanNetwork().setLimitId(dl.getId());
+            }
+        }
+        
         return vm;
     }
 
@@ -1672,8 +1688,8 @@ public class VirtualMachineService extends DefaultApiService
         final Integer vmId)
     {
         VirtualMachine vm = repo.findVirtualMachineById(vmId);
-
         VirtualAppliance vapp = getVirtualApplianceAndCheckVirtualDatacenter(vdcId, vappId);
+        VirtualDatacenter vdc = vdcRep.findById(vdcId);
 
         if (vm == null || !isAssignedTo(vmId, vapp.getId()))
         {
@@ -1691,6 +1707,21 @@ public class VirtualMachineService extends DefaultApiService
             addNotFoundErrors(APIError.NODE_VIRTUAL_MACHINE_IMAGE_NOT_EXISTS);
             flushErrors();
         }
+        
+        // if the ips are external, we need to set the limitID in order to return the
+        // proper info.
+        for (IpPoolManagement ip : vm.getIps())
+        {
+            if (ip.getVlanNetwork().getEnterprise() != null)
+            {
+                // needed for REST links.
+                DatacenterLimits dl =
+                    infRep.findDatacenterLimits(ip.getVlanNetwork().getEnterprise(),
+                        vdc.getDatacenter());
+                ip.getVlanNetwork().setLimitId(dl.getId());
+            }
+        }
+        
         return nodeVirtualImage;
     }
 

@@ -89,6 +89,7 @@
             
             private var _resizeEffect:Resize;
             
+            [Bindable]
             private var _virtualDatacenter:VirtualDataCenter;
             
             public function set virtualDatacenter(value:VirtualDataCenter):void
