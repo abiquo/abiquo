@@ -45,8 +45,8 @@ import com.abiquo.commons.amqp.impl.vsm.VSMConsumer;
  */
 public class AmqpConsumerContextListener implements ServletContextListener
 {
-    protected static final Logger LOGGER =
-        LoggerFactory.getLogger(AmqpConsumerContextListener.class);
+    protected static final Logger LOGGER = LoggerFactory
+        .getLogger(AmqpConsumerContextListener.class);
 
     /** The RabbitMQ consumer for VSM */
     protected VSMConsumer eventsConsumer;
@@ -121,11 +121,9 @@ public class AmqpConsumerContextListener implements ServletContextListener
     {
         eventsConsumer = new VSMConsumer(VSMConfiguration.EVENT_SYNK_QUEUE);
 
-        VSMCallback callback =
-            WebApplicationContextUtils.getRequiredWebApplicationContext(sce.getServletContext())
-                .getBean(VSMCallback.class);
+        eventsConsumer.addCallback(WebApplicationContextUtils.getRequiredWebApplicationContext(
+            sce.getServletContext()).getBean("VSMEventProcessorWithFilters", VSMCallback.class));
 
-        eventsConsumer.addCallback(callback);
         eventsConsumer.start();
     }
 
@@ -137,12 +135,11 @@ public class AmqpConsumerContextListener implements ServletContextListener
      */
     protected void initializeAMConsumer(final ServletContextEvent sce) throws IOException
     {
-        AMCallback processor =
-            WebApplicationContextUtils.getRequiredWebApplicationContext(sce.getServletContext())
-                .getBean("AMEventProcessor", AMCallback.class);
-
         amConsumer = new AMConsumer();
-        amConsumer.addCallback(processor);
+
+        amConsumer.addCallback(WebApplicationContextUtils.getRequiredWebApplicationContext(
+            sce.getServletContext()).getBean("AMEventProcessorWithFilters", AMCallback.class));
+
         amConsumer.start();
     }
 }
