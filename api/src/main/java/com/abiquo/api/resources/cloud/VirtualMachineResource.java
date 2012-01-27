@@ -562,7 +562,7 @@ public class VirtualMachineResource extends AbstractResource
         {
             String taskId =
                 vmService.instanceVirtualMachine(vmId, vappId, vdcId,
-                    snapshotData.getSnapshotName(), originalState);
+                    snapshotData.getInstanceName(), originalState);
             if (taskId == null)
             {
                 throw new InternalServerErrorException(APIError.STATUS_INTERNAL_SERVER_ERROR);
