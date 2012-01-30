@@ -40,7 +40,7 @@ public class VirtualMachinePrice
         CHARGE("%CHARGE_FORMATTED%"), CHARGE_PERIOD("%CHARGEPERIOD%"), MIN_CHARGE(
             "%MINCHARGE_FORMATTED%"), MIN_PERIOD("%MINPERIOD%");
 
-        private String text;
+        private final String text;
 
         PricingModelVariables(final String text)
         {
@@ -53,7 +53,7 @@ public class VirtualMachinePrice
         }
     }
 
-    /** Value for the image being deployed */
+    /** Value for the template being deployed */
     private BigDecimal costCodeCost;
 
     /** Value for the CPU, memory */

@@ -36,8 +36,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.abiquo.am.services.OVFPackageConventions;
-import com.abiquo.am.services.util.TimeoutFSUtils;
+import com.abiquo.am.resources.handler.CheckRepositoryHandler;
+import com.abiquo.am.services.TemplateConventions;
 import com.abiquo.appliancemanager.config.AMConfigurationManager;
 
 // TODO add authentication support
@@ -64,23 +64,26 @@ extends HttpServlet
 
         protected final String message;
 
-        public Error(int statusCode, String message)
+        public Error(final int statusCode, final String message)
         {
             this.statusCode = statusCode;
             this.message = message;
         }
 
+        @Override
         public long getLastModified()
         {
             return -1;
         }
 
-        public void respondGet(HttpServletResponse resp) throws IOException
+        @Override
+        public void respondGet(final HttpServletResponse resp) throws IOException
         {
             resp.sendError(statusCode, message);
         }
 
-        public void respondHead(HttpServletResponse resp)
+        @Override
+        public void respondHead(final HttpServletResponse resp)
         {
             throw new UnsupportedOperationException();
         }
@@ -98,8 +101,8 @@ extends HttpServlet
 
         protected final URL url;
 
-        public StaticFile(long lastModified, String mimeType, int contentLength,
-            boolean acceptsDeflate, URL url)
+        public StaticFile(final long lastModified, final String mimeType, final int contentLength,
+            final boolean acceptsDeflate, final URL url)
         {
             this.lastModified = lastModified;
             this.mimeType = mimeType;
@@ -108,6 +111,7 @@ extends HttpServlet
             this.url = url;
         }
 
+        @Override
         public long getLastModified()
         {
             return lastModified;
@@ -118,7 +122,7 @@ extends HttpServlet
             return acceptsDeflate && deflatable(mimeType) && contentLength >= deflateThreshold;
         }
 
-        protected void setHeaders(HttpServletResponse resp)
+        protected void setHeaders(final HttpServletResponse resp)
         {
             resp.setStatus(HttpServletResponse.SC_OK);
             resp.setContentType(mimeType);
@@ -126,7 +130,8 @@ extends HttpServlet
                 resp.setContentLength(contentLength);
         }
 
-        public void respondGet(HttpServletResponse resp) throws IOException
+        @Override
+        public void respondGet(final HttpServletResponse resp) throws IOException
         {
             setHeaders(resp);
             final OutputStream os;
@@ -140,7 +145,8 @@ extends HttpServlet
             transferStreams(url.openStream(), os);
         }
 
-        public void respondHead(HttpServletResponse resp)
+        @Override
+        public void respondHead(final HttpServletResponse resp)
         {
             if (willDeflate())
                 throw new UnsupportedOperationException();
@@ -149,20 +155,22 @@ extends HttpServlet
     }
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException
+    protected void doGet(final HttpServletRequest req, final HttpServletResponse resp)
+        throws IOException
     {
         lookup(req).respondGet(resp);
     }
 
     @Override
-    protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws IOException
+    protected void doPut(final HttpServletRequest req, final HttpServletResponse resp)
+        throws IOException
     {
         doGet(req, resp);
     }
 
     @Override
-    protected void doHead(HttpServletRequest req, HttpServletResponse resp) throws IOException,
-        ServletException
+    protected void doHead(final HttpServletRequest req, final HttpServletResponse resp)
+        throws IOException, ServletException
     {
         try
         {
@@ -175,17 +183,16 @@ extends HttpServlet
     }
 
     @Override
-    protected long getLastModified(HttpServletRequest req)
+    protected long getLastModified(final HttpServletRequest req)
     {
         return lookup(req).getLastModified();
     }
 
-    protected LookupResult lookup(HttpServletRequest req)
+    protected LookupResult lookup(final HttpServletRequest req)
     {
-        // checks the NFS is up and running
-        TimeoutFSUtils.getInstance().canUseRepository();
-        
-        LookupResult r = (LookupResult) req.getAttribute("lookupResult");
+        new CheckRepositoryHandler().canUseRepository();
+
+            LookupResult r = (LookupResult) req.getAttribute("lookupResult");
         if (r == null)
         {
             r = lookupNoCache(req);
@@ -194,11 +201,11 @@ extends HttpServlet
         return r;
     }
 
-    protected LookupResult lookupNoCache(HttpServletRequest req)
+    protected LookupResult lookupNoCache(final HttpServletRequest req)
     {
         String path = getPath(req);
 
-        path = OVFPackageConventions.customEncode(path);
+        path = TemplateConventions.customEncode(path);
         path = path.replace("files/", "");
 
         // XXX if(isForbidden(path))
@@ -269,32 +276,32 @@ extends HttpServlet
         }
     }
 
-    protected String getPath(HttpServletRequest req)
+    protected String getPath(final HttpServletRequest req)
     {
         String servletPath = req.getServletPath();
         String pathInfo = coalesce(req.getPathInfo(), "");
         return servletPath + pathInfo;
     }
 
-    protected boolean isForbidden(String path)
+    protected boolean isForbidden(final String path)
     {
         String lpath = path.toLowerCase();
         return lpath.startsWith("/web-inf/") || lpath.startsWith("/meta-inf/");
     }
 
-    protected String getMimeType(String path)
+    protected String getMimeType(final String path)
     {
         return "application/octet-stream";
         // XXX return coalesce(getServletContext().getMimeType(path), "application/octet-stream");
     }
 
-    protected static boolean acceptsDeflate(HttpServletRequest req)
+    protected static boolean acceptsDeflate(final HttpServletRequest req)
     {
         final String ae = req.getHeader("Accept-Encoding");
         return ae != null && ae.contains("gzip");
     }
 
-    protected static boolean deflatable(String mimetype)
+    protected static boolean deflatable(final String mimetype)
     {
         return mimetype.startsWith("text/") || mimetype.equals("application/postscript")
             || mimetype.startsWith("application/ms") || mimetype.startsWith("application/vnd")
@@ -305,7 +312,8 @@ extends HttpServlet
 
     protected static final int bufferSize = 4 * 1024;
 
-    protected static void transferStreams(InputStream is, OutputStream os) throws IOException
+    protected static void transferStreams(final InputStream is, final OutputStream os)
+        throws IOException
     {
         try
         {
@@ -321,7 +329,7 @@ extends HttpServlet
         }
     }
 
-    public static <T> T coalesce(T... ts)
+    public static <T> T coalesce(final T... ts)
     {
         for (T t : ts)
             if (t != null)

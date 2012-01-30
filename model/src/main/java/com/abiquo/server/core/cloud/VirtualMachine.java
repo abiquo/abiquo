@@ -21,8 +21,12 @@
 
 package com.abiquo.server.core.cloud;
 
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.UUID;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Enumerated;
@@ -30,28 +34,49 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.OneToMany;
+import javax.persistence.OrderBy;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.Filter;
+import org.hibernate.annotations.FilterDef;
+import org.hibernate.annotations.FilterDefs;
+import org.hibernate.annotations.Filters;
 import org.hibernate.annotations.ForeignKey;
 import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.Range;
 
-import com.abiquo.model.enumerator.VirtualMachineState;
+import com.abiquo.server.core.appslibrary.VirtualImageConversion;
+import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
+import com.abiquo.server.core.cloud.chef.RunlistElement;
 import com.abiquo.server.core.common.DefaultEntityBase;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.infrastructure.Datastore;
+import com.abiquo.server.core.infrastructure.management.RasdManagement;
+import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
+import com.abiquo.server.core.infrastructure.network.NetworkConfiguration;
+import com.abiquo.server.core.infrastructure.storage.DiskManagement;
+import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
 import com.softwarementors.validation.constraints.LeadingOrTrailingWhitespace;
 import com.softwarementors.validation.constraints.Required;
 
 @Entity
+@FilterDefs({@FilterDef(name = VirtualMachine.NOT_TEMP),
+@FilterDef(name = VirtualMachine.ONLY_TEMP)})
+@Filters({@Filter(name = VirtualMachine.NOT_TEMP, condition = "temporal is null"),
+@Filter(name = VirtualMachine.ONLY_TEMP, condition = "temporal is not null")})
 @Table(name = VirtualMachine.TABLE_NAME)
 @org.hibernate.annotations.Table(appliesTo = VirtualMachine.TABLE_NAME)
 @NamedQueries({@NamedQuery(name = "VIRTUAL_MACHINE.BY_VAPP", query = VirtualMachine.BY_VAPP),
-@NamedQuery(name = "VIRTUAL_MACHINE.BY_DC", query = VirtualMachine.BY_DC)})
+@NamedQuery(name = "VIRTUAL_MACHINE.BY_DC", query = VirtualMachine.BY_DC),
+@NamedQuery(name = "VIRTUAL_MACHINE.BY_VMT", query = VirtualMachine.BY_VMT),
+@NamedQuery(name = "VIRTUAL_MACHINE.HAS_VMT", query = VirtualMachine.HAS_VMT)})
 public class VirtualMachine extends DefaultEntityBase
 {
     public static final String TABLE_NAME = "virtualmachine";
@@ -64,11 +89,22 @@ public class VirtualMachine extends DefaultEntityBase
         + " WHERE vm.hypervisor.id = hy.id and hy.machine = pm.id "
         + " AND pm.datacenter.id = :datacenterId";
 
+    public static final String BY_VMT = "SELECT vm " + "FROM VirtualMachine vm "
+        + "WHERE vm.virtualMachineTemplate.id = :virtualMachineTplId";
+
+    public static final String HAS_VMT = "SELECT COUNT(*) " + "FROM VirtualMachine vm "
+        + "WHERE vm.virtualMachineTemplate.id = :virtualMachineTplId";
+
     public static final int MANAGED = 1;
 
     public static final int NOT_MANAGED = 0;
 
-    protected VirtualMachine()
+    /* Name of the filters we use to return the virtual machine temporals or not */
+    public static final String NOT_TEMP = "virtualmachine_not_temp";
+
+    public static final String ONLY_TEMP = "virtualmachine_only_temp";
+
+    public VirtualMachine()
     {
     }
 
@@ -109,27 +145,52 @@ public class VirtualMachine extends DefaultEntityBase
 
     //
 
-    public final static String VIRTUAL_IMAGE_PROPERTY = "virtualImage";
+    public final static String VIRTUAL_MACHINE_TEMPLATE_PROPERTY = "virtualMachineTemplate";
 
-    private final static boolean VIRTUAL_IMAGE_REQUIRED = false;
+    private final static boolean VIRTUAL_MACHINE_TEMPLATE_REQUIRED = false;
 
-    private final static String VIRTUAL_IMAGE_ID_COLUMN = "idImage";
+    private final static String VIRTUAL_MACHINE_TEMPLATE_ID_COLUMN = "idImage";
 
-    @JoinColumn(name = VIRTUAL_IMAGE_ID_COLUMN, nullable = !VIRTUAL_IMAGE_REQUIRED)
+    @JoinColumn(name = VIRTUAL_MACHINE_TEMPLATE_ID_COLUMN, nullable = !VIRTUAL_MACHINE_TEMPLATE_REQUIRED)
     @ManyToOne(fetch = FetchType.LAZY)
     // , cascade = CascadeType.ALL)
     @ForeignKey(name = "FK_" + TABLE_NAME + "_virtualimage")
-    private VirtualImage virtualImage;
+    private VirtualMachineTemplate virtualMachineTemplate;
 
-    @Required(value = VIRTUAL_IMAGE_REQUIRED)
-    public VirtualImage getVirtualImage()
+    @Required(value = VIRTUAL_MACHINE_TEMPLATE_REQUIRED)
+    public VirtualMachineTemplate getVirtualMachineTemplate()
     {
-        return this.virtualImage;
+        return this.virtualMachineTemplate;
     }
 
-    public void setVirtualImage(final VirtualImage virtualImage)
+    public void setVirtualMachineTemplate(final VirtualMachineTemplate virtualMachineTemplate)
     {
-        this.virtualImage = virtualImage;
+        this.virtualMachineTemplate = virtualMachineTemplate;
+    }
+
+    //
+
+    public final static String VIRTUAL_IMAGE_CONVERSION_PROPERTY = "virtualImageConversion";
+
+    private final static boolean VIRTUAL_IMAGE_CONVERSION_REQUIRED = false;
+
+    private final static String VIRTUAL_IMAGE_CONVERSION_ID_COLUMN = "idConversion";
+
+    @JoinColumn(name = VIRTUAL_IMAGE_CONVERSION_ID_COLUMN, nullable = !VIRTUAL_IMAGE_CONVERSION_REQUIRED)
+    @ManyToOne(fetch = FetchType.LAZY)
+    // , cascade = CascadeType.ALL)
+    @ForeignKey(name = "FK_" + TABLE_NAME + "_conversion")
+    private VirtualImageConversion virtualImageConversion;
+
+    @Required(value = VIRTUAL_IMAGE_CONVERSION_REQUIRED)
+    public VirtualImageConversion getVirtualImageConversion()
+    {
+        return this.virtualImageConversion;
+    }
+
+    public void setVirtualImageConversion(final VirtualImageConversion virtualImageConversion)
+    {
+        this.virtualImageConversion = virtualImageConversion;
     }
 
     //
@@ -386,9 +447,9 @@ public class VirtualMachine extends DefaultEntityBase
 
     @Column(name = ID_TYPE_COLUMN, nullable = false)
     @Range(min = ID_TYPE_MIN, max = ID_TYPE_MAX)
-    private Integer idType;
+    private int idType;
 
-    public Integer getIdType()
+    public int getIdType()
     {
         return this.idType;
     }
@@ -398,7 +459,12 @@ public class VirtualMachine extends DefaultEntityBase
         return getIdType() == MANAGED;
     }
 
-    public void setIdType(final Integer idType)
+    public boolean isDeployed()
+    {
+        return !this.state.equals(State.NOT_ALLOCATED) && !this.state.equals(State.UNKNOWN);
+    }
+
+    public void setIdType(final int idType)
     {
         this.idType = idType;
     }
@@ -447,6 +513,27 @@ public class VirtualMachine extends DefaultEntityBase
         this.user = user;
     }
 
+    public final static String SUB_STATE_PROPERTY = "subState";
+
+    private final static boolean SUB_STATE_REQUIRED = false;
+
+    private final static String SUB_STATE_COLUMN = "subState";
+
+    @Enumerated(value = javax.persistence.EnumType.STRING)
+    @Column(name = SUB_STATE_COLUMN, nullable = !SUB_STATE_REQUIRED)
+    private State subState;
+
+    @Required(value = SUB_STATE_REQUIRED)
+    public State getSubState()
+    {
+        return this.subState;
+    }
+
+    public void setSubState(final State subState)
+    {
+        this.subState = subState;
+    }
+
     //
     public final static String STATE_PROPERTY = "state";
 
@@ -454,7 +541,7 @@ public class VirtualMachine extends DefaultEntityBase
 
     private final static String STATE_COLUMN = "state";
 
-    private final static VirtualMachineState STATE_DEFAULT = VirtualMachineState.NOT_DEPLOYED;
+    private final static VirtualMachineState STATE_DEFAULT = VirtualMachineState.NOT_ALLOCATED;
 
     @Enumerated(value = javax.persistence.EnumType.STRING)
     @Column(name = STATE_COLUMN, nullable = !STATE_REQUIRED)
@@ -499,28 +586,234 @@ public class VirtualMachine extends DefaultEntityBase
         this.password = password;
     }
 
+    public final static String CONFIGURATION_PROPERTY = "networkConfiguration";
+
+    private final static boolean CONFIGURATION_REQUIRED = false;
+
+    private final static String CONFIGURATION_ID_COLUMN = "network_configuration_id";
+
+    @JoinColumn(name = CONFIGURATION_ID_COLUMN)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
+    @ForeignKey(name = "FK_" + TABLE_NAME + "_configuration")
+    private NetworkConfiguration networkConfiguration;
+
+    @Required(value = CONFIGURATION_REQUIRED)
+    public NetworkConfiguration getNetworkConfiguration()
+    {
+        return this.networkConfiguration;
+    }
+
+    public void setNetworkConfiguration(final NetworkConfiguration configuration)
+    {
+        this.networkConfiguration = configuration;
+    }
+
+    public final static String TEMPORAL_PROPERTY = "temporal";
+
+    private final static String TEMPORAL_COLUMN = "temporal";
+
+    private final static int TEMPORAL_MIN = 1;
+
+    private final static int TEMPORAL_MAX = Integer.MAX_VALUE;
+
+    @Column(name = TEMPORAL_COLUMN, nullable = true)
+    @Range(min = TEMPORAL_MIN, max = TEMPORAL_MAX)
+    private Integer temporal = null;
+
+    /**
+     * This field is used to mark temporal objects used in reconfigure operations. It holds a
+     * reference to the id of the original virtual machine.
+     * 
+     * @return The reference to the id of the original virtual machine.
+     */
+    public Integer getTemporal()
+    {
+        return this.temporal;
+    }
+
+    public void setTemporal(final Integer temporal)
+    {
+        this.temporal = temporal;
+    }
+
+    /** List of disks */
+    @OneToMany(targetEntity = DiskManagement.class)
+    @JoinTable(name = "rasd_management", joinColumns = {@JoinColumn(name = "idVM")}, inverseJoinColumns = {@JoinColumn(name = "idManagement")})
+    private List<DiskManagement> disks;
+
+    public List<DiskManagement> getDisks()
+    {
+        return disks != null ? disks : new LinkedList<DiskManagement>();
+    }
+
+    public void setDisks(final List<DiskManagement> disks)
+    {
+        this.disks = disks;
+    }
+
+    /** List of volumes */
+    @OneToMany(targetEntity = VolumeManagement.class)
+    @JoinTable(name = "rasd_management", joinColumns = {@JoinColumn(name = "idVM")}, inverseJoinColumns = {@JoinColumn(name = "idManagement")})
+    private List<VolumeManagement> volumes;
+
+    public List<VolumeManagement> getVolumes()
+    {
+        return volumes != null ? volumes : new LinkedList<VolumeManagement>();
+    }
+
+    public void setVolumes(final List<VolumeManagement> volumes)
+    {
+        this.volumes = volumes;
+    }
+
+    /** List of ips */
+    @OneToMany(targetEntity = IpPoolManagement.class)
+    @JoinTable(name = "rasd_management", joinColumns = {@JoinColumn(name = "idVM")}, inverseJoinColumns = {@JoinColumn(name = "idManagement")})
+    private List<IpPoolManagement> ips;
+
+    public List<IpPoolManagement> getIps()
+    {
+        return ips != null ? ips : new LinkedList<IpPoolManagement>();
+    }
+
+    public void setIps(final List<IpPoolManagement> ips)
+    {
+        this.ips = ips;
+    }
+
+    /**
+     * List all {@link RasdManagement} (including {@link DiskManagement}, {@link IpPoolManagement}
+     * and {@link VolumeManagement} )
+     */
+    // do not orphanRemoval = true,
+    @OneToMany(targetEntity = RasdManagement.class, mappedBy = RasdManagement.VIRTUAL_MACHINE_PROPERTY)
+    private List<RasdManagement> rasdManagements;
+
+    public List<RasdManagement> getRasdManagements()
+    {
+        return rasdManagements;
+    }
+
+    public void setRasdManagements(final List<RasdManagement> rasdManagements)
+    {
+        this.rasdManagements = rasdManagements;
+    }
+
+    public static final String CHEF_RUNLIST_TABLE = "chef_runlist";
+
+    public static final String CHEF_RUNLIST_PROPERTY = "runlist";
+
+    static final String CHEF_RUNLIST_ID_COLUMN = "id";
+
+    static final String VIRTUALMACHINE_ID_COLUMN = "idVM";
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = CHEF_RUNLIST_TABLE, joinColumns = {@JoinColumn(name = CHEF_RUNLIST_ID_COLUMN)}, inverseJoinColumns = {@JoinColumn(name = VIRTUALMACHINE_ID_COLUMN)})
+    @OrderBy(RunlistElement.PRIORITY_PROPERTY + " ASC")
+    private List<RunlistElement> runlist = new ArrayList<RunlistElement>();
+
+    public List<RunlistElement> getRunlist()
+    {
+        if (runlist == null)
+        {
+            runlist = new ArrayList<RunlistElement>();
+        }
+        return runlist;
+    }
+
+    /* package */void addRunlistElement(final RunlistElement element)
+    {
+        this.runlist.add(element);
+    }
+
+    /* package */void removeRunlistElement(final RunlistElement element)
+    {
+        this.runlist.remove(element);
+    }
+
+    /* ******************* Helper methods ******************* */
+
+    public boolean isChefEnabled()
+    {
+        return getVirtualMachineTemplate().isChefEnabled() && getEnterprise().isChefEnabled();
+    }
+
+    public boolean isStateful()
+    {
+        return virtualMachineTemplate.isStateful();
+    }
+
+    // vm imported from PM (no more!)
+    public boolean isImported()
+    {
+        return getVirtualMachineTemplate() == null;
+    }
+
+    // vm imported from a PM and added into a Vapp
+    // when vm isCaptured then isn't imported
+    public boolean isCaptured()
+    {
+        return getVirtualMachineTemplate().getRepository() == null && !isStateful();
+    }
+
     public VirtualMachine(final String name, final Enterprise enterprise, final User user,
-        final Hypervisor hypervisor, final VirtualImage virtualImage, final UUID uuid,
-        final Integer typeId)
+        final Hypervisor hypervisor, final VirtualMachineTemplate virtualMachineTemplate,
+        final UUID uuid, final Integer typeId)
     {
         setName(name);
         setEnterprise(enterprise);
         setUser(user);
         setHypervisor(hypervisor);
-        setVirtualImage(virtualImage);
+        setVirtualMachineTemplate(virtualMachineTemplate);
         setUuid(uuid.toString());
         setIdType(typeId);
     }
 
     public VirtualMachine(final String name, final Enterprise enterprise, final User user,
-        final VirtualImage virtualImage, final UUID uuid, final Integer typeId)
+        final VirtualMachineTemplate virtualMachineTemplate, final UUID uuid, final Integer typeId)
     {
         setName(name);
         setEnterprise(enterprise);
         setUser(user);
-        setVirtualImage(virtualImage);
+        setVirtualMachineTemplate(virtualMachineTemplate);
         setUuid(uuid.toString());
         setIdType(typeId);
     }
 
+    /**
+     * This method is intended to clone a {@link VirtualMachine} that shares a reference to a
+     * {@link Datastore}, {@link Enterprise}, {@link User} and the {@link VirtualMachineTemplate} .
+     * The {@link Datastore} and the {@link Enterprise} are not editable in a {@link VirtualMachine}
+     * .
+     * 
+     * @see java.lang.Object#clone()
+     */
+    @Override
+    public VirtualMachine clone()
+    {
+        VirtualMachine virtualMachine = new VirtualMachine();
+        virtualMachine.setCpu(cpu);
+        // We are sharing the same reference
+        virtualMachine.setDatastore(datastore);
+        virtualMachine.setDescription(description);
+        // The enterprise cannot be modified
+        virtualMachine.setEnterprise(enterprise);
+        virtualMachine.setHdInBytes(hdInBytes);
+        virtualMachine.setHighDisponibility(highDisponibility);
+        // The hypervisor is selected by the allocator
+        virtualMachine.setHypervisor(hypervisor);
+        virtualMachine.setIdType(idType);
+        virtualMachine.setName(name);
+        virtualMachine.setPassword(password);
+        virtualMachine.setRam(ram);
+        virtualMachine.setState(state);
+        // Not editable
+        virtualMachine.setUser(user);
+        virtualMachine.setUuid(uuid);
+        virtualMachine.setVdrpIP(vdrpIP);
+        virtualMachine.setVdrpPort(vdrpPort);
+        // Not editable
+        virtualMachine.setVirtualMachineTemplate(virtualMachineTemplate);
+        return virtualMachine;
+    }
 }

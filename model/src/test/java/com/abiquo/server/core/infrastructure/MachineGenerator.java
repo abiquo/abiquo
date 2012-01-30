@@ -27,6 +27,7 @@ import org.testng.Assert;
 import com.abiquo.model.enumerator.MachineState;
 import com.abiquo.server.core.common.DefaultEntityGenerator;
 import com.abiquo.server.core.enterprise.Enterprise;
+import com.abiquo.server.core.infrastructure.storage.InitiatorMappingGenerator;
 import com.softwarementors.commons.test.SeedGenerator;
 
 public class MachineGenerator extends DefaultEntityGenerator<Machine>
@@ -56,12 +57,16 @@ public class MachineGenerator extends DefaultEntityGenerator<Machine>
         return createMachine(datacenter);
     }
 
+    public Machine createMachineIntoDatacenter(final Datacenter datacenter)
+    {
+        Rack rack = rackGenerator.createInstance(datacenter);
+        return createMachine(datacenter, rack);
+    }
+
     public Machine createMachineIntoRack()
     {
         Datacenter datacenter = this.datacenterGenerator.createUniqueInstance();
-        Rack rack = rackGenerator.createInstance(datacenter);
-
-        return createMachine(datacenter, rack);
+        return createMachineIntoDatacenter(datacenter);
     }
 
     public Machine createReservedMachine(final Enterprise enterprise)
@@ -90,21 +95,18 @@ public class MachineGenerator extends DefaultEntityGenerator<Machine>
         super.addAuxiliaryEntitiesToPersist(entity, entitiesToPersist);
     }
 
+    @Deprecated
+    // set the rack
     public Machine createMachine(final Datacenter datacenter)
     {
-        int seed = nextSeed();
-
-        final String name = newString(seed, Machine.NAME_LENGTH_MIN, Machine.NAME_LENGTH_MAX);
-        Machine machine = createMachine(datacenter, name);
-
-        return machine;
+        final String name = newString(nextSeed(), Machine.NAME_LENGTH_MIN, Machine.NAME_LENGTH_MAX);
+        return createMachine(datacenter, name);
     }
 
     public Machine createMachine(final Datacenter datacenter, final Rack rack)
     {
         Machine machine = createMachine(datacenter);
         machine.setRack(rack);
-
         return machine;
     }
 
@@ -126,6 +128,8 @@ public class MachineGenerator extends DefaultEntityGenerator<Machine>
         Machine machine =
             datacenter.createMachine(name, description, virtualRamInMb, virtualRamUsedInMb,
                 realCpuThreads, currentCpusInUse, virtualCpusPerThread, state, virtualSwitch);
+        machine.setInitiatorIQN(InitiatorMappingGenerator.DEFAULT_INITIATOR);
+
         return machine;
     }
 

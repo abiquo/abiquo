@@ -73,11 +73,21 @@ public class VirtualDatacenterResource extends AbstractResource
 
     public static final String VIRTUAL_DATACENTER_PARAM = "{" + VIRTUAL_DATACENTER + "}";
 
-    public static final String VIRTUAL_DATACENTER_ACTION_GET_IPS = "/action/ips";
+    public static final String VIRTUAL_DATACENTER_GET_IPS_PATH = "/action/ips";
 
-    public static final String VIRTUAL_DATACENTER_ACTION_GET_DHCP_INFO = "/action/dhcpinfo";
+    public static final String VIRTUAL_DATACENTER_GET_IPS_REL = "ips";
 
-    public static final String ACTION_DEFAULT_VLAN = "/action/defaultvlan";
+    public static final String VIRTUAL_DATACENTER_DHCP_INFO_PATH = "/action/dhcpinfo";
+
+    public static final String VIRTUAL_DATACENTER_DHCP_INFO_REL = "dhcpinfo";
+
+    public static final String DEFAULT_VLAN_PATH = "/action/defaultvlan";
+
+    public static final String DEFAULT_VLAN_REL = "defaultvlan";
+
+    public static final String DEFAULT_NETWORK_REL = "defaultnetwork";
+
+    public static final String TYPE = "type";
 
     // @Autowired
     @Resource(name = "virtualDatacenterService")
@@ -119,7 +129,7 @@ public class VirtualDatacenterResource extends AbstractResource
 
     @SuppressWarnings("unchecked")
     @GET
-    @Path(VirtualDatacenterResource.VIRTUAL_DATACENTER_ACTION_GET_IPS)
+    @Path(VirtualDatacenterResource.VIRTUAL_DATACENTER_GET_IPS_PATH)
     public IpsPoolManagementDto getIPsByVirtualDatacenter(
         @PathParam(VIRTUAL_DATACENTER) final Integer id,
         @QueryParam(START_WITH) @Min(0) final Integer startwith,
@@ -127,12 +137,13 @@ public class VirtualDatacenterResource extends AbstractResource
         @QueryParam(FILTER) @DefaultValue("") final String filter,
         @QueryParam(LIMIT) @DefaultValue(DEFAULT_PAGE_LENGTH_STRING) @Min(1) final Integer limit,
         @QueryParam(ASC) @DefaultValue("true") final Boolean desc_or_asc,
-        @Context final IRESTBuilder restBuilder) throws Exception
+        @QueryParam(TYPE) final String type, @Context final IRESTBuilder restBuilder)
+        throws Exception
     {
 
         List<IpPoolManagement> all =
             netService.getListIpPoolManagementByVdc(id, startwith, limit, filter, orderBy,
-                desc_or_asc);
+                desc_or_asc, type);
         /*
          * if (all == null || all.isEmpty()) { throw new
          * ConflictException(APIError.VIRTUAL_DATACENTER_INVALID_NETWORKS); }
@@ -153,12 +164,13 @@ public class VirtualDatacenterResource extends AbstractResource
     }
 
     @GET
-    @Path(VirtualDatacenterResource.VIRTUAL_DATACENTER_ACTION_GET_DHCP_INFO)
+    @Path(VirtualDatacenterResource.VIRTUAL_DATACENTER_DHCP_INFO_PATH)
     public String getDHCPInfoByVirtualDatacenter(@PathParam(VIRTUAL_DATACENTER) final Integer id,
         @Context final IRESTBuilder restBuilder) throws Exception
     {
         List<IpPoolManagement> all =
-            netService.getListIpPoolManagementByVdc(id, 0, DEFAULT_PAGE_LENGTH, "", "ip", true);
+            netService.getListIpPoolManagementByVdc(id, 0, DEFAULT_PAGE_LENGTH, "", "ip", true,
+                null);
         StringBuilder formattedData = new StringBuilder();
         formattedData.append("## AbiCloud DHCP configuration for network "
             + service.getVirtualDatacenter(id).getNetwork().getUuid() + "\n");
@@ -196,7 +208,7 @@ public class VirtualDatacenterResource extends AbstractResource
     // ALERT! this method is @override in enterprise version, any change here
     // should be also changed in enterprise version.
     @GET
-    @Path(VirtualDatacenterResource.ACTION_DEFAULT_VLAN)
+    @Path(VirtualDatacenterResource.DEFAULT_VLAN_PATH)
     public VLANNetworkDto getDefaultVlan(
         @PathParam(VIRTUAL_DATACENTER) @NotNull @Min(1) final Integer id,
         @Context final IRESTBuilder restBuilder) throws Exception
@@ -208,7 +220,7 @@ public class VirtualDatacenterResource extends AbstractResource
     // ALERT! this method is @override in enterprise version, any change here
     // should be also changed in enterprise version.
     @PUT
-    @Path(VirtualDatacenterResource.ACTION_DEFAULT_VLAN)
+    @Path(VirtualDatacenterResource.DEFAULT_VLAN_PATH)
     public void setDefaultVlan(@PathParam(VIRTUAL_DATACENTER) @NotNull @Min(1) final Integer id,
         @NotNull final LinksDto links, @Context final IRESTBuilder restBuilder) throws Exception
     {

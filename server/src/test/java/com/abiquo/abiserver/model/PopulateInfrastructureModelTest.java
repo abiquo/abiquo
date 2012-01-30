@@ -194,7 +194,7 @@ public class PopulateInfrastructureModelTest
         va.setEnterpriseHB(getDefaultEnterprise());
         va.setName(name);
         va.setVirtualDataCenterHB(virtualDatacenter);
-        va.setState(StateEnum.NOT_DEPLOYED);
+        va.setState(StateEnum.NOT_ALLOCATED);
         va.setError(0);
 
         HibernateDAOFactory.instance().getVirtualApplianceDAO().makePersistentBasic(va);
@@ -211,7 +211,7 @@ public class PopulateInfrastructureModelTest
         RemoteServiceHB vf = new RemoteServiceHB();
 
         vf.setIdDataCenter(datacenter.getIdDataCenter());
-        vf.setRemoteServiceType(RemoteServiceType.VIRTUAL_FACTORY);
+        vf.setRemoteServiceType(RemoteServiceType.TARANTINO);
 
         vf.setUri(virtualFactoryURL);
 

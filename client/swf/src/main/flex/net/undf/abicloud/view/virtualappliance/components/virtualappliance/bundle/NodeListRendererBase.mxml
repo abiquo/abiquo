@@ -48,6 +48,12 @@
 
             [Bindable]
             private var _nodeSize:Number = 0;
+            
+            [Bindable]
+            private var _editMode:Boolean;
+            
+            [Bindable]
+            public var newName:String;
 
             override public function set data(value:Object):void
             {
@@ -63,6 +69,7 @@
                 {
                     this._nodeListItem = data as NodeListItem;
                     this._nodeName = this._nodeListItem.node.name;
+                    newName = this._nodeListItem.node.name;
 
                     if (this._nodeListItem.node is NodeVirtualImage)
                     {
@@ -99,6 +106,38 @@
                 dispatchEvent(nodeListItemEvent);
 
             }
+            
+            /**
+             * Sets this component in edit mode
+             */
+            private function onClickEdit():void
+            {
+                this._editMode = true;
+                
+            }
+            
+            /**
+             * Cancels the edition of the physical machine being rendered
+             */
+            private function onClickCancel():void
+            {
+                this._editMode = false;
+                changeNameLabel.text = newName;
+            }
+            
+             /**
+             * Set the new name value
+             */
+            private function onAccept():void
+            {
+                newName = changeNameLabel.text;
+                this._editMode = false;
+                
+                if (data is NodeListItem)
+                {
+                    NodeListItem(data).node.name = newName;
+                }
+            }
         ]]>
     </mx:Script>
 
@@ -109,15 +148,50 @@
         scaleContent="true"
         defaultImagePath="{VirtualImageManager.DEFAULT_ICON_IMAGE_PATH}"/>
 
-    <mx:Label id="nameLabel"
-        left="80" top="5"
-        fontSize="12"
-        fontWeight="bold"
-        maxWidth="200" text="{this._nodeName}" truncateToFit="true"
-        toolTip="{this._nodeName}"/>
+    <mx:HBox id="boxNameLabel"
+            visible="{!this._editMode}"
+            includeInLayout="{!this._editMode}"
+            left="80" top="5">
+        <mx:Label id="nameLabel"
+               fontSize="12"
+               fontWeight="bold"
+               maxWidth="200" text="{newName}" truncateToFit="true"
+               toolTip="{newName}"/>
+        <utils:SmoothImage id="accessEditModeButton"
+                    height="17"
+                    creationComplete="net.undf.abicloud.utils.AbicloudUtils.getImageFromStyle('PhysicalMachineEditIcon', accessEditModeButton)"
+                    toolTip="@Resource(bundle='Common', key='BUTTON_EDIT_TOOLTIP')"
+                    includeInLayout="{! this._editMode}"
+                    visible="{! this._editMode}"
+                    click="onClickEdit()"/>     
+    </mx:HBox>
+    
+    <mx:VBox id="boxChangeNameLabel"
+        visible="{this._editMode}"
+        includeInLayout="{this._editMode}"
+        left="80" top="5">
+        
+        <mx:TextInput id="changeNameLabel"
+            fontSize="12"
+            fontWeight="bold"
+            maxChars="200" text="{newName}" 
+            toolTip="{newName}"/>           
+         <mx:HBox verticalGap="4">
+             <mx:Button 
+                    height="17"
+                    label="@Resource(bundle='Common', key='BUTTON_ACCEPT')"
+                    click="onAccept()"/>
+        
+                <mx:Button 
+                    height="17"
+                    label="@Resource(bundle='Common', key='BUTTON_CANCEL')"
+                    styleName="AlternativeButton"
+                    click="onClickCancel()"/>           
+         </mx:HBox>
+    </mx:VBox>
 
     <mx:Label id="sizeLabel"
-        left="80" top="22"
+        left="80" top="{this._editMode ? '52':'22'}"
         fontSize="12"
         maxWidth="200"
         truncateToFit="true" toolTip="{this._nodeName}"/>

@@ -31,14 +31,14 @@ public class RackGenerator extends DefaultEntityGenerator<Rack>
 
     private DatacenterGenerator datacenterGenerator;
 
-    public RackGenerator(SeedGenerator seed)
+    public RackGenerator(final SeedGenerator seed)
     {
         super(seed);
         this.datacenterGenerator = new DatacenterGenerator(seed);
     }
 
     @Override
-    public void assertAllPropertiesEqual(Rack arg0, Rack arg1)
+    public void assertAllPropertiesEqual(final Rack arg0, final Rack arg1)
     {
         Assert.assertEquals(arg0.getName(), arg1.getName());
     }
@@ -51,14 +51,14 @@ public class RackGenerator extends DefaultEntityGenerator<Rack>
         return createInstance(datacenter);
     }
 
-    public Rack createInstance(Datacenter datacenter)
+    public Rack createInstance(final Datacenter datacenter)
     {
         final String name = newString(nextSeed(), Rack.NAME_LENGTH_MIN, Rack.NAME_LENGTH_MAX);
 
         return createInstance(datacenter, name);
     }
 
-    public Rack createInstance(Datacenter datacenter, String name)
+    public Rack createInstance(final Datacenter datacenter, final String name)
     {
         int seed = nextSeed();
         final String shortDescription =
@@ -66,9 +66,9 @@ public class RackGenerator extends DefaultEntityGenerator<Rack>
         final String longDescription =
             newString(seed, Rack.LONG_DESCRIPTION_LENGTH_MIN, Rack.LONG_DESCRIPTION_LENGTH_MAX);
 
-        Integer vlan_id_min = nextSeed();
-        Integer vlan_id_max = nextSeed();
-        Integer nrsq = nextSeed();
+        Integer vlan_id_min = Rack.VLAN_ID_MIN_DEFAULT_VALUE;
+        Integer vlan_id_max = Rack.VLAN_ID_MAX_DEFAULT_VALUE;
+        Integer nrsq = Rack.NRSQ_DEFAULT_VALUE;
         String vlans_id_avoided =
             newString(this.nextSeed(), Rack.VLANS_ID_AVOIDED_LENGTH_MIN,
                 Rack.VLANS_ID_AVOIDED_LENGTH_MAX);
@@ -82,7 +82,7 @@ public class RackGenerator extends DefaultEntityGenerator<Rack>
         return result;
     }
 
-    public Rack createInstanceDefaultNetwork(Datacenter datacenter, String name)
+    public Rack createInstanceDefaultNetwork(final Datacenter datacenter, final String name)
     {
         int seed = nextSeed();
         final String shortDescription =
@@ -106,7 +106,8 @@ public class RackGenerator extends DefaultEntityGenerator<Rack>
     }
 
     @Override
-    public void addAuxiliaryEntitiesToPersist(Rack entity, List<Object> entitiesToPersist)
+    public void addAuxiliaryEntitiesToPersist(final Rack entity,
+        final List<Object> entitiesToPersist)
     {
         super.addAuxiliaryEntitiesToPersist(entity, entitiesToPersist);
 

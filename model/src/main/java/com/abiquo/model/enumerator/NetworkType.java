@@ -31,7 +31,7 @@ package com.abiquo.model.enumerator;
  */
 public enum NetworkType
 {
-    INTERNAL, EXTERNAL, PUBLIC, UNMANAGED;
+    INTERNAL, EXTERNAL, PUBLIC, UNMANAGED, EXTERNAL_UNMANAGED;
 
     public static NetworkType fromValue(final String orderBy)
     {

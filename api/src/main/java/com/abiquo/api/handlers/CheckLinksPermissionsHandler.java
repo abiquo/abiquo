@@ -24,6 +24,7 @@ package com.abiquo.api.handlers;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.wink.server.handlers.AbstractHandler;
 import org.apache.wink.server.handlers.MessageContext;
 
@@ -40,7 +41,8 @@ public class CheckLinksPermissionsHandler extends AbstractHandler
 
     private URLAuthenticator urlAuthenticator;
 
-    @SuppressWarnings("unchecked")
+    private static final String SLASH = "/";
+
     @Override
     public void handleResponse(final MessageContext msgContext) throws Throwable
     {
@@ -51,20 +53,22 @@ public class CheckLinksPermissionsHandler extends AbstractHandler
                 (SingleResourceTransportDto) msgContext.getResponseEntity();
             if (srtDto != null)
             {
+                String baseUri =
+                    StringUtils.removeEnd(msgContext.getUriInfo().getBaseUri().toString(), SLASH);
                 if (srtDto instanceof WrapperDto< ? >)
                 {
                     for (Object obj : ((WrapperDto< ? >) srtDto).getCollection())
                     {
                         if (obj instanceof SingleResourceTransportDto)
                         {
-                            SingleResourceTransportDto srt = ((SingleResourceTransportDto) obj);
-                            srt.setLinks(checkLinks(srt.getLinks()));
+                            SingleResourceTransportDto srt = (SingleResourceTransportDto) obj;
+                            srt.setLinks(checkLinks(srt.getLinks(), baseUri));
                         }
                     }
                 }
                 else if (srtDto.getLinks() != null)
                 {
-                    srtDto.setLinks(checkLinks(srtDto.getLinks()));
+                    srtDto.setLinks(checkLinks(srtDto.getLinks(), baseUri));
                 }
             }
         }
@@ -72,13 +76,13 @@ public class CheckLinksPermissionsHandler extends AbstractHandler
     }
 
     @SuppressWarnings("unchecked")
-    protected List<RESTLink> checkLinks(final List<RESTLink> links)
+    protected List<RESTLink> checkLinks(final List<RESTLink> links, final String baseUri)
     {
         List<RESTLink> authLinks = null;
 
         if (links != null)
         {
-            authLinks = getUrlAuthenticator().checkAuthLinks(links);
+            authLinks = getUrlAuthenticator().checkAuthLinks(links, baseUri);
             Collections.sort(authLinks,
                 CompositeComparator.build(LinkOrder.BY_REL, LinkOrder.BY_TITLE));
         }

@@ -161,6 +161,11 @@ public class EnterprisesResourceStubImpl extends AbstractAPIStub implements Ente
     {
         EnterpriseDto dto = new EnterpriseDto();
         dto.setName(enterprise.getName());
+        dto.setChefURL(enterprise.getChefURL());
+        dto.setChefClient(enterprise.getChefClient());
+        dto.setChefValidator(enterprise.getChefValidator());
+        dto.setChefClientCertificate(enterprise.getChefClientCertificate());
+        dto.setChefValidatorCertificate(enterprise.getChefValidatorCertificate());
         if (enterprise.getIdPricingTemplate() != null)
         {
             dto.addLink(new RESTLink("pricingtemplate", createPricingTemplateLink(enterprise

@@ -23,8 +23,8 @@ package com.abiquo.server.core.cloud.stateful;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
-import com.abiquo.model.enumerator.VirtualMachineState;
 import com.abiquo.model.transport.SingleResourceTransportDto;
+import com.abiquo.server.core.cloud.VirtualMachineState;
 
 @XmlRootElement(name = "virtualApplianceStatefulConversion")
 public class VirtualApplianceStatefulConversionDto extends SingleResourceTransportDto

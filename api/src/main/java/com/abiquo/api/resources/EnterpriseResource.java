@@ -46,7 +46,7 @@ import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.exceptions.InternalServerErrorException;
 import com.abiquo.api.resources.cloud.IpAddressesResource;
 import com.abiquo.api.resources.cloud.VirtualDatacenterResource;
-import com.abiquo.api.resources.cloud.VirtualMachinesResource;
+import com.abiquo.api.resources.cloud.VirtualMachineResource;
 import com.abiquo.api.services.DatacenterService;
 import com.abiquo.api.services.EnterpriseService;
 import com.abiquo.api.services.NetworkService;
@@ -60,6 +60,7 @@ import com.abiquo.model.enumerator.Privileges;
 import com.abiquo.server.core.cloud.NodeVirtualImage;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
+import com.abiquo.server.core.cloud.VirtualDatacenterDto;
 import com.abiquo.server.core.cloud.VirtualDatacentersDto;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachinesDto;
@@ -229,8 +230,8 @@ public class EnterpriseResource extends AbstractResource
             VirtualAppliance vapp = nvimg.getVirtualAppliance();
             VirtualMachine vm = nvimg.getVirtualMachine();
 
-            vmDto.add(VirtualMachinesResource.createCloudAdminTransferObject(vm, vapp
-                .getVirtualDatacenter().getId(), vapp.getId(), restBuilder));
+            vmDto.add(VirtualMachineResource.createTransferObject(vm, vapp.getVirtualDatacenter(),
+                vapp.getId(), restBuilder, null, null, null));
         }
         return vmDto;
 
@@ -293,6 +294,11 @@ public class EnterpriseResource extends AbstractResource
         dto.setStorageSoft(e.getStorageSoft());
         dto.setRepositorySoft(e.getRepositorySoft());
         dto.setRepositoryHard(e.getRepositoryHard());
+        dto.setChefURL(e.getChefURL());
+        dto.setChefClient(e.getChefClient());
+        dto.setChefValidator(e.getChefValidator());
+        dto.setChefClientCertificate(e.getChefClientCertificate());
+        dto.setChefValidatorCertificate(e.getChefValidatorCertificate());
         dto.setIsReservationRestricted(e.getIsReservationRestricted());
         if (e.getPricingTemplate() != null)
         {

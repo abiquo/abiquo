@@ -148,6 +148,7 @@ public class DatacentersResourceIT extends AbstractJpaGeneratorIT
         DatacenterDto d = new DatacenterDto();
         d.setName("datacenter_test");
         d.setLocation("situation_datacenter_test");
+        d.setUuid("uuid_datacenter_test");
         d.setRemoteServices(rsList);
 
         // Assert creation

@@ -29,7 +29,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.abiquo.model.enumerator.HypervisorType;
-import com.abiquo.model.enumerator.VirtualMachineState;
+import com.abiquo.server.core.appslibrary.AppsLibraryRep;
+import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
+import com.abiquo.server.core.appslibrary.VirtualMachineTemplateGenerator;
 import com.abiquo.server.core.cloud.NodeVirtualImage;
 import com.abiquo.server.core.cloud.NodeVirtualImageGenerator;
 import com.abiquo.server.core.cloud.VirtualAppliance;
@@ -37,17 +39,17 @@ import com.abiquo.server.core.cloud.VirtualApplianceGenerator;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualDatacenterGenerator;
 import com.abiquo.server.core.cloud.VirtualDatacenterRep;
-import com.abiquo.server.core.cloud.VirtualImage;
-import com.abiquo.server.core.cloud.VirtualImageDAO;
-import com.abiquo.server.core.cloud.VirtualImageGenerator;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineDAO;
 import com.abiquo.server.core.cloud.VirtualMachineGenerator;
+import com.abiquo.server.core.cloud.VirtualMachineState;
 import com.abiquo.server.core.enterprise.DatacenterLimits;
 import com.abiquo.server.core.enterprise.DatacenterLimitsDAO;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.EnterpriseGenerator;
 import com.abiquo.server.core.enterprise.EnterpriseRep;
+import com.abiquo.server.core.enterprise.Privilege;
+import com.abiquo.server.core.enterprise.PrivilegeDAO;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.InfrastructureRep;
 import com.abiquo.server.core.infrastructure.Rack;
@@ -80,10 +82,13 @@ public class PopulateVirtualInfrastructure extends PopulateConstants
     DatacenterLimitsDAO dcLimitsDao;
 
     @Autowired
+    PrivilegeDAO privilegeDao;
+
+    @Autowired
     RepositoryDAO repoDao;
 
     @Autowired
-    VirtualImageDAO vimageDao;
+    private AppsLibraryRep appslibraryRep;
 
     @Autowired
     VirtualMachineDAO vmachineDao;
@@ -107,7 +112,7 @@ public class PopulateVirtualInfrastructure extends PopulateConstants
 
     IpPoolManagementGenerator ipPoolGen = new IpPoolManagementGenerator(seed);
 
-    VirtualImageGenerator vimageGen = new VirtualImageGenerator(seed);
+    VirtualMachineTemplateGenerator vimageGen = new VirtualMachineTemplateGenerator(seed);
 
     public PopulateVirtualInfrastructure()
     {
@@ -264,7 +269,7 @@ public class PopulateVirtualInfrastructure extends PopulateConstants
     /**
      * @param vimageDec, vi1:d1,1,2,10 (VirtualImage)
      */
-    private VirtualImage createVirtualImage(final String enterStr, final String vimageDec)
+    private VirtualMachineTemplate createVirtualImage(final String enterStr, final String vimageDec)
     {
         Enterprise enterprise = enterRep.findByName(enterStr);
 
@@ -295,10 +300,11 @@ public class PopulateVirtualInfrastructure extends PopulateConstants
             hdRequired = Integer.parseInt(frg[3]) * GB_TO_MB * 1014 * 1024; // bytes
         }
 
-        VirtualImage vimage =
+        VirtualMachineTemplate vimage =
             vimageGen.createInstance(enterprise, repository, cpuRequired, ramRequired, hdRequired,
                 virtualimageName);
-        vimageDao.persist(vimage);
+        appslibraryRep.insertCategory(vimage.getCategory());
+        appslibraryRep.insertVirtualMachineTemplate(vimage);
 
         return vimage;
     }
@@ -390,10 +396,22 @@ public class PopulateVirtualInfrastructure extends PopulateConstants
             createIpMan(vnicName, vlanName, vdc);
         }
 
-        VirtualImage vimage = vimageDao.findByName(virtualimageName);
-        assertNotNull("vimage not found " + virtualimageName, vimage);
+        VirtualMachineTemplate vmtemplate =
+            appslibraryRep.findVirtualMachineTemplateByName(virtualimageName);
+        assertNotNull("vimage not found " + virtualimageName, vmtemplate);
 
-        VirtualMachine vmachine = vmGen.createInstance(vimage, enterprise, vmachineName);
+        VirtualMachine vmachine = vmGen.createInstance(vmtemplate, enterprise, vmachineName);
+
+        for (Privilege p : vmachine.getUser().getRole().getPrivileges())
+        {
+            privilegeDao.persist(p);
+        }
+
+        // set the default vmachine requirements based on the template
+        vmachine.setCpu(vmtemplate.getCpuRequired());
+        vmachine.setRam(vmtemplate.getRamRequired());
+        vmachine.setHdInBytes(vmtemplate.getHdRequiredInBytes());
+
         enterRep.insertRole(vmachine.getUser().getRole());
         enterRep.insertUser(vmachine.getUser());
         vdcRep.insertVirtualMachine(vmachine);
@@ -489,6 +507,16 @@ public class PopulateVirtualInfrastructure extends PopulateConstants
 
     public void runningVirtualMachine(final Integer virtualMachineId)
     {
-        vmachineDao.updateVirtualMachineState(virtualMachineId, VirtualMachineState.RUNNING);
+        vmachineDao.updateVirtualMachineState(virtualMachineId, VirtualMachineState.ON);
+    }
+
+    public VirtualMachine getVirtualMachine(final Integer virtualMachineId)
+    {
+        return vmachineDao.findById(virtualMachineId);
+    }
+
+    public VirtualAppliance getVirtualAppliance(final Integer virtualAppId)
+    {
+        return vdcRep.findVirtualApplianceById(virtualAppId);
     }
 }

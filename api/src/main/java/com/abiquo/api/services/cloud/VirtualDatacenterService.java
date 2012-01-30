@@ -22,6 +22,7 @@
 package com.abiquo.api.services.cloud;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.UUID;
 
 import javax.persistence.EntityManager;
@@ -52,6 +53,7 @@ import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.InfrastructureRep;
+import com.abiquo.server.core.infrastructure.network.DhcpOption;
 import com.abiquo.server.core.infrastructure.network.Network;
 import com.abiquo.server.core.infrastructure.network.VLANNetwork;
 import com.abiquo.server.core.infrastructure.network.VLANNetworkDto;
@@ -141,6 +143,7 @@ public class VirtualDatacenterService extends DefaultApiService
         return repo.findByDatacenter(datacenter);
     }
 
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
     public VirtualDatacenter getVirtualDatacenter(final Integer id)
     {
         VirtualDatacenter vdc = repo.findById(id);
@@ -167,8 +170,8 @@ public class VirtualDatacenterService extends DefaultApiService
 
         // set as default vlan (as it is the first one) and create it.
         VLANNetwork vlan =
-            networkService.createPrivateNetwork(vdc.getId(), PrivateNetworkResource
-                .createPersistenceObject(dto.getVlan()), false);
+            networkService.createPrivateNetwork(vdc.getId(),
+                PrivateNetworkResource.createPersistenceObject(dto.getVlan()), false);
 
         // find the default vlan stablished by the enterprise-datacenter limits
         DatacenterLimits dcLimits =
@@ -267,6 +270,16 @@ public class VirtualDatacenterService extends DefaultApiService
             addConflictErrors(APIError.VIRTUAL_DATACENTER_CONTAINS_RESOURCES);
         }
 
+        // delete dhcpOption
+        if (vdc.getDefaultVlan() != null)
+        {
+            List<DhcpOption> dhcpList = vdc.getDefaultVlan().getDhcpOption();
+            if (!dhcpList.isEmpty())
+            {
+                datacenterRepo.deleteAllDhcpOption(dhcpList);
+            }
+        }
+
         flushErrors();
 
         repo.delete(vdc);
@@ -283,8 +296,11 @@ public class VirtualDatacenterService extends DefaultApiService
         final Datacenter datacenter, final Enterprise enterprise, final Network network)
     {
         VirtualDatacenter vdc =
-            new VirtualDatacenter(enterprise, datacenter, network, dto.getHypervisorType(), dto
-                .getName());
+            new VirtualDatacenter(enterprise,
+                datacenter,
+                network,
+                dto.getHypervisorType(),
+                dto.getName());
 
         setLimits(dto, vdc);
         validateVirtualDatacenter(vdc, dto.getVlan(), datacenter);

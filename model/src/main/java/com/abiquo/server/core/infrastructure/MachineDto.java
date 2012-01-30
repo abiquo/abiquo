@@ -61,13 +61,15 @@ public class MachineDto extends SingleResourceTransportDto implements Serializab
 
     private DatastoresDto datastores;
 
-    private String ipmiIp;
+    private String ipmiIP;
 
     private Integer ipmiPort;
 
     private String ipmiUser;
 
     private String ipmiPassword;
+
+    private String initiatorIQN;
 
     /**
      * @return the port
@@ -295,14 +297,14 @@ public class MachineDto extends SingleResourceTransportDto implements Serializab
         return datastores;
     }
 
-    public String getIpmiIp()
+    public String getIpmiIP()
     {
-        return ipmiIp;
+        return ipmiIP;
     }
 
-    public void setIpmiIp(final String ipmiIp)
+    public void setIpmiIP(final String ipmiIP)
     {
-        this.ipmiIp = ipmiIp;
+        this.ipmiIP = ipmiIP;
     }
 
     public Integer getIpmiPort()
@@ -333,5 +335,15 @@ public class MachineDto extends SingleResourceTransportDto implements Serializab
     public void setIpmiPassword(final String ipmiPassword)
     {
         this.ipmiPassword = ipmiPassword;
+    }
+
+    public String getInitiatorIQN()
+    {
+        return initiatorIQN;
+    }
+
+    public void setInitiatorIQN(String initiatorIQN)
+    {
+        this.initiatorIQN = initiatorIQN;
     }
 }

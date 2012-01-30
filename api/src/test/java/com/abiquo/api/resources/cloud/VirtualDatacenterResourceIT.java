@@ -117,12 +117,12 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
     {
         VirtualDatacenter vdc = vdcGenerator.createUniqueInstance();
         RemoteService rs =
-            remoteServiceGenerator.createInstance(RemoteServiceType.DHCP_SERVICE,
-                vdc.getDatacenter());
+            remoteServiceGenerator.createInstance(RemoteServiceType.DHCP_SERVICE, vdc
+                .getDatacenter());
         VLANNetwork vlan = vlanGenerator.createInstance(vdc.getNetwork(), rs, "255.255.255.0");
         vdc.setDefaultVlan(vlan);
-        setup(vdc.getDatacenter(), rs, vdc.getEnterprise(), vdc.getNetwork(),
-            vlan.getConfiguration(), vlan, vdc);
+        setup(vdc.getDatacenter(), rs, vdc.getEnterprise(), vdc.getNetwork(), vlan
+            .getConfiguration(), vlan, vdc);
 
         VirtualDatacenterDto dto = getValidVdc(vdc);
         assertNotNull(dto);
@@ -133,8 +133,8 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
             PrivateNetworksResource.PRIVATE_NETWORKS_PATH);
         assertLinkExist(dto, resolveVirtualDatacenterURI(vdc.getId()), "edit");
         assertLinkExist(dto, resolveVirtualAppliancesURI(vdc.getId()),
-            VirtualApplianceResource.VIRTUAL_APPLIANCE);
-        assertLinkExist(dto, resolveVirtualDatacenterActionGetIPsURI(vdc.getId()), "action",
+            VirtualAppliancesResource.VIRTUAL_APPLIANCES_PATH);
+        assertLinkExist(dto, resolveVirtualDatacenterActionGetIPsURI(vdc.getId()),
             IpAddressesResource.IP_ADDRESSES);
     }
 
@@ -155,12 +155,12 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
     {
         VirtualDatacenter vdc = vdcGenerator.createUniqueInstance();
         RemoteService rs =
-            remoteServiceGenerator.createInstance(RemoteServiceType.DHCP_SERVICE,
-                vdc.getDatacenter());
+            remoteServiceGenerator.createInstance(RemoteServiceType.DHCP_SERVICE, vdc
+                .getDatacenter());
         VLANNetwork vlan = vlanGenerator.createInstance(vdc.getNetwork(), rs, "255.255.255.0");
         vdc.setDefaultVlan(vlan);
-        setup(vdc.getDatacenter(), rs, vdc.getEnterprise(), vdc.getNetwork(),
-            vlan.getConfiguration(), vlan, vdc);
+        setup(vdc.getDatacenter(), rs, vdc.getEnterprise(), vdc.getNetwork(), vlan
+            .getConfiguration(), vlan, vdc);
 
         VirtualDatacenterDto dto = getValidVdc(vdc);
 
@@ -179,12 +179,12 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
     {
         VirtualDatacenter vdc = vdcGenerator.createUniqueInstance();
         RemoteService rs =
-            remoteServiceGenerator.createInstance(RemoteServiceType.DHCP_SERVICE,
-                vdc.getDatacenter());
+            remoteServiceGenerator.createInstance(RemoteServiceType.DHCP_SERVICE, vdc
+                .getDatacenter());
         VLANNetwork vlan = vlanGenerator.createInstance(vdc.getNetwork(), rs, "255.255.255.0");
         vdc.setDefaultVlan(vlan);
-        setup(vdc.getDatacenter(), rs, vdc.getEnterprise(), vdc.getNetwork(),
-            vlan.getConfiguration(), vlan, vdc);
+        setup(vdc.getDatacenter(), rs, vdc.getEnterprise(), vdc.getNetwork(), vlan
+            .getConfiguration(), vlan, vdc);
 
         VirtualDatacenterDto dto = getValidVdc(vdc);
         dto.setCpuCountLimits(1000, 1001);
@@ -240,26 +240,6 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
         assertErrors(response, 409, APIError.VIRTUAL_DATACENTER_CONTAINS_RESOURCES);
     }
 
-    @Test(groups = {NETWORK_INTEGRATION_TESTS})
-    public void deleteVirtualDatacenterWithIps()
-    {
-        VirtualDatacenter vdc = vdcGenerator.createUniqueInstance();
-        IpPoolManagement ip = ipGenerator.createInstance(vdc, vdc.getNetwork());
-        RemoteService rs =
-            remoteServiceGenerator.createInstance(RemoteServiceType.DHCP_SERVICE,
-                vdc.getDatacenter());
-
-        List<Object> entitiesToPersist = new ArrayList<Object>();
-        ipGenerator.addAuxiliaryEntitiesToPersist(ip, entitiesToPersist);
-        entitiesToPersist.add(ip);
-
-        setup(entitiesToPersist.toArray());
-
-        ClientResponse response =
-            delete(resolveVirtualDatacenterURI(vdc.getId()), SYSADMIN, SYSADMIN);
-        assertEquals(response.getStatusCode(), 204);
-    }
-
     // TESTS refered to the action of GET IPs by VDC
 
     /**
@@ -295,9 +275,9 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
 
         IPAddress ip = IPAddress.newIPAddress(vlan.getConfiguration().getAddress()).nextIPAddress();
         IPAddress lastIP =
-            IPNetworkRang.lastIPAddressWithNumNodes(
-                IPAddress.newIPAddress(vlan.getConfiguration().getAddress()),
-                IPNetworkRang.masktoNumberOfNodes(vlan.getConfiguration().getMask()));
+            IPNetworkRang.lastIPAddressWithNumNodes(IPAddress.newIPAddress(vlan.getConfiguration()
+                .getAddress()), IPNetworkRang
+                .masktoNumberOfNodes(vlan.getConfiguration().getMask()));
 
         persistIP(ip, lastIP, vdc, vlan);
 
@@ -307,9 +287,9 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
         IPAddress ip2 =
             IPAddress.newIPAddress(vlan2.getConfiguration().getAddress()).nextIPAddress();
         IPAddress lastIP2 =
-            IPNetworkRang.lastIPAddressWithNumNodes(
-                IPAddress.newIPAddress(vlan2.getConfiguration().getAddress()),
-                IPNetworkRang.masktoNumberOfNodes(vlan2.getConfiguration().getMask()));
+            IPNetworkRang.lastIPAddressWithNumNodes(IPAddress.newIPAddress(vlan2.getConfiguration()
+                .getAddress()), IPNetworkRang.masktoNumberOfNodes(vlan2.getConfiguration()
+                .getMask()));
 
         persistIP(ip2, lastIP2, vdc, vlan2);
 
@@ -335,9 +315,9 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
 
         IPAddress ip = IPAddress.newIPAddress(vlan.getConfiguration().getAddress()).nextIPAddress();
         IPAddress lastIP =
-            IPNetworkRang.lastIPAddressWithNumNodes(
-                IPAddress.newIPAddress(vlan.getConfiguration().getAddress()),
-                IPNetworkRang.masktoNumberOfNodes(vlan.getConfiguration().getMask()));
+            IPNetworkRang.lastIPAddressWithNumNodes(IPAddress.newIPAddress(vlan.getConfiguration()
+                .getAddress()), IPNetworkRang
+                .masktoNumberOfNodes(vlan.getConfiguration().getMask()));
 
         persistIP(ip, lastIP, vdc, vlan);
 
@@ -363,9 +343,9 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
 
         IPAddress ip = IPAddress.newIPAddress(vlan.getConfiguration().getAddress()).nextIPAddress();
         IPAddress lastIP =
-            IPNetworkRang.lastIPAddressWithNumNodes(
-                IPAddress.newIPAddress(vlan.getConfiguration().getAddress()),
-                IPNetworkRang.masktoNumberOfNodes(vlan.getConfiguration().getMask()));
+            IPNetworkRang.lastIPAddressWithNumNodes(IPAddress.newIPAddress(vlan.getConfiguration()
+                .getAddress()), IPNetworkRang
+                .masktoNumberOfNodes(vlan.getConfiguration().getMask()));
 
         persistIP(ip, lastIP, vdc, vlan);
 
@@ -391,9 +371,9 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
 
         IPAddress ip = IPAddress.newIPAddress(vlan.getConfiguration().getAddress()).nextIPAddress();
         IPAddress lastIP =
-            IPNetworkRang.lastIPAddressWithNumNodes(
-                IPAddress.newIPAddress(vlan.getConfiguration().getAddress()),
-                IPNetworkRang.masktoNumberOfNodes(vlan.getConfiguration().getMask()));
+            IPNetworkRang.lastIPAddressWithNumNodes(IPAddress.newIPAddress(vlan.getConfiguration()
+                .getAddress()), IPNetworkRang
+                .masktoNumberOfNodes(vlan.getConfiguration().getMask()));
 
         persistIP(ip, lastIP, vdc, vlan);
 
@@ -419,9 +399,9 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
 
         IPAddress ip = IPAddress.newIPAddress(vlan.getConfiguration().getAddress()).nextIPAddress();
         IPAddress lastIP =
-            IPNetworkRang.lastIPAddressWithNumNodes(
-                IPAddress.newIPAddress(vlan.getConfiguration().getAddress()),
-                IPNetworkRang.masktoNumberOfNodes(vlan.getConfiguration().getMask()));
+            IPNetworkRang.lastIPAddressWithNumNodes(IPAddress.newIPAddress(vlan.getConfiguration()
+                .getAddress()), IPNetworkRang
+                .masktoNumberOfNodes(vlan.getConfiguration().getMask()));
 
         persistIP(ip, lastIP, vdc, vlan);
 
@@ -447,9 +427,9 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
 
         IPAddress ip = IPAddress.newIPAddress(vlan.getConfiguration().getAddress()).nextIPAddress();
         IPAddress lastIP =
-            IPNetworkRang.lastIPAddressWithNumNodes(
-                IPAddress.newIPAddress(vlan.getConfiguration().getAddress()),
-                IPNetworkRang.masktoNumberOfNodes(vlan.getConfiguration().getMask()));
+            IPNetworkRang.lastIPAddressWithNumNodes(IPAddress.newIPAddress(vlan.getConfiguration()
+                .getAddress()), IPNetworkRang
+                .masktoNumberOfNodes(vlan.getConfiguration().getMask()));
 
         persistIP(ip, lastIP, vdc, vlan);
 
@@ -475,9 +455,9 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
 
         IPAddress ip = IPAddress.newIPAddress(vlan.getConfiguration().getAddress()).nextIPAddress();
         IPAddress lastIP =
-            IPNetworkRang.lastIPAddressWithNumNodes(
-                IPAddress.newIPAddress(vlan.getConfiguration().getAddress()),
-                IPNetworkRang.masktoNumberOfNodes(vlan.getConfiguration().getMask()));
+            IPNetworkRang.lastIPAddressWithNumNodes(IPAddress.newIPAddress(vlan.getConfiguration()
+                .getAddress()), IPNetworkRang
+                .masktoNumberOfNodes(vlan.getConfiguration().getMask()));
 
         persistIP(ip, lastIP, vdc, vlan);
 
@@ -503,9 +483,9 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
 
         IPAddress ip = IPAddress.newIPAddress(vlan.getConfiguration().getAddress()).nextIPAddress();
         IPAddress lastIP =
-            IPNetworkRang.lastIPAddressWithNumNodes(
-                IPAddress.newIPAddress(vlan.getConfiguration().getAddress()),
-                IPNetworkRang.masktoNumberOfNodes(vlan.getConfiguration().getMask()));
+            IPNetworkRang.lastIPAddressWithNumNodes(IPAddress.newIPAddress(vlan.getConfiguration()
+                .getAddress()), IPNetworkRang
+                .masktoNumberOfNodes(vlan.getConfiguration().getMask()));
 
         persistIP(ip, lastIP, vdc, vlan);
 
@@ -531,9 +511,9 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
 
         IPAddress ip = IPAddress.newIPAddress(vlan.getConfiguration().getAddress()).nextIPAddress();
         IPAddress lastIP =
-            IPNetworkRang.lastIPAddressWithNumNodes(
-                IPAddress.newIPAddress(vlan.getConfiguration().getAddress()),
-                IPNetworkRang.masktoNumberOfNodes(vlan.getConfiguration().getMask()));
+            IPNetworkRang.lastIPAddressWithNumNodes(IPAddress.newIPAddress(vlan.getConfiguration()
+                .getAddress()), IPNetworkRang
+                .masktoNumberOfNodes(vlan.getConfiguration().getMask()));
 
         persistIP(ip, lastIP, vdc, vlan);
 
@@ -559,9 +539,9 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
 
         IPAddress ip = IPAddress.newIPAddress(vlan.getConfiguration().getAddress()).nextIPAddress();
         IPAddress lastIP =
-            IPNetworkRang.lastIPAddressWithNumNodes(
-                IPAddress.newIPAddress(vlan.getConfiguration().getAddress()),
-                IPNetworkRang.masktoNumberOfNodes(vlan.getConfiguration().getMask()));
+            IPNetworkRang.lastIPAddressWithNumNodes(IPAddress.newIPAddress(vlan.getConfiguration()
+                .getAddress()), IPNetworkRang
+                .masktoNumberOfNodes(vlan.getConfiguration().getMask()));
 
         persistIP(ip, lastIP, vdc, vlan);
 
@@ -610,9 +590,9 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
 
         IPAddress ip = IPAddress.newIPAddress(vlan.getConfiguration().getAddress()).nextIPAddress();
         IPAddress lastIP =
-            IPNetworkRang.lastIPAddressWithNumNodes(
-                IPAddress.newIPAddress(vlan.getConfiguration().getAddress()),
-                IPNetworkRang.masktoNumberOfNodes(vlan.getConfiguration().getMask()));
+            IPNetworkRang.lastIPAddressWithNumNodes(IPAddress.newIPAddress(vlan.getConfiguration()
+                .getAddress()), IPNetworkRang
+                .masktoNumberOfNodes(vlan.getConfiguration().getMask()));
 
         persistIP(ip, lastIP, vdc, vlan);
 
@@ -645,6 +625,7 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
         while (!ip.equals(lastIP))
         {
             IpPoolManagement ippool = ipGenerator.createInstance(vdc, vlan, ip.toString());
+            lists.add(ippool.getRasd());
             lists.add(ippool);
             ip = ip.nextIPAddress();
         }

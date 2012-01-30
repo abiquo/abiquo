@@ -40,7 +40,7 @@
 
     <mx:Script>
         <![CDATA[
-        	import net.undf.abicloud.events.InfrastructureEvent;
+        	import mx.events.CloseEvent;
         	import net.undf.abicloud.events.VirtualApplianceEvent;
         	import net.undf.abicloud.vo.virtualappliance.VirtualAppliance;
         	import net.undf.abicloud.vo.infrastructure.VirtualMachine;
@@ -104,7 +104,12 @@
             
             private var _canBeModified:Boolean;
 
-
+            private var _virtualAppliance:VirtualAppliance;
+            
+            public function set virtualAppliance(value:VirtualAppliance):void
+            {
+            	this._virtualAppliance = value;
+            }
             
             private function onCreationComplete():void{
             	//Checking privilege
@@ -179,7 +184,7 @@
 					this._infoToolTip = resourceManager.getString('VirtualAppliance','TOOL_TIP_NODE_DELETED');
 				}else if(NodeVirtualImage(this._node).virtualMachine){
 					//Need to be added
-					if(NodeVirtualImage(this._node).virtualMachine.state.id == net.undf.abicloud.vo.infrastructure.State.NOT_DEPLOYED){							
+					if(NodeVirtualImage(this._node).virtualMachine.state.description == net.undf.abicloud.vo.infrastructure.State.NOT_ALLOCATED.description){							
 						this._pendingStatus = "NodeVirtualImageAdded";
 					}
 				}else{
@@ -403,9 +408,9 @@
             	if(event && event.virtualMachine){
                     if(NodeVirtualImage(this._node) && NodeVirtualImage(this._node).virtualMachine){
                     	if(NodeVirtualImage(this._node).virtualMachine.id == event.virtualMachine.id){
-                    		//Update virtual machine state
+                    		//Update State
                     		NodeVirtualImage(this._node).virtualMachine.state = event.virtualMachine.state;
-                    		if(event.virtualMachine.state.id == net.undf.abicloud.vo.infrastructure.State.IN_PROGRESS){
+                    		if(event.virtualMachine.state.description == net.undf.abicloud.vo.infrastructure.State.LOCKED.description){
                     			this._canBeModified = false;
                     		}
                     	}
@@ -420,7 +425,7 @@
             private function onRollOver():void
             {
                 if(this._node && this._node is NodeVirtualImage && NodeVirtualImage(this._node).virtualMachine){
-	                buttonsContainer.visible = this._canBeModified && NodeVirtualImage(this._node).virtualMachine.state.id != net.undf.abicloud.vo.infrastructure.State.IN_PROGRESS;
+	                buttonsContainer.visible = this._canBeModified && NodeVirtualImage(this._node).virtualMachine.state.description != net.undf.abicloud.vo.infrastructure.State.LOCKED.description;
                 }else{
                 	buttonsContainer.visible = true;
                 }
@@ -433,38 +438,57 @@
             {
                 buttonsContainer.visible = false;
             }
+            
+            private function onPreviousEraseNodeButton():void
+            {
+            	if(this._virtualAppliance.state.description == net.undf.abicloud.vo.infrastructure.State.DEPLOYED.description){
+	            	AbiCloudAlert.showAlert(ResourceManager.getInstance().getString("Common",
+	                                                                                "ALERT_TITLE_LABEL"),
+	                                        ResourceManager.getInstance().getString("VirtualAppliance",
+	                                                                                "ALERT_DELETE_NODE_VIRTUALIMAGE_HEADER"),
+	                                        ResourceManager.getInstance().getString("VirtualAppliance",
+	                                                                                "ALERT_DELETE_NODE_VIRTUALIMAGE_TEXT"),
+	                                        Alert.YES | Alert.NO,
+	                                        onClickEraseNodeButton);
+            	}else{
+            		onClickEraseNodeButton();
+            	}
+            }
 
             /**
              * Announces that user wants to delete this node
              **/
-            private function onClickEraseNodeButton():void
+            private function onClickEraseNodeButton(closeEvent:CloseEvent = null):void
             {
-                if (this._isSelected)
+                if (!closeEvent || closeEvent.detail == Alert.YES )
                 {
-                    isSelected = false;
-                }
-                
-                //We add the remove state
-                if(NodeVirtualImage(this._node).virtualMachine){
-	                if(NodeVirtualImage(this._node).virtualMachine.state.id == net.undf.abicloud.vo.infrastructure.State.RUNNING){	
+	                if (this._isSelected)
+	                {
+	                    isSelected = false;
+	                }
+	                
+	                //We add the remove state
+	                if(NodeVirtualImage(this._node).virtualMachine){
+		                if(NodeVirtualImage(this._node).virtualMachine.state.description == net.undf.abicloud.vo.infrastructure.State.ON.description){	
+		
+			                this.enabled = false;
+							this._pendingStatus = "NodeVirtualImageDeleted";   
+							this._infoToolTip = resourceManager.getString('VirtualAppliance','TOOL_TIP_NODE_DELETED');
+							AbicloudUtils.getImageFromStyle(this._pendingStatus, nodeRenedererBase);             	
+		                }                	
+	                }
+	                //We have to Unregister the Connector for this NodeRenderer
+	                if (this._connector)
+	                {
+	                    var connectionEvent:ConnectionEvent = new ConnectionEvent(ConnectionEvent.UNREGISTER_CONNECTOR);
+	                    connectionEvent.connector = this._connector;
+	                    this._connector.dispatchEvent(connectionEvent);
+	                }
 	
-		                this.enabled = false;
-						this._pendingStatus = "NodeVirtualImageDeleted";   
-						this._infoToolTip = resourceManager.getString('VirtualAppliance','TOOL_TIP_NODE_DELETED');
-						AbicloudUtils.getImageFromStyle(this._pendingStatus, nodeRenedererBase);             	
-	                }                	
-                }
-                //We have to Unregister the Connector for this NodeRenderer
-                if (this._connector)
-                {
-                    var connectionEvent:ConnectionEvent = new ConnectionEvent(ConnectionEvent.UNREGISTER_CONNECTOR);
-                    connectionEvent.connector = this._connector;
-                    this._connector.dispatchEvent(connectionEvent);
-                }
-
-                var nodeRendererEvent:NodeRendererEvent = new NodeRendererEvent(NodeRendererEvent.NODERENDERER_ERASE);
-                nodeRendererEvent.nodeRenderer = this;
-                dispatchEvent(nodeRendererEvent);
+	                var nodeRendererEvent:NodeRendererEvent = new NodeRendererEvent(NodeRendererEvent.NODERENDERER_ERASE);
+	                nodeRendererEvent.nodeRenderer = this;
+	                dispatchEvent(nodeRendererEvent);
+	            }
             }
 
             /**
@@ -624,19 +648,27 @@
 
 
     <!-- Node state icons -->
-    <mx:HBox id="stateIconsContainer"
-        left="5" top="3">
+    <mx:Canvas id="stateIconsContainer"
+        left="5" top="3" 
+        height="100%"
+        width="100%">
 
         <utils:SmoothImage 
 			id="nodeRenedererBase" 
             width="18" height="18"
-            horizontalCenter="0"
-            verticalCenter="0"
+            left="5" top="3"
             visible="{this._pendingStatus.length != 0}"
             creationComplete="{AbicloudUtils.getImageFromStyle(this._pendingStatus, nodeRenedererBase)}"	
             toolTip="{this._pendingStatus == 'NodeVirtualImageDeleted' ? resourceManager.getString('VirtualAppliance','TOOL_TIP_NODE_DELETED'):resourceManager.getString('VirtualAppliance','TOOL_TIP_NODE_ADDED')}"/>
 
-    </mx:HBox>
+        <utils:SmoothImage id="chefImage"
+            right="5" bottom="15"
+            creationComplete="net.undf.abicloud.utils.AbicloudUtils.getImageFromStyle('VirtualImageMiniatureBaseChefImage', chefImage)"            
+            toolTip="@Resource(bundle='VirtualImage', key='LABEL_CHEF_ENABLED')"
+            visible="{this._node is NodeVirtualImage &amp;&amp; NodeVirtualImage(this._node).virtualImage.chefEnabled}"/>
+
+    </mx:Canvas>
+    
 
     <!-- More options for the NodeRenderer -->
 
@@ -657,7 +689,7 @@
             styleName="VirtualApplianceEraseNodeButton"
             mouseDown="stopMouseDownUpPropagation(event)"
             mouseUp="stopMouseDownUpPropagation(event)"
-            click="onClickEraseNodeButton()"/>
+            click="onPreviousEraseNodeButton()"/>
     </mx:HBox>
 
 </mx:Canvas>

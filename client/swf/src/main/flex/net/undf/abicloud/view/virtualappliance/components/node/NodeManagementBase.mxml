@@ -69,6 +69,9 @@
             override protected function createChildren():void
             {
                 super.createChildren();
+                
+                //Listen to reconfigure event
+                AbiCloudModel.getInstance().virtualApplianceManager.addEventListener("reconfigureVirtualApplianceEvent",updateVirtualApplianceState);
 
                 //Creating components
                 vmBasicInfo = new NodeBasicInfo();
@@ -85,6 +88,19 @@
                                                                                                          "LABEL_NETWORK"));                	
                 }
             }
+            
+            /**
+            * Set the virtual appliance into LOCKED state when a change is made
+            **/
+            protected function updateVirtualApplianceState(event:Event):void
+            {
+            	//reconfigure if the virtual appliance is running
+            	if(this._virtualAppliance.state.description == State.DEPLOYED.description)
+            	{
+	            	AbiCloudModel.getInstance().virtualApplianceManager.setVirtualApplianceInProgress(this._virtualAppliance);
+	            	onClickButtonClose();
+            	}
+            }
 
             /**
              * Initializes this component to manage a Node
@@ -97,11 +113,11 @@
                 this._virtualAppliance = virtualAppliance;
                 this._node = node;
 
-                //For NodeVirtualImage, edition is only allowed when its VirtualMachine is NOT_DEPLOYED or POWERED_OFF
+                //For NodeVirtualImage, edition is only allowed when its VirtualMachine is NOT_ALLOCATED or OFF
                 var nodeVirtualImage:NodeVirtualImage = this._node as NodeVirtualImage;
                 if (nodeVirtualImage.virtualMachine 
-                && (nodeVirtualImage.virtualMachine.state.id == State.NOT_DEPLOYED || 
-                    nodeVirtualImage.virtualMachine.state.id == State.POWERED_OFF ))
+                && (nodeVirtualImage.virtualMachine.state.description == State.NOT_ALLOCATED.description 
+                ||  nodeVirtualImage.virtualMachine.state.description == State.OFF.description))
                 {
                     this._isEditionAllowed = true
                 }

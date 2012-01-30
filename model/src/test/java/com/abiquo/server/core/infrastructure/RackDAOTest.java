@@ -30,7 +30,10 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import com.abiquo.model.enumerator.MachineState;
 import com.abiquo.server.core.appslibrary.Category;
+import com.abiquo.server.core.cloud.Hypervisor;
+import com.abiquo.server.core.cloud.HypervisorGenerator;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineGenerator;
 import com.abiquo.server.core.common.persistence.DefaultDAOTestBase;
@@ -187,15 +190,12 @@ public class RackDAOTest extends DefaultDAOTestBase<RackDAO, Rack>
     {
         VirtualMachine vm1 = vmgenerator.createUniqueInstance();
         VirtualMachine vm2 =
-            vmgenerator.createInstance(vm1.getVirtualImage(), vm1.getEnterprise(),
+            vmgenerator.createInstance(vm1.getVirtualMachineTemplate(), vm1.getEnterprise(),
                 vm1.getHypervisor(), vm1.getUser(), "test");
 
         // FIXME: Fix virtual image fields until we have the changes in the VirtualImage API
         Category category = new Category("test-category");
-        category.setIsDefault(0);
-        category.setIsErasable(0);
-        ds().persistAll(category);
-        vm1.getVirtualImage().setIdCategory(category.getId());
+        vm1.getVirtualMachineTemplate().setCategory(category);
 
         List<Object> entitiesToPersist = new ArrayList<Object>();
         vmgenerator.addAuxiliaryEntitiesToPersist(vm1, entitiesToPersist);
@@ -207,5 +207,86 @@ public class RackDAOTest extends DefaultDAOTestBase<RackDAO, Rack>
         List<Integer> usedPorts = dao.findUsedVrdpPorts(rack);
 
         assertEquals(usedPorts.size(), 2);
+    }
+        
+    /**
+     * Returns any machine that is in the rack in MANAGED.
+     * 
+     * @param rackId rack.
+     * @return Machine
+     */
+    @Test
+    public void getRandomMachinesToShutDownFromRack()
+    {
+
+        DatacenterGenerator generator = new DatacenterGenerator(getSeed());
+        UcsRackGenerator ucsRackGenerator = new UcsRackGenerator(getSeed());
+        MachineGenerator machineGenerator = new MachineGenerator(getSeed());
+        HypervisorGenerator hypervisorGenerator = new HypervisorGenerator(getSeed());
+        Datacenter datacenter = generator.createUniqueInstance();
+
+        UcsRack ucsRack = ucsRackGenerator.createInstance(datacenter);
+        ds().persistAll(datacenter, ucsRack);
+        for (int i = 0; i < 7; i++)
+        {
+            Machine machine = machineGenerator.createUniqueInstance();
+            machine.setState(MachineState.MANAGED);
+            machine.setRack(ucsRack);
+            machine.setDatacenter(datacenter);
+            machine.setBelongsToManagedRack(Boolean.TRUE);
+
+            Hypervisor visor = hypervisorGenerator.createUniqueInstance();
+            visor.setMachine(machine);
+            ds().persistAll(machine, visor);
+        }
+
+        List<Machine> machines =
+            createDaoForRollbackTransaction().getRandomMachinesToShutDownFromRack(ucsRack.getId(),
+                4);
+        Assert.assertEquals(machines.size(), 4);
+    }
+
+    /**
+     * Returns any machine that is in the rack in MANAGED.
+     * 
+     * @param rackId rack.
+     * @return Machine
+     */
+    @Test
+    public void getRandomMachinesToPoweOnFromRack()
+    {
+
+        DatacenterGenerator generator = new DatacenterGenerator(getSeed());
+        UcsRackGenerator ucsRackGenerator = new UcsRackGenerator(getSeed());
+        MachineGenerator machineGenerator = new MachineGenerator(getSeed());
+        HypervisorGenerator hypervisorGenerator = new HypervisorGenerator(getSeed());
+        Datacenter datacenter = generator.createUniqueInstance();
+
+        UcsRack ucsRack = ucsRackGenerator.createInstance(datacenter);
+        ds().persistAll(datacenter, ucsRack);
+        for (int i = 0; i < 7; i++)
+        {
+            Machine machine = machineGenerator.createUniqueInstance();
+            machine.setState(MachineState.HALTED_FOR_SAVE);
+            machine.setRack(ucsRack);
+            machine.setBelongsToManagedRack(Boolean.TRUE);
+
+            machine.setDatacenter(datacenter);
+            Hypervisor visor = hypervisorGenerator.createUniqueInstance();
+            visor.setMachine(machine);
+            ds().persistAll(machine, visor);
+        }
+        Machine machine = machineGenerator.createUniqueInstance();
+        machine.setState(MachineState.MANAGED);
+        machine.setRack(ucsRack);
+        machine.setBelongsToManagedRack(Boolean.TRUE);
+
+        machine.setDatacenter(datacenter);
+        Hypervisor visor = hypervisorGenerator.createUniqueInstance();
+        visor.setMachine(machine);
+        ds().persistAll(machine, visor);
+        List<Machine> machines =
+            createDaoForRollbackTransaction().getRandomMachinesToStartFromRack(ucsRack.getId(), 4);
+        Assert.assertEquals(machines.size(), 4);
     }
 }

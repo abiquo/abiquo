@@ -37,8 +37,11 @@
     <logger name="org.mortbay">
         <level value="WARN" />
     </logger>
+    <logger name="com.abiquo.api.spring.jpa">
+        <level value="ERROR" />
+    </logger>
     <root>
-        <level value="DEBUG" />
+        <level value="INFO" />
         <appender-ref ref="FILE" />
         <appender-ref ref="STDOUT" />
     </root>

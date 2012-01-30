@@ -19,16 +19,16 @@
       }
  
       function uploadFile() {
-        var fd = new FormData();
+        var fd = new FormData(document.getElementById('objectForm'));
+//        fd.append("diskInfo", document.getElementById('objectForm')[0].value);
         fd.append("diskFile", document.getElementById('diskFile').files[0]);
-        fd.append("diskInfo", document.getElementById('object'));
  
         var xhr = new XMLHttpRequest();
         xhr.upload.addEventListener("progress", uploadProgress, false);
         xhr.addEventListener("load", uploadComplete, false);
         xhr.addEventListener("error", uploadFailed, false);
         xhr.addEventListener("abort", uploadCanceled, false);
-        xhr.open("POST", "http://localhost/am/erepos/1/ovfs");
+        xhr.open("POST", "erepos/1/ovfs");
         xhr.send(fd);
       }
  
@@ -91,8 +91,8 @@
 <h2 id="crudBlankTitle">
 	Add OVFPackage <br /> <br />
 
-	<div class="objectForm">
-		<form>
+	<div class="form">
+		<form id="objectForm">
 
 
 

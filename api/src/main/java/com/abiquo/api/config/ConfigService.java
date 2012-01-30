@@ -35,6 +35,8 @@ public class ConfigService
 
     public static final String VLAN_PER_VDC = "abiquo.server.networking.vlanPerVdc";
 
+    public static final String API_LOCATION = "abiquo.server.api.location";
+
     public static final String MIN_REMOTE_DESKTOP_PORT = "abiquo.vncport.min";
 
     public static final String MAX_REMOTE_DESKTOP_PORT = "abiquo.vncport.max";
@@ -64,6 +66,10 @@ public class ConfigService
     public static String getVlanPerVdc()
     {
         return getSystemProperty(VLAN_PER_VDC, "0");
-
     }
+
+    public static String getApiLocation()
+    {
+        return System.getProperty(API_LOCATION);
+    } 
 }

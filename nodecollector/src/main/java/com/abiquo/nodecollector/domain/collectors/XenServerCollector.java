@@ -35,6 +35,7 @@ import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.nodecollector.constants.MessageValues;
 import com.abiquo.nodecollector.domain.Collector;
 import com.abiquo.nodecollector.domain.collectors.xenserver.SRType;
+import com.abiquo.nodecollector.domain.collectors.xenserver.SoftwareVersion;
 import com.abiquo.nodecollector.exception.CollectorException;
 import com.abiquo.nodecollector.exception.ConnectionException;
 import com.abiquo.nodecollector.exception.LoginException;
@@ -55,13 +56,13 @@ import com.xensource.xenapi.PBD;
 import com.xensource.xenapi.PIF;
 import com.xensource.xenapi.SR;
 import com.xensource.xenapi.Session;
-import com.xensource.xenapi.VBD;
-import com.xensource.xenapi.VDI;
-import com.xensource.xenapi.VM;
 import com.xensource.xenapi.Types.SessionAuthenticationFailed;
 import com.xensource.xenapi.Types.SessionInvalid;
 import com.xensource.xenapi.Types.VbdType;
 import com.xensource.xenapi.Types.VmPowerState;
+import com.xensource.xenapi.VBD;
+import com.xensource.xenapi.VDI;
+import com.xensource.xenapi.VM;
 
 /**
  * XenServer collector plugin.
@@ -221,7 +222,7 @@ public class XenServerCollector extends AbstractCollector
      * @param repositoryLocation The location of the Appliance Library Storage Repository.
      * @throws NoManagedException If the physical machine is not properly configured.
      */
-    private void checkPhysicalState(Host.Record hostRecord, final String repositoryLocation)
+    private void checkPhysicalState(final Host.Record hostRecord, final String repositoryLocation)
         throws NoManagedException
     {
         LOGGER.debug("Checking Repository configuration...");
@@ -261,16 +262,8 @@ public class XenServerCollector extends AbstractCollector
         // Check if Linux Guest support package is installed
         LOGGER.debug("Checking Linux Guest support installation...");
 
-        String linuxInstallStatus = hostRecord.softwareVersion.get("package-linux");
-        String linuxDetails = hostRecord.softwareVersion.get("xs:linux");
-
-        if (linuxInstallStatus == null || linuxDetails == null)
-        {
-            LOGGER.debug(MessageValues.NOMAN_XEN_SERVER_I);
-            throw new NoManagedException(MessageValues.NOMAN_XEN_SERVER_I);
-        }
-
-        if (!linuxInstallStatus.equalsIgnoreCase("installed"))
+        SoftwareVersion version = SoftwareVersion.of(hostRecord);
+        if (!version.hasLinuxPack())
         {
             LOGGER.debug(MessageValues.NOMAN_XEN_SERVER_I);
             throw new NoManagedException(MessageValues.NOMAN_XEN_SERVER_I);
@@ -354,7 +347,7 @@ public class XenServerCollector extends AbstractCollector
                 LOGGER.debug("Found Storage Repository {}", srRecord.nameLabel);
 
                 ResourceType resource = new ResourceType();
-                resource.setResourceType(ResourceEnumType.STORAGE_DISK);
+                resource.setResourceType(ResourceEnumType.HARD_DISK);
                 resource.setResourceSubType(type.name());
                 resource.setAddress(srRecord.uuid);
                 resource.setElementName(srRecord.nameLabel);
@@ -401,16 +394,16 @@ public class XenServerCollector extends AbstractCollector
         switch (state)
         {
             case HALTED:
-                return VirtualSystemStatusEnumType.POWERED_OFF;
+                return VirtualSystemStatusEnumType.OFF;
             case RUNNING:
-                return VirtualSystemStatusEnumType.RUNNING;
+                return VirtualSystemStatusEnumType.ON;
             case SUSPENDED:
-                return VirtualSystemStatusEnumType.POWERED_OFF;
+                return VirtualSystemStatusEnumType.OFF;
             case PAUSED:
                 return VirtualSystemStatusEnumType.PAUSED;
             case UNRECOGNIZED:
             default:
-                return VirtualSystemStatusEnumType.POWERED_OFF;
+                return VirtualSystemStatusEnumType.OFF;
         }
     }
 
@@ -444,7 +437,7 @@ public class XenServerCollector extends AbstractCollector
 
                     disk.setUnits(vdiRecord.virtualSize);
                     disk.setAddress(vdiRecord.location);
-                    disk.setResourceType(ResourceEnumType.STORAGE_DISK);
+                    disk.setResourceType(ResourceEnumType.HARD_DISK);
                     disk.setConnection(vdiRecord.SR.getUuid(connection));
                     disk.setElementName(vdiRecord.nameLabel);
 
@@ -506,7 +499,7 @@ public class XenServerCollector extends AbstractCollector
      * 
      * @param hostRecord The host information
      */
-    private void logHostDetails(Host.Record hostRecord)
+    private void logHostDetails(final Host.Record hostRecord)
     {
         // Do not perform XenServer API calls if debug is disabled
         if (LOGGER.isDebugEnabled())

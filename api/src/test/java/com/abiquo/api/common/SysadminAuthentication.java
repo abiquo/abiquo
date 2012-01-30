@@ -31,4 +31,9 @@ public class SysadminAuthentication extends MockAuthentication
     {
         super("sysadmin");
     }
+
+    public SysadminAuthentication(final String username)
+    {
+        super(username);
+    }
 }

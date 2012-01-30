@@ -224,6 +224,8 @@
                         event.infrastructureElement = this._selectedInfrastructureElement;
                     }
                     dispatchEvent(event);
+                    
+                    this._selectedInfrastructureElement = null;
                 }
             }
 

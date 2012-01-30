@@ -33,8 +33,8 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.abiquo.api.exceptions.APIError;
+import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
-import com.abiquo.server.core.cloud.VirtualImage;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.Privilege;
 import com.abiquo.server.core.enterprise.Role;
@@ -95,8 +95,9 @@ public class EnterpriseDeleteResourceIT extends AbstractJpaGeneratorIT
     @Test
     public void shouldDeleteEnterpriseWhenContainsVirtualImages()
     {
-        VirtualImage image = virtualImageGenerator.createUniqueInstance();
-        setup(image.getEnterprise(), image);
+        VirtualMachineTemplate image = virtualMachineTemplateGenerator.createUniqueInstance();
+        setup(image.getRepository().getDatacenter(), image.getRepository(), image.getEnterprise(),
+            image.getCategory(), image);
 
         String uri = resolveEnterpriseURI(image.getEnterprise().getId());
 

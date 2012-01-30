@@ -82,7 +82,6 @@ public class DatacentersResource extends AbstractResource
         @QueryParam(value = "idEnterprise") final String idEnterprise,
         @QueryParam("pricing") final Integer pricingId) throws Exception
     {
-
         Collection<Datacenter> list = null;
         if (pricingId != null)
         {

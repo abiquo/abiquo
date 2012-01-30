@@ -21,11 +21,15 @@
 
 package com.abiquo.ovfmanager.ovf.section;
 
+
 /**
+ * TODO use com.abiquo.model.enumerator.DiskFormatType (model)
+ * <p>
  * Supported virtual disk formats. In order to meet the 5.2 clause an URI is required as disk
  * format. ''the disk format shall be given by a URI which identifies an unencumbered specification
  * on how to interpret the disk format'' TODO add for all the supported disk formats.
  */
+@Deprecated
 public enum DiskFormat
 {
     /**
@@ -143,8 +147,7 @@ public enum DiskFormat
 
         return DiskFormat.UNKNOWN;
     }
-    
-    
+
     public static DiskFormat fromName(final String diskFormatName) throws IllegalArgumentException
     {
         for (DiskFormat df : DiskFormat.values())
@@ -157,7 +160,6 @@ public enum DiskFormat
 
         return DiskFormat.UNKNOWN;
     }
-    
 
     /**
      * @return the identifier

@@ -22,12 +22,10 @@
 package com.abiquo.abiserver.services.flex;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import com.abiquo.abiserver.business.BusinessDelegateProxy;
 import com.abiquo.abiserver.business.UserSessionException;
 import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.HypervisorHB;
-import com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualmachineHB;
 import com.abiquo.abiserver.commands.InfrastructureCommand;
 import com.abiquo.abiserver.commands.impl.InfrastructureCommandImpl;
 import com.abiquo.abiserver.commands.stub.APIStubFactory;
@@ -35,10 +33,12 @@ import com.abiquo.abiserver.commands.stub.DatacentersResourceStub;
 import com.abiquo.abiserver.commands.stub.MachineResourceStub;
 import com.abiquo.abiserver.commands.stub.MachinesResourceStub;
 import com.abiquo.abiserver.commands.stub.RacksResourceStub;
+import com.abiquo.abiserver.commands.stub.VirtualMachineResourceStub;
 import com.abiquo.abiserver.commands.stub.impl.DatacentersResourceStubImpl;
 import com.abiquo.abiserver.commands.stub.impl.MachineResourceStubImpl;
 import com.abiquo.abiserver.commands.stub.impl.MachinesResourceStubImpl;
 import com.abiquo.abiserver.commands.stub.impl.RacksResourceStubImpl;
+import com.abiquo.abiserver.commands.stub.impl.VirtualMachineResourceStubImpl;
 import com.abiquo.abiserver.exception.InfrastructureCommandException;
 import com.abiquo.abiserver.exception.PersistenceException;
 import com.abiquo.abiserver.pojo.authentication.UserSession;
@@ -64,8 +64,11 @@ public class InfrastructureService
 
     private InfrastructureCommand infrastructureCommand;
 
+    private VirtualMachineResourceStub vmStub;
+
     public InfrastructureService()
     {
+        vmStub = new VirtualMachineResourceStubImpl();
         try
         {
             infrastructureCommand =
@@ -80,6 +83,11 @@ public class InfrastructureService
         {
             infrastructureCommand = new InfrastructureCommandImpl();
         }
+    }
+
+    protected VirtualMachineResourceStub proxyVmStub(final UserSession userSession)
+    {
+        return APIStubFactory.getInstance(userSession, vmStub, VirtualMachineResourceStub.class);
     }
 
     private InfrastructureCommand proxyCommand(final UserSession userSession)
@@ -206,30 +214,9 @@ public class InfrastructureService
      * @return returns a DataResult, containing an Arraylist of virtualmachine
      */
     public BasicResult getVirtualMachineByPhysicalMachine(final UserSession session,
-        final Integer pmId)
+        final Integer datacenterId, final Integer rackId, final Integer pmId)
     {
-        InfrastructureCommand command = proxyCommand(session);
-        DataResult<ArrayList<VirtualMachine>> result = new DataResult<ArrayList<VirtualMachine>>();
-        try
-        {
-            List<VirtualmachineHB> commandResult =
-                command.getVirtualMachinesByPhysicalMachine(session, pmId);
-
-            result.setData(new ArrayList<VirtualMachine>());
-            for (VirtualmachineHB singleResult : commandResult)
-            {
-                result.getData().add(singleResult.toPojo());
-            }
-            result.setSuccess(Boolean.TRUE);
-
-        }
-        catch (InfrastructureCommandException e)
-        {
-            result.setSuccess(Boolean.FALSE);
-            result.setMessage(e.getMessage());
-        }
-
-        return result;
+        return proxyMachineStub(session).getVirtualMachinesFromMachine(datacenterId, rackId, pmId);
     }
 
     /**
@@ -282,33 +269,10 @@ public class InfrastructureService
      * @param user
      * @return a DataResult object, with an ArrayList of DataCenter
      */
-    public BasicResult getAllowedDataCenters(final UserSession session)
+    public BasicResult getAllowedDataCenters(final UserSession session,
+        final Integer effectiveEnterpriseId)
     {
-        return getDataCenters(session);
-    }
-
-    /**
-     * Community or premium. XXX IoC do it yourselfe
-     */
-    private InfrastructureCommand getInfrastructureCommandImplementation()
-    {
-        final String premiumClass =
-            "com.abiquo.abiserver.commands.impl.InfrastructureCommandPremiumImpl";
-
-        InfrastructureCommand instance;
-        try
-        {
-            instance =
-                (InfrastructureCommand) Thread.currentThread().getContextClassLoader()
-                    .loadClass(premiumClass).newInstance();
-
-        }
-        catch (final Exception e)
-        {
-            instance = new InfrastructureCommandImpl();
-        }
-
-        return instance;
+        return proxyDatacentersStub(session).getDatacenters(effectiveEnterpriseId);
     }
 
     /**
@@ -467,6 +431,22 @@ public class InfrastructureService
     }
 
     /**
+     * Deletes the virtual machine
+     * 
+     * @param sessionKey
+     * @param virtualMachine
+     * @return
+     */
+    public BasicResult deleteVirtualMachine(final UserSession session,
+        final Integer virtualDatacenterId, final Integer virtualApplianceId,
+        final VirtualMachine virtualMachine)
+    {
+
+        return proxyVmStub(session).deleteVirtualMachine(virtualDatacenterId, virtualApplianceId,
+            virtualMachine);
+    }
+
+    /**
      * Edits virtual machine's information
      * 
      * @param sessionKey
@@ -474,11 +454,16 @@ public class InfrastructureService
      * @return
      */
     public BasicResult editVirtualMachine(final UserSession session,
-        final VirtualMachine virtualMachine)
+        final VirtualMachine virtualMachine, final Integer virtualDatacenterId,
+        final Integer virtualApplianceId)
     {
 
-        InfrastructureCommand command = proxyCommand(session);
-        return command.editVirtualMachine(session, virtualMachine);
+        VirtualMachineResourceStub vmachineResource =
+            APIStubFactory.getInstance(session, new VirtualMachineResourceStubImpl(),
+                VirtualMachineResourceStub.class);
+
+        return vmachineResource.updateVirtualMachine(virtualDatacenterId, virtualApplianceId,
+            virtualMachine);
     }
 
     /**
@@ -587,7 +572,7 @@ public class InfrastructureService
     }
 
     public DataResult<HypervisorRemoteAccessInfo> getHypervisorRemoteAccessInfo(
-        UserSession userSession, PhysicalMachine machine)
+        final UserSession userSession, final PhysicalMachine machine)
     {
         MachineResourceStub proxy =
             APIStubFactory.getInstance(userSession, new MachineResourceStubImpl(),

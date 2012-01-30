@@ -34,5 +34,6 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement(name = "links")
 public class LinksDto extends SingleResourceTransportDto
 {
+    private static final long serialVersionUID = -8659042159324422045L;
 
 }

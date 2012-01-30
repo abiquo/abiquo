@@ -148,6 +148,7 @@
                     //Creating the node renderer for the new node
                     nodeRenderer = new NodeRenderer();
                     nodeRenderer.node = node;
+                    nodeRenderer.virtualAppliance = this._virtualAppliance;
                     var bounds:Rectangle = new Rectangle(nodesArea.x, nodesArea.y,
                                                          nodesArea.width - NodeRendererBase.NODERENDERER_SIZE,
                                                          nodesArea.height - NodeRendererBase.NODERENDERER_SIZE);
@@ -282,7 +283,7 @@
                                                                                     "ALERT_CHANGESTATE_VIRTUALAPPLIANCE_TEXT"),
                                             Alert.OK,
                                             null);
-                }else if(this._virtualAppliance.state.id == State.APPLY_CHANGES_NEEDED){
+                }else if(this._virtualAppliance.state.description == State.NEEDS_SYNC.description){
                 	AbiCloudAlert.showError(ResourceManager.getInstance().getString("Common",
                                                                                     "ALERT_TITLE_LABEL"),
                                             ResourceManager.getInstance().getString("VirtualAppliance",
@@ -344,7 +345,7 @@
                 //Since if a Virtual Appliance is Running, a non blocking service will be used
                 //to save it, we must set the virtual appliance as not modified, to let user get out
                 //from this screen without warning
-                if (this._virtualAppliance.state.id == State.RUNNING)
+                if (this._virtualAppliance.state.description == State.DEPLOYED.description)
                 {
                     this._isVirtualApplianceModified = false;
                     dispatchEvent(new Event("isVirtualApplianceModifiedChange"));
@@ -464,6 +465,7 @@
                         node = nodeListCopy.getItemAt(i) as Node;
                         nodeRenderer = new NodeRenderer();
                         nodeRenderer.node = node;
+                        nodeRenderer.virtualAppliance = this._virtualAppliance;
                         nodeRenderer.bounds = bounds
                         this._nodeRenderers.addItem(nodeRenderer);
                     }
@@ -509,7 +511,7 @@
                 {
                     var dispatch:Boolean;
                     //Added, saved, but no running
-                    if(NodeVirtualImage(nodeRendererToErase.node).virtualMachine.state.id != State.RUNNING){	
+                    if(NodeVirtualImage(nodeRendererToErase.node).virtualMachine.state.description != State.ON.description){	
                     	dispatch = true;
                     }else{
                     	dispatch = false;
@@ -566,8 +568,7 @@
             {
                 //We only accept drop operations when we have a VirtualAppliance
                 if (this._virtualAppliance != null 
-                && this._virtualAppliance.subState.id != State.UNKNOWN
-                && this._virtualAppliance.state.id != State.IN_PROGRESS)
+                && this._virtualAppliance.state.description != State.LOCKED.description)
                 {
                     if (event.dragSource.hasFormat("VirtualImage"))
                     {
@@ -623,6 +624,7 @@
                     //Creating the node renderer for the new node
                     nodeRenderer = new NodeRenderer();
                     nodeRenderer.node = node;
+                    nodeRenderer.virtualAppliance = this._virtualAppliance;
                     var bounds:Rectangle = new Rectangle(nodesArea.x, nodesArea.y,
                                                          nodesArea.width - NodeRendererBase.NODERENDERER_SIZE,
                                                          nodesArea.height - NodeRendererBase.NODERENDERER_SIZE);
@@ -689,7 +691,7 @@
 
     <!-- Buttons Tool Bar, for drawing options -->
 
-    <mx:HBox id="drawingToolBar"
+    <mx:HBox 
         x="0" width="100%" height="34"
         top="0"
         horizontalGap="2"
@@ -697,97 +699,101 @@
         paddingRight="0"
         verticalAlign="middle"
         verticalScrollPolicy="off"
-        enabled="{this._virtualAppliance.subState.id != State.UNKNOWN ? true:false}"
         styleName="GeneralDataPanelTopFullSkin">
         
         <mx:Button id="saveButton"
             width="21" height="21"
             styleName="VirtualApplianceSaveButton"
-            enabled="{this._isVirtualApplianceModified &amp;&amp; this._virtualAppliance != null &amp;&amp; this._virtualAppliance.state.id != State.IN_PROGRESS}"
+            enabled="{this._isVirtualApplianceModified &amp;&amp; this._virtualAppliance != null &amp;&amp; this._virtualAppliance.state.description != State.LOCKED.description}"
             toolTip="@Resource(bundle='Common', key='BUTTON_SAVE_TOOLTIP')"
             click="onClickSaveButton()"/>
 
-
-        <mx:Image source="{CommonAssets.separator}"/>
-
-        <mx:Button id="selectionButton"
-            styleName="VirtualAppliancePointerButton"
-            selected="{DrawToolsManager.getInstance().currentTool == DrawToolsManager.SELECTION_TOOL}"
-            enabled="{DrawToolsManager.getInstance().currentTool != DrawToolsManager.NO_TOOL}"
-            toolTip="@Resource(bundle='Common', key='BUTTON_SELECTION_TOOLTIP')"
-            click="onClickSelectionButton()"/>
-
-        <mx:Button id="relationButton"
-            styleName="VirtualApplianceDrawLineButton"
-            selected="{DrawToolsManager.getInstance().currentTool == DrawToolsManager.DRAW_CONNECTION_TOOL}"
-            enabled="{DrawToolsManager.getInstance().currentTool != DrawToolsManager.NO_TOOL}"
-            toolTip="@Resource(bundle='Common', key='BUTTON_LINE_TOOLTIP')"
-            click="onClickRelationButton()"/>
-
-
-        <mx:Button id="listButton"
-            styleName="ListViewButton"
-            toolTip="@Resource(bundle='VirtualAppliance', key='TOOLTIP_CATEGORY_VIEW')"
-            click="onClickViewOptions('categoriesMode')"/>
-
-        <mx:Button id="iconsButton"
-            styleName="IconViewButton"
-            toolTip="@Resource(bundle='Common', key='TOOLTIP_DRAW_VIEW')"
-            click="onClickViewOptions('drawMode')"/>
-
-        <mx:Image source="{CommonAssets.separator}"/>
-
-        <mx:Label 
-            left="10" top="5"
-            fontWeight="normal"
-            text="@Resource(bundle='VirtualAppliance', key='LABEL_MODIFIED')"
-            visible="{this._isVirtualApplianceModified}"/>
-
-        <mx:Spacer 
-            width="100%" height="10"/>
-
-        <mx:Button id="createBundleButton"
-            height="16"
-            label="@Resource(bundle='VirtualAppliance', key='BUTTON_LABEL_CREATE_BUNDLE')"
-            enabled="{this._virtualAppliance != null &amp;&amp; 
-				   			 (this._virtualAppliance.state.id == State.RUNNING || this._virtualAppliance.state.id == State.APPLY_CHANGES_NEEDED)}"
-            styleName="VirtualApplianceEraseButton"
-            click="onClickCreateBundleButton()"/>
-
-
-        <mx:Spacer 
-            width="3" height="3"/>
-
-        <mx:Spacer 
-            width="3" height="3"/>
-
-        <mx:Button id="applyChangesButton"
-            height="16"
-            includeInLayout="{this._virtualAppliance != null &amp;&amp; this._virtualAppliance.state.id == State.APPLY_CHANGES_NEEDED}"
-            label="@Resource(bundle='VirtualAppliance', key='LABEL_APPLY_CHANGES')"
-            styleName="VirtualApplianceEraseButton"
-            visible="{this._virtualAppliance != null &amp;&amp; this._virtualAppliance.state.id == State.APPLY_CHANGES_NEEDED}"
-            click="onClickApplyChangesButton()"/>
-
-        <mx:Spacer 
-            width="3" height="3"/>
-
-        <mx:Button id="powerOnOffButton"
-            width="32" height="32"
-            right="1"
-            top="1"
-            bottom="1"
-            enabled="{this._virtualAppliance != null  &amp;&amp; this._virtualAppliance.state.id != State.IN_PROGRESS
-				   			 &amp;&amp; this._virtualAppliance.state.id != State.FAILED &amp;&amp; this._virtualAppliance.nodes.length != 0}"
-            styleName="VirtualApplianceDeployButton"
-            selected="{_virtualAppliance.state.id == State.PAUSED || _virtualAppliance.state.id == State.RUNNING || _virtualAppliance.state.id == State.APPLY_CHANGES_NEEDED}"
-            toolTip="{powerOnOffButton.selected ? ResourceManager.getInstance().getString('VirtualAppliance', 'LABEL_UNDEPLOY') : 
-				  	 									 ResourceManager.getInstance().getString('VirtualAppliance', 'LABEL_DEPLOY')}"
-            click="onClickPowerOnOffButton()"
-            useHandCursor="true"
-            mouseChildren="false"
-            buttonMode="true"/>
-
+        <mx:HBox width="100%" verticalAlign="middle" verticalScrollPolicy="off"
+        	id="drawingToolBar"
+        	enabled="{this._virtualAppliance.state.description != State.UNKNOWN.description}">
+        
+	        <mx:Image source="{CommonAssets.separator}"/>
+	
+	        <mx:Button id="selectionButton"
+	            styleName="VirtualAppliancePointerButton"
+	            selected="{DrawToolsManager.getInstance().currentTool == DrawToolsManager.SELECTION_TOOL}"
+	            enabled="{DrawToolsManager.getInstance().currentTool != DrawToolsManager.NO_TOOL}"
+	            toolTip="@Resource(bundle='Common', key='BUTTON_SELECTION_TOOLTIP')"
+	            click="onClickSelectionButton()"/>
+	
+	        <mx:Button id="relationButton"
+	            styleName="VirtualApplianceDrawLineButton"
+	            selected="{DrawToolsManager.getInstance().currentTool == DrawToolsManager.DRAW_CONNECTION_TOOL}"
+	            enabled="{DrawToolsManager.getInstance().currentTool != DrawToolsManager.NO_TOOL}"
+	            toolTip="@Resource(bundle='Common', key='BUTTON_LINE_TOOLTIP')"
+	            click="onClickRelationButton()"/>
+	
+	
+	        <mx:Button id="listButton"
+	            styleName="ListViewButton"
+	            toolTip="@Resource(bundle='VirtualAppliance', key='TOOLTIP_CATEGORY_VIEW')"
+	            click="onClickViewOptions('categoriesMode')"/>
+	
+	        <mx:Button id="iconsButton"
+	            styleName="IconViewButton"
+	            toolTip="@Resource(bundle='Common', key='TOOLTIP_DRAW_VIEW')"
+	            click="onClickViewOptions('drawMode')"/>
+	
+	        <mx:Image source="{CommonAssets.separator}"/>
+	
+	        <mx:Label 
+	            left="10" top="5"
+	            fontWeight="normal"
+	            text="@Resource(bundle='VirtualAppliance', key='LABEL_MODIFIED')"
+	            visible="{this._isVirtualApplianceModified}"/>
+	
+	        <mx:Spacer 
+	            width="100%" height="10"/>
+	
+	        <mx:Button id="createBundleButton"
+	            height="16"
+	            label="@Resource(bundle='VirtualAppliance', key='BUTTON_LABEL_CREATE_BUNDLE')"
+	            enabled="{this._virtualAppliance != null &amp;&amp; 
+					   			 (this._virtualAppliance.state.description == State.DEPLOYED.description || this._virtualAppliance.state.description == State.NEEDS_SYNC.description)}"
+	            styleName="VirtualApplianceEraseButton"
+	            click="onClickCreateBundleButton()"/>
+	
+	
+	        <mx:Spacer 
+	            width="3" height="3"/>
+	
+	        <mx:Spacer 
+	            width="3" height="3"/>
+	
+	        <mx:Button id="applyChangesButton"
+	            height="16"
+	            includeInLayout="{this._virtualAppliance != null &amp;&amp; this._virtualAppliance.state.description == State.NEEDS_SYNC.description}"
+	            label="@Resource(bundle='VirtualAppliance', key='LABEL_APPLY_CHANGES')"
+	            styleName="VirtualApplianceEraseButton"
+	            visible="{this._virtualAppliance != null &amp;&amp; this._virtualAppliance.state.description == State.NEEDS_SYNC.description}"
+	            click="onClickApplyChangesButton()"/>
+	
+	        <mx:Spacer 
+	            width="3" height="3"/>
+	
+	        <mx:Button id="powerOnOffButton"
+	            width="32" height="32"
+	            right="1"
+	            top="1"
+	            bottom="1"
+	            enabled="{this._virtualAppliance != null  &amp;&amp; this._virtualAppliance.state.description != State.LOCKED.description
+					   			 &amp;&amp; this._virtualAppliance.state.description != State.UNKNOWN.description &amp;&amp; this._virtualAppliance.nodes.length != 0}"
+	            styleName="VirtualApplianceDeployButton"
+	            selected="{_virtualAppliance.state.description == State.DEPLOYED.description || _virtualAppliance.state.description == State.NEEDS_SYNC.description}"
+	            toolTip="{powerOnOffButton.selected ? ResourceManager.getInstance().getString('VirtualAppliance', 'LABEL_UNDEPLOY') : 
+					  	 									 ResourceManager.getInstance().getString('VirtualAppliance', 'LABEL_DEPLOY')}"
+	            click="onClickPowerOnOffButton()"
+	            useHandCursor="true"
+	            mouseChildren="false"
+	            buttonMode="true"/>
+            
+        </mx:HBox>
+            
     </mx:HBox>
 
 
@@ -805,7 +811,7 @@
 
             <mx:ViewStack id="nodesArea"
                 width="100%" height="100%"
-                enabled="{this._virtualAppliance != null  &amp;&amp; this._virtualAppliance.state.id != State.IN_PROGRESS}"
+                enabled="{this._virtualAppliance != null  &amp;&amp; this._virtualAppliance.state.description != State.LOCKED.description}"
                 creationPolicy="all"
                 dragEnter="onDragEnterNodesArea(event)"
                 dragDrop="onDragDropNodesArea(event)">
@@ -824,7 +830,7 @@
         <componentsVA:VirtualApplianceDeploying 
             horizontalCenter="0"
             verticalCenter="-20"
-            visible="{this._virtualAppliance != null  &amp;&amp; this._virtualAppliance.state.id == State.IN_PROGRESS}"
+            visible="{this._virtualAppliance != null  &amp;&amp; this._virtualAppliance.state.description == State.LOCKED.description}"
             virtualAppliance="{this._virtualAppliance}"/>
     </mx:Canvas>
 

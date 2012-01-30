@@ -44,6 +44,7 @@
 
     <mx:Script>
         <![CDATA[
+        	import net.undf.abicloud.utils.AbicloudUtils;
         	import net.undf.abicloud.vo.user.PrivilegeType;
         	import net.undf.abicloud.utils.SecuredPrivilegeAccess;
         	import mx.utils.ObjectUtil;
@@ -185,15 +186,19 @@
                 }
             }
 
+            private var _virtualDatacenter:VirtualDataCenter;
+            
             public function filterVirtualAppliancesByVirtualDataCenter(virtualDataCenter:VirtualDataCenter):void
             {
-                if (virtualDataCenter == null)
+                this._virtualDatacenter = virtualDataCenter;
+                
+                /* if (virtualDataCenter == null)
                 {
                     //Virtual Appliances are not filtered. Showing them all
                     this._virtualAppliancesFiltered = this._virtualAppliances;
                 }
                 else
-                {
+                { */
                     //Filtering virtualAppliances by virtualDataCenter
                     var virtualAppliancesFiltered:ArrayCollection = new ArrayCollection();
                     var virtualAppliance:VirtualAppliance;
@@ -202,7 +207,8 @@
                     for (i = 0; i < length; i++)
                     {
                         virtualAppliance = this._virtualAppliances.getItemAt(i) as VirtualAppliance;
-                        if (virtualAppliance.virtualDataCenter.id == virtualDataCenter.id)
+                        if ((!virtualDataCenter || virtualAppliance.virtualDataCenter.id == virtualDataCenter.id)
+                        && (vappsFilter.text == "" || virtualAppliance.name.toLowerCase().search(vappsFilter.text.toLowerCase()) != -1))
                         {
                             virtualAppliancesFiltered.addItem(virtualAppliance);
                         }
@@ -210,7 +216,7 @@
 
                     //Showing the filtered VirtualAppliances
                     this._virtualAppliancesFiltered = virtualAppliancesFiltered;
-                }
+                //}
 
                 //Update view if _virtualAppliancesFiltered is not null
                 if(this._virtualAppliancesFiltered){
@@ -256,11 +262,19 @@
              }
              
              private function compareVirtualImageState(virtualImg1:VirtualAppliance, virtualImg2:VirtualAppliance):int{
-            	var virtualMachineState1:Number = virtualImg1.state.id;
-            	var virtualMachineState2:Number = virtualImg2.state.id;
+            	var virtualMachineState1:String = virtualImg1.state.description;
+            	var virtualMachineState2:String = virtualImg2.state.description;
             	
-            	return ObjectUtil.numericCompare(virtualMachineState1, virtualMachineState2);
+            	return ObjectUtil.stringCompare(virtualMachineState1, virtualMachineState2);
             }
+            
+            /**
+             * Filter Vapps
+             */
+             private function filterVappsList():void
+             {
+                filterVirtualAppliancesByVirtualDataCenter(this._virtualDatacenter);
+             }
         ]]>
     </mx:Script>
 
@@ -284,7 +298,20 @@
             toolTip="@Resource(bundle='Common', key='BUTTON_ICONSMODE_TOOLTIP')"
             click="onClickViewOptions('iconsMode')"/>
 
-        <mx:HBox id="vAHeaderMoreButtonsContainer"/>
+        <mx:HBox id="vAHeaderMoreButtonsContainer" width="100%"/>
+        
+        <mx:Image 
+                id="vappListMagnifier"
+                creationComplete="AbicloudUtils.getImageFromStyle('UserListMagnifier', vappListMagnifier)"
+                useHandCursor="true"
+                buttonMode="true"
+                mouseChildren="false"
+                click="filterVappsList()"/>
+
+        <mx:TextInput id="vappsFilter"
+            height="20"
+            toolTip="@Resource(bundle='Common', key='BUTTON_FILTER_TOOLTIP')"
+            change="filterVappsList()"/>
     </mx:HBox>
 
 
@@ -413,10 +440,10 @@
                                         width="14" height="14"
                                         horizontalCenter="0"
                                         verticalCenter="0"
-                                        includeInLayout="{this._virtualAppliance.subState.id != State.UNKNOWN}"
-                                        source="{(this._virtualAppliance.state.id == State.RUNNING) ? StateIcons.RUNNING : 
-						   										((this._virtualAppliance.state.id == State.APPLY_CHANGES_NEEDED) ? StateIcons.APPLY_CHANGES_NEEDED : StateIcons.POWERED_OFF)}"
-                                        visible="{this._virtualAppliance.subState.id != State.IN_PROGRESS &amp;&amp; this._virtualAppliance.subState.id != State.UNKNOWN}"/>
+                                        includeInLayout="{this._virtualAppliance.state.description != State.UNKNOWN.description}"
+                                        source="{(this._virtualAppliance.state.description == State.DEPLOYED.description) ? StateIcons.RUNNING : 
+						   										((this._virtualAppliance.state.description == State.NEEDS_SYNC.description) ? StateIcons.APPLY_CHANGES_NEEDED : StateIcons.OFF)}"
+                                        visible="{this._virtualAppliance.state.description != State.LOCKED.description &amp;&amp; this._virtualAppliance.state.description != State.UNKNOWN.description}"/>
 									        
 									   <utils:SmoothImage 
 									        width="18" height="18"
@@ -424,8 +451,8 @@
                                         	verticalCenter="0"
 									        source="{CommonAssets.unknownIcon}"
 									        toolTip="@Resource(bundle='Infrastructure', key='LABEL_VM_UNKNOWN')"
-									        includeInLayout="{this._virtualAppliance.subState.id == State.UNKNOWN}"
-									        visible="{this._virtualAppliance.subState.id == State.UNKNOWN}"/>
+									        includeInLayout="{this._virtualAppliance.state.description == State.UNKNOWN.description}"
+									        visible="{this._virtualAppliance.state.description == State.UNKNOWN.description}"/>
                                    
                                     <mx:SWFLoader
                                     	id="virtualApplicanceListBaseLoadingSmall" 
@@ -433,7 +460,7 @@
                                         horizontalCenter="0"
                                         verticalCenter="0"
                                         creationComplete="AbicloudUtils.getImageFromStyle('VirtualApplianceBusyIconSmall', virtualApplicanceListBaseLoadingSmall)"
-                                        visible="{this._virtualAppliance.state.id == State.IN_PROGRESS}"/>
+                                        visible="{this._virtualAppliance.state.description == State.LOCKED.description}"/>
                                 </mx:Canvas>
                             </mx:Component>
                         </mx:itemRenderer>
@@ -471,7 +498,9 @@
                                         id="virtualApplianceListBaseAlertIcon"
                                         creationComplete="net.undf.abicloud.utils.AbicloudUtils.getImageFromStyle('VirtualApplianceMiniatureAlertIcon', virtualApplianceListBaseAlertIcon)"
                                         visible="{this._virtualAppliance.error || 
-													   			 this._virtualAppliance.state.id == State.FAILED}"/>
+													   			 this._virtualAppliance.state.description == State.UNKNOWN.description}"/>
+									    <!--visible="{this._virtualAppliance.error || 
+                                                                 this._virtualAppliance.state.description == State.FAILED.description}"/>-->
                                 </mx:Canvas>
                             </mx:Component>
                         </mx:itemRenderer>
@@ -512,8 +541,7 @@
 	
 	        <mx:Button id="deleteVirtualApplianceButton"
 	            enabled="{this._selectedVirtualAppliance != null &amp;&amp; 
-					   			 this._selectedVirtualAppliance.state.id != State.IN_PROGRESS &amp;&amp;
-					   			 this._selectedVirtualAppliance.subState.id != State.UNKNOWN}"
+					   			 this._selectedVirtualAppliance.state.description != State.LOCKED.description}"
 	            styleName="RemoveButton"
 	            toolTip="@Resource(bundle='Common', key='BUTTON_DEL_TOOLTIP')"
 	            click="deleteVirtualAppliance()"/>
@@ -522,7 +550,7 @@
 	
 	        <mx:Button id="editVirtualApplianceButton"
 	            enabled="{this._selectedVirtualAppliance != null &amp;&amp; 
-					   			 this._selectedVirtualAppliance.state.id != State.IN_PROGRESS}"
+					   			 this._selectedVirtualAppliance.state.description != State.LOCKED.description}"
 	            styleName="ConfigurationButton"
 	            toolTip="@Resource(bundle='Common', key='BUTTON_EDIT_TOOLTIP')"
 	            click="editVirtualAppliance()"/>

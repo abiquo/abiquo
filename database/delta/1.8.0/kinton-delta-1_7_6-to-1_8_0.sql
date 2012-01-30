@@ -664,6 +664,8 @@ CREATE TRIGGER `kinton`.`update_volume_management_update_stats` AFTER UPDATE ON 
     END IF;
     END;
 
+
+ 
 |
 DELIMITER ;
 
@@ -870,4 +872,13 @@ UPDATE kinton.metering SET actionperformed="PERSISTENT_DUMP_FINISHED" WHERE acti
 UPDATE kinton.metering SET actionperformed="PERSISTENT_PROCESS_FINISHED" WHERE actionperformed="STATEFUL_PROCESS_FINISHED";
 UPDATE kinton.metering SET actionperformed="PERSISTENT_PROCESS_FAILED" WHERE actionperformed="STATEFUL_PROCESS_FAILED";
 UPDATE kinton.metering SET actionperformed="PERSISTENT_INITIATOR_ADDED" WHERE actionperformed="STATEFUL_INITIATOR_ADDED";
+
+--
+-- ONETIMETOKEN TABLE
+--
+DROP  TABLE IF EXISTS `kinton`.`one_time_token`;
+CREATE  TABLE `kinton`.`one_time_token` (`idOneTimeTokenSession` int(3) unsigned NOT NULL AUTO_INCREMENT,
+  `token` VARCHAR(128) NOT NULL ,
+  `version_c` int(11) default 0,
+  PRIMARY KEY (`idOneTimeTokenSession`)) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
 

@@ -27,7 +27,9 @@ package com.abiquo.abiserver.commands.stub.impl;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.ws.rs.core.Response.Status;
 
@@ -40,6 +42,7 @@ import com.abiquo.abiserver.exception.NetworkCommandException;
 import com.abiquo.abiserver.networking.IPAddress;
 import com.abiquo.abiserver.networking.IPNetworkRang;
 import com.abiquo.abiserver.pojo.authentication.UserSession;
+import com.abiquo.abiserver.pojo.networking.DhcpOption;
 import com.abiquo.abiserver.pojo.networking.IpPoolManagement;
 import com.abiquo.abiserver.pojo.networking.NetworkConfiguration;
 import com.abiquo.abiserver.pojo.networking.VlanNetwork;
@@ -55,6 +58,8 @@ import com.abiquo.server.core.enterprise.DatacenterLimitsDto;
 import com.abiquo.server.core.enterprise.DatacentersLimitsDto;
 import com.abiquo.server.core.enterprise.EnterpriseDto;
 import com.abiquo.server.core.enterprise.EnterprisesDto;
+import com.abiquo.server.core.infrastructure.network.DhcpOptionDto;
+import com.abiquo.server.core.infrastructure.network.DhcpOptionsDto;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagementDto;
 import com.abiquo.server.core.infrastructure.network.IpsPoolManagementDto;
 import com.abiquo.server.core.infrastructure.network.NicDto;
@@ -91,7 +96,12 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
         newNet.setNetworkId(dto.getId());
         newNet.setNetworkType(dto.getType().toString());
         newNet.setDefaultNetwork(dto.getDefaultNetwork());
-
+        Set<DhcpOption> dhcpOptions = new HashSet<DhcpOption>();
+        for (DhcpOptionDto opt : dto.getDhcpOptions().getCollection())
+        {
+            dhcpOptions.add(DhcpOption.create(opt));
+        }
+        newNet.setDhcpOptions(dhcpOptions);
         return newNet;
     }
 
@@ -182,7 +192,7 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
     @Override
     public BasicResult createPublicVlan(final Integer datacenterId, final String networkName,
         final Integer vlanTag, final NetworkConfiguration configuration,
-        final Enterprise enterprise, final boolean unmanaged)
+        final Enterprise enterprise, final boolean unmanaged, final Set<DhcpOption> dhcpOptions)
     {
         DataResult<VlanNetwork> result = new DataResult<VlanNetwork>();
         String uri = createPublicNetworksLink(datacenterId);
@@ -198,6 +208,20 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
         dto.setTag(vlanTag);
         dto.setUnmanaged(unmanaged);
 
+        DhcpOptionsDto options = new DhcpOptionsDto();
+        for (DhcpOption opt : dhcpOptions)
+        {
+            DhcpOptionDto dtoOpt = new DhcpOptionDto();
+
+            dtoOpt.setGateway(opt.getGateway());
+            dtoOpt.setNetworkAddress(opt.getNetworkAddress());
+            dtoOpt.setMask(opt.getMask());
+            dtoOpt.setNetmask(opt.getNetmask());
+            options.add(dtoOpt);
+
+        }
+
+        dto.setDhcpOptions(options);
         if (enterprise != null)
         {
             // It is an External network.
@@ -210,8 +234,14 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
         ClientResponse response = post(uri, dto);
         if (response.getStatusCode() == 201)
         {
-            result.setData(createFlexObject(response.getEntity(VLANNetworkDto.class)));
+            VlanNetwork network = createFlexObject(response.getEntity(VLANNetworkDto.class));
+            result.setData(network);
             result.setSuccess(Boolean.TRUE);
+            if (network.getDhcpOptions().size() != dhcpOptions.size())
+            {
+                result
+                    .setMessage("Public Vlan created successfully but some static routes were not created.");
+            }
         }
         else
         {
@@ -325,7 +355,7 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
     @Override
     public BasicResult editPublicVlan(final Integer datacenterId, final Integer vlanNetworkId,
         final String vlanName, final Integer vlanTag, final NetworkConfiguration configuration,
-        final Boolean defaultNetwork, final Enterprise enterprise)
+        final Boolean defaultNetwork, final Enterprise enterprise, final Set<DhcpOption> dhcpOptions)
     {
         BasicResult result = new BasicResult();
         String uri = createPublicNetworkLink(datacenterId, vlanNetworkId);
@@ -350,10 +380,30 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
             dto.addLink(entLink);
         }
 
+        DhcpOptionsDto options = new DhcpOptionsDto();
+        for (DhcpOption opt : dhcpOptions)
+        {
+            DhcpOptionDto dtoOpt = new DhcpOptionDto();
+            dtoOpt.setGateway(opt.getGateway());
+            dtoOpt.setNetworkAddress(opt.getNetworkAddress());
+            dtoOpt.setMask(opt.getMask());
+            dtoOpt.setNetmask(opt.getNetmask());
+            options.add(dtoOpt);
+
+        }
+
+        dto.setDhcpOptions(options);
+
         ClientResponse response = put(uri, dto);
         if (response.getStatusCode() == 200)
         {
             result.setSuccess(Boolean.TRUE);
+            VlanNetwork network = createFlexObject(response.getEntity(VLANNetworkDto.class));
+            if (network.getDhcpOptions().size() != dhcpOptions.size())
+            {
+                result
+                    .setMessage("Public Vlan edited successfully but some static routes were not created.");
+            }
         }
         else
         {
@@ -543,13 +593,14 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
         }
 
         result.setSuccess(Boolean.FALSE);
-        result.setMessage("Unknow exception. External networks not found.");
+        result.setMessage("Unknown exception. External networks not found.");
         return result;
     }
 
     @Override
     public BasicResult getExternalVlansByVirtualDatacenter(final VirtualDataCenter vdc)
     {
+
         return this.getExternalVlansByDatacenterInEnterprise(vdc.getIdDataCenter(), vdc
             .getEnterprise().getId());
     }
@@ -747,7 +798,7 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
     @Override
     public BasicResult getListNetworkPoolByVirtualDatacenter(final Integer vdcId,
         final Integer offset, final Integer numElem, final String filterLike, final String orderBy,
-        final Boolean asc) throws NetworkCommandException
+        final Boolean asc, String type) throws NetworkCommandException
     {
         DataResult<ListResponse<IpPoolManagement>> dataResult =
             new DataResult<ListResponse<IpPoolManagement>>();
@@ -759,6 +810,15 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
         buildRequest.append("&limit=" + numElem);
         buildRequest.append("&by=" + transformOrderBy(orderBy));
         buildRequest.append("&asc=" + (asc ? "true" : "false"));
+        if (type != null && type.equals("EXTERNAL"))
+        {
+            type = "EXTERNAL_UNMANAGED";
+        }
+        if (type != null)
+        {
+            buildRequest.append("&type=" + type);
+        }
+
         if (!filterLike.isEmpty())
         {
             buildRequest.append("&has=" + filterLike);
@@ -793,7 +853,7 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
     @Override
     public DataResult<ListResponse<IpPoolManagement>> getListNetworkPublicPoolByDatacenter(
         final Integer datacenterId, final Integer offset, final Integer numberOfNodes,
-        final String filterLike, final String orderBy, final Boolean asc)
+        final String filterLike, final String orderBy, final Boolean asc, String type)
         throws NetworkCommandException
     {
         DataResult<ListResponse<IpPoolManagement>> dataResult =
@@ -805,6 +865,11 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
         buildRequest.append("&limit=" + numberOfNodes);
         buildRequest.append("&by=" + transformOrderBy(orderBy));
         buildRequest.append("&asc=" + (asc ? "true" : "false"));
+        if (type.equals("EXTERNAL"))
+        {
+            type = "EXTERNAL_UNMANAGED";
+        }
+        buildRequest.append("&type=" + type);
         if (!filterLike.isEmpty())
         {
             buildRequest.append("&has=" + filterLike);
@@ -1130,11 +1195,15 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
     }
 
     @Override
-    public BasicResult getPublicVlansByDatacenter(final Integer datacenterId, final String type)
+    public BasicResult getPublicVlansByDatacenter(final Integer datacenterId, String type)
     {
         DataResult<List<VlanNetwork>> result = new DataResult<List<VlanNetwork>>();
 
         StringBuilder buildRequest = new StringBuilder(createPublicNetworksLink(datacenterId));
+        if (type != null && type.equals("EXTERNAL"))
+        {
+            type = "EXTERNAL_UNMANAGED";
+        }
         buildRequest.append("?type=" + type);
 
         ClientResponse response = get(buildRequest.toString());
@@ -1192,7 +1261,7 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
 
         ClientResponse response = delete(uri.toString());
 
-        if (response.getStatusCode() == 204)
+        if (response.getStatusCode() == 204 || response.getStatusCode() == 202)
         {
             result.setSuccess(Boolean.TRUE);
         }
@@ -1290,6 +1359,7 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
                 }
                 else
                 {
+                    uriIp = uriIp + "/ips";
                     externalIPlink.setRel("unmanagedip");
                 }
 
@@ -1299,7 +1369,7 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
                 linkDto.addLink(externalIPlink);
 
                 response = post(uriNIC, linkDto);
-                if (response.getStatusCode() == 201)
+                if (response.getStatusCode() == 204 || response.getStatusCode() == 202)
                 {
                     result.setSuccess(Boolean.TRUE);
                 }
@@ -1334,7 +1404,7 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
 
         ClientResponse response = post(uri, links);
 
-        if (response.getStatusCode() == 201)
+        if (response.getStatusCode() == 204 || response.getStatusCode() == 202)
         {
             result.setSuccess(Boolean.TRUE);
         }
@@ -1362,7 +1432,7 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
 
         ClientResponse response = post(uri, links);
 
-        if (response.getStatusCode() == 201)
+        if (response.getStatusCode() == 204 || response.getStatusCode() == 202)
         {
             result.setSuccess(Boolean.TRUE);
         }
@@ -1471,21 +1541,21 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
             // to update the gateway, search for the VMNetworkconfigurationDto object.
             if (gateway == null)
             {
-                for (VMNetworkConfigurationDto dto : dtos.getCollection())
+                // Here we have found the dto. Modify it to inform we want to use this
+                // configuration
+                // by default.
+                String gatewaysUri = createVirtualMachineConfigurationsLink(vdcId, vappId, vmId);
+                
+                // send an empty list of gateways to enable it means to disable the network configuration.
+                LinksDto linksDto = new LinksDto();
+                response = put(gatewaysUri, linksDto);
+                if (response.getStatusCode() == 202 || response.getStatusCode() == 204)
                 {
-
-                    String uriConfig =
-                        createVirtualMachineConfigurationLink(vdcId, vappId, vmId, dto.getId());
-                    dto.setUsed(Boolean.FALSE);
-                    response = put(uriConfig, dto);
-                    if (response.getStatusCode() == 200)
-                    {
-                        result.setSuccess(Boolean.TRUE);
-                    }
-                    else
-                    {
-                        populateErrors(response, result, "setGatewayForVirtualMachine");
-                    }
+                    result.setSuccess(Boolean.TRUE);
+                }
+                else
+                {
+                    populateErrors(response, result, "setGatewayForVirtualMachine");
                 }
                 return result;
             }
@@ -1497,12 +1567,18 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
                     // Here we have found the dto. Modify it to inform we want to use this
                     // configuration
                     // by default.
-                    String uriConfig =
+                    String gatewaysUri = createVirtualMachineConfigurationsLink(vdcId, vappId, vmId);
+                    
+                    String gatewayToEnable =
                         createVirtualMachineConfigurationLink(vdcId, vappId, vmId, dto.getId());
-                    dto.setUsed(Boolean.TRUE);
-
-                    response = put(uriConfig, dto);
-                    if (response.getStatusCode() == 200)
+                    RESTLink linkGateway = new RESTLink();
+                    linkGateway.setHref(gatewayToEnable);
+                    linkGateway.setRel("network_configuration");
+                    
+                    LinksDto linksDto = new LinksDto();
+                    linksDto.addLink(linkGateway);
+                    response = put(gatewaysUri, linksDto);
+                    if (response.getStatusCode() == 202 || response.getStatusCode() == 204)
                     {
                         result.setSuccess(Boolean.TRUE);
                     }
@@ -1601,7 +1677,6 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
         dto.setNetworkName(ip.getVlanNetworkName());
         dto.setQuarantine(ip.getQuarantine());
         dto.setAvailable(ip.getAvailable());
-        dto.setConfigureGateway(ip.getConfigureGateway());
         return dto;
     }
 
@@ -1615,52 +1690,54 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
         flexIp.setQuarantine(ip.getQuarantine());
         flexIp.setName(ip.getName());
         flexIp.setAvailable(ip.getAvailable());
-        flexIp.setConfigureGateway(ip.getConfigureGateway());
+        flexIp.setConfigureGateway(Boolean.FALSE);
         flexIp.setVlanNetworkName(ip.getNetworkName());
-
-        for (RESTLink currentLink : ip.getLinks())
+        if (ip.getLinks() != null)
         {
-            if (currentLink.getRel().equalsIgnoreCase("privatenetwork"))
+            for (RESTLink currentLink : ip.getLinks())
             {
-                flexIp.setVlanNetworkName(currentLink.getTitle());
-                flexIp.setVlanNetworkId(Integer.valueOf(currentLink.getHref().substring(
-                    currentLink.getHref().lastIndexOf("/") + 1)));
-            }
-            if (currentLink.getRel().equalsIgnoreCase("publicnetwork"))
-            {
-                flexIp.setVlanNetworkName(currentLink.getTitle());
-                flexIp.setVlanNetworkId(Integer.valueOf(currentLink.getHref().substring(
-                    currentLink.getHref().lastIndexOf("/") + 1)));
-            }
-            if (currentLink.getRel().equalsIgnoreCase("externalnetwork"))
-            {
-                flexIp.setVlanNetworkName(currentLink.getTitle());
-                flexIp.setVlanNetworkId(Integer.valueOf(currentLink.getHref().substring(
-                    currentLink.getHref().lastIndexOf("/") + 1)));
-            }
-            else if (currentLink.getRel().equalsIgnoreCase("virtualdatacenter"))
-            {
-                flexIp.setVirtualDatacenterName(currentLink.getTitle());
-                flexIp.setVirtualDatacenterId(Integer.valueOf(currentLink.getHref().substring(
-                    currentLink.getHref().lastIndexOf("/") + 1)));
-            }
-            else if (currentLink.getRel().equalsIgnoreCase("virtualappliance"))
-            {
-                flexIp.setVirtualApplianceName(currentLink.getTitle());
-                flexIp.setVirtualApplianceId(Integer.valueOf(currentLink.getHref().substring(
-                    currentLink.getHref().lastIndexOf("/") + 1)));
-            }
-            else if (currentLink.getRel().equalsIgnoreCase("virtualmachine"))
-            {
-                flexIp.setVirtualMachineName(currentLink.getTitle());
-                flexIp.setVirtualMachineId(Integer.valueOf(currentLink.getHref().substring(
-                    currentLink.getHref().lastIndexOf("/") + 1)));
-            }
-            else if (currentLink.getRel().equalsIgnoreCase("enterprise"))
-            {
-                flexIp.setEnterpriseName(currentLink.getTitle());
-                flexIp.setEnterpriseId(Integer.valueOf(currentLink.getHref().substring(
-                    currentLink.getHref().lastIndexOf("/") + 1)));
+                if (currentLink.getRel().equalsIgnoreCase("privatenetwork"))
+                {
+                    flexIp.setVlanNetworkName(currentLink.getTitle());
+                    flexIp.setVlanNetworkId(Integer.valueOf(currentLink.getHref().substring(
+                        currentLink.getHref().lastIndexOf("/") + 1)));
+                }
+                if (currentLink.getRel().equalsIgnoreCase("publicnetwork"))
+                {
+                    flexIp.setVlanNetworkName(currentLink.getTitle());
+                    flexIp.setVlanNetworkId(Integer.valueOf(currentLink.getHref().substring(
+                        currentLink.getHref().lastIndexOf("/") + 1)));
+                }
+                if (currentLink.getRel().equalsIgnoreCase("externalnetwork"))
+                {
+                    flexIp.setVlanNetworkName(currentLink.getTitle());
+                    flexIp.setVlanNetworkId(Integer.valueOf(currentLink.getHref().substring(
+                        currentLink.getHref().lastIndexOf("/") + 1)));
+                }
+                else if (currentLink.getRel().equalsIgnoreCase("virtualdatacenter"))
+                {
+                    flexIp.setVirtualDatacenterName(currentLink.getTitle());
+                    flexIp.setVirtualDatacenterId(Integer.valueOf(currentLink.getHref().substring(
+                        currentLink.getHref().lastIndexOf("/") + 1)));
+                }
+                else if (currentLink.getRel().equalsIgnoreCase("virtualappliance"))
+                {
+                    flexIp.setVirtualApplianceName(currentLink.getTitle());
+                    flexIp.setVirtualApplianceId(Integer.valueOf(currentLink.getHref().substring(
+                        currentLink.getHref().lastIndexOf("/") + 1)));
+                }
+                else if (currentLink.getRel().equalsIgnoreCase("virtualmachine"))
+                {
+                    flexIp.setVirtualMachineName(currentLink.getTitle());
+                    flexIp.setVirtualMachineId(Integer.valueOf(currentLink.getHref().substring(
+                        currentLink.getHref().lastIndexOf("/") + 1)));
+                }
+                else if (currentLink.getRel().equalsIgnoreCase("enterprise"))
+                {
+                    flexIp.setEnterpriseName(currentLink.getTitle());
+                    flexIp.setEnterpriseId(Integer.valueOf(currentLink.getHref().substring(
+                        currentLink.getHref().lastIndexOf("/") + 1)));
+                }
             }
         }
 
@@ -1674,6 +1751,7 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
         flexIp.setIdManagement(dto.getId());
         flexIp.setIp(dto.getIp());
         flexIp.setMac(dto.getMac());
+        flexIp.setSequence(dto.getSequence());
 
         for (RESTLink currentLink : dto.getLinks())
         {

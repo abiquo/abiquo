@@ -14,7 +14,6 @@
         <!-- Build properties -->
         <jdk.version>1.6</jdk.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <tomcat.home>localhost</tomcat.home>
         <tomcat.port>80</tomcat.port>
         <tomcat.user>abiquo</tomcat.user>
         <tomcat.password>abiquo</tomcat.password>
@@ -30,19 +29,20 @@
         <jackson.version>1.6.1</jackson.version>
         <catalina.version>6.0.29</catalina.version>
         <testng.version>5.12.1</testng.version>
+        <commonsamqp.version>2.0-tarantino-SNAPSHOT</commonsamqp.version>
+        <guava.version>11.0.1</guava.version>
+        <abiquo-jclouds.version>1.0-SNAPSHOT</abiquo-jclouds.version>
     </properties>
     <!-- Aggregations. Common modules -->
     <modules>
         <module>database</module>
-        <module>vsm</module>
         <module>model</module>
+        <module>vsm</module>
         <module>am</module>
         <module>server</module>
         <module>client</module>
-        <module>virtualfactory</module>
         <module>api</module>
         <module>nodecollector</module>
-        <module>commons-amqp</module>
     </modules>
     <!-- -->
     <!-- PROJECT INFORMATION -->
@@ -194,7 +194,7 @@
                         <configuration>
                             <type>runtime</type>
                             <properties>
-                                <cargo.tomcat.manager.url>http://${tomcat.home}:${tomcat.port}/manager</cargo.tomcat.manager.url>
+                                <cargo.tomcat.manager.url>http://${devmachine}:${tomcat.port}/manager</cargo.tomcat.manager.url>
                                 <cargo.remote.username>${tomcat.user}</cargo.remote.username>
                                 <cargo.remote.password>${tomcat.password}</cargo.remote.password>
                             </properties>
@@ -230,6 +230,11 @@
     </ciManagement>
     <!-- Repositories -->
     <repositories>
+        <repository>
+            <id>jclouds</id>
+            <name>Sonatype Repository</name>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+        </repository>
         <repository>
             <id>abiquo-repo</id>
             <name>Abiquo Maven Repository</name>
@@ -303,7 +308,6 @@
             <id>hudson</id>
             <properties>
                 <env>hudson</env>
-                <tomcat.home>localhost</tomcat.home>
                 <tomcat.port>8080</tomcat.port>
                 <tomcat.user>admin</tomcat.user>
                 <tomcat.password>admin</tomcat.password>
@@ -322,7 +326,6 @@
                 <module>task-service</module>
                 <module>model</module>
                 <module>aimstub</module>
-                <module>commons-amqp</module>
                 <module>system-properties</module>
             </modules>
         </profile>

@@ -50,6 +50,7 @@ import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.resources.cloud.VirtualMachinesResource;
 import com.abiquo.model.rest.RESTLink;
 import com.abiquo.model.transport.error.ErrorsDto;
+import com.abiquo.server.core.cloud.NodeVirtualImage;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineDto;
 import com.abiquo.server.core.cloud.VirtualMachinesDto;
@@ -180,8 +181,10 @@ public class UserResourceIT extends AbstractJpaGeneratorIT
 
         assertLinkExist(dto, href, "edit");
         assertLinkExist(dto, enterpriseUri, "enterprise");
-        assertLinkExist(dto, resolveUserActionGetVirtualMachinesURI(user.getEnterprise().getId(),
-            user.getId()), VirtualMachinesResource.VIRTUAL_MACHINES_PATH);
+        assertLinkExist(dto,
+            resolveUserActionGetVirtualMachinesURI(user.getEnterprise().getId(), user.getId()),
+            VirtualMachinesResource.VIRTUAL_MACHINES_PATH,
+            VirtualMachinesResource.VIRTUAL_MACHINES_PATH);
 
     }
 
@@ -464,6 +467,10 @@ public class UserResourceIT extends AbstractJpaGeneratorIT
     public void getVirtualMachinesByUser()
     {
         VirtualMachine vm = vmGenerator.createUniqueInstance();
+        NodeVirtualImage nvi = nodeVirtualImageGenerator.createInstance(vm);
+
+        vm.getVirtualMachineTemplate().getRepository()
+            .setDatacenter(vm.getHypervisor().getMachine().getDatacenter());
 
         List<Object> entitiesToSetup = new ArrayList<Object>();
 
@@ -478,9 +485,15 @@ public class UserResourceIT extends AbstractJpaGeneratorIT
         entitiesToSetup.add(vm.getHypervisor().getMachine().getRack());
         entitiesToSetup.add(vm.getHypervisor().getMachine());
         entitiesToSetup.add(vm.getHypervisor());
-        entitiesToSetup.add(vm.getVirtualImage().getEnterprise());
-        entitiesToSetup.add(vm.getVirtualImage());
+        entitiesToSetup.add(vm.getVirtualMachineTemplate().getRepository());
+        entitiesToSetup.add(vm.getVirtualMachineTemplate().getEnterprise());
+        entitiesToSetup.add(vm.getVirtualMachineTemplate().getCategory());
+        entitiesToSetup.add(vm.getVirtualMachineTemplate());
         entitiesToSetup.add(vm);
+        entitiesToSetup.add(nvi.getVirtualAppliance().getVirtualDatacenter().getNetwork());
+        entitiesToSetup.add(nvi.getVirtualAppliance().getVirtualDatacenter());
+        entitiesToSetup.add(nvi.getVirtualAppliance());
+        entitiesToSetup.add(nvi);
 
         setup(entitiesToSetup.toArray());
 
@@ -500,8 +513,8 @@ public class UserResourceIT extends AbstractJpaGeneratorIT
         VirtualMachineDto vmDto = vms.getCollection().get(0);
         assertLinkExist(vmDto, resolveEnterpriseURI(e.getId()), "enterprise");
         assertLinkExist(vmDto, resolveUserURI(e.getId(), u.getId()), "user");
-        assertLinkExist(vmDto, resolveMachineURI(m.getDatacenter().getId(), m.getRack().getId(), m
-            .getId()), "machine");
+        assertLinkExist(vmDto,
+            resolveMachineURI(m.getDatacenter().getId(), m.getRack().getId(), m.getId()), "machine");
     }
 
     @Test

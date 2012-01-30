@@ -38,8 +38,6 @@ import com.abiquo.vsm.monitor.Monitor;
 import com.abiquo.vsm.monitor.Monitor.Type;
 import com.abiquo.vsm.monitor.executor.AbstractTask;
 import com.abiquo.vsm.monitor.executor.PeriodicalExecutor;
-import com.abiquo.vsm.redis.dao.RedisDao;
-import com.abiquo.vsm.redis.dao.RedisDaoFactory;
 
 /**
  * The VirtualBox monitor.
@@ -54,9 +52,6 @@ public class VirtualBoxMonitor extends AbstractMonitor
 
     /** Maximum number of machines this monitor can manage. */
     public static final int MAX_MONITORED_MACHINES = 1;
-
-    /** The dao used to access stored data. */
-    private RedisDao dao;
 
     // Polling stuff
 
@@ -74,7 +69,6 @@ public class VirtualBoxMonitor extends AbstractMonitor
     public VirtualBoxMonitor()
     {
         vboxConnector = new VirtualBoxConnector();
-        dao = RedisDaoFactory.getInstance();
         poller = new Poller();
         executor = createExecutor(poller, Poller.POLLING_INTERVAL);
     }
@@ -141,7 +135,7 @@ public class VirtualBoxMonitor extends AbstractMonitor
             @Override
             public void executionFailure(final Throwable t)
             {
-                // [ABICLOUDPREMIUM-283] After an error in physical machine, Hyper-V is not
+                // [ABICLOUDPREMIUM-283] After an error in physical machine, VBOX is not
                 // monitorized anymore
                 // stopMonitoring();
 

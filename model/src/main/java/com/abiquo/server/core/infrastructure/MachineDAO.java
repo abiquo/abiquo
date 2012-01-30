@@ -22,8 +22,10 @@
 package com.abiquo.server.core.infrastructure;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceException;
@@ -101,9 +103,6 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
 
     public List<Machine> findMachines(final Datacenter datacenter)
     {
-        assert datacenter != null;
-        assert isManaged2(datacenter);
-
         Criteria criteria = createCriteria(sameDatacenter(datacenter));
         criteria.addOrder(Order.asc(Machine.NAME_PROPERTY));
         List<Machine> result = getResultList(criteria);
@@ -142,6 +141,10 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
 
     public List<Machine> findRackEnabledForHAMachines(final Rack rack)
     {
+        if (rack instanceof UcsRack)
+        {
+            return findRackEnabledForHAMachinesInUcs((UcsRack) rack);
+        }
         Criteria criteria = createCriteria(sameRack(rack));
         criteria.createAlias(Machine.HYPERVISOR_PROPERTY, "hypervisor");
 
@@ -152,6 +155,24 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
         criteria.add(Restrictions.isNotNull(Machine.IPMI_IP_PROPERTY));
         criteria.add(Restrictions.isNotNull(Machine.IPMI_USER_PROPERTY));
         criteria.add(Restrictions.isNotNull(Machine.IPMI_PASSWORD_PROPERTY));
+
+        // XenServer does not support HA
+        criteria.add(Restrictions.ne("hypervisor." + Hypervisor.TYPE_PROPERTY,
+            HypervisorType.XENSERVER));
+
+        // Order by name
+        criteria.addOrder(Order.asc(Machine.NAME_PROPERTY));
+
+        return getResultList(criteria);
+    }
+
+    public List<Machine> findRackEnabledForHAMachinesInUcs(final UcsRack rack)
+    {
+        Criteria criteria = createCriteria(sameRack(rack));
+        criteria.createAlias(Machine.HYPERVISOR_PROPERTY, "hypervisor");
+
+        // Is a managed one
+        criteria.add(Restrictions.eq(Machine.STATE_PROPERTY, MachineState.MANAGED));
 
         // XenServer does not support HA
         criteria.add(Restrictions.ne("hypervisor." + Hypervisor.TYPE_PROPERTY,
@@ -414,19 +435,17 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
 
             if (machines == null || machines.size() == 0)
             {
-                throw new PersistenceException(String
-                    .format(
-                        "There isn't any MANAGED machine on the required rack [%d] and virtual datacenter [%d] available for the current enterpirse [%s]. "
-                            + "Pleas check the machine reservation policies.", idRack,
-                        idVirtualDatacenter, enterprise.getName()));
+                throw new PersistenceException(String.format(
+                    "There isn't any MANAGED machine on the required rack [%d] and virtual datacenter [%d] available for the current enterpirse [%s]. "
+                        + "Pleas check the machine reservation policies.", idRack,
+                    idVirtualDatacenter, enterprise.getName()));
             }
             else
             {
-                throw new PersistenceException(String
-                    .format(
-                        "The only MANAGED machine on the required rack [%d] and virtual datacenter [%d] available for the current enterpirse [%s]"
-                            + "is the target of the high availability (so can't be used) ", idRack,
-                        idVirtualDatacenter, enterprise.getName()));
+                throw new PersistenceException(String.format(
+                    "The only MANAGED machine on the required rack [%d] and virtual datacenter [%d] available for the current enterpirse [%s]"
+                        + "is the target of the high availability (so can't be used) ", idRack,
+                    idVirtualDatacenter, enterprise.getName()));
             }
         }
 
@@ -505,11 +524,10 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
 
             if (query1res.size() == 0)
             {
-                throw new PersistenceException(String
-                    .format(
-                        "%s\nThere isn't any machine on the required rack [%d] and virtual datacenter [%d]. "
-                            + "Please check the racks and hypervisor technology on the infrastructure.",
-                        reservedMachinesB.toString(), idRack, idVirtualDatacenter));
+                throw new PersistenceException(String.format(
+                    "%s\nThere isn't any machine on the required rack [%d] and virtual datacenter [%d]. "
+                        + "Please check the racks and hypervisor technology on the infrastructure.",
+                    reservedMachinesB.toString(), idRack, idVirtualDatacenter));
             }
 
             /**
@@ -551,11 +569,10 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
 
             if (query1res.size() == 0)
             {
-                throw new PersistenceException(String
-                    .format(
-                        "There isn't any machine on the required rack [%d] and virtual datacenter [%d]. "
-                            + "Please check the racks and hypervisor technology on the infrastructure.",
-                        idRack, idVirtualDatacenter));
+                throw new PersistenceException(String.format(
+                    "There isn't any machine on the required rack [%d] and virtual datacenter [%d]. "
+                        + "Please check the racks and hypervisor technology on the infrastructure.",
+                    idRack, idVirtualDatacenter));
             }
 
             /**
@@ -590,11 +607,10 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
 
             if (query3res.size() == 0)
             {
-                throw new PersistenceException(String
-                    .format(
-                        "There isn't any MANAGED machine on the required rack [%d] and virtual datacenter [%d] available for the current enterpirse [%s]. "
-                            + "Pleas check the machine reservation policies.", idRack,
-                        idVirtualDatacenter, enterprise.getName()));
+                throw new PersistenceException(String.format(
+                    "There isn't any MANAGED machine on the required rack [%d] and virtual datacenter [%d] available for the current enterpirse [%s]. "
+                        + "Pleas check the machine reservation policies.", idRack,
+                    idVirtualDatacenter, enterprise.getName()));
             }
 
             /**
@@ -766,14 +782,30 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
     public Machine findByIds(final Integer datacenterId, final Integer rackId,
         final Integer machineId)
     {
-        return findUniqueByCriterions(Restrictions.eq("datacenter.id", datacenterId), Restrictions
-            .eq("rack.id", rackId), Restrictions.eq("id", machineId));
+        return findUniqueByCriterions(Restrictions.eq("datacenter.id", datacenterId),
+            Restrictions.eq("rack.id", rackId), Restrictions.eq("id", machineId));
     }
 
-    public Machine findByIp(final Integer datacenterId, final String ip)
+    public Machine findByIp(final Datacenter datacenter, final String ip)
     {
-        return findUniqueByCriterions(Restrictions.eq("datacenter.id", datacenterId), Restrictions
-            .eq("hypervisor.ip", ip));
+        Criteria crit = createCriteria();
+        crit.createAlias(Machine.HYPERVISOR_PROPERTY, "hypervisor");
+
+        crit.add(sameDatacenter(datacenter));
+        crit.add(Restrictions.eq("hypervisor.ip", ip));
+
+        return (Machine) crit.uniqueResult();
+    }
+
+    public Set<Integer> findAllIds()
+    {
+        Set<Integer> ids = new HashSet<Integer>();
+        List<Machine> machines = findAll();
+        for (Machine m : machines)
+        {
+            ids.add(m.getId());
+        }
+        return ids;
     }
 
 }

@@ -23,15 +23,30 @@ package com.abiquo.abiserver.business.hibernate.pojohb.infrastructure;
 
 public enum StateEnum
 {
-    RUNNING, PAUSED, POWERED_OFF, REBOOTED, NOT_DEPLOYED, IN_PROGRESS, APPLY_CHANGES_NEEDED, UPDATING_NODES, FAILED, COPYING, MOVING, CHECKING, BUNDLING, STATEFUL, UNKNOWN, HA_IN_PROGRESS;
+    NOT_DEPLOYED, NOT_ALLOCATED, ALLOCATED, DEPLOYED, CONFIGURED, ON, PAUSED, OFF, NEEDS_SYNC, LOCKED, UNKNOWN;
 
     public int id()
     {
         return ordinal() + 1;
     }
 
-    public static StateEnum fromId(int id)
+    public static StateEnum fromId(final int id)
     {
         return StateEnum.values()[id - 1];
+    }
+
+    public boolean existsInHypervisor()
+    {
+        switch (this)
+        {
+            case CONFIGURED:
+            case OFF:
+            case PAUSED:
+            case ON:
+            case DEPLOYED:
+                return true;
+            default:
+                return false;
+        }
     }
 }

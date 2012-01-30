@@ -26,6 +26,7 @@ import java.net.URL;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
@@ -108,45 +109,34 @@ import com.vmware.vim25.mo.Task;
 public class ESXiCollector extends AbstractCollector
 {
 
-    private static final Integer TWELVE = 12;
-
-    private static final Integer THIRTEEN = 13;
-
-    private static final String POWERED_OFF = "poweredOff";
-
-    private static final String POWERED_ON = "poweredOn";
-
-    private static final Integer KBYTE = 1024;
-
-    private static final Integer MEGABYTE = 1048576;
-
-    /** The logger. */
-    private static final Logger LOGGER = LoggerFactory.getLogger(ESXiCollector.class);
-
     /** Folder mark perfix. */
     private static String DATASTORE_UUID_MARK = "datastoreuuid.";
 
     /** Pattern to match with the mark folder. */
     private static String DATASTORE_UUID_MARK_PATTERN = DATASTORE_UUID_MARK + "*";
 
-    /**
-     * The api version of the Hypervisor.
-     */
-    private String apiVersion;
+    private static PropertySpec[] hostSystemSpec;
 
-    private ManagedObjectReference rootFolder;
+    private static final Integer KBYTE = 1024;
+
+    /** The logger. */
+    private static final Logger LOGGER = LoggerFactory.getLogger(ESXiCollector.class);
+
+    private static final Integer MEGABYTE = 1048576;
+
+    private static final String POWERED_OFF = "poweredOff";
+
+    private static final String POWERED_ON = "poweredOn";
 
     private static SelectionSpec[] selectionSpecs;
 
     private static ManagedObjectReference siMoref;
 
-    private static PropertySpec[] hostSystemSpec;
+    private static final Integer THIRTEEN = 13;
+
+    private static final Integer TWELVE = 12;
 
     private static PropertySpec[] virtualMachineSpec;
-
-    private ObjectSpec[] rootObjSpecs;
-
-    private ServiceInstance serviceInstance;
 
     static
     {
@@ -169,6 +159,98 @@ public class ESXiCollector extends AbstractCollector
         virtualMachineSpec[0].setAll(true);
     }
 
+    // TODO DELME
+    public static void main(final String[] args) throws Exception
+    {
+        ESXiCollector coll = new ESXiCollector();
+        coll.setIpAddress("10.60.1.120");
+        coll.connect("root", "temporal");
+        coll.getHostInfo();
+    }
+
+    /**
+     * This method creates a SelectionSpec[] to traverses the entire inventory tree starting at a
+     * Folder.
+     * 
+     * @return The SelectionSpec[]
+     */
+    private static SelectionSpec[] buildFullTraversal()
+    {
+
+        SelectionSpec rpToVmSpec = createSelectionSpec("rpToVm");
+        SelectionSpec rpToRpSpec = createSelectionSpec("rpToRp");
+
+        // ResourcePool to itself
+        TraversalSpec rpToRp =
+            createTraversalSpec("rpToRp", "ResourcePool", "resourcePool", rpToRpSpec, rpToVmSpec);
+
+        // ResourcePool to Vm
+        TraversalSpec rpToVm =
+            createTraversalSpec("rpToVm", "ResourcePool", "vm", new SelectionSpec[] {});
+
+        // ComputerResource to ResourcePool
+        TraversalSpec crToRp =
+            createTraversalSpec("crToRp", "ComputeResource", "resourcePool", rpToRpSpec, rpToVmSpec);
+
+        // ComputerResource to Host
+        TraversalSpec crToH =
+            createTraversalSpec("crToH", "ComputeResource", "host", new SelectionSpec[] {});
+
+        SelectionSpec visitFoldersSpec = createSelectionSpec("visitFolders");
+
+        // Datacenter to hostFolder
+        TraversalSpec dcToHf =
+            createTraversalSpec("dcToHf", "Datacenter", "hostFolder", visitFoldersSpec);
+
+        // Datacenter to vm Folder
+        TraversalSpec dcToVmf =
+            createTraversalSpec("dcToVmf", "Datacenter", "vmFolder", visitFoldersSpec);
+
+        // Host to Vm
+        TraversalSpec hToVm = createTraversalSpec("HToVm", "HostSystem", "vm", visitFoldersSpec);
+
+        // Root folder to others
+        TraversalSpec visitFolders =
+            createTraversalSpec("visitFolders", "Folder", "childEntity", visitFoldersSpec,
+                createSelectionSpec("dcToHf"), createSelectionSpec("dcToVmf"),
+                createSelectionSpec("crToH"), createSelectionSpec("crToRp"),
+                createSelectionSpec("HToVm"), rpToVmSpec);
+
+        return new SelectionSpec[] {visitFolders, dcToVmf, dcToHf, crToH, crToRp, rpToRp, hToVm,
+        rpToVm};
+    }
+
+    private static SelectionSpec createSelectionSpec(final String name)
+    {
+        SelectionSpec s = new SelectionSpec();
+        s.setName(name);
+        return s;
+    }
+
+    private static TraversalSpec createTraversalSpec(final String name, final String type,
+        final String path, final SelectionSpec... selectSet)
+    {
+        TraversalSpec traversalSpec = new TraversalSpec();
+        traversalSpec.setName(name);
+        traversalSpec.setType(type);
+        traversalSpec.setPath(path);
+        traversalSpec.setSkip(false);
+        traversalSpec.setSelectSet(selectSet);
+
+        return traversalSpec;
+    }
+
+    /**
+     * The api version of the Hypervisor.
+     */
+    private String apiVersion;
+
+    private ManagedObjectReference rootFolder;
+
+    private ObjectSpec[] rootObjSpecs;
+
+    private ServiceInstance serviceInstance;
+
     /**
      * Default constructor.
      * 
@@ -179,15 +261,6 @@ public class ESXiCollector extends AbstractCollector
         // ignore certs
         System.setProperty("org.apache.axis.components.net.SecureSocketFactory",
             "org.apache.axis.components.net.SunFakeTrustSocketFactory");
-    }
-
-    // TODO DELME
-    public static void main(final String[] args) throws Exception
-    {
-        ESXiCollector coll = new ESXiCollector();
-        coll.setIpAddress("10.60.1.120");
-        coll.connect("root", "temporal");
-        coll.getHostInfo();
     }
 
     @Override
@@ -412,15 +485,6 @@ public class ESXiCollector extends AbstractCollector
         return serviceInstance.getServiceContent();
     }
 
-    private ManagedObjectReference getRootFolder()
-    {
-        if (rootFolder == null)
-        {
-            rootFolder = getServiceContent().getRootFolder();
-        }
-        return rootFolder;
-    }
-
     @Override
     public VirtualSystemCollectionDto getVirtualMachines() throws CollectorException
     {
@@ -464,11 +528,21 @@ public class ESXiCollector extends AbstractCollector
                         vSys.setVport(getVPortFromExtraConfig(vmConfig.getExtraConfig()));
 
                         // Recover the list of disks for each virtual system
+
+                        HashMap<Integer, VirtualDevice> deviceHashMap =
+                            buildDeviceMap(vmConfig.getHardware().getDevice());
+
                         for (VirtualDevice device : vmConfig.getHardware().getDevice())
                         {
                             if (device instanceof VirtualDisk)
                             {
-                                vSys.getResources().add(createDiskFromVirtualDevice(device));
+                                ResourceType diskResource = createDiskFromVirtualDevice(device);
+                                // add the controller key.. like IDE 0:0
+                                VirtualDevice controller =
+                                    deviceHashMap.get(device.getControllerKey());
+                                diskResource.setAttachment(controller.getDeviceInfo().label + ":"
+                                    + device.getUnitNumber());
+                                vSys.getResources().add(diskResource);
                             }
                         }
 
@@ -500,6 +574,93 @@ public class ESXiCollector extends AbstractCollector
     }
 
     /**
+     * Gets the internet SCSI controller (Host Bus Adapter -- config.storageDevice.scsiLun)
+     * initiator IQN.
+     */
+    protected String getInternetSCSIInitiatorIQN(final ObjectContent hostSystemOc,
+        final ManagedObjectReference storageSystemMor) throws CollectorException
+    {
+        String[] hbasPropDesc = new String[] {"config.storageDevice.hostBusAdapter"};
+        ManagedObjectReference hostSystemMor = hostSystemOc.getObj();
+
+        HostInternetScsiHba iscsi = null;
+        HostHostBusAdapter[] hbas;
+
+        if (!isInternetSCSIEnable(hostSystemOc, storageSystemMor))
+        {
+            final String cause = "Can not enable the software iSCSI controller"; // internal message
+            throw new CollectorException(cause);
+        }
+
+        try
+        {
+            ManagedObjectReference collector = null; // obtain?
+
+            ObjectContent[] hostBusAdapters =
+                getObjectProperties(collector, hostSystemMor, hbasPropDesc);
+
+            if (hostBusAdapters == null || hostBusAdapters.length != 1)
+            {
+                final String cause =
+                    "Can not retrieve avaiable Host Bus Adapters on the Storage Device";// internal
+                // message
+                LOGGER.error(cause);
+                throw new CollectorException(cause);
+            }
+
+            // TODO propSet at 0 -- check by type
+            ArrayOfHostHostBusAdapter arrHbas =
+                (ArrayOfHostHostBusAdapter) hostBusAdapters[0].getPropSet()[0].getVal();
+
+            hbas = arrHbas.getHostHostBusAdapter();
+        }
+        catch (Exception e)
+        {
+            final String cause =
+                "Can not retrieve avaiable Host Bus Adapters on the Storage Device";// internal
+            // message
+            LOGGER.error(cause);
+            throw new CollectorException(cause, e);
+        }
+
+        for (HostHostBusAdapter hba : hbas)
+        {
+            if (hba instanceof HostInternetScsiHba)
+            {
+
+                HostInternetScsiHba iscsicurrent = (HostInternetScsiHba) hba;
+
+                LOGGER.info(String.format(
+                    "[iscsi] Device:%s Driver:%s Model:%s\n\tAlias:%s Name:%s Software:%s",
+                    iscsicurrent.getDevice(), iscsicurrent.getDriver(), iscsicurrent.getModel(),
+                    iscsicurrent.getIScsiAlias(), iscsicurrent.getIScsiName(),
+                    String.valueOf(iscsicurrent.isIsSoftwareBased())));
+
+                if (iscsicurrent.isIsSoftwareBased()
+                    && iscsicurrent.getModel().equalsIgnoreCase("iSCSI Software Adapter"))
+                {
+                    iscsi = iscsicurrent;
+                }
+            }
+        }
+
+        if (iscsi == null)
+        {
+            final String cause = "Can not find the iSCSI Host Bus Adapter";
+            LOGGER.error(cause);
+            throw new CollectorException(cause); // internal
+            // message
+        }
+
+        LOGGER.info(String.format(
+            "[iscsi] SELECTED :\n Device:%s Driver:%s Model:%s\n\tAlias:%s Name:%s Software:%s",
+            iscsi.getDevice(), iscsi.getDriver(), iscsi.getModel(), iscsi.getIScsiAlias(),
+            iscsi.getIScsiName(), String.valueOf(iscsi.isIsSoftwareBased())));
+
+        return iscsi.getIScsiName();
+    }
+
+    /**
      * Determines of a method 'methodName' exists for the Object 'obj'.
      * 
      * @param obj The Object to check
@@ -527,75 +688,34 @@ public class ESXiCollector extends AbstractCollector
     }
 
     /**
-     * This method creates a SelectionSpec[] to traverses the entire inventory tree starting at a
-     * Folder.
+     * Builds a hasmap from list of devices.
      * 
-     * @return The SelectionSpec[]
+     * @param devices list of virtual devices
+     * @return hash map based on key devices.
      */
-    private static SelectionSpec[] buildFullTraversal()
+    private HashMap<Integer, VirtualDevice> buildDeviceMap(final VirtualDevice[] devices)
     {
-
-        SelectionSpec rpToVmSpec = createSelectionSpec("rpToVm");
-        SelectionSpec rpToRpSpec = createSelectionSpec("rpToRp");
-
-        // ResourcePool to itself
-        TraversalSpec rpToRp =
-            createTraversalSpec("rpToRp", "ResourcePool", "resourcePool", rpToRpSpec, rpToVmSpec);
-
-        // ResourcePool to Vm
-        TraversalSpec rpToVm =
-            createTraversalSpec("rpToVm", "ResourcePool", "vm", new SelectionSpec[] {});
-
-        // ComputerResource to ResourcePool
-        TraversalSpec crToRp =
-            createTraversalSpec("crToRp", "ComputeResource", "resourcePool", rpToRpSpec, rpToVmSpec);
-
-        // ComputerResource to Host
-        TraversalSpec crToH =
-            createTraversalSpec("crToH", "ComputeResource", "host", new SelectionSpec[] {});
-
-        SelectionSpec visitFoldersSpec = createSelectionSpec("visitFolders");
-
-        // Datacenter to hostFolder
-        TraversalSpec dcToHf =
-            createTraversalSpec("dcToHf", "Datacenter", "hostFolder", visitFoldersSpec);
-
-        // Datacenter to vm Folder
-        TraversalSpec dcToVmf =
-            createTraversalSpec("dcToVmf", "Datacenter", "vmFolder", visitFoldersSpec);
-
-        // Host to Vm
-        TraversalSpec hToVm = createTraversalSpec("HToVm", "HostSystem", "vm", visitFoldersSpec);
-
-        // Root folder to others
-        TraversalSpec visitFolders =
-            createTraversalSpec("visitFolders", "Folder", "childEntity", visitFoldersSpec,
-                createSelectionSpec("dcToHf"), createSelectionSpec("dcToVmf"),
-                createSelectionSpec("crToH"), createSelectionSpec("crToRp"),
-                createSelectionSpec("HToVm"), rpToVmSpec);
-
-        return new SelectionSpec[] {visitFolders, dcToVmf, dcToHf, crToH, crToRp, rpToRp, hToVm,
-        rpToVm};
+        HashMap<Integer, VirtualDevice> deviceMap = new HashMap<Integer, VirtualDevice>();
+        for (VirtualDevice device : devices)
+        {
+            deviceMap.put(device.getKey(), device);
+        }
+        return deviceMap;
     }
 
-    private static SelectionSpec createSelectionSpec(final String name)
+    /**
+     * Create a new datastore folder mark.
+     * 
+     * @return the just created UUID for the folder mark
+     */
+    private String createDatastoreFolderMark(final Datacenter dc, final String dsName)
+        throws CollectorException
     {
-        SelectionSpec s = new SelectionSpec();
-        s.setName(name);
-        return s;
-    }
+        String folderUuidMark = UUID.randomUUID().toString();
+        String directoryOnDatastore =
+            String.format("%s %s%s", dsName, DATASTORE_UUID_MARK, folderUuidMark);
 
-    private static TraversalSpec createTraversalSpec(final String name, final String type,
-        final String path, final SelectionSpec... selectSet)
-    {
-        TraversalSpec traversalSpec = new TraversalSpec();
-        traversalSpec.setName(name);
-        traversalSpec.setType(type);
-        traversalSpec.setPath(path);
-        traversalSpec.setSkip(false);
-        traversalSpec.setSelectSet(selectSet);
-
-        return traversalSpec;
+        return folderUuidMark;
     }
 
     /**
@@ -615,15 +735,35 @@ public class ESXiCollector extends AbstractCollector
             VirtualDisk diskDevice = (VirtualDisk) device;
             ResourceType hardDisk = new ResourceType();
             hardDisk.setUnits(diskDevice.getCapacityInKB() * KBYTE);
-            hardDisk.setResourceType(ResourceEnumType.STORAGE_DISK);
+
+            // Check if we can say it is the system disk or the extra disk.
+            if (diskDevice.getDeviceInfo().getLabel().equals("Hard disk 1"))
+            {
+                hardDisk.setLabel("SYSTEM DISK");
+            }
+            else
+            {
+                hardDisk.setLabel("EXTRA DISK");
+            }
+
+            diskDevice.getControllerKey();
+            // get the attachment
 
             if (diskDevice.getBacking() instanceof VirtualDeviceFileBackingInfo)
             {
                 VirtualDeviceFileBackingInfo backing =
                     (VirtualDeviceFileBackingInfo) diskDevice.getBacking();
                 String fileName = backing.getFileName();
-                VirtualDiskEnumType vdet = resolveDiskFileType(backing);
 
+                if (diskDevice.getBacking() instanceof VirtualDiskRawDiskMappingVer1BackingInfo)
+                {
+                    hardDisk.setResourceType(ResourceEnumType.VOLUME_DISK);
+                }
+                else
+                {
+                    hardDisk.setResourceType(ResourceEnumType.HARD_DISK);
+                }
+                VirtualDiskEnumType vdet = resolveDiskFileType(backing);
                 hardDisk.setResourceSubType(vdet.value());
                 if (vdet == VirtualDiskEnumType.VMDK_FLAT)
                 {
@@ -636,7 +776,6 @@ public class ESXiCollector extends AbstractCollector
                 ManagedObjectReference datastore = backing.getDatastore();
                 String datastoreName = (String) getDynamicProperty(datastore, "name");
                 hardDisk.setConnection(datastoreName);
-
             }
             // The disk belong to a device. The correct statement here would be
             // 'diskDevice.getBacking() instanceof VirtualDeviceDeviceBackingInfo' because
@@ -654,6 +793,7 @@ public class ESXiCollector extends AbstractCollector
                     (VirtualDiskRawDiskVer2BackingInfo) diskDevice.getBacking();
                 hardDisk.setAddress(backing.getDescriptorFileName());
                 hardDisk.setResourceSubType(VirtualDiskEnumType.RAW);
+                hardDisk.setResourceType(ResourceEnumType.VOLUME_DISK);
                 hardDisk.setConnection("unknown");
             }
             // Other disk types not used.
@@ -661,6 +801,7 @@ public class ESXiCollector extends AbstractCollector
             {
                 hardDisk.setAddress("unknown");
                 hardDisk.setResourceSubType(VirtualDiskEnumType.VMDK_FLAT);
+                hardDisk.setResourceType(ResourceEnumType.HARD_DISK);
                 hardDisk.setConnection("unknown");
             }
 
@@ -672,12 +813,165 @@ public class ESXiCollector extends AbstractCollector
         }
     }
 
+    /** Reused Query specification to locate the folder mark (UUID) */
+    private HostDatastoreBrowserSearchSpec createQueryDatastoreFolderMark()
+    {
+        HostDatastoreBrowserSearchSpec querySpec = new HostDatastoreBrowserSearchSpec();
+        querySpec.setQuery(new FileQuery[] {new FolderFileQuery()}); // VmDiskFileQuery() FileQuery
+        querySpec.setSearchCaseInsensitive(false);
+        querySpec.setMatchPattern(new String[] {DATASTORE_UUID_MARK_PATTERN});
+
+        // FileQueryFlags fqf = new FileQueryFlags();
+        // fqf.setFileSize(true);
+        // fqf.setModification(true);
+        // querySpec.setDetails(fqf);
+        return querySpec;
+
+    }
+
     /**
      * @return the api version of the esxi hypervisor.
      */
     private String getApiVersion()
     {
         return apiVersion;
+    }
+
+    /**
+     * Gets the vSpherer Datatacenter. Assume its named ''ha-datacenter''.
+     */
+    private Datacenter getDatacenter() throws CollectorException
+    {
+        Datacenter dc;
+
+        try
+        {
+            dc =
+                (Datacenter) new InventoryNavigator(serviceInstance.getRootFolder())
+                    .searchManagedEntity("Datacenter", "ha-datacenter");
+        }
+        catch (Exception e)
+        {
+            throw new CollectorException(MessageValues.CONN_EXCP_I);
+        }
+
+        if (dc == null)
+        {
+            LOGGER.error("Datacenter ''ha-datacenter'' not found.");
+            throw new CollectorException(MessageValues.DATACENTER_NOT_FOUND);
+        }
+
+        return dc;
+    }
+
+    /**
+     * Locate or create the datastore folder mark to determine if the datastore is being shared
+     * across hypervisors.
+     * 
+     * @return a Datastore UUID
+     * @throws CollectorException
+     */
+    private String getDatastoreUuidMark(final String dsName, final HostDatastoreBrowser dsBrowser,
+        final Datacenter dc) throws CollectorException
+    {
+        String uuid = null;
+        Task searchtask;
+
+        try
+        {
+            // search on the top of the filesystem (do not navegate subfolders)
+            searchtask = dsBrowser.searchDatastore_Task(dsName, createQueryDatastoreFolderMark()); // TODO
+                                                                                                   // static
+
+            searchtask.waitForTask();
+
+            if (searchtask.getTaskInfo().state == TaskInfoState.success)
+            {
+                Object objres = searchtask.getTaskInfo().getResult();
+
+                HostDatastoreBrowserSearchResults result =
+                    (HostDatastoreBrowserSearchResults) objres;
+
+                if (result.getFile() != null)
+                {
+                    if (result.getFile().length != 1)
+                    {
+                        throw new CollectorException(MessageValues.DATASTRORE_MULTIPLE_MARKS);
+                    }
+
+                    FileInfo fi = result.getFile()[0];
+                    String foldername = fi.getPath(); // path = name in the root
+                    LOGGER.debug("Datastore folder mark found [{}]", foldername);
+
+                    if (!foldername.startsWith(DATASTORE_UUID_MARK))
+                    {
+                        LOGGER.error("The datastore folder mark isn't the expected [{}].",
+                            foldername);
+
+                        throw new CollectorException(MessageValues.DATASTRORE_MARK);
+                    }
+
+                    uuid = foldername.substring(DATASTORE_UUID_MARK.length());
+                }
+                else
+                {
+                    // any folder mark found
+                }
+            }
+            else
+            {
+                // folder mark not found
+            }
+
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace(); // delme
+            LOGGER.error("Can't identify the datastore [{}] uuid", dsName);
+            throw new CollectorException(MessageValues.DATASTRORE_MARK, e);
+        }
+
+        if (uuid == null)
+        {
+            LOGGER.info(String.format(
+                "Datastore %s on Host [%s] hasn't any folder mark, creating it.", dsName,
+                getIpAddress()));
+
+            uuid = createDatastoreFolderMark(dc, dsName);
+        }
+
+        LOGGER.debug("Datastore {} UUID [{}]", dsName, uuid);
+
+        return uuid;
+    }
+
+    /**
+     * Return the property of the ObjectContent with name 'propertyName'
+     * 
+     * @param obj object content to get its properties
+     * @param propertyName property name to retrieve
+     * @return
+     * @throws Exception
+     */
+    private Object getDynamicProperty(final ObjectContent obj, final String propertyName)
+        throws Exception
+    {
+        if (obj != null)
+        {
+            DynamicProperty[] dynamicProperties = obj.getPropSet();
+            if (dynamicProperties != null)
+            {
+                for (DynamicProperty currentProp : dynamicProperties)
+                {
+                    if (currentProp.getName().equalsIgnoreCase(propertyName))
+                    {
+                        return currentProp.getVal();
+                    }
+                }
+            }
+        }
+
+        return null;
     }
 
     /**
@@ -702,27 +996,30 @@ public class ESXiCollector extends AbstractCollector
 
         // Network resouces
         HostNetworkInfo network = config.getNetwork();
-        for (HostVirtualSwitch vswitch : network.getVswitch())
+        if (network.getVswitch() != null)
         {
-            if (vswitch.pnic != null)
+            for (HostVirtualSwitch vswitch : network.getVswitch())
             {
-                ResourceType resource = new ResourceType();
-                resource.setResourceType(ResourceEnumType.NETWORK_INTERFACE);
-                String[] pnics = vswitch.getPnic();
-                String address = "";
-                if (pnics.length > 0)
+                if (vswitch.pnic != null)
                 {
-                    for (PhysicalNic nic : network.getPnic())
+                    ResourceType resource = new ResourceType();
+                    resource.setResourceType(ResourceEnumType.NETWORK_INTERFACE);
+                    String[] pnics = vswitch.getPnic();
+                    String address = "";
+                    if (pnics.length > 0)
                     {
-                        if (nic.getKey().equalsIgnoreCase(pnics[0]))
+                        for (PhysicalNic nic : network.getPnic())
                         {
-                            address = nic.getMac();
+                            if (nic.getKey().equalsIgnoreCase(pnics[0]))
+                            {
+                                address = nic.getMac();
+                            }
                         }
                     }
+                    resource.setAddress(address);
+                    resource.setElementName(vswitch.getName());
+                    resources.add(resource);
                 }
-                resource.setAddress(address);
-                resource.setElementName(vswitch.getName());
-                resources.add(resource);
             }
         }
 
@@ -804,7 +1101,7 @@ public class ESXiCollector extends AbstractCollector
 
                 ResourceType resource = new ResourceType();
 
-                resource.setResourceType(ResourceEnumType.STORAGE_DISK);
+                resource.setResourceType(ResourceEnumType.HARD_DISK);
                 resource.setAddress(datastoreSummary.getName());
                 resource.setElementName(datastoreSummary.getName());
                 resource.setUnits(size);
@@ -857,162 +1154,6 @@ public class ESXiCollector extends AbstractCollector
     }
 
     /**
-     * Gets the vSpherer Datatacenter. Assume its named ''ha-datacenter''.
-     */
-    private Datacenter getDatacenter() throws CollectorException
-    {
-        Datacenter dc;
-
-        try
-        {
-            dc =
-                (Datacenter) new InventoryNavigator(serviceInstance.getRootFolder())
-                    .searchManagedEntity("Datacenter", "ha-datacenter");
-        }
-        catch (Exception e)
-        {
-            throw new CollectorException(MessageValues.CONN_EXCP_I);
-        }
-
-        if (dc == null)
-        {
-            LOGGER.error("Datacenter ''ha-datacenter'' not found.");
-            throw new CollectorException(MessageValues.DATACENTER_NOT_FOUND);
-        }
-
-        return dc;
-    }
-
-    /** Reused Query specification to locate the folder mark (UUID) */
-    private HostDatastoreBrowserSearchSpec createQueryDatastoreFolderMark()
-    {
-        HostDatastoreBrowserSearchSpec querySpec = new HostDatastoreBrowserSearchSpec();
-        querySpec.setQuery(new FileQuery[] {new FolderFileQuery()}); // VmDiskFileQuery() FileQuery
-        querySpec.setSearchCaseInsensitive(false);
-        querySpec.setMatchPattern(new String[] {DATASTORE_UUID_MARK_PATTERN});
-
-        // FileQueryFlags fqf = new FileQueryFlags();
-        // fqf.setFileSize(true);
-        // fqf.setModification(true);
-        // querySpec.setDetails(fqf);
-        return querySpec;
-
-    }
-
-    /**
-     * Locate or create the datastore folder mark to determine if the datastore is being shared
-     * across hypervisors.
-     * 
-     * @return a Datastore UUID
-     * @throws CollectorException
-     */
-    private String getDatastoreUuidMark(final String dsName, final HostDatastoreBrowser dsBrowser,
-        final Datacenter dc) throws CollectorException
-    {
-        String uuid = null;
-        Task searchtask;
-
-        try
-        {
-            // search on the top of the filesystem (do not navegate subfolders)
-            searchtask = dsBrowser.searchDatastore_Task(dsName, createQueryDatastoreFolderMark()); // TODO
-            // static
-
-            searchtask.waitForTask();
-
-            if (searchtask.getTaskInfo().state == TaskInfoState.success)
-            {
-                Object objres = searchtask.getTaskInfo().getResult();
-
-                HostDatastoreBrowserSearchResults result =
-                    (HostDatastoreBrowserSearchResults) objres;
-
-                if (result.getFile() != null)
-                {
-                    if (result.getFile().length != 1)
-                    {
-                        throw new CollectorException(MessageValues.DATASTRORE_MULTIPLE_MARKS);
-                    }
-
-                    FileInfo fi = result.getFile()[0];
-                    String foldername = fi.getPath(); // path = name in the root
-                    LOGGER.debug("Datastore folder mark found [{}]", foldername);
-
-                    if (!foldername.startsWith(DATASTORE_UUID_MARK))
-                    {
-                        LOGGER.error("The datastore folder mark isn't the expected [{}].",
-                            foldername);
-
-                        throw new CollectorException(MessageValues.DATASTRORE_MARK);
-                    }
-
-                    uuid = foldername.substring(DATASTORE_UUID_MARK.length());
-                }
-                else
-                {
-                    // any folder mark found
-                }
-            }
-            else
-            {
-                // folder mark not found
-            }
-
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace(); // delme
-            LOGGER.error("Can't identify the datastore [{}] uuid", dsName);
-            throw new CollectorException(MessageValues.DATASTRORE_MARK, e);
-        }
-
-        if (uuid == null)
-        {
-            LOGGER.info(String.format(
-                "Datastore %s on Host [%s] haven't any folder mark, creating it.", dsName,
-                getIpAddress()));
-
-            uuid = createDatastoreFolderMark(dc, dsName);
-        }
-
-        LOGGER.debug("Datastore {} UUID [{}]", dsName, uuid);
-
-        return uuid;
-    }
-
-    /**
-     * Create a new datastore folder mark.
-     * 
-     * @return the just created UUID for the folder mark
-     */
-    private String createDatastoreFolderMark(final Datacenter dc, final String dsName)
-        throws CollectorException
-    {
-        String folderUuidMark = UUID.randomUUID().toString();
-        String directoryOnDatastore =
-            String.format("%s %s%s", dsName, DATASTORE_UUID_MARK, folderUuidMark);
-
-        try
-        {
-            // do not create parent folders (is on the root)
-            serviceInstance.getFileManager().makeDirectory(directoryOnDatastore, dc, false);
-        }
-        catch (FileFault e)
-        {
-            LOGGER.error("Can not create the folder mark at [{}], caused by file fault {}", dsName,
-                e);
-            throw new CollectorException(MessageValues.DATASTRORE_MARK, e);
-        }
-        catch (Exception e)
-        {
-            LOGGER.error("Can not create the folder mark at [{}]\n{}", dsName, e);
-            throw new CollectorException(MessageValues.DATASTRORE_MARK, e);
-        }
-
-        return folderUuidMark;
-    }
-
-    /**
      * This auxiliar method return a list of ManagedObjectReference encapsulated into an
      * ObjectContent instance. Informing the name of the managed object reference as a parameter,
      * will return the list of MORs whatever is its place into the inventory hierarchy of the VI
@@ -1038,6 +1179,15 @@ public class ESXiCollector extends AbstractCollector
                 new PropertyFilterSpec[] {propertyFilter});
 
         return objectContent;
+    }
+
+    private ManagedObjectReference getRootFolder()
+    {
+        if (rootFolder == null)
+        {
+            rootFolder = getServiceContent().getRootFolder();
+        }
+        return rootFolder;
     }
 
     private ObjectSpec[] getRootObjectSpec()
@@ -1105,17 +1255,49 @@ public class ESXiCollector extends AbstractCollector
         // parametrize the state
         if (stateString.equalsIgnoreCase(POWERED_OFF))
         {
-            vmStateType = VirtualSystemStatusEnumType.POWERED_OFF;
+            vmStateType = VirtualSystemStatusEnumType.OFF;
         }
         else if (stateString.equalsIgnoreCase(POWERED_ON))
         {
-            vmStateType = VirtualSystemStatusEnumType.RUNNING;
+            vmStateType = VirtualSystemStatusEnumType.ON;
         }
         else
         {
             vmStateType = VirtualSystemStatusEnumType.PAUSED;
         }
         return vmStateType;
+    }
+
+    /**
+     * Gets the storage system reference from the host system's configuration manager.
+     */
+    private ManagedObjectReference getStorageSystem(final ObjectContent hostSystemOc)
+        throws CollectorException
+    {
+        String[] storageSystemPropDesc = new String[] {"configManager.storageSystem"};
+        ManagedObjectReference hostSystemMor = hostSystemOc.getObj();
+        ManagedObjectReference storageSystem;
+
+        try
+        {
+            ManagedObjectReference collector = null; // obtain?
+
+            ObjectContent[] storages =
+                this.getObjectProperties(collector, hostSystemMor, storageSystemPropDesc);
+
+            // TODO storages.length == 1;
+
+            storageSystem = storages[0].getObj();
+        }
+        catch (Exception e1)
+        {
+            final String cause = "Can not get Configuration Manager on the Host System";
+            LOGGER.error(cause, e1);
+            throw new CollectorException(cause, e1);// internal
+            // message
+        }
+
+        return storageSystem;
     }
 
     /**
@@ -1190,10 +1372,8 @@ public class ESXiCollector extends AbstractCollector
                 Long expirationMinutes = new Long(0);
                 boolean neverExpires = true;
 
-                for (int i = 0; i < properties.length; i++)
+                for (KeyAnyValue keyAnyValue : properties)
                 {
-                    KeyAnyValue keyAnyValue = properties[i];
-
                     if ("expirationHours".equals(keyAnyValue.getKey()))
                     {
                         expirationHours = (Long) keyAnyValue.getValue();
@@ -1209,7 +1389,6 @@ public class ESXiCollector extends AbstractCollector
                 if (!neverExpires)
                 {
                     if (expirationHours.intValue() == 0 && expirationMinutes.intValue() == 0)
-
                     {
                         LOGGER.debug("Expired license found!");
                         throw new NoManagedException(MessageValues.NOMAN_ESXI_LIC);
@@ -1294,127 +1473,6 @@ public class ESXiCollector extends AbstractCollector
     }
 
     /**
-     * Gets the internet SCSI controller (Host Bus Adapter -- config.storageDevice.scsiLun)
-     * initiator IQN.
-     */
-    protected String getInternetSCSIInitiatorIQN(final ObjectContent hostSystemOc,
-        final ManagedObjectReference storageSystemMor) throws CollectorException
-    {
-        String[] hbasPropDesc = new String[] {"config.storageDevice.hostBusAdapter"};
-        ManagedObjectReference hostSystemMor = hostSystemOc.getObj();
-
-        HostInternetScsiHba iscsi = null;
-        HostHostBusAdapter[] hbas;
-
-        if (!isInternetSCSIEnable(hostSystemOc, storageSystemMor))
-        {
-            final String cause = "Can not enable the software iSCSI controller"; // internal message
-            throw new CollectorException(cause);
-        }
-
-        try
-        {
-            ManagedObjectReference collector = null; // obtain?
-
-            ObjectContent[] hostBusAdapters =
-                getObjectProperties(collector, hostSystemMor, hbasPropDesc);
-
-            if (hostBusAdapters == null || hostBusAdapters.length != 1)
-            {
-                final String cause =
-                    "Can not retrieve avaiable Host Bus Adapters on the Storage Device";// internal
-                // message
-                LOGGER.error(cause);
-                throw new CollectorException(cause);
-            }
-
-            // TODO propSet at 0 -- check by type
-            ArrayOfHostHostBusAdapter arrHbas =
-                (ArrayOfHostHostBusAdapter) hostBusAdapters[0].getPropSet()[0].getVal();
-
-            hbas = arrHbas.getHostHostBusAdapter();
-        }
-        catch (Exception e)
-        {
-            final String cause =
-                "Can not retrieve avaiable Host Bus Adapters on the Storage Device";// internal
-            // message
-            LOGGER.error(cause);
-            throw new CollectorException(cause, e);
-        }
-
-        for (int i = 0; i < hbas.length; i++) // && iscsi == null
-        {
-            HostHostBusAdapter hba = hbas[i];
-
-            if (hba instanceof HostInternetScsiHba)
-            {
-
-                HostInternetScsiHba iscsicurrent = (HostInternetScsiHba) hba;
-
-                LOGGER.info(String.format(
-                    "[iscsi] Device:%s Driver:%s Model:%s\n\tAlias:%s Name:%s Software:%s",
-                    iscsicurrent.getDevice(), iscsicurrent.getDriver(), iscsicurrent.getModel(),
-                    iscsicurrent.getIScsiAlias(), iscsicurrent.getIScsiName(), String
-                        .valueOf(iscsicurrent.isIsSoftwareBased())));
-
-                if (iscsicurrent.isIsSoftwareBased()
-                    && iscsicurrent.getModel().equalsIgnoreCase("iSCSI Software Adapter"))
-                {
-                    iscsi = iscsicurrent;
-                }
-            }
-        }
-
-        if (iscsi == null)
-        {
-            final String cause = "Can not find the iSCSI Host Bus Adapter";
-            LOGGER.error(cause);
-            throw new CollectorException(cause); // internal
-            // message
-        }
-
-        LOGGER.info(String.format(
-            "[iscsi] SELECTED :\n Device:%s Driver:%s Model:%s\n\tAlias:%s Name:%s Software:%s",
-            iscsi.getDevice(), iscsi.getDriver(), iscsi.getModel(), iscsi.getIScsiAlias(), iscsi
-                .getIScsiName(), String.valueOf(iscsi.isIsSoftwareBased())));
-
-        return iscsi.getIScsiName();
-    }
-
-    /**
-     * Gets the storage system reference from the host system's configuration manager.
-     */
-    private ManagedObjectReference getStorageSystem(final ObjectContent hostSystemOc)
-        throws CollectorException
-    {
-        String[] storageSystemPropDesc = new String[] {"configManager.storageSystem"};
-        ManagedObjectReference hostSystemMor = hostSystemOc.getObj();
-        ManagedObjectReference storageSystem;
-
-        try
-        {
-            ManagedObjectReference collector = null; // obtain?
-
-            ObjectContent[] storages =
-                this.getObjectProperties(collector, hostSystemMor, storageSystemPropDesc);
-
-            // TODO storages.length == 1;
-
-            storageSystem = storages[0].getObj();
-        }
-        catch (Exception e1)
-        {
-            final String cause = "Can not get Configuration Manager on the Host System";
-            LOGGER.error(cause, e1);
-            throw new CollectorException(cause, e1);// internal
-            // message
-        }
-
-        return storageSystem;
-    }
-
-    /**
      * Check if host system has the internetSCSI software controller enable, if not try to enabling
      * it. TODO only look for software controller, add hardware support
      */
@@ -1473,32 +1531,4 @@ public class ESXiCollector extends AbstractCollector
         return isIscsiEnable;
     }
 
-    /**
-     * Return the property of the ObjectContent with name 'propertyName'
-     * 
-     * @param obj object content to get its properties
-     * @param propertyName property name to retrieve
-     * @return
-     * @throws Exception
-     */
-    private Object getDynamicProperty(final ObjectContent obj, final String propertyName)
-        throws Exception
-    {
-        if (obj != null)
-        {
-            DynamicProperty[] dynamicProperties = obj.getPropSet();
-            if (dynamicProperties != null)
-            {
-                for (DynamicProperty currentProp : dynamicProperties)
-                {
-                    if (currentProp.getName().equalsIgnoreCase(propertyName))
-                    {
-                        return currentProp.getVal();
-                    }
-                }
-            }
-        }
-
-        return null;
-    }
 }

@@ -170,7 +170,7 @@ public class PopulateModelTest
 
         date = new Date();
         htype = getDefaultHypervisorType();
-        state = StateEnum.NOT_DEPLOYED;
+        state = StateEnum.NOT_ALLOCATED;
         category = getDefaultCategory();
         user = getDefaultUser();
         enterprise = getDefaultEnterprise();
@@ -369,7 +369,7 @@ public class PopulateModelTest
         virtualMachine.setCpu(2);
         virtualMachine.setRam(256);
         virtualMachine.setUUID("apophis");
-        State state = new State(StateEnum.NOT_DEPLOYED);
+        State state = new State(StateEnum.ALLOCATED);
         virtualMachine.setState(state);
         virtualMachine.setVdrpIP("vdrpIP");
         virtualMachine.setVdrpPort(5050);

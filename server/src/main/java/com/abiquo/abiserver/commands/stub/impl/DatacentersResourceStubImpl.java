@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.wink.client.ClientResponse;
+import org.jclouds.abiquo.domain.infrastructure.Datacenter;
 
 import com.abiquo.abiserver.commands.impl.InfrastructureCommandImpl;
 import com.abiquo.abiserver.commands.stub.AbstractAPIStub;
@@ -35,7 +36,6 @@ import com.abiquo.abiserver.pojo.result.DataResult;
 import com.abiquo.abiserver.pojo.service.RemoteService;
 import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.server.core.infrastructure.DatacenterDto;
-import com.abiquo.server.core.infrastructure.DatacentersDto;
 import com.abiquo.server.core.infrastructure.RemoteServiceDto;
 import com.abiquo.server.core.infrastructure.RemoteServicesDto;
 
@@ -51,26 +51,58 @@ public class DatacentersResourceStubImpl extends AbstractAPIStub implements Data
         DataResult<ArrayList<DataCenter>> result = new DataResult<ArrayList<DataCenter>>();
         ArrayList<DataCenter> dcs = new ArrayList<DataCenter>();
 
-        ClientResponse response = get(createDatacenterLink(), FLAT_MEDIA_TYPE);
-
-        if (response.getStatusCode() == 200)
+        try
         {
-            DatacentersDto responseDto = response.getEntity(DatacentersDto.class);
+            Iterable<Datacenter> datacenters =
+                getApiClient().getAdministrationService().listDatacenters();
 
-            if (responseDto.getCollection() != null)
+            for (Datacenter dc : datacenters)
             {
-                for (DatacenterDto dcDto : responseDto.getCollection())
-                {
-                    dcs.add(fromDtoToPojo(dcDto));
-                }
+                dcs.add(fromDtoToPojo(dc));
             }
 
             result.setSuccess(true);
             result.setData(dcs);
         }
-        else
+        catch (Exception ex)
         {
-            populateErrors(response, result, "getDatacenters");
+            populateErrors(ex, result, "getDatacenters");
+        }
+        finally
+        {
+            releaseApiClient();
+        }
+
+        return result;
+    }
+
+    @Override
+    public DataResult<ArrayList<DataCenter>> getDatacenters(final Integer enterpriseId)
+    {
+        DataResult<ArrayList<DataCenter>> result = new DataResult<ArrayList<DataCenter>>();
+        ArrayList<DataCenter> dcs = new ArrayList<DataCenter>();
+
+        try
+        {
+            Iterable<Datacenter> datacenters =
+                getApiClient().getAdministrationService().getEnterprise(enterpriseId)
+                    .listAllowedDatacenters();
+
+            for (Datacenter dc : datacenters)
+            {
+                dcs.add(fromDtoToPojo(dc, false));
+            }
+
+            result.setSuccess(true);
+            result.setData(dcs);
+        }
+        catch (Exception ex)
+        {
+            populateErrors(ex, result, "getDatacenters");
+        }
+        finally
+        {
+            releaseApiClient();
         }
 
         return result;
@@ -81,20 +113,20 @@ public class DatacentersResourceStubImpl extends AbstractAPIStub implements Data
     {
         DataResult<DataCenter> result = new DataResult<DataCenter>();
 
-        ClientResponse response = get(createDatacenterLink(datacenterId));
-
-        if (response.getStatusCode() == 200)
+        try
         {
-            DatacenterDto responseDto = response.getEntity(DatacenterDto.class);
-
-            DataCenter dataCenter = fromDtoToPojo(responseDto);
+            Datacenter dc = getApiClient().getAdministrationService().getDatacenter(datacenterId);
 
             result.setSuccess(true);
-            result.setData(dataCenter);
+            result.setData(fromDtoToPojo(dc));
         }
-        else
+        catch (Exception ex)
         {
-            populateErrors(response, result, "getDatacenters");
+            populateErrors(ex, result, "getDatacenters");
+        }
+        finally
+        {
+            releaseApiClient();
         }
 
         return result;
@@ -266,17 +298,22 @@ public class DatacentersResourceStubImpl extends AbstractAPIStub implements Data
         return rsdto;
     }
 
-    public DataCenter fromDtoToPojo(final DatacenterDto datanceterDto)
+    public DataCenter fromDtoToPojo(final Datacenter datacenter)
     {
+        return fromDtoToPojo(datacenter, true);
+    }
 
-        DataCenter dc = DataCenter.create(datanceterDto);
+    public DataCenter fromDtoToPojo(final Datacenter datacenter, final boolean includeRS)
+    {
+        DataCenter dc = DataCenter.create(datacenter.unwrap());
         dc.setRemoteServices(new ArrayList<RemoteService>());
-        if (datanceterDto.getRemoteServices() != null
-            && !datanceterDto.getRemoteServices().isEmpty())
+
+        if (includeRS)
         {
-            for (RemoteServiceDto rsdto : datanceterDto.getRemoteServices().getCollection())
+            for (org.jclouds.abiquo.domain.infrastructure.RemoteService rs : datacenter
+                .listRemoteServices())
             {
-                dc.getRemoteServices().add(RemoteService.create(rsdto, dc.getId()));
+                dc.getRemoteServices().add(RemoteService.create(rs.unwrap(), dc.getId()));
             }
         }
 
@@ -306,13 +343,13 @@ public class DatacentersResourceStubImpl extends AbstractAPIStub implements Data
         {
             return RemoteServiceType.STORAGE_SYSTEM_MONITOR;
         }
-        else if (rst.equals(RemoteServiceType.VIRTUAL_FACTORY.getServiceMapping()))
-        {
-            return RemoteServiceType.VIRTUAL_FACTORY;
-        }
         else if (rst.equals(RemoteServiceType.VIRTUAL_SYSTEM_MONITOR.getServiceMapping()))
         {
             return RemoteServiceType.VIRTUAL_SYSTEM_MONITOR;
+        }
+        else if (rst.equals(RemoteServiceType.TARANTINO.getServiceMapping()))
+        {
+            return RemoteServiceType.TARANTINO;
         }
         return null;
     }

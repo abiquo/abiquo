@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ns3:RepositorySpace xmlns:ns6="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData" 
+xmlns:ns5="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_VirtualSystemSettingData" xmlns:ns4="http://schemas.dmtf.org/wbem/wscim/1/common" 
+xmlns:ns3="http://www.abiquo.com/appliancemanager/repositoryspace" xmlns:ns2="http://schemas.dmtf.org/ovf/envelope/1" 
+
+ns3:RepositoryURI="http://abiquo-repository.s3.amazonaws.com/" 
+ns3:RepositoryName="Abiquo Official Repository">
+
+
+	<ns3:OVFDescription ns3:DiskFormat="QCOW2_SPARSE" ns3:OVFFile="centos5/centos5.ovf" ns3: OVFCategories="OS" ns3:DiskSize="1024"  ns2:instance="" ns2:class="">
+		<ns2:Info>Centos 5.  Log in as 'root' with password 'abiquo'. </ns2:Info>
+		<ns2:Product>Centos 5.6 x86_64</ns2:Product>
+       	<ns2:Icon ns2:fileRef="http://abiquo-repository.s3.amazonaws.com/centos5/centos.png" ns2:mimeType="image/jpeg" ns2:width="200" ns2:height="200"/>
+	</ns3:OVFDescription>
+   
+
+</ns3:RepositorySpace>

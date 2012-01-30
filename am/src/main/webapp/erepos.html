@@ -1,0 +1,23 @@
+<html>
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <title>User List</title>
+    <link href="css/base.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+    <h1>User List</h1>
+    <div>
+        <ul id="userlist">
+        </ul>
+    </div>
+</body>
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js"></script>
+<script type="text/javascript">
+    $.getJSON("erepos",
+        function(data){
+                $("#userlist").append("<li>"+data.repositoryLocation+"</li>");
+        
+        });
+</script>
+
+</html>

@@ -26,7 +26,6 @@ import java.util.List;
 
 import javax.xml.xpath.XPathExpressionException;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.libvirt.Connect;
 import org.libvirt.Domain;
@@ -72,7 +71,7 @@ public abstract class AbstractLibvirtCollector extends AbstractCollector
      */
     protected AimCollector aimcollector;
 
-    private void freeDomain(Domain dom)
+    private void freeDomain(final Domain dom)
     {
         try
         {
@@ -102,11 +101,9 @@ public abstract class AbstractLibvirtCollector extends AbstractCollector
             hostInfo.setHypervisor(getHypervisorType().getValue());
             hostInfo.setVersion(String.valueOf(conn.getVersion()));
 
-            List<ResourceType> datastores =
-                aimcollector.getDatastores();
+            List<ResourceType> datastores = aimcollector.getDatastores();
 
-            hostInfo.getResources().addAll(
-                aimcollector.getNetInterfaces());
+            hostInfo.getResources().addAll(aimcollector.getNetInterfaces());
             hostInfo.setInitiatorIQN(aimcollector.getInitiatorIQN());
 
             try
@@ -294,7 +291,7 @@ public abstract class AbstractLibvirtCollector extends AbstractCollector
         {
             case VIR_DOMAIN_RUNNING:
             case VIR_DOMAIN_BLOCKED:
-                vSys.setStatus(VirtualSystemStatusEnumType.RUNNING);
+                vSys.setStatus(VirtualSystemStatusEnumType.ON);
                 break;
 
             case VIR_DOMAIN_PAUSED:
@@ -302,7 +299,7 @@ public abstract class AbstractLibvirtCollector extends AbstractCollector
                 break;
 
             default:
-                vSys.setStatus(VirtualSystemStatusEnumType.POWERED_OFF);
+                vSys.setStatus(VirtualSystemStatusEnumType.OFF);
                 break;
         }
 
@@ -319,7 +316,7 @@ public abstract class AbstractLibvirtCollector extends AbstractCollector
     {
 
         final ResourceType currentHardDisk = new ResourceType();
-        currentHardDisk.setResourceType(ResourceEnumType.STORAGE_DISK);
+        currentHardDisk.setResourceType(ResourceEnumType.HARD_DISK);
         currentHardDisk.setAddress(imagePath);
         try
         {

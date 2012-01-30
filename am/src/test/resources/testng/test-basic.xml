@@ -7,7 +7,7 @@
             </run>
         </groups>
         <packages>
-            <package name="com.abiquo.appliancemanager.*" />
+            <package name="com.abiquo.appliancemanager.*Test" />
         </packages>
     </test>
 </suite>

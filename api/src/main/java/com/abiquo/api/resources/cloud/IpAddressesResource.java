@@ -112,7 +112,10 @@ public class IpAddressesResource extends AbstractResource
             ModelTransformer.transportFromPersistence(IpPoolManagementDto.class, ip);
 
         // Create the links to the resources where the IP object is assigned to
-        dto.addLinks(restBuilder.buildIpRasdLinks(ip));
+        if (ip.getVirtualDatacenter() != null)
+        {
+            dto.addLinks(restBuilder.buildIpRasdLinks(ip));
+        }
         dto.addLinks(restBuilder.buildRasdLinks(ip));
 
         return dto;

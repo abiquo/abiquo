@@ -1,25 +1,45 @@
 <?xml version="1.0"?>
-<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://java.sun.com/xml/ns/javaee" xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
-    xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" id="am" version="2.5">
-    <display-name>Abiquo Appliance Manager</display-name>
-    <!-- Spring framework context file -->
-    <!-- Default configuration, it could be omitted -->
-    <context-param>
-        <param-name>contextConfigLocation</param-name>
-        <param-value> 
-		classpath:springresources/applicationContext.xml</param-value>
-    </context-param>
-    <!-- classpath:META-INF/server/wink-core-context.xml -->
-    <listener>
-        <listener-class>com.abiquo.appliancemanager.web.listener.LicenseContextListener</listener-class>
-    </listener>
-    <listener>
-        <listener-class>com.abiquo.appliancemanager.web.listener.ContextListener</listener-class>
-    </listener>
-    <listener>
-        <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
-    </listener>
-    <!-- Remote Service Check Servlet -->
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns="http://java.sun.com/xml/ns/javaee" xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+	id="am" version="2.5">
+	<display-name>Abiquo Appliance Manager</display-name>
+	<context-param>
+		<param-name>contextConfigLocation</param-name>
+		<param-value> classpath:META-INF/server/wink-core-context.xml, classpath:springresources/applicationContext.xml </param-value>
+	</context-param>
+
+	<!-- classpath:META-INF/server/wink-core-context.xml -->
+	<listener>
+		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+	</listener>
+	<listener>
+		<listener-class>com.abiquo.appliancemanager.web.listener.LicenseContextListener</listener-class>
+	</listener>
+	<listener>
+		<listener-class>com.abiquo.appliancemanager.web.listener.ContextListener</listener-class>
+	</listener>
+
+	<servlet>
+		<servlet-name>amdefault</servlet-name>
+		<servlet-class>com.abiquo.appliancemanager.web.servlet.StaticRepositoryServlet</servlet-class>
+		<load-on-startup>0</load-on-startup>
+	</servlet>
+	<servlet>
+		<servlet-name>AmApiServlet</servlet-name>
+		<servlet-class>com.abiquo.appliancemanager.util.AbiquoRestServlet</servlet-class>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+	<servlet>
+		<servlet-name>restSdkAdmin</servlet-name>
+		<servlet-class>org.apache.wink.server.internal.servlet.AdminServlet</servlet-class>
+		<load-on-startup>2</load-on-startup>
+	</servlet>
+	
+	
+	
+	<!-- Remote Service Check Servlet 
+	TODO deprecate to CheckResource -->
     <servlet>
         <servlet-name>CheckServlet</servlet-name>
         <servlet-class>com.abiquo.appliancemanager.web.servlet.CheckServlet</servlet-class>
@@ -28,35 +48,23 @@
         <servlet-name>CheckServlet</servlet-name>
         <url-pattern>/check</url-pattern>
     </servlet-mapping>
-    <servlet>
-        <servlet-name>amdefault</servlet-name>
-        <servlet-class>com.abiquo.appliancemanager.web.servlet.StaticRepositoryServlet</servlet-class>
-        <!-- <init-param>
-            <param-name>listings</param-name>
-            <param-value>true</param-value>
-            </init-param> -->
-        <load-on-startup>0</load-on-startup>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>amdefault</servlet-name>
-        <url-pattern>/files/*</url-pattern>
-    </servlet-mapping>
-    <servlet>
-        <servlet-name>ApiServlet</servlet-name>
-        <servlet-class>com.abiquo.appliancemanager.util.AbiquoRestServlet</servlet-class>
-        <load-on-startup>1</load-on-startup>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>ApiServlet</servlet-name>
-        <url-pattern>/*</url-pattern>
-    </servlet-mapping>
-    <servlet>
-        <servlet-name>restSdkAdmin</servlet-name>
-        <servlet-class>org.apache.wink.server.internal.servlet.AdminServlet</servlet-class>
-        <load-on-startup>2</load-on-startup>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>restSdkAdmin</servlet-name>
-        <url-pattern>/console</url-pattern>
-    </servlet-mapping>
+	<!-- EXPERIMENTING HTML UPLOAD FORM
+	
+	<servlet-mapping>
+		<servlet-name>default</servlet-name>
+		<url-pattern>*.html</url-pattern>
+	</servlet-mapping>
+	 -->
+	<servlet-mapping>
+		<servlet-name>amdefault</servlet-name>
+		<url-pattern>/files/*</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>AmApiServlet</servlet-name>
+		<url-pattern>/*</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>restSdkAdmin</servlet-name>
+		<url-pattern>/console</url-pattern>
+	</servlet-mapping>
 </web-app>

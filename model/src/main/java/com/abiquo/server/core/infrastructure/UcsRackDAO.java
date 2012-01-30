@@ -81,9 +81,15 @@ public class UcsRackDAO extends DefaultDAOBase<Integer, UcsRack>
      */
     private Criterion sameDatacenter(final Datacenter datacenterId)
     {
-        return Restrictions.eq(UcsRack.DATACENTER_PROPERTY, datacenterId);
+        return Restrictions.eq(Rack.DATACENTER_PROPERTY, datacenterId);
     }
 
+    /**
+     * The ip is unique in DB.
+     * 
+     * @param ip ip.
+     * @return boolean
+     */
     public boolean existAnyOtherWithIP(final String ip)
     {
         return existsAnyByCriterions(Restrictions.eq(UcsRack.IP_PROPERTY, ip));

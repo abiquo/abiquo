@@ -21,6 +21,9 @@
 
 package com.abiquo.api.exceptions.mapper;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
@@ -37,6 +40,7 @@ import com.abiquo.api.exceptions.ConflictException;
 import com.abiquo.api.exceptions.ForbiddenException;
 import com.abiquo.api.exceptions.InternalServerErrorException;
 import com.abiquo.api.exceptions.NotFoundException;
+import com.abiquo.api.exceptions.PreconditionFailedException;
 import com.abiquo.api.exceptions.ServiceUnavailableException;
 import com.abiquo.api.exceptions.UnsupportedMediaException;
 import com.abiquo.model.transport.error.CommonError;
@@ -46,17 +50,35 @@ import com.abiquo.model.transport.error.ErrorsDto;
 @Provider
 public class APIExceptionMapper implements ExceptionMapper<APIException>
 {
+    private static final Logger LOGGER = LoggerFactory.getLogger(APIExceptionMapper.class);
 
-    private static final Logger logger = LoggerFactory.getLogger(APIExceptionMapper.class);
+    private static final Map<Class< ? extends APIException>, Status> statusMappings;
+
+    static
+    {
+        statusMappings = new HashMap<Class< ? extends APIException>, Status>();
+        statusMappings.put(ForbiddenException.class, Status.FORBIDDEN);
+        statusMappings.put(BadRequestException.class, Status.BAD_REQUEST);
+        statusMappings.put(ConflictException.class, Status.CONFLICT);
+        statusMappings.put(NotFoundException.class, Status.NOT_FOUND);
+        statusMappings.put(ServiceUnavailableException.class, Status.SERVICE_UNAVAILABLE);
+        statusMappings.put(InternalServerErrorException.class, Status.INTERNAL_SERVER_ERROR);
+        statusMappings.put(UnsupportedMediaException.class, Status.UNSUPPORTED_MEDIA_TYPE);
+        statusMappings.put(PreconditionFailedException.class, Status.PRECONDITION_FAILED);
+    }
 
     @Override
     public Response toResponse(final APIException exception)
     {
         ErrorsDto errors = new ErrorsDto();
-        APIException ext = exception;
-        for (CommonError error : ext.getErrors())
+
+        for (CommonError error : exception.getErrors())
         {
-            errors.add(createError(error));
+            ErrorDto errorDto = new ErrorDto();
+            errorDto.setCode(error.getCode());
+            errorDto.setMessage(error.getMessage());
+
+            errors.add(errorDto);
         }
 
         ResponseBuilder builder = new ResponseBuilderImpl();
@@ -65,82 +87,19 @@ public class APIExceptionMapper implements ExceptionMapper<APIException>
         return builder.build();
     }
 
-    private ErrorDto createError(final CommonError error)
-    {
-        ErrorDto errorDto = new ErrorDto();
-        errorDto.setCode(error.getCode());
-        errorDto.setMessage(error.getMessage());
-        return errorDto;
-    }
-
     private Status defineStatus(final APIException exception, final ErrorsDto dto)
-
     {
-        if (exception instanceof ForbiddenException)
+        Status status = statusMappings.get(exception.getClass());
+        if (status == null)
         {
-            if (logger.isTraceEnabled())
-            {
-                logger.trace("API Response " + Status.FORBIDDEN.name() + "\n" + dto.toString(),
-                    exception);
-            }
-            return Status.FORBIDDEN;
-        }
-        if (exception instanceof BadRequestException)
-        {
-            if (logger.isTraceEnabled())
-            {
-                logger.trace("API Response " + Status.BAD_REQUEST.name() + "\n" + dto.toString(),
-                    exception);
-            }
-            return Status.BAD_REQUEST;
-        }
-        if (exception instanceof ConflictException)
-        {
-            if (logger.isTraceEnabled())
-            {
-                logger.trace("API Response " + Status.CONFLICT.name() + "\n" + dto.toString(),
-                    exception);
-            }
-            return Status.CONFLICT;
-        }
-        if (exception instanceof NotFoundException)
-        {
-            if (logger.isTraceEnabled())
-            {
-                logger.trace("API Response " + Status.NOT_FOUND.name() + "\n" + dto.toString(),
-                    exception);
-            }
-            return Status.NOT_FOUND;
-        }
-        if (exception instanceof ServiceUnavailableException)
-        {
-            logger.error(
-                "Unexpected exception that throws a 503 error code in API:\n" + dto.toString(),
-                exception);
-            return Status.SERVICE_UNAVAILABLE;
-        }
-        if (exception instanceof InternalServerErrorException)
-        {
-            logger.error(
-                "Unexpected exception that throws a 500 error code in API:\n" + dto.toString(),
-                exception);
-            return Status.INTERNAL_SERVER_ERROR;
-        }
-        if (exception instanceof UnsupportedMediaException)
-        {
-            if (logger.isTraceEnabled())
-            {
-                logger.trace(
-                    "API Response " + Status.UNSUPPORTED_MEDIA_TYPE.name() + "\n" + dto.toString(),
-                    exception);
-            }
-            return Status.UNSUPPORTED_MEDIA_TYPE;
-        }
-        else
-        {
-            logger.error("Unknown exception thrown.", exception);
-            return Status.INTERNAL_SERVER_ERROR;
+            status = Status.INTERNAL_SERVER_ERROR;
         }
 
+        if (LOGGER.isTraceEnabled())
+        {
+            LOGGER.trace("API Response " + status.name() + "\n" + dto.toString() + "\n", exception);
+        }
+
+        return status;
     }
 }

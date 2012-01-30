@@ -47,6 +47,11 @@ public class DatacenterDto extends SingleResourceTransportDto implements Seriali
     private String location;
 
     /**
+     * Datacenter queue naming
+     */
+    private String uuid;
+
+    /**
      * List of remote services of the datacenter.
      */
     private RemoteServicesDto remoteServices;
@@ -62,7 +67,7 @@ public class DatacenterDto extends SingleResourceTransportDto implements Seriali
     /**
      * @param id id to set
      */
-    public void setId(Integer id)
+    public void setId(final Integer id)
     {
         this.id = id;
     }
@@ -78,7 +83,7 @@ public class DatacenterDto extends SingleResourceTransportDto implements Seriali
     /**
      * @param name name to set
      */
-    public void setName(String name)
+    public void setName(final String name)
     {
         this.name = name;
     }
@@ -94,7 +99,7 @@ public class DatacenterDto extends SingleResourceTransportDto implements Seriali
     /**
      * @param location set the location
      */
-    public void setLocation(String location)
+    public void setLocation(final String location)
     {
         this.location = location;
     }
@@ -102,7 +107,7 @@ public class DatacenterDto extends SingleResourceTransportDto implements Seriali
     /**
      * @param remoteServices the remoteServices to set
      */
-    public void setRemoteServices(RemoteServicesDto remoteServices)
+    public void setRemoteServices(final RemoteServicesDto remoteServices)
     {
         this.remoteServices = remoteServices;
     }
@@ -113,5 +118,15 @@ public class DatacenterDto extends SingleResourceTransportDto implements Seriali
     public RemoteServicesDto getRemoteServices()
     {
         return remoteServices;
+    }
+
+    public String getUuid()
+    {
+        return uuid;
+    }
+
+    public void setUuid(final String uuid)
+    {
+        this.uuid = uuid;
     }
 }

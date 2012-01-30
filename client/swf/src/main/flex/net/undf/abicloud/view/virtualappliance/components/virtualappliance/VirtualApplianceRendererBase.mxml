@@ -100,9 +100,11 @@
              */
             public function onLogsRetrieved(value:ArrayCollection):void
             {
-                this._virtualAppliance.logs = value;
-                this._logs = value; 
-
+                if(this._virtualAppliance)
+                {
+	                this._virtualAppliance.logs = value;
+	                this._logs = value; 
+                }
             }
 
             /**
@@ -110,7 +112,7 @@
              **/
             private function onClickPowerOnOffButton():void
             {
-                if(this._virtualAppliance.state.id == State.APPLY_CHANGES_NEEDED){
+                if(this._virtualAppliance.state.description == State.NEEDS_SYNC.description){
                 	AbiCloudAlert.showError(ResourceManager.getInstance().getString("Common",
                                                                                     "ALERT_TITLE_LABEL"),
                                             ResourceManager.getInstance().getString("VirtualAppliance",
@@ -149,9 +151,9 @@
              */
             private function powerOnOffVirtualAppliance():void
             {
-                switch (this._virtualAppliance.state.id)
+                switch (this._virtualAppliance.state.description)
                 {
-                    case State.RUNNING:
+                    case State.DEPLOYED.description:
                         //Asking for confirmation to power the virtual appliance off
                         AbiCloudAlert.showAlert(ResourceManager.getInstance().getString("Common",
                                                                                         "ALERT_TITLE_LABEL"),
@@ -162,7 +164,7 @@
                                                 Alert.YES | Alert.NO, powerOffVirtualAppliance);
                         break;
 
-                    case State.PAUSED:
+                    case State.NEEDS_SYNC.description:
                         //Asking for confirmation to power the virtual appliance off
                         AbiCloudAlert.showAlert(ResourceManager.getInstance().getString("Common",
                                                                                         "ALERT_TITLE_LABEL"),
@@ -173,28 +175,12 @@
                                                 Alert.YES | Alert.NO, powerOffVirtualAppliance);
                         break;
 
-                    case State.APPLY_CHANGES_NEEDED:
-                        //Asking for confirmation to power the virtual appliance off
-                        AbiCloudAlert.showAlert(ResourceManager.getInstance().getString("Common",
-                                                                                        "ALERT_TITLE_LABEL"),
-                                                ResourceManager.getInstance().getString("VirtualAppliance",
-                                                                                        "ALERT_SHUTDOWN_VIRTUALAPPLIANCE_HEADER"),
-                                                ResourceManager.getInstance().getString("VirtualAppliance",
-                                                                                        "ALERT_SHUTDOWN_VIRTUALAPPLIANCE_TEXT"),
-                                                Alert.YES | Alert.NO, powerOffVirtualAppliance);
-                        break;
-
-                    case State.POWERED_OFF:
+                    case State.NOT_DEPLOYED.description:
                         //The Virtual Appliance is powered off We proceed to power it on
                         powerOnVirtualAppliance();
                         break;
-
-                    case State.NOT_DEPLOYED:
-                        //The Virtual Appliance is powered off We proceed to power it on
-                        powerOnVirtualAppliance();
-                        break;
-
-                    case State.FAILED:
+                    
+                    case State.UNKNOWN.description:
                         //The VirtualAppliance is in state Failed, and cannot be modified
                         AbiCloudAlert.showError(ResourceManager.getInstance().getString("Common",
                                                                                         "ALERT_TITLE_LABEL"),
@@ -202,7 +188,8 @@
                                                                                         "ALERT_VIRTUALAPPLIANCE_FAILED_STATE_HEADER"),
                                                 ResourceManager.getInstance().getString("VirtualAppliance",
                                                                                         "ALERT_VIRTUALAPPLIANCE_FAILED_STATE_TEXT"),
-                                                Alert.OK);
+                                                Alert.OK); 
+
                         break;
 
                     default:
@@ -263,7 +250,7 @@
                 var virtualApplianceEvent:VirtualApplianceEvent = new VirtualApplianceEvent(VirtualApplianceEvent.MARK_LOG_AS_DELETED);
                 virtualApplianceEvent.log = log;
                 virtualApplianceEvent.virtualAppliance = this._virtualAppliance;
-                dispatchEvent(virtualApplianceEvent);
+                //dispatchEvent(virtualApplianceEvent);
             }
 
             private function dateLabelFunction(item:Object, column:DataGridColumn):String
@@ -285,20 +272,20 @@
         styleName="VerticalStateBlackBarSkin">
 
          <utils:SmoothImage id="startImage"
-            source="{(this._virtualAppliance.state.id == State.RUNNING &amp;&amp; this._virtualAppliance.subState.id != State.UNKNOWN) ? StateIcons.RUNNING:StateIcons.NOT_DEPLOYED}"/>
+            source="{(this._virtualAppliance.state.description == State.DEPLOYED.description &amp;&amp; this._virtualAppliance.state.description != State.UNKNOWN.description) ? StateIcons.RUNNING:StateIcons.NOT_DEPLOYED}"/>
 
         <utils:SmoothImage id="applyChangesImage"
-            source="{(this._virtualAppliance.state.id == State.APPLY_CHANGES_NEEDED) ? StateIcons.PAUSED:StateIcons.NOT_DEPLOYED}"/>
+            source="{(this._virtualAppliance.state.description == State.NEEDS_SYNC.description) ? StateIcons.PAUSED:StateIcons.NOT_DEPLOYED}"/>
 
         <utils:SmoothImage id="stopImage"
-            source="{(this._virtualAppliance.state.id == State.POWERED_OFF || this._virtualAppliance.state.id == State.NOT_DEPLOYED) ? StateIcons.POWERED_OFF:StateIcons.DISABLED}"
-            visible="{this._virtualAppliance.subState.id == State.UNKNOWN ? false:true}"
-            includeInLayout="{this._virtualAppliance.subState.id == State.UNKNOWN ? false:true}"/>
+            source="{(this._virtualAppliance.state.description == State.NOT_DEPLOYED.description) ? StateIcons.OFF:StateIcons.DISABLED}"
+            visible="{this._virtualAppliance.state.description == State.UNKNOWN.description ? false:true}"
+            includeInLayout="{this._virtualAppliance.state.description == State.UNKNOWN.description ? false:true}"/>
 
 		<utils:SmoothImage id="unknow_Image"
-            source="{(this._virtualAppliance.subState.id == State.UNKNOWN) ? CommonAssets.unknownIcon:null}"
-            visible="{this._virtualAppliance.subState.id == State.UNKNOWN}"
-            includeInLayout="{this._virtualAppliance.subState.id == State.UNKNOWN}"
+            source="{(this._virtualAppliance.state.description == State.UNKNOWN.description) ? CommonAssets.unknownIcon:null}"
+            visible="{this._virtualAppliance.state.description == State.UNKNOWN.description}"
+            includeInLayout="{this._virtualAppliance.state.description == State.UNKNOWN.description}"
             toolTip="@Resource(bundle='Main', key='LABEL_VM_UNKNOWN')"/>       
 
     </mx:VBox>
@@ -336,7 +323,7 @@
                     horizontalCenter="-10"
                     verticalCenter="-10"
                     creationComplete="AbicloudUtils.getImageFromStyle('VirtualApplianceBusyIcon', busyIcon)"
-                    visible="{this._virtualAppliance.state.id == State.IN_PROGRESS}"/>
+                    visible="{this._virtualAppliance.state.description == State.LOCKED.description}"/>
             </mx:Canvas>
 
 
@@ -371,6 +358,8 @@
         <mx:VRule 
             width="1" height="100%"
             horizontalCenter="0"
+            visible="false"
+            includeInLayout="false"
             styleName="VirtualApplianceRendererVRule1"
             />
 
@@ -380,6 +369,8 @@
             paddingBottom="10"
             paddingRight="10"
             paddingTop="10"
+            visible="false"
+            includeInLayout="false"
             verticalGap="3">
 
             <mx:HBox 
@@ -491,13 +482,14 @@
         verticalAlign="top"
         verticalGap="0"
         verticalScrollPolicy="off" horizontalScrollPolicy="off"
-        enabled="{this._virtualAppliance.state.id != State.IN_PROGRESS &amp;&amp; this._virtualAppliance.state.id != State.FAILED &amp;&amp; this._virtualAppliance.subState.id != State.UNKNOWN}"
+        enabled="{this._virtualAppliance.state.description != State.LOCKED.description &amp;&amp; this._virtualAppliance.state.description != State.UNKNOWN.description &amp;&amp; this._virtualAppliance.state.description != State.UNKNOWN.description}"
         styleName="VerticalStateBlackBarSkin">
-
+        <!--enabled="{this._virtualAppliance.state.description != State.LOCKED.description &amp;&amp; this._virtualAppliance.state.description != State.FAILED.description &amp;&amp; this._virtualAppliance.state.description != State.UNKNOWN.description}"-->
+            
         <mx:Button id="powerOnOffButton"
             width="57" height="47"
             styleName="VirtualApplianceDeployBigButton"
-            selected="{_virtualAppliance.state.id == State.PAUSED || _virtualAppliance.state.id == State.RUNNING || _virtualAppliance.state.id == State.APPLY_CHANGES_NEEDED}"
+            selected="{_virtualAppliance.state.description == State.DEPLOYED.description || _virtualAppliance.state.description == State.NEEDS_SYNC.description}"
             toolTip="{powerOnOffButton.selected ? ResourceManager.getInstance().getString('VirtualAppliance', 'LABEL_UNDEPLOY') : 
 				   										 ResourceManager.getInstance().getString('VirtualAppliance', 'LABEL_DEPLOY')}"
             click="onClickPowerOnOffButton()"

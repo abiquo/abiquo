@@ -61,7 +61,7 @@
         ]]>
     </mx:Script>
 
-    <mx:Form paddingTop="3">
+    <mx:Form paddingTop="3" paddingBottom="0">
         <mx:FormItem 
             width="100%"
             horizontalAlign="right"
@@ -198,12 +198,15 @@
                 </mx:DataGridColumn>
             </mx:columns>
         </mx:DataGrid>
-
+    </mx:Form>
+    <mx:HBox width="100%" 
+    	horizontalAlign="center" verticalAlign="top"
+    	paddingBottom="10">
         <mx:Button id="closeButton"
             height="18"
             label="@Resource(bundle='Common', key='BUTTON_CLOSE')"
             styleName="AlternativeButton"
-            click="onClickCloseButton()"/>
-    </mx:Form>
+            click="onClickCloseButton()"/>    	
+    </mx:HBox>
 
 </AbiCloudPopUp>

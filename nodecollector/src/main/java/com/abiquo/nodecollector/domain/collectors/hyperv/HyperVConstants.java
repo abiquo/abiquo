@@ -43,6 +43,15 @@ public final class HyperVConstants
     /** Hyper-V resource sub-type for virtual hard disks. */
     public static final String VIRTUAL_DISK_RESOURCE_SUBTYPE = "Microsoft Virtual Hard Disk";
 
+    /** Hyper-V resource type for virtual or physical hard disks. */
+    public static final int DISK_RESOURCE_TYPE = 22;
+
+    /** Hyper-V resource sub-type for virtual hard disks. */
+    public static final String DISKSYNTHETIC = "MICROSOFT SYNTHETIC DISK DRIVE";
+
+    /** Hyper-V resource sub-type for physical hard disks (attached volumes). */
+    public static final String DISKPHYSICAL = "MICROSOFT PHYSICAL DISK DRIVE";
+
     /** The Number Of Processor field in the Msvm_SummaryInformation object. */
     public static final Integer NUMBER_OF_PROCESSORS_FIELD = 4;
 

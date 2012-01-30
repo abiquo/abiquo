@@ -21,6 +21,7 @@
 
 package com.abiquo.server.core.infrastructure.storage;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
@@ -30,18 +31,24 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
+import org.hibernate.annotations.Filter;
+import org.hibernate.annotations.FilterDef;
+import org.hibernate.annotations.FilterDefs;
+import org.hibernate.annotations.Filters;
 import org.hibernate.annotations.ForeignKey;
 import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.Range;
 
 import com.abiquo.model.enumerator.VolumeState;
 import com.abiquo.model.validation.IscsiPath;
+import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
-import com.abiquo.server.core.cloud.VirtualImage;
+import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.infrastructure.management.Rasd;
 import com.abiquo.server.core.infrastructure.management.RasdManagement;
 import com.softwarementors.validation.constraints.LeadingOrTrailingWhitespace;
@@ -49,13 +56,19 @@ import com.softwarementors.validation.constraints.Required;
 
 @Entity
 @Table(name = VolumeManagement.TABLE_NAME)
+@FilterDefs({@FilterDef(name = VolumeManagement.NOT_TEMP),
+    @FilterDef(name = VolumeManagement.ONLY_TEMP)})
+@Filters({@Filter(name = VolumeManagement.NOT_TEMP, condition = "temporal is null"),
+    @Filter(name = VolumeManagement.ONLY_TEMP, condition = "temporal is not null")})
 @DiscriminatorValue(VolumeManagement.DISCRIMINATOR)
 @NamedQueries({
+@NamedQuery(name = VolumeManagement.VOLUMES_ATTACHED_TO_VM, query = VolumeManagement.ATTACHED_TO_VM),
+@NamedQuery(name = VolumeManagement.VOLUMES_AVAILABLES, query = VolumeManagement.AVAILABLES),
 @NamedQuery(name = VolumeManagement.VOLUMES_BY_VDC, query = VolumeManagement.BY_VDC),
 @NamedQuery(name = VolumeManagement.VOLUMES_BY_POOL, query = VolumeManagement.BY_POOL)})
 public class VolumeManagement extends RasdManagement
 {
-    public static final String DISCRIMINATOR = "8";
+    public static final String DISCRIMINATOR = "8"; // CIMResourceTypeEnum.iSCSI_HBA
 
     public static final String ALLOCATION_UNITS = "MegaBytes";
 
@@ -67,24 +80,45 @@ public class VolumeManagement extends RasdManagement
 
     public static final String VOLUMES_BY_POOL = "VOLUMES_BY_POOL";
 
-    public static final String BY_VDC = "SELECT vol FROM VolumeManagement vol "
-        + "LEFT JOIN vol.virtualMachine vm " + "LEFT JOIN vol.virtualAppliance vapp "
-        + "WHERE vol.virtualDatacenter.id = :vdcId " + "AND ("
-        + "vol.rasd.elementName like :filterLike " + "OR vm.name like :filterLike "
-        + "OR vapp.name like :filterLike " + "OR vol.virtualDatacenter.name like :filterLike "
-        + "OR vol.storagePool.tier.name like :filterLike " + ")";
+    public static final String VOLUMES_ATTACHED_TO_VM = "VOLUMES_ATTACHED_TO_VM";
 
-    public static final String BY_POOL = "SELECT vol FROM VolumeManagement vol "
-        + "LEFT JOIN vol.virtualMachine vm " + "LEFT JOIN vol.virtualAppliance vapp "
-        + "WHERE vol.storagePool.idStorage = :poolId " + "AND ("
-        + "vol.rasd.elementName like :filterLike " + "OR vol.rasd.id like :filterLike "
-        + "OR vm.name like :filterLike " + "OR vapp.name like :filterLike "
-        + "OR vol.virtualDatacenter.name like :filterLike "
-        + "OR vol.storagePool.tier.name like :filterLike " + ")";
+    public static final String VOLUMES_AVAILABLES = "VOLUMES_AVAILABLES";
+
+    public static final String NOT_TEMP = "volumemanagement_not_temp";
+    public static final String ONLY_TEMP = "volumemanagement_only_temp";
+    
+    public static final String BY_VDC =
+        "SELECT vol FROM VolumeManagement vol LEFT JOIN vol.virtualMachine vm "
+            + "LEFT JOIN vol.virtualAppliance vapp WHERE vol.virtualDatacenter.id = :vdcId "
+            + "AND (vol.rasd.elementName like :filterLike OR vm.name like :filterLike "
+            + "OR vapp.name like :filterLike OR vol.virtualDatacenter.name like :filterLike "
+            + "OR vol.storagePool.tier.name like :filterLike )";
+
+    public static final String BY_POOL =
+        "SELECT vol FROM VolumeManagement vol LEFT JOIN vol.virtualMachine vm "
+            + "LEFT JOIN vol.virtualAppliance vapp WHERE vol.storagePool.idStorage = :poolId "
+            + "AND (vol.rasd.elementName like :filterLike "
+            + "OR vol.rasd.id like :filterLike OR vm.name like :filterLike "
+            + "OR vapp.name like :filterLike OR vol.virtualDatacenter.name like :filterLike "
+            + "OR vol.storagePool.tier.name like :filterLike )";
+
+    public static final String ATTACHED_TO_VM =
+        "SELECT vol FROM VolumeManagement vol LEFT JOIN vol.virtualMachine vm "
+            + "LEFT JOIN vol.virtualAppliance vapp "
+            + "WHERE vm.id = :vmId AND vol.state = :state "
+            + "AND (vol.rasd.elementName like :filterLike " + "OR vm.name like :filterLike "
+            + "OR vapp.name like :filterLike " + "OR vol.virtualDatacenter.name like :filterLike "
+            + "OR vol.storagePool.tier.name like :filterLike)" + " AND vol.virtualMachineTemplate IS NULL";
+
+    public static final String AVAILABLES =
+        "SELECT vol FROM VolumeManagement vol LEFT JOIN vol.virtualMachine vm "
+            + "WHERE vol.virtualDatacenter.id = :vdcId AND vm IS NULL "
+            + "AND vol.virtualMachineTemplate IS NULL AND vol.rasd.elementName like :filterLike "
+            + "AND vol NOT IN (SELECT stateful.volume FROM DiskStatefulConversion stateful)";
 
     // DO NOT ACCESS: present due to needs of infrastructure support. *NEVER* call from business
     // code
-    protected VolumeManagement()
+    public VolumeManagement()
     {
         // Just for JPA support
     }
@@ -134,31 +168,37 @@ public class VolumeManagement extends RasdManagement
         getRasd().setPoolId(storagePool.getId());
     }
 
-    public final static String VIRTUAL_IMAGE_PROPERTY = "virtualImage";
+    public final static String VIRTUAL_MACHINE_TEMPLATE_PROPERTY = "virtualMachineTemplate";
 
-    private final static boolean VIRTUAL_IMAGE_REQUIRED = false;
+    private final static boolean VIRTUAL_MACHINE_TEMPLATE_REQUIRED = false;
 
-    private final static String VIRTUAL_IMAGE_ID_COLUMN = "idImage";
+    private final static String VIRTUAL_MACHINE_TEMPLATE_ID_COLUMN = "idImage";
 
-    @JoinColumn(name = VIRTUAL_IMAGE_ID_COLUMN)
-    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = VIRTUAL_MACHINE_TEMPLATE_ID_COLUMN)
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @ForeignKey(name = "FK_" + TABLE_NAME + "_virtualImage")
-    private VirtualImage virtualImage;
+    private VirtualMachineTemplate virtualMachineTemplate;
 
-    @Required(value = VIRTUAL_IMAGE_REQUIRED)
-    public VirtualImage getVirtualImage()
+    @Required(value = VIRTUAL_MACHINE_TEMPLATE_REQUIRED)
+    public VirtualMachineTemplate getVirtualMachineTemplate()
     {
-        return this.virtualImage;
+        return this.virtualMachineTemplate;
     }
 
-    public void setVirtualImage(final VirtualImage virtualImage)
+    public void setVirtualMachineTemplate(final VirtualMachineTemplate virtualMachineTemplate)
     {
-        this.virtualImage = virtualImage;
+        this.virtualMachineTemplate = virtualMachineTemplate;
+
+        if (virtualMachineTemplate != null)
+        {
+            this.virtualMachineTemplate.setStateful(true);
+            this.virtualMachineTemplate.setPath(getIdScsi());
+        }
     }
 
     public boolean isStateful()
     {
-        return virtualImage != null;
+        return virtualMachineTemplate != null;
     }
 
     public final static String ID_SCSI_PROPERTY = "idScsi";
@@ -185,10 +225,15 @@ public class VolumeManagement extends RasdManagement
         return this.idScsi;
     }
 
-    private void setIdScsi(final String idScsi)
+    public void setIdScsi(final String idScsi)
     {
         this.idScsi = idScsi;
         getRasd().setConnection(idScsi);
+        if (isStateful())
+        {
+            // If the volume is stateful update the virtual machine template too
+            this.virtualMachineTemplate.setPath(idScsi);
+        }
     }
 
     public final static String STATE_PROPERTY = "state";
@@ -205,7 +250,7 @@ public class VolumeManagement extends RasdManagement
     }
 
     // Must not be used. Use the state change methods
-    private void setState(final VolumeState state)
+    public void setState(final VolumeState state)
     {
         this.state = state;
     }
@@ -273,28 +318,46 @@ public class VolumeManagement extends RasdManagement
 
     // ********************************** Volume state transitions ********************************
 
-    public void associate()
+    @Override
+    public void attach(final int sequence, final VirtualMachine vm)
     {
         if (state != VolumeState.DETACHED)
         {
-            throw new IllegalStateException("Volume should be in state "
-                + VolumeState.DETACHED.name());
+            throw new IllegalStateException("Volume should be in " + VolumeState.DETACHED.name()
+                + " state");
         }
 
+        if (vm == null)
+        {
+            throw new IllegalStateException("Virtual machine can not be null");
+        }
+
+        setSequence(sequence);
+        setVirtualMachine(vm);
         setState(VolumeState.ATTACHED);
     }
 
-    public void disassociate()
+    @Override
+    public void detach()
     {
         if (state != VolumeState.ATTACHED)
         {
-            throw new IllegalStateException("Volume should be in state "
-                + VolumeState.ATTACHED.name());
+            throw new IllegalStateException("Volume should be in " + VolumeState.ATTACHED.name()
+                + " state");
         }
 
+        getRasd().setGeneration(null);
+        setVirtualMachine(null);
+        setVirtualAppliance(null);
         setState(VolumeState.DETACHED);
     }
 
+    @Override
+    public boolean isAttached()
+    {
+        return state == VolumeState.ATTACHED && getVirtualMachine() != null;
+    }
+    
     // ********************************** Others ********************************
     @Override
     public String toString()

@@ -24,8 +24,8 @@ import com.abiquo.vsm.exception.MonitorException;
 import com.abiquo.vsm.exception.VSMException;
 import com.abiquo.vsm.model.PhysicalMachine;
 import com.abiquo.vsm.model.VirtualMachine;
-import com.abiquo.vsm.monitor.MonitorManager;
 import com.abiquo.vsm.monitor.Monitor.Type;
+import com.abiquo.vsm.monitor.MonitorManager;
 
 /**
  * Entry point to the VSM business logic.
@@ -63,7 +63,8 @@ public class VSMService
         monitorManager = new MonitorManager();
     }
 
-    public void getState(String physicalMachineAddress, String type, String virtualMachineName)
+    public void getState(final String physicalMachineAddress, final String type,
+        final String virtualMachineName)
     {
         try
         {
@@ -75,14 +76,29 @@ public class VSMService
                 + virtualMachineName + " on " + physicalMachineAddress, ex);
         }
     }
-    
-    public PhysicalMachine monitor(String physicalMachineAddress, String type)
+
+    public void invalidateLastKnownState(final String physicalMachineAddress, final String type,
+        final String virtualMachineName)
     {
-    	return monitor(physicalMachineAddress, type, null, null);
+        try
+        {
+            monitorManager.invalidateLastKnownState(physicalMachineAddress, Type.valueOf(type),
+                virtualMachineName);
+        }
+        catch (MonitorException ex)
+        {
+            throw new VSMException("Could not invalidate the last known state of virtual machine "
+                + virtualMachineName + " on " + physicalMachineAddress, ex);
+        }
     }
 
-    public PhysicalMachine monitor(String physicalMachineAddress, String type, String username,
-        String password)
+    public PhysicalMachine monitor(final String physicalMachineAddress, final String type)
+    {
+        return monitor(physicalMachineAddress, type, null, null);
+    }
+
+    public PhysicalMachine monitor(final String physicalMachineAddress, final String type,
+        final String username, final String password)
     {
         try
         {
@@ -95,8 +111,8 @@ public class VSMService
         }
     }
 
-    public void createAndStartMonitor(String physicalMachineAddress, String type, String username,
-        String password)
+    public void createAndStartMonitor(final String physicalMachineAddress, final String type,
+        final String username, final String password)
     {
         try
         {
@@ -109,7 +125,7 @@ public class VSMService
         }
     }
 
-    public void shutdown(String physicalMachineAddress, String type)
+    public void shutdown(final String physicalMachineAddress, final String type)
     {
         try
         {
@@ -126,8 +142,8 @@ public class VSMService
         monitorManager.stopAllMonitors();
     }
 
-    public VirtualMachine subscribe(String physicalMachineAddress, String type,
-        String virtualMachineName)
+    public VirtualMachine subscribe(final String physicalMachineAddress, final String type,
+        final String virtualMachineName)
     {
         try
         {
@@ -140,7 +156,8 @@ public class VSMService
         }
     }
 
-    public void unsubscribe(String physicalMachineAddress, String type, String virtualMachineName)
+    public void unsubscribe(final String physicalMachineAddress, final String type,
+        final String virtualMachineName)
     {
         try
         {

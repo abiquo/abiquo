@@ -103,5 +103,10 @@
         destination="systemPropertiesService"
         channelSet="{AbiCloudModel.getInstance().configurationManager.config.USE_SECURE_CHANNEL_LOGIN == 1 ? AbiCloudModel.getInstance().configurationManager.secureChannelSet : AbiCloudModel.getInstance().configurationManager.channelSet}"
         showBusyCursor="false"/>
+    
+    <mx:RemoteObject id="storageService"
+        destination="storageService"
+        channelSet="{AbiCloudModel.getInstance().configurationManager.channelSet}"
+        showBusyCursor="false"/>
         
 </EventMap>

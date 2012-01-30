@@ -33,9 +33,14 @@ import javax.persistence.Table;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
+import org.hibernate.annotations.Filter;
+import org.hibernate.annotations.FilterDef;
+import org.hibernate.annotations.FilterDefs;
+import org.hibernate.annotations.Filters;
 import org.hibernate.annotations.ForeignKey;
 import org.hibernate.validator.constraints.Length;
 
+import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.infrastructure.management.RasdManagement;
 import com.softwarementors.validation.constraints.LeadingOrTrailingWhitespace;
 import com.softwarementors.validation.constraints.Required;
@@ -43,6 +48,10 @@ import com.softwarementors.validation.constraints.Required;
 @Entity
 @Table(name = IpPoolManagement.TABLE_NAME)
 @DiscriminatorValue("10")
+@FilterDefs({@FilterDef(name = IpPoolManagement.NOT_TEMP),
+@FilterDef(name = IpPoolManagement.ONLY_TEMP)})
+@Filters({@Filter(name = IpPoolManagement.NOT_TEMP, condition = "temporal is null"),
+@Filter(name = IpPoolManagement.ONLY_TEMP, condition = "temporal is not null")})
 @NamedQueries({@NamedQuery(name = "IP_POOL_MANAGEMENT.BY_VLAN", query = IpPoolManagement.BY_VLAN),
 @NamedQuery(name = "IP_POOL_MANAGEMENT.BY_VDC", query = IpPoolManagement.BY_VDC),
 @NamedQuery(name = "IP_POOL_MANAGEMENT.BY_ENT", query = IpPoolManagement.BY_ENT)})
@@ -57,6 +66,13 @@ public class IpPoolManagement extends RasdManagement
 
     public static final String DEFAULT_RESOURCE_PUBLIC_IP_DESCRIPTION =
         "MAC Address asociated to public Network";
+
+    public static final String DEFAULT_RESOURCE_EXTERNAL_IP_DESCRIPTION =
+        "MAC Address asociated to external Network";
+
+    public static final String NOT_TEMP = "ipmanagement_not_temp";
+
+    public static final String ONLY_TEMP = "ipmanagement_only_temp";
 
     public static enum Type
     {
@@ -90,7 +106,7 @@ public class IpPoolManagement extends RasdManagement
     }
 
     public IpPoolManagement(final VLANNetwork vlan, final String mac, final String name,
-        final String ip, final String networkName, final Type type)
+        final String ip, final String networkName)
     {
         super(DISCRIMINATOR);
 
@@ -184,26 +200,6 @@ public class IpPoolManagement extends RasdManagement
         {
             getRasd().setAddress(mac);
         }
-    }
-
-    public final static String CONFIGURATION_GATEWAY_PROPERTY = "configureGateway";
-
-    private final static String CONFIGURATION_GATEWAY_COLUMN = "configureGateway";
-
-    private final static boolean CONFIGURATION_GATEWAY_REQUIRED = true;
-
-    @Column(name = CONFIGURATION_GATEWAY_COLUMN, nullable = false)
-    private boolean configureGateway;
-
-    @Required(value = CONFIGURATION_GATEWAY_REQUIRED)
-    public boolean getConfigureGateway()
-    {
-        return this.configureGateway;
-    }
-
-    public void setConfigureGateway(final boolean configurareGateway)
-    {
-        this.configureGateway = configurareGateway;
     }
 
     public final static String QUARANTINE_PROPERTY = "quarantine";
@@ -367,6 +363,38 @@ public class IpPoolManagement extends RasdManagement
 
             return null;
         }
+    }
+
+    @Override
+    public void attach(final int sequence, final VirtualMachine vm)
+    {
+        if (vm == null)
+        {
+            throw new IllegalStateException("Virtual machine can not be null");
+        }
+
+        setSequence(sequence);
+        setVirtualMachine(vm);
+    }
+
+    @Override
+    public void detach()
+    {
+        setVirtualMachine(null);
+        setVirtualAppliance(null);
+    }
+
+    @Override
+    public boolean isAttached()
+    {
+        return getVirtualMachine() != null;
+    }
+
+    public boolean itHasTheDefaultConfiguration(VirtualMachine vm)
+    {
+        return vm.getNetworkConfiguration() != null
+            && getVlanNetwork().getConfiguration().getId()
+                .equals(vm.getNetworkConfiguration().getId());
     }
 
 }

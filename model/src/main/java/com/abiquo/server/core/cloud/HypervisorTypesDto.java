@@ -21,6 +21,7 @@
 
 package com.abiquo.server.core.cloud;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.xml.bind.annotation.XmlElement;
@@ -32,17 +33,34 @@ import com.abiquo.model.transport.WrapperDto;
 /**
  * Represent a collection of HypervisorTypes
  */
-@XmlRootElement(name = "hypervisors")
-public class HypervisorTypesDto extends WrapperDto<HypervisorType>
+@XmlRootElement(name = "hypervisorstype")
+public class HypervisorTypesDto extends WrapperDto<HypervisorTypeDto>
 {
-    @XmlElement(name = "type")
-    public List<HypervisorType> getCollection()
+    /**
+     * 
+     */
+    private static final long serialVersionUID = -4460166562066326383L;
+
+    @Override
+    @XmlElement(name = "hypervisortype")
+    public List<HypervisorTypeDto> getCollection()
     {
         return collection;
     }
 
-    public void setCollection(List<HypervisorType> types)
+    public void setCollection(final ArrayList<HypervisorType> arrayList)
     {
-        collection = types;
+        // TODO Auto-generated method stub
+
+        for (HypervisorType ht : arrayList)
+        {
+            HypervisorTypeDto aux = new HypervisorTypeDto();
+            aux.setBaseFormat(ht.baseFormat);
+            aux.setCompatibilityTable(ht.compatibilityTable);
+            aux.setDefaultPort(ht.defaultPort);
+            aux.setId(ht.id());
+            collection.add(aux);
+        }
+
     }
 }

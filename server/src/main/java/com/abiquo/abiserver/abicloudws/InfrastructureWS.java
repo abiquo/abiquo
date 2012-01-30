@@ -46,8 +46,6 @@ import com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.Virtualap
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.ResourceAllocationSettingData;
 import com.abiquo.abiserver.config.AbiConfig;
 import com.abiquo.abiserver.config.AbiConfigManager;
-import com.abiquo.abiserver.eventing.EventingException;
-import com.abiquo.abiserver.eventing.EventingSupport;
 import com.abiquo.abiserver.exception.PersistenceException;
 import com.abiquo.abiserver.exception.RemoteServiceException;
 import com.abiquo.abiserver.exception.VirtualApplianceFaultException;
@@ -175,7 +173,7 @@ public class InfrastructureWS implements IInfrastructureWS
             }
             else
             {
-                throw new VirtualFactoryHealthException("The virtual machine health check don't pass");
+                throw new VirtualFactoryHealthException("The virtual machine did not pass the health check.");
             }
 
         }
@@ -230,6 +228,7 @@ public class InfrastructureWS implements IInfrastructureWS
      * @param virtualMachine the virtual machine to delete
      * @return a basic result
      */
+    @Override
     public BasicResult deleteVirtualMachine(final VirtualMachine virtualMachine)
     {
         BasicResult result = null;
@@ -262,6 +261,7 @@ public class InfrastructureWS implements IInfrastructureWS
      * com.abiquo.abiserver.abicloudws.IInfrastructureWS#editVirtualMachine(com.abiquo.abiserver
      * .pojo.infrastructure.VirtualMachine)
      */
+    @Override
     public BasicResult editVirtualMachine(final VirtualMachine virtualMachine)
     {
         BasicResult result = new BasicResult();
@@ -424,7 +424,7 @@ public class InfrastructureWS implements IInfrastructureWS
         for (RemoteService remoteService : remoteServices)
         {
             if (com.abiquo.abiserver.business.hibernate.pojohb.service.RemoteServiceType
-                .valueOf(remoteService.getRemoteServiceType().getValueOf()) == com.abiquo.abiserver.business.hibernate.pojohb.service.RemoteServiceType.VIRTUAL_FACTORY)
+                .valueOf(remoteService.getRemoteServiceType().getValueOf()) == com.abiquo.abiserver.business.hibernate.pojohb.service.RemoteServiceType.TARANTINO)
             {
                 destination = remoteService.getUri();
                 break;
@@ -433,52 +433,16 @@ public class InfrastructureWS implements IInfrastructureWS
         return destination;
     }
 
-    /**
-     * Helper to refresh the virtual appliance in the virtualfactory
-     * 
-     * @param virtualAppliance the virtual factory to refresh
-     * @param virtualApplianceWs
-     * @param mustChangeState this flag indicates if the virtual machines should recover its state
-     * @deprecated
-     * @throws Exception
-     */
-    @Deprecated
-    private BasicResult refreshVirtualAppliance(final VirtualAppliance virtualAppliance,
-        final VirtualApplianceWS virtualApplianceWs, final boolean mustChangeState)
-        throws Exception
-    {
-        // Launching the refreshing operation for the virtual appliance
-
-        logger.info("Refreshing the Virtual Appliance in the virtual factory");
-
-        BasicResult basicResult = new BasicResult();
-        basicResult.setSuccess(true);
-
-        try
-        {
-            basicResult =
-                virtualApplianceWs.forceCreateVirtualAppliance(virtualAppliance, mustChangeState);
-        }
-        catch (Exception e)
-        {
-            String msg = "An error was occurred when refreshing the virtual appliance";
-            logger.debug(msg, e);
-            basicResult.setSuccess(true);
-            throw new Exception(msg, e);
-        }
-
-        return basicResult;
-    }
-
     /*
      * (non-Javadoc)
      * @see
      * com.abiquo.abiserver.abicloudws.IInfrastructureWS#forceRefreshVirtualMachineState(com.abiquo
      * .abiserver.pojo.infrastructure.VirtualMachine)
      */
+    @Override
     public BasicResult forceRefreshVirtualMachineState(final VirtualMachine virtualMachine)
     {
-        logger.info("Refreshing the virtual machine state: {}", virtualMachine.getId());
+        logger.info("Forcing refresh of the virtual machine state: {}", virtualMachine.getId());
         BasicResult result = new BasicResult();
         VirtualappHB virtualappHBPojo = null;
         Session session = null;
@@ -488,29 +452,24 @@ public class InfrastructureWS implements IInfrastructureWS
             session = HibernateUtil.getSession();
             transaction = session.beginTransaction();
             Query query = session.createSQLQuery(IDVIRTUALAPP_SQL_BY_VM);
-            query.setString("id", (virtualMachine.getId()).toString());
+            query.setString("id", virtualMachine.getId().toString());
             Integer virtualApplianceId = (Integer) query.uniqueResult();
             virtualappHBPojo =
                 (VirtualappHB) session.get("VirtualappExtendedHB", virtualApplianceId);
             VirtualAppliance vapp = virtualappHBPojo.toPojo();
             String virtualSystemMonitorAddress =
                 RemoteServiceUtils.getVirtualSystemMonitorFromVA(vapp);
-            EventingSupport.subscribePullEventToVM(virtualMachine, virtualSystemMonitorAddress);
-        }
-        catch (EventingException e)
-        {
-            logger
-                .warn(
-                    "An error was occurred when invokin a pulling subscribing to recover the VA events: {}",
-                    e);
+            // EventingSupport.subscribePullEventToVM(virtualMachine, virtualSystemMonitorAddress);
         }
         catch (PersistenceException e)
         {
-            logger.trace("Exists a problem finding the VirtualSystemMonitor", e.getStackTrace()[0]);
+            logger.trace("An error occurred when retrieving the VirtualSystemMonitor",
+                e.getStackTrace()[0]);
         }
         catch (RemoteServiceException e)
         {
-            logger.trace("Exists a problem finding the VirtualSystemMonitor", e.getStackTrace()[0]);
+            logger.trace("An error occurred when contacting the VirtualSystemMonitor",
+                e.getStackTrace()[0]);
         }
 
         result.setSuccess(true);
@@ -523,6 +482,7 @@ public class InfrastructureWS implements IInfrastructureWS
      * com.abiquo.abiserver.abicloudws.IInfrastructureWS#checkVirtualSystem(com.abiquo.abiserver
      * .pojo.infrastructure.VirtualMachine)
      */
+    @Override
     public Boolean checkVirtualSystem(final VirtualMachine virtualMachine)
     {
         return true;
@@ -583,8 +543,7 @@ public class InfrastructureWS implements IInfrastructureWS
         }
 
         String logMessage =
-            (message == null) ? exceptionMessage : message + "(Caused by: " + exceptionMessage
-                + ")";
+            message == null ? exceptionMessage : message + "(Caused by: " + exceptionMessage + ")";
 
         traceLog(vm, event, logMessage);
 

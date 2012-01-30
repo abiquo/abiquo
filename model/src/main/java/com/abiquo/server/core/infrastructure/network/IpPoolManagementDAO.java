@@ -36,6 +36,7 @@ import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 
+import com.abiquo.model.enumerator.NetworkType;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
@@ -68,7 +69,21 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
             + "AND ip.vlanNetwork.id = vlan.id "
             + " AND dc.id = :datacenter_id AND "
             + "( ip.ip LIKE :filterLike OR ip.mac LIKE :filterLike OR ip.networkName LIKE :filterLike OR "
-            + " vm.name like :filterLike OR vapp.name LIKE :filterLike OR ent.name LIKE :filterLike )";
+            + " vm.name like :filterLike OR vapp.name LIKE :filterLike OR ent.name LIKE :filterLike )";//
+
+    public static final String BY_DATACENTER_AND_ENTERPRISE =
+        " SELECT ip FROM "
+            + "Datacenter dc INNER JOIN dc.network net, VLANNetwork vlan "
+            + "INNER JOIN vlan.configuration conf, "
+            // "INNER JOIN conf.dhcp dhcp, "
+            + "IpPoolManagement ip LEFT JOIN ip.virtualMachine vm LEFT JOIN ip.virtualAppliance vapp "
+            + "LEFT JOIN ip.virtualDatacenter vdc LEFT JOIN vlan.enterprise ent "
+            + "WHERE net.id = vlan.network.id "
+            // +"AND dhcp.id = ip.dhcp.id"
+            + "AND ip.vlanNetwork.id = vlan.id "
+            + " AND dc.id = :datacenter_id AND "
+            + "( ip.ip LIKE :filterLike OR ip.mac LIKE :filterLike OR ip.networkName LIKE :filterLike OR "
+            + " vm.name like :filterLike OR vapp.name LIKE :filterLike OR ent.name LIKE :filterLike )";//
 
     public static final String BY_DEFAULT_VLAN_USED_BY_ANY_VDC =
         " SELECT ip FROM  virtualdatacenter vdc, ip_pool_management ip where "
@@ -85,6 +100,22 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
         + "WHERE ip.vlanNetwork.id = vn.id " + " AND nc.id = vn.configuration.id "
         + " AND vn.network.id = vdc.network.id" + " AND vdc.enterprise.id = ent.id"
         + " AND ent.id = :ent_id " + " AND " + "( ip.ip like :filterLike "
+        + " OR ip.mac like :filterLike " + " OR ip.vlanNetwork.name like :filterLike "
+        + " OR vapp.name like :filterLike " + " OR vm.name like :filterLike " + ")";
+
+    public static final String BY_EXTERNAL_VLAN = "SELECT ip FROM IpPoolManagement ip "
+        + " left join ip.virtualMachine vm "
+        + " left join ip.virtualAppliance vapp "
+        + " left join ip.virtualDatacenter vdc, "
+        + " NetworkConfiguration nc, "
+        + " VLANNetwork vn "
+        + " join vn.enterprise ent, "
+        + " DatacenterLimits dcl"
+        // + " WHERE ip.dhcp.id = nc.dhcp.id "
+        + " WHERE ip.vlanNetwork.id = vn.id " + " AND nc.id = vn.configuration.id "
+        + " AND vn.id = :vlan_id " + " AND ent.id = :ent_id AND "
+        + " dcl.enterprise.id = ent.id AND " + " ip.available = 1 AND "
+        + " dcl.id = :dc_limit_id AND " + "( ip.ip like :filterLike "
         + " OR ip.mac like :filterLike " + " OR ip.vlanNetwork.name like :filterLike "
         + " OR vapp.name like :filterLike " + " OR vm.name like :filterLike " + ")";
 
@@ -150,7 +181,7 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
         + " AND vn.network.id = vdc.network.id" + " AND vdc.id = :vdc_id AND"
         + "( ip.ip like :filterLike " + " OR ip.mac like :filterLike "
         + " OR ip.vlanNetwork.name like :filterLike " + " OR vapp.name like :filterLike "
-        + " OR vm.name like :filterLike " + ")";
+        + " OR vm.name like :filterLike " + ")";//
 
     public static final String BY_VDC_PURCHASED =
         " SELECT ip FROM "
@@ -186,7 +217,7 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
 
     public static final String BY_VIRTUAL_MACHINE = "SELECT ip "
         + "FROM IpPoolManagement ip INNER JOIN ip.virtualMachine vm " + "WHERE vm.id = :vm_id "
-        + "ORDER BY ip.rasd.configurationName";
+        + "ORDER BY ip.sequence";
 
     public static final String BY_VLAN = " SELECT ip FROM IpPoolManagement ip "
         + " left join ip.virtualMachine vm "
@@ -198,22 +229,6 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
         + "WHERE ip.vlanNetwork.id = vn.id " + " AND nc.id = vn.configuration.id "
         + " AND vn.id = :vlan_id " + " AND vn.network.id = vdc.network.id"
         + " AND vdc.id = :vdc_id AND" + "( ip.ip like :filterLike "
-        + " OR ip.mac like :filterLike " + " OR ip.vlanNetwork.name like :filterLike "
-        + " OR vapp.name like :filterLike " + " OR vm.name like :filterLike " + ")";
-
-    public static final String BY_EXTERNAL_VLAN = "SELECT ip FROM IpPoolManagement ip "
-        + " left join ip.virtualMachine vm "
-        + " left join ip.virtualAppliance vapp "
-        + " left join ip.virtualDatacenter vdc, "
-        + " NetworkConfiguration nc, "
-        + " VLANNetwork vn "
-        + " join vn.enterprise ent, "
-        + " DatacenterLimits dcl"
-        // + " WHERE ip.dhcp.id = nc.dhcp.id "
-        + " WHERE ip.vlanNetwork.id = vn.id " + " AND nc.id = vn.configuration.id "
-        + " AND vn.id = :vlan_id " + " AND ent.id = :ent_id AND "
-        + " dcl.enterprise.id = ent.id AND " + " ip.available = 1 AND "
-        + " dcl.id = :dc_limit_id AND " + "( ip.ip like :filterLike "
         + " OR ip.mac like :filterLike " + " OR ip.vlanNetwork.name like :filterLike "
         + " OR vapp.name like :filterLike " + " OR vm.name like :filterLike " + ")";
 
@@ -272,6 +287,9 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
         + "and vdc.enterprise.id = :enterpriseId "
         + "and ip.virtualDatacenter.id = vdc.id "
         + "and vlan.type = 'PUBLIC'";
+
+    public static final String GET_IP_INTO_VIRTUALMACHINE = " SELECT ip FROM IpPoolManagement ip"
+        + " WHERE ip.virtualMachine.id = :idVm " + " AND ip.id = :idIp ";
 
     private static Criterion equalMac(final String mac)
     {
@@ -626,14 +644,23 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
 
     }
 
+    public IpPoolManagement findIpByVirtualMachine(final VirtualMachine vm, final Integer nicId)
+    {
+        Query finalQuery = getSession().createQuery(GET_IP_INTO_VIRTUALMACHINE);
+        finalQuery.setParameter("idVm", vm.getId());
+        finalQuery.setParameter("idIp", nicId);
+
+        return (IpPoolManagement) finalQuery.uniqueResult();
+    }
+
     public List<IpPoolManagement> findIpsByVirtualMachineWithConfigurationId(
-        final VirtualMachine vm, final Integer vmConfigId)
+        final VirtualMachine vm)
     {
         List<IpPoolManagement> ips = findIpsByVirtualMachine(vm);
         List<IpPoolManagement> resultIps = new ArrayList<IpPoolManagement>();
         for (IpPoolManagement ip : ips)
         {
-            if (ip.getVlanNetwork().getConfiguration().getId().equals(vmConfigId))
+            if (ip.getVlanNetwork().getConfiguration().getId().equals(vm.getNetworkConfiguration().getId()))
             {
                 resultIps.add(ip);
             }
@@ -669,13 +696,90 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
      */
     public List<IpPoolManagement> findPublicIpsByDatacenter(final Integer datacenterId,
         Integer startwith, final Integer limit, final String filter, final OrderByEnum orderByEnum,
-        final Boolean descOrAsc)
+        final Boolean descOrAsc, NetworkType type)
     {
+        NetworkType type2 = type;
+        String query = BY_DATACENTER;
+        if (type != null)
+        {
+
+            if (type.equals(NetworkType.EXTERNAL_UNMANAGED))
+            {
+                type = NetworkType.EXTERNAL;
+                // to check. unecessary because with unmanaged vlan doesn't exist ips
+                type2 = NetworkType.UNMANAGED;
+            }
+            // Get the query that counts the total results.
+            query = BY_DATACENTER + " AND (vlan.type = :type OR vlan.type  = :type2 )";
+        }
+
         Query finalQuery =
-            getSession().createQuery(BY_DATACENTER + " " + defineOrderBy(orderByEnum, descOrAsc));
+            getSession().createQuery(query + " " + defineOrderBy(orderByEnum, descOrAsc));
         finalQuery.setParameter("datacenter_id", datacenterId);
         finalQuery.setParameter("filterLike", filter == null || filter.isEmpty() ? "%" : "%"
             + filter + "%");
+        if (type != null)
+        {
+            finalQuery.setParameter("type", type);
+            finalQuery.setParameter("type2", type2);
+        }
+
+        // Check if the page requested is bigger than the last one
+        Integer totalResults = finalQuery.list().size();
+
+        if (limit != null)
+        {
+            finalQuery.setMaxResults(limit);
+        }
+
+        if (startwith >= totalResults)
+        {
+            startwith = totalResults - limit;
+        }
+        finalQuery.setFirstResult(startwith);
+        finalQuery.setMaxResults(limit);
+
+        PagedList<IpPoolManagement> ipList = new PagedList<IpPoolManagement>(finalQuery.list());
+        ipList.setTotalResults(totalResults);
+        ipList.setPageSize(limit);
+        ipList.setCurrentElement(startwith);
+
+        return ipList;
+    }
+
+    public List<IpPoolManagement> findPublicIpsByEnterpriseAndDatacenter(
+        final Integer datacenterId, final Integer enterpriseId, Integer startwith,
+        final Integer limit, final String filter, final OrderByEnum orderByEnum,
+        final Boolean descOrAsc, NetworkType type)
+    {
+        NetworkType type2 = type;
+        String query = BY_DATACENTER;
+        if (type != null)
+        {
+
+            if (type.equals(NetworkType.EXTERNAL_UNMANAGED))
+            {
+                type = NetworkType.EXTERNAL;
+                // to check. unecessary because with unmanaged vlan doesn't exist ips
+                type2 = NetworkType.UNMANAGED;
+            }
+            // Get the query that counts the total results.
+            query =
+                BY_DATACENTER
+                    + " AND ent.id = :enterpriseId AND (vlan.type = :type OR vlan.type  = :type2 )  ";
+        }
+
+        Query finalQuery =
+            getSession().createQuery(query + " " + defineOrderBy(orderByEnum, descOrAsc));
+        finalQuery.setParameter("datacenter_id", datacenterId);
+        finalQuery.setParameter("filterLike", filter == null || filter.isEmpty() ? "%" : "%"
+            + filter + "%");
+        if (type != null)
+        {
+            finalQuery.setParameter("type", type);
+            finalQuery.setParameter("type2", type2);
+            finalQuery.setParameter("enterpriseId", enterpriseId);
+        }
 
         // Check if the page requested is bigger than the last one
         Integer totalResults = finalQuery.list().size();

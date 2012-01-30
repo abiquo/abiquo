@@ -23,6 +23,8 @@ package com.abiquo.api.resources;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
@@ -65,8 +67,8 @@ public class RemoteServiceResource extends AbstractResource
     @GET
     public RemoteServiceDto getRemoteService(
         @PathParam(DatacenterResource.DATACENTER) final Integer datacenterId,
-        @PathParam(REMOTE_SERVICE) final String serviceType, @Context final IRESTBuilder restBuilder)
-        throws Exception
+        @PathParam(REMOTE_SERVICE) @com.abiquo.model.validation.RemoteService @NotNull final String serviceType,
+        @Context final IRESTBuilder restBuilder) throws Exception
     {
         validatePathParameters(datacenterId, serviceType);
 
@@ -80,19 +82,21 @@ public class RemoteServiceResource extends AbstractResource
     @Path(CHECK_RESOURCE)
     public void pingRemoteService(
         @PathParam(DatacenterResource.DATACENTER) final Integer datacenterId,
-        @PathParam(REMOTE_SERVICE) final String serviceType, @Context final IRESTBuilder restBuilder)
-        throws Exception
+        @PathParam(REMOTE_SERVICE) @com.abiquo.model.validation.RemoteService @NotNull final String serviceType,
+        @Context final IRESTBuilder restBuilder) throws Exception
     {
-        RemoteServiceDto rs = getRemoteService(datacenterId, serviceType, restBuilder);
-
-        service.checkRemoteServiceStatus(rs.getType(), rs.getUri(), true);
+        validatePathParameters(datacenterId, serviceType);
+        RemoteService rs =
+            service.getRemoteService(datacenterId, RemoteServiceType.valueFromName(serviceType));
+        service.checkRemoteServiceStatus(rs.getDatacenter(), rs.getType(), rs.getUri(), true);
     }
 
     @PUT
     public RemoteServiceDto modifyRemoteService(
         @PathParam(DatacenterResource.DATACENTER) final Integer datacenterId,
-        @PathParam(REMOTE_SERVICE) final String serviceType, final RemoteServiceDto remoteService,
-        @Context final IRESTBuilder restBuilder) throws Exception
+        @PathParam(REMOTE_SERVICE) @com.abiquo.model.validation.RemoteService @NotNull final String serviceType,
+        final RemoteServiceDto remoteService, @Context final IRESTBuilder restBuilder)
+        throws Exception
     {
         validatePathParameters(datacenterId, serviceType);
 
@@ -109,7 +113,7 @@ public class RemoteServiceResource extends AbstractResource
     @DELETE
     public void deleteRemoteService(
         @PathParam(DatacenterResource.DATACENTER) final Integer datacenterId,
-        @PathParam(REMOTE_SERVICE) final String serviceType)
+        @PathParam(REMOTE_SERVICE) @com.abiquo.model.validation.RemoteService @NotNull final String serviceType)
     {
         validatePathParameters(datacenterId, serviceType);
 

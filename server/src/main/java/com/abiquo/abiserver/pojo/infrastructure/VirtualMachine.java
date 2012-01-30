@@ -30,6 +30,8 @@ import com.abiquo.abiserver.pojo.user.Enterprise;
 import com.abiquo.abiserver.pojo.user.User;
 import com.abiquo.abiserver.pojo.virtualimage.VirtualImage;
 import com.abiquo.abiserver.pojo.virtualimage.VirtualImageConversions;
+import com.abiquo.model.enumerator.HypervisorType;
+import com.abiquo.model.rest.RESTLink;
 import com.abiquo.server.core.cloud.VirtualMachineDto;
 
 public class VirtualMachine extends InfrastructureElement implements IPojo<VirtualmachineHB>
@@ -56,6 +58,8 @@ public class VirtualMachine extends InfrastructureElement implements IPojo<Virtu
     private String vrdpPassword;
 
     private State state;
+
+    private State subState;
 
     private boolean highDisponibility;
 
@@ -187,6 +191,16 @@ public class VirtualMachine extends InfrastructureElement implements IPojo<Virtu
         this.state = state;
     }
 
+    public State getSubState()
+    {
+        return subState;
+    }
+
+    public void setSubState(final State subState)
+    {
+        this.subState = subState;
+    }
+
     public boolean isHighDisponibility()
     {
         return highDisponibility;
@@ -278,6 +292,23 @@ public class VirtualMachine extends InfrastructureElement implements IPojo<Virtu
             virtualMachineHB.setState(StateEnum.valueOf(state.getDescription()));
         }
 
+        if (subState != null)
+        {
+            // Client sends sometimes a description null or ""
+            if (StringUtils.isEmpty(subState.getDescription()))
+            {
+                virtualMachineHB.setSubState(StateEnum.fromId(subState.getId()));
+            }
+            else
+            {
+                virtualMachineHB.setSubState(StateEnum.valueOf(subState.getDescription()));
+            }
+        }
+        else
+        {
+            virtualMachineHB.setSubState(StateEnum.UNKNOWN);
+        }
+
         virtualMachineHB.setImage(virtualImage == null ? null : virtualImage.toPojoHB());
 
         virtualMachineHB.setUuid(UUID);
@@ -324,16 +355,36 @@ public class VirtualMachine extends InfrastructureElement implements IPojo<Virtu
         return datastore;
     }
 
-    public static VirtualMachine create(final VirtualMachineDto dto)
+    public static VirtualMachine createFlexObject(final VirtualMachineDto dto)
     {
         VirtualMachine vm = new VirtualMachine();
-
-        vm.setCpu(dto.getCpu());
-        vm.setDescription(dto.getDescription());
-        vm.setHd(dto.getHd());
-        vm.setHighDisponibility(dto.getHighDisponibility() == com.abiquo.server.core.cloud.VirtualMachine.NOT_MANAGED);
         vm.setId(dto.getId());
-        vm.setState(new State(dto.getIdState(), dto.getState().toString()));
+        vm.setCpu(dto.getCpu());
+        vm.setHd(dto.getHdInBytes());
+        vm.setHighDisponibility(dto.getHighDisponibility() == 1 ? true : false);
+        vm.setDescription(dto.getDescription());
+        vm.setName(dto.getName());
+        vm.setRam(dto.getRam());
+        vm.setState(new State(StateEnum.valueOf(dto.getState().name())));
+        vm.setVdrpPort(dto.getVdrpPort());
+        vm.setVdrpIP(dto.getVdrpIP());
+        if (dto.getIdType() == com.abiquo.server.core.cloud.VirtualMachine.MANAGED)
+        {
+            vm.setIdType(1);
+        }
+        else
+        {
+            vm.setIdType(0);
+        }
+        vm.setVirtualImage(null); // Set to null to avoid VirtualImage conversion fail to PojoHB and
+        // because we don't use it
+
+        // Build the hypervisor with the information available.
+        // It will only be used to check the type.
+        RESTLink vdcLink = dto.searchLink("machine");
+        HyperVisor hypervisor = new HyperVisor();
+        hypervisor.setType(new HyperVisorType(HypervisorType.valueOf(vdcLink.getTitle())));
+        vm.setAssignedTo(hypervisor);
 
         return vm;
     }

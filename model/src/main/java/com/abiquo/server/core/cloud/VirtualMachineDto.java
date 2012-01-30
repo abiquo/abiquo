@@ -25,13 +25,18 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import org.springframework.util.StringUtils;
 
-import com.abiquo.model.enumerator.VirtualMachineState;
 import com.abiquo.model.transport.SingleResourceTransportDto;
+import com.abiquo.server.core.cloud.chef.RunlistElementsDto;
 
 @XmlRootElement(name = "virtualMachine")
 public class VirtualMachineDto extends SingleResourceTransportDto implements
     Comparable<VirtualMachineDto>
 {
+    /**
+     * 
+     */
+    private static final long serialVersionUID = -8877350185009627544L;
+
     private Integer id;
 
     public Integer getId()
@@ -92,16 +97,16 @@ public class VirtualMachineDto extends SingleResourceTransportDto implements
         this.cpu = cpu;
     }
 
-    private long hd;
+    private long hdInBytes;
 
-    public long getHd()
+    public long getHdInBytes()
     {
-        return hd;
+        return hdInBytes;
     }
 
-    public void setHd(final long hd)
+    public void setHdInBytes(final long hdInBytes)
     {
-        this.hd = hd;
+        this.hdInBytes = hdInBytes;
     }
 
     private int vdrpPort;
@@ -188,6 +193,18 @@ public class VirtualMachineDto extends SingleResourceTransportDto implements
         this.password = password;
     }
 
+    private String uuid;
+
+    public String getUuid()
+    {
+        return uuid;
+    }
+
+    public void setUuid(final String uuid)
+    {
+        this.uuid = uuid;
+    }
+
     @Override
     public int compareTo(final VirtualMachineDto vm2)
     {
@@ -207,6 +224,18 @@ public class VirtualMachineDto extends SingleResourceTransportDto implements
         {
             return 1;
         }
+    }
+
+    private RunlistElementsDto runlistElements;
+
+    public RunlistElementsDto getRunlist()
+    {
+        return runlistElements;
+    }
+
+    public void setRunlist(final RunlistElementsDto runlistElements)
+    {
+        this.runlistElements = runlistElements;
     }
 
 }

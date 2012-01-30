@@ -28,12 +28,15 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.xml.namespace.QName;
 
 import org.dmtf.schemas.ovf.envelope._1.AbicloudNetworkType;
 import org.dmtf.schemas.ovf.envelope._1.AnnotationSectionType;
 import org.dmtf.schemas.ovf.envelope._1.ContentType;
+import org.dmtf.schemas.ovf.envelope._1.DHCPOption;
+import org.dmtf.schemas.ovf.envelope._1.DHCPOptions;
 import org.dmtf.schemas.ovf.envelope._1.DHCPServiceType;
 import org.dmtf.schemas.ovf.envelope._1.EnvelopeType;
 import org.dmtf.schemas.ovf.envelope._1.FileType;
@@ -53,8 +56,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.abiquo.abiserver.abicloudws.AbiCloudConstants;
+import com.abiquo.abiserver.business.hibernate.pojohb.authorization.OneTimeTokenSessionHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.HypervisorHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.StateEnum;
+import com.abiquo.abiserver.business.hibernate.pojohb.networking.DhcpOptionHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.networking.IpPoolManagementHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.networking.VlanNetworkHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.service.RemoteServiceHB;
@@ -65,7 +70,9 @@ import com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.Virtualap
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualmachineHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.ResourceAllocationSettingData;
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.ResourceManagementHB;
+import com.abiquo.abiserver.config.AbiConfigManager;
 import com.abiquo.abiserver.exception.PersistenceException;
+import com.abiquo.abiserver.networking.NetworkResolver;
 import com.abiquo.abiserver.persistence.DAOFactory;
 import com.abiquo.abiserver.persistence.dao.infrastructure.DataCenterDAO;
 import com.abiquo.abiserver.persistence.dao.infrastructure.RemoteServiceDAO;
@@ -259,18 +266,18 @@ public class OVFModelFromVirtualAppliance
         String state = null;
         switch (virtualMachine.getState().toEnum())
         {
-            case RUNNING:
+            case ON:
                 state = AbiCloudConstants.POWERUP_ACTION;
                 break;
             case PAUSED:
                 state = AbiCloudConstants.PAUSE_ACTION;
                 break;
-            case POWERED_OFF:
+            case OFF:
                 state = AbiCloudConstants.POWERDOWN_ACTION;
                 break;
-            case REBOOTED:
-                state = AbiCloudConstants.RESUME_ACTION;
-                break;
+        // case REBOOTED:
+        // state = AbiCloudConstants.RESUME_ACTION;
+        // break;
         }
         return state;
     }
@@ -388,7 +395,7 @@ public class OVFModelFromVirtualAppliance
 
                 // Creates the virtual system inside the virtual system collection
                 VirtualSystemType virtualSystem =
-                    createVirtualSystem(nodeVirtualImage, virtualAppliance.getName());
+                    createVirtualSystem(nodeVirtualImage, virtualAppliance);
 
                 OVFEnvelopeUtils.addVirtualSystem(virtualSystemCollection, virtualSystem);
 
@@ -492,7 +499,18 @@ public class OVFModelFromVirtualAppliance
 
             Integer numberOfRules = 0;
             OrgNetworkType vlan = vlanDAO.findById(vlanId);
-            VlanNetworkHB vlanHB = vlanDAO.findById(vlanId);
+            VlanNetworkHB vlanHB = (VlanNetworkHB) vlan;
+            DHCPOptions options = new DHCPOptions();
+            Set<DhcpOptionHB> optionsHB = vlanHB.getDhcpOptionsHB();
+            for (DhcpOptionHB opHB : optionsHB)
+            {
+                DHCPOption option = new DHCPOption();
+                option.setValue(NetworkResolver.getDhcpOption(opHB.getNetworkAddress(),
+                    opHB.getMask(), opHB.getGateway()));
+                option.setOpt(opHB.getOption());
+                options.getOption().add(option);
+            }
+            vlan.setDhcpOptions(options);
             Integer idDataCenter = null;
             if (vlanHB.getNetworkType().equals(NetworkType.INTERNAL.name()))
             {
@@ -529,6 +547,13 @@ public class OVFModelFromVirtualAppliance
                 rule.setIp(ip.getIp());
                 rule.setMac(ip.getMac());
                 rule.setName(ip.getName());
+
+                // Configure bootstrap for the gateway-enabled NIC
+                if (ip.getConfigureGateway())
+                {
+                    addBootstrapConfiguration(ip.getVirtualDataCenter().getIdVirtualDataCenter(),
+                        ip.getVirtualApp().getIdVirtualApp(), vmHB, rule);
+                }
 
                 service.getStaticRules().add(rule);
 
@@ -756,13 +781,13 @@ public class OVFModelFromVirtualAppliance
      * @throws Exception
      */
     public VirtualSystemType createVirtualSystem(final NodeVirtualImage nodeVirtualImage,
-        final String virtualApplianceName) throws Exception
+        final VirtualAppliance virtualAppliance) throws Exception
     {
         VirtualMachine virtualMachine = nodeVirtualImage.getVirtualMachine();
         VirtualImage virtualImage = nodeVirtualImage.getVirtualImage();
 
         // setting the network name the name of the virtualAppliance
-        String networkName = virtualApplianceName + "_network";
+        String networkName = virtualAppliance.getName() + "_network";
 
         // The Id of the virtualSystem is used for machine name
         String vsId = virtualMachine.getUUID(); // TODO Using the machine instance UUID as ID
@@ -811,6 +836,39 @@ public class OVFModelFromVirtualAppliance
         }
 
         return annotationSection;
+    }
+
+    private static void addBootstrapConfiguration(final Integer idVirtualdatacenter,
+        final Integer idVirtualAppliance, final VirtualmachineHB virtualMachine,
+        final IpPoolType rule) throws Exception
+    {
+        // Captured VMs may have null virtual images
+        if (virtualMachine.getImage() != null && virtualMachine.getImage().isChefEnabled())
+        {
+            // Build the bootstrap configuration URI
+            String bootstrapURITemplate =
+                "%s/cloud/virtualdatacenters/%s/virtualappliances/%s/virtualmachines/%s/config/bootstrap";
+
+            String apiLocation = AbiConfigManager.getInstance().getAbiConfig().getApiLocation();
+            if (apiLocation.endsWith("/"))
+            {
+                apiLocation = apiLocation.substring(0, apiLocation.length() - 1);
+            }
+
+            String bootstrapURI =
+                String.format(bootstrapURITemplate, apiLocation, idVirtualdatacenter,
+                    idVirtualAppliance, virtualMachine.getIdVm());
+
+            // Generate the one-time authentication token
+            DAOFactory factory = HibernateDAOFactory.instance();
+            factory.beginConnection();
+            OneTimeTokenSessionHB oneTimeToken =
+                factory.getOneTimeTokenSessionDAO().generateToken();
+            factory.endConnection();
+
+            rule.setBootstrapConfigURI(bootstrapURI);
+            rule.setBootstrapConfigAuth(oneTimeToken.getToken());
+        }
     }
 
     /**
@@ -1034,10 +1092,10 @@ public class OVFModelFromVirtualAppliance
         String actionState = null;
         switch (state.toEnum())
         {
-            case RUNNING:
+            case ON:
                 actionState = AbiCloudConstants.POWERUP_ACTION;
                 break;
-            case POWERED_OFF:
+            case OFF:
                 actionState = AbiCloudConstants.POWERDOWN_ACTION;
                 break;
             case PAUSED:

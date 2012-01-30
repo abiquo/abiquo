@@ -35,17 +35,14 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import com.abiquo.api.exceptions.APIError;
-import com.abiquo.api.exceptions.InternalServerErrorException;
+import com.abiquo.api.exceptions.APIException;
 import com.abiquo.api.services.cloud.VirtualMachineService;
 import com.abiquo.api.services.stub.VsmServiceStub;
 import com.abiquo.api.tracer.TracerLogger;
-import com.abiquo.model.enumerator.RemoteServiceType;
-import com.abiquo.model.enumerator.VirtualMachineState;
 import com.abiquo.server.core.cloud.Hypervisor;
-import com.abiquo.server.core.cloud.NodeVirtualImage;
-import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualDatacenterRep;
 import com.abiquo.server.core.cloud.VirtualMachine;
+import com.abiquo.server.core.cloud.VirtualMachineState;
 import com.abiquo.server.core.infrastructure.Datastore;
 import com.abiquo.server.core.infrastructure.InfrastructureRep;
 import com.abiquo.server.core.infrastructure.Machine;
@@ -161,6 +158,14 @@ public class MachineService extends DefaultApiService
     {
         Machine old = getMachine(machineId);
 
+        if (old.getBelongsToManagedRack())
+        {
+            if (!old.getName().equalsIgnoreCase(machineDto.getName()))
+            {
+                addValidationErrors(APIError.MANAGED_MACHINE_CANNOT_CHANGE_NAME);
+                flushErrors();
+            }
+        }
         old.setName(machineDto.getName());
         old.setDescription(machineDto.getDescription());
         old.setState(machineDto.getState());
@@ -171,6 +176,11 @@ public class MachineService extends DefaultApiService
         old.setVirtualCpuCores(machineDto.getVirtualCpuCores());
         old.setVirtualCpusUsed(machineDto.getVirtualCpusUsed());
         old.setVirtualCpusPerCore(machineDto.getVirtualCpusPerCore());
+
+        old.setIpmiIP(machineDto.getIpmiIP());
+        old.setIpmiPort(machineDto.getIpmiPort());
+        old.setIpmiUser(machineDto.getIpmiUser());
+        old.setIpmiPassword(machineDto.getIpmiPassword());
 
         isValidMachine(old);
 
@@ -185,11 +195,10 @@ public class MachineService extends DefaultApiService
 
         repo.updateMachine(old);
 
-        tracer
-            .log(SeverityType.INFO, ComponentType.MACHINE, EventType.MACHINE_CREATE, "Machine "
-                + old.getName() + "[ ip: " + old.getHypervisor().getIp() + " type: "
-                + old.getHypervisor().getType() + " state: " + old.getState()
-                + "] created succesfully");
+        tracer.log(SeverityType.INFO, ComponentType.MACHINE, EventType.MACHINE_MODIFY,
+            "machine.modified", old.getName(), old.getHypervisor() == null ? "No Hypervisor" : old
+                .getHypervisor().getIp(), old.getHypervisor() == null ? "No Hypervisor" : old
+                .getHypervisor().getType(), old.getState());
 
         return old;
     }
@@ -219,20 +228,11 @@ public class MachineService extends DefaultApiService
     public void removeMachine(final Integer id, final boolean force)
     {
         Machine machine = repo.findMachineById(id);
-        RemoteService vsmRS =
-            remoteServiceService.getRemoteService(machine.getDatacenter().getId(),
-                RemoteServiceType.VIRTUAL_SYSTEM_MONITOR);
-
         Hypervisor hypervisor = machine.getHypervisor();
-        try
-        {
-            vsm.shutdownMonitor(vsmRS.getUri(), hypervisor.getIp(), hypervisor.getPort());
-        }
-        catch (InternalServerErrorException e)
-        {
-            // we can ignore this error
-        }
 
+        RemoteService service = remoteServiceService.getVSMRemoteService(machine.getDatacenter());
+
+        // Update virtual machines and remove imported virtual machines
         Collection<VirtualMachine> virtualMachines =
             virtualMachineService.findByHypervisor(hypervisor);
 
@@ -240,35 +240,38 @@ public class MachineService extends DefaultApiService
         {
             for (VirtualMachine vm : virtualMachines)
             {
-                VirtualAppliance vapp =
-                    virtualDatacenterRep.findVirtualApplianceByVirtualMachine(vm);
-
-                VirtualMachineState newState = VirtualMachineState.NOT_DEPLOYED;
-                for (NodeVirtualImage node : vapp.getNodes())
+                if (vm.isManaged())
                 {
-                    if (node.getVirtualMachine().getState() != VirtualMachineState.NOT_DEPLOYED)
+                    if (vm.getState() != VirtualMachineState.NOT_ALLOCATED)
                     {
                         if (!force)
                         {
                             addConflictErrors(APIError.RACK_CANNOT_REMOVE_VMS);
                             flushErrors();
                         }
-                        else
-                        {
-                            newState = VirtualMachineState.APPLY_CHANGES_NEEDED;
-                            break;
-                        }
                     }
+
+                    vm.setState(VirtualMachineState.NOT_ALLOCATED);
+                    vm.setDatastore(null);
+                    vm.setHypervisor(null);
+
+                    virtualMachineService.updateVirtualMachine(vm);
                 }
-
-                vm.setState(VirtualMachineState.NOT_DEPLOYED);
-                vm.setDatastore(null);
-                vm.setHypervisor(null);
-
-                vapp.setState(newState);
-                vapp.setSubState(newState);
-                virtualDatacenterRep.updateVirtualAppliance(vapp);
-                virtualMachineService.updateVirtualMachine(vm);
+                else if (vm.isImported())
+                {
+                    try
+                    {
+                        vsm.unsubscribe(service, vm);
+                    }
+                    catch (APIException e)
+                    {
+                        logger
+                            .error(
+                                "Trying to unsubscribe virtual machine {} when it is already unsubscribed.",
+                                vm.getName());
+                    }
+                    virtualDatacenterRep.deleteVirtualMachine(vm);
+                }
             }
         }
 
@@ -284,10 +287,43 @@ public class MachineService extends DefaultApiService
 
         repo.deleteMachine(machine);
 
-        tracer.log(SeverityType.INFO, ComponentType.MACHINE, EventType.MACHINE_DELETE, "Machine "
-            + machine.getName() + "[ ip: " + machine.getHypervisor().getIp() + " type: "
-            + machine.getHypervisor().getType() + " state: " + machine.getState()
-            + "] deleted succesfully");
+        // Update VSM state
+
+        if (virtualMachines != null)
+        {
+            for (VirtualMachine vm : virtualMachines)
+            {
+                // import yet unsubscribed from vsm
+                if (!vm.isImported())
+                {
+                    try
+                    {
+                        vsm.unsubscribe(service, vm);
+                    }
+                    catch (APIException e)
+                    {
+                        logger
+                            .error(
+                                "Trying to unsubscribe virtual machine {} when it is already unsubscribed.",
+                                vm.getName());
+                    }
+                }
+            }
+        }
+
+        try
+        {
+            vsm.shutdownMonitor(service, hypervisor);
+        }
+        catch (APIException e)
+        {
+            logger.error("Trying to stop monitor of machine {} when it is not monitored.",
+                hypervisor.getIp());
+        }
+
+        tracer.log(SeverityType.INFO, ComponentType.MACHINE, EventType.MACHINE_DELETE,
+            "machine.deleted", machine.getName(), machine.getHypervisor().getIp(), machine
+                .getHypervisor().getType(), machine.getState());
     }
 
     protected void deleteMachineLoadRulesFromMachine(final Machine machine)
