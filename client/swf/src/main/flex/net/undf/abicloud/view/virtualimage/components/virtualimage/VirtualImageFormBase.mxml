@@ -239,11 +239,6 @@
                     iconsList.selectedIndex = AbicloudUtils.getValuePositionInArray(virtualImageManager.icons.toArray(),
                                                                                     "id",
                                                                                     _virtualImage.icon);
-
-                    //FIXME in-master publicImageInput.selected = this._virtualImage.shared == 1;                    
-                    //FIXME in-master  this._costCodeId = this._virtualImage.costCode;
-                    //FIXME in-master chefEnabledCombobox.selected = this._virtualImage.chefEnabled;
-
                     publicImageInput.selected = this._virtualImage.shared;
                     chefEnabledCombobox.selected = this._virtualImage.chefEnabled;
                     this._costCodeId = this._virtualImage.costCode;

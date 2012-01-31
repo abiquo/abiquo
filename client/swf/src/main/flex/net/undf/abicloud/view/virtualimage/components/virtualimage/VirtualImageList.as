@@ -321,10 +321,7 @@ package net.undf.abicloud.view.virtualimage.components.virtualimage
                 //if the image matches with all search criteria
                 if(isCorrect){
                 	virtualImageMiniature = new VirtualImageMiniature();
-
-                	//FIXME in-master virtualImageMiniature.id = "virtual_image_" + count;
                 	virtualImageMiniature.datacenter = repository.datacenter;
-
                     virtualImageMiniature.virtualImage = virtualImage;
                     virtualImageMiniature.sizeMultiplier = sizeMultiplier;
                     virtualImageMiniature.editable = editable;
@@ -459,9 +456,6 @@ package net.undf.abicloud.view.virtualimage.components.virtualimage
                 {
                     //Build the miniature immediately
                     var virtualImageMiniature:VirtualImageMiniature = new VirtualImageMiniature();
-
-                    //FIXME in-master virtualImageMiniature.id = "virtual_image_" + (virtualImageMiniatures.length + 1);
-
                     virtualImageMiniature.datacenter = repository.datacenter;
                     virtualImageMiniature.sizeMultiplier = sizeMultiplier;
                     virtualImageMiniature.virtualImage = virtualImage;

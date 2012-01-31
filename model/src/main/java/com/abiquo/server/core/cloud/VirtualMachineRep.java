@@ -157,6 +157,27 @@ public class VirtualMachineRep extends DefaultRepBase
         return rasdDao.findByVirtualMachine(virtualMachine);
     }
 
+    /**
+     * Delete a {@link VirtualMachine}.
+     * 
+     * @param virtualMachine to delete. void
+     */
+    public void deleteVirtualMachine(final VirtualMachine virtualMachine)
+    {
+        this.dao.remove(virtualMachine);
+    }
+
+    /**
+     * Persists a {@link VirtualMachine}.
+     * 
+     * @param virtualMachine to create. void
+     */
+    public VirtualMachine createVirtualMachine(final VirtualMachine virtualMachine)
+    {
+        this.dao.persist(virtualMachine);
+        return virtualMachine;
+    }
+
     public void insert(final VirtualMachine virtualMachine)
     {
         assert virtualMachine != null;
@@ -246,22 +267,6 @@ public class VirtualMachineRep extends DefaultRepBase
     public void detachVirtualMachine(final VirtualMachine vm)
     {
         dao.detachVirtualMachine(vm);
-    }
-
-    public void deleteVirtualMachine(final VirtualMachine virtualMachine)
-    {
-        dao.remove(virtualMachine);
-    }
-
-    public VirtualMachine createVirtualMachine(final VirtualMachine virtualMachine)
-    {
-        dao.persist(virtualMachine);
-        return virtualMachine;
-    }
-
-    public void deleteNotManagedVirtualMachines(final Hypervisor hypervisor)
-    {
-        dao.deleteNotManagedVirtualMachines(hypervisor);
     }
 
     public void setDefaultFilters()

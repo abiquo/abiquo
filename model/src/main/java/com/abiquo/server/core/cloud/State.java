@@ -21,8 +21,6 @@
 
 package com.abiquo.server.core.cloud;
 
-@Deprecated
-// api-deploy should not use this
 public enum State
 {
     ON, OFF, PAUSED, ALLOCATED, CONFIGURED, UNKNOWN, NOT_ALLOCATED, LOCKED;
@@ -96,9 +94,9 @@ public enum State
             case OFF:
             case PAUSED:
                 return true;
-                // Configured state. The VM is in the hypervisor but it
-                // has never been powered on. The Chef agent has not run
-                // yet and the node does not exist in the Chef server.
+            // Configured state. The VM is in the hypervisor but it
+            // has never been powered on. The Chef agent has not run
+            // yet and the node does not exist in the Chef server.
             case CONFIGURED:
             default:
                 return false;

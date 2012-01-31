@@ -299,11 +299,7 @@
             {
                 //If the Infrastructure Element selected is a Physical Machine, we can show more info about it
                 if (infrastructureSelector.selectedInfrastructureElement is PhysicalMachine){
-                	//FIXME in-master showPhysicalMachine();                    
-                	//FIXME in-master AbiCloudModel.getInstance().infrastructureManager.selectedPhysicalMachine = infrastructureSelector.selectedInfrastructureElement as PhysicalMachine;
-                
                 	this._physicalMachine = infrastructureSelector.selectedInfrastructureElement as PhysicalMachine;
-
                     //remove the selected virtual machine reference
                     if(!event.automaticUpdate){
                         virtualMachineList.selectedVirtualMachine = null;

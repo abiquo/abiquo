@@ -57,6 +57,7 @@ public class TestServerListener implements ISuiteListener
     public void onStart(final ISuite suite)
     {
         LOGGER.info("Starting test server...");
+
         long start = System.currentTimeMillis();
         int port = Integer.valueOf(getParameter(WEBAPP_PORT, DEFAULT_SERVER_PORT));
 

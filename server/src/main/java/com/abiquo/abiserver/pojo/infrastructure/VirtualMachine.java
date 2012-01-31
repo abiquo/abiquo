@@ -179,14 +179,14 @@ public class VirtualMachine extends InfrastructureElement implements IPojo<Virtu
         this.state = state;
     }
 
-    public State getSubState()
-    {
-        return subState;
-    }
-
     public void setSubState(final State subState)
     {
         this.subState = subState;
+    }
+
+    public State getSubState()
+    {
+        return subState;
     }
 
     public boolean isHighDisponibility()

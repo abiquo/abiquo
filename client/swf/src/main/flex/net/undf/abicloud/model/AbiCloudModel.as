@@ -118,7 +118,7 @@ package net.undf.abicloud.model
         public static const GB_TO_MBYTES:Number = 1024;
         
         public static const TB_TO_MBYTES:Number = 1048576;
-
+        
         public static const MAX_NUMBER_OF_CPU:Number = 999;
 
         //When conversion = 1, means that unit is the default one, and is the unit to store the value in server

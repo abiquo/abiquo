@@ -261,7 +261,7 @@ public class VirtualMachineService extends DefaultApiService
             flushErrors();
         }
         LOGGER.debug("Virtual machine {} found", vmId);
-        
+
         // if the ips are external, we need to set the limitID in order to return the
         // proper info.
         for (IpPoolManagement ip : vm.getIps())
@@ -275,7 +275,7 @@ public class VirtualMachineService extends DefaultApiService
                 ip.getVlanNetwork().setLimitId(dl.getId());
             }
         }
-        
+
         return vm;
     }
 
@@ -801,6 +801,32 @@ public class VirtualMachineService extends DefaultApiService
     }
 
     /**
+     * Deletes the {@link Rasd} of an {@link IpPoolManagement}.
+     * 
+     * @param virtualMachine void
+     */
+    private void detachVirtualMachineIPs(final VirtualMachine virtualMachine)
+    {
+        for (IpPoolManagement ip : virtualMachine.getIps())
+        {
+            vdcRep.deleteRasd(ip.getRasd());
+            switch (ip.getType())
+            {
+                case UNMANAGED:
+                    rasdDao.remove(ip);
+                    break;
+                case EXTERNAL:
+                    ip.setVirtualDatacenter(null);
+                    ip.setMac(null);
+                    ip.setName(null);
+                default:
+                    ip.detach();
+
+            }
+        }
+    }
+
+    /**
      * Delete a {@link VirtualMachine}. And the {@link VirtualMachineNode}. Without account for
      * permission.
      * 
@@ -827,32 +853,6 @@ public class VirtualMachineService extends DefaultApiService
 
         tracer.log(SeverityType.INFO, ComponentType.VIRTUAL_MACHINE, EventType.VM_DELETE,
             "virtualMachine.delete");
-    }
-
-    /**
-     * Deletes the {@link Rasd} of an {@link IpPoolManagement}.
-     * 
-     * @param virtualMachine void
-     */
-    private void detachVirtualMachineIPs(final VirtualMachine virtualMachine)
-    {
-        for (IpPoolManagement ip : virtualMachine.getIps())
-        {
-            vdcRep.deleteRasd(ip.getRasd());
-            switch (ip.getType())
-            {
-                case UNMANAGED:
-                    rasdDao.remove(ip);
-                    break;
-                case EXTERNAL:
-                    ip.setVirtualDatacenter(null);
-                    ip.setMac(null);
-                    ip.setName(null);
-                default:
-                    ip.detach();
-
-            }
-        }
     }
 
     /**
@@ -1706,7 +1706,7 @@ public class VirtualMachineService extends DefaultApiService
             addNotFoundErrors(APIError.NODE_VIRTUAL_MACHINE_IMAGE_NOT_EXISTS);
             flushErrors();
         }
-        
+
         // if the ips are external, we need to set the limitID in order to return the
         // proper info.
         for (IpPoolManagement ip : vm.getIps())
@@ -1720,7 +1720,7 @@ public class VirtualMachineService extends DefaultApiService
                 ip.getVlanNetwork().setLimitId(dl.getId());
             }
         }
-        
+
         return nodeVirtualImage;
     }
 
@@ -2824,25 +2824,5 @@ public class VirtualMachineService extends DefaultApiService
     public void updateVirtualMachineBySystem(final VirtualMachine vm)
     {
         repo.update(vm);
-    }
-
-    @Transactional(propagation = Propagation.REQUIRED)
-    public void deleteNotManagedVirtualMachines(final Hypervisor hypervisor)
-    {
-        repo.deleteNotManagedVirtualMachines(hypervisor);
-    }
-
-    @Transactional(propagation = Propagation.REQUIRED)
-    public void deleteNotManagedVirtualMachines(final Hypervisor hypervisor, final boolean trace)
-    {
-        this.deleteNotManagedVirtualMachines(hypervisor);
-
-        if (trace)
-        {
-            tracer.log(SeverityType.INFO, ComponentType.MACHINE,
-                EventType.MACHINE_DELETE_VMS_NOTMANAGED,
-                "Virtual Machines not managed by host from '" + hypervisor.getIp()
-                    + "' have been deleted");
-        }
     }
 }

@@ -777,6 +777,7 @@ public class InfrastructureRep extends DefaultRepBase
      */
     public Integer getEmptyOffMachines(final Integer rackId)
     {
+
         return rackDao.getEmptyOffMachines(rackId);
     }
 
@@ -804,7 +805,7 @@ public class InfrastructureRep extends DefaultRepBase
         // TODO Auto-generated method stub
         return rackDao.getRandomMachinesToStartFromRack(rackId, howMany);
     }
-
+    
     /**
      * Returns any machine that is in the rack in MANAGED.
      * 
@@ -817,7 +818,7 @@ public class InfrastructureRep extends DefaultRepBase
         // TODO Auto-generated method stub
         return rackDao.getRandomMachinesToShutDownFromRack(rackId, howMany);
     }
-
+    
     /**
      * Return all the public VLANs by Datacenter.
      * 

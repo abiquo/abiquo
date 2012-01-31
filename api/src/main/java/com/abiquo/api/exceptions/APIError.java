@@ -317,9 +317,9 @@ public enum APIError
         "In Ldap mode can not create user"), NOT_EDIT_USER_ROLE_LDAP_MODE("USER-7",
         "In Ldap mode can not modify user's role"), NOT_EDIT_USER_ENTERPRISE_LDAP_MODE("USER-8",
         "In Ldap mode can not modify user's enterprise"), USER_DELETING_HIMSELF("USER 9",
-        "The user cannot delete his own user account"), USER_PASSWORD_IS_NECESSARY("USER 10",
-        "The field password is necessary"), USER_NICK_CANNOT_BE_CHANGED("USER 11",
-        "Cannot change the user nick"), USER_NAME_IS_NECESSARY("USER 12",
+        "The user cannot delete his own user account"), USER_NICK_CANNOT_BE_CHANGED("USER 10",
+        "Cannot change the user nick"), USER_PASSWORD_IS_NECESSARY("USER 11",
+        "The field password is necessary"), USER_NAME_IS_NECESSARY("USER 12",
         "The field name is necessary"), USER_NICK_IS_NECESSARY("USER 13",
         "The field nick is necessary"),
 

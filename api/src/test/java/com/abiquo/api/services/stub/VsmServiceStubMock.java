@@ -36,13 +36,13 @@ import com.abiquo.vsm.client.VSMClient;
 public class VsmServiceStubMock extends VsmServiceStub
 {
     @Override
-    protected VSMClient getClientFromPool(final RemoteService service)
+    protected VSMClient getClientFromPool(RemoteService service)
     {
         return mock(VSMClient.class);
     }
 
     @Override
-    protected void returnClientToPool(final VSMClient client)
+    protected void returnClientToPool(VSMClient client)
     {
         // Do nothing
     }

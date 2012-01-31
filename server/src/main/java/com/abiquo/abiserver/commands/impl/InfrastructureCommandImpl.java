@@ -1089,6 +1089,7 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
     public BasicResult editVirtualMachine(final UserSession userSession,
         final VirtualMachine virtualMachine)
     {
+
         throw new RuntimeException("move not use editVirtualMachine");
     }
 

@@ -113,6 +113,7 @@ public class URLAuthenticator
      */
     public boolean checkPermissions(final StringBuffer url, final String baseUri)
     {
+
         if (roleVoter == null) // No role based security
         {
             return Boolean.TRUE;

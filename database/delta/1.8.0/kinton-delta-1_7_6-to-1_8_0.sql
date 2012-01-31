@@ -1358,3 +1358,12 @@ CREATE  TABLE `kinton`.`one_time_token` (`idOneTimeTokenSession` int(3) unsigned
   `version_c` int(11) default 0,
   PRIMARY KEY (`idOneTimeTokenSession`)) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
 
+--
+-- ONETIMETOKEN TABLE
+--
+DROP  TABLE IF EXISTS `kinton`.`one_time_token`;
+CREATE  TABLE `kinton`.`one_time_token` (`idOneTimeTokenSession` int(3) unsigned NOT NULL AUTO_INCREMENT,
+  `token` VARCHAR(128) NOT NULL ,
+  `version_c` int(11) default 0,
+  PRIMARY KEY (`idOneTimeTokenSession`)) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
+

@@ -48,7 +48,7 @@ public interface VirtualSystemService
         throws NodecollectorException;
 
     /**
-     * Get a unique virtual system based on its UUID
+     * Get a unique virtual system.
      * 
      * @param ip address of the virtual system
      * @param hypervisorType

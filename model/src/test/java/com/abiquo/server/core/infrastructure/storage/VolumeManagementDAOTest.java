@@ -140,21 +140,21 @@ public class VolumeManagementDAOTest extends
 
     }
 
-    @Test
-    public void testGetVolumesByRasd()
-    {
-        VolumeManagement volume = eg().createUniqueInstance();
+    // @Test
+    // public void testGetVolumesByRasd()
+    // {
+    //     VolumeManagement volume = eg().createUniqueInstance();
 
-        List<Object> entitiesToPersist = new ArrayList<Object>();
-        eg().addAuxiliaryEntitiesToPersist(volume, entitiesToPersist);
-        persistAll(ds(), entitiesToPersist, volume);
-        Rasd rasd = volume.getRasd();
-        VolumeManagementDAO dao = createDaoForRollbackTransaction();
+    //     List<Object> entitiesToPersist = new ArrayList<Object>();
+    //     eg().addAuxiliaryEntitiesToPersist(volume, entitiesToPersist);
+    //     persistAll(ds(), entitiesToPersist, volume);
+    //     Rasd rasd = volume.getRasd();
+    //     VolumeManagementDAO dao = createDaoForRollbackTransaction();
 
-        VolumeManagement vol = dao.getVolumeByRasd(rasd);
+    //     VolumeManagement vol = dao.getVolumeByRasd(rasd);
 
-        eg().assertAllPropertiesEqual(vol, volume);
-    }
+    //     eg().assertAllPropertiesEqual(vol, volume);
+    // }
 
     @Test
     public void testGetStatefulCandidatesWithoutVolumes()
@@ -287,21 +287,6 @@ public class VolumeManagementDAOTest extends
         persistAll(ds(), entitiesToPersist, volume);
     }
     
-    /**
-     * Create five machines, three with the temporal value set, and two without the temporal values
-     * set. Check the default behaviour (check {@link VirtualMachine} entity filters) is to return
-     * only the ones without the temporal values.
-     */
-    @Test(enabled = false)
-    public void findAllWithNotTemporalFilters()
-    {
-        createFiveVolumesWithTemporalAndNotTemporalValueSetAndPersistThem();
-        
-        VolumeManagementDAO dao = createDaoForRollbackTransaction();
-
-        List<VolumeManagement> all = dao.findAll();
-        assertEquals(all.size(), 2);
-    }
     
     /**
      * Create five resources, three with the temporal value set, and two without the temporal values
@@ -382,4 +367,21 @@ public class VolumeManagementDAOTest extends
 
         persistAll(ds(), resourceList, rm1, rm2, rm3, rm4, rm5);
     }
+    
+    /**
+     * Create five machines, three with the temporal value set, and two without the temporal values
+     * set. Check the default behaviour (check {@link VirtualMachine} entity filters) is to return
+     * only the ones without the temporal values.
+     */
+    @Test(enabled = false)
+    public void findAllWithNotTemporalFilters()
+    {
+        createFiveVolumesWithTemporalAndNotTemporalValueSetAndPersistThem();
+        
+        VolumeManagementDAO dao = createDaoForRollbackTransaction();
+
+        List<VolumeManagement> all = dao.findAll();
+        assertEquals(all.size(), 2);
+    }
+        
 }

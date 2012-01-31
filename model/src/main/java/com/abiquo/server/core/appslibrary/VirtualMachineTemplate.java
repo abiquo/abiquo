@@ -548,7 +548,6 @@ public class VirtualMachineTemplate extends DefaultEntityBase
         this.chefEnabled = chefEnabled;
     }
 
-
     public final static String CREATION_DATE_PROPERTY = "creationDate";
 
     private final static boolean CREATION_DATE_REQUIRED = false;

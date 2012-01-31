@@ -311,11 +311,6 @@ public class VirtualMachineAllocatorService extends DefaultApiService
         try
         {
             upgradeUse.updateUse(vapp, allocatedVirtualMachine);
-
-            if (fitPolicy.equals(FitPolicy.PROGRESSIVE))
-            {
-                adjustPoweredMachinesInRack(targetMachine.getRack());
-            }
         }
         catch (ResourceUpgradeUseException e) // TODO with this error no other machine candidate
         {
@@ -373,18 +368,7 @@ public class VirtualMachineAllocatorService extends DefaultApiService
     {
         try
         {
-            FitPolicy policy =
-                getAllocationFitPolicyOnDatacenter(vmachine.getHypervisor().getMachine()
-                    .getDatacenter().getId());
-            // need to adjust UCS
-            Rack rack = vmachine.getHypervisor().getMachine().getRack();
-
             upgradeUse.rollbackUse(vmachine);
-
-            if (FitPolicy.PROGRESSIVE == policy)
-            {
-                adjustPoweredMachinesInRack(rack);
-            }
         }
         catch (ResourceUpgradeUseException e)
         {
@@ -469,7 +453,6 @@ public class VirtualMachineAllocatorService extends DefaultApiService
     {
 
         checkEnterpirse.checkLimits(vapp.getEnterprise(), required, force, checkVLAN, false);
-
     }
 
     /**

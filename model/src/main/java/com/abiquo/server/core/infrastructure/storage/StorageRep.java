@@ -173,11 +173,6 @@ public class StorageRep extends DefaultRepBase
         return volumeDAO.findById(volumeId);
     }
 
-    public VolumeManagement findVolumeByRasd(final Rasd rasd)
-    {
-        return volumeDAO.getVolumeByRasd(rasd);
-    }
-
     public List<VolumeManagement> findVolumesByEnterprise(final Integer id,
         final FilterOptions filters)
     {
@@ -236,7 +231,7 @@ public class StorageRep extends DefaultRepBase
     {
         return tierDAO.findAll();
     }
-
+    
     public List<Tier> getTiersByDatacenter(final Integer datacenterId)
     {
         return tierDAO.getTiersByDatacenter(datacenterId);

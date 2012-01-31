@@ -1,5 +1,5 @@
 /**
-t * Abiquo community edition
+ * Abiquo community edition
  * cloud management application for hybrid clouds
  * Copyright (C) 2008-2010 - Abiquo Holdings S.L.
  *

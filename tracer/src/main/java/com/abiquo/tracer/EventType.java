@@ -201,8 +201,8 @@ public enum EventType implements Serializable
         "Currency deleted"),
 
     // STORAGE DEVICE
-    STORAGE_DEVICE_CREATED(2000, "STORAGE DEVICE CREATED", "Storage device created"), STORAGE_DEVICE_MODIFIED(
-        2001, "STORAGE DEVICE MODIFIED", "Storage device modified"), STORAGE_DEVICE_DELETED(2002,
+    STORAGE_DEVICE_CREATED(1600, "STORAGE DEVICE CREATED", "Storage device created"), STORAGE_DEVICE_MODIFIED(
+        1601, "STORAGE DEVICE MODIFIED", "Storage device modified"), STORAGE_DEVICE_DELETED(1602,
         "STORAGE DEVICE DELETED", "Storage device deleted"),
 
     // CHEF

@@ -42,6 +42,7 @@ import org.springframework.stereotype.Component;
 import com.abiquo.api.services.InfrastructureService;
 import com.abiquo.model.enumerator.FitPolicy;
 import com.abiquo.scheduler.workload.NotEnoughResourcesException;
+import com.abiquo.scheduler.workload.VirtualimageAllocationService;
 import com.abiquo.server.core.cloud.HypervisorDAO;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
@@ -89,6 +90,9 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
 
     @Autowired
     private HypervisorDAO hypervisorDao;
+
+    @Autowired
+    private VirtualimageAllocationService allocationService;
 
     @Autowired
     private InfrastructureService infrastructureService;

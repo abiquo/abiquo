@@ -237,4 +237,5 @@ public class VirtualMachineDto extends SingleResourceTransportDto implements
     {
         this.runlistElements = runlistElements;
     }
+
 }

@@ -134,8 +134,9 @@ public class ObjectFactory
         return new VirtualSystemDto();
     }
 
+
     /**
-     * <<<<<<< HEAD Create an instance of {@link LogicServerDto }
+     * Create an instance of {@link LogicServerDto }
      */
     public LogicServerDto createLogicServerDto()
     {

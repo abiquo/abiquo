@@ -997,7 +997,6 @@ public class InfrastructureService extends DefaultApiService
         }
     }
 
-
     /**
      * We check how many empty machines are in a rack. Then we power on or off to fit the
      * configuration. In 2.0 only in {@link UcsRack}.

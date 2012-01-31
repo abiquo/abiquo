@@ -104,6 +104,7 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
 
     public VirtualApplianceCommandImpl()
     {
+
     }
 
     /*

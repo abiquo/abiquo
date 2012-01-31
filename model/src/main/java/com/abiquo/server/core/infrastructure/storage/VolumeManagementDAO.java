@@ -119,12 +119,6 @@ import com.softwarementors.bzngine.entities.PersistentEntity;
         return getSingleResultOrNull(criteria);
     }
 
-    public VolumeManagement getVolumeByRasd(final Rasd rasd)
-    {
-        Criteria criteria = createCriteria(sameRasd(rasd));
-        return getSingleResultOrNull(criteria);
-    }
-
     public List<VolumeManagement> getStatefulCandidates(final VirtualDatacenter vdc)
     {
         // Filters on the VolumeManagement entity
@@ -352,11 +346,6 @@ import com.softwarementors.bzngine.entities.PersistentEntity;
     private static Criterion samePool(final StoragePool pool)
     {
         return Restrictions.eq(VolumeManagement.STORAGE_POOL_PROPERTY, pool);
-    }
-
-    private static Criterion sameRasd(final Rasd rasd)
-    {
-        return Restrictions.eq(VolumeManagement.RASD_PROPERTY, rasd);
     }
 
     private static Criterion sameId(final Integer id)

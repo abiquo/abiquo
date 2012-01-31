@@ -216,9 +216,9 @@ public class NodeResource
      * @return the {@link VirtualSystemResource} object
      */
     @GET
-    @Path(VIRTUAL_SYSTEM + "/by_name/{name}")
+    @Path(VIRTUAL_SYSTEM + "/by_name/{uuid}")
     public VirtualSystemDto getVirtualSystemByName(@PathParam("ip") @NotNull @Ip final String ip,
-        @PathParam("name") @NotNull final String name,
+        @PathParam("uuid") @NotNull final String uuid,
         @QueryParam("hyp") @NotNull final String hypervisorType,
         @QueryParam("user") @NotNull final String user,
         @QueryParam("passwd") @NotNull final String password,
@@ -237,6 +237,6 @@ public class NodeResource
         }
 
         return virtualSystemService.getVirtualSystemByName(ip, hypType, user, password, aimport,
-            name);
+            uuid);
     }
 }

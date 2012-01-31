@@ -40,7 +40,6 @@
 
     <mx:Script>
         <![CDATA[
-        	import net.undf.abicloud.events.InfrastructureEvent;
         	import mx.events.CloseEvent;
         	import net.undf.abicloud.events.VirtualApplianceEvent;
         	import net.undf.abicloud.vo.virtualappliance.VirtualAppliance;

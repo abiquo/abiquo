@@ -521,15 +521,15 @@ public class VirtualMachine extends DefaultEntityBase
 
     @Enumerated(value = javax.persistence.EnumType.STRING)
     @Column(name = SUB_STATE_COLUMN, nullable = !SUB_STATE_REQUIRED)
-    private VirtualMachineState subState;
+    private State subState;
 
     @Required(value = SUB_STATE_REQUIRED)
-    public VirtualMachineState getSubState()
+    public State getSubState()
     {
         return this.subState;
     }
 
-    public void setSubState(final VirtualMachineState subState)
+    public void setSubState(final State subState)
     {
         this.subState = subState;
     }

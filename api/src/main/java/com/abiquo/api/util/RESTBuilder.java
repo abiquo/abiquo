@@ -300,7 +300,6 @@ public class RESTBuilder implements IRESTBuilder
             links.add(builder.buildActionLink(MachineResource.class,
                 MachineResource.MACHINE_ACTION_POWER_OFF_PATH,
                 MachineResource.MACHINE_ACTION_POWER_OFF_REL, params));
-
             links.add(builder.buildActionLink(MachineResource.class,
                 MachineResource.MACHINE_ACTION_LED_ON, MachineResource.MACHINE_ACTION_LED_ON_REL,
                 params));
@@ -1195,6 +1194,12 @@ public class RESTBuilder implements IRESTBuilder
     }
 
     @Override
+    public List<RESTLink> buildCurrencyLinks(final CurrencyDto currencyDto, final Currency currency)
+    {
+        return null;
+    }
+
+    @Override
     public List<RESTLink> buildPublicIpLinks(final Integer datacenterId, final IpPoolManagement ip)
     {
         // TODO Auto-generated method stub
@@ -1205,12 +1210,6 @@ public class RESTBuilder implements IRESTBuilder
     public List<RESTLink> buildPublicIpRasdLinks(final Integer vdcId, final IpPoolManagement ip)
     {
         // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public List<RESTLink> buildCurrencyLinks(final CurrencyDto currencyDto, final Currency currency)
-    {
         return null;
     }
 
