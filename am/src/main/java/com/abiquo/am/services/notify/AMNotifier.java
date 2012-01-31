@@ -34,7 +34,7 @@ import com.abiquo.appliancemanager.exceptions.AMException;
 import com.abiquo.appliancemanager.exceptions.EventException;
 import com.abiquo.appliancemanager.transport.TemplateStatusEnumType;
 import com.abiquo.commons.amqp.impl.am.AMProducer;
-import com.abiquo.commons.amqp.impl.am.domain.OVFPackageInstanceStatusEvent;
+import com.abiquo.commons.amqp.impl.am.domain.TemplateStatusEvent;
 import com.abiquo.ovfmanager.ovf.exceptions.IdNotFoundException;
 
 @Component
@@ -108,7 +108,7 @@ public class AMNotifier extends AMProducer
             AMRedisDao.returnDao(dao);
         }
 
-        OVFPackageInstanceStatusEvent event = new OVFPackageInstanceStatusEvent();
+        TemplateStatusEvent event = new TemplateStatusEvent();
         event.setOvfId(ovfId);
         event.setStatus(status.name());
         event.setEnterpriseId(erId);
