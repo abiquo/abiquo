@@ -261,7 +261,7 @@ public class VirtualMachineService extends DefaultApiService
             flushErrors();
         }
         LOGGER.debug("Virtual machine {} found", vmId);
-        
+
         // if the ips are external, we need to set the limitID in order to return the
         // proper info.
         for (IpPoolManagement ip : vm.getIps())
@@ -275,7 +275,7 @@ public class VirtualMachineService extends DefaultApiService
                 ip.getVlanNetwork().setLimitId(dl.getId());
             }
         }
-        
+
         return vm;
     }
 
@@ -1257,7 +1257,8 @@ public class VirtualMachineService extends DefaultApiService
      * 
      * @param virtualMachine void
      */
-    protected void initiatorMappings(final VirtualMachine virtualMachine)
+    @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
+    public void initiatorMappings(final VirtualMachine virtualMachine)
     {
         // PREMIUM
         LOGGER.debug("initiatorMappings community edition");
@@ -1707,7 +1708,7 @@ public class VirtualMachineService extends DefaultApiService
             addNotFoundErrors(APIError.NODE_VIRTUAL_MACHINE_IMAGE_NOT_EXISTS);
             flushErrors();
         }
-        
+
         // if the ips are external, we need to set the limitID in order to return the
         // proper info.
         for (IpPoolManagement ip : vm.getIps())
@@ -1721,7 +1722,7 @@ public class VirtualMachineService extends DefaultApiService
                 ip.getVlanNetwork().setLimitId(dl.getId());
             }
         }
-        
+
         return nodeVirtualImage;
     }
 
