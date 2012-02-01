@@ -84,11 +84,11 @@ public class VirtualAppliance extends DefaultEntityBase
 
     public final static String NAME_PROPERTY = "name";
 
-    private final static boolean NAME_REQUIRED = false;
+    private final static boolean NAME_REQUIRED = true;
 
-    private final static int NAME_LENGTH_MIN = 0;
+    private final static int NAME_LENGTH_MIN = 1;
 
-    private final static int NAME_LENGTH_MAX = 255;
+    private final static int NAME_LENGTH_MAX = 30;
 
     private final static boolean NAME_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
 
