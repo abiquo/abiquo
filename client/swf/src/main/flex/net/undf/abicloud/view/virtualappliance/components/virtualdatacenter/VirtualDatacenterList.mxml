@@ -73,6 +73,7 @@
                 //Checking for privileges
                 SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.VDC_MANAGE,"removeChild",addVirtualDataCenterButton,securableVDCAccionsBox);
                 SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.VDC_MANAGE,"removeChild",deleteVirtualDataCenterButton,securableVDCAccionsBox);
+                SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.VDC_MANAGE,"removeChild",editVirtualDataCenterButton,securableVDCAccionsBox);
                 
                 //Listening for changes in model
                 AbiCloudModel.getInstance().virtualApplianceManager.addEventListener(VirtualApplianceEvent.VIRTUAL_DATACENTER_ADDED,
