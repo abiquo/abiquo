@@ -43,6 +43,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.exceptions.APIException;
+import com.abiquo.api.exceptions.InternalServerErrorException;
 import com.abiquo.api.services.cloud.VirtualMachineService;
 import com.abiquo.api.services.stub.NodecollectorServiceStub;
 import com.abiquo.api.services.stub.VsmServiceStub;
@@ -992,7 +993,18 @@ public class InfrastructureService extends DefaultApiService
                 RemoteServiceType.VIRTUAL_SYSTEM_MONITOR);
         for (VirtualMachine vm : vmachines)
         {
-            vsmServiceStub.unsubscribe(vsm, vm);
+            try
+            {
+                vsmServiceStub.unsubscribe(vsm, vm);
+            }
+            catch (InternalServerErrorException ex)
+            {
+                LOGGER
+                    .error(String
+                        .format(
+                            "An unexpected error has ocurred when try to unsubscribe the virtual machine '%s', it probably unsubscribed yet",
+                            vm.getName()));
+            }
             vdcRep.deleteVirtualMachine(vm);
         }
     }
