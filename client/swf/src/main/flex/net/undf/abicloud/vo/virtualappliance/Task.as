@@ -28,11 +28,24 @@ package net.undf.abicloud.vo.virtualappliance
     [Bindable]
     public class Task
     {
+        //Task STATES
         public static const FINISHED_SUCCESSFULLY:String = "FINISHED_SUCCESSFULLY";
         public static const FINISHED_UNSUCCESSFULLY:String = "FINISHED_UNSUCCESSFULLY";
         public static const PENDING:String = "PENDING";
         public static const STARTED:String = "STARTED";
         public static const ABORTED:String = "ABORTED";
+        
+        //Task TYPES
+        public static const DEPLOY:String = "DEPLOY";
+        public static const UNDEPLOY:String = "UNDEPLOY";
+        public static const RECONFIGURE:String = "RECONFIGURE";
+        public static const POWER_ON:String = "POWER_ON";
+        public static const POWER_OFF:String = "POWER_OFF";
+        public static const PAUSE:String = "PAUSE";
+        public static const RESUME:String = "RESUME";
+        public static const RESET:String = "RESET";
+        public static const SNAPSHOT:String = "SNAPSHOT";
+        public static const HIGH_AVAILABILITY:String = "HIGH_AVAILABILITY";
         
         public var ownerId:String;
 	    public var taskId:String;
