@@ -32,14 +32,6 @@
     xmlns:mx="http://www.adobe.com/2006/mxml"
     xmlns:general="net.undf.abicloud.view.general.*">
 
-    <!-- editVirtualDataCenterButton's data provider -->
-    <mx:XMLList id="editVirtualDataCenterButtonDP">
-        <node id="editVDC"
-            label="@Resource(bundle='Common', key='BUTTON_EDIT')"/>
-        <node id="showDHCPInfo"
-            label="@Resource(bundle='VirtualAppliance', key='LABEL_SHOW_DHCP_INFO')"/>
-    </mx:XMLList>
-
     <mx:Metadata>
 		[Event(name="selectedVirtualDataCenterChange", type="flash.events.Event")]
 	</mx:Metadata>
@@ -262,31 +254,6 @@
             }
 
             /**
-             * When user clicks on VirtualDataCenter edit button
-             */
-            private function onClickEditVirtualDataCenter(event:MenuEvent):void
-            {
-
-                if (this._selectedVirtualDataCenter)
-                {
-                    editVirtualDataCenterButton.dataProvider = editVirtualDataCenterButtonDP; //To avoid an annoying graphic problem...
-
-                    if (event.item.@id == "editVDC")
-                    {
-                        //Calling for VDC edition
-                        editVirtualDataCenter();
-                    }
-                    else if (event.item.@id == "showDHCPInfo")
-                    {
-                        //Asking for the DHCP information for the selected Virtual Data Center
-                        var virtualApplianceEvent:VirtualApplianceEvent = new VirtualApplianceEvent(VirtualApplianceEvent.GET_VIRTUAL_DATACENTER_DHCP_CONF);
-                        virtualApplianceEvent.virtualDataCenter = this._selectedVirtualDataCenter;
-                        dispatchEvent(virtualApplianceEvent);
-                    }
-                }
-            }
-
-            /**
              * Opens a VirtualDataCenterForm for edition
              */
             private function editVirtualDataCenter():void
@@ -397,14 +364,12 @@
 	        <mx:Spacer 
 	            width="100%" height="10"/>
 	
-	        <mx:PopUpMenuButton id="editVirtualDataCenterButton"
-	            width="40" height="22"
-	            styleName="ConfigurationButtonPlus"
-	            dataProvider="{editVirtualDataCenterButtonDP}" label=""
-	            labelField="@label"
-	            enabled="{this._selectedVirtualDataCenter != null}"
-	            itemClick="onClickEditVirtualDataCenter(event)"
-	            closeDuration="0"/>
+	        <mx:Button id="editVirtualDataCenterButton"
+                enabled="{this._selectedVirtualDataCenter != null}"
+                styleName="ConfigurationButton"
+                toolTip="@Resource(bundle='Common', key='BUTTON_EDIT_TOOLTIP')"
+                click="editVirtualDataCenter()"/>
+
 		</mx:HBox>
     </general:GeneralPanelToolBox>
 
