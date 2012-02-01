@@ -71,7 +71,7 @@ public class Role extends DefaultEntityBase
 
     private final static boolean NAME_REQUIRED = true;
 
-    public final static int NAME_LENGTH_MIN = 0;
+    public final static int NAME_LENGTH_MIN = 1;
 
     public final static int NAME_LENGTH_MAX = 40;
 
