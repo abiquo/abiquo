@@ -114,7 +114,8 @@ public class RoleService extends DefaultApiService
         {
             enterprise = findEnterprise(enterpriseId);
         }
-        return enterpriseRep.findRolesByEnterprise(enterprise, filter, order, desc, 0, 25);
+        return enterpriseRep.findRolesByEnterprise(enterprise, filter, order, desc, page,
+            numResults);
     }
 
     public Collection<Role> getRolesWithEqualsOrLessPrivileges(final Role role,
