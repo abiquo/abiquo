@@ -252,42 +252,6 @@
 
     </EventHandlers>
 
-
-    <!-- VirtualApplianceEvent.GET_VIRTUAL_DATACENTER_DHCP_CONF ________________________________________________________________________ -->
-    <EventHandlers type="{VirtualApplianceEvent.GET_VIRTUAL_DATACENTER_DHCP_CONF}">
-
-        <!-- Blocking screen -->
-        <InlineInvoker method="ScreenBlocker.blockScreen"/>
-
-        <!-- Make call to the server here -->
-
-        <RemoteObjectInvoker instance="{services.networkingService}"
-            method="getInfoDHCPServer"
-            arguments="{[AbiCloudModel.getInstance().loginManager.session, event.virtualDataCenter.id]}">
-
-            <resultHandlers>
-                <MethodInvoker generator="{VirtualApplianceResultHandler}"
-                    method="handleGetVirtualDataCenterDHCPConf"
-                    arguments="{[resultObject, event.virtualDataCenter]}"/>
-
-                <!-- Unblock screen -->
-                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
-            </resultHandlers>
-
-            <faultHandlers>
-                <MethodInvoker generator="{FaultHandler}"
-                    method="handleFault"
-                    arguments="{[fault]}"/>
-
-                <!-- Unblock screen -->
-                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
-            </faultHandlers>
-
-        </RemoteObjectInvoker>
-
-    </EventHandlers>
-
-
     <!-- ********************************************************************************************************************* -->
     <!-- VirtualApplianceEvent.GET_VIRTUALAPPLIANCES_BY_ENTERPRISE ________________________________________________________________________ -->
     <EventHandlers type="{VirtualApplianceEvent.GET_VIRTUALAPPLIANCES_BY_ENTERPRISE}">
