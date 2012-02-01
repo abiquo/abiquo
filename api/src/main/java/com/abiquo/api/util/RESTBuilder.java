@@ -289,29 +289,8 @@ public class RESTBuilder implements IRESTBuilder
             DatastoresResource.DATASTORES_PATH, params));
         links.add(builder.buildRestLink(VirtualMachinesInfrastructureResource.class,
             VirtualMachinesInfrastructureResource.VIRTUAL_MACHINES_INFRASTRUCTURE_PARAM, params));
-        links.add(builder.buildActionLink(MachineResource.class,
+        links.add(builder.buildRestLink(MachineResource.class,
             MachineResource.MACHINE_ACTION_CHECK, MachineResource.MACHINE_CHECK, params));
-
-        if (managedRack)
-        {
-            links.add(builder.buildActionLink(MachineResource.class,
-                MachineResource.MACHINE_ACTION_POWER_ON_PATH,
-                MachineResource.MACHINE_ACTION_POWER_ON_REL, params));
-            links.add(builder.buildActionLink(MachineResource.class,
-                MachineResource.MACHINE_ACTION_POWER_OFF_PATH,
-                MachineResource.MACHINE_ACTION_POWER_OFF_REL, params));
-            links.add(builder.buildActionLink(MachineResource.class,
-                MachineResource.MACHINE_ACTION_LED_ON, MachineResource.MACHINE_ACTION_LED_ON_REL,
-                params));
-            links.add(builder.buildActionLink(MachineResource.class,
-                MachineResource.MACHINE_ACTION_LS, MachineResource.MACHINE_ACTION_LS__REL, params));
-            links.add(builder.buildActionLink(MachineResource.class,
-                MachineResource.MACHINE_ACTION_LED_OFF, MachineResource.MACHINE_ACTION_LED_OFF_REL,
-                params));
-            links.add(builder.buildActionLink(MachineResource.class,
-                MachineResource.MACHINE_LOCATOR_LED, MachineResource.MACHINE_LOCATOR_LED_REL,
-                params));
-        }
 
         return links;
     }
@@ -792,12 +771,13 @@ public class RESTBuilder implements IRESTBuilder
 
         if (vm.getNetworkConfiguration() != null)
         {
-            params.put(VirtualMachineNetworkConfigurationResource.CONFIGURATION, vm.getNetworkConfiguration().getId().toString());
+            params.put(VirtualMachineNetworkConfigurationResource.CONFIGURATION, vm
+                .getNetworkConfiguration().getId().toString());
             links.add(builder.buildRestLink(VirtualMachineNetworkConfigurationResource.class,
-            VirtualMachineNetworkConfigurationResource.CONFIGURATION_PATH + "/" + VirtualMachineNetworkConfigurationResource.CONFIGURATION_PARAM,            
-            VirtualMachineNetworkConfigurationResource.DEFAULT_CONFIGURATION, params));
+                VirtualMachineNetworkConfigurationResource.CONFIGURATION_PATH + "/"
+                    + VirtualMachineNetworkConfigurationResource.CONFIGURATION_PARAM,
+                VirtualMachineNetworkConfigurationResource.DEFAULT_CONFIGURATION, params));
         }
-        
 
         links.add(builder.buildRestLink(VirtualMachineNetworkConfigurationResource.class,
             VirtualMachineNetworkConfigurationResource.NICS_PATH,
@@ -838,10 +818,10 @@ public class RESTBuilder implements IRESTBuilder
 
     @Override
     public List<RESTLink> buildVirtualMachineCloudAdminLinks(final Integer vdcId,
-        final Integer vappId, final VirtualMachine vm, final Integer datacenterId, final Integer rackId,
-        final Integer machineId, final Integer enterpriseId, final Integer userId,
-        final boolean chefEnabled, final Integer[] volumeIds, final Integer[] diskIds,
-        final List<IpPoolManagement> ips, final HypervisorType vdcType)
+        final Integer vappId, final VirtualMachine vm, final Integer datacenterId,
+        final Integer rackId, final Integer machineId, final Integer enterpriseId,
+        final Integer userId, final boolean chefEnabled, final Integer[] volumeIds,
+        final Integer[] diskIds, final List<IpPoolManagement> ips, final HypervisorType vdcType)
     {
 
         List<RESTLink> links = new ArrayList<RESTLink>();

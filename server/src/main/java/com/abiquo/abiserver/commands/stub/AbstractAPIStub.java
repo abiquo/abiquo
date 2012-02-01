@@ -1230,7 +1230,7 @@ public class AbstractAPIStub
         String uri = "admin/datacenters/{datacenter}/";
         if (includeMachineId)
         {
-            uri += "racks/{rack}/machines/{machine}/action/checkState?sync=true";
+            uri += "racks/{rack}/machines/{machine}/action/checkstate?sync=true";
         }
         else
         {
@@ -1265,7 +1265,7 @@ public class AbstractAPIStub
         String uri = "admin/datacenters/{datacenter}/";
         if (includeMachineId)
         {
-            uri += "racks/{rack}/machines/{machine}/action/checkIpmi";
+            uri += "racks/{rack}/machines/{machine}/action/checkipmi";
         }
         else
         {
