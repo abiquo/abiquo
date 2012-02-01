@@ -81,12 +81,16 @@ public class MachineResource extends AbstractResource
 
     public static final String MACHINE_ACTION_POWER_ON_REL = "poweron";
 
+    public static final String MACHINE_ACTION_CHECK = "action/checkstate";
+
+    public static final String MACHINE_CHECK = "checkstate";
+
     public static final String MACHINE_ACTION_LED_ON = "action/ledon";
 
     public static final String MACHINE_ACTION_LED_ON_REL = "ledon";
 
     public static final String MACHINE_ACTION_LS = "logicserver";
-    
+
     public static final String SHOW_CREDENTIALS_QUERY_PARAM = "credentials";
 
     public static final String MACHINE_ACTION_GET_VIRTUALMACHINES = "action/virtualmachines";
@@ -100,10 +104,6 @@ public class MachineResource extends AbstractResource
     public static final String MACHINE_LOCATOR_LED = "led";
 
     public static final String MACHINE_LOCATOR_LED_REL = "led";
-
-    public static final String MACHINE_ACTION_CHECK = "action/checkState";
-
-    public static final String MACHINE_CHECK = "checkState";
 
     @Autowired
     MachineService service;

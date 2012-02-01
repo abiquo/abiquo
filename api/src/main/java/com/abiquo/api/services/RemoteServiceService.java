@@ -296,6 +296,7 @@ public class RemoteServiceService extends DefaultApiService
         if (old.getUri().equals(dto.getUri()))
         {
             // no other checks to determine if its of the same type etc
+            dto.setStatus(old.getStatus());
             return dto;
         }
 

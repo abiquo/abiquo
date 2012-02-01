@@ -40,6 +40,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
 import com.abiquo.api.exceptions.APIError;
+import com.abiquo.api.exceptions.ConflictException;
 import com.abiquo.api.exceptions.NotFoundException;
 import com.abiquo.api.services.InfrastructureService;
 import com.abiquo.api.util.IRESTBuilder;
@@ -105,6 +106,11 @@ public class RemoteServiceResource extends AbstractResource
 
         RemoteServiceType type = RemoteServiceType.valueFromName(serviceType);
         RemoteService old = service.getRemoteService(datacenterId, type);
+
+        if (!old.getType().equals(remoteService.getType()))
+        {
+            throw new ConflictException(APIError.WRONG_REMOTE_SERVICE_TYPE);
+        }
 
         RemoteServiceDto r = service.modifyRemoteService(old.getId(), remoteService);
 
