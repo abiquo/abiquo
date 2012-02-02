@@ -38,6 +38,7 @@ import org.springframework.util.StringUtils;
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.exceptions.APIException;
 import com.abiquo.api.services.cloud.VirtualMachineService;
+import com.abiquo.api.services.stub.NodecollectorServiceStub;
 import com.abiquo.api.services.stub.VsmServiceStub;
 import com.abiquo.api.tracer.TracerLogger;
 import com.abiquo.server.core.cloud.Hypervisor;
@@ -82,6 +83,9 @@ public class MachineService extends DefaultApiService
     @Autowired
     protected VirtualDatacenterRep virtualDatacenterRep;
 
+    @Autowired
+    protected NodecollectorServiceStub nodecollectorServiceStub;
+
     public MachineService()
     {
 
@@ -95,6 +99,7 @@ public class MachineService extends DefaultApiService
         virtualMachineService = new VirtualMachineService(em);
         virtualDatacenterRep = new VirtualDatacenterRep(em);
         remoteServiceService = new RemoteServiceService(em);
+        nodecollectorServiceStub = new NodecollectorServiceStub();
         tracer = new TracerLogger();
     }
 
@@ -254,19 +259,16 @@ public class MachineService extends DefaultApiService
         }
         old.setName(machineDto.getName());
         old.setDescription(machineDto.getDescription());
-        old.setState(machineDto.getState());
-
-        old.setVirtualRamInMb(machineDto.getVirtualRamInMb());
-        old.setVirtualRamUsedInMb(machineDto.getVirtualRamUsedInMb());
-
-        old.setVirtualCpuCores(machineDto.getVirtualCpuCores());
-        old.setVirtualCpusUsed(machineDto.getVirtualCpusUsed());
-        old.setVirtualCpusPerCore(machineDto.getVirtualCpusPerCore());
 
         old.setIpmiIP(machineDto.getIpmiIP());
         old.setIpmiPort(machineDto.getIpmiPort());
         old.setIpmiUser(machineDto.getIpmiUser());
         old.setIpmiPassword(machineDto.getIpmiPassword());
+
+        // [ABICLOUDPREMIUM-2996] State, CPU and RAM must never be edited. Always must reflect the
+        // real ones, obtained from NodeCollector in Machine creation.
+        // Used CPU and RAM should not be edited, since the Allocator is the responsible of
+        // maintaining them.
 
         isValidMachine(old);
 
