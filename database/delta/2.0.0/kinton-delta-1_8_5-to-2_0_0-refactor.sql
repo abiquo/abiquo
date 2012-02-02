@@ -460,6 +460,161 @@ BEGIN
 		INSERT INTO kinton.system_properties (name, value, description) VALUES ('client.logout.url','','Redirect to this URL after logout (empty -> login screen)');
 	END IF;
 	
+	-- Update System Properties
+	SELECT COUNT(*) INTO @existsCount FROM kinton.system_properties WHERE name='client.wiki.defaultURL' AND value='http://community.abiquo.com/display/ABI18/Abiquo+Documentation+Home';
+	IF @existsCount = 1 THEN 
+		UPDATE kinton.system_properties SET value='http://community.abiquo.com/display/ABI20/Abiquo+Documentation+Home' WHERE name='client.wiki.defaultURL';
+	END IF;
+	SELECT COUNT(*) INTO @existsCount FROM kinton.system_properties WHERE name='client.wiki.infra.createDatacenter' AND value='http://community.abiquo.com/display/ABI18/Managing+Datacenters#ManagingDatacenters-CreatingaDatacenter';
+	IF @existsCount = 1 THEN 
+		UPDATE kinton.system_properties SET value='http://community.abiquo.com/display/ABI20/Managing+Datacenters#ManagingDatacenters-CreatingaDatacenter' WHERE name='client.wiki.infra.createDatacenter';
+	END IF;
+	SELECT COUNT(*) INTO @existsCount FROM kinton.system_properties WHERE name='client.wiki.infra.editDatacenter' AND value='http://community.abiquo.com/display/ABI18/Managing+Datacenters#ManagingDatacenters-ModifyingaDatacenter';
+	IF @existsCount = 1 THEN 
+		UPDATE kinton.system_properties SET value='http://community.abiquo.com/display/ABI20/Managing+Datacenters#ManagingDatacenters-ModifyingaDatacenter' WHERE name='client.wiki.infra.editDatacenter';
+	END IF;
+	SELECT COUNT(*) INTO @existsCount FROM kinton.system_properties WHERE name='client.wiki.infra.editRemoteService' AND value='http://community.abiquo.com/display/ABI18/Managing+Datacenters#ManagingDatacenters-RemoteServices';
+	IF @existsCount = 1 THEN 
+		UPDATE kinton.system_properties SET value='http://community.abiquo.com/display/ABI20/Managing+Datacenters#ManagingDatacenters-RemoteServices' WHERE name='client.wiki.infra.editRemoteService';
+	END IF;
+	SELECT COUNT(*) INTO @existsCount FROM kinton.system_properties WHERE name='client.wiki.infra.createPhysicalMachine' AND value='http://community.abiquo.com/display/ABI18/Manage+Racks+and+Physical+Machines#ManageRacksandPhysicalMachines-CreatingPhysicalMachinesonStandardRacks';
+	IF @existsCount = 1 THEN 
+		UPDATE kinton.system_properties SET value='http://community.abiquo.com/display/ABI20/Manage+Physical+Machines#ManagePhysicalMachines-CreatingPhysicalMachinesonStandardRacks' WHERE name='client.wiki.infra.createPhysicalMachine';
+	END IF;
+	SELECT COUNT(*) INTO @existsCount FROM kinton.system_properties WHERE name='client.wiki.infra.mailNotification' AND value='http://community.abiquo.com/display/ABI18/Manage+Racks+and+Physical+Machines#ManageRacksandPhysicalMachines-SendingEmailNotifications';
+	IF @existsCount = 1 THEN 
+		UPDATE kinton.system_properties SET value='http://community.abiquo.com/display/ABI20/Manage+Physical+Machines#ManagePhysicalMachines-SendingEmailNotifications' WHERE name='client.wiki.infra.mailNotification';
+	END IF;
+	SELECT COUNT(*) INTO @existsCount FROM kinton.system_properties WHERE name='client.wiki.infra.addDatastore' AND value='http://community.abiquo.com/display/ABI18/Manage+Racks+and+Physical+Machines#ManageRacksandPhysicalMachines-DatastoresManagement';
+	IF @existsCount = 1 THEN 
+		UPDATE kinton.system_properties SET value='http://community.abiquo.com/display/ABI20/Manage+Physical+Machines#ManagePhysicalMachines-DatastoreManagement' WHERE name='client.wiki.infra.addDatastore';
+	END IF;
+	SELECT COUNT(*) INTO @existsCount FROM kinton.system_properties WHERE name='client.wiki.infra.createRack' AND value='http://community.abiquo.com/display/ABI18/Manage+Racks+and+Physical+Machines#ManageRacksandPhysicalMachines-CreatingRacks';
+	IF @existsCount = 1 THEN 
+		UPDATE kinton.system_properties SET value='http://community.abiquo.com/display/ABI20/Manage+Racks#ManageRacks-CreatingRacks' WHERE name='client.wiki.infra.createRack';
+	END IF;
+	SELECT COUNT(*) INTO @existsCount FROM kinton.system_properties WHERE name='client.wiki.infra.createMultiplePhysicalMachine' AND value='http://community.abiquo.com/display/ABI18/Manage+Racks+and+Physical+Machines#ManageRacksandPhysicalMachines-CreatingMultiplePhysicalMachines';
+	IF @existsCount = 1 THEN 
+		UPDATE kinton.system_properties SET value='http://community.abiquo.com/display/ABI20/Manage+Physical+Machines#ManagePhysicalMachines-CreatingMultiplePhysicalMachines' WHERE name='client.wiki.infra.createMultiplePhysicalMachine';
+	END IF;
+	SELECT COUNT(*) INTO @existsCount FROM kinton.system_properties WHERE name='client.wiki.infra.createMultiplePhysicalMachine' AND value='http://community.abiquo.com/display/ABI18/Manage+Racks+and+Physical+Machines#ManageRacksandPhysicalMachines-CreatingMultiplePhysicalMachines';
+	IF @existsCount = 1 THEN 
+		UPDATE kinton.system_properties SET value='http://community.abiquo.com/display/ABI20/Manage+Physical+Machines#ManagePhysicalMachines-CreatingMultiplePhysicalMachines' WHERE name='client.wiki.infra.createMultiplePhysicalMachine';
+	END IF;
+	SELECT COUNT(*) INTO @existsCount FROM kinton.system_properties WHERE name='client.wiki.network.publicVlan' AND value='http://community.abiquo.com/display/ABI18/Manage+Network+Configuration#ManageNetworkConfiguration-ManagePublicVLANs';
+	IF @existsCount = 1 THEN 
+		UPDATE kinton.system_properties SET value='http://community.abiquo.com/display/ABI20/Manage+Network+Configuration#ManageNetworkConfiguration-CreateVLANsforPublicNetworks' WHERE name='client.wiki.network.publicVlan';
+	END IF;
+	SELECT COUNT(*) INTO @existsCount FROM kinton.system_properties WHERE name='client.wiki.storage.storageDevice' AND value='http://community.abiquo.com/display/ABI18/Managing+External+Storage#ManagingExternalStorage-ManagingManagedStorageDevices';
+	IF @existsCount = 1 THEN 
+		UPDATE kinton.system_properties SET value='http://community.abiquo.com/display/ABI20/Managing+External+Storage#ManagingExternalStorage-ManagedStorage' WHERE name='client.wiki.storage.storageDevice';
+	END IF;
+	SELECT COUNT(*) INTO @existsCount FROM kinton.system_properties WHERE name='client.wiki.storage.storagePool' AND value='http://community.abiquo.com/display/ABI18/Managing+External+Storage#ManagingExternalStorage-StoragePools';
+	IF @existsCount = 1 THEN 
+		UPDATE kinton.system_properties SET value='http://community.abiquo.com/display/ABI20/Managing+External+Storage#ManagingExternalStorage-StoragePools' WHERE name='client.wiki.storage.storagePool';
+	END IF;
+	SELECT COUNT(*) INTO @existsCount FROM kinton.system_properties WHERE name='client.wiki.storage.tier' AND value='http://community.abiquo.com/display/ABI18/Managing+External+Storage#ManagingExternalStorage-TierManagement';
+	IF @existsCount = 1 THEN 
+		UPDATE kinton.system_properties SET value='http://community.abiquo.com/display/ABI20/Managing+External+Storage#ManagingExternalStorage-TierManagement' WHERE name='client.wiki.storage.tier';
+	END IF;
+	SELECT COUNT(*) INTO @existsCount FROM kinton.system_properties WHERE name='client.wiki.allocation.global' AND value='http://community.abiquo.com/display/ABI18/Manage+Allocation+Rules#ManageAllocationRules-GlobalRulesManagement';
+	IF @existsCount = 1 THEN 
+		UPDATE kinton.system_properties SET value='http://community.abiquo.com/display/ABI20/Manage+Allocation+Rules#ManageAllocationRules-GlobalRulesManagement' WHERE name='client.wiki.allocation.global';
+	END IF;
+	SELECT COUNT(*) INTO @existsCount FROM kinton.system_properties WHERE name='client.wiki.allocation.datacenter' AND value='http://community.abiquo.com/display/ABI18/Manage+Allocation+Rules#ManageAllocationRules-DatacenterRulesManagement';
+	IF @existsCount = 1 THEN 
+		UPDATE kinton.system_properties SET value='http://community.abiquo.com/display/ABI20/Manage+Allocation+Rules#ManageAllocationRules-DatacenterRulesManagement' WHERE name='client.wiki.allocation.datacenter';
+	END IF;
+	SELECT COUNT(*) INTO @existsCount FROM kinton.system_properties WHERE name='client.wiki.vdc.createVdc' AND value='http://community.abiquo.com/display/ABI18/Manage+Virtual+Datacenters#ManageVirtualDatacenters-CreatingaVirtualDatacenter';
+	IF @existsCount = 1 THEN 
+		UPDATE kinton.system_properties SET value='http://community.abiquo.com/display/ABI20/Manage+Virtual+Datacenters#ManageVirtualDatacenters-CreatingaVirtualDatacenter' WHERE name='client.wiki.vdc.createVdc';
+	END IF;
+	SELECT COUNT(*) INTO @existsCount FROM kinton.system_properties WHERE name='client.wiki.vdc.createVapp' AND value='http://community.abiquo.com/display/ABI18/Basic+operations#BasicOperations-CreatingaNewVirtualAppliance';
+	IF @existsCount = 1 THEN 
+		UPDATE kinton.system_properties SET value='http://community.abiquo.com/display/ABI20/Basic+operations#BasicOperations-CreatingaNewVirtualAppliance' WHERE name='client.wiki.vdc.createVapp';
+	END IF;
+	SELECT COUNT(*) INTO @existsCount FROM kinton.system_properties WHERE name='client.wiki.vdc.createPrivateNetwork' AND value='http://community.abiquo.com/display/ABI18/Manage+Networks#ManageNetworks-PrivateIPAddresses';
+	IF @existsCount = 1 THEN 
+		UPDATE kinton.system_properties SET value='http://community.abiquo.com/display/ABI20/Manage+Networks#ManageNetworks-CreateaPrivateVLAN' WHERE name='client.wiki.vdc.createPrivateNetwork';
+	END IF;
+	SELECT COUNT(*) INTO @existsCount FROM kinton.system_properties WHERE name='client.wiki.vdc.createPublicNetwork' AND value='http://community.abiquo.com/display/ABI18/Manage+Networks#ManageNetworks-PublicIPReservation';
+	IF @existsCount = 1 THEN 
+		UPDATE kinton.system_properties SET value='http://community.abiquo.com/display/ABI20/Manage+Networks#ManageNetworks-PublicIPReservation' WHERE name='client.wiki.vdc.createPublicNetwork';
+	END IF;
+	SELECT COUNT(*) INTO @existsCount FROM kinton.system_properties WHERE name='client.wiki.vdc.createVolume' AND value='http://community.abiquo.com/display/ABI18/Manage+Virtual+Storage#ManageVirtualStorage-CreatingaVolumeofManagedStorage';
+	IF @existsCount = 1 THEN 
+		UPDATE kinton.system_properties SET value='http://community.abiquo.com/display/ABI20/Manage+Virtual+Storage#ManageVirtualStorage-CreatingaVolumeofManagedStorage' WHERE name='client.wiki.vdc.createVolume';
+	END IF;
+	SELECT COUNT(*) INTO @existsCount FROM kinton.system_properties WHERE name='client.wiki.vdc.createVolume' AND value='http://community.abiquo.com/display/ABI18/Manage+Virtual+Storage#ManageVirtualStorage-CreatingaVolumeofManagedStorage';
+	IF @existsCount = 1 THEN 
+		UPDATE kinton.system_properties SET value='http://community.abiquo.com/display/ABI20/Manage+Virtual+Storage#ManageVirtualStorage-CreatingaVolumeofManagedStorage' WHERE name='client.wiki.vdc.createVolume';
+	END IF;
+	SELECT COUNT(*) INTO @existsCount FROM kinton.system_properties WHERE name='client.wiki.vm.editVirtualMachine' AND value='http://community.abiquo.com/display/ABI18/Configure+Virtual+Machines';
+	IF @existsCount = 1 THEN 
+		UPDATE kinton.system_properties SET value='http://community.abiquo.com/display/ABI20/Configure+Virtual+Machines' WHERE name='client.wiki.vm.editVirtualMachine';
+	END IF;
+	SELECT COUNT(*) INTO @existsCount FROM kinton.system_properties WHERE name='client.wiki.vm.bundleVirtualMachine' AND value='http://community.abiquo.com/display/ABI18/Configure+a+Virtual+Appliance#ConfigureaVirtualAppliance-Configure';
+	IF @existsCount = 1 THEN 
+		UPDATE kinton.system_properties SET value='http://community.abiquo.com/display/ABI20/Configure+a+Virtual+Appliance#ConfigureaVirtualAppliance-CreateanInstance' WHERE name='client.wiki.vm.bundleVirtualMachine';
+	END IF;
+	SELECT COUNT(*) INTO @existsCount FROM kinton.system_properties WHERE name='client.wiki.vm.createNetworkInterface' AND value='http://community.abiquo.com/display/ABI18/Configure+Virtual+Machines#ConfigureVirtualMachines-CreatingaNewNetworkInterface';
+	IF @existsCount = 1 THEN 
+		UPDATE kinton.system_properties SET value='http://community.abiquo.com/display/ABI20/Configure+Virtual+Machines#ConfigureVirtualMachines-CreatingaNewNetworkInterface' WHERE name='client.wiki.vm.createNetworkInterface';
+	END IF;
+	SELECT COUNT(*) INTO @existsCount FROM kinton.system_properties WHERE name='client.wiki.vm.createInstance' AND value='http://community.abiquo.com/display/ABI18/Create+Virtual+Machine+instances';
+	IF @existsCount = 1 THEN 
+		UPDATE kinton.system_properties SET value='http://community.abiquo.com/display/ABI20/Create+Virtual+Machine+instances' WHERE name='client.wiki.vm.createInstance';
+	END IF;
+	SELECT COUNT(*) INTO @existsCount FROM kinton.system_properties WHERE name='client.wiki.vm.createStateful' AND value='http://community.abiquo.com/display/ABI18/Create+Persistent+Virtual+Machines';
+	IF @existsCount = 1 THEN 
+		UPDATE kinton.system_properties SET value='http://community.abiquo.com/display/ABI20/Create+Persistent+Virtual+Machines' WHERE name='client.wiki.vm.createStateful';
+	END IF;
+	SELECT COUNT(*) INTO @existsCount FROM kinton.system_properties WHERE name='client.wiki.vm.captureVirtualMachine' AND value='http://community.abiquo.com/display/ABI18/Manage+Racks+and+Physical+Machines#ManageRacksandPhysicalMachines-ImportaRetrievedVirtualMachine';
+	IF @existsCount = 1 THEN 
+		UPDATE kinton.system_properties SET value='http://community.abiquo.com/display/ABI20/Manage+Physical+Machines#ManagePhysicalMachines-WorkingwithImportedVirtualMachines' WHERE name='client.wiki.vm.captureVirtualMachine';
+	END IF;
+	SELECT COUNT(*) INTO @existsCount FROM kinton.system_properties WHERE name='client.wiki.apps.uploadVM' AND value='http://community.abiquo.com/display/ABI20/Adding+VM+Templates+to+the+Appliance+Library#AddingVMTemplatestotheApplianceLibrary-UploadingfromtheLocalFilesystem';
+	IF @existsCount = 1 THEN 
+		UPDATE kinton.system_properties SET value='http://community.abiquo.com/display/ABI20/Adding+VM+Templates+to+the+Appliance+Library#AddingVMTemplatestotheApplianceLibrary-UploadingfromtheLocalFilesystem' WHERE name='client.wiki.apps.uploadVM';
+	END IF;
+	SELECT COUNT(*) INTO @existsCount FROM kinton.system_properties WHERE name='client.wiki.user.createEnterprise' AND value='http://community.abiquo.com/display/ABI18/Manage+Enterprises#ManageEnterprises-CreatingorEditinganEnterprise';
+	IF @existsCount = 1 THEN 
+		UPDATE kinton.system_properties SET value='http://community.abiquo.com/display/ABI20/Manage+Enterprises#ManageEnterprises-CreatingorEditinganEnterprise' WHERE name='client.wiki.user.createEnterprise';
+	END IF;
+	SELECT COUNT(*) INTO @existsCount FROM kinton.system_properties WHERE name='client.wiki.user.dataCenterLimits' AND value='http://community.abiquo.com/display/ABI18/Manage+Enterprises#ManageEnterprises-RestrictingDatacenterAccess';
+	IF @existsCount = 1 THEN 
+		UPDATE kinton.system_properties SET value='http://community.abiquo.com/display/ABI20/Manage+Enterprises#ManageEnterprises-EdittheEnterprise%27sDatacenters' WHERE name='client.wiki.user.dataCenterLimits';
+	END IF;
+	SELECT COUNT(*) INTO @existsCount FROM kinton.system_properties WHERE name='client.wiki.user.createUser' AND value='http://community.abiquo.com/display/ABI18/Manage+Users#ManageUsers-CreatingorEditingaUser';
+	IF @existsCount = 1 THEN 
+		UPDATE kinton.system_properties SET value='http://community.abiquo.com/display/ABI20/Manage+Users#ManageUsers-CreatingorEditingaUser' WHERE name='client.wiki.user.createUser';
+	END IF;
+	SELECT COUNT(*) INTO @existsCount FROM kinton.system_properties WHERE name='client.wiki.user.createRole' AND value='http://community.abiquo.com/display/ABI18/Manage+Roles+and+Privileges';
+	IF @existsCount = 1 THEN 
+		UPDATE kinton.system_properties SET value='http://community.abiquo.com/display/ABI20/Manage+Roles+and+Privileges' WHERE name='client.wiki.user.createRole';
+	END IF;
+	SELECT COUNT(*) INTO @existsCount FROM kinton.system_properties WHERE name='client.wiki.config.general' AND value='http://community.abiquo.com/display/ABI18/Configuration+view';
+	IF @existsCount = 1 THEN 
+		UPDATE kinton.system_properties SET value='http://community.abiquo.com/display/ABI20/Configuration+view' WHERE name='client.wiki.config.general';
+	END IF;
+	SELECT COUNT(*) INTO @existsCount FROM kinton.system_properties WHERE name='client.wiki.config.heartbeat' AND value='http://community.abiquo.com/display/ABI18/Configuration+view#Configurationview-Heartbeating';
+	IF @existsCount = 1 THEN 
+		UPDATE kinton.system_properties SET value='http://community.abiquo.com/display/ABI20/Configuration+view#ConfigurationView-Heartbeating' WHERE name='client.wiki.config.heartbeat';
+	END IF;
+	SELECT COUNT(*) INTO @existsCount FROM kinton.system_properties WHERE name='client.wiki.config.licence' AND value='http://community.abiquo.com/display/ABI18/Configuration+view#Configurationview-Licensemanagement';
+	IF @existsCount = 1 THEN 
+		UPDATE kinton.system_properties SET value='http://community.abiquo.com/display/ABI20/Configuration+view#ConfigurationView-LicenseManagement' WHERE name='client.wiki.config.licence';
+	END IF;
+	SELECT COUNT(*) INTO @existsCount FROM kinton.system_properties WHERE name='client.wiki.config.registration' AND value='http://community.abiquo.com/display/ABI18/Configuration+view#Configurationview-ProductRegistration';
+	IF @existsCount = 1 THEN 
+		UPDATE kinton.system_properties SET value='http://community.abiquo.com/display/ABI20/Configuration+view#Configurationview-ProductRegistration' WHERE name='client.wiki.config.registration';
+	END IF;
+	SELECT COUNT(*) INTO @existsCount FROM kinton.system_properties WHERE name='client.wiki.infra.discoverBlades' AND value='http://community.abiquo.com/display/ABI18/Manage+Racks+and+Physical+Machines#ManageRacksandPhysicalMachines-DiscoveringBladesonManagedRacks';
+	IF @existsCount = 1 THEN 
+		UPDATE kinton.system_properties SET value='http://community.abiquo.com/display/ABI20/Manage+Physical+Machines#ManagePhysicalMachines-DiscoveringBladesonManagedRacks' WHERE name='client.wiki.infra.discoverBlades';
+	END IF;
+
+
 	-- PRICING --
 	-- Dumping data for table kinton.privilege
 	SELECT COUNT(*) INTO @existsCount FROM kinton.privilege WHERE idPrivilege='49' AND name='PRICING_VIEW';
