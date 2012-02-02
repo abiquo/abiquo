@@ -233,15 +233,13 @@ class EnterpriseDAO extends DefaultDAOBase<Integer, Enterprise>
                                                                                                // //
                                                                                                // not
                                                                                                // HA_DISABLED
-            + " and vm.idEnterprise = :enterpriseId and STRCMP(vm.state, :not_deployed) != 0";
+            + " and vm.idEnterprise = :enterpriseId and vm.state != 'NOT_ALLOCATED' and vm.idHypervisor != null";
 
     public DefaultEntityCurrentUsed getEnterpriseResourceUsage(final int enterpriseId)
     {
         Object[] vmResources =
             (Object[]) getSession().createSQLQuery(SUM_VM_RESOURCES)
-                .setParameter("enterpriseId", enterpriseId)
-                .setParameter("not_deployed", VirtualMachineState.NOT_ALLOCATED.name())
-                .uniqueResult();
+                .setParameter("enterpriseId", enterpriseId).uniqueResult();
 
         Long cpu = vmResources[0] == null ? 0 : ((BigDecimal) vmResources[0]).longValue();
         Long ram = vmResources[1] == null ? 0 : ((BigDecimal) vmResources[1]).longValue();
