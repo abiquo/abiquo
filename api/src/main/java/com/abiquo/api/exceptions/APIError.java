@@ -94,10 +94,10 @@ public enum APIError
         "Invalid VLAN hard limit; this cannot be greater than the number of VLANS per virtual datacenter: {0}"), LIMITS_DUPLICATED(
         "LIMIT-7", "Duplicate limits by enterprise and datacenter"), LIMITS_NOT_EXIST("LIMIT-8",
         "Limits by enterprise and datacenter do not exist"), //
-    ENTERPRISE_LIMIT_EDIT_ARE_SURPRASED("LIMIT-9",
+    ENTERPRISE_LIMIT_EDIT_ARE_SURPASSED("LIMIT-9",
         "Cannot edit resource limits; current enterprise allocation exceeds the new specified limits "
             + "(see SYSTEM traces in order to determine which resources are at HARD limit)"), //
-    DATACENTER_LIMIT_EDIT_ARE_SURPRASED(
+    DATACENTER_LIMIT_EDIT_ARE_SURPASSED(
         "LIMIT-10",
         "Cannot edit resource limits; current enterprise and datacenter allocation exceeds the new specified limits "
             + "(see SYSTEM traces in order to determine which resources are at HARD limit)"), DATACENTER_LIMIT_DELETE_VDCS(

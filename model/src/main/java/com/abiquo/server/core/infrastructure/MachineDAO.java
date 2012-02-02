@@ -808,4 +808,27 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
         return ids;
     }
 
+    private static final String QUERY_TOTAL_USED_CORES = "SELECT sum(virtualCpuCores) "
+        + "FROM com.abiquo.server.core.infrastructure.Machine";
+
+    public Long getTotalUsedCores()
+    {
+        Query query = getSession().createQuery(QUERY_TOTAL_USED_CORES);
+        Long result = (Long) query.uniqueResult();
+        // If there are no results (no machines in DB) return 0
+        return result == null ? 0L : result;
+    }
+
+    private static final String QUERY_USED_CORES_EXCEPT_MACHINE = "SELECT sum(virtualCpuCores) "
+        + "FROM com.abiquo.server.core.infrastructure.Machine WHERE id != :id";
+
+    public Long getTotalUsedCoresExceptMachine(final Machine machine)
+    {
+        Query query = getSession().createQuery(QUERY_USED_CORES_EXCEPT_MACHINE);
+        query.setInteger("id", machine.getId());
+        Long result = (Long) query.uniqueResult();
+        // If there are no results (no other machines in DB) return 0
+        return result == null ? 0L : result;
+    }
+
 }
