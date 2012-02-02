@@ -107,7 +107,7 @@ public class AMRedisDao
     {
         for (String ovfKey : getOvfKeys(erId))
         {
-
+            redis.srem(key(erId), ovfKey);
             redis.del(ovfKey);
         }
 
