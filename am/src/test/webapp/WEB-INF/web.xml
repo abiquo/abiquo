@@ -16,7 +16,7 @@
 	<listener>
 		<listener-class>com.abiquo.appliancemanager.web.listener.LicenseContextListener</listener-class>
 	</listener>
-	
+
 	<servlet>
 		<servlet-name>amdefault</servlet-name>
 		<servlet-class>com.abiquo.appliancemanager.web.servlet.StaticRepositoryServlet</servlet-class>
@@ -32,26 +32,20 @@
 		<servlet-class>org.apache.wink.server.internal.servlet.AdminServlet</servlet-class>
 		<load-on-startup>2</load-on-startup>
 	</servlet>
-	
-	
-	
-	<!-- Remote Service Check Servlet 
-	TODO deprecate to CheckResource -->
-    <servlet>
-        <servlet-name>CheckServlet</servlet-name>
-        <servlet-class>com.abiquo.appliancemanager.web.servlet.CheckServlet</servlet-class>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>CheckServlet</servlet-name>
-        <url-pattern>/check</url-pattern>
-    </servlet-mapping>
-	<!-- EXPERIMENTING HTML UPLOAD FORM
-	
+
+
+
+	<!-- Remote Service Check Servlet TODO deprecate to CheckResource -->
+	<servlet>
+		<servlet-name>CheckServlet</servlet-name>
+		<servlet-class>com.abiquo.appliancemanager.web.servlet.CheckServletTest</servlet-class>
+	</servlet>
 	<servlet-mapping>
-		<servlet-name>default</servlet-name>
-		<url-pattern>*.html</url-pattern>
+		<servlet-name>CheckServlet</servlet-name>
+		<url-pattern>/check</url-pattern>
 	</servlet-mapping>
-	 -->
+	<!-- EXPERIMENTING HTML UPLOAD FORM <servlet-mapping> <servlet-name>default</servlet-name> 
+		<url-pattern>*.html</url-pattern> </servlet-mapping> -->
 	<servlet-mapping>
 		<servlet-name>amdefault</servlet-name>
 		<url-pattern>/files/*</url-pattern>
