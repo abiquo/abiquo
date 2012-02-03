@@ -55,7 +55,6 @@ import com.abiquo.api.resources.RoleResource;
 import com.abiquo.api.resources.RolesResource;
 import com.abiquo.api.spring.security.AbiquoUserDetails;
 import com.abiquo.api.spring.security.SecurityService;
-import com.abiquo.api.spring.security.SecurityService;
 import com.abiquo.api.util.URIResolver;
 import com.abiquo.model.enumerator.Privileges;
 import com.abiquo.model.rest.RESTLink;
@@ -173,8 +172,7 @@ public class UserService extends DefaultApiService
         }
 
         Collection<User> users =
-            repo
-                .findUsersByEnterprise(enterprise, filter, order, desc, connected, page, numResults);
+            repo.findUsersByEnterprise(enterprise, filter, order, desc, connected, page, numResults);
 
         // Refresh all entities to avioid lazys
         for (User u : users)
@@ -221,8 +219,8 @@ public class UserService extends DefaultApiService
         }
 
         User user =
-            enterprise.createUser(role, dto.getName(), dto.getSurname(), dto.getEmail(), dto
-                .getNick(), encrypt(dto.getPassword()), dto.getLocale());
+            enterprise.createUser(role, dto.getName(), dto.getSurname(), dto.getEmail(),
+                dto.getNick(), encrypt(dto.getPassword()), dto.getLocale());
         user.setActive(dto.isActive() ? 1 : 0);
         user.setDescription(dto.getDescription());
         validate(user);
@@ -600,6 +598,14 @@ public class UserService extends DefaultApiService
         {
             throw new AccessDeniedException("Missing privilege to manage info from other enterprises");
         }
+    }
+
+    /**
+     * Retrieves the user by nick in the DB. This method assumes that the login is unique.
+     */
+    public User getUserByLogin(final String login)
+    {
+        return repo.getUserByUserName(login);
     }
 
     private Boolean emailIsValid(final String email)

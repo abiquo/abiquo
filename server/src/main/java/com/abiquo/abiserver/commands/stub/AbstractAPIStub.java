@@ -498,13 +498,15 @@ public class AbstractAPIStub
         Map<String, String[]> queryParams = new HashMap<String, String[]>();
         if (!StringUtils.isEmpty(filter))
         {
-            queryParams.put("filter", new String[] {filter});
+            queryParams.put(FILTER, new String[] {filter});
         }
-        if (firstElem != null && numResults != null)
+        if (firstElem != null)
         {
-
-            queryParams.put("START_WITH", new String[] {firstElem.toString()});
-            queryParams.put("numResults", new String[] {numResults.toString()});
+            queryParams.put(START_WITH, new String[] {firstElem.toString()});
+        }
+        if (numResults != null)
+        {
+            queryParams.put(LIMIT, new String[] {numResults.toString()});
         }
 
         return UriHelper.appendQueryParamsToPath(uri, queryParams, false);
@@ -2048,4 +2050,20 @@ public class AbstractAPIStub
         return resolveURI(apiUri,
             "admin/datacenters/{datacenter}/racks/{rack}/machines/{machine}/led", params);
     }
+
+    protected String createVirtualMachineHardDiskLink(final Integer datacenterId,
+        final Integer rackId, final Integer pmId, final Integer vmId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("datacenter", datacenterId.toString());
+        params.put("rack", rackId.toString());
+        params.put("machine", pmId.toString());
+        params.put("vm", vmId.toString());
+
+        return resolveURI(
+            apiUri,
+            "admin/datacenters/{datacenter}/racks/{rack}/machines/{machine}/virtualmachines/{vm}/action/disk",
+            params);
+    }
+
 }

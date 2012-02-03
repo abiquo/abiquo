@@ -48,7 +48,6 @@ import com.abiquo.server.core.infrastructure.storage.StorageRep;
 import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
 import com.abiquo.server.core.pricing.PricingTemplate;
 import com.abiquo.server.core.util.PagedList;
-import com.softwarementors.bzngine.entities.PersistentEntity;
 
 @Repository("jpaEnterpriseDAO")
 class EnterpriseDAO extends DefaultDAOBase<Integer, Enterprise>
@@ -117,24 +116,29 @@ class EnterpriseDAO extends DefaultDAOBase<Integer, Enterprise>
         return result;
     }
 
-    public List<Enterprise> findByPricingTemplate(final PricingTemplate pt, final boolean included,
-        final String filterName, final Integer offset, final Integer numResults,
-        final String orderBy, final boolean desc, final Integer idEnterprise)
+    public List<Enterprise> findByPricingTemplate(Integer firstElem, final PricingTemplate pt,
+        final boolean included, final String filterName, final Integer numResults)
     {
-        Criteria criteria = createCriteria(pt, included, filterName, orderBy, desc, idEnterprise);
+        // Check if the page requested is bigger than the last one
+
+        Criteria criteria = createCriteria(pt, included, filterName);
 
         Long total = count(criteria);
 
-        criteria = createCriteria(pt, included, filterName, orderBy, desc, idEnterprise);
+        if (firstElem >= total.intValue())
+        {
+            firstElem = total.intValue() - numResults;
+        }
 
-        criteria.setFirstResult(offset * numResults);
+        criteria = createCriteria(pt, included, filterName);
+        criteria.setFirstResult(firstElem);
         criteria.setMaxResults(numResults);
 
         List<Enterprise> result = getResultList(criteria);
 
         PagedList<Enterprise> page = new PagedList<Enterprise>();
         page.addAll(result);
-        page.setCurrentElement(offset);
+        page.setCurrentElement(firstElem);
         page.setPageSize(numResults);
         page.setTotalResults(total.intValue());
 
@@ -369,7 +373,7 @@ class EnterpriseDAO extends DefaultDAOBase<Integer, Enterprise>
     }
 
     private Criteria createCriteria(final PricingTemplate pricingTemplate, final boolean included,
-        final String filter, final String orderBy, final boolean desc, final Integer enterpriseId)
+        final String filter)
     {
         Criteria criteria = createCriteria();
 
@@ -394,24 +398,9 @@ class EnterpriseDAO extends DefaultDAOBase<Integer, Enterprise>
             criteria.add(withoutPricingTemplate());
         }
 
-        if (enterpriseId != null)
-        {
-            criteria.add(Restrictions.eq(PersistentEntity.ID_PROPERTY, enterpriseId));
-        }
-
         if (!StringUtils.isEmpty(filter))
         {
             criteria.add(filterBy(filter));
-        }
-
-        if (!StringUtils.isEmpty(orderBy))
-        {
-            Order order = Order.asc(orderBy);
-            if (desc)
-            {
-                order = Order.desc(orderBy);
-            }
-            criteria.addOrder(order);
         }
 
         return criteria;

@@ -111,38 +111,26 @@ public class EnterpriseService extends DefaultApiService
     }
 
     @Transactional(readOnly = true)
-    public Collection<Enterprise> getEnterprises(final int idPricingTempl, final boolean included,
-        final String filterName, final Integer offset, final Integer numResults,
-        final String orderBy, final boolean desc)
+    public Collection<Enterprise> getEnterprises(final Integer startwith, final int idPricingTempl,
+        final boolean included, final String filterName, final Integer numResults)
     {
         User user = userService.getCurrentUser();
-        PricingTemplate pt = null;
+        // if (user.getRole().getType() == Role.Type.ENTERPRISE_ADMIN)
+        if (!securityService.hasPrivilege(Privileges.ENTERPRISE_ENUMERATE)
+            && !securityService.hasPrivilege(Privileges.USERS_MANAGE_OTHER_ENTERPRISES)
+            && !securityService.hasPrivilege(Privileges.ENTERPRISE_ADMINISTER_ALL))
+        {
+            return Collections.singletonList(user.getEnterprise());
+        }
 
+        PricingTemplate pt = null;
         if (idPricingTempl != -1)
         {
             if (idPricingTempl != 0)
             {
                 pt = findPricingTemplate(idPricingTempl);
             }
-        }
-
-        // if (user.getRole().getType() == Role.Type.ENTERPRISE_ADMIN)
-        if (!securityService.hasPrivilege(Privileges.ENTERPRISE_ENUMERATE)
-            && !securityService.hasPrivilege(Privileges.USERS_MANAGE_OTHER_ENTERPRISES)
-            && !securityService.hasPrivilege(Privileges.ENTERPRISE_ADMINISTER_ALL))
-        {
-            if (idPricingTempl != -1)
-            {
-                return repo.findByPricingTemplate(pt, included, filterName, offset, numResults,
-                    orderBy, desc, user.getEnterprise().getId());
-            }
-            return Collections.singletonList(user.getEnterprise());
-        }
-
-        if (idPricingTempl != -1)
-        {
-            return repo.findByPricingTemplate(pt, included, filterName, offset, numResults,
-                orderBy, desc, null);
+            return repo.findByPricingTemplate(startwith, pt, included, filterName, numResults);
         }
 
         if (!StringUtils.isEmpty(filterName))
@@ -150,7 +138,8 @@ public class EnterpriseService extends DefaultApiService
             return repo.findByNameAnywhere(filterName);
         }
 
-        return repo.findAll(offset, numResults);
+        return repo.findAll(startwith, numResults);
+
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
@@ -226,6 +215,25 @@ public class EnterpriseService extends DefaultApiService
 
         // userService.checkEnterpriseAdminCredentials(enterprise);
         userService.checkCurrentEnterprise(enterprise);
+        return enterprise;
+    }
+
+    /**
+     * This method does not enforce same enterprise. But does check for privs.
+     * 
+     * @param id
+     * @return Enterprise
+     */
+    @Transactional(readOnly = true)
+    public Enterprise getAnyEnterprise(final Integer id)
+    {
+        Enterprise enterprise = repo.findById(id);
+        if (enterprise == null)
+        {
+            addNotFoundErrors(APIError.NON_EXISTENT_ENTERPRISE);
+            flushErrors();
+        }
+
         return enterprise;
     }
 
@@ -447,6 +455,20 @@ public class EnterpriseService extends DefaultApiService
         final Integer datacenterId)
     {
         Enterprise enterprise = getEnterprise(enterpriseId);
+        Datacenter datacenter = datacenterService.getDatacenter(datacenterId);
+
+        return repo.findLimitsByEnterpriseAndDatacenter(enterprise, datacenter);
+    }
+
+    /**
+     * Checks enterprise and datacenter exists and have a limits relation (datacenter allowed by
+     * enterprise).
+     */
+    @Transactional(readOnly = true)
+    public DatacenterLimits findLimitsByEnterpriseVMTShared(final Integer enterpriseId,
+        final Integer datacenterId)
+    {
+        Enterprise enterprise = getAnyEnterprise(enterpriseId);
         Datacenter datacenter = datacenterService.getDatacenter(datacenterId);
 
         return repo.findLimitsByEnterpriseAndDatacenter(enterprise, datacenter);
