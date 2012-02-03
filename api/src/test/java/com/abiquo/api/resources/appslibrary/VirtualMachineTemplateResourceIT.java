@@ -29,6 +29,7 @@ import static com.abiquo.api.common.UriTestResolver.resolveEnterpriseURI;
 import static com.abiquo.api.common.UriTestResolver.resolveIconURI;
 import static com.abiquo.api.common.UriTestResolver.resolveVirtualMachineTemplateURI;
 import static com.abiquo.api.util.URIResolver.buildPath;
+import static com.abiquo.testng.TestConfig.APPS_INTEGRATION_TESTS;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
@@ -69,6 +70,8 @@ public class VirtualMachineTemplateResourceIT extends AbstractJpaGeneratorIT
 {
     private static final String SYSADMIN = "sysadmin1";
 
+    private static final String ENTADMIN = "entadmin";
+
     private Enterprise ent;
 
     private Datacenter datacenter;
@@ -91,7 +94,10 @@ public class VirtualMachineTemplateResourceIT extends AbstractJpaGeneratorIT
         am.setUri(TestServerAndAMListener.AM_URI);
 
         Role role = roleGenerator.createInstanceSysAdmin();
+        Role role2 = roleGenerator.createInstanceEnterpriseAdmin();
+
         User user = userGenerator.createInstance(ent, role, SYSADMIN, SYSADMIN);
+        User user2 = userGenerator.createInstance(ent, role2, ENTADMIN, ENTADMIN);
 
         List<Object> entitiesToSetup = new ArrayList<Object>();
         entitiesToSetup.add(ent);
@@ -104,8 +110,14 @@ public class VirtualMachineTemplateResourceIT extends AbstractJpaGeneratorIT
         {
             entitiesToSetup.add(p);
         }
+        for (Privilege p : role2.getPrivileges())
+        {
+            entitiesToSetup.add(p);
+        }
         entitiesToSetup.add(role);
+        entitiesToSetup.add(role2);
         entitiesToSetup.add(user);
+        entitiesToSetup.add(user2);
 
         setup(entitiesToSetup.toArray());
 
@@ -133,8 +145,8 @@ public class VirtualMachineTemplateResourceIT extends AbstractJpaGeneratorIT
         setup(vmtemplate.getCategory(), vmtemplate);
 
         String uri =
-            resolveVirtualMachineTemplateURI(ent.getId() + 100, datacenter.getId(),
-                vmtemplate.getId());
+            resolveVirtualMachineTemplateURI(ent.getId() + 100, datacenter.getId(), vmtemplate
+                .getId());
         ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
         assertError(response, 404, APIError.NON_EXISTENT_ENTERPRISE);
     }
@@ -147,8 +159,8 @@ public class VirtualMachineTemplateResourceIT extends AbstractJpaGeneratorIT
         setup(vmtemplate.getCategory(), vmtemplate);
 
         String uri =
-            resolveVirtualMachineTemplateURI(ent.getId(), datacenter.getId() + 100,
-                vmtemplate.getId());
+            resolveVirtualMachineTemplateURI(ent.getId(), datacenter.getId() + 100, vmtemplate
+                .getId());
         ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
         assertError(response, 404, APIError.NON_EXISTENT_DATACENTER);
     }
@@ -267,7 +279,6 @@ public class VirtualMachineTemplateResourceIT extends AbstractJpaGeneratorIT
 
     }
 
-    @Test
     public void editVirtualMachineTemplateChangeEnterpriseRises409()
     {
         VirtualMachineTemplate vmtemplate =
@@ -468,7 +479,8 @@ public class VirtualMachineTemplateResourceIT extends AbstractJpaGeneratorIT
         assertError(response, 409, APIError.VMTEMPLATE_STATEFUL_TEMPLATE_CANNOT_BE_DELETED);
     }
 
-    public void deleteSharedMachineTemplateFromOtherEnterpriseRises409()
+    @Test(groups = {APPS_INTEGRATION_TESTS})
+    public void deleteSharedMachineTemplateFromOtherEnterpriseByEntAdminRises409()
     {
 
         Enterprise ent1 = enterpriseGenerator.createUniqueInstance();
@@ -490,7 +502,7 @@ public class VirtualMachineTemplateResourceIT extends AbstractJpaGeneratorIT
         String uri =
             resolveVirtualMachineTemplateURI(ent.getId(), datacenter.getId(), vmtemplate.getId());
 
-        ClientResponse response = delete(uri, SYSADMIN, SYSADMIN);
+        ClientResponse response = delete(uri, ENTADMIN, ENTADMIN);
         assertError(response, 409, APIError.VMTEMPLATE_SHARED_TEMPLATE_FROM_OTHER_ENTERPRISE);
     }
 
