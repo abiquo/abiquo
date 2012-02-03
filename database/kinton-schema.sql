@@ -2627,7 +2627,7 @@ CREATE TRIGGER `kinton`.`update_virtualmachine_update_stats` AFTER UPDATE ON `ki
                 WHERE idVirtualDataCenter = idVirtualDataCenterObj;
 -- cloud_usage_stats Used Stats (vCpuUsed, vMemoryUsed, vStorageUsed) are updated from update_physical_machine_update_stats trigger
             -- ELSEIF OLD.state = "ON" THEN           * This has to change, OLD.state is always LOCKED
-		ELSEIF (NEW.state = "OFF" AND previousState != "OFF") OR (NEW.state = "PAUSED" AND previousState != "OFF") THEN
+		ELSEIF (NEW.state IN ("PAUSED","OFF","NOT_ALLOCATED") AND previousState = "ON") THEN
                 -- Active Out
                 UPDATE IGNORE vapp_enterprise_stats SET vmActive = vmActive-1
                 WHERE idVirtualApp = idVirtualAppObj;
@@ -2652,7 +2652,7 @@ CREATE TRIGGER `kinton`.`update_virtualmachine_update_stats` AFTER UPDATE ON `ki
                 WHERE idVirtualDataCenter = idVirtualDataCenterObj; 
 -- cloud_usage_stats Used Stats (vCpuUsed, vMemoryUsed, vStorageUsed) are updated from update_physical_machine_update_stats trigger
             END IF;     	    
-            IF NEW.state = "CONFIGURED" AND previousState != "CONFIGURED" THEN -- OR OLD.idType != NEW.idType
+            IF NEW.state = "ON" AND previousState = "NOT_ALLOCATED" THEN -- OR OLD.idType != NEW.idType
                 -- VMachine Deployed or VMachine imported
                 UPDATE IGNORE cloud_usage_stats SET vMachinesTotal = vMachinesTotal+1
                 WHERE idDataCenter = idDataCenterObj;
@@ -2660,7 +2660,7 @@ CREATE TRIGGER `kinton`.`update_virtualmachine_update_stats` AFTER UPDATE ON `ki
                 WHERE idVirtualApp = idVirtualAppObj;
                 UPDATE IGNORE vdc_enterprise_stats SET vmCreated = vmCreated+1
                 WHERE idVirtualDataCenter = idVirtualDataCenterObj;
-            ELSEIF NEW.state = "NOT_ALLOCATED"  AND previousState != "NOT_ALLOCATED" THEN 
+            ELSEIF NEW.state = "NOT_ALLOCATED"  AND previousState IN ("ON","OFF") THEN 
                 -- VMachine was deconfigured (still allocated)
                 UPDATE IGNORE cloud_usage_stats SET vMachinesTotal = vMachinesTotal-1
                 WHERE idDataCenter = idDataCenterObj;
@@ -2684,55 +2684,6 @@ CREATE TRIGGER `kinton`.`update_virtualmachine_update_stats` AFTER UPDATE ON `ki
     END;
 --
 --
--- Updating cloud_usage_stats: Virtual Machines Total / Running
---
--- ******************************************************************************************
--- Description:
---  * Updates counter for virtual machines: total && created for cloud_usage_stats
---  * Updates counter for virtual machines: total && created for vdc_enterprise_stats
---  * Updates counter for virtual machines: total && created for vapp_enterprise_stats
---
--- Fires: ON INSERT for the nodevirtualimage table
---
--- ******************************************************************************************
---
-|
-CREATE TRIGGER `kinton`.`create_nodevirtualimage_update_stats` AFTER INSERT ON `kinton`.`nodevirtualimage`
-  FOR EACH ROW BEGIN
-    DECLARE idDataCenterObj INTEGER;
-    DECLARE idVirtualAppObj INTEGER;
-    DECLARE idVirtualDataCenterObj INTEGER;
-    DECLARE state VARCHAR(50);
-    DECLARE type INTEGER;
-    IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN
-      SELECT vapp.idVirtualApp, vapp.idVirtualDataCenter, vdc.idDataCenter INTO idVirtualAppObj, idVirtualDataCenterObj, idDataCenterObj
-      FROM node n, virtualapp vapp, virtualdatacenter vdc
-      WHERE vdc.idVirtualDataCenter = vapp.idVirtualDataCenter
-      AND n.idNode = NEW.idNode
-      AND n.idVirtualApp = vapp.idVirtualApp;
-      SELECT vm.state, vm.idType INTO state, type FROM virtualmachine vm WHERE vm.idVM = NEW.idVM;
-      --
-      IF state != "NOT_ALLOCATED" AND state != "UNKNOWN" AND type = 1 THEN
-        UPDATE IGNORE cloud_usage_stats SET vMachinesTotal = vMachinesTotal+1
-        WHERE idDataCenter = idDataCenterObj;
-        UPDATE IGNORE vapp_enterprise_stats SET vmCreated = vmCreated+1
-        WHERE idVirtualApp = idVirtualAppObj;
-        UPDATE IGNORE vdc_enterprise_stats SET vmCreated = vmCreated+1
-        WHERE idVirtualDataCenter = idVirtualDataCenterObj;
-      END IF;
-      --
-      IF state = "ON" AND type = 1 THEN
-        UPDATE IGNORE cloud_usage_stats SET vMachinesRunning = vMachinesRunning+1
-        WHERE idDataCenter = idDataCenterObj;
-        UPDATE IGNORE vapp_enterprise_stats SET vmActive = vmActive+1
-        WHERE idVirtualApp = idVirtualAppObj;
-        UPDATE IGNORE vdc_enterprise_stats SET vmActive = vmActive+1
-        WHERE idVirtualDataCenter = idVirtualDataCenterObj;
-      END IF;
-    END IF;
-  END;
---
---
 -- ******************************************************************************************
 -- Description:
 --  * Updates counter for virtual machines: total && created for cloud_usage_stats
@@ -2749,7 +2700,7 @@ CREATE TRIGGER `kinton`.`delete_nodevirtualimage_update_stats` AFTER DELETE ON `
     DECLARE idDataCenterObj INTEGER;
     DECLARE idVirtualAppObj INTEGER;
     DECLARE idVirtualDataCenterObj INTEGER;
-    DECLARE oldState VARCHAR(50);
+    DECLARE previousState VARCHAR(50);
     DECLARE type INTEGER;
     DECLARE isUsingIP INTEGER;
     IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN
@@ -2758,10 +2709,16 @@ CREATE TRIGGER `kinton`.`delete_nodevirtualimage_update_stats` AFTER DELETE ON `
       WHERE vdc.idVirtualDataCenter = vapp.idVirtualDataCenter
       AND n.idNode = OLD.idNode
       AND n.idVirtualApp = vapp.idVirtualApp;
-    SELECT state, idType INTO oldState, type FROM virtualmachine WHERE idVM = OLD.idVM;
+      SELECT vm.idType INTO type
+     FROM virtualmachine vm
+	WHERE vm.idVM = OLD.idVM;
+    SELECT vmts.previousState INTO previousState
+     FROM virtualmachinetrackedstate vmts
+	WHERE vmts.idVM = OLD.idVM;
+    -- INSERT INTO debug_msg (msg) VALUES (CONCAT('previousState ', previousState));
     --
     IF type = 1 THEN
-      IF oldState != "NOT_ALLOCATED" AND oldState != "UNKNOWN" THEN
+      IF previousState != "NOT_ALLOCATED" AND previousState != "UNKNOWN" THEN      	
         UPDATE IGNORE cloud_usage_stats SET vMachinesTotal = vMachinesTotal-1
           WHERE idDataCenter = idDataCenterObj;
         UPDATE IGNORE vapp_enterprise_stats SET vmCreated = vmCreated-1
@@ -2770,7 +2727,7 @@ CREATE TRIGGER `kinton`.`delete_nodevirtualimage_update_stats` AFTER DELETE ON `
           WHERE idVirtualDataCenter = idVirtualDataCenterObj;
       END IF;
       --
-      IF oldState = "ON" THEN
+      IF previousState = "ON" THEN
         UPDATE IGNORE cloud_usage_stats SET vMachinesRunning = vMachinesRunning-1
         WHERE idDataCenter = idDataCenterObj;
         UPDATE IGNORE vapp_enterprise_stats SET vmActive = vmActive-1
