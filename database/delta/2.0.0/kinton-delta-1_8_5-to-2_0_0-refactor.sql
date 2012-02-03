@@ -459,6 +459,10 @@ BEGIN
 	IF @existsCount = 0 THEN 
 		INSERT INTO kinton.system_properties (name, value, description) VALUES ('client.logout.url','','Redirect to this URL after logout (empty -> login screen)');
 	END IF;
+	SELECT COUNT(*) INTO @existsCount FROM kinton.system_properties WHERE name='client.wiki.network.staticRoutes' AND value='http://community.abiquo.com/display/ABI20/Manage+Network+Configuration#ManageNetworkConfiguration-ConfiguringStaticRoutesUsingDHCP' AND description='static routes wiki';
+	IF @existsCount = 0 THEN 
+		INSERT INTO kinton.system_properties (name, value, description) VALUES ('client.wiki.network.staticRoutes','http://community.abiquo.com/display/ABI20/Manage+Network+Configuration#ManageNetworkConfiguration-ConfiguringStaticRoutesUsingDHCP','static routes wiki');
+	END IF;
 	
 	-- Update System Properties
 	SELECT COUNT(*) INTO @existsCount FROM kinton.system_properties WHERE name='client.wiki.defaultURL' AND value='http://community.abiquo.com/display/ABI18/Abiquo+Documentation+Home';

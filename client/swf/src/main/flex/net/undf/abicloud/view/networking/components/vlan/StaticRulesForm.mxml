@@ -27,12 +27,14 @@
 	creationComplete="onCreationComplete()"
     xmlns:mx="http://www.adobe.com/2006/mxml"
     xmlns:general="net.undf.abicloud.view.general.*"
+    wikiUrl="{AbiCloudModel.getInstance().configurationManager.config.client_wiki_network_staticRoutes.value}"
     titleText="@Resource(bundle='Infrastructure', key='POPUP_TITLE_STATIC_RULES')"
     xmlns:utils="net.undf.abicloud.utils.*">
 
 
     <mx:Script>
         <![CDATA[
+        	import net.undf.abicloud.model.AbiCloudModel;
         	import mx.controls.dataGridClasses.DataGridColumn;
         	import net.undf.abicloud.vo.networking.DhcpOption;
         	import mx.utils.StringUtil;
