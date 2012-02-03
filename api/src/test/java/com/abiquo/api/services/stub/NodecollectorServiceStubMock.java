@@ -192,6 +192,11 @@ public class NodecollectorServiceStubMock extends NodecollectorServiceStub
                 mockClient.getRemoteHostInfo(eq(IP_DISCOVER_LAST), (HypervisorType) anyObject(),
                     anyString(), anyString(), anyInt())).thenReturn(hostDiscover2);
 
+            // Every discover
+            when(
+                mockClient.getRemoteHostInfo(anyString(), (HypervisorType) anyObject(),
+                    anyString(), anyString(), anyInt())).thenReturn(hostDiscover1);
+
         }
         catch (Exception e)
         {
