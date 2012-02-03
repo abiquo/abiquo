@@ -1445,6 +1445,7 @@ INSERT INTO `kinton`.`system_properties` (`name`, `value`, `description`) VALUES
  ("client.wiki.infra.createRack","http://community.abiquo.com/display/ABI20/Manage+Racks#ManageRacks-CreatingRacks","rack creation wiki"),
  ("client.wiki.infra.createMultiplePhysicalMachine","http://community.abiquo.com/display/ABI20/Manage+Physical+Machines#ManagePhysicalMachines-CreatingMultiplePhysicalMachines","multiple physical machine creation wiki"),
  ("client.wiki.network.publicVlan","http://community.abiquo.com/display/ABI20/Manage+Network+Configuration#ManageNetworkConfiguration-CreateVLANsforPublicNetworks","public vlan creation wiki"),
+ ("client.wiki.network.staticRoutes","http://community.abiquo.com/display/ABI20/Manage+Network+Configuration#ManageNetworkConfiguration-ConfiguringStaticRoutesUsingDHCP","static routes wiki"),
  ("client.wiki.storage.storageDevice","http://community.abiquo.com/display/ABI20/Managing+External+Storage#ManagingExternalStorage-ManagedStorage","storage device creation wiki"),
  ("client.wiki.storage.storagePool","http://community.abiquo.com/display/ABI20/Managing+External+Storage#ManagingExternalStorage-StoragePools","storage pool creation wiki"), 
  ("client.wiki.storage.tier","http://community.abiquo.com/display/ABI20/Managing+External+Storage#ManagingExternalStorage-TierManagement","tier edition wiki"),
