@@ -891,7 +891,7 @@
         <!-- Make call to the server here -->
 
         <RemoteObjectInvoker instance="{services.storageService}"
-            method="getDisksByVirtualMachine"
+            method="getHardDisksByVirtualMachine"
             arguments="{[AbiCloudModel.getInstance().loginManager.session, 
             event.datacenter.id, 
             event.rack.id,
