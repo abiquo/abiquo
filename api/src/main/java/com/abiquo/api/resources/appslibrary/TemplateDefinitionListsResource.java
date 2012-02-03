@@ -21,6 +21,7 @@
 
 package com.abiquo.api.resources.appslibrary;
 
+import java.net.SocketTimeoutException;
 import java.util.List;
 
 import javax.ws.rs.Consumes;
@@ -60,9 +61,10 @@ public class TemplateDefinitionListsResource extends AbstractResource
     @GET
     public TemplateDefinitionListsDto getTemplateDefinitionLists(
         @PathParam(EnterpriseResource.ENTERPRISE) final Integer idEnterprise,
-        @Context final IRESTBuilder restBuilder) throws Exception
+        @Context final IRESTBuilder restBuilder) throws Exception, SocketTimeoutException
     {
-        List<TemplateDefinitionList> all = service.getTemplateDefinitionListsByEnterprise(idEnterprise);
+        List<TemplateDefinitionList> all =
+            service.getTemplateDefinitionListsByEnterprise(idEnterprise);
 
         TemplateDefinitionListsDto templateDefListsDto = new TemplateDefinitionListsDto();
 
@@ -82,7 +84,8 @@ public class TemplateDefinitionListsResource extends AbstractResource
     }
 
     /**
-     * if TEMPLATE_DEFINITION_POST_QUERY_PARM is set do not use the content body {@link TemplateDefinitionListDto}.
+     * if TEMPLATE_DEFINITION_POST_QUERY_PARM is set do not use the content body
+     * {@link TemplateDefinitionListDto}.
      */
     @POST
     @Consumes(MediaType.APPLICATION_XML)
@@ -99,7 +102,8 @@ public class TemplateDefinitionListsResource extends AbstractResource
     }
 
     /**
-     * if TEMPLATE_DEFINITION_POST_QUERY_PARM is set do not use the content body {@link TemplateDefinitionListDto}.
+     * if TEMPLATE_DEFINITION_POST_QUERY_PARM is set do not use the content body
+     * {@link TemplateDefinitionListDto}.
      */
     @POST
     @Consumes(MediaType.TEXT_PLAIN)
