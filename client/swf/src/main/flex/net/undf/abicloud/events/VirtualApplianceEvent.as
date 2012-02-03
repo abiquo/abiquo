@@ -26,6 +26,8 @@ package net.undf.abicloud.events
     import mx.collections.ArrayCollection;
     
     import net.undf.abicloud.vo.infrastructure.DataCenter;
+    import net.undf.abicloud.vo.infrastructure.PhysicalMachine;
+    import net.undf.abicloud.vo.infrastructure.Rack;
     import net.undf.abicloud.vo.infrastructure.VirtualMachine;
     import net.undf.abicloud.vo.networking.NetworkConfiguration;
     import net.undf.abicloud.vo.user.Enterprise;
@@ -94,8 +96,6 @@ package net.undf.abicloud.events
 
         public static const EDIT_VIRTUAL_DATACENTER:String = "editVirtualDataCenterVirtualApplianceEvent";
 
-        public static const GET_VIRTUAL_DATACENTER_DHCP_CONF:String = "getVirtualDataCenterDHCPConfVirtualApplianceEvent";
-
         public static const VIRTUAL_DATACENTER_ADDED:String = "virtualDataCenterAddedVirtualApplianceEvent";
 
         public static const VIRTUAL_DATACENTER_EDITED:String = "virtualDataCenterEditedVirtualApplianceEvent";
@@ -112,6 +112,8 @@ package net.undf.abicloud.events
 	   
 	   //VIRTUAL MACHINE STORAGE
         public static const GET_HARD_DISKS_BY_VIRTUAL_MACHINE:String = "getHardDisksByVirtualMachineEvent";
+        
+        public static const GET_HARD_DISKS_BY_VIRTUAL_MACHINE_FROM_INFRASTRUCTURE:String = "getHardDisksByVirtualMachineFromInfrastructureVirtualApplianceEvent";
         
         public static const DELETE_HARD_DISK:String = "deleteHardDiskVirtualApplianceEvent";
         
@@ -145,6 +147,10 @@ package net.undf.abicloud.events
         public var diskId:Number;
         
         public var size:Number;
+        
+        public var rack:Rack;
+        
+        public var physicalmachine:PhysicalMachine;
 
 
         /* ------------- Constructor ------------- */
