@@ -66,6 +66,8 @@ public class MachinesResourceIT extends AbstractJpaGeneratorIT
     public void setup()
     {
         hypervisor = hypervisorGenerator.createUniqueInstance();
+        hypervisor.setIpService(NodecollectorServiceStubMock.IP_DISCOVER_FIRST);
+
         machine = hypervisor.getMachine();
 
         RemoteService vsm =
@@ -299,8 +301,8 @@ public class MachinesResourceIT extends AbstractJpaGeneratorIT
         m.setVirtualSwitch("192.168.1.1");
 
         m.setType(HypervisorType.HYPERV_301);
-        m.setIp("10.0.0.1");
-        m.setIpService("10.0.0.1");
+        m.setIp(NodecollectorServiceStubMock.IP_DISCOVER_LAST);
+        m.setIpService(NodecollectorServiceStubMock.IP_DISCOVER_LAST);
         m.setPort(3556);
         m.setUser("foo");
         m.setPassword("bar");
