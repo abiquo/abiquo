@@ -155,13 +155,12 @@ public class EnterpriseRep extends DefaultRepBase
         return this.enterpriseDAO.findAll(startwith, numResults);
     }
 
-    public List<Enterprise> findByPricingTemplate(final PricingTemplate pricingTempl,
-        final boolean included, final String filterName, final Integer offset,
-        final Integer numResults, final String orderBy, final boolean desc,
-        final Integer enterpriseId)
+    public List<Enterprise> findByPricingTemplate(final Integer firstElem,
+        final PricingTemplate pricingTempl, final boolean included, final String filterName,
+        final Integer numResults)
     {
-        return this.enterpriseDAO.findByPricingTemplate(pricingTempl, included, filterName, offset,
-            numResults, orderBy, desc, enterpriseId);
+        return this.enterpriseDAO.findByPricingTemplate(firstElem, pricingTempl, included,
+            filterName, numResults);
     }
 
     public List<Enterprise> findByNameAnywhere(final String name)
