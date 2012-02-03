@@ -2050,4 +2050,20 @@ public class AbstractAPIStub
         return resolveURI(apiUri,
             "admin/datacenters/{datacenter}/racks/{rack}/machines/{machine}/led", params);
     }
+
+    protected String createVirtualMachineHardDiskLink(final Integer datacenterId,
+        final Integer rackId, final Integer pmId, final Integer vmId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("datacenter", datacenterId.toString());
+        params.put("rack", rackId.toString());
+        params.put("machine", pmId.toString());
+        params.put("vm", vmId.toString());
+
+        return resolveURI(
+            apiUri,
+            "admin/datacenters/{datacenter}/racks/{rack}/machines/{machine}/virtualmachines/{vm}/action/disk",
+            params);
+    }
+
 }

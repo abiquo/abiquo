@@ -218,6 +218,25 @@ public class EnterpriseService extends DefaultApiService
         return enterprise;
     }
 
+    /**
+     * This method does not enforce same enterprise. But does check for privs.
+     * 
+     * @param id
+     * @return Enterprise
+     */
+    @Transactional(readOnly = true)
+    public Enterprise getAnyEnterprise(final Integer id)
+    {
+        Enterprise enterprise = repo.findById(id);
+        if (enterprise == null)
+        {
+            addNotFoundErrors(APIError.NON_EXISTENT_ENTERPRISE);
+            flushErrors();
+        }
+
+        return enterprise;
+    }
+
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public Enterprise modifyEnterprise(final Integer enterpriseId, final EnterpriseDto dto)
     {
@@ -436,6 +455,20 @@ public class EnterpriseService extends DefaultApiService
         final Integer datacenterId)
     {
         Enterprise enterprise = getEnterprise(enterpriseId);
+        Datacenter datacenter = datacenterService.getDatacenter(datacenterId);
+
+        return repo.findLimitsByEnterpriseAndDatacenter(enterprise, datacenter);
+    }
+
+    /**
+     * Checks enterprise and datacenter exists and have a limits relation (datacenter allowed by
+     * enterprise).
+     */
+    @Transactional(readOnly = true)
+    public DatacenterLimits findLimitsByEnterpriseVMTShared(final Integer enterpriseId,
+        final Integer datacenterId)
+    {
+        Enterprise enterprise = getAnyEnterprise(enterpriseId);
         Datacenter datacenter = datacenterService.getDatacenter(datacenterId);
 
         return repo.findLimitsByEnterpriseAndDatacenter(enterprise, datacenter);
