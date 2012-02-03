@@ -23,6 +23,7 @@ package com.abiquo.api.services.appslibrary;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -59,8 +60,8 @@ import com.abiquo.tracer.SeverityType;
 public class TemplateDefinitionListService extends DefaultApiServiceWithApplianceManagerClient
 {
 
-    private final static Logger LOGGER = LoggerFactory
-        .getLogger(TemplateDefinitionListService.class);
+    private final static Logger LOGGER =
+        LoggerFactory.getLogger(TemplateDefinitionListService.class);
 
     @Autowired
     protected AppsLibraryDAO appsLibraryDao;
@@ -159,8 +160,8 @@ public class TemplateDefinitionListService extends DefaultApiServiceWithApplianc
         {
             try
             {
-                stateList.add(amClient.getTemplateStatus(String.valueOf(enterpriseId),
-                    templateDef.getUrl()));
+                stateList.add(amClient.getTemplateStatus(String.valueOf(enterpriseId), templateDef
+                    .getUrl()));
             }
             catch (Exception e)
             {
@@ -198,9 +199,8 @@ public class TemplateDefinitionListService extends DefaultApiServiceWithApplianc
 
     @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
     public List<TemplateDefinitionList> getTemplateDefinitionListsByEnterprise(
-        final Integer idEnterprise)
+        final Integer idEnterprise) throws SocketTimeoutException
     {
-
         Enterprise ent = entService.getEnterprise(idEnterprise);
         if (ent == null)
         {

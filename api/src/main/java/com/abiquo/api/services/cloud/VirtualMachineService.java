@@ -270,8 +270,8 @@ public class VirtualMachineService extends DefaultApiService
             {
                 // needed for REST links.
                 DatacenterLimits dl =
-                    infRep.findDatacenterLimits(ip.getVlanNetwork().getEnterprise(),
-                        vdc.getDatacenter());
+                    infRep.findDatacenterLimits(ip.getVlanNetwork().getEnterprise(), vdc
+                        .getDatacenter());
                 ip.getVlanNetwork().setLimitId(dl.getId());
             }
         }
@@ -413,8 +413,8 @@ public class VirtualMachineService extends DefaultApiService
         final VirtualAppliance vapp, final VirtualMachine vm, final VirtualMachine newValues,
         final VirtualMachineState originalState)
     {
-        if (checkReconfigureTemplate(vm.getVirtualMachineTemplate(),
-            newValues.getVirtualMachineTemplate()))
+        if (checkReconfigureTemplate(vm.getVirtualMachineTemplate(), newValues
+            .getVirtualMachineTemplate()))
         {
             LOGGER.debug("Will reconfigure the vm template");
 
@@ -429,6 +429,7 @@ public class VirtualMachineService extends DefaultApiService
             {
                 LOGGER.debug("Attaching virtual machine template volume");
                 newValues.getVirtualMachineTemplate().getVolume().attach(0, vm);
+                newValues.getVirtualMachineTemplate().getVolume().setVirtualAppliance(vapp);
                 // primary disk sequence == 0
             }
         }
@@ -458,8 +459,8 @@ public class VirtualMachineService extends DefaultApiService
                     vmRequirements.createVirtualMachineRequirements(vm, newValues);
                 vmAllocatorService.checkAllocate(vapp.getId(), vm.getId(), requirements, false);
 
-                LOGGER.debug("Updated the hardware needs in DB for virtual machine {}",
-                    newValues.getId());
+                LOGGER.debug("Updated the hardware needs in DB for virtual machine {}", newValues
+                    .getId());
 
                 LOGGER
                     .debug("Creating the temporary register in Virtual Machine for rollback purposes");
@@ -791,8 +792,8 @@ public class VirtualMachineService extends DefaultApiService
 
         // Does it has volumes? PREMIUM
         detachVolumesFromVirtualMachine(virtualMachine);
-        LOGGER.debug("Detached the virtual machine's volumes with UUID {}",
-            virtualMachine.getUuid());
+        LOGGER.debug("Detached the virtual machine's volumes with UUID {}", virtualMachine
+            .getUuid());
 
         detachVirtualMachineIPs(virtualMachine);
 
@@ -846,8 +847,8 @@ public class VirtualMachineService extends DefaultApiService
 
         // Does it has volumes? PREMIUM
         detachVolumesFromVirtualMachine(virtualMachine);
-        LOGGER.debug("Detached the virtual machine's volumes with UUID {}",
-            virtualMachine.getUuid());
+        LOGGER.debug("Detached the virtual machine's volumes with UUID {}", virtualMachine
+            .getUuid());
 
         detachVirtualMachineIPs(virtualMachine);
 
@@ -1013,8 +1014,8 @@ public class VirtualMachineService extends DefaultApiService
     private void createNodeVirtualImage(final VirtualMachine virtualMachine,
         final VirtualAppliance virtualAppliance, final String name)
     {
-        LOGGER.debug("Create node virtual image with name virtual machine: {}",
-            virtualMachine.getName());
+        LOGGER.debug("Create node virtual image with name virtual machine: {}", virtualMachine
+            .getName());
         NodeVirtualImage nodeVirtualImage =
             new NodeVirtualImage(name,
                 virtualAppliance,
@@ -1349,8 +1350,8 @@ public class VirtualMachineService extends DefaultApiService
 
             // For the Admin to know all errors
             tracer.systemLog(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
-                EventType.VM_UNDEPLOY, "virtualMachine.undeployError", e.toString(),
-                virtualMachine.getName(), e.getMessage());
+                EventType.VM_UNDEPLOY, "virtualMachine.undeployError", e.toString(), virtualMachine
+                    .getName(), e.getMessage());
             LOGGER
                 .error(
                     "Error undeploying setting the virtual machine to UNKNOWN virtual machine name {}: {}",
@@ -1412,8 +1413,8 @@ public class VirtualMachineService extends DefaultApiService
 
             // For the Admin to know all errors
             tracer.systemLog(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
-                EventType.VM_UNDEPLOY, "virtualMachine.undeployError", e.toString(),
-                virtualMachine.getName(), e.getMessage());
+                EventType.VM_UNDEPLOY, "virtualMachine.undeployError", e.toString(), virtualMachine
+                    .getName(), e.getMessage());
             LOGGER
                 .error(
                     "Error undeploying setting the virtual machine to UNKNOWN virtual machine name {}: {}",
@@ -1493,8 +1494,8 @@ public class VirtualMachineService extends DefaultApiService
 
             tracer
                 .systemError(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
-                    EventType.VM_INSTANCE, e, "virtualMachine.instanceFailed",
-                    virtualMachine.getName());
+                    EventType.VM_INSTANCE, e, "virtualMachine.instanceFailed", virtualMachine
+                        .getName());
 
             throw e;
         }
@@ -1505,8 +1506,8 @@ public class VirtualMachineService extends DefaultApiService
 
             tracer
                 .systemError(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
-                    EventType.VM_INSTANCE, e, "virtualMachine.instanceFailed",
-                    virtualMachine.getName());
+                    EventType.VM_INSTANCE, e, "virtualMachine.instanceFailed", virtualMachine
+                        .getName());
 
             addUnexpectedErrors(APIError.STATUS_INTERNAL_SERVER_ERROR);
             flushErrors();
@@ -1649,8 +1650,8 @@ public class VirtualMachineService extends DefaultApiService
                 "virtualMachine.resetVirtualMachineError", virtualMachine.getName());
 
             tracer.systemError(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
-                EventType.VM_DEPLOY, ex, "virtualMachine.resetVirtualMachineError",
-                virtualMachine.getName());
+                EventType.VM_DEPLOY, ex, "virtualMachine.resetVirtualMachineError", virtualMachine
+                    .getName());
 
             addUnexpectedErrors(APIError.STATUS_INTERNAL_SERVER_ERROR);
             flushErrors();
@@ -1675,8 +1676,8 @@ public class VirtualMachineService extends DefaultApiService
         for (RemoteService r : remoteServicesByDatacenter)
         {
             ErrorsDto checkRemoteServiceStatus =
-                remoteServiceService.checkRemoteServiceStatus(r.getDatacenter(), r.getType(),
-                    r.getUri());
+                remoteServiceService.checkRemoteServiceStatus(r.getDatacenter(), r.getType(), r
+                    .getUri());
             errors.addAll(checkRemoteServiceStatus);
         }
 
@@ -1716,8 +1717,8 @@ public class VirtualMachineService extends DefaultApiService
             {
                 // needed for REST links.
                 DatacenterLimits dl =
-                    infRep.findDatacenterLimits(ip.getVlanNetwork().getEnterprise(),
-                        vdc.getDatacenter());
+                    infRep.findDatacenterLimits(ip.getVlanNetwork().getEnterprise(), vdc
+                        .getDatacenter());
                 ip.getVlanNetwork().setLimitId(dl.getId());
             }
         }
@@ -2261,7 +2262,7 @@ public class VirtualMachineService extends DefaultApiService
             throw new BadRequestException(APIError.NETWORK_LINK_INVALID_VAPP);
         }
         if (!vmId.equals(newvm.getTemporal())) // it is the new resource, the id it is in the
-                                               // 'temporal'
+        // 'temporal'
         {
             throw new BadRequestException(APIError.NETWORK_LINK_INVALID_VM);
         }
