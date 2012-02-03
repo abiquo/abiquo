@@ -908,8 +908,7 @@
 
             <mx:ProgressBar id="uploadProgressBar"
                 width="100%" height="12"
-                barColor="#FE9608"
-                borderColor="#666666"
+                styleName="CustomProgressBar"
                 fontSize="10"
                 indeterminateMoveInterval="30"
                 minimum="0" maximum="100" indeterminate="true" label="%3%%"
