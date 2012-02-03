@@ -433,7 +433,10 @@ BEGIN
 	IF NOT EXISTS (SELECT * FROM information_schema.table_constraints WHERE table_schema= 'kinton' AND table_name='rasd_management' AND constraint_name='idResource_FK') THEN
 		ALTER TABLE kinton.rasd_management ADD  CONSTRAINT idResource_FK FOREIGN KEY (idResource) REFERENCES rasd (instanceID) ON DELETE SET NULL;
 	END IF;
-	
+	-- Index for unicity in user table
+	IF NOT EXISTS (SELECT * FROM information_schema.table_constraints WHERE table_schema= 'kinton' AND table_name='user' AND constraint_name='user_auth_idx') THEN
+		ALTER TABLE user ADD UNIQUE INDEX user_auth_idx (user, authType); 
+	END IF;
 	-- ########################################################## --	
         -- ######## DATA: NEW DATA (INSERTS, UPDATES, DELETES ####### --
 	-- ########################################################## --

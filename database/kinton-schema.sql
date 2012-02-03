@@ -965,7 +965,8 @@ CREATE TABLE  `kinton`.`user` (
   KEY `User_FK1` (`idRole`),
   KEY `FK1_user` (`idEnterprise`),
   CONSTRAINT `FK1_user` FOREIGN KEY (`idEnterprise`) REFERENCES `enterprise` (`idEnterprise`),
-  CONSTRAINT `User_FK1` FOREIGN KEY (`idRole`) REFERENCES `role` (`idRole`)
+  CONSTRAINT `User_FK1` FOREIGN KEY (`idRole`) REFERENCES `role` (`idRole`),
+  UNIQUE KEY user_auth_idx (user, authType)
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
 
 --
