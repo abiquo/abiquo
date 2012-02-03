@@ -47,7 +47,6 @@ import com.abiquo.am.services.TemplateConventions;
 import com.abiquo.am.services.notify.AMNotifier;
 import com.abiquo.am.services.ovfformat.TemplateToOVFEnvelope;
 import com.abiquo.appliancemanager.config.AMConfiguration;
-import com.abiquo.appliancemanager.config.AMConfigurationManager;
 import com.abiquo.appliancemanager.exceptions.AMException;
 import com.abiquo.appliancemanager.exceptions.DownloadException;
 import com.abiquo.appliancemanager.transport.TemplateDto;
@@ -162,8 +161,8 @@ public class TemplateDownloader
         {
             // note the expected bytes are from the OVF document, but for progress we use the
             // content-length header
-            throw new AMException(AMError.REPO_NO_SPACE, String.format("Requested %s MB", String
-                .valueOf((expectedBytes / 1048576))));
+            throw new AMException(AMError.REPO_NO_SPACE, String.format("Requested %s MB",
+                String.valueOf((expectedBytes / 1048576))));
         }
 
         final String destinationPath =
@@ -240,7 +239,6 @@ public class TemplateDownloader
 
     private static AsyncHttpClientConfig createHttpClientConf()
     {
-        AMConfiguration amconf = AMConfigurationManager.getInstance().getAMConfiguration();
 
         AsyncHttpClientConfig.Builder builder = new AsyncHttpClientConfig.Builder(). //
             setFollowRedirects(true).//
@@ -250,12 +248,13 @@ public class TemplateDownloader
             setRequestTimeoutInMs(HTTP_REQUEST_TIMEOUT).//
             setMaximumConnectionsTotal(HTTP_MAX_CONNECTIONS);
 
-        if (amconf.getProxyHost() != null && amconf.getProxyPort() != null)
+        if (AMConfiguration.getProxyHost() != null && AMConfiguration.getProxyPort() != null)
         {
             LOG.info("Configure HTTP connections to use the proxy [{}] [{}]",
-                amconf.getProxyHost(), amconf.getProxyPort());
+                AMConfiguration.getProxyHost(), AMConfiguration.getProxyPort());
 
-            ProxyServer proxy = new ProxyServer(amconf.getProxyHost(), amconf.getProxyPort());
+            ProxyServer proxy =
+                new ProxyServer(AMConfiguration.getProxyHost(), AMConfiguration.getProxyPort());
             builder = builder.setProxyServer(proxy);
         }
 

@@ -36,7 +36,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.abiquo.am.exceptions.AMError;
-import com.abiquo.appliancemanager.config.AMConfigurationManager;
+import com.abiquo.appliancemanager.config.AMConfiguration;
 import com.abiquo.appliancemanager.exceptions.AMException;
 import com.abiquo.appliancemanager.transport.TemplateStateDto;
 
@@ -44,11 +44,9 @@ public class EnterpriseRepositoryFileSystem
 {
     private final static Logger LOG = LoggerFactory.getLogger(EnterpriseRepositoryFileSystem.class);
 
-    private final static String BASE_REPO_PATH = AMConfigurationManager.getInstance()
-        .getAMConfiguration().getRepositoryPath();
+    private final static String BASE_REPO_PATH = AMConfiguration.getRepositoryPath();
 
-    private final static Integer FS_TIMOUT_MS = AMConfigurationManager.getInstance()
-        .getAMConfiguration().getFsTimeoutMs();
+    private final static Integer FS_TIMOUT_MS = AMConfiguration.getFsTimeoutMs();
 
     /**
      * Check if it exist or create it.

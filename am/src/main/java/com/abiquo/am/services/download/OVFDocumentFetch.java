@@ -50,7 +50,7 @@ import org.dmtf.schemas.wbem.wscim._1.common.CimString;
 import org.springframework.stereotype.Component;
 
 import com.abiquo.am.exceptions.AMError;
-import com.abiquo.appliancemanager.config.AMConfigurationManager;
+import com.abiquo.appliancemanager.config.AMConfiguration;
 import com.abiquo.appliancemanager.exceptions.AMException;
 import com.abiquo.appliancemanager.exceptions.DownloadException;
 import com.abiquo.appliancemanager.transport.MemorySizeUnit;
@@ -68,8 +68,7 @@ import com.abiquo.ovfmanager.ovf.xml.OVFSerializer;
 public class OVFDocumentFetch
 {
     /** Timeout for all the HTTP connections. */
-    private final static Integer httpTimeout =
-        AMConfigurationManager.getInstance().getAMConfiguration().getTimeout();
+    private final static Integer httpTimeout = AMConfiguration.getTimeout();
 
     private InputStream openHTTPConnection(final String ovfid) throws DownloadException
     {
@@ -375,8 +374,8 @@ public class OVFDocumentFetch
         catch (Exception e)
         {
             throw new InvalidSectionException(String.format("Invalid File References section "
-                + "(check all the files on the OVF document contains the ''size'' attribute):\n", e
-                .toString()));
+                + "(check all the files on the OVF document contains the ''size'' attribute):\n",
+                e.toString()));
         }
 
         return envelope;
