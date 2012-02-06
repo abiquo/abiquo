@@ -49,6 +49,7 @@ import com.abiquo.api.resources.UserResource;
 import com.abiquo.api.resources.UsersResource;
 import com.abiquo.api.resources.VirtualMachinesInfrastructureResource;
 import com.abiquo.api.resources.appslibrary.CategoryResource;
+import com.abiquo.api.resources.appslibrary.DatacenterRepositoriesResource;
 import com.abiquo.api.resources.appslibrary.DatacenterRepositoryResource;
 import com.abiquo.api.resources.appslibrary.IconResource;
 import com.abiquo.api.resources.appslibrary.TemplateDefinitionListResource;
@@ -453,7 +454,9 @@ public class RESTBuilder implements IRESTBuilder
         links.add(builder.buildRestLink(EnterpriseResource.class,
             EnterpriseResource.ENTERPRISE_ACTION_GET_VIRTUALDATACENTERS_PATH,
             VirtualDatacentersResource.VIRTUAL_DATACENTERS_PATH, params));
-
+        links.add(builder.buildRestLink(EnterpriseResource.class,
+            DatacenterRepositoriesResource.DATACENTER_REPOSITORIES_PATH,
+            DatacenterRepositoriesResource.DATACENTER_REPOSITORIES_PATH, params));
         return links;
     }
 
@@ -785,12 +788,13 @@ public class RESTBuilder implements IRESTBuilder
 
         if (vm.getNetworkConfiguration() != null)
         {
-            params.put(VirtualMachineNetworkConfigurationResource.CONFIGURATION, vm.getNetworkConfiguration().getId().toString());
+            params.put(VirtualMachineNetworkConfigurationResource.CONFIGURATION, vm
+                .getNetworkConfiguration().getId().toString());
             links.add(builder.buildRestLink(VirtualMachineNetworkConfigurationResource.class,
-            VirtualMachineNetworkConfigurationResource.CONFIGURATION_PATH + "/" + VirtualMachineNetworkConfigurationResource.CONFIGURATION_PARAM,            
-            VirtualMachineNetworkConfigurationResource.DEFAULT_CONFIGURATION, params));
+                VirtualMachineNetworkConfigurationResource.CONFIGURATION_PATH + "/"
+                    + VirtualMachineNetworkConfigurationResource.CONFIGURATION_PARAM,
+                VirtualMachineNetworkConfigurationResource.DEFAULT_CONFIGURATION, params));
         }
-        
 
         links.add(builder.buildRestLink(VirtualMachineNetworkConfigurationResource.class,
             VirtualMachineNetworkConfigurationResource.NICS_PATH,
@@ -831,10 +835,10 @@ public class RESTBuilder implements IRESTBuilder
 
     @Override
     public List<RESTLink> buildVirtualMachineCloudAdminLinks(final Integer vdcId,
-        final Integer vappId, final VirtualMachine vm, final Integer datacenterId, final Integer rackId,
-        final Integer machineId, final Integer enterpriseId, final Integer userId,
-        final boolean chefEnabled, final Integer[] volumeIds, final Integer[] diskIds,
-        final List<IpPoolManagement> ips, final HypervisorType vdcType)
+        final Integer vappId, final VirtualMachine vm, final Integer datacenterId,
+        final Integer rackId, final Integer machineId, final Integer enterpriseId,
+        final Integer userId, final boolean chefEnabled, final Integer[] volumeIds,
+        final Integer[] diskIds, final List<IpPoolManagement> ips, final HypervisorType vdcType)
     {
 
         List<RESTLink> links = new ArrayList<RESTLink>();
