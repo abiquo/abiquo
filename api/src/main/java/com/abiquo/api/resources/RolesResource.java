@@ -73,11 +73,11 @@ public class RolesResource extends AbstractResource
     @GET
     public RolesDto getRoles(
         @QueryParam(EnterpriseResource.ENTERPRISE_AS_PARAM) @DefaultValue("0") @Min(0) final Integer enterpriseId,
-        @QueryParam("filter") final String filter,
-        @QueryParam("orderBy") final String orderBy,
-        @QueryParam("desc") final boolean desc,
-        @QueryParam("page") @DefaultValue("0") @Min(0) final Integer page,
-        @QueryParam("numResults") @DefaultValue(DEFAULT_PAGE_LENGTH_STRING) final Integer numResults,
+        @QueryParam(FILTER) @DefaultValue("") final String filter,
+        @QueryParam(BY) @DefaultValue("") final String orderBy,
+        @QueryParam(ASC) @DefaultValue("") final boolean desc,
+        @QueryParam(START_WITH) @DefaultValue("0") @Min(0) final Integer page,
+        @QueryParam(LIMIT) @DefaultValue(DEFAULT_PAGE_LENGTH_STRING) final Integer numResults,
         @Context final IRESTBuilder restBuilder) throws Exception
     {
         Collection<Role> all =
@@ -116,9 +116,9 @@ public class RolesResource extends AbstractResource
         // Can get all roles
         if (all != null && !all.isEmpty() && all instanceof PagedList< ? >)
         {
-            PagedList<Role> list = (PagedList<Role>) all;        
+            PagedList<Role> list = (PagedList<Role>) all;
 
-            Collection <Role> allowedRoles =
+            Collection<Role> allowedRoles =
                 service.getRolesWithEqualsOrLessPrivileges(userService.getCurrentUser().getRole(),
                     all);
 
