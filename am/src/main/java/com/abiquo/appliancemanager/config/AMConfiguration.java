@@ -36,7 +36,6 @@ public class AMConfiguration
     static
     {
         OVFSerializer.getInstance().setFormatOutput(true);
-        OVFSerializer.getInstance().setValidateXML(false);
     }
 
     /** System property determine to use Proxy connections using this host. */
