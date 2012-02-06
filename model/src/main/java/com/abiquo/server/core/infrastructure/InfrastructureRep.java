@@ -40,6 +40,7 @@ import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.cloud.HypervisorDAO;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineDAO;
+import com.abiquo.server.core.cloud.VirtualMachineState;
 import com.abiquo.server.core.common.DefaultRepBase;
 import com.abiquo.server.core.enterprise.DatacenterLimits;
 import com.abiquo.server.core.enterprise.DatacenterLimitsDAO;
@@ -701,9 +702,10 @@ public class InfrastructureRep extends DefaultRepBase
         for (Object element : vmachinesInDC)
         {
             VirtualMachine virtualMachine = (VirtualMachine) element;
-            // We can ignore CRASHED state: it means the VM is actually not deployed
-            if (!(virtualMachine.getState().equals("NOT_DEPLOYED") || virtualMachine.getState()
-                .equals("CRASHED")))
+            // We can ignore import VMs
+            if (virtualMachine.isManaged()
+                && !(virtualMachine.getState().equals(VirtualMachineState.NOT_ALLOCATED) || virtualMachine
+                    .getState().equals(VirtualMachineState.UNKNOWN)))
             {
                 return true;
             }
@@ -830,7 +832,9 @@ public class InfrastructureRep extends DefaultRepBase
         // TODO Auto-generated method stub
         return rackDao.getRandomMachinesToShutDownFromRack(rackId, howMany);
     }
-     /** Return all the public VLANs by Datacenter.
+
+    /**
+     * Return all the public VLANs by Datacenter.
      * 
      * @param datacenter {@link Datacenter} where we search for.
      * @return list of found {@link VLANNetwork}
