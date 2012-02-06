@@ -36,6 +36,7 @@
 
     <mx:Script>
         <![CDATA[
+        	import net.undf.abicloud.vo.user.Role;
         	import net.undf.abicloud.vo.user.PrivilegeType;
         	import net.undf.abicloud.utils.SecuredPrivilegeAccess;
         	import net.undf.abicloud.view.main.CommonAssets;
@@ -98,7 +99,10 @@
                                                                          onEnterpriseDeleted);
 				
 				AbiCloudModel.getInstance().userManager.addEventListener(UserEvent.ENTERPRISE_EDITED,
-                                                                         requestEnterprises);                                                                         
+                                                                         requestEnterprises);  
+                                                                         
+                AbiCloudModel.getInstance().userManager.addEventListener(UserEvent.ROLE_CREATED,
+                                                                         selectEnterprise);                                                                      
             }
 
             public function init():void
@@ -348,6 +352,19 @@
 
                 //Requesting the list of users filtered
                 requestEnterprises();
+            }
+            
+            private function selectEnterprise(event:UserEvent):void
+            {   
+            	var role:Role = event.role;
+            	for(var i:int = 0 ; i < this._enterprises.length ; i++)
+            	{
+            		if(this._enterprises.getItemAt(i).id == role.idEnterprise)
+            		{
+            		  enterprisesList.selectedIndex = i;
+            		  selectedEnterprise = enterprisesList.selectedItem as Enterprise;  	
+            		}
+            	}
             }
         ]]>
     </mx:Script>
