@@ -25,6 +25,8 @@ import static com.abiquo.api.resources.RoleResource.createTransferObject;
 
 import java.util.Collection;
 
+import javax.validation.constraints.Min;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
@@ -70,30 +72,16 @@ public class RolesResource extends AbstractResource
 
     @GET
     public RolesDto getRoles(
-        @QueryParam(EnterpriseResource.ENTERPRISE_AS_PARAM) final String enterpriseId,
-        @QueryParam("filter") final String filter, @QueryParam("orderBy") final String orderBy,
-        @QueryParam("desc") final boolean desc, @QueryParam("page") Integer page,
-        @QueryParam("numResults") Integer numResults, @Context final IRESTBuilder restBuilder)
-        throws Exception
+        @QueryParam(EnterpriseResource.ENTERPRISE_AS_PARAM) @DefaultValue("0") @Min(0) final Integer enterpriseId,
+        @QueryParam(FILTER) @DefaultValue("") final String filter,
+        @QueryParam(BY) @DefaultValue("") final String orderBy,
+        @QueryParam(ASC) @DefaultValue("") final boolean desc,
+        @QueryParam(START_WITH) @DefaultValue("0") @Min(0) final Integer page,
+        @QueryParam(LIMIT) @DefaultValue(DEFAULT_PAGE_LENGTH_STRING) final Integer numResults,
+        @Context final IRESTBuilder restBuilder) throws Exception
     {
-        if (page == null)
-        {
-            page = 0;
-        }
-
-        if (numResults == null)
-        {
-            numResults = DEFAULT_PAGE_LENGTH;
-        }
-
-        int entId = 0;
-        if (enterpriseId != null)
-        {
-            entId = Integer.valueOf(enterpriseId);
-        }
-
         Collection<Role> all =
-            service.getRolesByEnterprise(entId, filter, orderBy, desc, page, numResults);
+            service.getRolesByEnterprise(enterpriseId, filter, orderBy, desc, page, numResults);
         RolesDto roles = new RolesDto();
 
         // Can only get my role
@@ -126,27 +114,23 @@ public class RolesResource extends AbstractResource
         }
 
         // Can get all roles
-        if (all != null && !all.isEmpty())
+        if (all != null && !all.isEmpty() && all instanceof PagedList< ? >)
         {
-            all =
+            PagedList<Role> list = (PagedList<Role>) all;
+
+            Collection<Role> allowedRoles =
                 service.getRolesWithEqualsOrLessPrivileges(userService.getCurrentUser().getRole(),
                     all);
 
-            for (Role r : all)
+            for (Role r : allowedRoles)
             {
                 roles.add(createTransferObject(r, restBuilder));
             }
-
-            if (all instanceof PagedList< ? >)
-            {
-                PagedList<Role> list = (PagedList<Role>) all;
-                roles.setLinks(restBuilder.buildPaggingLinks(uriInfo.getAbsolutePath().toString(),
-                    list));
-                roles.setTotalSize(list.getTotalResults());
-            }
+            roles.setLinks(restBuilder
+                .buildPaggingLinks(uriInfo.getAbsolutePath().toString(), list));
+            roles.setTotalSize(list.getTotalResults());
         }
 
         return roles;
     }
-
 }
