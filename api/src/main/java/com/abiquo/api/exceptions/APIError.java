@@ -342,13 +342,14 @@ public enum APIError
         "The repository exported by the current appliance manager is being used in another datacenter"), APPLIANCE_MANAGER_REPOSITORY_IN_USE(
         "AM-1",
         "The current repository holds virtual images being used on some virtual appliances, so it is not possible to remove this remote service. You can modify the appliance manager but only if the same repository is used."), REMOTE_SERVICE_STORAGE_REMOTE_WITH_POOLS(
-        "RS-9", "Cannot delete a storage manager with associated storage pools"), REMOTE_SERVICE_IS_BEING_USED(
+        "RS-9", "Cannot delete a storage manager with associated storage pools"), REMOTE_SERVICE_DHCP_IS_BEING_USED(
+        "RS-10", "Cannot delete a DHCP Service. There are virtual machines deployed."), REMOTE_SERVICE_VSM_IS_BEING_USED(
         "RS-10",
-        "Cannot delete a Virtual System Monitor or DHCP Service. There are virtual machines deployed."), REMOTE_SERVICE_WRONG_URL(
-        "RS-11", "URL supplied is not valid"), REMOTE_SERVICE_DHCP_WRONG_URI("RS-12",
-        "The DHCP URI is invalid"), REMOTE_SERVICE_DATACENTER_UUID_NOT_FOUND("RS-13",
+        "Cannot delete a Virtual System Monitor Service. There are virtual machines deployed."), REMOTE_SERVICE_WRONG_URL(
+        "RS-12", "URL supplied is not valid"), REMOTE_SERVICE_DHCP_WRONG_URI("RS-13",
+        "The DHCP URI is invalid"), REMOTE_SERVICE_DATACENTER_UUID_NOT_FOUND("RS-14",
         "The remote service does not have the *abiquo.datacenter.id* property set"), REMOTE_SERVICE_DATACENTER_UUID_INCONSISTENT(
-        "RS-14",
+        "RS-15",
         "The remote service is configured with a different datacenter UUID, please adjust the *abiquo.datacenter.id* property in the remote service."),
 
     // OVF PACKAGE LIST
