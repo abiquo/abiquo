@@ -29,10 +29,14 @@
     paddingRight="0"
     paddingTop="5"
     verticalGap="-1"
+    show="requestVirtualMachineNICs()"
     creationComplete="onCreationComplete()"
     xmlns:mx="http://www.adobe.com/2006/mxml">
     <mx:Script>
         <![CDATA[
+        	import net.undf.abicloud.vo.infrastructure.PhysicalMachine;
+        	import net.undf.abicloud.vo.infrastructure.Rack;
+        	import net.undf.abicloud.vo.infrastructure.DataCenter;
         	import net.undf.abicloud.vo.virtualappliance.VirtualDataCenter;
         	import net.undf.abicloud.vo.virtualappliance.VirtualAppliance;
         	import net.undf.abicloud.utils.AbicloudUtils;
@@ -68,7 +72,30 @@
             public function set virtualMachine(value:VirtualMachine):void
             {
                 _virtualMachine = value;
-                requestVirtualMachineNICs();
+            }
+            
+            //The VirtualDatacenter 
+            protected var _datacenter:DataCenter;
+
+            public function set datacenter(value:DataCenter):void
+            {
+                _datacenter = value;
+            }
+            
+            //The VirtualAppliance
+            protected var _rack:Rack;
+
+            public function set rack(value:Rack):void
+            {
+                _rack = value;
+            }
+            
+            //The VirtualMachine to list its NICs
+            protected var _physicalMachine:PhysicalMachine;
+
+            public function set physicalMachine(value:PhysicalMachine):void
+            {
+                _physicalMachine = value;
             }
 
             private function onCreationComplete():void
@@ -80,19 +107,23 @@
 
             protected function requestVirtualMachineNICs():void
             {
+                var event:NetworkingEvent = new NetworkingEvent(NetworkingEvent.GET_NICs_BY_VIRTUAL_MACHINE);
                 if (_virtualMachine && _virtualAppliance && _virtualDatacenter)
                 {
-                    var event:NetworkingEvent = new NetworkingEvent(NetworkingEvent.GET_NICs_BY_VIRTUAL_MACHINE);
+                    event = new NetworkingEvent(NetworkingEvent.GET_NICs_BY_VIRTUAL_MACHINE);
                     event.virtualDatacenter = _virtualDatacenter;
                     event.virtualAppliance = _virtualAppliance; 
-                    event.virtualMachine = _virtualMachine;
-                    event.callback = setVirtualMachineNICs; 
-                    dispatchEvent(event);
                 }
                 else
                 {
-                    virtualMachineNICs = new ArrayCollection();
+                    event = new NetworkingEvent(NetworkingEvent.GET_INFRASTRUCTURE_NICs_BY_VIRTUAL_MACHINE);
+                    event.datacenter = _datacenter;
+                    event.rack = _rack; 
+                    event.physicalMachine = _physicalMachine;
                 }
+                event.virtualMachine = _virtualMachine;
+                event.callback = setVirtualMachineNICs; 
+                dispatchEvent(event);
             }
 
             public function setVirtualMachineNICs(list:ArrayCollection):void

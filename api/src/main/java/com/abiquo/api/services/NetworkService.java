@@ -53,6 +53,7 @@ import com.abiquo.server.core.enterprise.DatacenterLimits;
 import com.abiquo.server.core.enterprise.EnterpriseRep;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.InfrastructureRep;
+import com.abiquo.server.core.infrastructure.Machine;
 import com.abiquo.server.core.infrastructure.management.Rasd;
 import com.abiquo.server.core.infrastructure.network.DhcpOption;
 import com.abiquo.server.core.infrastructure.network.DhcpOptionDto;
@@ -738,6 +739,39 @@ public class NetworkService extends DefaultApiService
         VirtualAppliance vapp = getVirtualAppliance(vdc, vappId);
         VirtualMachine vm = getVirtualMachine(vapp, vmId);
 
+        List<IpPoolManagement> ips = repo.findIpsByVirtualMachine(vm);
+
+        for (IpPoolManagement ip : ips)
+        {
+            Hibernate.initialize(ip.getVlanNetwork().getEnterprise());
+            if (ip.getVlanNetwork().getEnterprise() != null)
+            {
+                // needed for REST links.
+                DatacenterLimits dl =
+                    datacenterRepo.findDatacenterLimits(ip.getVlanNetwork().getEnterprise(),
+                        vdc.getDatacenter());
+                ip.getVlanNetwork().setLimitId(dl.getId());
+            }
+        }
+
+        LOGGER.debug("Returning the list of IPs used by Virtual Machine '" + vm.getName() + "'.");
+        return ips;
+    }
+    
+    public List<IpPoolManagement> getListIpPoolManagementByInfrastructureVirtualMachine(
+        Integer datacenterId, Integer rackId, Integer machineId, Integer vmId)
+    {
+        Machine pm = datacenterRepo.findMachineByIds(datacenterId, rackId, machineId);
+        if (pm == null)
+        {
+            addNotFoundErrors(APIError.NON_EXISTENT_MACHINE);
+            flushErrors();
+        }
+        
+        VirtualMachine vm = vmService.getVirtualMachineByHypervisor(pm.getHypervisor(), vmId);
+        
+        VirtualDatacenter vdc = repo.findVirtualApplianceByVirtualMachine(vm).getVirtualDatacenter();
+        
         List<IpPoolManagement> ips = repo.findIpsByVirtualMachine(vm);
 
         for (IpPoolManagement ip : ips)

@@ -1801,4 +1801,36 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
         }
     }
 
+    @Override
+    public BasicResult getInfrastructureNICsByVirtualMachine(Integer datacenterId, Integer rackId,
+        Integer machineId, Integer virtualMachineId)
+    {
+        DataResult<List<IpPoolManagement>> result = new DataResult<List<IpPoolManagement>>();
+
+        String uri = createInfrastructureVirtualMachineNICsLink(datacenterId, rackId, machineId, virtualMachineId);
+        ClientResponse response = get(uri);
+
+        if (response.getStatusCode() == 200)
+        {
+            NicsDto nics = response.getEntity(NicsDto.class);
+            List<IpPoolManagement> returnIps = new ArrayList<IpPoolManagement>();
+
+            for (NicDto dto : nics.getCollection())
+            {
+                returnIps.add(createFlexObject(dto));
+            }
+
+            result.setData(returnIps);
+            result.setSuccess(Boolean.TRUE);
+        }
+        else
+        {
+            populateErrors(response, result, "getInfrastructureNICsByVirtualMachine");
+        }
+
+        return result;
+    }
+
+
+
 }
