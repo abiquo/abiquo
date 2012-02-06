@@ -236,6 +236,19 @@ public class VirtualMachineDAO extends DefaultDAOBase<Integer, VirtualMachine>
         flush();
     }
 
+    /**
+     * Sets the {@link VirtualMachine#setState(VirtualMachineState)} to
+     * {@link VirtualMachineState#UNKNOWN}.
+     * 
+     * @param vmachineId id void
+     */
+    public void unknownState(final Integer vmachineId)
+    {
+        VirtualMachine vmachine = findById(vmachineId);
+
+        vmachine.setState(VirtualMachineState.UNKNOWN);
+    }
+
     private Criterion managed()
     {
         return Restrictions.eq(VirtualMachine.ID_TYPE_PROPERTY, VirtualMachine.MANAGED);

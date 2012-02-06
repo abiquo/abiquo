@@ -261,7 +261,7 @@ public class VirtualMachineService extends DefaultApiService
             flushErrors();
         }
         LOGGER.debug("Virtual machine {} found", vmId);
-        
+
         // if the ips are external, we need to set the limitID in order to return the
         // proper info.
         for (IpPoolManagement ip : vm.getIps())
@@ -275,7 +275,7 @@ public class VirtualMachineService extends DefaultApiService
                 ip.getVlanNetwork().setLimitId(dl.getId());
             }
         }
-        
+
         return vm;
     }
 
@@ -1707,7 +1707,7 @@ public class VirtualMachineService extends DefaultApiService
             addNotFoundErrors(APIError.NODE_VIRTUAL_MACHINE_IMAGE_NOT_EXISTS);
             flushErrors();
         }
-        
+
         // if the ips are external, we need to set the limitID in order to return the
         // proper info.
         for (IpPoolManagement ip : vm.getIps())
@@ -1721,7 +1721,7 @@ public class VirtualMachineService extends DefaultApiService
                 ip.getVlanNetwork().setLimitId(dl.getId());
             }
         }
-        
+
         return nodeVirtualImage;
     }
 
@@ -2732,8 +2732,8 @@ public class VirtualMachineService extends DefaultApiService
         return null;
     }
 
-    /*
-     * @param vmId
+    /**
+     * @param vmId to return
      * @return VirtualMachine with DC.
      */
     public VirtualMachine getVirtualMachineInitialized(final Integer vmId)
@@ -2763,6 +2763,16 @@ public class VirtualMachineService extends DefaultApiService
         }
 
         return virtualMachine;
+    }
+
+    /**
+     * Sets the {@link VirtualMachine#setState(VirtualMachineState)} to
+     * {@link VirtualMachineState#UNKNOWN}.
+     */
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void setVirtualMachineToUnknown(final Integer vmId)
+    {
+        repo.setVirtualMachineToUnknown(vmId);
     }
 
     /**
