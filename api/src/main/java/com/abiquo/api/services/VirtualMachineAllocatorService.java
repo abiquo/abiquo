@@ -130,12 +130,10 @@ public class VirtualMachineAllocatorService extends DefaultApiService
      * @param foreceEnterpriseSoftLimits
      */
     @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
-    public void checkAllocate(final Integer idVirtualApp, final Integer virtualMachineId,
+    public void checkAllocate(final Integer idVirtualApp, final VirtualMachine vmachine,
         final VirtualMachineRequirements increaseRequirements,
         final boolean foreceEnterpriseSoftLimits)
     {
-
-        final VirtualMachine vmachine = virtualMachineDao.findById(virtualMachineId);
         final VirtualAppliance vapp = virtualAppDao.findById(idVirtualApp);
         final Machine machine = vmachine.getHypervisor().getMachine();
 
@@ -163,6 +161,7 @@ public class VirtualMachineAllocatorService extends DefaultApiService
             }
 
             upgradeUse.updateUsed(vmachine.getHypervisor().getMachine(), increaseRequirements);
+            upgradeUse.updateNetworkingResources(vmachine.getHypervisor().getMachine(), vmachine, vapp);
 
         }
         catch (NotEnoughResourcesException e)
