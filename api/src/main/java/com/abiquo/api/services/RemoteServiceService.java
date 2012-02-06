@@ -445,7 +445,15 @@ public class RemoteServiceService extends DefaultApiService
         {
             if (infrastructureRepo.existDeployedVirtualMachines(remoteService.getDatacenter()))
             {
-                addConflictErrors(APIError.REMOTE_SERVICE_IS_BEING_USED);
+                if (remoteService.getType() == RemoteServiceType.VIRTUAL_SYSTEM_MONITOR)
+                {
+                    addConflictErrors(APIError.REMOTE_SERVICE_VSM_IS_BEING_USED);
+                }
+                // JIRA: ABICLOUDPREMIUM-3009 - Final decision: DHCP service can be deleted always
+                // else
+                // {
+                // addConflictErrors(APIError.REMOTE_SERVICE_DHCP_IS_BEING_USED);
+                // }
                 flushErrors();
             }
         }
