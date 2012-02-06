@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.abiquo.am.exceptions.AMError;
-import com.abiquo.appliancemanager.config.AMConfigurationManager;
+import com.abiquo.appliancemanager.config.AMConfiguration;
 import com.abiquo.appliancemanager.exceptions.AMException;
 
 /**
@@ -47,8 +47,7 @@ public class DiskFileServiceImpl implements DiskFileService
     private static final Logger LOGGER = LoggerFactory.getLogger(DiskFileServiceImpl.class);
 
     /** The path to the local repository. */
-    private final String repositoryPath = AMConfigurationManager.getInstance().getAMConfiguration()
-        .getRepositoryPath();
+    private final String repositoryPath = AMConfiguration.getRepositoryPath();
 
     /**
      * Creates the service.

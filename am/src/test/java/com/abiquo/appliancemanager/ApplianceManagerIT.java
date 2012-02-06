@@ -104,8 +104,7 @@ public class ApplianceManagerIT
 
         // TODO check size after a create
 
-        Assert
-            .assertTrue((erepo.getEnterpriseUsedMb() < erepo.getCapacityMb()));
+        Assert.assertTrue((erepo.getEnterpriseUsedMb() < erepo.getCapacityMb()));
         Assert.assertTrue((erepo.getCapacityMb() >= erepo.getEnterpriseUsedMb()
             + erepo.getRemainingMb()));
     }

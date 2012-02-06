@@ -33,7 +33,7 @@ import org.springframework.stereotype.Controller;
 import com.abiquo.am.services.ErepoFactory;
 import com.abiquo.am.services.filesystem.EnterpriseRepositoryFileSystem;
 import com.abiquo.api.resource.AbstractResource;
-import com.abiquo.appliancemanager.config.AMConfigurationManager;
+import com.abiquo.appliancemanager.config.AMConfiguration;
 import com.abiquo.appliancemanager.transport.EnterpriseRepositoryDto;
 
 @Parent(EnterpriseRepositoriesResource.class)
@@ -45,8 +45,7 @@ public class EnterpriseRepositoryResource extends AbstractResource
 
     public static final String ENTERPRISE_REPOSITORY_PARAM = "{" + ENTERPRISE_REPOSITORY + "}";
 
-    private static final String REPOSITORY_LOCATION = AMConfigurationManager.getInstance()
-        .getAMConfiguration().getRepositoryLocation();
+    private static final String REPOSITORY_LOCATION = AMConfiguration.getRepositoryLocation();
 
     @POST
     public void refreshEnterpriseRepository(
@@ -60,8 +59,6 @@ public class EnterpriseRepositoryResource extends AbstractResource
         @PathParam(EnterpriseRepositoryResource.ENTERPRISE_REPOSITORY) final String erId,
         @QueryParam("checkCanWrite") final boolean checkCanWrite)
     {
-        CheckResource.validate();
-
         EnterpriseRepositoryDto repo = new EnterpriseRepositoryDto();
 
         repo.setId(Integer.valueOf(erId));
@@ -71,7 +68,6 @@ public class EnterpriseRepositoryResource extends AbstractResource
         repo.setLocation(REPOSITORY_LOCATION);
         repo.setCapacityMb(EnterpriseRepositoryFileSystem.getCapacityMb());
         repo.setRemainingMb(EnterpriseRepositoryFileSystem.getFreeMb());
-
 
         return repo;
     }
