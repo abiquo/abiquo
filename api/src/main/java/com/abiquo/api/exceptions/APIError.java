@@ -459,12 +459,8 @@ public enum APIError
         "TIER-6", "Cannot disable a tier with associated storage pools"), TIER_DISABLED("TIER-7",
         "The requested tier is disabled"), TIER_LINK_VIRTUALDATACENTER_PARAM_NOT_FOUND("TIER-8",
         "VirtualDatacenter parameter was not found in tier link"), TIER_LINK_VIRTUALDATACENTER_DIFFERENT(
-<<<<<<< HEAD
         "TIER-9", "Tier's virtualdatacenter link does not match the virtualdatacenter supplied"), TIER_LINK_WRONG_DATACENTER(
         "TIER-10", "The Tier does not belong to indicated datacenter"),
-=======
-        "TIER-9", "The Tier's virtualdatacenter link does not match the virtualdatacenter supplied"),
->>>>>>> e903d0c1c3446b7a37c82a4430c3e1447bdcdbd8
 
     // DEVICES
     NON_EXISTENT_DEVICE("DEVICE-0", "The requested device does not exist"), DEVICE_DUPLICATED(
