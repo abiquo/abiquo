@@ -21,6 +21,7 @@
 
 package com.abiquo.am.services.filesystem;
 
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -174,7 +175,7 @@ public class EnterpriseRepositoryFileSystem
      * @return null if the destination file is being download by another package.
      * @throws FileNotFoundException
      */
-    public static FileOutputStream takeFile(final String destinationPath)
+    public static BufferedOutputStream takeFile(final String destinationPath)
     {
         File destination = new File(destinationPath);
         File destinationMark = new File(destinationPath + FILE_MARK);
@@ -208,7 +209,7 @@ public class EnterpriseRepositoryFileSystem
 
         try
         {
-            return new FileOutputStream(destination);
+            return new BufferedOutputStream(new FileOutputStream(destination));
         }
         catch (FileNotFoundException e)
         {
