@@ -49,6 +49,7 @@ import com.abiquo.api.resources.UserResource;
 import com.abiquo.api.resources.UsersResource;
 import com.abiquo.api.resources.VirtualMachinesInfrastructureResource;
 import com.abiquo.api.resources.appslibrary.CategoryResource;
+import com.abiquo.api.resources.appslibrary.DatacenterRepositoriesResource;
 import com.abiquo.api.resources.appslibrary.DatacenterRepositoryResource;
 import com.abiquo.api.resources.appslibrary.IconResource;
 import com.abiquo.api.resources.appslibrary.TemplateDefinitionListResource;
@@ -433,7 +434,9 @@ public class RESTBuilder implements IRESTBuilder
         links.add(builder.buildRestLink(EnterpriseResource.class,
             EnterpriseResource.ENTERPRISE_ACTION_GET_VIRTUALDATACENTERS_PATH,
             VirtualDatacentersResource.VIRTUAL_DATACENTERS_PATH, params));
-
+        links.add(builder.buildRestLink(EnterpriseResource.class,
+            DatacenterRepositoriesResource.DATACENTER_REPOSITORIES_PATH,
+            DatacenterRepositoriesResource.DATACENTER_REPOSITORIES_PATH, params));
         return links;
     }
 
