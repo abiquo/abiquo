@@ -32,6 +32,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.Response.Status.Family;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.wink.client.ClientResponse;
 import org.apache.wink.client.Resource;
 import org.jclouds.abiquo.domain.DomainWrapper;
@@ -273,13 +274,28 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
         final List<String> templateDefinitionUrls, final Integer idEnterprise,
         final Integer datacenterId)
     {
+        StringBuffer error = new StringBuffer();
         for (String templateDefUrl : templateDefinitionUrls)
         {
-            installTemplateDefinitionInDatacenter(templateDefUrl, idEnterprise, datacenterId);
+
+            BasicResult partRes =
+                installTemplateDefinitionInDatacenter(templateDefUrl, idEnterprise, datacenterId);
+            if (!partRes.getSuccess())
+            {
+                error.append("\n").append(templateDefUrl).append(" : ")
+                    .append(partRes.getMessage());
+            }
         }
 
         BasicResult result = new BasicResult();
         result.setSuccess(true);
+        String totalError = error.toString();
+        if (!StringUtils.isEmpty(totalError))
+        {
+            result.setSuccess(false);
+            result.setMessage(totalError);
+        }
+
         return result;
     }
 
@@ -303,9 +319,16 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
         {
             logger.error("Can't install TemplateDefinition {} in dc {}", templateDefinitionUrl,
                 datacenterId);
+            try
+            {
+                populateErrors(response, result, "installTemplateDefinitionInDatacenter");
+            }
+            catch (Exception e)
+            {
+                result.setMessage(response.getEntity(String.class));
+            }
+
             result.setSuccess(false);
-            result.setMessage(response.getMessage());
-            // error cause will be shown with getOVFPackageState
         }
         return result;
     }

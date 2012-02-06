@@ -351,6 +351,7 @@ public enum APIError
         "The remote service does not have the *abiquo.datacenter.id* property set"), REMOTE_SERVICE_DATACENTER_UUID_INCONSISTENT(
         "RS-15",
         "The remote service is configured with a different datacenter UUID, please adjust the *abiquo.datacenter.id* property in the remote service."),
+        APPLIANCE_MANAGER_CALL("AM-1", "Failed Appliance Manager communication"),
 
     // OVF PACKAGE LIST
     TEMPLATE_DEFINITION_LIST_NAME_ALREADY_EXIST("OVF-PACKAGE-LIST-0",
