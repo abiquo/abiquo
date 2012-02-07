@@ -298,7 +298,8 @@ public enum APIError
         "Missing privilege parameter"), DELETE_ERROR("ROLE-3",
         "The requested role is blocked. It cannot be deleted"), DELETE_ERROR_WITH_USER("ROLE-4",
         "Cannot delete a role with a user associated"), DELETE_ERROR_WITH_ROLE_LDAP("ROLE-5",
-        "Cannot delete a role with a RoleLdap associated"), DUPLICATED_ROLE_NAME_ENT("ROLE-6",
+        "Cannot delete a role with a RoleLdap associated"), DUPLICATED_ROLE_NAME_ENT(
+        "ROLE-6",
         "Cannot create a role with the same name as an existing role for the same enterprise or with the same name as an existing global role"), DUPLICATED_ROLE_NAME_GEN(
         "ROLE-7", "Cannot create a global role with the same name as an existing  role"), HAS_NOT_ENOUGH_PRIVILEGE(
         "ROLE-8", "Hasn't got enough privileges to manage this role"), ROLE_NAME_BLANK("ROLE-9",
@@ -464,12 +465,8 @@ public enum APIError
         "TIER-6", "Cannot disable a tier with associated storage pools"), TIER_DISABLED("TIER-7",
         "The requested tier is disabled"), TIER_LINK_VIRTUALDATACENTER_PARAM_NOT_FOUND("TIER-8",
         "VirtualDatacenter parameter was not found in tier link"), TIER_LINK_VIRTUALDATACENTER_DIFFERENT(
-<<<<<<< HEAD
         "TIER-9", "Tier's virtualdatacenter link does not match the virtualdatacenter supplied"), TIER_LINK_WRONG_DATACENTER(
         "TIER-10", "The Tier does not belong to indicated datacenter"),
-=======
-        "TIER-9", "The Tier's virtualdatacenter link does not match the virtualdatacenter supplied"),
->>>>>>> ABICLOUDPREMIUM-3124
 
     // DEVICES
     NON_EXISTENT_DEVICE("DEVICE-0", "The requested device does not exist"), DEVICE_DUPLICATED(
@@ -697,8 +694,8 @@ public enum APIError
         // Outputs all errors in wiki table format
         for (APIError error : errors)
         {
-            System.out.println(String.format("| %s | %s | %s |", error.code, error.message, error
-                .name()));
+            System.out.println(String.format("| %s | %s | %s |", error.code, error.message,
+                error.name()));
         }
 
         System.out.println("\n ************ Flex client labels ************** \n");
