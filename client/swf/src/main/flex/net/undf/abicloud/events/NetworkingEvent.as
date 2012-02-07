@@ -144,6 +144,8 @@ package net.undf.abicloud.events
         public var available:Boolean;
         
         public var staticRules:ArrayCollection;
+        
+        public var tag:int;
 
         /* ------------- Constructor ------------- */
         public function NetworkingEvent(type:String, bubbles:Boolean = true, cancelable:Boolean = false)
