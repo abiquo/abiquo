@@ -43,7 +43,6 @@ public class AMConfigurationManager
     /** Any initialization error cause. */
     private String configurationError = null;
 
-
     public final static String UPDATE_INTERVAL_DEFAULT = "5000";
 
     public final static String DEPLOY_TIMEOUT_DEFAULT = "60000";
@@ -89,10 +88,14 @@ public class AMConfigurationManager
     private AMConfiguration loadConfiguration() throws Exception
     {
         String repositoryLocation =
-            System.getProperty("abiquo.appliancemanager.repositoryLocation", "nfs-test:/test/repostiory"); // FIXME not default values
-        
-        String repositoryPath = System.getProperty("abiquo.appliancemanager.localRepositoryPath", "/tmp/testrepo"); // FIXME not default values
-        
+            System.getProperty("abiquo.appliancemanager.repositoryLocation",
+                "nfs-test:/test/repostiory"); // FIXME not default values
+
+        String repositoryPath =
+            System.getProperty("abiquo.appliancemanager.localRepositoryPath", "/tmp/testrepo"); // FIXME
+                                                                                                // not
+                                                                                                // default
+                                                                                                // values
 
         if (repositoryLocation == null || repositoryLocation.isEmpty())
         {
@@ -131,7 +134,7 @@ public class AMConfigurationManager
         // optional configuration elements or defaults
         configuration.setUpdateProgressInterval(Integer.parseInt(System.getProperty(
             "abiquo.appliancemanager.upload.progressInterval", UPDATE_INTERVAL_DEFAULT)));
-        //configuration.setDeployBuffer(DEPLOY_BUFFER_DEFAULT);
+        // configuration.setDeployBuffer(DEPLOY_BUFFER_DEFAULT);
         configuration.setTimeout(Integer.parseInt(System.getProperty(
             "abiquo.appliancemanager.deploy.timeout", DEPLOY_TIMEOUT_DEFAULT)));
 
@@ -140,10 +143,10 @@ public class AMConfigurationManager
         Integer fstimeoutMs =
             Integer.parseInt(System.getProperty("abiquo.appliancemanager.fstimeoutms", "7000"));
         configuration.setFsTimeoutMs(fstimeoutMs);
-        
+
         // set it on the OVFManager serialize utility class
         OVFSerializer.getInstance().setFormatOutput(true);
-        OVFSerializer.getInstance().setValidateXML(false);
+        // OVFSerializer.getInstance().setValidateXML(false);
 
         return configuration;
     }
@@ -197,7 +200,7 @@ public class AMConfigurationManager
                             + "please check this folder is properly mounted (usually NFS) the location [%s].",
                         abiquoRepoMark.getAbsolutePath(), configuration.getRepositoryLocation());
 
-            throw new Exception(msg);            
+            throw new Exception(msg);
         }
 
         // [FATAL] ApplianceManager configuration error, caused by:
@@ -268,7 +271,7 @@ public class AMConfigurationManager
     /** System property determine to use Proxy connections using this port. */
     private final static String SYSTEM_PROXY_PORT_ATTRIBUTE = "http.proxyPort";
 
-    private AMConfiguration setProxyConfiguration(AMConfiguration config)
+    private AMConfiguration setProxyConfiguration(final AMConfiguration config)
     {
         String host;
         Integer port;

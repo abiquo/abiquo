@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
 import java.net.MalformedURLException;
+import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.HashMap;
@@ -68,8 +69,8 @@ import com.abiquo.ovfmanager.ovf.xml.OVFSerializer;
 public class OVFDocumentFetch
 {
     /** Timeout for all the HTTP connections. */
-    private final static Integer httpTimeout =
-        AMConfigurationManager.getInstance().getAMConfiguration().getTimeout();
+    private final static Integer httpTimeout = AMConfigurationManager.getInstance()
+        .getAMConfiguration().getTimeout();
 
     private InputStream openHTTPConnection(final String ovfid) throws DownloadException
     {
@@ -112,31 +113,34 @@ public class OVFDocumentFetch
      */
     public EnvelopeType obtainEnvelope(final String ovfId)
     {
-        InputStream evelopeStream = openHTTPConnection(ovfId);
-
         EnvelopeType envelope;
+        InputStream evelopeStream = null;
         try
         {
+            evelopeStream = openHTTPConnection(ovfId);
+
             envelope = OVFSerializer.getInstance().readXMLEnvelope(evelopeStream);
 
             envelope = fixOVfDocument(ovfId, envelope);
 
             checkEnvelopeIsValid(envelope);
         }
+        catch (AMException ame)
+        {
+            throw ame;
+        }
         catch (Exception e)
         {
-            if (e instanceof AMException)
-            {
-                throw (AMException) e;
-            }
-
             throw new AMException(AMError.TEMPLATE_INVALID, e);
         }
         finally
         {
             try
             {
-                evelopeStream.close();
+                if (evelopeStream != null)
+                {
+                    evelopeStream.close();
+                }
             }
             catch (IOException e)
             {
@@ -375,8 +379,8 @@ public class OVFDocumentFetch
         catch (Exception e)
         {
             throw new InvalidSectionException(String.format("Invalid File References section "
-                + "(check all the files on the OVF document contains the ''size'' attribute):\n", e
-                .toString()));
+                + "(check all the files on the OVF document contains the ''size'' attribute):\n",
+                e.toString()));
         }
 
         return envelope;

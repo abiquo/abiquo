@@ -48,7 +48,7 @@ public class ContextListener implements ServletContextListener
     public void contextInitialized(final ServletContextEvent sce)
     {
 
-        OVFSerializer.getInstance().setValidateXML(false); // TODO delme
+        // OVFSerializer.getInstance().setValidateXML(false); // TODO delme
         //
         // try
         // {
