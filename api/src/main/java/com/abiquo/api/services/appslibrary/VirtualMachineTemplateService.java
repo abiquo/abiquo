@@ -258,6 +258,16 @@ public class VirtualMachineTemplateService extends DefaultApiServiceWithApplianc
         VirtualMachineTemplate old =
             getVirtualMachineTemplate(enterpriseId, datacenterId, virtualMachineTemplateId);
 
+        // If shared and with instances then those instance cannot access to the template anymore
+        if (old.isShared() && !virtualMachineTemplate.isShared()
+            && virtualMachineRep.existsVirtualMachineFromTemplate(virtualMachineTemplateId))
+        {
+            tracer.log(SeverityType.CRITICAL, ComponentType.VIRTUAL_APPLIANCE, EventType.VI_UPDATE,
+                "vmtemplate.modified.notshared.instance", new Object[] {virtualMachineTemplateId,
+                old.getName()});
+            addConflictErrors(APIError.VMTEMPLATE_TEMPLATE_USED_BY_VIRTUAL_MACHINES_CANNOT_BE_UNSHARED);
+            flushErrors();
+        }
         old.setCostCode(virtualMachineTemplate.getCostCode());
         old.setCpuRequired(virtualMachineTemplate.getCpuRequired());
         old.setDescription(virtualMachineTemplate.getDescription());

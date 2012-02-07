@@ -101,7 +101,7 @@ public class RemoteServiceResourceIT extends AbstractJpaGeneratorIT
     @Test
     public void modifyRemoteService() throws ClientWebException
     {
-        RemoteService rs = remoteServiceGenerator.createInstance(RemoteServiceType.NODE_COLLECTOR);
+        RemoteService rs = remoteServiceGenerator.createInstance(RemoteServiceType.DHCP_SERVICE);
         setup(rs.getDatacenter(), rs);
 
         String uri = resolveRemoteServiceURI(rs.getDatacenter().getId(), rs.getType());
@@ -109,14 +109,14 @@ public class RemoteServiceResourceIT extends AbstractJpaGeneratorIT
         Resource resource = client.resource(uri).accept(MediaType.APPLICATION_XML);
 
         RemoteServiceDto remoteService = resource.get(RemoteServiceDto.class);
-        remoteService.setUri("http://example.com/tarantino");
+        remoteService.setUri("http://example.com:8080/nodecolector");
 
         ClientResponse response =
             resource.contentType(MediaType.APPLICATION_XML).put(remoteService);
         assertEquals(200, response.getStatusCode());
 
         RemoteServiceDto modified = response.getEntity(RemoteServiceDto.class);
-        assertEquals("http://example.com/tarantino", modified.getUri());
+        assertEquals("http://example.com:8080/nodecolector", modified.getUri());
     }
 
     @Test

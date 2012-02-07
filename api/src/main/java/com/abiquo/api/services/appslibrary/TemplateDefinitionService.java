@@ -40,9 +40,11 @@ import org.springframework.transaction.annotation.Transactional;
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.services.EnterpriseService;
 import com.abiquo.appliancemanager.client.ApplianceManagerResourceStubImpl;
+import com.abiquo.appliancemanager.client.ApplianceManagerResourceStubImpl.ApplianceManagerStubException;
 import com.abiquo.appliancemanager.repositoryspace.OVFDescription;
 import com.abiquo.appliancemanager.transport.TemplateStateDto;
 import com.abiquo.model.enumerator.DiskFormatType;
+import com.abiquo.model.transport.error.CommonError;
 import com.abiquo.ovfmanager.ovf.xml.OVFSerializer;
 import com.abiquo.server.core.appslibrary.AppsLibraryRep;
 import com.abiquo.server.core.appslibrary.Category;
@@ -132,7 +134,17 @@ public class TemplateDefinitionService extends DefaultApiServiceWithApplianceMan
         final String ovfUrl = getTemplateDefinition(id).getUrl();
         final ApplianceManagerResourceStubImpl amClient = getApplianceManagerClient(datacenterId);
 
-        return amClient.getTemplateStatus(String.valueOf(enterpriseId), ovfUrl);
+        try
+        {
+            return amClient.getTemplateStatus(String.valueOf(enterpriseId), ovfUrl);
+        }
+        catch (ApplianceManagerStubException e)
+        {
+            addConflictErrors(new CommonError(APIError.APPLIANCE_MANAGER_CALL.getCode(),
+                e.getMessage()));
+            flushErrors();
+            return null;
+        }
     }
 
     @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
@@ -144,10 +156,19 @@ public class TemplateDefinitionService extends DefaultApiServiceWithApplianceMan
         final String ovfUrl = getTemplateDefinition(id).getUrl();
         final ApplianceManagerResourceStubImpl amClient = getApplianceManagerClient(datacenterId);
 
-        // checks the repository is writable
-        amClient.getRepository(String.valueOf(enterpriseId), true);
+        try
+        {
+            // checks the repository is writable
+            amClient.getRepository(String.valueOf(enterpriseId), true);
 
-        amClient.installTemplateDefinition(String.valueOf(enterpriseId), ovfUrl);
+            amClient.installTemplateDefinition(String.valueOf(enterpriseId), ovfUrl);
+        }
+        catch (ApplianceManagerStubException e)
+        {
+            addConflictErrors(new CommonError(APIError.APPLIANCE_MANAGER_CALL.getCode(),
+                e.getMessage()));
+            flushErrors();
+        }
     }
 
     @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
@@ -159,7 +180,16 @@ public class TemplateDefinitionService extends DefaultApiServiceWithApplianceMan
         final String ovfUrl = getTemplateDefinition(id).getUrl();
         final ApplianceManagerResourceStubImpl amClient = getApplianceManagerClient(datacenterId);
 
-        amClient.delete(String.valueOf(enterpriseId), ovfUrl);
+        try
+        {
+            amClient.delete(String.valueOf(enterpriseId), ovfUrl);
+        }
+        catch (ApplianceManagerStubException e)
+        {
+            addConflictErrors(new CommonError(APIError.APPLIANCE_MANAGER_CALL.getCode(),
+                e.getMessage()));
+            flushErrors();
+        }
     }
 
     /** #################### ovfindex.xml #################### */
