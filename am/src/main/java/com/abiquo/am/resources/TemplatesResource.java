@@ -27,6 +27,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.SocketTimeoutException;
 import java.net.URI;
 
 import javax.ws.rs.Consumes;
@@ -139,9 +140,9 @@ public class TemplatesResource
         catch (AMException e)
         {
             notifier.setTemplateStatusError(erId, ovfId, e.toString());
+            throw e;
 
             // XXX the request ends successfully but the ovf package status is ERROR
-            // throw new AMException(Status.BAD_REQUEST, cause);
         }
     }
 
@@ -195,7 +196,7 @@ public class TemplatesResource
 
         diskInfo.setDiskFileSize(diskFile.length());
         diskInfo.setEnterpriseRepositoryId(Integer.valueOf(erId));
-        
+
         templateService.upload(diskInfo, diskFile, errorMsg);
 
         return Response.created(URI.create(diskInfo.getUrl())).build();

@@ -94,8 +94,6 @@ package net.undf.abicloud.events
 
         public static const EDIT_VIRTUAL_DATACENTER:String = "editVirtualDataCenterVirtualApplianceEvent";
 
-        public static const GET_VIRTUAL_DATACENTER_DHCP_CONF:String = "getVirtualDataCenterDHCPConfVirtualApplianceEvent";
-
         public static const VIRTUAL_DATACENTER_ADDED:String = "virtualDataCenterAddedVirtualApplianceEvent";
 
         public static const VIRTUAL_DATACENTER_EDITED:String = "virtualDataCenterEditedVirtualApplianceEvent";

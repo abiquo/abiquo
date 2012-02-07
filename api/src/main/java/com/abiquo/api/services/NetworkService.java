@@ -592,6 +592,14 @@ public class NetworkService extends DefaultApiService
             addNotFoundErrors(APIError.NON_EXISTENT_IP);
             flushErrors();
         }
+        if (ip.getVlanNetwork().getEnterprise() != null)
+        {
+            // needed for REST links.
+            DatacenterLimits dl =
+                datacenterRepo.findDatacenterLimits(ip.getVlanNetwork().getEnterprise(),
+                    vdc.getDatacenter());
+            ip.getVlanNetwork().setLimitId(dl.getId());
+        }
 
         LOGGER.debug("Returning the list of IPs used by Virtual Machine '" + vm.getName() + "'.");
         return ip;

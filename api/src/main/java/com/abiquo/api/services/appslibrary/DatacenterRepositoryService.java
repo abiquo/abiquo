@@ -56,8 +56,8 @@ public class DatacenterRepositoryService extends DefaultApiServiceWithApplianceM
     private TemplateFactory toVmtemplate;
 
     /**
-     * Request the DOWNLOAD {@link TemplateDto} available in the ApplianceManager and
-     * update the {@link VirtualMachineTemplate} repository with new virtual machine templates.
+     * Request the DOWNLOAD {@link TemplateDto} available in the ApplianceManager and update the
+     * {@link VirtualMachineTemplate} repository with new virtual machine templates.
      */
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public void synchronizeDatacenterRepository(final Datacenter datacenter,
@@ -84,6 +84,9 @@ public class DatacenterRepositoryService extends DefaultApiServiceWithApplianceM
         try
         {
             ApplianceManagerResourceStubImpl amStub = getApplianceManagerClient(datacenterId);
+
+            amStub.checkService();
+
             EnterpriseRepositoryDto erepoDto = amStub.getRepository(String.valueOf(enterpriseId));
 
             repoDto.setRepositoryCapacityMb(erepoDto.getCapacityMb());
@@ -156,8 +159,7 @@ public class DatacenterRepositoryService extends DefaultApiServiceWithApplianceM
 
         try
         {
-            TemplatesStateDto list =
-                amStub.getTemplatesState(idEnterprise.toString());
+            TemplatesStateDto list = amStub.getTemplatesState(idEnterprise.toString());
 
             for (TemplateStateDto status : list.getCollection())
             {

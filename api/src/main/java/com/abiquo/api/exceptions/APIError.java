@@ -54,8 +54,7 @@ public enum APIError
         "Invalid credentials"), INVALID_LINK("GEN-6", "Invalid link reference"), WHITE_NAME(
         "GEN-7", "The property 'name' must not have whitespace at the beginning or the end"), WHITE_SYMBOL(
         "GEN-8", "The property 'symbol' must not have whitespace at the beginning or the end"), WHITE_DESCRIPTION(
-        "GEN-9",
-        "The property 'description' must not have whitespace at the beginning or the end"),
+        "GEN-9", "The property 'description' must not have whitespace at the beginning or the end"),
 
     // INVALID_IP("GEN-4", "Invalid IP"),
     INVALID_PRIVATE_NETWORK_TYPE("GEN-6", "Invalid private network type"), INTERNAL_SERVER_ERROR(
@@ -255,7 +254,8 @@ public enum APIError
         "VM-6", "The virtual machine does not support the action PAUSE"), VIRTUAL_MACHINE_INVALID_STATE_DEPLOY(
         "VM-7", "The allowed power states for Virtual Machines is NOT_ALLOCATED"), VIRTUAL_MACHINE_INVALID_STATE_DELETE(
         "VM-8", "The allowed power states for Virtual Machines are UNKNOWN and NOT_ALLOCATED"), NON_EXISTENT_VIRTUAL_IMAGE(
-        "VM-9", "The requested Virtual Machine Template does not exist"), VIRTUAL_MACHINE_EDIT_STATE("VM-10",
+        "VM-9", "The requested Virtual Machine Template does not exist"), VIRTUAL_MACHINE_EDIT_STATE(
+        "VM-10",
         "The Virtual Machine is in a state that does not allow the request, therefore it cannot be modified"), VIRTUAL_MACHINE_UNALLOCATED_STATE(
         "VM-11",
         "The Virtual Machine is not in any Hypervisor. Therefore the change of the state cannot be applied"), VIRTUAL_MACHINE_INVALID_STATE_UNDEPLOY(
@@ -266,9 +266,11 @@ public enum APIError
         "VM-14",
         "Only the 'used' attribute of the Virtual Machine Network Configuration can be changed"), VIRTUAL_MACHINE_AT_LEAST_ONE_USED_CONFIGURATION(
         "VM-15", "There should be at least one 'used' configuration in each Virtual Machine"), VIRTUAL_MACHINE_MACHINE_TEMPLATE_NOT_IN_DATACENTER(
-        "VM-16", "The virtual machine template supplied isn't available in the virtual appliance's datacenter"), VIRTUAL_MACHINE_MACHINE_TEMPLATE_NOT_ALLOWED(
+        "VM-16",
+        "The virtual machine template supplied isn't available in the virtual appliance's datacenter"), VIRTUAL_MACHINE_MACHINE_TEMPLATE_NOT_ALLOWED(
         "VM-17", "The virtual machine template supplied cannot be used in the current enterprise"), VIRTUAL_MACHINE_IMAGE_NOT_COMPATIBLE(
-        "VM-18", "The virtual machine template is not compatible and there is no compatible conversion"), VIRTUAL_MACHINE_IMAGE_NOT_READY(
+        "VM-18",
+        "The virtual machine template is not compatible and there is no compatible conversion"), VIRTUAL_MACHINE_IMAGE_NOT_READY(
         "VM-19",
         "The virtual machine template has a compatible conversion but it is not ready (in progress or failed)"), VIRTUAL_MACHINE_MUST_BE_NON_MANAGED(
         "VM-20", "To perform this action, the virtual machine must be in NON_MANAGED state"), NODE_VIRTUAL_MACHINE_IMAGE_NOT_EXISTS(
@@ -283,7 +285,8 @@ public enum APIError
         "VM-29", "Cannot reconfigure the template of a non-managed virtual machine"), VIRTUAL_MACHINE_RECONFIGURE_TEMPLATE_NOT_SAME_MASTER(
         "VM-30",
         "Cannot reconfigure to change the virtual machine template to another master (only instances or persistent)"), VIRTUAL_MACHINE_RECONFIGURE_TEMPLATE_ATTACHED_PRESISTENT(
-        "VM-31", "The persistent virtual machine template supplied for reconfigure is already attached to a virtual machine"), VIRTUAL_MACHINE_RECONFIGURE_TEMPLATE_IN_THE_HYPERVISOR(
+        "VM-31",
+        "The persistent virtual machine template supplied for reconfigure is already attached to a virtual machine"), VIRTUAL_MACHINE_RECONFIGURE_TEMPLATE_IN_THE_HYPERVISOR(
         "VM-32",
         "Cannot reconfigure the virual machine template once the virtual machine is present in the hypervisor"), VIRTUAL_MACHINE_IMPORTED_CAN_NOT_RECONFIGURE(
         "VM-33", "We do not currently allow imported virtual machines to be reconfigured"), VIRTUAL_MACHINE_IMPORTED_WILL_BE_DELETED(
@@ -346,7 +349,8 @@ public enum APIError
         "The DHCP URI is invalid"), REMOTE_SERVICE_DATACENTER_UUID_NOT_FOUND("RS-13",
         "The remote service does not have the *abiquo.datacenter.id* property set"), REMOTE_SERVICE_DATACENTER_UUID_INCONSISTENT(
         "RS-14",
-        "The remote service is configured with a different datacenter UUID, please adjust the *abiquo.datacenter.id* property in the remote service."),
+        "The remote service is configured with a different datacenter UUID, please adjust the *abiquo.datacenter.id* property in the remote service."), APPLIANCE_MANAGER_CALL(
+        "AM-1", "Failed Appliance Manager communication"),
 
     // OVF PACKAGE LIST
     TEMPLATE_DEFINITION_LIST_NAME_ALREADY_EXIST("OVF-PACKAGE-LIST-0",
@@ -367,8 +371,9 @@ public enum APIError
         "Datacenter does not have the ApplianceManager properly configured. Repository not created"), VMTEMPLATE_REPOSITORY_CHANGED(
         "VIMAGE-REPOSITORY-CHANGED", "Datacenter repository location has changed"), VIMAGE_AM_DOWN(
         "VIMAGE-AM-DOWN", "Check Appliance Manager configuration error"), NON_EXISTENT_VIRTUAL_MACHINE_TEMPLATE(
-        "VIMAGE-0", "The requested virtual machine template does not exist"), VIMAGE_IS_NOT_BUNDLE("VIMAGE-1",
-        "The virtual machine template supplied is not an instance"), INVALID_VMTEMPLATE_LINK("VIMAGE-2",
+        "VIMAGE-0", "The requested virtual machine template does not exist"), VIMAGE_IS_NOT_BUNDLE(
+        "VIMAGE-1", "The virtual machine template supplied is not an instance"), INVALID_VMTEMPLATE_LINK(
+        "VIMAGE-2",
         "Invalid Virtual Machine Template identifier in the Virtual Machine Template link"), INVALID_DATACENTER_RESPOSITORY_LINK(
         "VIMAGE-3", "Invalid Datacenter Repository identifier in the Datacenter Repository link"), VMTEMPLATE_ENTERPRISE_CANNOT_BE_CHANGED(
         "VIMAGE-4", "Change in Enterprise of the Virtual Machine Template is not allowed"), VMTEMPLATE_DATACENTER_REPOSITORY_CANNOT_BE_CHANGED(
@@ -455,8 +460,7 @@ public enum APIError
         "TIER-6", "Cannot disable a tier with associated storage pools"), TIER_DISABLED("TIER-7",
         "The requested tier is disabled"), TIER_LINK_VIRTUALDATACENTER_PARAM_NOT_FOUND("TIER-8",
         "VirtualDatacenter parameter was not found in tier link"), TIER_LINK_VIRTUALDATACENTER_DIFFERENT(
-        "TIER-9",
-        "The Tier's virtualdatacenter link does not match the virtualdatacenter supplied"),
+        "TIER-9", "The Tier's virtualdatacenter link does not match the virtualdatacenter supplied"),
 
     // DEVICES
     NON_EXISTENT_DEVICE("DEVICE-0", "The requested device does not exist"), DEVICE_DUPLICATED(
@@ -599,8 +603,7 @@ public enum APIError
         "Cost Code description maximum length is 100 characters"),
 
     // COST CODE- CURRENCY
-    COSTCODE_CURRENCY_DUPLICATED("COSTCODE_CURRENCY-0",
-        "Duplicate value by Cost Code and Currency"), NON_EXISTENT_COSTCODE_CURRENCY(
+    COSTCODE_CURRENCY_DUPLICATED("COSTCODE_CURRENCY-0", "Duplicate value by Cost Code and Currency"), NON_EXISTENT_COSTCODE_CURRENCY(
         "COSTCODE_CURRENCY-1", "The requested Cost Code -Currency does not exist"), NOT_ASSIGNED_COSTCODE_CURRENCY(
         "COSTCODE_CURRENCY-2", "The Cost Code -Currency is not assigned to the Cost Code"), NOT_ASSIGNED_COSTCODE_CURRENCY_PRICE(
         "COSTCODE_CURRENCY-3", "Price is required"),
@@ -613,8 +616,7 @@ public enum APIError
     // PRICING - TIER
     PRICING_TIER_DUPLICATED("PRICING_TIER-0", "Duplicate value by Tier and PricingTemplate"), NON_EXISTENT_PRICING_TIER(
         "PRICING_TIER-1", "The requested Tier-PricingTemplate does not exist"), PRICING_TIER_WRONG_RELATION(
-        "PRICING_TIER-2",
-        "The pricing tier is not related to the pricing model indicated"), PRICING_TIER_DATACENTER(
+        "PRICING_TIER-2", "The pricing tier is not related to the pricing model indicated"), PRICING_TIER_DATACENTER(
         "PRICING_TIER-3", "This tier is not related to the datacenter indicated"), NOT_ASSIGNED_PRICING_TIER_PRICE(
         "PRICING_TIER-4", "Price is required"), NOT_TIER_IN_PRICING_TIER("PRICING_TIER_5",
         "The tier indicated in the link is not related to this pricing tier"),
