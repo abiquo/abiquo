@@ -167,7 +167,7 @@ public class DatacenterDAO extends DefaultDAOBase<Integer, Datacenter>
         "select sum(vm.cpu), sum(vm.ram), sum(vm.hd) from virtualmachine vm, hypervisor hy, physicalmachine pm "
             + " where hy.id = vm.idHypervisor and pm.idPhysicalMachine = hy.idPhysicalMachine "//
             // and pm.idState != 7" // not HA_DISABLED
-            + " and pm.idDatacenter = :datacenterId and vm.idEnterprise = :enterpriseId and vm.state != 'NOT_ALLOCATED' and vm.idHypervisor != null";
+            + " and pm.idDatacenter = :datacenterId and vm.idEnterprise = :enterpriseId and vm.state != 'NOT_ALLOCATED' and vm.idHypervisor is not null";
 
     private static final String SUM_STORAGE_RESOURCES =
         "select sum(r.limitResource) "
