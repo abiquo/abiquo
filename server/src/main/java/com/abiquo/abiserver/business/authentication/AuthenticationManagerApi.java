@@ -537,7 +537,8 @@ public class AuthenticationManagerApi implements IAuthenticationManager
                     .getPassword())
                     + userHB.getAuthType();
 
-            if (!signature.equals(tokenSignature))
+            // Just as we create the signature by adding the AuthType
+            if (!signature.equals(tokenSignature + token[3]))
             {
                 return null;
             }
