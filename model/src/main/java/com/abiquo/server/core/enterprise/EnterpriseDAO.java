@@ -233,7 +233,7 @@ class EnterpriseDAO extends DefaultDAOBase<Integer, Enterprise>
                                                                                                // //
                                                                                                // not
                                                                                                // HA_DISABLED
-            + " and vm.idEnterprise = :enterpriseId and vm.state != 'NOT_ALLOCATED' and vm.idHypervisor != null";
+            + " and vm.idEnterprise = :enterpriseId and vm.state != 'NOT_ALLOCATED' and vm.idHypervisor is not null";
 
     public DefaultEntityCurrentUsed getEnterpriseResourceUsage(final int enterpriseId)
     {
