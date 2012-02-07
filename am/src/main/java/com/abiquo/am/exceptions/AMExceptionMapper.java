@@ -38,7 +38,7 @@ public class AMExceptionMapper implements ExceptionMapper<AMException>
 {
 
     @Override
-    public Response toResponse(AMException exception)
+    public Response toResponse(final AMException exception)
     {
         ErrorsDto errors = new ErrorsDto();
         errors.add(createError(exception));
@@ -49,11 +49,17 @@ public class AMExceptionMapper implements ExceptionMapper<AMException>
         return builder.build();
     }
 
-    private ErrorDto createError(AMException error)
+    private ErrorDto createError(final AMException error)
     {
         ErrorDto errorDto = new ErrorDto();
         errorDto.setCode(error.getError().getCode());
         errorDto.setMessage(error.getMessage());
+        if (error.getCause() != null)
+        {
+            errorDto.setMessage(errorDto.getMessage() + "\nCaused by: "
+                + error.getCause().getLocalizedMessage());
+        }
+
         return errorDto;
     }
 
