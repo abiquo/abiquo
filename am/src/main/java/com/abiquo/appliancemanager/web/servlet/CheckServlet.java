@@ -96,6 +96,15 @@ public class CheckServlet extends AbstractCheckServlet
     {
         String repositoryLocatino = AMConfiguration.getRepositoryLocation();
         String repositoryMountPoint = AMConfiguration.getRepositoryPath();
+
+        if (repositoryLocatino.startsWith("localhost")
+            || repositoryLocatino.startsWith("127.0.0.1"))
+        {
+            LOGGER.warn("Can't validate ''abiquo.appliancemanager.repositoryLocation'' {}."
+                + " Its a local repository", repositoryLocatino);
+            return true;
+        }
+
         // mtab do not contains final /
         if (repositoryLocatino.endsWith("/"))
         {
