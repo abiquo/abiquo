@@ -3837,7 +3837,7 @@ CREATE PROCEDURE `kinton`.CalculateCloudUsageStats()
     AND vapp.idVirtualApp = n.idVirtualApp
     AND vdc.idVirtualDataCenter = vapp.idVirtualDataCenter
     AND vdc.idDataCenter = idDataCenterObj
-    AND v.state != "NOT_ALLOCATED" AND v.state != "UNKNOWN" 
+    AND v.state != 'NOT_ALLOCATED' AND v.state != 'UNKNOWN'
     and v.idType = 1;
     --
     SELECT  IF (COUNT(*) IS NULL, 0, COUNT(*)) INTO vMachinesRunning
@@ -3847,7 +3847,7 @@ CREATE PROCEDURE `kinton`.CalculateCloudUsageStats()
     AND vapp.idVirtualApp = n.idVirtualApp
     AND vdc.idVirtualDataCenter = vapp.idVirtualDataCenter
     AND vdc.idDataCenter = idDataCenterObj
-    AND v.state = "ON"
+    AND v.state = 'ON'
     and v.idType = 1;
     --
     SELECT IF (SUM(cpu*cpuRatio) IS NULL,0,SUM(cpu*cpuRatio)), IF (SUM(ram) IS NULL,0,SUM(ram)), IF (SUM(hd) IS NULL,0,SUM(hd)) , IF (SUM(cpuUsed) IS NULL,0,SUM(cpuUsed)), IF (SUM(ramUsed) IS NULL,0,SUM(ramUsed)), IF (SUM(hdUsed) IS NULL,0,SUM(hdUsed)) INTO vCpuTotal, vMemoryTotal, vStorageTotal, vCpuUsed, vMemoryUsed, vStorageUsed
@@ -3977,7 +3977,7 @@ CREATE PROCEDURE `kinton`.CalculateEnterpriseResourcesStats()
     --
     SELECT IF (SUM(vm.cpu) IS NULL, 0, SUM(vm.cpu)), IF (SUM(vm.ram) IS NULL, 0, SUM(vm.ram)), IF (SUM(vm.hd) IS NULL, 0, SUM(vm.hd)) INTO vCpuUsed, memoryUsed, localStorageUsed
     FROM virtualmachine vm
-    WHERE vm.state = "ON"
+    WHERE vm.state = 'ON'
     AND vm.idType = 1
     AND vm.idEnterprise = idEnterpriseObj;
     --
@@ -4077,7 +4077,7 @@ CREATE PROCEDURE `kinton`.CalculateVdcEnterpriseStats()
     AND n.idNode = nvi.idNode
     AND n.idVirtualApp = vapp.idVirtualApp
     AND vapp.idVirtualDataCenter = idVirtualDataCenterObj
-    AND v.state != "NOT_ALLOCATED" AND v.state != "UNKNOWN";
+    AND v.state != 'NOT_ALLOCATED' AND v.state != 'UNKNOWN';
     --
     SELECT IF (COUNT(*) IS NULL, 0, COUNT(*)) INTO vmActive
     FROM nodevirtualimage nvi, virtualmachine v, node n, virtualapp vapp
@@ -4086,7 +4086,7 @@ CREATE PROCEDURE `kinton`.CalculateVdcEnterpriseStats()
     AND n.idNode = nvi.idNode
     AND n.idVirtualApp = vapp.idVirtualApp
     AND vapp.idVirtualDataCenter = idVirtualDataCenterObj
-    AND v.state = "ON";
+    AND v.state = 'ON';
     --
     SELECT IF (COUNT(*) IS NULL, 0, COUNT(*)) INTO volCreated
     FROM rasd_management rm
@@ -4115,7 +4115,7 @@ CREATE PROCEDURE `kinton`.CalculateVdcEnterpriseStats()
     WHERE vm.idVM = nvi.idVM
     AND nvi.idNode = n.idNode
     AND vapp.idVirtualApp = n.idVirtualApp
-    AND vm.state = "ON"
+    AND vm.state = 'ON'
     AND vm.idType = 1
     AND vapp.idVirtualDataCenter = idVirtualDataCenterObj;
     --
@@ -4206,7 +4206,7 @@ CREATE PROCEDURE `kinton`.CalculateVappEnterpriseStats()
     AND n.idNode = nvi.idNode
     AND n.idVirtualApp = vapp.idVirtualApp
     AND vapp.idVirtualApp = idVirtualAppObj
-    AND v.state != "NOT_ALLOCATED" AND v.state != "UNKNOWN"
+    AND v.state != 'NOT_ALLOCATED' AND v.state != 'UNKNOWN'
     and v.idType = 1;
     --
     SELECT IF (COUNT(*) IS NULL, 0, COUNT(*)) INTO vmActive
@@ -4216,7 +4216,7 @@ CREATE PROCEDURE `kinton`.CalculateVappEnterpriseStats()
     AND n.idNode = nvi.idNode
     AND n.idVirtualApp = vapp.idVirtualApp
     AND vapp.idVirtualApp = idVirtualAppObj
-    AND v.state = "ON"
+    AND v.state = 'ON'
     and v.idType = 1;
     --
     SELECT IF (COUNT(*) IS NULL, 0, COUNT(*)) INTO volAssociated
