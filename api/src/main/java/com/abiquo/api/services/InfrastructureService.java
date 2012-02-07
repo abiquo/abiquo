@@ -743,6 +743,12 @@ public class InfrastructureService extends DefaultApiService
                 machine.getDatastores().get(0).setEnabled(true);
             }
         }
+        else
+        {
+            // no datastores to enable
+            addConflictErrors(APIError.MACHINE_ANY_DATASTORE_DEFINED);
+            flushErrors();
+        }
 
     }
 
