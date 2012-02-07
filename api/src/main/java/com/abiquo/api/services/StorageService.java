@@ -36,6 +36,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.services.cloud.VirtualMachineService;
+import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.model.transport.LinksDto;
 import com.abiquo.model.transport.error.CommonError;
 import com.abiquo.scheduler.limit.EnterpriseLimitChecker;
@@ -177,6 +178,13 @@ public class StorageService extends DefaultApiService
     {
         VirtualDatacenter vdc = getVirtualDatacenter(vdcId);
 
+        if (!vdc.getHypervisorType().equals(HypervisorType.VMX_04))
+        {
+            LOGGER.debug("Only ESXi is allowed to create hard disks. Found a "
+                + vdc.getHypervisorType().getValue() + " hypervisor");
+            addConflictErrors(APIError.HD_CREATION_NOT_UNAVAILABLE);
+            flushErrors();
+        }
         // The user has the role for manage This. But... is the user from the same enterprise
         // than Virtual Datacenter?
         userService.checkCurrentEnterpriseForPostMethods(vdc.getEnterprise());
