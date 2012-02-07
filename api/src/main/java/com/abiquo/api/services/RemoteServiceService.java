@@ -25,6 +25,7 @@ import static com.abiquo.api.resources.RemoteServiceResource.createTransferObjec
 import static com.abiquo.server.core.infrastructure.RemoteService.STATUS_ERROR;
 import static com.abiquo.server.core.infrastructure.RemoteService.STATUS_SUCCESS;
 
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 
@@ -619,30 +620,45 @@ public class RemoteServiceService extends DefaultApiService
             }
         }
 
-        if (remoteService.getType().checkUniqueness())
+        try
         {
-            try
+            URI uriChecked = new URI(remoteService.getUri());
+
+            if (uriChecked.getPort() < 0)
             {
-                if (infrastructureRepo.existAnyRemoteServiceWithUri(remoteService.getUri()))
-                {
-                    APIError error = APIError.REMOTE_SERVICE_URL_ALREADY_EXISTS;
-                    configurationErrors.add(new ErrorDto(error.getCode(), remoteService.getType()
-                        .getName() + " : " + error.getMessage()));
-                    if (flushErrors)
-                    {
-                        addConflictErrors(error);
-                    }
-                }
-            }
-            catch (URISyntaxException e)
-            {
-                APIError error = APIError.REMOTE_SERVICE_MALFORMED_URL;
+                APIError error = APIError.REMOTE_SERVICE_UNDEFINED_PORT;
                 configurationErrors.add(new ErrorDto(error.getCode(), remoteService.getType()
                     .getName() + " : " + error.getMessage()));
                 if (flushErrors)
                 {
-                    addValidationErrors(error);
+                    addConflictErrors(error);
                 }
+            }
+            else
+            {
+                if (remoteService.getType().checkUniqueness())
+                {
+                    if (infrastructureRepo.existAnyRemoteServiceWithUri(uriChecked.toString()))
+                    {
+                        APIError error = APIError.REMOTE_SERVICE_URL_ALREADY_EXISTS;
+                        configurationErrors.add(new ErrorDto(error.getCode(), remoteService
+                            .getType().getName() + " : " + error.getMessage()));
+                        if (flushErrors)
+                        {
+                            addConflictErrors(error);
+                        }
+                    }
+                }
+            }
+        }
+        catch (URISyntaxException e)
+        {
+            APIError error = APIError.REMOTE_SERVICE_MALFORMED_URL;
+            configurationErrors.add(new ErrorDto(error.getCode(), remoteService.getType().getName()
+                + " : " + error.getMessage()));
+            if (flushErrors)
+            {
+                addValidationErrors(error);
             }
         }
 
