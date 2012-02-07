@@ -301,13 +301,32 @@ public class RemoteServiceService extends DefaultApiService
             return dto;
         }
 
-        if (dto.getType().checkUniqueness())
+        try
         {
-            if (infrastructureRepo.existAnyRemoteServiceWithUri(dto.getUri()))
+            URI uriChecked = new URI(dto.getUri());
+
+            if (uriChecked.getPort() < 0)
             {
-                addConflictErrors(APIError.REMOTE_SERVICE_URL_ALREADY_EXISTS);
+                addConflictErrors(APIError.REMOTE_SERVICE_UNDEFINED_PORT);
                 flushErrors();
             }
+            else
+            {
+
+                if (dto.getType().checkUniqueness())
+                {
+                    if (infrastructureRepo.existAnyRemoteServiceWithUri(dto.getUri()))
+                    {
+                        addConflictErrors(APIError.REMOTE_SERVICE_URL_ALREADY_EXISTS);
+                        flushErrors();
+                    }
+                }
+            }
+        }
+        catch (URISyntaxException e)
+        {
+            addConflictErrors(APIError.REMOTE_SERVICE_MALFORMED_URL);
+            flushErrors();
         }
 
         final ErrorsDto checkError =
