@@ -108,9 +108,7 @@
 		<dependency>
 			<groupId>com.ning</groupId>
 			<artifactId>async-http-client</artifactId>
-			<version>1.6.2</version>
-			<!-- <exclusions> <exclusion> <groupId>log4j</groupId> <artifactId>log4j</artifactId> 
-				</exclusion> </exclusions> -->
+			<version>1.7.0</version>			
 		</dependency>
 		<!-- jedis -->
 		<dependency>

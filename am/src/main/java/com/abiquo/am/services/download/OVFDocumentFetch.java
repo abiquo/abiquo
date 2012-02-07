@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
 import java.net.MalformedURLException;
+import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.HashMap;
@@ -111,31 +112,34 @@ public class OVFDocumentFetch
      */
     public EnvelopeType obtainEnvelope(final String ovfId)
     {
-        InputStream evelopeStream = openHTTPConnection(ovfId);
-
         EnvelopeType envelope;
+        InputStream evelopeStream = null;
         try
         {
+            evelopeStream = openHTTPConnection(ovfId);
+
             envelope = OVFSerializer.getInstance().readXMLEnvelope(evelopeStream);
 
             envelope = fixOVfDocument(ovfId, envelope);
 
             checkEnvelopeIsValid(envelope);
         }
+        catch (AMException ame)
+        {
+            throw ame;
+        }
         catch (Exception e)
         {
-            if (e instanceof AMException)
-            {
-                throw (AMException) e;
-            }
-
             throw new AMException(AMError.TEMPLATE_INVALID, e);
         }
         finally
         {
             try
             {
-                evelopeStream.close();
+                if (evelopeStream != null)
+                {
+                    evelopeStream.close();
+                }
             }
             catch (IOException e)
             {
