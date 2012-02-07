@@ -25,6 +25,7 @@ import static com.abiquo.am.services.filesystem.EnterpriseRepositoryFileSystem.r
 import static com.abiquo.am.services.filesystem.EnterpriseRepositoryFileSystem.takeFile;
 import static com.abiquo.appliancemanager.exceptions.AMException.getErrorMessage;
 
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -61,7 +62,7 @@ public class DownloadingFile implements AsyncHandler<Boolean>
     protected final String destinationPath;
 
     /** An open stream to the destinationPath. */
-    protected final FileOutputStream osDestFile;
+    protected final BufferedOutputStream osDestFile;
 
     /** The package is being cancelled. */
     protected volatile boolean isCancell = false;
@@ -211,7 +212,7 @@ public class DownloadingFile implements AsyncHandler<Boolean>
 
         try
         {
-            // osDestFile.flush();
+            osDestFile.flush();
             osDestFile.close();
         }
         catch (IOException e)
@@ -236,6 +237,17 @@ public class DownloadingFile implements AsyncHandler<Boolean>
     public void onCancel(final boolean deleteFolder)
     {
         isCancell = true;
+
+        try
+        {
+            osDestFile.flush();
+            osDestFile.close();
+        }
+        catch (IOException e)
+        {
+            onError("Can not close file " + destinationPath);
+            return;
+        }
 
         releaseFile(destinationPath);
         File destiantion = new File(destinationPath);

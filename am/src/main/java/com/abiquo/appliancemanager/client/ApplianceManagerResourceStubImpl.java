@@ -20,10 +20,15 @@
  */
 package com.abiquo.appliancemanager.client;
 
+import java.net.SocketTimeoutException;
+
 import javax.ws.rs.core.MediaType;
 
 import org.apache.wink.client.ClientResponse;
+import org.apache.wink.client.ClientRuntimeException;
 import org.apache.wink.client.Resource;
+import org.apache.wink.client.internal.ClientRuntimeContext;
+import org.dmtf.schemas.ovf.envelope._1.EnvelopeType;
 
 import com.abiquo.appliancemanager.transport.EnterpriseRepositoryDto;
 import com.abiquo.appliancemanager.transport.RepositoryConfigurationDto;
@@ -32,14 +37,14 @@ import com.abiquo.appliancemanager.transport.TemplateStateDto;
 import com.abiquo.appliancemanager.transport.TemplateStatusEnumType;
 import com.abiquo.appliancemanager.transport.TemplatesStateDto;
 import com.abiquo.model.transport.error.ErrorsDto;
-import org.dmtf.schemas.ovf.envelope._1.EnvelopeType;
-import com.abiquo.model.transport.error.ErrorDto;
 
 public class ApplianceManagerResourceStubImpl extends ApplianceManagerResourceStub
 {
 
     public class ApplianceManagerStubException extends RuntimeException
     {
+        private static final long serialVersionUID = 8958140299476494818L;
+
         public ApplianceManagerStubException(final String statusMsg)
         {
             super(statusMsg);
@@ -104,31 +109,53 @@ public class ApplianceManagerResourceStubImpl extends ApplianceManagerResourceSt
     {
         Resource resource = templatesTimeout(idEnterprise);
 
-        ClientResponse response = resource.accept(MEDIA_TYPE).get();
+        try
+        {
+            ClientResponse response = resource.accept(MEDIA_TYPE).get();
 
-        checkResponse(response, 200);
+            checkResponse(response, 200);
 
-        return response.getEntity(TemplatesStateDto.class);
+            return response.getEntity(TemplatesStateDto.class);
+        }
+        catch (ClientRuntimeException e)
+        {
+            checkTimeout(e);
+            return null;
+        }
     }
 
     public RepositoryConfigurationDto getRepositoryConfiguration()
     {
         Resource resource = repositories();
 
-        ClientResponse response = resource.accept(MEDIA_TYPE).get();
+        try
+        {
+            ClientResponse response = resource.accept(MEDIA_TYPE).get();
 
-        checkResponse(response, 200);
+            checkResponse(response, 200);
 
-        return response.getEntity(RepositoryConfigurationDto.class);
+            return response.getEntity(RepositoryConfigurationDto.class);
+        }
+        catch (ClientRuntimeException e)
+        {
+            checkTimeout(e);
+            return null;
+        }
     }
 
     public void checkService() throws ApplianceManagerStubException
     {
         Resource resource = check();
 
-        ClientResponse response = resource.accept(MEDIA_TYPE).get();
-
-        checkResponse(response, 200);
+        try
+        {
+            ClientResponse response = resource.accept(MEDIA_TYPE).get();
+            checkResponse(response, 200);
+        }
+        catch (ClientRuntimeException e)
+        {
+            checkTimeout(e);
+        }
     }
 
     public EnterpriseRepositoryDto getRepository(final String idEnterprise)
@@ -143,20 +170,47 @@ public class ApplianceManagerResourceStubImpl extends ApplianceManagerResourceSt
     {
         Resource resource = repository(idEnterprise, checkCanWrite);
 
-        ClientResponse response = resource.accept(MEDIA_TYPE).get();
+        try
+        {
+            ClientResponse response = resource.accept(MEDIA_TYPE).get();
+            checkResponse(response, 200);
 
-        checkResponse(response, 200);
+            return response.getEntity(EnterpriseRepositoryDto.class);
+        }
+        catch (ClientRuntimeException e)
+        {
+            checkTimeout(e);
+            return null;
+        }
+    }
 
-        return response.getEntity(EnterpriseRepositoryDto.class);
+    private void checkTimeout(final ClientRuntimeException re)
+    {
+        if (re.getCause() instanceof SocketTimeoutException || re.getCause().getCause() != null
+            && re.getCause().getCause() instanceof SocketTimeoutException)
+        {
+            throw new ApplianceManagerStubException("Appliance Manager timeout at : " + serviceUri);
+        }
+        else
+        {
+            throw new ApplianceManagerStubException("Unexpected error calling Appliance Manager at "
+                + serviceUri + "\n" + re.getCause().toString());
+        }
     }
 
     public void delete(final String idEnterprise, final String ovfId)
     {
         Resource resource = template(idEnterprise, ovfId);
 
-        ClientResponse response = resource.accept(MEDIA_TYPE).delete();
-
-        checkResponse(response, 204);
+        try
+        {
+            ClientResponse response = resource.accept(MEDIA_TYPE).delete();
+            checkResponse(response, 204);
+        }
+        catch (ClientRuntimeException e)
+        {
+            checkTimeout(e);
+        }
     }
 
     /**
@@ -166,12 +220,17 @@ public class ApplianceManagerResourceStubImpl extends ApplianceManagerResourceSt
     {
         Resource resource = templates(idEnterprise);
 
-        // contentType(mediaType)
-        ClientResponse response =
-            resource.accept(MEDIA_TYPE).contentType(MediaType.TEXT_PLAIN).post(ovfId);
+        try
+        {
+            ClientResponse response =
+                resource.accept(MEDIA_TYPE).contentType(MediaType.TEXT_PLAIN).post(ovfId);
 
-        checkResponse(response, 204);
-
+            checkResponse(response, 204);
+        }
+        catch (ClientRuntimeException e)
+        {
+            checkTimeout(e);
+        }
     }
 
     /**
@@ -185,18 +244,27 @@ public class ApplianceManagerResourceStubImpl extends ApplianceManagerResourceSt
     {
         Resource resource = template(idEnterprise, ovfId);
 
-        ClientResponse response = resource.accept(MEDIA_TYPE).queryParam(FORAMT, "status").get();
-
-        if (response.getStatusCode() == 404) // not found == not download
+        try
         {
-            TemplateStateDto notFound = new TemplateStateDto();
-            notFound.setOvfId(ovfId);
-            notFound.setStatus(TemplateStatusEnumType.NOT_DOWNLOAD);
-            return notFound;
-        }
+            ClientResponse response =
+                resource.accept(MEDIA_TYPE).queryParam(FORAMT, "status").get();
 
-        checkResponse(response, 200);
-        return response.getEntity(TemplateStateDto.class);
+            if (response.getStatusCode() == 404) // not found == not download
+            {
+                TemplateStateDto notFound = new TemplateStateDto();
+                notFound.setOvfId(ovfId);
+                notFound.setStatus(TemplateStatusEnumType.NOT_DOWNLOAD);
+                return notFound;
+            }
+
+            checkResponse(response, 200);
+            return response.getEntity(TemplateStateDto.class);
+        }
+        catch (ClientRuntimeException e)
+        {
+            checkTimeout(e);
+            return null;
+        }
     }
 
     public String preBundleTemplate(final String idEnterprise, final String name)

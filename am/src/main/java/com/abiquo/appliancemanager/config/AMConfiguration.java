@@ -42,7 +42,7 @@ public class AMConfiguration
 
     /** milliseconds */
     public final static int DOWNLOADING_PUBLISH_INTERVAL = Integer.valueOf(System.getProperty(
-        "abiquo.appliancemanager.downloadingPublishInterval", "1500"));
+        "abiquo.appliancemanager.downloadingPublishInterval", "5000"));
 
     /**
      * Where the ''repositoryLocation'' file system is mounted. Base path on the machine local file
