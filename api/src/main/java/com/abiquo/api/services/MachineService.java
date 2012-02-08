@@ -175,7 +175,6 @@ public class MachineService extends DefaultApiService
 
         old.setVirtualCpuCores(machineDto.getVirtualCpuCores());
         old.setVirtualCpusUsed(machineDto.getVirtualCpusUsed());
-        old.setVirtualCpusPerCore(machineDto.getVirtualCpusPerCore());
 
         old.setIpmiIP(machineDto.getIpmiIP());
         old.setIpmiPort(machineDto.getIpmiPort());

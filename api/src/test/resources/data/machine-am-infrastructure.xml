@@ -16,10 +16,10 @@
     <rack idRack="2" idDataCenter="2" name="rack_2" shortDescription="description_rack_2" largeDescription="large_description_rack_2" version_c="1" />
     <rack idRack="3" idDataCenter="2" name="rack_3" shortDescription="description_rack_3" largeDescription="large_description_rack_3" version_c="1" />
     <rack idRack="4" idDataCenter="2" name="rack_4" shortDescription="description_rack_4" largeDescription="large_description_rack_4" version_c="1" />
-    <physicalmachine idPhysicalMachine="1" idRack="1" idDataCenter="1" name="machine_1" description="description_1" realRam="24" realCpu="24" realStorage="24" ram="2" cpu="2" hd="2"
-        cpuRatio="1" ramUsed="0" cpuUsed="0" hdUSed="0" idState="1" vswitchName="127.0.0.1" version_c="1" />
-    <physicalmachine idPhysicalMachine="2" idRack="2" idDataCenter="2" name="machine_2" description="description_2" realRam="24" realCpu="24" realStorage="24" ram="2" cpu="2" hd="2"
-        cpuRatio="1" ramUsed="0" cpuUsed="0" hdUSed="0" idState="1" vswitchName="127.0.0.1" version_c="1" />
+    <physicalmachine idPhysicalMachine="1" idRack="1" idDataCenter="1" name="machine_1" description="description_1" realRam="24" realCpu="24" realStorage="24" ram="2" cpu="2"
+        ramUsed="0" cpuUsed="0" idState="1" vswitchName="127.0.0.1" version_c="1" />
+    <physicalmachine idPhysicalMachine="2" idRack="2" idDataCenter="2" name="machine_2" description="description_2" realRam="24" realCpu="24" realStorage="24" ram="2" cpu="2"
+        ramUsed="0" cpuUsed="0" idState="1" vswitchName="127.0.0.1" version_c="1" />
     <repository idRepository="1" idDataCenter="1" name="dcrep1" URL="url_dcrep1" /><!-- version_c="1"/ -->
     <apps_library id_apps_library="1" idEnterprise="1" />
     <apps_library id_apps_library="2" idEnterprise="2" />

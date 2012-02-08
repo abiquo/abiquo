@@ -46,8 +46,7 @@ public interface ISchedulerTestCase
 
     /**
      * PhysicalMachines to be used. Only required to fill the ''name'' and the resource properties
-     * (cpu,ram,hc, cpuRatio), all the other attributes are managed on
-     * {@link PopulatePhysicalMachines}
+     * (cpu,ram,hc), all the other attributes are managed on {@link PopulatePhysicalMachines}
      */
     List<PhysicalmachineHB> getPhysicalMachines();
 

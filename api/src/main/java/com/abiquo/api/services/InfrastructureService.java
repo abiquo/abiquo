@@ -300,7 +300,6 @@ public class InfrastructureService extends DefaultApiService
         }
 
         // Insert the machine into database
-        machine.setVirtualCpusPerCore(1);
         machine.setDatacenter(datacenter);
         machine.setRack(rack);
 
