@@ -261,7 +261,7 @@ public class VirtualMachineService extends DefaultApiService
             flushErrors();
         }
         LOGGER.debug("Virtual machine {} found", vmId);
-        
+
         // if the ips are external, we need to set the limitID in order to return the
         // proper info.
         for (IpPoolManagement ip : vm.getIps())
@@ -275,7 +275,7 @@ public class VirtualMachineService extends DefaultApiService
                 ip.getVlanNetwork().setLimitId(dl.getId());
             }
         }
-        
+
         return vm;
     }
 
@@ -369,7 +369,8 @@ public class VirtualMachineService extends DefaultApiService
     }
 
     /**
-     * updates the {@link NodeVirtualImage} name. <br>
+     * updates the {@link NodeVirtualImage} name, y and x (those setted in the virtual appliance
+     * builder. <br>
      * This method must persist the changes even if the reconfigure of the {@link VirtualMachine}
      * fails.
      * 
@@ -386,6 +387,8 @@ public class VirtualMachineService extends DefaultApiService
         NodeVirtualImage nodeVirtualImage = getNodeVirtualImage(vdcId, vappId, vmId);
 
         nodeVirtualImage.setName(dto.getNodeName());
+        nodeVirtualImage.setY(dto.getY());
+        nodeVirtualImage.setX(dto.getX());
     }
 
     /**
@@ -1707,7 +1710,7 @@ public class VirtualMachineService extends DefaultApiService
             addNotFoundErrors(APIError.NODE_VIRTUAL_MACHINE_IMAGE_NOT_EXISTS);
             flushErrors();
         }
-        
+
         // if the ips are external, we need to set the limitID in order to return the
         // proper info.
         for (IpPoolManagement ip : vm.getIps())
@@ -1721,7 +1724,7 @@ public class VirtualMachineService extends DefaultApiService
                 ip.getVlanNetwork().setLimitId(dl.getId());
             }
         }
-        
+
         return nodeVirtualImage;
     }
 
