@@ -164,4 +164,7 @@ public interface NetworkResourceStub
     public BasicResult setInternalVlansAsDefaultInEnterpriseByDatacenterLimit(Integer id,
         Integer limitId);
 
+    public BasicResult editExternalIp(Integer enterpriseId, Integer datacenterId, Integer vlanId,
+        IpPoolManagement ipPoolManagement);
+
 }
