@@ -39,8 +39,6 @@ package net.undf.abicloud.vo.infrastructure
 
         public var cpu:int;
 
-        public var cpuRatio:int;
-
         public var hd:Number;
 
         public var ramUsed:int;
@@ -104,7 +102,6 @@ package net.undf.abicloud.vo.infrastructure
             description = "";
             ram = 0;
             cpu = 0;
-            cpuRatio = 0;
             hd = 0;
             ramUsed = 0;
             cpuUsed = 0;
