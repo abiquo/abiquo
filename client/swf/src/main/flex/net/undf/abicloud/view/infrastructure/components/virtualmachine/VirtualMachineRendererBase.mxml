@@ -70,6 +70,7 @@
             * To access from Infrastructure
             * *****/
             
+            [Bindable]
             private var _datacenter:DataCenter;
             
             public function set datacenter(value:DataCenter):void
@@ -84,6 +85,7 @@
                 return this._datacenter;
             }
             
+            [Bindable]
             private var _rack:Rack;
             
             public function set rack(value:Rack):void
@@ -98,6 +100,7 @@
                 return this._rack;
             }
             
+            [Bindable]
             protected var _physicalMachine:PhysicalMachine;
             
             public function set physicalMachine(value:PhysicalMachine):void
@@ -930,7 +933,10 @@
                         label="@Resource(bundle='Networking', key='LABEL_NETWORK')"
                         virtualDatacenter="{this._virtualDatacenter}"
                         virtualAppliance="{this._virtualAppliance}"
-                        virtualMachine="{this._virtualMachine}"/>
+                        virtualMachine="{this._virtualMachine}"
+                        datacenter="{this._datacenter}"
+                        rack="{this._rack}"
+                        physicalMachine="{this._physicalMachine}"/>
                 </mx:ViewStack>
             </mx:HBox>
 

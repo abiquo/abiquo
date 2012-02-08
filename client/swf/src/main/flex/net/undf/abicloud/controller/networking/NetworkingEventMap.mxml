@@ -445,6 +445,44 @@
         </RemoteObjectInvoker>
 
     </EventHandlers>
+    
+    <!-- NetworkingEvent.GET_INFRASTRUCTURE_NICs_BY_VIRTUAL_MACHINE _______________ -->
+    <EventHandlers type="{NetworkingEvent.GET_INFRASTRUCTURE_NICs_BY_VIRTUAL_MACHINE}">
+
+        <!-- Blocking screen -->
+        <InlineInvoker method="ScreenBlocker.blockScreen"/>
+
+        <!-- Make call to the server here -->
+
+        <RemoteObjectInvoker instance="{services.networkingService}"
+            method="getInfrastructureNICsByVirtualMachine"
+            arguments="{[AbiCloudModel.getInstance().loginManager.session, 
+            event.datacenter.id,
+            event.rack.id,
+            event.physicalMachine.id,
+            event.virtualMachine.id]}">
+
+            <resultHandlers>
+                <MethodInvoker generator="{NetworkingResultHandler}"
+                    method="handleGetNICsByVirtualMachine"
+                    arguments="{[resultObject, event.callback]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </resultHandlers>
+
+            <faultHandlers>
+                <MethodInvoker generator="{FaultHandler}"
+                    method="handleFault"
+                    arguments="{[fault]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </faultHandlers>
+
+        </RemoteObjectInvoker>
+
+    </EventHandlers>
 
     <!-- NetworkingEvent.GET_AVAILABLE_NICs_BY_VLAN ______________________________ -->
     <EventHandlers type="{NetworkingEvent.GET_AVAILABLE_NICs_BY_VLAN}">
