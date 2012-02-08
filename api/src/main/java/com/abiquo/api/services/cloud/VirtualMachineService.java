@@ -456,11 +456,8 @@ public class VirtualMachineService extends DefaultApiService
                     .debug("Updating the hardware needs in DB for virtual machine {}", vm.getId());
                 VirtualMachineRequirements requirements =
                     vmRequirements.createVirtualMachineRequirements(vm, newValues);
-                vmAllocatorService.checkAllocate(vapp.getId(), vm.getId(), requirements, false);
-
-                LOGGER.debug("Updated the hardware needs in DB for virtual machine {}",
-                    newValues.getId());
-
+                vmAllocatorService.checkAllocate(vapp.getId(), newValues, requirements, false);
+                
                 LOGGER
                     .debug("Creating the temporary register in Virtual Machine for rollback purposes");
                 backUpVm = createBackUpMachine(vm);
@@ -479,7 +476,6 @@ public class VirtualMachineService extends DefaultApiService
             // and set the ID of the backupmachine (which has the old values) for recovery purposes.
             LOGGER.debug("Updating the virtual machine in the DB with id {}", vm.getId());
             updateVirtualMachineToNewValues(vapp, vm, newValues);
-
             LOGGER.debug("Updated virtual machine {}", vm.getId());
 
             // it is required a tarantino Task ?
@@ -642,7 +638,7 @@ public class VirtualMachineService extends DefaultApiService
         allocateNewStorages(vapp, old, storageResources, usedStorageSlots);
 
         repo.update(old);
-
+        
         // FIXME: improvement related ABICLOUDPREMIUM-2925
         updateNodeVirtualImage(old, vmnew.getVirtualMachineTemplate());
     }
