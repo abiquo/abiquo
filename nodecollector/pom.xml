@@ -26,12 +26,12 @@
         <dependency>
             <groupId>com.abiquo</groupId>
             <artifactId>aimstub</artifactId>
-            <version>${pom.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.abiquo</groupId>
             <artifactId>model</artifactId>
-            <version>${pom.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <!-- ws-man -->
         <dependency>

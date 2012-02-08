@@ -31,6 +31,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.dmtf.schemas.ovf.envelope._1.DiskSectionType;
 import org.dmtf.schemas.ovf.envelope._1.EnvelopeType;
@@ -80,7 +81,8 @@ public class TemplateDownloader
 
     private final AsyncHttpClient httpClient = new AsyncHttpClient(clientConf);
 
-    private final Map<String, DownloadingFile> inprogress = new HashMap<String, DownloadingFile>();
+    private final Map<String, DownloadingFile> inprogress =
+        new ConcurrentHashMap<String, DownloadingFile>();
 
     /**
      * Make the provided template available on the enterprise repository. Creates a new directory
@@ -115,7 +117,7 @@ public class TemplateDownloader
         }
     }
 
-    private void purgeInprogress()
+    private synchronized void purgeInprogress()
     {
         for (String ovfid : inprogress.keySet())
         {
@@ -162,8 +164,8 @@ public class TemplateDownloader
         {
             // note the expected bytes are from the OVF document, but for progress we use the
             // content-length header
-            throw new AMException(AMError.REPO_NO_SPACE, String.format("Requested %s MB", String
-                .valueOf((expectedBytes / 1048576))));
+            throw new AMException(AMError.REPO_NO_SPACE, String.format("Requested %s MB",
+                String.valueOf((expectedBytes / 1048576))));
         }
 
         final String destinationPath =
@@ -236,6 +238,16 @@ public class TemplateDownloader
         }
 
         purgeInprogress();
+    }
+
+    @Override
+    protected void finalize() throws Throwable
+    {
+        super.finalize();
+        for (DownloadingFile downloads : inprogress.values())
+        {
+            downloads.onCancel(true);
+        }
     }
 
     private static AsyncHttpClientConfig createHttpClientConf()

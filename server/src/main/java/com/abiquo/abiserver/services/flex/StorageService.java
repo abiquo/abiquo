@@ -91,6 +91,21 @@ public class StorageService
     }
 
     /**
+     * @param userSession
+     * @param datacenterId
+     * @param rackId
+     * @param pmId physical machine id
+     * @param vmId virtual machine id
+     * @return
+     */
+    public BasicResult getHardDisksByVirtualMachine(final UserSession userSession,
+        final Integer datacenterId, final Integer rackId, final Integer pmId, final Integer vmId)
+    {
+        return proxyStub(userSession)
+            .getHardDisksByVirtualMachine(datacenterId, rackId, pmId, vmId);
+    }
+
+    /**
      * Requests to API to create a new disk into the virtual machine.
      * 
      * @param userSession user who performs the action.
