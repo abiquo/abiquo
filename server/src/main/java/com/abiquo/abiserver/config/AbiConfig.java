@@ -58,11 +58,6 @@ public class AbiConfig
         return limits;
     }
 
-    public int getVirtualCpuPerCore()
-    {
-        return Integer.valueOf(System.getProperty("abiquo.server.virtualCpuPerCore", "0"));
-    }
-
     public long getTimeout()
     {
         return Long.valueOf(System.getProperty("abiquo.server.timeout", "0"));

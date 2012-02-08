@@ -56,10 +56,8 @@ import com.abiquo.server.core.appslibrary.VirtualMachineTemplateDto;
 import com.abiquo.server.core.cloud.VirtualMachineDto;
 import com.abiquo.server.core.cloud.VirtualMachinesDto;
 import com.abiquo.server.core.enterprise.EnterpriseDto;
-import com.abiquo.server.core.enterprise.UserDto;
 import com.abiquo.server.core.enterprise.User.AuthType;
-import com.abiquo.abiserver.pojo.ucs.BladeLocatorLed;
-import com.abiquo.abiserver.pojo.ucs.LogicServer;
+import com.abiquo.server.core.enterprise.UserDto;
 import com.abiquo.server.core.infrastructure.MachineDto;
 
 public class MachineResourceStubImpl extends AbstractAPIStub implements MachineResourceStub
@@ -126,7 +124,6 @@ public class MachineResourceStubImpl extends AbstractAPIStub implements MachineR
         dto.setDescription(machine.getDescription());
         dto.setVirtualCpuCores(machine.getCpu());
         dto.setVirtualCpusUsed(machine.getCpuUsed());
-        dto.setVirtualCpusPerCore(machine.getCpuRatio());
         dto.setVirtualRamInMb(machine.getRam());
         dto.setVirtualRamUsedInMb(machine.getRamUsed());
 
@@ -160,6 +157,7 @@ public class MachineResourceStubImpl extends AbstractAPIStub implements MachineR
         // PREMIUM
         return null;
     }
+
     /**
      * @see com.abiquo.abiserver.commands.stub.MachineResourceStub#bladeLocatorLED(PhysicalMachine)
      */

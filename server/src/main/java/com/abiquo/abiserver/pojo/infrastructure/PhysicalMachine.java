@@ -28,7 +28,6 @@ import org.apache.commons.lang.StringUtils;
 
 import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.DatastoreHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.PhysicalmachineHB;
-import com.abiquo.abiserver.config.AbiConfigManager;
 import com.abiquo.abiserver.pojo.IPojo;
 import com.abiquo.server.core.infrastructure.DatastoreDto;
 import com.abiquo.server.core.infrastructure.MachineDto;
@@ -48,8 +47,6 @@ public class PhysicalMachine extends InfrastructureElement implements IPojo<Phys
     private int cpu;
 
     private long hd;
-
-    private int cpuRatio = AbiConfigManager.getInstance().getAbiConfig().getVirtualCpuPerCore();
 
     private int ramUsed;
 
@@ -86,8 +83,6 @@ public class PhysicalMachine extends InfrastructureElement implements IPojo<Phys
         super();
 
         dataCenter = new DataCenter();
-
-        cpuRatio = AbiConfigManager.getInstance().getAbiConfig().getVirtualCpuPerCore();
 
         description = "";
         ram = 0;
@@ -186,14 +181,6 @@ public class PhysicalMachine extends InfrastructureElement implements IPojo<Phys
         hdUsed = hd;
     }
 
-    /**
-     * @return the cpuRatio
-     */
-    public int getCpuRatio()
-    {
-        return cpuRatio;
-    }
-
     public int getIdState()
     {
         return idState;
@@ -202,14 +189,6 @@ public class PhysicalMachine extends InfrastructureElement implements IPojo<Phys
     public void setIdState(final int idState)
     {
         this.idState = idState;
-    }
-
-    /**
-     * @param cpuRatio the cpuRatio to set
-     */
-    public void setCpuRatio(final int cpuRatio)
-    {
-        this.cpuRatio = cpuRatio;
     }
 
     /**
@@ -327,16 +306,6 @@ public class PhysicalMachine extends InfrastructureElement implements IPojo<Phys
 
         physicalMachineHB.setDataCenter(getDataCenter().toPojoHB());
 
-        if (cpuRatio == 0)
-        {
-            physicalMachineHB.setCpuRatio(AbiConfigManager.getInstance().getAbiConfig()
-                .getVirtualCpuPerCore());
-        }
-        else
-        {
-            physicalMachineHB.setCpuRatio(getCpuRatio());
-        }
-
         physicalMachineHB.setIdPhysicalMachine(getId());
         physicalMachineHB.setName(StringUtils.substring(getName(), 0, 255)); // a fully qualified
         // domain name (FQDN)
@@ -397,7 +366,6 @@ public class PhysicalMachine extends InfrastructureElement implements IPojo<Phys
         PhysicalMachine physicalMachine = new PhysicalMachine();
 
         physicalMachine.setDataCenter(datacenter);
-        physicalMachine.setCpuRatio(dto.getVirtualCpusPerCore());
         physicalMachine.setCpu(dto.getVirtualCpuCores());
         physicalMachine.setCpuUsed(dto.getVirtualCpusUsed());
         physicalMachine.setDescription(dto.getDescription());
@@ -424,7 +392,6 @@ public class PhysicalMachine extends InfrastructureElement implements IPojo<Phys
         PhysicalMachine physicalMachine = new PhysicalMachine();
 
         // physicalMachine.setDataCenter(datacenter);
-        physicalMachine.setCpuRatio(dto.getVirtualCpusPerCore());
         physicalMachine.setCpu(dto.getVirtualCpuCores());
         physicalMachine.setCpuUsed(dto.getVirtualCpusUsed());
         physicalMachine.setDescription(dto.getDescription());

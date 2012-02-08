@@ -501,7 +501,6 @@ public class NodecollectorServiceStub extends DefaultApiService
                 0,
                 cpus,
                 0,
-                0,
                 transfromToState(host.getStatus()),
                 "");
 
@@ -632,7 +631,8 @@ public class NodecollectorServiceStub extends DefaultApiService
                     vm.setDatastore(ds);
                 }
 
-                VirtualMachineTemplate vi = new VirtualMachineTemplate(); // XXX this is not stored in the DDBB
+                VirtualMachineTemplate vi = new VirtualMachineTemplate(); // XXX this is not stored
+                                                                          // in the DDBB
                 VirtualDiskEnumType diskFormatType =
                     VirtualDiskEnumType.fromValue(rt.getResourceSubType().toString());
                 vi.setDiskFormatType(DiskFormatType.fromURI(diskFormatType.value()));
@@ -644,7 +644,7 @@ public class NodecollectorServiceStub extends DefaultApiService
                 vi.setDiskFileSize(rt.getUnits());
                 vm.setVirtualMachineTemplate(vi);
                 vm.setHdInBytes(rt.getUnits());
-                
+
                 if (rt.getLabel() == null)
                 {
                     break;

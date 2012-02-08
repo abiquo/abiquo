@@ -41,11 +41,11 @@ import com.abiquo.api.services.cloud.VirtualMachineService;
 import com.abiquo.api.services.stub.NodecollectorServiceStub;
 import com.abiquo.api.services.stub.VsmServiceStub;
 import com.abiquo.api.tracer.TracerLogger;
+import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.cloud.VirtualDatacenterRep;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineState;
-import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.Datastore;
 import com.abiquo.server.core.infrastructure.DatastoreDto;
@@ -174,9 +174,8 @@ public class MachineService extends DefaultApiService
             machineDto.getVirtualRamInMb(), machineDto.getVirtualRamUsedInMb(),
 
             machineDto.getVirtualCpuCores(), machineDto.getVirtualCpusUsed(),
-                machineDto.getVirtualCpusPerCore(),
 
-                machineDto.getState(), machineDto.getVirtualSwitch());
+            machineDto.getState(), machineDto.getVirtualSwitch());
 
         machine.setRack(rack);
 
