@@ -369,7 +369,8 @@ public class VirtualMachineService extends DefaultApiService
     }
 
     /**
-     * updates the {@link NodeVirtualImage} name. <br>
+     * updates the {@link NodeVirtualImage} name, y and x (those setted in the virtual appliance
+     * builder. <br>
      * This method must persist the changes even if the reconfigure of the {@link VirtualMachine}
      * fails.
      * 
@@ -386,6 +387,8 @@ public class VirtualMachineService extends DefaultApiService
         NodeVirtualImage nodeVirtualImage = getNodeVirtualImage(vdcId, vappId, vmId);
 
         nodeVirtualImage.setName(dto.getNodeName());
+        nodeVirtualImage.setY(dto.getY());
+        nodeVirtualImage.setX(dto.getX());
     }
 
     /**

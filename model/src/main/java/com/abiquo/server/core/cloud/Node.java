@@ -198,7 +198,7 @@ class Node extends DefaultEntityBase
         return this.x;
     }
 
-    protected void setX(final int x)
+    public void setX(final int x)
     {
         this.x = x;
     }
@@ -224,7 +224,7 @@ class Node extends DefaultEntityBase
         return this.y;
     }
 
-    protected void setY(final int y)
+    public void setY(final int y)
     {
         this.y = y;
     }

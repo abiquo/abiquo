@@ -57,16 +57,16 @@ public class VirtualApplianceDto extends SingleResourceTransportDto
         this.name = name;
     }
 
-    private String nodecollections;
+    private String nodeconnections;
 
-    public String getNodecollections()
+    public String getNodeconnections()
     {
-        return nodecollections;
+        return nodeconnections;
     }
 
-    public void setNodecollections(final String nodecollections)
+    public void setNodeconnections(final String nodeconnections)
     {
-        this.nodecollections = nodecollections;
+        this.nodeconnections = nodeconnections;
     }
 
     private int publicApp;
