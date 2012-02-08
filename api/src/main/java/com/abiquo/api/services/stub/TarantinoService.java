@@ -398,7 +398,7 @@ public class TarantinoService extends DefaultApiService
     @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
     public String deployVirtualMachineHA(final VirtualMachine virtualMachine,
         final VirtualMachineDescriptionBuilder virtualMachineDesciptionBuilder,
-        final boolean originalVMStateON)
+        final boolean originalVMStateON, final Map<String, String> extraData)
     {
         Datacenter datacenter = virtualMachine.getHypervisor().getMachine().getDatacenter();
 
@@ -414,13 +414,14 @@ public class TarantinoService extends DefaultApiService
             if (originalVMStateON)
             {
                 deployTask =
-                    builder.add(VirtualMachineStateTransition.CONFIGURE)
+                    builder.add(VirtualMachineStateTransition.CONFIGURE, extraData)
                         .add(VirtualMachineStateTransition.POWERON).buildTarantinoTask();
             }
             else
             {
                 deployTask =
-                    builder.add(VirtualMachineStateTransition.CONFIGURE).buildTarantinoTask();
+                    builder.add(VirtualMachineStateTransition.CONFIGURE, extraData)
+                        .buildTarantinoTask();
             }
 
             enqueueTask(datacenter, builder.buildAsyncTask(String.valueOf(virtualMachine.getId()),

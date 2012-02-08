@@ -67,7 +67,7 @@ public class TarantinoServiceMock extends TarantinoService
         when(mock.applyVirtualMachineState(anyVM(), anyDesc(), anyTransition())).thenReturn(
             randomTaskId());
         when(mock.deployVirtualMachine(anyVM(), anyDesc())).thenReturn(randomTaskId());
-        when(mock.deployVirtualMachineHA(anyVM(), anyDesc(), anyBoolean())).thenReturn(
+        when(mock.deployVirtualMachineHA(anyVM(), anyDesc(), anyBoolean(), null)).thenReturn(
             randomTaskId());
         when(mock.reconfigureVirtualMachine(anyVM(), anyDesc(), anyDesc())).thenReturn(
             randomTaskId());
@@ -135,7 +135,7 @@ public class TarantinoServiceMock extends TarantinoService
         VirtualMachineDescriptionBuilder virtualMachineDesciptionBuilder, boolean originalVMStateON)
     {
         return mock.deployVirtualMachineHA(virtualMachine, virtualMachineDesciptionBuilder,
-            originalVMStateON);
+            originalVMStateON, null);
     }
 
     public String undeployVirtualMachine(VirtualMachine virtualMachine,
