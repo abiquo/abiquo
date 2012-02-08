@@ -21,8 +21,10 @@
 
 package com.abiquo.nodecollector.domain.collectors;
 
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Method;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -52,7 +54,6 @@ import com.abiquo.server.core.infrastructure.nodecollector.VirtualSystemStatusEn
 import com.vmware.vim25.ArrayOfHostHostBusAdapter;
 import com.vmware.vim25.DatastoreSummary;
 import com.vmware.vim25.DynamicProperty;
-import com.vmware.vim25.FileFault;
 import com.vmware.vim25.FileInfo;
 import com.vmware.vim25.FileQuery;
 import com.vmware.vim25.FolderFileQuery;
@@ -512,6 +513,8 @@ public class ESXiCollector extends AbstractCollector
                 {
                     // get the machine name for logging.
                     machineName = (String) getDynamicProperty(esxiMachine, "name");
+                    machineName = decodeURLRawString(machineName);
+
                     // Get the virtual machine configuration
                     Object obj = getDynamicProperty(esxiMachine, "config");
 
@@ -520,7 +523,7 @@ public class ESXiCollector extends AbstractCollector
                         VirtualMachineConfigInfo vmConfig = (VirtualMachineConfigInfo) obj;
 
                         VirtualSystemDto vSys = new VirtualSystemDto();
-                        vSys.setName(vmConfig.getName());
+                        vSys.setName(decodeURLRawString(vmConfig.getName()));
                         vSys.setStatus(getStateFromESXiMachine(esxiMachine));
                         vSys.setUuid(vmConfig.getUuid());
                         vSys.setCpu(Long.valueOf(vmConfig.getHardware().getNumCPU()));
@@ -1531,4 +1534,16 @@ public class ESXiCollector extends AbstractCollector
         return isIscsiEnable;
     }
 
+    protected String decodeURLRawString(final String value) throws CollectorException
+    {
+        try
+        {
+            return URLDecoder.decode(value, "UTF-8");
+        }
+        catch (UnsupportedEncodingException e)
+        {
+            LOGGER.error("Can not decode {} from URL raw encoding. {}", value, e);
+            throw new CollectorException(MessageValues.COLL_EXCP_DECODE);
+        }
+    }
 }

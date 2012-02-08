@@ -20,6 +20,8 @@
  */
 package com.abiquo.vsm.monitor.esxi;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -191,7 +193,7 @@ public class ExecutorBasedESXiPoller extends AbstractMonitor
                             }
 
                             // Save the VM in the list of current VMs
-                            String vmName = vmConfig.getName();
+                            String vmName = decodeURLRawString(vmConfig.getName());
                             currentVMs.add(vmName);
 
                             // Get the new state of the VM
@@ -273,4 +275,16 @@ public class ExecutorBasedESXiPoller extends AbstractMonitor
         }
     }
 
+    protected String decodeURLRawString(final String value)
+    {
+        try
+        {
+            return URLDecoder.decode(value, "UTF-8");
+        }
+        catch (UnsupportedEncodingException e)
+        {
+            LOGGER.error("Can not decode {} from URL raw encoding. {}", value, e);
+            return value;
+        }
+    }
 }
