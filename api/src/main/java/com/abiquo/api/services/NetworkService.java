@@ -1083,12 +1083,12 @@ public class NetworkService extends DefaultApiService
             .equalsIgnoreCase(newNetwork.getConfiguration().getAddress())
             || !oldNetwork.getConfiguration().getMask()
                 .equals(newNetwork.getConfiguration().getMask())
-            || oldNetwork.getTag() == null
-            && newNetwork.getTag() != null
-            || oldNetwork.getTag() != null
-            && newNetwork.getTag() == null
-            || oldNetwork.getTag() != null
-            && newNetwork.getTag() != null && !oldNetwork.getTag().equals(newNetwork.getTag()))
+            || (oldNetwork.getTag() == null
+            && newNetwork.getTag() != null)
+            || (oldNetwork.getTag() != null
+            && newNetwork.getTag() == null)
+            || (oldNetwork.getTag() != null
+            && newNetwork.getTag() != null && !oldNetwork.getTag().equals(newNetwork.getTag())))
         {
             addConflictErrors(APIError.VLANS_EDIT_INVALID_VALUES);
             flushErrors();
