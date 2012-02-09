@@ -118,6 +118,7 @@ public class EnterpriseService extends DefaultApiService
         User user = userService.getCurrentUser();
         PricingTemplate pt = null;
 
+        // id pricing -1
         if (idPricingTempl != -1)
         {
             if (idPricingTempl != 0)
