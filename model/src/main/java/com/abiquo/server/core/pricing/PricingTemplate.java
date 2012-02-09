@@ -165,7 +165,7 @@ public class PricingTemplate extends DefaultEntityBase
     private BigDecimal hdGB;
 
     @Required(value = HD_GB_REQUIRED)
-    // @BigDec
+    @BigDec
     public BigDecimal getHdGB()
     {
         return this.hdGB;
@@ -186,7 +186,7 @@ public class PricingTemplate extends DefaultEntityBase
     private BigDecimal standingChargePeriod;
 
     @Required(value = STANDING_CHARGE_PERIOD_REQUIRED)
-    // @BigDec
+    @BigDec
     public BigDecimal getStandingChargePeriod()
     {
         return this.standingChargePeriod;
@@ -207,7 +207,7 @@ public class PricingTemplate extends DefaultEntityBase
     private BigDecimal vlan;
 
     @Required(value = VLAN_REQUIRED)
-    // @BigDec
+    @BigDec
     public BigDecimal getVlan()
     {
         return this.vlan;
@@ -331,7 +331,7 @@ public class PricingTemplate extends DefaultEntityBase
     private BigDecimal publicIp;
 
     @Required(value = PUBLIC_IP_REQUIRED)
-    // @BigDec
+    @BigDec
     public BigDecimal getPublicIp()
     {
         return publicIp;
@@ -352,7 +352,7 @@ public class PricingTemplate extends DefaultEntityBase
     private BigDecimal vcpu;
 
     @Required(value = V_CPU_REQUIRED)
-    // @BigDec
+    @BigDec
     public BigDecimal getVcpu()
     {
         return vcpu;
@@ -373,7 +373,7 @@ public class PricingTemplate extends DefaultEntityBase
     private BigDecimal memoryMB;
 
     @Required(value = MEMORY_MB_REQUIRED)
-    // @BigDec
+    @BigDec
     public BigDecimal getMemoryMB()
     {
         return memoryMB;
