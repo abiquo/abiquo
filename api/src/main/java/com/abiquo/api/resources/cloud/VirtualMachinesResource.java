@@ -23,12 +23,15 @@ package com.abiquo.api.resources.cloud;
 
 import java.util.List;
 
+import javax.validation.constraints.Min;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 
@@ -72,19 +75,25 @@ public class VirtualMachinesResource extends AbstractResource
     public VirtualMachinesDto getVirtualMachines(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
+        @QueryParam(START_WITH) @DefaultValue("0") @Min(0) final Integer startwith,
+        @QueryParam(BY) @DefaultValue("name") final String orderBy,
+        @QueryParam(FILTER) @DefaultValue("") final String filter,
+        @QueryParam(LIMIT) @Min(1) @DefaultValue(DEFAULT_PAGE_LENGTH_STRING) final Integer limit,
+        @QueryParam(ASC) @DefaultValue("true") final Boolean descOrAsc,
         @Context final IRESTBuilder restBuilder) throws Exception
     {
         final VirtualAppliance vapp = vappService.getVirtualAppliance(vdcId, vappId);
 
-        final List<VirtualMachine> all = service.findByVirtualAppliance(vapp);
+        final List<VirtualMachine> all =
+            service.findByVirtualAppliance(vapp, startwith, orderBy, filter, limit, descOrAsc);
         final VirtualMachinesDto vappsDto = new VirtualMachinesDto();
 
         if (all != null && !all.isEmpty())
         {
             for (final VirtualMachine v : all)
             {
-                vappsDto.add(VirtualMachineResource.createTransferObject(v,
-                    vapp.getVirtualDatacenter(), vapp.getId(), restBuilder, null, null, null));
+                vappsDto.add(VirtualMachineResource.createTransferObject(v, vapp
+                    .getVirtualDatacenter(), vapp.getId(), restBuilder, null, null, null));
             }
         }
 
