@@ -115,15 +115,23 @@ public class EnterpriseService extends DefaultApiService
         final boolean included, final String filterName, final Integer numResults)
     {
         User user = userService.getCurrentUser();
+        PricingTemplate pt = null;
         // if (user.getRole().getType() == Role.Type.ENTERPRISE_ADMIN)
         if (!securityService.hasPrivilege(Privileges.ENTERPRISE_ENUMERATE)
             && !securityService.hasPrivilege(Privileges.USERS_MANAGE_OTHER_ENTERPRISES)
             && !securityService.hasPrivilege(Privileges.ENTERPRISE_ADMINISTER_ALL))
         {
+            if (idPricingTempl != -1)
+            {
+                if (idPricingTempl != 0)
+                {
+                    pt = findPricingTemplate(idPricingTempl);
+                }
+                return repo.findByPricingTemplate(startwith, pt, included, filterName, numResults);
+            }
             return Collections.singletonList(user.getEnterprise());
         }
 
-        PricingTemplate pt = null;
         if (idPricingTempl != -1)
         {
             if (idPricingTempl != 0)
