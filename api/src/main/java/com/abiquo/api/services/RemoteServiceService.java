@@ -270,8 +270,8 @@ public class RemoteServiceService extends DefaultApiService
         {
             // Only one remote service of each type by datacenter.
             remoteService = services.get(0);
-        }
-        else
+        } // DHCP is not required
+        else if (type != RemoteServiceType.DHCP_SERVICE)
         {
             addNotFoundErrors(APIError.NON_EXISTENT_REMOTE_SERVICE_TYPE);
             flushErrors();
