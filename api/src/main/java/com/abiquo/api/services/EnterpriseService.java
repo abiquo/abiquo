@@ -132,6 +132,7 @@ public class EnterpriseService extends DefaultApiService
             && !securityService.hasPrivilege(Privileges.USERS_MANAGE_OTHER_ENTERPRISES)
             && !securityService.hasPrivilege(Privileges.ENTERPRISE_ADMINISTER_ALL))
         {
+            // changes ?
             if (idPricingTempl != -1)
             {
                 return repo.findByPricingTemplate(pt, included, filterName, offset, numResults,
