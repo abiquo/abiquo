@@ -109,16 +109,6 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
         return result;
     }
 
-    public boolean isMachineInAllocator(final Integer machineId)
-    {
-        // The way to define the virtual machines in the allocator is:
-        // All the virtual machines with an hypervisor associated and with state=NOT_DEPLOYED
-        Query query = getSession().createQuery(QUERY_IS_MACHINE_IN_ALLOCATOR);
-        query.setParameter("machineId", machineId);
-
-        return !query.list().isEmpty();
-    }
-
     public List<Machine> findRackMachines(final Rack rack)
     {
         return findRackMachines(rack, null);
