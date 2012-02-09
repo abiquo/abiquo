@@ -310,6 +310,13 @@ public class NetworkingService
         return proxyStub(userSession).getNICsByVirtualMachine(virtualDatacenterId, vappId,
             virtualMachineId);
     }
+    
+    public BasicResult getInfrastructureNICsByVirtualMachine(final UserSession userSession,
+        final Integer datacenterId, final Integer rackId, final Integer machineId, final Integer virtualMachineId)
+    {
+        return proxyStub(userSession).getInfrastructureNICsByVirtualMachine(datacenterId, rackId,
+            machineId, virtualMachineId);
+    }
 
     /**
      * Return the list of virtual networks from a virtual datacenter

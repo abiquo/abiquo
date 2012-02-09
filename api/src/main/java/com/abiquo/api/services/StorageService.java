@@ -44,6 +44,7 @@ import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualDatacenterRep;
 import com.abiquo.server.core.cloud.VirtualMachine;
+import com.abiquo.server.core.cloud.VirtualMachineRep;
 import com.abiquo.server.core.cloud.VirtualMachineState;
 import com.abiquo.server.core.enterprise.DatacenterLimits;
 import com.abiquo.server.core.enterprise.Enterprise;
@@ -83,6 +84,9 @@ public class StorageService extends DefaultApiService
 
     @Autowired
     protected VirtualMachineService vmService;
+
+    @Autowired
+    protected VirtualMachineRep vmRepo;
 
     /** Default constructor. */
     public StorageService()
@@ -480,8 +484,8 @@ public class StorageService extends DefaultApiService
         if (tracer != null)
         {
             tracer.log(SeverityType.INFO, ComponentType.VIRTUAL_MACHINE,
-                EventType.HARD_DISK_ASSIGN, "hardDisk.assigned", createdDisk.getId(), createdDisk
-                    .getSizeInMb(), vm.getName());
+                EventType.HARD_DISK_ASSIGN, "hardDisk.assigned", createdDisk.getId(),
+                createdDisk.getSizeInMb(), vm.getName());
         }
 
         return createdDisk;
@@ -549,8 +553,8 @@ public class StorageService extends DefaultApiService
         // creating volumes in other enterprises VDC
         Enterprise enterprise = vdc.getEnterprise();
 
-        LOGGER.debug("Checking limits for enterprise {} to a locate a volume of {}MB", enterprise
-            .getName(), sizeInMB);
+        LOGGER.debug("Checking limits for enterprise {} to a locate a volume of {}MB",
+            enterprise.getName(), sizeInMB);
 
         DatacenterLimits dcLimits =
             datacenterRepo.findDatacenterLimits(enterprise, vdc.getDatacenter());
@@ -626,5 +630,22 @@ public class StorageService extends DefaultApiService
             flushErrors();
         }
         return vm;
+    }
+
+    /**
+     * Gets disks of a virtual machine
+     * 
+     * @param virtualMachine
+     * @return
+     */
+    public List<DiskManagement> getListOfHardDisksByVM(final VirtualMachine virtualMachine)
+    {
+        List<DiskManagement> disks = new ArrayList<DiskManagement>();
+        disks.addAll(vdcRepo.findHardDisksByVirtualMachine(virtualMachine));
+
+        LOGGER.debug("Returning list of disks allocated into VirtualMachine '"
+            + virtualMachine.getName() + ".");
+
+        return disks;
     }
 }

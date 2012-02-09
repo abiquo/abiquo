@@ -58,11 +58,11 @@
                 super.createChildren();
 
                 //Creating configuration sections
-                this._registrationForm = new RegistrationForm();
+                /*this._registrationForm = new RegistrationForm();
                 toggledContainer.addContent(this._registrationForm, ResourceManager.getInstance().getString("Configuration",
                                                                                                             "LABEL_REGISTRATION"));
 
-                /* this._heartbeatManagement = new HeartbeatManagement();
+                 this._heartbeatManagement = new HeartbeatManagement();
                 toggledContainer.addContent(this._heartbeatManagement, ResourceManager.getInstance().getString("Configuration",
                                                                                                                "LABEL_HEARTBEATING")); */
             }
@@ -75,7 +75,7 @@
                 toggledContainer.selectedIndex = 0;
 
                 //Initalize the different configuration sections
-                _registrationForm.setFormInputs();
+                //_registrationForm.setFormInputs();
             }
 
 
