@@ -33,7 +33,7 @@ import org.testng.ISuiteListener;
 import com.abiquo.appliancemanager.transport.TemplateStatusEnumType;
 import com.abiquo.commons.amqp.impl.am.AMCallback;
 import com.abiquo.commons.amqp.impl.am.AMConsumer;
-import com.abiquo.commons.amqp.impl.am.domain.OVFPackageInstanceStatusEvent;
+import com.abiquo.commons.amqp.impl.am.domain.TemplateStatusEvent;
 
 /**
  * Consumes AM events {@link OVFPackageInstanceStatusEvent} and check them arrives in the expected
@@ -47,7 +47,8 @@ public class AMConsumerTestListener implements ISuiteListener, AMCallback
 
     private AMConsumer consumer;
 
-    private static Queue<TemplateStatusEnumType> EVENTS = new ConcurrentLinkedQueue<TemplateStatusEnumType>();
+    private static Queue<TemplateStatusEnumType> EVENTS =
+        new ConcurrentLinkedQueue<TemplateStatusEnumType>();
 
     private final static int TIMEOUT = 3;
 
@@ -91,7 +92,7 @@ public class AMConsumerTestListener implements ISuiteListener, AMCallback
     }
 
     @Override
-    public void onStart(ISuite suite)
+    public void onStart(final ISuite suite)
     {
         consumer = new AMConsumer();
         consumer.addCallback(this);
@@ -110,7 +111,7 @@ public class AMConsumerTestListener implements ISuiteListener, AMCallback
     }
 
     @Override
-    public void onFinish(ISuite suite)
+    public void onFinish(final ISuite suite)
     {
         try
         {
@@ -131,25 +132,25 @@ public class AMConsumerTestListener implements ISuiteListener, AMCallback
      */
 
     @Override
-    public void onDownload(OVFPackageInstanceStatusEvent event)
+    public void onDownload(final TemplateStatusEvent event)
     {
         EVENTS.add(TemplateStatusEnumType.fromValue(event.getStatus()));
     }
 
     @Override
-    public void onNotDownload(OVFPackageInstanceStatusEvent event)
+    public void onNotDownload(final TemplateStatusEvent event)
     {
         EVENTS.add(TemplateStatusEnumType.fromValue(event.getStatus()));
     }
 
     @Override
-    public void onError(OVFPackageInstanceStatusEvent event)
+    public void onError(final TemplateStatusEvent event)
     {
         EVENTS.add(TemplateStatusEnumType.fromValue(event.getStatus()));
     }
 
     @Override
-    public void onDownloading(OVFPackageInstanceStatusEvent event)
+    public void onDownloading(final TemplateStatusEvent event)
     {
         EVENTS.add(TemplateStatusEnumType.fromValue(event.getStatus()));
     }
