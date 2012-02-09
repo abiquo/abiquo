@@ -2341,8 +2341,6 @@ CREATE TRIGGER `kinton`.`enterprise_deleted` AFTER DELETE ON `kinton`.`enterpris
 |
 CREATE TRIGGER `kinton`.`create_physicalmachine_update_stats` AFTER INSERT ON `kinton`.`physicalmachine`
 FOR EACH ROW BEGIN
-DECLARE datastoreUsedSize BIGINT UNSIGNED;
-DECLARE datastoreSize BIGINT UNSIGNED;
 IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN
     IF NEW.idState = 3 THEN
         UPDATE IGNORE cloud_usage_stats SET serversRunning = serversRunning+1,
@@ -2394,8 +2392,6 @@ END
 |
 CREATE TRIGGER `kinton`.`delete_physicalmachine_update_stats` AFTER DELETE ON `kinton`.`physicalmachine`
 FOR EACH ROW BEGIN
-DECLARE datastoreUsedSize BIGINT UNSIGNED;
-DECLARE datastoreSize BIGINT UNSIGNED;
 IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN
     IF OLD.idState = 3 THEN
         UPDATE IGNORE cloud_usage_stats SET serversRunning = serversRunning-1,
@@ -4274,20 +4270,20 @@ DELIMITER |
 --
 CREATE PROCEDURE `kinton`.`get_datastore_size_by_dc`(IN idDC INT, OUT size BIGINT UNSIGNED)
 BEGIN
-    SELECT IF (SUM(d.size) IS NULL,0,SUM(d.size)) INTO size
-    FROM datastore d LEFT OUTER JOIN datastore_assignment da ON d.idDatastore = da.idDatastore 
+    SELECT IF (SUM(ds_view.size) IS NULL,0,SUM(ds_view.size)) INTO size
+    FROM (SELECT d.size as size FROM datastore d LEFT OUTER JOIN datastore_assignment da ON d.idDatastore = da.idDatastore 
     LEFT OUTER JOIN physicalmachine pm ON da.idPhysicalMachine = pm.idPhysicialMachine
-    WHERE pm.idDataCenter = idDC AND d.enabled = 1;
+    WHERE pm.idDataCenter = idDC AND d.enabled = 1 GROUP BY d.datastoreUuid) ds_view;
 END
 --
 |
 --
 CREATE PROCEDURE `kinton`.`get_datastore_used_size_by_dc`(IN idDC INT, OUT usedSize BIGINT UNSIGNED)
 BEGIN
-    SELECT IF (SUM(d.usedSize) IS NULL,0,SUM(d.usedSize)) INTO usedSize
-    FROM datastore d LEFT OUTER JOIN datastore_assignment da ON d.idDatastore = da.idDatastore
+    SELECT IF (SUM(ds_view.usedSize) IS NULL,0,SUM(ds_view.usedSize)) INTO usedSize
+    FROM (SELECT d.usedSize as usedSize FROM datastore d LEFT OUTER JOIN datastore_assignment da ON d.idDatastore = da.idDatastore
     LEFT OUTER JOIN physicalmachine pm ON da.idPhysicalMachine = pm.idPhysicialMachine
-    WHERE pm.idDataCenter = idDC AND d.enabled = 1;
+    WHERE pm.idDataCenter = idDC AND d.enabled = 1 GROUP BY d.datastoreUuid) ds_view;
 END
 --
 |

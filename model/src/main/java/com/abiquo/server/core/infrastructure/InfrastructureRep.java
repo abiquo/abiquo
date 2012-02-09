@@ -521,6 +521,11 @@ public class InfrastructureRep extends DefaultRepBase
         this.datastoreDao.flush();
     }
 
+    public List<Datastore> findShares(final Datastore datastore)
+    {
+        return this.datastoreDao.findShares(datastore);
+    }
+
     public boolean existAnyDatastoreWithName(final String name)
     {
         assert !StringUtils.isEmpty(name);
@@ -830,7 +835,9 @@ public class InfrastructureRep extends DefaultRepBase
         // TODO Auto-generated method stub
         return rackDao.getRandomMachinesToShutDownFromRack(rackId, howMany);
     }
-     /** Return all the public VLANs by Datacenter.
+
+    /**
+     * Return all the public VLANs by Datacenter.
      * 
      * @param datacenter {@link Datacenter} where we search for.
      * @return list of found {@link VLANNetwork}
