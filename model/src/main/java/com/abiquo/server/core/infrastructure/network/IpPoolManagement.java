@@ -309,7 +309,7 @@ public class IpPoolManagement extends RasdManagement
     public Type getType()
     {
         int typeFlag = Integer.valueOf(getRasd().getResourceSubType());
-        return Type.values()[typeFlag];
+        return Type.values()[typeFlag]; 
     }
 
     public void setType(final Type type)
