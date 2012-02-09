@@ -96,7 +96,7 @@
 
             //List of IPPoolManagement object
             [Bindable]
-            private var ipList:ArrayCollection;
+            public var ipList:ArrayCollection;
 
             //Total number of private IPs that match the listRequest
             [Bindable]
