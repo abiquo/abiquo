@@ -265,24 +265,24 @@
 
             <mx:FormItem 
                 horizontalGap="0"
-                label="@Resource(bundle='Networking', key='LABEL_NETMASK')"
-                direction="horizontal"
-                required="true">
-
-                <mx:TextInput id="netmaskInput"
-                    height="20"
-                    maxChars="39"
-                    change="validateForm()"
-                    restrict="0-9.:A-F"/>
-            </mx:FormItem>
-
-            <mx:FormItem 
-                horizontalGap="0"
                 label="@Resource(bundle='Networking', key='LABEL_ADDRESS')"
                 direction="horizontal"
                 required="true">
 
                 <mx:TextInput id="addressInput"
+                    height="20"
+                    maxChars="39"
+                    change="validateForm()"
+                    restrict="0-9.:A-F"/>
+            </mx:FormItem>
+            
+            <mx:FormItem 
+                horizontalGap="0"
+                label="@Resource(bundle='Networking', key='LABEL_NETMASK')"
+                direction="horizontal"
+                required="true">
+
+                <mx:TextInput id="netmaskInput"
                     height="20"
                     maxChars="39"
                     change="validateForm()"
@@ -345,16 +345,16 @@
 		                    </mx:Component>
 		                </mx:itemRenderer>
 		            </mx:DataGridColumn>
+	                <mx:DataGridColumn 
+	                    sortable="false"
+	                    dataField="networkAddress"
+	                    headerText="@Resource(bundle='Networking',key='LABEL_ADDRESS')"/>
+	                    
 	                 <mx:DataGridColumn
 	                 	width="100"
 	                    sortable="false"
 	                    labelFunction="netmaskComboBoxDataGridLabelFunction"
 	                    headerText="@Resource(bundle='Networking',key='LABEL_NETMASK')"/>
-	                
-	                <mx:DataGridColumn 
-	                    sortable="false"
-	                    dataField="networkAddress"
-	                    headerText="@Resource(bundle='Networking',key='LABEL_ADDRESS')"/>
 	                
 	                <mx:DataGridColumn 
 	                    sortable="false"
