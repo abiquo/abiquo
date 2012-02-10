@@ -38,10 +38,12 @@ import org.slf4j.LoggerFactory;
 import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.nodecollector.constants.MessageValues;
 import com.abiquo.nodecollector.domain.Collector;
+import com.abiquo.nodecollector.exception.CannotExecuteException;
 import com.abiquo.nodecollector.exception.CollectorException;
 import com.abiquo.nodecollector.exception.ConnectionException;
 import com.abiquo.nodecollector.exception.LoginException;
 import com.abiquo.nodecollector.exception.NoManagedException;
+import com.abiquo.nodecollector.exception.NodecollectorException;
 import com.abiquo.nodecollector.utils.ResourceComparator;
 import com.abiquo.server.core.infrastructure.nodecollector.HostDto;
 import com.abiquo.server.core.infrastructure.nodecollector.HostStatusEnumType;
@@ -358,23 +360,14 @@ public class ESXiCollector extends AbstractCollector
     }
 
     @Override
-    public HostDto getHostInfo() throws CollectorException
+    public HostDto getHostInfo() throws NodecollectorException
     {
         LOGGER.debug("Getting information for host at: {}", getIpAddress());
 
         final HostHardwareInfo hardwareInfo;
         final HostDto physicalInfo = new HostDto();
         // Check the license of the ESXi
-        try
-        {
-            hasValidLicense();
-        }
-        catch (NoManagedException e)
-        {
-            physicalInfo.setStatus(HostStatusEnumType.NOT_MANAGED);
-            physicalInfo.setStatusInfo(e.getMessage());
-            return physicalInfo;
-        }
+        hasValidLicense();
 
         // We take the first one because we use ESXi not VirtualCenter, and there is only one host
         // managed
@@ -1349,7 +1342,7 @@ public class ESXiCollector extends AbstractCollector
      * 
      * @throws NoManagedException if the license is not valid.
      */
-    private synchronized void hasValidLicense() throws NoManagedException
+    private synchronized void hasValidLicense() throws NodecollectorException
     {
         LOGGER.debug("Checking if host {} has a valid license...", getIpAddress());
 
@@ -1366,7 +1359,7 @@ public class ESXiCollector extends AbstractCollector
                 if (licenseManagerLicenseInfo.getEditionKey().equals("esxBasic"))
                 {
                     LOGGER.debug("Invalid license found!");
-                    throw new NoManagedException(MessageValues.NOMAN_ESXI_LIC);
+                    throw new CannotExecuteException(MessageValues.NOMAN_ESXI_LIC);
                 }
 
                 KeyAnyValue[] properties = licenseManagerLicenseInfo.getProperties();
@@ -1394,7 +1387,7 @@ public class ESXiCollector extends AbstractCollector
                     if (expirationHours.intValue() == 0 && expirationMinutes.intValue() == 0)
                     {
                         LOGGER.debug("Expired license found!");
-                        throw new NoManagedException(MessageValues.NOMAN_ESXI_LIC);
+                        throw new CannotExecuteException(MessageValues.NOMAN_ESXI_LIC);
                     }
                 }
             }
@@ -1403,7 +1396,7 @@ public class ESXiCollector extends AbstractCollector
         catch (Exception e)
         {
             LOGGER.error("An error was occurred when checking the license: {}", e);
-            throw new NoManagedException(MessageValues.NOMAN_ESXI_LIC);
+            throw new CannotExecuteException(MessageValues.NOMAN_ESXI_LIC);
         }
 
         LOGGER.debug("Valid license found");
