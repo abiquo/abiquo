@@ -26,6 +26,7 @@ import java.util.UUID;
 import org.apache.commons.io.FilenameUtils;
 
 import com.abiquo.model.enumerator.DiskFormatType;
+import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineState;
@@ -67,6 +68,25 @@ public class SnapshotUtils
          */
         public static SnapshotType getSnapshotType(final VirtualMachine virtualMachine)
         {
+
+            HypervisorType hypervisorType = virtualMachine.getHypervisor().getType();
+
+            if (virtualMachine.isStateful())
+            {
+                return FROM_STATEFUL_DISK;
+            }
+            else if (hypervisorType.isInstanceFormatFixed())
+            {
+                if (hypervisorType.getInstanceFormat() == virtualMachine
+                    .getVirtualMachineTemplate().getDiskFormatType())
+                {
+                    return FROM_ORIGINAL_DISK;
+                }
+                else
+                {
+                    return SnapshotType.FROM_DISK_CONVERSION;
+                }
+            }
             if (virtualMachine.isCaptured())
             {
                 return SnapshotType.FROM_IMPORTED_VIRTUALMACHINE;
@@ -74,10 +94,6 @@ public class SnapshotUtils
             else if (virtualMachine.getVirtualImageConversion() != null)
             {
                 return SnapshotType.FROM_DISK_CONVERSION;
-            }
-            else if (virtualMachine.isStateful())
-            {
-                return FROM_STATEFUL_DISK;
             }
             else
             {
