@@ -42,6 +42,7 @@ import com.abiquo.api.services.stub.NodecollectorServiceStub;
 import com.abiquo.api.services.stub.VsmServiceStub;
 import com.abiquo.api.tracer.TracerLogger;
 import com.abiquo.model.enumerator.RemoteServiceType;
+import com.abiquo.model.enumerator.MachineState;
 import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.cloud.VirtualDatacenterRep;
 import com.abiquo.server.core.cloud.VirtualMachine;
@@ -264,10 +265,16 @@ public class MachineService extends DefaultApiService
         old.setIpmiUser(machineDto.getIpmiUser());
         old.setIpmiPassword(machineDto.getIpmiPassword());
 
-        // [ABICLOUDPREMIUM-2996] State, CPU and RAM must never be edited. Always must reflect the
+        // [ABICLOUDPREMIUM-2996] CPU and RAM must never be edited. Always must reflect the
         // real ones, obtained from NodeCollector in Machine creation.
         // Used CPU and RAM should not be edited, since the Allocator is the responsible of
         // maintaining them.
+
+        // Only allow to modify the state if it is going to disabled or re-enabled
+        if (machineDto.getState() == MachineState.HALTED || old.getState() == MachineState.HALTED)
+        {
+            old.setState(machineDto.getState());
+        }
 
         isValidMachine(old);
 
