@@ -520,6 +520,11 @@ public class InfrastructureRep extends DefaultRepBase
         this.datastoreDao.flush();
     }
 
+    public List<Datastore> findShares(final Datastore datastore)
+    {
+        return this.datastoreDao.findShares(datastore);
+    }
+
     public boolean existAnyDatastoreWithName(final String name)
     {
         assert !StringUtils.isEmpty(name);

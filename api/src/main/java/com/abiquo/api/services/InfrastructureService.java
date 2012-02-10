@@ -203,8 +203,8 @@ public class InfrastructureService extends DefaultApiService
         validateCreateInfo(createInfo);
 
         return addMachines(datacenterId, rackId, createInfo.getIpFrom(), createInfo.getIpTo(),
-            createInfo.getHypervisor(), createInfo.getUser(), createInfo.getPassword(),
-            createInfo.getPort(), createInfo.getvSwitch());
+            createInfo.getHypervisor(), createInfo.getUser(), createInfo.getPassword(), createInfo
+                .getPort(), createInfo.getvSwitch());
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
@@ -233,7 +233,7 @@ public class InfrastructureService extends DefaultApiService
         HypervisorType hyType = HypervisorType.fromValue(hypervisor);
         List<Machine> discoveredMachines =
         // nodecollectorServiceStub.getRemoteHypervisors(nodecollector, ipFromOK, ipToOK, hyType,
-        // user, password, port);
+            // user, password, port);
             this.discoverRemoteHypevisors(datacenterId, ipFromOK, ipToOK, hyType, user, password,
                 port, vSwitch);
 
@@ -302,6 +302,15 @@ public class InfrastructureService extends DefaultApiService
             }
 
             validate(datastore);
+
+            // updates shared datastores
+            List<Datastore> datastoresShared = repo.findShares(datastore);
+            for (Datastore dstore : datastoresShared)
+            {
+                dstore.setSize(datastore.getSize());
+                dstore.setUsedSize(datastore.getUsedSize());
+            }
+
             repo.insertDatastore(datastore);
         }
 
@@ -353,6 +362,11 @@ public class InfrastructureService extends DefaultApiService
             "machine.created", machine.getName(), machine.getHypervisor().getIp(), machine
                 .getHypervisor().getType(), machine.getState());
 
+        if (machine.getInitiatorIQN() == null)
+        {
+            tracer.log(SeverityType.WARNING, ComponentType.MACHINE, EventType.MACHINE_CREATE,
+                "machine.withoutiqn", machine.getName(), machine.getHypervisor().getIp());
+        }
         return machine;
     }
 
@@ -856,8 +870,9 @@ public class InfrastructureService extends DefaultApiService
             {
                 if (pd.getReadMethod().invoke(dto) == null)
                 {
-                    addValidationErrors(new CommonError(APIError.STATUS_BAD_REQUEST.getCode(),
-                        pd.getName() + " can't be null"));
+                    addValidationErrors(new CommonError(APIError.STATUS_BAD_REQUEST.getCode(), pd
+                        .getName()
+                        + " can't be null"));
                     flushErrors();
                 }
             }

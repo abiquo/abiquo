@@ -182,6 +182,12 @@ public class TarantinoJobCreator extends DefaultApiService
         final RemoteService dhcp =
             remoteServiceService.getRemoteService(datacenterId, RemoteServiceType.DHCP_SERVICE);
 
+        if (dhcp == null)
+        {
+            logger.debug("Tarantino Job Creator the datacenter id {} hasn't DHCP service");
+            // The datacenter hasn't dhcp
+            return;
+        }
         try
         {
             final URI dhcpUri = new URI(dhcp.getUri());
@@ -437,7 +443,7 @@ public class TarantinoJobCreator extends DefaultApiService
         {
             List<DhcpOption> dhcplist = i.getVlanNetwork().getDhcpOption();
             NetworkConfiguration configuration = i.getVlanNetwork().getConfiguration();
-            
+
             if (i.itHasTheDefaultConfiguration(virtualMachine) && !defaultConfigurationFound)
             {
                 // This interface is the one that configures the Network parameters.
@@ -461,9 +467,9 @@ public class TarantinoJobCreator extends DefaultApiService
             // configureNetwork parameter
             Integer tag = i.getVlanNetwork().getTag();
             vmDesc.addNetwork(i.getMac(), i.getIp(), virtualMachine.getHypervisor().getMachine()
-                .getVirtualSwitch(), i.getNetworkName(), tag, i.getName(), null, null, null, configuration.getNetMask(),
-                null, null, null, i.getSequence(), toDchpOptionCom(dhcplist), Boolean.FALSE,
-                i.isUnmanagedIp());
+                .getVirtualSwitch(), i.getNetworkName(), tag, i.getName(), null, null, null,
+                configuration.getNetMask(), null, null, null, i.getSequence(),
+                toDchpOptionCom(dhcplist), Boolean.FALSE, i.isUnmanagedIp());
 
         }
     }
