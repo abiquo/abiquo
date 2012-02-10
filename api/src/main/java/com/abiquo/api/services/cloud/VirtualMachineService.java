@@ -897,6 +897,7 @@ public class VirtualMachineService extends DefaultApiService
         // First we get from dto. All the values wi
         VirtualMachine virtualMachine = buildVirtualMachineFromDto(vdc, virtualAppliance, dto);
         virtualMachine.setUuid(UUID.randomUUID().toString());
+        virtualMachine.setIdType(VirtualMachine.MANAGED);
         String nodeName = virtualMachine.getName();
         if (dto instanceof VirtualMachineWithNodeDto)
         {
