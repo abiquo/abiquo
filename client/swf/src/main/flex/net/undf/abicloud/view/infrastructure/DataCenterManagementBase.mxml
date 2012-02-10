@@ -595,6 +595,9 @@
             {
                 dataCenterList.selectedIndex = -1;
                 onClickDataCenterList();
+                //Retrieve all datacenters
+                willShow();
+                filterInput.text = '';
                 if(dataCentersMap.isLoaded()){
 	                //Setting the Google Maps to its original position	                
 	                dataCentersMap.panTo(new LatLng(this._defaultLatitude,this._defaultLongitude));
