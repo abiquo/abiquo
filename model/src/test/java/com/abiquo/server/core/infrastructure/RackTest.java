@@ -62,7 +62,6 @@ public class RackTest extends DefaultEntityTestBase<Rack>
         assertFalse(rack.isValid());
         rack.setVlanPerVdcReserved(Rack.VLAN_PER_VDC_EXPECTED_MIN);
         assertTrue(rack.isValid());
-
     }
 
     @Test
