@@ -299,9 +299,10 @@ public enum APIError
         "Missing privilege parameter"), DELETE_ERROR("ROLE-3",
         "The requested role is blocked. It cannot be deleted"), DELETE_ERROR_WITH_USER("ROLE-4",
         "Cannot delete a role with a user associated"), DELETE_ERROR_WITH_ROLE_LDAP("ROLE-5",
-        "Cannot delete a role with a RoleLdap associated"), DUPLICATED_ROLE_NAME_ENT("ROLE-6",
-        "Cannot create a role with the same name as an existing role for the same enterprise"), DUPLICATED_ROLE_NAME_GEN(
-        "ROLE-7", "Cannot create a global role with the same name as an existing global role"), HAS_NOT_ENOUGH_PRIVILEGE(
+        "Cannot delete a role with a RoleLdap associated"), DUPLICATED_ROLE_NAME_ENT(
+        "ROLE-6",
+        "Cannot create a role with the same name as an existing role for the same enterprise or with the same name as an existing global role"), DUPLICATED_ROLE_NAME_GEN(
+        "ROLE-7", "Cannot create a global role with the same name as an existing role"), HAS_NOT_ENOUGH_PRIVILEGE(
         "ROLE-8", "Not enough privileges to manage this role"),
 
     // PRIVILEGE
@@ -685,8 +686,8 @@ public enum APIError
         // Outputs all errors in wiki table format
         for (APIError error : errors)
         {
-            System.out.println(String.format("| %s | %s | %s |", error.code, error.message,
-                error.name()));
+            System.out.println(String.format("| %s | %s | %s |", error.code, error.message, error
+                .name()));
         }
 
         System.out.println("\n ************ Flex client labels ************** \n");
