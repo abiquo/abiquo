@@ -81,9 +81,9 @@ public class MachineResource extends AbstractResource
 
     public static final String MACHINE_ACTION_POWER_ON_REL = "poweron";
 
-    public static final String MACHINE_ACTION_CHECK = "action/checkState";
+    public static final String MACHINE_ACTION_CHECK = "action/checkstate";
 
-    public static final String MACHINE_CHECK = "checkState";
+    public static final String MACHINE_CHECK = "checkstate";
 
     public static final String SHOW_CREDENTIALS_QUERY_PARAM = "credentials";
 
