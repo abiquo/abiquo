@@ -1057,6 +1057,20 @@ public class AbstractAPIStub
             "cloud/virtualdatacenters/{vdcid}/virtualappliances/{vappid}/virtualmachines/{vmid}/network/nics",
             params);
     }
+    
+    protected String createInfrastructureVirtualMachineNICsLink(Integer datacenterId, Integer rackId,
+        Integer machineId, Integer virtualMachineId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("datacenter", datacenterId.toString());
+        params.put("rack", rackId.toString());
+        params.put("machine", machineId.toString());
+        params.put("vm", virtualMachineId.toString());
+
+        return resolveURI(apiUri,
+            "admin/datacenters/{datacenter}/racks/{rack}/machines/{machine}/virtualmachines/{vm}/action/nics",
+            params);
+    }
 
     protected String createVirtualMachineNICLink(final Integer vdcId, final Integer vappId,
         final Integer vmId, final Integer nicOrder)
