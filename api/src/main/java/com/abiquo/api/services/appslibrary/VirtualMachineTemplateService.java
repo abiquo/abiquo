@@ -165,7 +165,16 @@ public class VirtualMachineTemplateService extends DefaultApiServiceWithApplianc
 
         for (DatacenterLimits dclimit : enterpriseService.findLimitsByEnterprise(enterpriseId))
         {
-            repos.add(getDatacenterRepository(dclimit.getDatacenter().getId(), enterpriseId));
+            try
+            {
+                repos.add(getDatacenterRepository(dclimit.getDatacenter().getId(), enterpriseId));
+            }
+            catch (Exception ex)
+            {
+                tracer.log(SeverityType.WARNING, ComponentType.DATACENTER,
+                    EventType.APPLIANCE_MANAGER_CONFIGURATION, "appliancemanager.error", dclimit
+                        .getDatacenter().getName());
+            }
         }
 
         return repos;

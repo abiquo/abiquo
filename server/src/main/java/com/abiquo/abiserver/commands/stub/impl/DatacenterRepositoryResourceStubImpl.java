@@ -34,8 +34,9 @@ import com.abiquo.abiserver.pojo.infrastructure.DataCenter;
 import com.abiquo.abiserver.pojo.result.DataResult;
 import com.abiquo.abiserver.pojo.service.RemoteServiceType;
 import com.abiquo.abiserver.pojo.virtualimage.Repository;
-import com.abiquo.server.core.appslibrary.DatacenterRepositoriesDto;
 import com.abiquo.server.core.appslibrary.DatacenterRepositoryDto;
+import com.abiquo.server.core.enterprise.DatacenterLimitsDto;
+import com.abiquo.server.core.enterprise.DatacentersLimitsDto;
 
 public class DatacenterRepositoryResourceStubImpl extends AbstractAPIStub implements
     DatacenterRepositoryResourceStub
@@ -67,7 +68,7 @@ public class DatacenterRepositoryResourceStubImpl extends AbstractAPIStub implem
         }
         else
         {
-            populateErrors(response, result, "deleteNotManagedVirtualMachines");
+            populateErrors(response, result, "getRepository");
         }
 
         return result;
@@ -78,52 +79,54 @@ public class DatacenterRepositoryResourceStubImpl extends AbstractAPIStub implem
     {
         DataResult<ArrayList<DataCenter>> result = new DataResult<ArrayList<DataCenter>>();
 
-        String uri = createDatacenterRepositoriesLink(idEnterprise);
+        // String uri = createDatacenterRepositoriesLink(idEnterprise);
+        String uri = createEnterpriseLimitsByDatacenterLink(idEnterprise);
 
         ClientResponse response = resource(uri).get();
 
         if (response.getStatusCode() / 200 == 1)
         {
-            DatacenterRepositoriesDto repos = response.getEntity(DatacenterRepositoriesDto.class);
+            DatacentersLimitsDto repos = response.getEntity(DatacentersLimitsDto.class);
 
             result.setSuccess(true);
             result.setData(transformToFlex(repos));
         }
         else
         {
-            populateErrors(response, result, "deleteNotManagedVirtualMachines");
+            populateErrors(response, result, "getAllowedRepositories");
         }
 
         return result;
     }
 
-    private ArrayList<DataCenter> transformToFlex(final DatacenterRepositoriesDto repos)
+    private ArrayList<DataCenter> transformToFlex(final DatacentersLimitsDto limits)
     {
         ArrayList<DataCenter> datacenters = new ArrayList<DataCenter>();
 
-        for (DatacenterRepositoryDto repo : repos.getCollection())
+        for (DatacenterLimitsDto limit : limits.getCollection())
         {
-            datacenters.add(transformToFlexDc(repo));
+            datacenters.add(transformToFlexDc(limit));
         }
 
         return datacenters;
     }
 
-    private DataCenter transformToFlexDc(final DatacenterRepositoryDto repo)
+    private DataCenter transformToFlexDc(final DatacenterLimitsDto limit)
     {
-        final Integer idDataCenter = repo.getIdFromLink("datacenter");
+        final Integer idDataCenter = limit.getIdFromLink("datacenter");
         DataCenter datacenter = new DataCenter();
         datacenter.setId(idDataCenter);
-        datacenter.setName(repo.searchLink("datacenter").getTitle());
+        datacenter.setName(limit.searchLink("datacenter").getTitle());
 
         // we only need the appliance manager address
         try
         {
-            URI amLink = new URI(repo.searchLink("applianceManagerRepositoryUri").getHref());
+            URI amLink = new URI(limit.searchLink("applianceManagerRepositoryUri").getHref());
             com.abiquo.abiserver.pojo.service.RemoteService am =
                 new com.abiquo.abiserver.pojo.service.RemoteService();
             am.setIdDataCenter(idDataCenter);
-            am.setRemoteServiceType(new RemoteServiceType(com.abiquo.model.enumerator.RemoteServiceType.APPLIANCE_MANAGER));
+            am
+                .setRemoteServiceType(new RemoteServiceType(com.abiquo.model.enumerator.RemoteServiceType.APPLIANCE_MANAGER));
             am.setUri(amLink.toASCIIString());
             am.setDomainName(amLink.getHost());
             am.setPort(amLink.getPort());
