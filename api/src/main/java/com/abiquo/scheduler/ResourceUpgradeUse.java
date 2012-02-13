@@ -181,6 +181,11 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
             cve.printStackTrace(); // FIXME
             throw new ResourceUpgradeUseException(msg.toString());
         }
+        catch (final NotEnoughResourcesException e)
+        {
+            // throwed by the 'updatedNetworkResources' method.
+            throw e;
+        }
         catch (final Exception e)
         // HibernateException NotEnoughResourcesException NoSuchObjectException
         {
@@ -433,16 +438,8 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
     public Integer getFreeVLANFromUsedList(final List<Integer> vlanIds, final Rack rack)
         throws NotEnoughResourcesException
     {
-        Integer candidatePort = rack.getVlanIdMin();
-
         // Adding Vlans Id not to add
-
         vlanIds.addAll(getVlansIdAvoidAsCollection(rack));
-
-        if (vlanIds.isEmpty())
-        {
-            return candidatePort;
-        }
 
         // Create a HashSet which allows no duplicates
         HashSet<Integer> hashSet = new HashSet<Integer>(vlanIds);
@@ -453,7 +450,9 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
 
         List<Integer> vlanTemp = new ArrayList<Integer>(vlanIdsOrdered);
 
-        // Removing id min to vlan id min
+        // Removing used port groups minor than minId and bigger then maxId
+        // (that could be only public and external networks with tags ouside the
+        // minid-maxid range)
         for (Integer vlanId : vlanTemp)
         {
             if (vlanId.intValue() < rack.getVlanIdMin())
@@ -461,36 +460,16 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
                 vlanIdsOrdered.remove(vlanId);
             }
         }
-
-        if (vlanIdsOrdered.isEmpty())
+        
+        for (Integer i = rack.getVlanIdMin(); i <= rack.getVlanIdMax(); i ++)
         {
-            return candidatePort;
-        }
-
-        // Checking the minimal interval
-        if (vlanIdsOrdered.get(0).compareTo(rack.getVlanIdMin()) != 0)
-        {
-            return candidatePort;
-        }
-
-        int next = 1;
-
-        // Searching a gap in the vlan used list
-        for (int i = 0; i < vlanIdsOrdered.size(); i++)
-        {
-            if (vlanIds.get(i) == rack.getVlanIdMax())
+            if (!vlanIdsOrdered.contains(i))
             {
-                throw new NotEnoughResourcesException("The maximun number of VLAN id has been reached");
+                return i;
             }
-            if (next == vlanIdsOrdered.size()
-                || vlanIdsOrdered.get(next) != vlanIdsOrdered.get(i) + 1)
-            {
-                return vlanIdsOrdered.get(i) + 1;
-            }
-            next++;
         }
 
-        return candidatePort;
+        throw new NotEnoughResourcesException("The maximun number of VLAN tag has been reached");
     }
 
     public Collection<Integer> getVlansIdAvoidAsCollection(final Rack rack)
