@@ -300,6 +300,8 @@
         >
         <mx:Button 
             styleName="AddButton"
+            visible="false"
+            includeInLayout="false"
             toolTip="@Resource(bundle='Common', key='BUTTON_NEW_TOOLTIP')"
             click="openFormToCreate()"
             enabled="{_editableButton}"/>
