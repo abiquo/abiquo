@@ -301,8 +301,8 @@ public enum APIError
         "Cannot delete a role with a RoleLdap associated"), DUPLICATED_ROLE_NAME_ENT(
         "ROLE-6",
         "Cannot create a role with the same name as an existing role for the same enterprise or with the same name as an existing global role"), DUPLICATED_ROLE_NAME_GEN(
-        "ROLE-7", "Cannot create a global role with the same name as an existing  role"), HAS_NOT_ENOUGH_PRIVILEGE(
-        "ROLE-8", "Hasn't got enough privileges to manage this role"), ROLE_NAME_BLANK("ROLE-9",
+        "ROLE-7", "Cannot create a global role with the same name as an existing role"), HAS_NOT_ENOUGH_PRIVILEGE(
+        "ROLE-8", "Not enough privileges to manage this role"), ROLE_NAME_BLANK("ROLE-9",
         "Property name must not be blank"),
 
     // PRIVILEGE

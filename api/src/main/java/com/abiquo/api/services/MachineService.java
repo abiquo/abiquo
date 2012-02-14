@@ -332,6 +332,14 @@ public class MachineService extends DefaultApiService
 
         RemoteService service = remoteServiceService.getVSMRemoteService(machine.getDatacenter());
 
+        // Delete not maneged vms is needed before update virtual appliances
+        List<VirtualMachine> vmachines = repo.getNotManagedVirtualMachines(hypervisor);
+        for (VirtualMachine vm : vmachines)
+        {
+            vsm.unsubscribe(service, vm);
+            virtualDatacenterRep.deleteVirtualMachine(vm);
+        }
+
         // Update virtual machines and remove imported virtual machines
         Collection<VirtualMachine> virtualMachines =
             virtualMachineService.findByHypervisor(hypervisor);

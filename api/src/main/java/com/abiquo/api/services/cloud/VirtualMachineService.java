@@ -72,6 +72,7 @@ import com.abiquo.api.services.UserService;
 import com.abiquo.api.services.VirtualMachineAllocatorService;
 import com.abiquo.api.services.stub.TarantinoJobCreator;
 import com.abiquo.api.services.stub.TarantinoService;
+import com.abiquo.api.tracer.TracerLogger;
 import com.abiquo.api.util.URIResolver;
 import com.abiquo.api.util.snapshot.SnapshotUtils.SnapshotType;
 import com.abiquo.appliancemanager.client.ApplianceManagerResourceStubImpl;
@@ -206,6 +207,7 @@ public class VirtualMachineService extends DefaultApiService
         this.storageRep = new StorageRep(em);
         this.jobCreator = new TarantinoJobCreator(em);
         this.ipService = new NetworkService(em);
+        this.tracer = new TracerLogger();
     }
 
     public Collection<VirtualMachine> findByHypervisor(final Hypervisor hypervisor)
