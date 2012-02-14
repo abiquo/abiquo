@@ -72,6 +72,7 @@ import com.abiquo.api.services.UserService;
 import com.abiquo.api.services.VirtualMachineAllocatorService;
 import com.abiquo.api.services.stub.TarantinoJobCreator;
 import com.abiquo.api.services.stub.TarantinoService;
+import com.abiquo.api.tracer.TracerLogger;
 import com.abiquo.api.util.URIResolver;
 import com.abiquo.api.util.snapshot.SnapshotUtils.SnapshotType;
 import com.abiquo.appliancemanager.client.ApplianceManagerResourceStubImpl;
@@ -205,6 +206,7 @@ public class VirtualMachineService extends DefaultApiService
         this.storageRep = new StorageRep(em);
         this.jobCreator = new TarantinoJobCreator(em);
         this.ipService = new NetworkService(em);
+        this.tracer = new TracerLogger();
     }
 
     public Collection<VirtualMachine> findByHypervisor(final Hypervisor hypervisor)
@@ -261,7 +263,7 @@ public class VirtualMachineService extends DefaultApiService
             flushErrors();
         }
         LOGGER.debug("Virtual machine {} found", vmId);
-        
+
         // if the ips are external, we need to set the limitID in order to return the
         // proper info.
         for (IpPoolManagement ip : vm.getIps())
@@ -275,7 +277,7 @@ public class VirtualMachineService extends DefaultApiService
                 ip.getVlanNetwork().setLimitId(dl.getId());
             }
         }
-        
+
         return vm;
     }
 
@@ -457,7 +459,7 @@ public class VirtualMachineService extends DefaultApiService
                 VirtualMachineRequirements requirements =
                     vmRequirements.createVirtualMachineRequirements(vm, newValues);
                 vmAllocatorService.checkAllocate(vapp.getId(), newValues, requirements, false);
-                
+
                 LOGGER
                     .debug("Creating the temporary register in Virtual Machine for rollback purposes");
                 backUpVm = createBackUpMachine(vm);
@@ -638,7 +640,7 @@ public class VirtualMachineService extends DefaultApiService
         allocateNewStorages(vapp, old, storageResources, usedStorageSlots);
 
         repo.update(old);
-        
+
         // FIXME: improvement related ABICLOUDPREMIUM-2925
         updateNodeVirtualImage(old, vmnew.getVirtualMachineTemplate());
     }
@@ -880,6 +882,7 @@ public class VirtualMachineService extends DefaultApiService
         // First we get from dto. All the values wi
         VirtualMachine virtualMachine = buildVirtualMachineFromDto(vdc, virtualAppliance, dto);
         virtualMachine.setUuid(UUID.randomUUID().toString());
+        virtualMachine.setIdType(VirtualMachine.MANAGED);
         String nodeName = virtualMachine.getName();
         if (dto instanceof VirtualMachineWithNodeDto)
         {
@@ -1703,7 +1706,7 @@ public class VirtualMachineService extends DefaultApiService
             addNotFoundErrors(APIError.NODE_VIRTUAL_MACHINE_IMAGE_NOT_EXISTS);
             flushErrors();
         }
-        
+
         // if the ips are external, we need to set the limitID in order to return the
         // proper info.
         for (IpPoolManagement ip : vm.getIps())
@@ -1717,7 +1720,7 @@ public class VirtualMachineService extends DefaultApiService
                 ip.getVlanNetwork().setLimitId(dl.getId());
             }
         }
-        
+
         return nodeVirtualImage;
     }
 

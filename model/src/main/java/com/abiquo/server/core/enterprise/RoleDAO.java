@@ -228,10 +228,11 @@ public class RoleDAO extends DefaultDAOBase<Integer, Role>
             }
 
         }
-        else
-        {
-            criteria.add(genericRole());
-        }
+        // BUG ABICLOUDPREMIUM-3124
+        // else
+        // {
+        // criteria.add(genericRole());
+        // }
 
         if (!StringUtils.isEmpty(filter))
         {

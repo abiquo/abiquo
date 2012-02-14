@@ -74,6 +74,8 @@ package net.undf.abicloud.events
         public static const GET_ROLES:String = "getRolesUserEvent";
                 
         public static const ROLE_RETRIEVED:String = "roleRetrievedUserEvent";
+        
+        public static const ROLE_CREATED:String = "roleCreatedUserEvent";
 
         /* ------------- Public atributes ------------- */
         public var user:User;

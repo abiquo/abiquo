@@ -299,10 +299,12 @@ public enum APIError
         "Missing privilege parameter"), DELETE_ERROR("ROLE-3",
         "The requested role is blocked. It cannot be deleted"), DELETE_ERROR_WITH_USER("ROLE-4",
         "Cannot delete a role with a user associated"), DELETE_ERROR_WITH_ROLE_LDAP("ROLE-5",
-        "Cannot delete a role with a RoleLdap associated"), DUPLICATED_ROLE_NAME_ENT("ROLE-6",
-        "Cannot create a role with the same name as an existing role for the same enterprise"), DUPLICATED_ROLE_NAME_GEN(
-        "ROLE-7", "Cannot create a global role with the same name as an existing global role"), HAS_NOT_ENOUGH_PRIVILEGE(
-        "ROLE-8", "Not enough privileges to manage this role"),
+        "Cannot delete a role with a RoleLdap associated"), DUPLICATED_ROLE_NAME_ENT(
+        "ROLE-6",
+        "Cannot create a role with the same name as an existing role for the same enterprise or with the same name as an existing global role"), DUPLICATED_ROLE_NAME_GEN(
+        "ROLE-7", "Cannot create a global role with the same name as an existing role"), HAS_NOT_ENOUGH_PRIVILEGE(
+        "ROLE-8", "Not enough privileges to manage this role"), ROLE_NAME_BLANK("ROLE-9",
+        "Property name must not be blank"),
 
     // PRIVILEGE
     NON_EXISTENT_PRIVILEGE("PRIVILEGE-0", "The requested privilege does not exist"),
@@ -527,7 +529,9 @@ public enum APIError
         "HD-3", "Invalid disk size."), HD_CURRENTLY_ALLOCATED("HD-4",
         "Cannot perform this action because the hard disk is currently attached to a virtual machine"), HD_ATTACH_INVALID_LINK(
         "HD-5", "Invalid link to the hard disk to attach"), HD_ATTACH_INVALID_VDC_LINK("HD-6",
-        "Invalid virtual datacenter in the link to the volume to attach"),
+        "Invalid virtual datacenter in the link to the volume to attach"), HD_CREATION_NOT_UNAVAILABLE(
+        "HD-7",
+        "Cannot perform this action because the hard disk creation is not available for this hypervisor"),
 
     // Chef
     CHEF_ERROR_GETTING_RECIPES("CHEF-0",
@@ -685,8 +689,8 @@ public enum APIError
         // Outputs all errors in wiki table format
         for (APIError error : errors)
         {
-            System.out.println(String.format("| %s | %s | %s |", error.code, error.message,
-                error.name()));
+            System.out.println(String.format("| %s | %s | %s |", error.code, error.message, error
+                .name()));
         }
 
         System.out.println("\n ************ Flex client labels ************** \n");

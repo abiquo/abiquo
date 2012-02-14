@@ -40,6 +40,7 @@ import com.abiquo.api.exceptions.BadRequestException;
 import com.abiquo.api.resources.AbstractJpaGeneratorIT;
 import com.abiquo.api.services.StorageService;
 import com.abiquo.api.services.cloud.DiskManagementServiceTest;
+import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.server.core.cloud.NodeVirtualImage;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualApplianceState;
@@ -71,6 +72,8 @@ public class DisksResourceIT extends AbstractJpaGeneratorIT
 
     protected VirtualDatacenter vdc;
 
+    private VirtualDatacenter vdcKVM;
+
     protected VirtualMachine vm;
 
     @BeforeMethod(groups = {STORAGE_INTEGRATION_TESTS})
@@ -82,6 +85,7 @@ public class DisksResourceIT extends AbstractJpaGeneratorIT
         setup(e, r, u);
 
         vdc = vdcGenerator.createInstance(e);
+        vdcKVM = vdcGenerator.createInstance(vdc.getDatacenter(), e, HypervisorType.KVM);
         vapp = vappGenerator.createInstance(vdc);
         vapp.setState(VirtualApplianceState.NOT_DEPLOYED);
         vm = vmGenerator.createInstance(e);
@@ -96,10 +100,11 @@ public class DisksResourceIT extends AbstractJpaGeneratorIT
         vm.setUser(u);
 
         // TODO vdc datacenter and virutal image datacenter ARE NOT THE SAME
-        setup(vdc.getDatacenter(), vdc, dclimit, vapp, vm.getVirtualMachineTemplate().getCategory(), vm
-            .getVirtualMachineTemplate().getRepository().getDatacenter(), vm.getVirtualMachineTemplate()
-            .getRepository(), vm.getVirtualMachineTemplate(), vm.getHypervisor().getMachine().getRack(), vm
-            .getHypervisor().getMachine(), vm.getHypervisor(), vm, nvi);
+        setup(vdc.getDatacenter(), vdc, vdcKVM, dclimit, vapp, vm.getVirtualMachineTemplate()
+            .getCategory(), vm.getVirtualMachineTemplate().getRepository().getDatacenter(), vm
+            .getVirtualMachineTemplate().getRepository(), vm.getVirtualMachineTemplate(), vm
+            .getHypervisor().getMachine().getRack(), vm.getHypervisor().getMachine(), vm
+            .getHypervisor(), vm, nvi);
 
         SecurityContextHolder.getContext().setAuthentication(new BasicUserAuthentication());
     }
@@ -117,12 +122,24 @@ public class DisksResourceIT extends AbstractJpaGeneratorIT
     @Test
     public void createHardDiskEndToEndTest()
     {
+
         String uri = resolveDisksUri(vdc.getId());
         DiskManagementDto newDisk = new DiskManagementDto();
         newDisk.setSizeInMb(12000L);
 
         ClientResponse response = post(uri, newDisk, "basicUser", "basicUser");
         assertEquals(response.getStatusCode(), Status.CREATED.getStatusCode());
+    }
+
+    @Test
+    public void createHardDiskInKVMRaises409()
+    {
+        String uri = resolveDisksUri(vdcKVM.getId());
+        DiskManagementDto newDisk = new DiskManagementDto();
+        newDisk.setSizeInMb(12000L);
+
+        ClientResponse response = post(uri, newDisk, "basicUser", "basicUser");
+        assertEquals(response.getStatusCode(), Status.CONFLICT.getStatusCode());
     }
 
     /**
@@ -206,12 +223,12 @@ public class DisksResourceIT extends AbstractJpaGeneratorIT
         String uri = resolveDiskUri(-12, disk1.getId());
         ClientResponse response = get(uri);
         assertEquals(response.getStatusCode(), Status.BAD_REQUEST.getStatusCode());
-        
+
         uri = resolveDiskUri(vdc.getId(), -21);
         response = get(uri);
         assertEquals(response.getStatusCode(), Status.BAD_REQUEST.getStatusCode());
     }
-    
+
     /**
      * Just check the delte of hard disk works.
      */
@@ -225,7 +242,7 @@ public class DisksResourceIT extends AbstractJpaGeneratorIT
         ClientResponse response = delete(uri, "basicUser", "basicUser");
 
         assertEquals(response.getStatusCode(), Status.NO_CONTENT.getStatusCode());
-        
+
         // Not found should be raised afeter delete the disk
         response = get(uri);
         assertEquals(response.getStatusCode(), Status.NOT_FOUND.getStatusCode());
@@ -244,7 +261,7 @@ public class DisksResourceIT extends AbstractJpaGeneratorIT
         String uri = resolveDiskUri(-12, disk1.getId());
         ClientResponse response = delete(uri);
         assertEquals(response.getStatusCode(), Status.BAD_REQUEST.getStatusCode());
-        
+
         uri = resolveDiskUri(vdc.getId(), -21);
         response = delete(uri);
         assertEquals(response.getStatusCode(), Status.BAD_REQUEST.getStatusCode());
