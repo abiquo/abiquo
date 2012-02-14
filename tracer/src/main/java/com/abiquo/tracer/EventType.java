@@ -174,7 +174,7 @@ public enum EventType implements Serializable
     // HA Engine Events
     MACHINE_DISABLED_BY_HA(1400, "MACHINE_DISABLED_BY_HA", "Machine disabled by HA engine."), VAPP_BLOCKED_BY_HA(
         1401, "VAPP_BLOCKED_BY_HA", "Virtual appliance block by HA engine"), VM_MOVING_BY_HA(1402,
-        "VAPP_MOVING_BY_HA", "Virtual machine being moved by HA engine"),
+        "VM_MOVING_BY_HA", "Virtual machine being moved by HA engine"),
 
     // ALLOCATION RULES
     ALLOCATION_RULES_APPLIED(1500, "ALLOCATION_RULES_APPLIED", "Allocation rules applied"), ALLOCATION_RULES_REMOVED(
