@@ -916,6 +916,18 @@ public class VirtualMachineService extends DefaultApiService
         attachVirtualMachineTemplateConversion(virtualAppliance.getVirtualDatacenter(),
             virtualMachine);
 
+        // Attach the matching stateful volume if the template is a saved persistent template
+        if (virtualMachine.getVirtualMachineTemplate().isStateful())
+        {
+            LOGGER.debug("Attaching virtual machine template volume");
+            virtualMachine.getVirtualMachineTemplate().getVolume().attach(0, virtualMachine,
+                virtualAppliance);
+            virtualMachine.getVirtualMachineTemplate().getVolume().setVirtualAppliance(
+                virtualAppliance);
+            virtualMachine.getVirtualMachineTemplate().getVolume()
+                .setVirtualMachine(virtualMachine);
+        }
+
         // At this stage the virtual machine is not associated with any hypervisor
         virtualMachine.setState(VirtualMachineState.NOT_ALLOCATED);
 
