@@ -26,6 +26,7 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.util.Map;
 import java.util.UUID;
 
 import javax.persistence.EntityManager;
@@ -33,6 +34,7 @@ import javax.persistence.EntityManager;
 import org.springframework.stereotype.Service;
 
 import com.abiquo.commons.amqp.impl.tarantino.domain.builder.VirtualMachineDescriptionBuilder;
+import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineState;
@@ -67,7 +69,8 @@ public class TarantinoServiceMock extends TarantinoService
         when(mock.applyVirtualMachineState(anyVM(), anyDesc(), anyTransition())).thenReturn(
             randomTaskId());
         when(mock.deployVirtualMachine(anyVM(), anyDesc())).thenReturn(randomTaskId());
-        when(mock.deployVirtualMachineHA(anyVM(), anyDesc(), anyBoolean(), null)).thenReturn(
+        when(mock.deployVirtualMachineHA(anyVM(), anyDesc(), anyBoolean(), anyExtraData()))
+            .thenReturn(
             randomTaskId());
         when(mock.reconfigureVirtualMachine(anyVM(), anyDesc(), anyDesc())).thenReturn(
             randomTaskId());
@@ -80,6 +83,8 @@ public class TarantinoServiceMock extends TarantinoService
             mock.instanceStatefulVirtualMachine(anyVirtualAppliance(), anyVM(), anyState(),
                 anyString())).thenReturn(randomTaskId());
         when(mock.undeployVirtualMachine(anyVM(), anyDesc(), anyState()))
+            .thenReturn(randomTaskId());
+        when(mock.undeployVirtualMachineHA(anyVM(), anyDesc(), anyState(), anyHypervisor()))
             .thenReturn(randomTaskId());
 
         return mock;
@@ -110,6 +115,16 @@ public class TarantinoServiceMock extends TarantinoService
     private static VirtualAppliance anyVirtualAppliance()
     {
         return (VirtualAppliance) any();
+    }
+
+    private static Hypervisor anyHypervisor()
+    {
+        return (Hypervisor) any();
+    }
+
+    private static Map<String, String> anyExtraData()
+    {
+        return (Map<String, String>) any();
     }
 
     private static String randomTaskId()
@@ -144,6 +159,14 @@ public class TarantinoServiceMock extends TarantinoService
     {
         return mock.undeployVirtualMachine(virtualMachine, virtualMachineDesciptionBuilder,
             currentState);
+    }
+
+    public String undeployVirtualMachineHA(VirtualMachine virtualMachine,
+        VirtualMachineDescriptionBuilder virtualMachineDesciptionBuilder,
+        VirtualMachineState currentState, Hypervisor originalHypervisor)
+    {
+        return mock.undeployVirtualMachineHA(virtualMachine, virtualMachineDesciptionBuilder,
+            currentState, originalHypervisor);
     }
 
     public String undeployVirtualMachineAndDelete(VirtualMachine virtualMachine,
