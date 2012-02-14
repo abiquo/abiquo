@@ -134,7 +134,7 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
         final VirtualMachine virtualMachine, final Integer sourceHypervisorId)
     {
         updateUse(virtualAppliance, virtualMachine, true); // upgrade resources on the target HA
-                                                           // hypervisor
+        // hypervisor
         // free resources on the original hypervisor
         Machine sourceMachine = hypervisorDao.findById(sourceHypervisorId).getMachine();
         updateUsagePhysicalMachine(sourceMachine, virtualMachine, true);
@@ -203,6 +203,7 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
 
         try
         {
+
             updateUsageDatastore(virtualMachine, true);
             updateUsagePhysicalMachine(physicalMachine, virtualMachine, true);
             rollbackNetworkingResources(physicalMachine, virtualMachine);
@@ -292,8 +293,8 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
                 vlanTagsUsed.addAll(getPublicVLANTagsFROMVLANNetworkList(publicVLANs));
 
                 Integer freeTag = getFreeVLANFromUsedList(vlanTagsUsed, rack);
-                log.debug("The VLAN tag chosen for the vlan network: {} is : {}",
-                    vlanNetwork.getId(), freeTag);
+                log.debug("The VLAN tag chosen for the vlan network: {} is : {}", vlanNetwork
+                    .getId(), freeTag);
                 vlanNetwork.setTag(freeTag);
             }
 
@@ -360,11 +361,13 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
 
         final int newCpu =
             isRollback ? machine.getVirtualCpusUsed() - used.getCpu() : machine
-                .getVirtualCpusUsed() + used.getCpu();
+                .getVirtualCpusUsed()
+                + used.getCpu();
 
         final int newRam =
             isRollback ? machine.getVirtualRamUsedInMb() - used.getRam() : machine
-                .getVirtualRamUsedInMb() + used.getRam();
+                .getVirtualRamUsedInMb()
+                + used.getRam();
 
         if (used.getVirtualMachineTemplate().isStateful())
         {
@@ -421,8 +424,8 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
         if (newUsed > datastore.getSize())
         {
 
-            log.error("Target datastore usage is over capacity !!!!! datastore : %s",
-                datastore.getName());
+            log.error("Target datastore usage is over capacity !!!!! datastore : %s", datastore
+                .getName());
         }
 
         datastore.setUsedSize(newUsed >= 0 ? newUsed : 0); // prevent negative usage
