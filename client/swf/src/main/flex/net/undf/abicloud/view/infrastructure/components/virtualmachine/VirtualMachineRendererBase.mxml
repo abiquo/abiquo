@@ -976,7 +976,9 @@
         <mx:Button id="rebootButton"
             width="57" height="47"
             styleName="StandardRebootButton"
-            enabled="{_virtualMachine.state.description == State.ON.description}"
+            enabled="{_virtualMachine.state.description == State.ON.description
+            &amp;&amp; (HyperVisor(this._virtualMachine.assignedTo).type.id != HyperVisorType.KVM 
+             &amp;&amp; HyperVisor(this._virtualMachine.assignedTo).type.id != HyperVisorType.XEN)}"
             click="onClickRebootButton()"
             useHandCursor="true"
             mouseChildren="false"
