@@ -381,7 +381,7 @@ public class NetworkService extends DefaultApiService
         // once we have validated we have IPs in all IP parameters (isValid() method), we should
         // ensure they are
         // actually PRIVATE IPs. Also check if the gateway is in the range, and
-        checkPrivateAddressAndMaskCoherency(IPAddress.newIPAddress(newVlan.getConfiguration()
+        checkAddressAndMaskCoherency(IPAddress.newIPAddress(newVlan.getConfiguration()
             .getAddress()), newVlan.getConfiguration().getMask());
 
         List<DhcpOption> opts = new ArrayList<DhcpOption>(newVlan.getDhcpOption());
@@ -1266,7 +1266,7 @@ public class NetworkService extends DefaultApiService
      * @throws NetworkCommandException if the values are not coherent into a public or private
      *             network environment.
      */
-    protected void checkPrivateAddressAndMaskCoherency(final IPAddress netAddress,
+    protected void checkAddressAndMaskCoherency(final IPAddress netAddress,
         final Integer netmask)
     {
 
@@ -1274,41 +1274,18 @@ public class NetworkService extends DefaultApiService
         IPAddress networkAddress = IPAddress.newIPAddress(netAddress.toString());
 
         // First of all, check if the networkAddress is correct.
-        Integer firstOctet = Integer.parseInt(networkAddress.getFirstOctet());
-        Integer secondOctet = Integer.parseInt(networkAddress.getSecondOctet());
 
         // if the value is a private network.
-        if (firstOctet == 10 || firstOctet == 192 && secondOctet == 168 || firstOctet == 172
-            && secondOctet >= 16 && secondOctet < 32)
+        if (netmask < 22)
         {
-            // check the mask is coherent with the server.
-            if (firstOctet == 10 && netmask < 22)
-            {
-                addConflictErrors(APIError.VLANS_TOO_BIG_NETWORK);
-            }
-            if ((firstOctet == 172 || firstOctet == 192) && netmask < 24)
-            {
-                addConflictErrors(APIError.VLANS_TOO_BIG_NETWORK_II);
-            }
-            if (netmask > 30)
-            {
-                addConflictErrors(APIError.VLANS_TOO_SMALL_NETWORK);
-            }
+            addConflictErrors(APIError.VLANS_TOO_BIG_NETWORK);
             flushErrors();
-
-            // Check the network address depending on the mask. For instance, the network address
-            // 192.168.1.128
-            // is valid for the mask 25, but the same (192.168.1.128) is an invalid network address
-            // for the mask 24.
-            if (!NetworkResolver.isValidNetworkMask(netAddress, netmask))
-            {
-                addValidationErrors(APIError.VLANS_INVALID_NETWORK_AND_MASK);
-                flushErrors();
-            }
         }
-        else
+
+        if (!NetworkResolver.isValidNetworkMask(networkAddress, netmask))
         {
-            throw new BadRequestException(APIError.VLANS_PRIVATE_ADDRESS_WRONG);
+            addValidationErrors(APIError.VLANS_INVALID_NETWORK_AND_MASK);
+            flushErrors();
         }
 
     }

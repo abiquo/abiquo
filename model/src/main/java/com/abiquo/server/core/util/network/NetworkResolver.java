@@ -92,17 +92,6 @@ public class NetworkResolver
         List<String> fourthElement = new ArrayList<String>();
         String maskString = mask.toString();
 
-        // After check if the mask is inside the array of the accepted masks
-        if ((firstOctet == 10 && !Arrays.asList(allMasks).subList(14, allMasks.length)
-            .contains(maskString))
-            || (firstOctet == 172 && !Arrays.asList(allMasks).subList(14, allMasks.length)
-                .contains(maskString))
-            || (firstOctet == 192 && !Arrays.asList(allMasks).subList(16, allMasks.length)
-                .contains(maskString)))
-        {
-            return null;
-        }
-
         StringTokenizer tokenizer = new StringTokenizer(maskString, ".");
 
         // First element of the list of lists.
