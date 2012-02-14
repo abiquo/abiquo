@@ -120,7 +120,7 @@
             /**
              * Allows users to drag this AbiCloudPoUp around screen
              */
-            private function headerMouseDown_handler(mouseEvent:MouseEvent):void
+            protected function headerMouseDown_handler(mouseEvent:MouseEvent):void
             {
                 startDrag(false, Application.application.getRect(Application.application));
             }
