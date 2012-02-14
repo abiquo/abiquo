@@ -529,7 +529,9 @@ public enum APIError
         "HD-3", "Invalid disk size."), HD_CURRENTLY_ALLOCATED("HD-4",
         "Cannot perform this action because the hard disk is currently attached to a virtual machine"), HD_ATTACH_INVALID_LINK(
         "HD-5", "Invalid link to the hard disk to attach"), HD_ATTACH_INVALID_VDC_LINK("HD-6",
-        "Invalid virtual datacenter in the link to the volume to attach"),
+        "Invalid virtual datacenter in the link to the volume to attach"), HD_CREATION_NOT_UNAVAILABLE(
+        "HD-7",
+        "Cannot perform this action because the hard disk creation is not available for this hypervisor"),
 
     // Chef
     CHEF_ERROR_GETTING_RECIPES("CHEF-0",
