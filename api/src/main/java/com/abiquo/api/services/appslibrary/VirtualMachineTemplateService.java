@@ -164,18 +164,27 @@ public class VirtualMachineTemplateService extends DefaultApiServiceWithApplianc
     public VirtualMachineTemplate getVirtualMachineTemplate(final Integer enterpriseId,
         final Integer datacenterId, final Integer virtualMachineTemplateId)
     {
-        // Check that the enterprise can use the datacenter (also checks enterprise and datacenter
-        // exists)
-        checkEnterpriseCanUseDatacenter(enterpriseId, datacenterId);
-
+        // When shared all enterprises can retrieve it (as long as the privileges are met)
         VirtualMachineTemplate virtualMachineTemplate =
             appsLibraryRep.findVirtualMachineTemplateById(virtualMachineTemplateId);
-        if (virtualMachineTemplate == null)
-        {
-            addNotFoundErrors(APIError.NON_EXISTENT_VIRTUAL_MACHINE_TEMPLATE);
-            flushErrors();
-        }
 
+        // We can't disclose whether the virtual machine template exists to user without privilege
+        if (virtualMachineTemplate != null && virtualMachineTemplate.isShared())
+        {
+            checkEnterpriseCanUseVMTShared(enterpriseId, datacenterId);
+        }
+        else
+        {
+            // Check that the enterprise can use the datacenter (also checks enterprise and
+            // datacenter exists)
+            checkEnterpriseCanUseDatacenter(enterpriseId, datacenterId);
+
+            if (virtualMachineTemplate == null)
+            {
+                addNotFoundErrors(APIError.NON_EXISTENT_VIRTUAL_MACHINE_TEMPLATE);
+                flushErrors();
+            }
+        }
         return virtualMachineTemplate;
     }
 
@@ -578,6 +587,22 @@ public class VirtualMachineTemplateService extends DefaultApiServiceWithApplianc
     {
         DatacenterLimits limits =
             enterpriseService.findLimitsByEnterpriseAndDatacenter(enterpriseId, datacenterId);
+        if (limits == null)
+        {
+            addConflictErrors(APIError.ENTERPRISE_NOT_ALLOWED_DATACENTER);
+            flushErrors();
+        }
+    }
+
+    /**
+     * Checks the enterprise and datacenter exists and have a limits relation (datacenter allowed by
+     * enterprise). Retrieve shared virtual machine templates
+     */
+    private void checkEnterpriseCanUseVMTShared(final Integer enterpriseId,
+        final Integer datacenterId)
+    {
+        DatacenterLimits limits =
+            enterpriseService.findLimitsByEnterpriseVMTShared(enterpriseId, datacenterId);
         if (limits == null)
         {
             addConflictErrors(APIError.ENTERPRISE_NOT_ALLOWED_DATACENTER);

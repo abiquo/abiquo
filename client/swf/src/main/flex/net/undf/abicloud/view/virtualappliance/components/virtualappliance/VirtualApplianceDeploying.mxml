@@ -170,7 +170,8 @@
                 *       - if the Virtual Appliance doesn't have timestamp -> *Check Flow*
                 * 
                 * *Check Flow*
-                *   - if task FINISHED_SUCCESSFULLY o FINISHED_UNSUCCESSFULLY o ABORTED -> task.state 
+                *   - if task FINISHED_SUCCESSFULLY -> task.type
+                *   - if task FINISHED_UNSUCCESSFULLY o ABORTED -> task.state 
                 *   - if a job as a different state that DONE and FAILED -> job.type + job.description
                 *  
                 * **/
@@ -191,7 +192,11 @@
                 	   }	
                 	}
                 	
-                	if(task.state == Task.FINISHED_SUCCESSFULLY || task.state == Task.FINISHED_UNSUCCESSFULLY || task.state == Task.ABORTED)
+                	if(task.state == Task.FINISHED_SUCCESSFULLY)
+                	{
+                		return resourceManager.getString('VirtualAppliance','LABEL_TYPE_' + task.type);
+                	}
+                	else if(task.state == Task.FINISHED_UNSUCCESSFULLY || task.state == Task.ABORTED)
                 	{
                 		return resourceManager.getString('VirtualAppliance','LABEL_STATUS_' + task.state);
                 	}
@@ -315,17 +320,15 @@
         <mx:ProgressBar id="deployProgressBar"
             width="0"
             top="-1" bottom="-1"
-            barColor="#FE9608"
-            trackHeight="14"
+            styleName="CustomProgressBar"
             minWidth="0" indeterminate="true" mode="event"
             visible="{this._virtualAppliance.state.description != State.LOCKED.description}"/>
 
         <mx:ProgressBar id="indeterminateDeployProgressBar"
             width="100%"
             top="-1" bottom="-1"
-            barColor="#FE9608"
+            styleName="CustomProgressBar"
             indeterminateMoveInterval="30"
-            trackHeight="14"
             minWidth="0" label="" labelPlacement="center" indeterminate="true"
             visible="{this._virtualAppliance.state.description == State.LOCKED.description}"/>
     </mx:Canvas>

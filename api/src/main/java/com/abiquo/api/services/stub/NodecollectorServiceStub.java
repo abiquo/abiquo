@@ -538,7 +538,9 @@ public class NodecollectorServiceStub extends DefaultApiService
 
         }
 
-        switches = switches.substring(0, switches.lastIndexOf('/'));
+        switches =
+            StringUtils.hasLength(switches) ? switches.substring(0, switches.lastIndexOf('/'))
+                : null;
         machine.setVirtualSwitch(switches);
         return machine;
     }

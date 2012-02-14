@@ -1276,3 +1276,10 @@ List {
 .paginatorTextOnColor {
 	color: #FFFFFF;
 }
+
+.CustomProgressBar {
+    bar-color: #FE9608;
+    border-color: #666666;
+    track-height: 14;
+    color: #505050;
+}

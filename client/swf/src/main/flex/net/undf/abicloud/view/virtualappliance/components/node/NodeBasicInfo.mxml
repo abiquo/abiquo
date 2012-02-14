@@ -138,7 +138,7 @@
                 
                 if(cpuInput.value != _originalNode.virtualMachine.cpu
                 || ramInput.value != _originalNode.virtualMachine.ram
-                || (passwordInput.text != '' && passwordInput.text != _originalNode.virtualMachine.password)
+                || passwordInput.text != _originalNode.virtualMachine.password
                 || descriptionInput.text != _originalNode.virtualMachine.description)
                 {
 	                //Making a copy of the virtual machine, to not modify the original one before changes are saved in server

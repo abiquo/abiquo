@@ -255,7 +255,7 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
      * @throws NotEnoughResourcesException
      * @throws NoSuchObjectException
      */
-    private void updateNetworkingResources(final Machine physicalTarget,
+    public void updateNetworkingResources(final Machine physicalTarget,
         final VirtualMachine virtualMachine, final VirtualAppliance vapp)
         throws NotEnoughResourcesException, NoSuchObjectException
     {
@@ -290,10 +290,6 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
                     vlanNetwork.getId(), freeTag);
                 vlanNetwork.setTag(freeTag);
             }
-            Rasd rasd = ipPoolManagement.getRasd();
-            rasd.setAllocationUnits(String.valueOf(vlanNetwork.getTag()));
-            rasd.setParent(ipPoolManagement.getNetworkName());
-            rasd.setConnection(physicalTarget.getVirtualSwitch());
 
             final NetworkAssignment nb =
                 new NetworkAssignment(virtualDatacenter, rack, vlanNetwork);
