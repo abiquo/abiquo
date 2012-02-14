@@ -55,6 +55,7 @@ import com.abiquo.commons.amqp.impl.tarantino.domain.builder.VirtualMachineDescr
 import com.abiquo.commons.amqp.impl.tarantino.domain.dto.DatacenterTasks;
 import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
+import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineState;
@@ -225,6 +226,7 @@ public class TarantinoService extends DefaultApiService
 
         return tarantinoTask.getId();
     }
+
 
     private TarantinoRequestProducer getTarantinoProducer(final Datacenter datacenter)
     {
@@ -398,7 +400,7 @@ public class TarantinoService extends DefaultApiService
     @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
     public String deployVirtualMachineHA(final VirtualMachine virtualMachine,
         final VirtualMachineDescriptionBuilder virtualMachineDesciptionBuilder,
-        final boolean originalVMStateON)
+        final boolean originalVMStateON, final Map<String, String> extraData)
     {
         Datacenter datacenter = virtualMachine.getHypervisor().getMachine().getDatacenter();
 
@@ -414,13 +416,14 @@ public class TarantinoService extends DefaultApiService
             if (originalVMStateON)
             {
                 deployTask =
-                    builder.add(VirtualMachineStateTransition.CONFIGURE)
+                    builder.add(VirtualMachineStateTransition.CONFIGURE, extraData)
                         .add(VirtualMachineStateTransition.POWERON).buildTarantinoTask();
             }
             else
             {
                 deployTask =
-                    builder.add(VirtualMachineStateTransition.CONFIGURE).buildTarantinoTask();
+                    builder.add(VirtualMachineStateTransition.CONFIGURE, extraData)
+                        .buildTarantinoTask();
             }
 
             enqueueTask(datacenter, builder.buildAsyncTask(String.valueOf(virtualMachine.getId()),
@@ -462,6 +465,80 @@ public class TarantinoService extends DefaultApiService
         return null;
     }
 
+
+    /**
+     * Undeploys VM after a Re-enable HA operation
+     * 
+     * @param virtualMachine
+     * @param virtualMachineDesciptionBuilder
+     * @param currentState
+     * @param sourceHypervisor VM is undeployed from this hypervisor, not the one we have in DB
+     * @return
+     */
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
+    public String undeployVirtualMachineHA(final VirtualMachine virtualMachine,
+        final VirtualMachineDescriptionBuilder virtualMachineDesciptionBuilder,
+        final VirtualMachineState currentState, Hypervisor originalHypervisor)
+    {
+
+        Map<String, String> extraData = new HashMap<String, String>();
+        extraData.put("isHA", Boolean.TRUE.toString());        
+        try
+        {
+            // VM is undeployed from this hypervisor, not the one we have in DB
+            HypervisorConnection conn =
+                jobCreator.hypervisorConnectionConfiguration(originalHypervisor);
+            DatacenterTaskBuilder builder =
+                new DatacenterTaskBuilder(virtualMachineDesciptionBuilder.build(),
+                    conn,
+                    userService.getCurrentUser().getNick());
+
+            if (VirtualMachineState.ON.equals(currentState))
+            {
+                builder.add(VirtualMachineStateTransition.POWEROFF);
+            }
+
+            DatacenterTasks tarantinoTask =
+                builder.add(VirtualMachineStateTransition.DECONFIGURE, extraData)
+                    .buildTarantinoTask();
+
+            Task redisTask =
+                builder.buildAsyncTask(String.valueOf(virtualMachine.getId()), TaskType.UNDEPLOY);
+
+            Datacenter datacenter = virtualMachine.getHypervisor().getMachine().getDatacenter();
+
+            // Add Redis task for progress tracking and send the tarantino task
+            logger.debug("Enqueuing task for virtual machine {}", virtualMachine.getName());
+            enqueueTask(datacenter, redisTask, tarantinoTask, EventType.VM_UNDEPLOY);
+            logger.debug("Task for virtual machine {} enqueued", virtualMachine.getName());
+
+            return tarantinoTask.getId();
+        }
+        catch (NotFoundException e)
+        {
+            throw e;
+        }
+        catch (RuntimeException e)
+        {
+            logger
+                .error("Error enqueuing the undeploy task dto to the virtual factory with error: "
+                    + e.getMessage());
+
+            tracer.log(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE, EventType.VM_UNDEPLOY,
+                APIError.GENERIC_OPERATION_ERROR.getMessage());
+
+            // For the Admin to know all errors
+            tracer.systemLog(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
+                EventType.VM_UNDEPLOY, "tarantino.undeployVMError", e.getMessage());
+
+            // There is no point in continue
+            addUnexpectedErrors(APIError.GENERIC_OPERATION_ERROR);
+            flushErrors();
+        }
+        return null;
+        
+    }
+
     /**
      * Creates and sends a deploy operation.
      * 
@@ -475,7 +552,6 @@ public class TarantinoService extends DefaultApiService
         final VirtualMachineDescriptionBuilder virtualMachineDesciptionBuilder,
         final VirtualMachineState currentState)
     {
-        Datacenter datacenter = virtualMachine.getHypervisor().getMachine().getDatacenter();
 
         try
         {
@@ -492,7 +568,8 @@ public class TarantinoService extends DefaultApiService
             }
 
             DatacenterTasks tarantinoTask =
-                builder.add(VirtualMachineStateTransition.DECONFIGURE).buildTarantinoTask();
+                builder.add(VirtualMachineStateTransition.DECONFIGURE)
+                    .buildTarantinoTask();
 
             Task redisTask =
                 builder.buildAsyncTask(String.valueOf(virtualMachine.getId()), TaskType.UNDEPLOY);

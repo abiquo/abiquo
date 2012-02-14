@@ -381,6 +381,13 @@ public class VirtualMachineAllocatorService extends DefaultApiService
         }
     }
 
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    public void deallocateVirtualMachineHA(final VirtualMachine vmachine)
+        throws AllocatorException, ResourceAllocationException
+    {
+        LOG.error("community can't *deallocateHAVirtualMachine*");
+    }
+
     protected String virtualMachineInfo(final VirtualMachine vm)
     {
 

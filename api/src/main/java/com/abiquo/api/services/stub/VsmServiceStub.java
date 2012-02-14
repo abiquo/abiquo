@@ -353,4 +353,24 @@ public class VsmServiceStub extends DefaultApiService
             returnClientToPool(client);
         }
     }
+
+    /**
+     * Returns true if the hypervisor is monitored.
+     * 
+     * @param service The VSM uri.
+     * @param hypervisor The hypervisor to query.
+     */
+    public boolean isHypervisorMonitored(final RemoteService service, final Hypervisor hypervisor)
+    {
+        VSMClient client = getClientFromPool(service);
+
+        try
+        {
+            return client.isMonitored(buildHypervisorURI(hypervisor));
+        }
+        finally
+        {
+            returnClientToPool(client);
+        }
+    }
 }
