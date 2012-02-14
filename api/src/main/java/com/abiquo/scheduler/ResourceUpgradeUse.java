@@ -436,20 +436,20 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
      * @return
      * @throws SchedulerException
      */
-    public Integer getFreeVLANFromUsedList(final List<Integer> vlanTags, final Rack rack)
+    public Integer getFreeVLANFromUsedList(final List<Integer> vlanIds, final Rack rack)
         throws NotEnoughResourcesException
     {
         // Adding Vlans Id not to add
         vlanIds.addAll(getVlansIdAvoidAsCollection(rack));
 
         // Create a HashSet which allows no duplicates
-        HashSet<Integer> hashSet = new HashSet<Integer>(vlanTags);
+        HashSet<Integer> hashSet = new HashSet<Integer>(vlanIds);
 
         // Assign the HashSet to a new ArrayList
-        List<Integer> vlanTagsOrdered = new ArrayList<Integer>(hashSet);
-        Collections.sort(vlanTagsOrdered);
+        List<Integer> vlanIdsOrdered = new ArrayList<Integer>(hashSet);
+        Collections.sort(vlanIdsOrdered);
 
-        List<Integer> vlanTemp = new ArrayList<Integer>(vlanTagsOrdered);
+        List<Integer> vlanTemp = new ArrayList<Integer>(vlanIdsOrdered);
 
         // Removing used port groups minor than minId and bigger then maxId
         // (that could be only public and external networks with tags ouside the
@@ -458,7 +458,7 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
         {
             if (vlanId.intValue() < rack.getVlanIdMin())
             {
-                vlanTagsOrdered.remove(vlanId);
+                vlanIdsOrdered.remove(vlanId);
             }
         }
         
