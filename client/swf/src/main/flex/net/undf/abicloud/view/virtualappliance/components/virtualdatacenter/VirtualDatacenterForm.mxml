@@ -91,7 +91,7 @@
 	                hyperTypeInput.selectedIndex = -1;
 	                hyperTypeInput.dataProvider = null;
 	                defaultPrivateNetworkRadioButton.selected = true;
-	                privateNetworkForm.init("default_private_network");
+	                privateNetworkForm.init(AbiCloudModel.getInstance().configurationManager.config.client_network_defaultName.value);
                 }              
                 
 
@@ -198,7 +198,7 @@
             {
                 if (privateNetworkInput.selectedValue == "default")
                 {
-                    privateNetworkForm.init("default_private_network");
+                    privateNetworkForm.init(AbiCloudModel.getInstance().configurationManager.config.client_network_defaultName.value);
                 }
             }
 
