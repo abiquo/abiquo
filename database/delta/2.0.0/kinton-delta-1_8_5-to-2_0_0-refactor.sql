@@ -466,6 +466,34 @@ BEGIN
 	IF @existsCount = 0 THEN 
 		INSERT INTO kinton.system_properties (name, value, description) VALUES ('client.wiki.network.staticRoutes','http://community.abiquo.com/display/ABI20/Manage+Network+Configuration#ManageNetworkConfiguration-ConfiguringStaticRoutesUsingDHCP','static routes wiki');
 	END IF;
+	SELECT COUNT(*) INTO @existsCount FROM kinton.system_properties WHERE name='client.network.defaultName' AND value='default_private_network' AND description='default private vlan name';
+	IF @existsCount = 0 THEN 
+		INSERT INTO kinton.system_properties (name, value, description) VALUES ('client.network.defaultName','default_private_network','default private vlan name');
+	END IF;
+	SELECT COUNT(*) INTO @existsCount FROM kinton.system_properties WHERE name='client.network.defaultNetmask' AND value='2' AND description='index of available netmask';
+	IF @existsCount = 0 THEN 
+		INSERT INTO kinton.system_properties (name, value, description) VALUES ('client.network.defaultNetmask','2','index of available netmask');
+	END IF;
+	SELECT COUNT(*) INTO @existsCount FROM kinton.system_properties WHERE name='client.network.defaultAddress' AND value='192.168.0.0' AND description='default private vlan address';
+	IF @existsCount = 0 THEN 
+		INSERT INTO kinton.system_properties (name, value, description) VALUES ('client.network.defaultAddress','192.168.0.0','default private vlan address');
+	END IF;
+	SELECT COUNT(*) INTO @existsCount FROM kinton.system_properties WHERE name='client.network.defaultGateway' AND value='192.168.0.1' AND description='default private vlan gateway';
+	IF @existsCount = 0 THEN 
+		INSERT INTO kinton.system_properties (name, value, description) VALUES ('client.network.defaultGateway','192.168.0.1','default private vlan gateway');
+	END IF;
+	SELECT COUNT(*) INTO @existsCount FROM kinton.system_properties WHERE name='client.network.defaultPrimaryDNS' AND value='' AND description='default primary DNS';
+	IF @existsCount = 0 THEN 
+		INSERT INTO kinton.system_properties (name, value, description) VALUES ('client.network.defaultPrimaryDNS','','default primary DNS');
+	END IF;
+	SELECT COUNT(*) INTO @existsCount FROM kinton.system_properties WHERE name='client.network.defaultSecondaryDNS' AND value='' AND description='default secondary DNS';
+	IF @existsCount = 0 THEN 
+		INSERT INTO kinton.system_properties (name, value, description) VALUES ('client.network.defaultSecondaryDNS','','default secondary DNS');
+	END IF;
+	SELECT COUNT(*) INTO @existsCount FROM kinton.system_properties WHERE name='client.network.defaultSufixDNS' AND value='' AND description='default sufix DNS';
+	IF @existsCount = 0 THEN 
+		INSERT INTO kinton.system_properties (name, value, description) VALUES ('client.network.defaultSufixDNS','','default sufix DNS');
+	END IF;
 	
 	-- Update System Properties
 	SELECT COUNT(*) INTO @existsCount FROM kinton.system_properties WHERE name='client.wiki.defaultURL' AND value='http://community.abiquo.com/display/ABI18/Abiquo+Documentation+Home';
