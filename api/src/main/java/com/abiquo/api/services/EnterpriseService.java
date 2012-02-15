@@ -504,20 +504,11 @@ public class EnterpriseService extends DefaultApiService
         }
 
         DatacenterLimits limit =
-            new DatacenterLimits(enterprise,
-                datacenter,
-                dto.getRamSoftLimitInMb(),
-                dto.getCpuCountSoftLimit(),
-                dto.getHdSoftLimitInMb(),
-                dto.getRamHardLimitInMb(),
-                dto.getCpuCountHardLimit(),
-                dto.getHdHardLimitInMb(),
-                dto.getStorageSoft(),
-                dto.getStorageHard(),
-                dto.getPublicIpsSoft(),
-                dto.getPublicIpsHard(),
-                dto.getVlansSoft(),
-                dto.getVlansHard());
+            new DatacenterLimits(enterprise, datacenter, dto.getRamSoftLimitInMb(), dto
+                .getCpuCountSoftLimit(), dto.getHdSoftLimitInMb(), dto.getRamHardLimitInMb(), dto
+                .getCpuCountHardLimit(), dto.getHdHardLimitInMb(), dto.getStorageSoft(), dto
+                .getStorageHard(), dto.getPublicIpsSoft(), dto.getPublicIpsHard(), dto
+                .getVlansSoft(), dto.getVlansHard());
 
         if (!limit.isValid())
         {
@@ -576,7 +567,8 @@ public class EnterpriseService extends DefaultApiService
         DatacenterLimits limit = findLimitsByEnterpriseAndIdentifier(enterprise, limitId);
 
         Collection<VirtualDatacenter> vdcs =
-            vdcRepo.findByEnterpriseAndDatacenter(enterprise, limit.getDatacenter());
+            vdcRepo.findByEnterpriseAndDatacenter(enterprise, limit.getDatacenter(), 0, 0, "",
+                VirtualDatacenter.OrderByEnum.NAME, true);
 
         if (vdcs != null && !vdcs.isEmpty())
         {
