@@ -743,9 +743,15 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
     protected OVFPackage createFlexOVFPackageObject(final TemplateDefinitionDto packDto)
     {
         OVFPackage pack = new OVFPackage();
-        if (packDto.getName() != null)
+        RESTLink categoryLink = getLink("category", packDto.getLinks());
+        if (categoryLink != null)
         {
-            pack.setCategory(packDto.getName());
+            ClientResponse categoryResponse = get(categoryLink.getHref());
+            if (categoryResponse.getStatusCode() == Status.OK.getStatusCode())
+            {
+                CategoryDto categoryDto = categoryResponse.getEntity(CategoryDto.class);
+                pack.setCategory(categoryDto.getName());
+            }
         }
         else
         {
@@ -905,5 +911,17 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
             populateErrors(response, result, "deleteCategory");
         }
         return result;
+    }
+
+    private RESTLink getLink(final String rel, final List<RESTLink> links)
+    {
+        for (RESTLink link : links)
+        {
+            if (link.getRel().equalsIgnoreCase(rel))
+            {
+                return link;
+            }
+        }
+        return null; // TODO check error. i guess could be null
     }
 }

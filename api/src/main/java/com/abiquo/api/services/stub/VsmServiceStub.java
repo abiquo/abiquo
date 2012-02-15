@@ -20,6 +20,7 @@
  */
 package com.abiquo.api.services.stub;
 
+import org.apache.wink.client.ClientRuntimeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -118,6 +119,12 @@ public class VsmServiceStub extends DefaultApiService
             client.monitor(buildHypervisorURI(hypervisor), hypervisor.getType().name(),
                 hypervisor.getUser(), hypervisor.getPassword());
         }
+        catch (ClientRuntimeException e)
+        {
+            LOGGER.error(APIError.VSM_UNAVAILABE.getMessage(), e);
+            addServiceUnavailableErrors(APIError.VSM_UNAVAILABE);
+            flushErrors();
+        }
         catch (Exception e)
         {
             LOGGER.error(APIError.MONITOR_PROBLEM.getMessage(), e);
@@ -145,6 +152,12 @@ public class VsmServiceStub extends DefaultApiService
         try
         {
             client.shutdown(buildHypervisorURI(hypervisor));
+        }
+        catch (ClientRuntimeException e)
+        {
+            LOGGER.error(APIError.VSM_UNAVAILABE.getMessage(), e);
+            addServiceUnavailableErrors(APIError.VSM_UNAVAILABE);
+            flushErrors();
         }
         catch (VSMClientException e)
         {
@@ -179,6 +192,12 @@ public class VsmServiceStub extends DefaultApiService
 
             client.subscribe(buildHypervisorURI(hypervisor), hypervisor.getType().name(),
                 virtualMachine.getName());
+        }
+        catch (ClientRuntimeException e)
+        {
+            LOGGER.error(APIError.VSM_UNAVAILABE.getMessage(), e);
+            addServiceUnavailableErrors(APIError.VSM_UNAVAILABE);
+            flushErrors();
         }
         catch (VSMClientException e)
         {
@@ -228,6 +247,12 @@ public class VsmServiceStub extends DefaultApiService
         {
             client.unsubscribe(virtualMachine.getName());
         }
+        catch (ClientRuntimeException e)
+        {
+            LOGGER.error(APIError.VSM_UNAVAILABE.getMessage(), e);
+            addServiceUnavailableErrors(APIError.VSM_UNAVAILABE);
+            flushErrors();
+        }
         catch (VSMClientException e)
         {
             LOGGER.error(APIError.UNSUBSCRIPTION_PROBLEM.getMessage(), e);
@@ -255,6 +280,12 @@ public class VsmServiceStub extends DefaultApiService
         {
             client.publishState(buildHypervisorURI(virtualMachine.getHypervisor()),
                 virtualMachine.getName());
+        }
+        catch (ClientRuntimeException e)
+        {
+            LOGGER.error(APIError.VSM_UNAVAILABE.getMessage(), e);
+            addServiceUnavailableErrors(APIError.VSM_UNAVAILABE);
+            flushErrors();
         }
         catch (VSMClientException e)
         {
@@ -284,6 +315,12 @@ public class VsmServiceStub extends DefaultApiService
             client.invalidateLastKnownState(buildHypervisorURI(virtualMachine.getHypervisor()),
                 virtualMachine.getName());
         }
+        catch (ClientRuntimeException e)
+        {
+            LOGGER.error(APIError.VSM_UNAVAILABE.getMessage(), e);
+            addServiceUnavailableErrors(APIError.VSM_UNAVAILABE);
+            flushErrors();
+        }
         catch (VSMClientException e)
         {
             LOGGER.error(APIError.INVALIDATE_STATE_PROBLEM.getMessage(), e);
@@ -310,6 +347,26 @@ public class VsmServiceStub extends DefaultApiService
         try
         {
             return client.isSubscribed(name);
+        }
+        finally
+        {
+            returnClientToPool(client);
+        }
+    }
+
+    /**
+     * Returns true if the hypervisor is monitored.
+     * 
+     * @param service The VSM uri.
+     * @param hypervisor The hypervisor to query.
+     */
+    public boolean isHypervisorMonitored(final RemoteService service, final Hypervisor hypervisor)
+    {
+        VSMClient client = getClientFromPool(service);
+
+        try
+        {
+            return client.isMonitored(buildHypervisorURI(hypervisor));
         }
         finally
         {

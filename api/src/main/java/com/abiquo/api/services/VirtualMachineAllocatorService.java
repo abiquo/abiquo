@@ -53,6 +53,7 @@ import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualApplianceDAO;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineDAO;
+import com.abiquo.server.core.cloud.VirtualMachineRep;
 import com.abiquo.server.core.cloud.VirtualMachineState;
 import com.abiquo.server.core.infrastructure.Machine;
 import com.abiquo.server.core.infrastructure.Rack;
@@ -104,6 +105,9 @@ public class VirtualMachineAllocatorService extends DefaultApiService
     @Autowired
     protected InfrastructureService infrastructureService;
 
+    @Autowired
+    protected VirtualMachineRep vmRepo;
+
     public VirtualMachineAllocatorService()
     {
 
@@ -119,6 +123,7 @@ public class VirtualMachineAllocatorService extends DefaultApiService
         this.checkEnterpirse = new EnterpriseLimitChecker(em);
         this.upgradeUse = new ResourceUpgradeUse(em);
         this.vmRequirements = new VirtualMachineRequirementsFactory();
+        this.vmRepo = new VirtualMachineRep(em);
     }
 
     /**
@@ -161,7 +166,8 @@ public class VirtualMachineAllocatorService extends DefaultApiService
             }
 
             upgradeUse.updateUsed(vmachine.getHypervisor().getMachine(), increaseRequirements);
-            upgradeUse.updateNetworkingResources(vmachine.getHypervisor().getMachine(), vmachine, vapp);
+            upgradeUse.updateNetworkingResources(vmachine.getHypervisor().getMachine(), vmachine,
+                vapp);
 
         }
         catch (NotEnoughResourcesException e)
@@ -367,7 +373,15 @@ public class VirtualMachineAllocatorService extends DefaultApiService
     {
         try
         {
-            upgradeUse.rollbackUse(vmachine);
+            if (vmachine.isManaged())
+            {
+                upgradeUse.rollbackUse(vmachine);
+            }
+            else
+            {
+                vmRepo.deleteVirtualMachine(vmachine);
+            }
+
         }
         catch (ResourceUpgradeUseException e)
         {
@@ -379,6 +393,13 @@ public class VirtualMachineAllocatorService extends DefaultApiService
         {
             flushErrors();
         }
+    }
+
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    public void deallocateVirtualMachineHA(final VirtualMachine vmachine)
+        throws AllocatorException, ResourceAllocationException
+    {
+        LOG.error("community can't *deallocateHAVirtualMachine*");
     }
 
     protected String virtualMachineInfo(final VirtualMachine vm)

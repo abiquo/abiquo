@@ -164,6 +164,7 @@
             event.networkName, 
             event.networkConfiguration, 
             event.defaultNetwork,
+            event.tag,
             event.staticRules]}">
 
             <resultHandlers>

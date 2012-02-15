@@ -112,7 +112,8 @@ package net.undf.abicloud.controller
                 AbiCloudModel.getInstance().notificationManager.isServerUnreachable = true;
             }
             
-            if(fault.rootCause && fault.rootCause.result && fault.rootCause.result.resultCode == BasicResult.SESSION_INVALID)
+            if(fault.rootCause && fault.rootCause.result 
+            && (fault.rootCause.result.resultCode == BasicResult.SESSION_INVALID || fault.rootCause.result.resultCode == BasicResult.SESSION_TIMEOUT))
             {
                 //Invalid Session
                 if (AbiCloudModel.getInstance().loginManager.sessionValid)

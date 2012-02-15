@@ -124,6 +124,22 @@ public class ApplianceManagerResourceStubImpl extends ApplianceManagerResourceSt
         }
     }
 
+    public void refreshRepository(final String idEnterprise)
+    {
+        Resource resource = repository(idEnterprise);
+
+        try
+        {
+            ClientResponse response = resource.accept(MEDIA_TYPE).post(null);
+
+            checkResponse(response, 204);
+        }
+        catch (ClientRuntimeException e)
+        {
+            checkTimeout(e);
+        }
+    }
+
     public RepositoryConfigurationDto getRepositoryConfiguration()
     {
         Resource resource = repositories();

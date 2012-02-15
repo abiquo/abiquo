@@ -136,7 +136,7 @@ public class NetworkingService
      */
     public BasicResult editVLAN(final UserSession userSession, final Integer vdcId,
         final Integer vlanId, final String vlanName, final NetworkConfiguration configuration,
-        final Boolean defaultNetwork, final Set<DhcpOption> dhcpOptions)
+        final Boolean defaultNetwork, final Integer tag, final Set<DhcpOption> dhcpOptions)
     {
 
         VLANNetworkDto vlandto = new VLANNetworkDto();
@@ -147,6 +147,7 @@ public class NetworkingService
         vlandto.setMask(configuration.getMask());
         vlandto.setPrimaryDNS(configuration.getPrimaryDNS());
         vlandto.setSecondaryDNS(configuration.getSecondaryDNS());
+        vlandto.setTag((tag.equals(0))? null : tag);
         vlandto.setSufixDNS(configuration.getSufixDNS());
         DhcpOptionsDto options = new DhcpOptionsDto();
         for (DhcpOption opt : dhcpOptions)

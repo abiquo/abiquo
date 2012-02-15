@@ -159,6 +159,8 @@ public class DatacenterRepositoryService extends DefaultApiServiceWithApplianceM
 
         try
         {
+            amStub.refreshRepository(idEnterprise.toString());
+
             TemplatesStateDto list = amStub.getTemplatesState(idEnterprise.toString());
 
             for (TemplateStateDto status : list.getCollection())

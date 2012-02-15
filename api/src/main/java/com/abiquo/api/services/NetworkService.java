@@ -381,7 +381,7 @@ public class NetworkService extends DefaultApiService
         // once we have validated we have IPs in all IP parameters (isValid() method), we should
         // ensure they are
         // actually PRIVATE IPs. Also check if the gateway is in the range, and
-        checkPrivateAddressAndMaskCoherency(IPAddress.newIPAddress(newVlan.getConfiguration()
+        checkAddressAndMaskCoherency(IPAddress.newIPAddress(newVlan.getConfiguration()
             .getAddress()), newVlan.getConfiguration().getMask());
 
         List<DhcpOption> opts = new ArrayList<DhcpOption>(newVlan.getDhcpOption());
@@ -663,39 +663,6 @@ public class NetworkService extends DefaultApiService
         return ips;
     }
 
-    public List<IpPoolManagement> getListIpPoolManagementByInfrastructureVirtualMachine(
-        Integer datacenterId, Integer rackId, Integer machineId, Integer vmId)
-    {
-        Machine pm = datacenterRepo.findMachineByIds(datacenterId, rackId, machineId);
-        if (pm == null)
-        {
-            addNotFoundErrors(APIError.NON_EXISTENT_MACHINE);
-            flushErrors();
-        }
-        
-        VirtualMachine vm = vmService.getVirtualMachineByHypervisor(pm.getHypervisor(), vmId);
-        
-        VirtualDatacenter vdc = repo.findVirtualApplianceByVirtualMachine(vm).getVirtualDatacenter();
-        
-        List<IpPoolManagement> ips = repo.findIpsByVirtualMachine(vm);
-
-        for (IpPoolManagement ip : ips)
-        {
-            Hibernate.initialize(ip.getVlanNetwork().getEnterprise());
-            if (ip.getVlanNetwork().getEnterprise() != null)
-            {
-                // needed for REST links.
-                DatacenterLimits dl =
-                    datacenterRepo.findDatacenterLimits(ip.getVlanNetwork().getEnterprise(),
-                        vdc.getDatacenter());
-                ip.getVlanNetwork().setLimitId(dl.getId());
-            }
-        }
-
-        LOGGER.debug("Returning the list of IPs used by Virtual Machine '" + vm.getName() + "'.");
-        return ips;
-    }
-
     /**
      * Asks for all the Private IPs managed by a Virtual Datacenter.
      * 
@@ -797,6 +764,47 @@ public class NetworkService extends DefaultApiService
         VirtualAppliance vapp = getVirtualAppliance(vdc, vappId);
         VirtualMachine vm = getVirtualMachine(vapp, vmId);
 
+        List<IpPoolManagement> ips = repo.findIpsByVirtualMachine(vm);
+
+        for (IpPoolManagement ip : ips)
+        {
+            Hibernate.initialize(ip.getVlanNetwork().getEnterprise());
+            if (ip.getVlanNetwork().getEnterprise() != null)
+            {
+                // needed for REST links.
+                DatacenterLimits dl =
+                    datacenterRepo.findDatacenterLimits(ip.getVlanNetwork().getEnterprise(),
+                        vdc.getDatacenter());
+                ip.getVlanNetwork().setLimitId(dl.getId());
+            }
+        }
+
+        LOGGER.debug("Returning the list of IPs used by Virtual Machine '" + vm.getName() + "'.");
+        return ips;
+    }
+    
+    public List<IpPoolManagement> getListIpPoolManagementByInfrastructureVirtualMachine(
+        Integer datacenterId, Integer rackId, Integer machineId, Integer vmId)
+    {
+        Machine pm = datacenterRepo.findMachineByIds(datacenterId, rackId, machineId);
+        if (pm == null)
+        {
+            addNotFoundErrors(APIError.NON_EXISTENT_MACHINE);
+            flushErrors();
+        }
+        
+        VirtualMachine vm = vmService.getVirtualMachineByHypervisor(pm.getHypervisor(), vmId);
+        VirtualAppliance vapp = repo.findVirtualApplianceByVirtualMachine(vm);
+        if (vapp == null)
+        {
+            // If vapp is 'null' it means the virtual machine does not belong
+            // to any virtual appliance and hence, is an imported virtual machine.
+            // since we don't manage NICs in imported Virtual Machines, return an empty lise
+            return new ArrayList<IpPoolManagement>();
+        }
+        
+        VirtualDatacenter vdc = vapp.getVirtualDatacenter();
+        
         List<IpPoolManagement> ips = repo.findIpsByVirtualMachine(vm);
 
         for (IpPoolManagement ip : ips)
@@ -1143,12 +1151,12 @@ public class NetworkService extends DefaultApiService
             .equalsIgnoreCase(newNetwork.getConfiguration().getAddress())
             || !oldNetwork.getConfiguration().getMask()
                 .equals(newNetwork.getConfiguration().getMask())
-            || oldNetwork.getTag() == null
-            && newNetwork.getTag() != null
-            || oldNetwork.getTag() != null
-            && newNetwork.getTag() == null
-            || oldNetwork.getTag() != null
-            && newNetwork.getTag() != null && !oldNetwork.getTag().equals(newNetwork.getTag()))
+            || (oldNetwork.getTag() == null
+            && newNetwork.getTag() != null)
+            || (oldNetwork.getTag() != null
+            && newNetwork.getTag() == null)
+            || (oldNetwork.getTag() != null
+            && newNetwork.getTag() != null && !oldNetwork.getTag().equals(newNetwork.getTag())))
         {
             addConflictErrors(APIError.VLANS_EDIT_INVALID_VALUES);
             flushErrors();
@@ -1258,7 +1266,7 @@ public class NetworkService extends DefaultApiService
      * @throws NetworkCommandException if the values are not coherent into a public or private
      *             network environment.
      */
-    protected void checkPrivateAddressAndMaskCoherency(final IPAddress netAddress,
+    protected void checkAddressAndMaskCoherency(final IPAddress netAddress,
         final Integer netmask)
     {
 
@@ -1266,41 +1274,18 @@ public class NetworkService extends DefaultApiService
         IPAddress networkAddress = IPAddress.newIPAddress(netAddress.toString());
 
         // First of all, check if the networkAddress is correct.
-        Integer firstOctet = Integer.parseInt(networkAddress.getFirstOctet());
-        Integer secondOctet = Integer.parseInt(networkAddress.getSecondOctet());
 
         // if the value is a private network.
-        if (firstOctet == 10 || firstOctet == 192 && secondOctet == 168 || firstOctet == 172
-            && secondOctet >= 16 && secondOctet < 32)
+        if (netmask < 22)
         {
-            // check the mask is coherent with the server.
-            if (firstOctet == 10 && netmask < 22)
-            {
-                addConflictErrors(APIError.VLANS_TOO_BIG_NETWORK);
-            }
-            if ((firstOctet == 172 || firstOctet == 192) && netmask < 24)
-            {
-                addConflictErrors(APIError.VLANS_TOO_BIG_NETWORK_II);
-            }
-            if (netmask > 30)
-            {
-                addConflictErrors(APIError.VLANS_TOO_SMALL_NETWORK);
-            }
+            addConflictErrors(APIError.VLANS_TOO_BIG_NETWORK);
             flushErrors();
-
-            // Check the network address depending on the mask. For instance, the network address
-            // 192.168.1.128
-            // is valid for the mask 25, but the same (192.168.1.128) is an invalid network address
-            // for the mask 24.
-            if (!NetworkResolver.isValidNetworkMask(netAddress, netmask))
-            {
-                addValidationErrors(APIError.VLANS_INVALID_NETWORK_AND_MASK);
-                flushErrors();
-            }
         }
-        else
+
+        if (!NetworkResolver.isValidNetworkMask(networkAddress, netmask))
         {
-            throw new BadRequestException(APIError.VLANS_PRIVATE_ADDRESS_WRONG);
+            addValidationErrors(APIError.VLANS_INVALID_NETWORK_AND_MASK);
+            flushErrors();
         }
 
     }

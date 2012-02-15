@@ -26,8 +26,10 @@ import static com.abiquo.api.util.URIResolver.buildPath;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import javax.persistence.EntityManager;
@@ -72,6 +74,7 @@ import com.abiquo.api.services.UserService;
 import com.abiquo.api.services.VirtualMachineAllocatorService;
 import com.abiquo.api.services.stub.TarantinoJobCreator;
 import com.abiquo.api.services.stub.TarantinoService;
+import com.abiquo.api.tracer.TracerLogger;
 import com.abiquo.api.util.URIResolver;
 import com.abiquo.api.util.snapshot.SnapshotUtils.SnapshotType;
 import com.abiquo.appliancemanager.client.ApplianceManagerResourceStubImpl;
@@ -206,6 +209,7 @@ public class VirtualMachineService extends DefaultApiService
         this.storageRep = new StorageRep(em);
         this.jobCreator = new TarantinoJobCreator(em);
         this.ipService = new NetworkService(em);
+        this.tracer = new TracerLogger();
     }
 
     public Collection<VirtualMachine> findByHypervisor(final Hypervisor hypervisor)
@@ -897,6 +901,7 @@ public class VirtualMachineService extends DefaultApiService
         // First we get from dto. All the values wi
         VirtualMachine virtualMachine = buildVirtualMachineFromDto(vdc, virtualAppliance, dto);
         virtualMachine.setUuid(UUID.randomUUID().toString());
+        virtualMachine.setIdType(VirtualMachine.MANAGED);
         String nodeName = virtualMachine.getName();
         if (dto instanceof VirtualMachineWithNodeDto)
         {
@@ -912,6 +917,18 @@ public class VirtualMachineService extends DefaultApiService
         // We check for a suitable conversion (PREMIUM)
         attachVirtualMachineTemplateConversion(virtualAppliance.getVirtualDatacenter(),
             virtualMachine);
+
+        // Attach the matching stateful volume if the template is a saved persistent template
+        if (virtualMachine.getVirtualMachineTemplate().isStateful())
+        {
+            LOGGER.debug("Attaching virtual machine template volume");
+            virtualMachine.getVirtualMachineTemplate().getVolume().attach(0, virtualMachine,
+                virtualAppliance);
+            virtualMachine.getVirtualMachineTemplate().getVolume().setVirtualAppliance(
+                virtualAppliance);
+            virtualMachine.getVirtualMachineTemplate().getVolume()
+                .setVirtualMachine(virtualMachine);
+        }
 
         // At this stage the virtual machine is not associated with any hypervisor
         virtualMachine.setState(VirtualMachineState.NOT_ALLOCATED);
@@ -1300,6 +1317,86 @@ public class VirtualMachineService extends DefaultApiService
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
+    public String undeployVirtualMachineHA(final Integer vmId, final Integer vappId,
+        final Integer vdcId, final Boolean forceUndeploy, final VirtualMachineState originalState,
+        final Hypervisor originalHypervisor)
+    {
+        LOGGER.debug("Starting the undeploy of the virtual machine {}", vmId);
+        // We need to operate with concrete and this also check that the VirtualMachine belongs to
+        // those VirtualAppliance and VirtualDatacenter
+        VirtualMachine virtualMachine = getVirtualMachine(vdcId, vappId, vmId);
+
+        if (!originalState.existsInHypervisor())
+        {
+            return TaskResourceUtils.UNTRACEABLE_TASK;
+        }
+        LOGGER.debug("Check for permissions");
+        // The user must have the proper permission
+        userService.checkCurrentEnterpriseForPostMethods(virtualMachine.getEnterprise());
+        LOGGER.debug("Permission granted");
+
+        LOGGER.debug("Check remote services");
+        // The remote services must be up for this Datacenter if we are to deploy
+        checkRemoteServicesByVirtualDatacenter(vdcId);
+        LOGGER.debug("Remote services are ok!");
+
+        VirtualAppliance virtualAppliance =
+            getVirtualApplianceAndCheckVirtualDatacenter(vdcId, vappId);
+
+        if (!forceUndeploy && virtualMachine.isCaptured())
+        {
+            addConflictErrors(APIError.VIRTUAL_MACHINE_IMPORTED_WILL_BE_DELETED);
+            flushErrors();
+        }
+
+        try
+        {
+            LOGGER.debug("Check remote services");
+            // The remote services must be up for this Datacenter if we are to deploy
+            checkRemoteServicesByVirtualDatacenter(vdcId);
+            LOGGER.debug("Remote services are ok!");
+
+            // Tasks needs the definition of the virtual machine
+            VirtualMachineDescriptionBuilder vmDesc =
+                jobCreator.toTarantinoDto(virtualMachine, virtualAppliance);
+
+            String idAsyncTask =
+                tarantino.undeployVirtualMachineHA(virtualMachine, vmDesc, originalState,
+                    originalHypervisor);
+            LOGGER.info("Undeploying of the virtual machine id {} in the virtual factory!",
+                virtualMachine.getId());
+            tracer.log(SeverityType.INFO, ComponentType.VIRTUAL_MACHINE, EventType.VM_UNDEPLOY,
+                "virtualMachine.enqueued", virtualMachine.getName());
+            // For the Admin to know all errors
+            tracer
+                .systemLog(SeverityType.INFO, ComponentType.VIRTUAL_MACHINE, EventType.VM_UNDEPLOY,
+                    "virtualMachine.enqueuedTarantino", virtualMachine.getName());
+
+            return idAsyncTask;
+
+        }
+        catch (Exception e)
+        {
+            tracer.log(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE, EventType.VM_UNDEPLOY,
+                APIError.GENERIC_OPERATION_ERROR.getMessage());
+
+            // For the Admin to know all errors
+            tracer.systemLog(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
+                EventType.VM_UNDEPLOY, "virtualMachine.undeployError", e.toString(),
+                virtualMachine.getName(), e.getMessage());
+            LOGGER
+                .error(
+                    "Error undeploying setting the virtual machine to UNKNOWN virtual machine name {}: {}",
+                    virtualMachine.getUuid(), e.toString());
+
+            addUnexpectedErrors(APIError.STATUS_INTERNAL_SERVER_ERROR);
+            flushErrors();
+        }
+
+        return null;
+    }
+
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
     public String undeployVirtualMachine(final Integer vmId, final Integer vappId,
         final Integer vdcId, final Boolean forceUndeploy, final VirtualMachineState originalState)
     {
@@ -1341,6 +1438,7 @@ public class VirtualMachineService extends DefaultApiService
             // Tasks needs the definition of the virtual machine
             VirtualMachineDescriptionBuilder vmDesc =
                 jobCreator.toTarantinoDto(virtualMachine, virtualAppliance);
+
 
             String idAsyncTask =
                 tarantino.undeployVirtualMachine(virtualMachine, vmDesc, originalState);
