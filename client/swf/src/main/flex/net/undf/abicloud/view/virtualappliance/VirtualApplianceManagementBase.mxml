@@ -307,6 +307,8 @@
                     //Instead of closing the NodeInfoContainer, we try to update its content
                     updateNodeInfoContainer();
                 }
+                
+                hideNodeInfoContainer();
             }
 
             /**
