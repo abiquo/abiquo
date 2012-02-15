@@ -389,8 +389,7 @@ public class VirtualDatacenterRep extends DefaultRepBase
         return ipManagementDAO.findIpsByVlan(vlan);
     }
 
-    public List<IpPoolManagement> findIpsWithConfigurationIdInVirtualMachine(
-        final VirtualMachine vm)
+    public List<IpPoolManagement> findIpsWithConfigurationIdInVirtualMachine(final VirtualMachine vm)
     {
         return ipManagementDAO.findIpsByVirtualMachineWithConfigurationId(vm);
     }
@@ -681,6 +680,9 @@ public class VirtualDatacenterRep extends DefaultRepBase
         vlanDAO.flush();
     }
 
-
+    public void detach(final VirtualDatacenter virtualDatacenter)
+    {
+        virtualDatacenterDAO.detach(virtualDatacenter);
+    }
 
 }

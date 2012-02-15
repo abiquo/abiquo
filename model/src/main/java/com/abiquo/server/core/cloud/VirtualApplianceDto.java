@@ -28,6 +28,12 @@ import com.abiquo.model.transport.SingleResourceTransportDto;
 @XmlRootElement(name = "virtualAppliance")
 public class VirtualApplianceDto extends SingleResourceTransportDto
 {
+    public static final String COPY_VIRTUAL_APPLIANCE_MIME_TYPE =
+        "application/vnd.cp-virtualappliance+xml";
+
+    public static final String MOVE_VIRTUAL_APPLIANCE_MIME_TYPE =
+        "application/vnd.mv-virtualappliance+xml";
+
     /**
      * 
      */

@@ -324,4 +324,26 @@ public class VirtualAppliance extends DefaultEntityBase
         // value.removeFromDatastores(this);
     }
 
+    /**
+     * Clones this virtual appliance. But references to objects still the same. Same enterpirse,
+     * same nodes, same virtual datacenter.
+     * 
+     * @see java.lang.Object#clone()
+     */
+    @Override
+    public VirtualAppliance clone()
+    {
+        VirtualAppliance virtualAppliance = new VirtualAppliance();
+
+        virtualAppliance.setEnterprise(enterprise);
+        virtualAppliance.setHighDisponibility(highDisponibility);
+        virtualAppliance.setName(name);
+        virtualAppliance.setNodeconnections(nodeconnections);
+        virtualAppliance.setPublicApp(publicApp);
+        virtualAppliance.setVirtualDatacenter(virtualDatacenter);
+
+        virtualAppliance.nodesVirtualImage.addAll(this.getNodes());
+        return virtualAppliance;
+
+    }
 }

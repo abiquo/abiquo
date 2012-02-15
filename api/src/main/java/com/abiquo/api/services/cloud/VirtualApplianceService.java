@@ -84,7 +84,7 @@ import com.abiquo.tracer.SeverityType;
 public class VirtualApplianceService extends DefaultApiService
 {
     /** The logger object **/
-    private final static Logger logger = LoggerFactory.getLogger(VirtualMachineService.class);
+    private final static Logger logger = LoggerFactory.getLogger(VirtualApplianceService.class);
 
     @Autowired
     TarantinoService tarantino;
@@ -93,13 +93,13 @@ public class VirtualApplianceService extends DefaultApiService
     private VirtualDatacenterRep repo;
 
     @Autowired
-    private VirtualDatacenterService vdcService;
+    protected VirtualDatacenterService vdcService;
 
     @Autowired
-    private UserService userService;
+    protected UserService userService;
 
     @Autowired
-    private VirtualApplianceRep virtualApplianceRepo;
+    protected VirtualApplianceRep virtualApplianceRepo;
 
     @Autowired
     private PricingRep pricingRep;
@@ -161,7 +161,7 @@ public class VirtualApplianceService extends DefaultApiService
      * @param vappId
      * @return
      */
-    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
     public VirtualAppliance getVirtualAppliance(final Integer vdcId, final Integer vappId)
     {
 
@@ -179,6 +179,30 @@ public class VirtualApplianceService extends DefaultApiService
 
         VirtualAppliance vapp = repo.findVirtualApplianceById(vappId);
         if (vapp == null || !vapp.getVirtualDatacenter().getId().equals(vdcId))
+        {
+            addNotFoundErrors(APIError.NON_EXISTENT_VIRTUALAPPLIANCE);
+            flushErrors();
+        }
+        return vapp;
+    }
+
+    /**
+     * Returns the virtual appliance.
+     * 
+     * @param vappId virtual appliance.
+     * @return
+     */
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
+    public VirtualAppliance getVirtualAppliance(final Integer vappId)
+    {
+        if (vappId == 0)
+        {
+            addValidationErrors(APIError.INVALID_ID);
+            flushErrors();
+        }
+
+        VirtualAppliance vapp = repo.findVirtualApplianceById(vappId);
+        if (vapp == null)
         {
             addNotFoundErrors(APIError.NON_EXISTENT_VIRTUALAPPLIANCE);
             flushErrors();

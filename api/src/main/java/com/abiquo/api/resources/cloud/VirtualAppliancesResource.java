@@ -25,11 +25,13 @@ import static com.abiquo.api.resources.cloud.VirtualApplianceResource.createTran
 
 import java.util.List;
 
+import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
 
 import org.apache.wink.common.annotations.Parent;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,8 +55,8 @@ public class VirtualAppliancesResource
 
     @GET
     public VirtualAppliancesDto getVirtualAppliances(
-        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) Integer vdcId,
-        @Context IRESTBuilder restBuilder) throws Exception
+        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
+        @Context final IRESTBuilder restBuilder) throws Exception
     {
         List<VirtualAppliance> all = service.getVirtualAppliancesByVirtualDatacenter(vdcId);
         VirtualAppliancesDto vappsDto = new VirtualAppliancesDto();
@@ -71,9 +73,10 @@ public class VirtualAppliancesResource
     }
 
     @POST
+    @Consumes(MediaType.APPLICATION_XML)
     public VirtualApplianceDto createVirtualAppliance(
-        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) Integer vdcId,
-        VirtualApplianceDto dto, @Context IRESTBuilder restBuilder) throws Exception
+        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
+        final VirtualApplianceDto dto, @Context final IRESTBuilder restBuilder) throws Exception
     {
         VirtualAppliance response = service.createVirtualAppliance(vdcId, dto);
 

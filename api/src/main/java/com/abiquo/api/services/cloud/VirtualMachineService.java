@@ -261,7 +261,7 @@ public class VirtualMachineService extends DefaultApiService
             flushErrors();
         }
         LOGGER.debug("Virtual machine {} found", vmId);
-        
+
         // if the ips are external, we need to set the limitID in order to return the
         // proper info.
         for (IpPoolManagement ip : vm.getIps())
@@ -275,7 +275,7 @@ public class VirtualMachineService extends DefaultApiService
                 ip.getVlanNetwork().setLimitId(dl.getId());
             }
         }
-        
+
         return vm;
     }
 
@@ -457,7 +457,7 @@ public class VirtualMachineService extends DefaultApiService
                 VirtualMachineRequirements requirements =
                     vmRequirements.createVirtualMachineRequirements(vm, newValues);
                 vmAllocatorService.checkAllocate(vapp.getId(), newValues, requirements, false);
-                
+
                 LOGGER
                     .debug("Creating the temporary register in Virtual Machine for rollback purposes");
                 backUpVm = createBackUpMachine(vm);
@@ -638,7 +638,7 @@ public class VirtualMachineService extends DefaultApiService
         allocateNewStorages(vapp, old, storageResources, usedStorageSlots);
 
         repo.update(old);
-        
+
         // FIXME: improvement related ABICLOUDPREMIUM-2925
         updateNodeVirtualImage(old, vmnew.getVirtualMachineTemplate());
     }
@@ -831,7 +831,7 @@ public class VirtualMachineService extends DefaultApiService
      * 
      * @param virtualMachine void
      */
-    private void detachVirtualMachineIPs(final VirtualMachine virtualMachine)
+    public void detachVirtualMachineIPs(final VirtualMachine virtualMachine)
     {
         for (IpPoolManagement ip : virtualMachine.getIps())
         {
@@ -1007,7 +1007,7 @@ public class VirtualMachineService extends DefaultApiService
      *            contain the virtual machine template.
      * @param virtualAppliance void where the virtual machine exists.
      */
-    private void createNodeVirtualImage(final VirtualMachine virtualMachine,
+    protected void createNodeVirtualImage(final VirtualMachine virtualMachine,
         final VirtualAppliance virtualAppliance, final String name)
     {
         LOGGER.debug("Create node virtual image with name virtual machine: {}",
@@ -1703,7 +1703,7 @@ public class VirtualMachineService extends DefaultApiService
             addNotFoundErrors(APIError.NODE_VIRTUAL_MACHINE_IMAGE_NOT_EXISTS);
             flushErrors();
         }
-        
+
         // if the ips are external, we need to set the limitID in order to return the
         // proper info.
         for (IpPoolManagement ip : vm.getIps())
@@ -1717,7 +1717,7 @@ public class VirtualMachineService extends DefaultApiService
                 ip.getVlanNetwork().setLimitId(dl.getId());
             }
         }
-        
+
         return nodeVirtualImage;
     }
 
@@ -2823,4 +2823,25 @@ public class VirtualMachineService extends DefaultApiService
         repo.update(vm);
     }
 
+    /**
+     * This method writes without care for permissions.
+     * 
+     * @param vm void
+     */
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void insertNodeVirtualImage(final NodeVirtualImage node)
+    {
+        repo.insertNodeVirtualImage(node);
+    }
+
+    /**
+     * This method writes without care for permissions.
+     * 
+     * @param vm void
+     */
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void insertVirtualMachine(final VirtualMachine virtualMachine)
+    {
+        repo.insert(virtualMachine);
+    }
 }
