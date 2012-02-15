@@ -118,7 +118,7 @@ public class RoleDAO extends DefaultDAOBase<Integer, Role>
 
         criteria = createCriteria(enterprise, filter, orderBy, desc, discardNullEnterprises);
 
-        criteria.setFirstResult(offset * numResults);
+        criteria.setFirstResult(offset);
         criteria.setMaxResults(numResults);
 
         List<Role> result = getResultList(criteria);
