@@ -613,22 +613,37 @@ public class AbstractAPIStub
 
     protected String createRolesLink()
     {
-        return createRolesLink(null, null);
+        return createRolesLink(null, null, null, null, false, null);
     }
 
-    protected String createRolesLink(Integer offset, final Integer numResults)
+    protected String createRolesLink(final Integer identerprise, final String filter,
+        final String OrderBy, final Integer offset, final boolean asc, final Integer numResults)
     {
         String uri = URIResolver.resolveURI(apiUri, "admin/roles", Collections.emptyMap());
 
         Map<String, String[]> queryParams = new HashMap<String, String[]>();
 
-        if (offset != null && numResults != null)
+        if (identerprise != null)
         {
-            offset = offset / numResults;
-
-            queryParams.put("page", new String[] {offset.toString()});
-            queryParams.put("numResults", new String[] {numResults.toString()});
+            queryParams.put("identerprise", new String[] {String.valueOf(identerprise)});
         }
+        if (StringUtils.isNotEmpty(filter))
+        {
+            queryParams.put("has", new String[] {filter});
+        }
+        if (StringUtils.isNotEmpty(OrderBy))
+        {
+            queryParams.put("by", new String[] {OrderBy});
+        }
+        if (offset != null)
+        {
+            queryParams.put("startwith", new String[] {String.valueOf(offset)});
+        }
+        if (numResults != null)
+        {
+            queryParams.put("limit", new String[] {String.valueOf(numResults)});
+        }
+        queryParams.put("asc", new String[] {String.valueOf(asc)});
 
         return UriHelper.appendQueryParamsToPath(uri, queryParams, false);
     }
@@ -1057,9 +1072,9 @@ public class AbstractAPIStub
             "cloud/virtualdatacenters/{vdcid}/virtualappliances/{vappid}/virtualmachines/{vmid}/network/nics",
             params);
     }
-    
-    protected String createInfrastructureVirtualMachineNICsLink(Integer datacenterId, Integer rackId,
-        Integer machineId, Integer virtualMachineId)
+
+    protected String createInfrastructureVirtualMachineNICsLink(final Integer datacenterId,
+        final Integer rackId, final Integer machineId, final Integer virtualMachineId)
     {
         Map<String, String> params = new HashMap<String, String>();
         params.put("datacenter", datacenterId.toString());
@@ -1067,7 +1082,8 @@ public class AbstractAPIStub
         params.put("machine", machineId.toString());
         params.put("vm", virtualMachineId.toString());
 
-        return resolveURI(apiUri,
+        return resolveURI(
+            apiUri,
             "admin/datacenters/{datacenter}/racks/{rack}/machines/{machine}/virtualmachines/{vm}/action/nics",
             params);
     }
