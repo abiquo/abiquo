@@ -35,13 +35,16 @@ import com.abiquo.api.exceptions.NotFoundException;
 import com.abiquo.api.services.MachineService;
 import com.abiquo.api.services.cloud.VirtualMachineService;
 import com.abiquo.api.services.stub.VsmServiceStubMock;
+import com.abiquo.model.enumerator.FitPolicy;
 import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineState;
 import com.abiquo.server.core.common.EnvironmentGenerator;
+import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.Machine;
+import com.abiquo.server.core.scheduler.FitPolicyRule;
 import com.softwarementors.bzngine.engines.jpa.EntityManagerHelper;
 
 public class MachineServiceTest extends AbstractUnitTest
@@ -70,9 +73,11 @@ public class MachineServiceTest extends AbstractUnitTest
     @Test
     public void testDeleteMachineWithVirtualMachineManagedDeployed()
     {
+        Datacenter datacenter = environment.get(Datacenter.class);
         environment.generateAllocatedVirtualMachine();
         setup(environment.getEnvironment().toArray());
-
+        FitPolicyRule f = new FitPolicyRule(datacenter, FitPolicy.PERFORMANCE);
+        setup(f);
         VirtualMachine vmManaged = environment.get(VirtualMachine.class);
 
         Hypervisor hypervisor = environment.get(Hypervisor.class);
@@ -116,12 +121,14 @@ public class MachineServiceTest extends AbstractUnitTest
 
     }
 
-    @Test(enabled = false)
+    @Test
     public void testDeleteMachineWithVirtualMachineNotManagedDeployed()
     {
-        environment.generateNotManagedAllocatedVirtualMachine();
+        Datacenter datacenter = environment.get(Datacenter.class);
+        environment.generateNotAllocatedVirtualMachine();
         setup(environment.getEnvironment().toArray());
-
+        FitPolicyRule f = new FitPolicyRule(datacenter, FitPolicy.PERFORMANCE);
+        setup(f);
         VirtualMachine vmNotManaged = environment.get(VirtualMachine.class);
 
         Hypervisor hypervisor = environment.get(Hypervisor.class);

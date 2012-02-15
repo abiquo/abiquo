@@ -35,6 +35,7 @@ import org.springframework.stereotype.Repository;
 
 import com.abiquo.model.enumerator.StorageTechnologyType;
 import com.abiquo.model.enumerator.VolumeState;
+import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
@@ -426,5 +427,12 @@ import com.softwarementors.bzngine.entities.PersistentEntity;
     private static Criterion sameState(final VolumeState state)
     {
         return Restrictions.eq(VolumeManagement.STATE_PROPERTY, state);
+    }
+
+    public List<VolumeManagement> getVolumesByVirtualAppliance(final VirtualAppliance vapp)
+    {
+        Query query = getSession().createQuery(VolumeManagement.BY_VAPP);
+        query.setInteger("vappId", vapp.getId());
+        return query.list();
     }
 }

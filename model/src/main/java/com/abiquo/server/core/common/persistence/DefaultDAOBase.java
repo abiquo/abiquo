@@ -158,4 +158,9 @@ public abstract class DefaultDAOBase<I extends Serializable, T extends GenericEn
         List<T> results = getResultList(criteria);
         return (results == null || results.isEmpty()) ? null : results.get(0);
     }
+        
+    public void detach(final T entity)
+    {
+        this.getEntityManager().detach(entity);
+    }
 }

@@ -700,4 +700,9 @@ public class VirtualDatacenterRep extends DefaultRepBase
         vlanDAO.flush();
     }
 
+    public void detach(final VirtualDatacenter virtualDatacenter)
+    {
+        virtualDatacenterDAO.detach(virtualDatacenter);
+    }
+
 }

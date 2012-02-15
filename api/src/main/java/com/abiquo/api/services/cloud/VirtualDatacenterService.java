@@ -382,4 +382,8 @@ public class VirtualDatacenterService extends DefaultApiService
         return repo.findNodeVirtualImageByEnterprise(enterprise);
     }
 
+    public void detach(final VirtualDatacenter virtualDatacenter)
+    {
+        repo.detach(virtualDatacenter);
+    }
 }

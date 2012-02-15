@@ -57,9 +57,9 @@ import com.softwarementors.validation.constraints.Required;
 @Entity
 @Table(name = VolumeManagement.TABLE_NAME)
 @FilterDefs({@FilterDef(name = VolumeManagement.NOT_TEMP),
-    @FilterDef(name = VolumeManagement.ONLY_TEMP)})
+@FilterDef(name = VolumeManagement.ONLY_TEMP)})
 @Filters({@Filter(name = VolumeManagement.NOT_TEMP, condition = "temporal is null"),
-    @Filter(name = VolumeManagement.ONLY_TEMP, condition = "temporal is not null")})
+@Filter(name = VolumeManagement.ONLY_TEMP, condition = "temporal is not null")})
 @DiscriminatorValue(VolumeManagement.DISCRIMINATOR)
 @NamedQueries({
 @NamedQuery(name = VolumeManagement.VOLUMES_ATTACHED_TO_VM, query = VolumeManagement.ATTACHED_TO_VM),
@@ -85,8 +85,9 @@ public class VolumeManagement extends RasdManagement
     public static final String VOLUMES_AVAILABLES = "VOLUMES_AVAILABLES";
 
     public static final String NOT_TEMP = "volumemanagement_not_temp";
+
     public static final String ONLY_TEMP = "volumemanagement_only_temp";
-    
+
     public static final String BY_VDC =
         "SELECT vol FROM VolumeManagement vol LEFT JOIN vol.virtualMachine vm "
             + "LEFT JOIN vol.virtualAppliance vapp WHERE vol.virtualDatacenter.id = :vdcId "
@@ -108,13 +109,18 @@ public class VolumeManagement extends RasdManagement
             + "WHERE vm.id = :vmId AND vol.state = :state "
             + "AND (vol.rasd.elementName like :filterLike " + "OR vm.name like :filterLike "
             + "OR vapp.name like :filterLike " + "OR vol.virtualDatacenter.name like :filterLike "
-            + "OR vol.storagePool.tier.name like :filterLike)" + " AND vol.virtualMachineTemplate IS NULL";
+            + "OR vol.storagePool.tier.name like :filterLike)"
+            + " AND vol.virtualMachineTemplate IS NULL";
 
     public static final String AVAILABLES =
         "SELECT vol FROM VolumeManagement vol LEFT JOIN vol.virtualMachine vm "
             + "WHERE vol.virtualDatacenter.id = :vdcId AND vm IS NULL "
             + "AND vol.virtualMachineTemplate IS NULL AND vol.rasd.elementName like :filterLike "
             + "AND vol NOT IN (SELECT stateful.volume FROM DiskStatefulConversion stateful)";
+
+    public static final String BY_VAPP =
+        "SELECT vol FROM VolumeManagement vol LEFT JOIN vol.virtualMachine vm "
+            + "LEFT JOIN vol.virtualAppliance vapp WHERE vapp.id = :vappId";
 
     // DO NOT ACCESS: present due to needs of infrastructure support. *NEVER* call from business
     // code
@@ -357,7 +363,7 @@ public class VolumeManagement extends RasdManagement
     {
         return state == VolumeState.ATTACHED && getVirtualMachine() != null;
     }
-    
+
     // ********************************** Others ********************************
     @Override
     public String toString()
