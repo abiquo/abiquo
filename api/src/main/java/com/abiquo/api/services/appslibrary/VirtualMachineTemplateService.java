@@ -80,8 +80,8 @@ import com.abiquo.tracer.SeverityType;
 public class VirtualMachineTemplateService extends DefaultApiServiceWithApplianceManagerClient
 {
 
-    final private static Logger logger = LoggerFactory
-        .getLogger(VirtualMachineTemplateService.class);
+    final private static Logger logger =
+        LoggerFactory.getLogger(VirtualMachineTemplateService.class);
 
     @Autowired
     private RepositoryDAO repositoryDao;
@@ -154,7 +154,16 @@ public class VirtualMachineTemplateService extends DefaultApiServiceWithApplianc
 
         for (DatacenterLimits dclimit : enterpriseService.findLimitsByEnterprise(enterpriseId))
         {
-            repos.add(getDatacenterRepository(dclimit.getDatacenter().getId(), enterpriseId));
+            try
+            {
+                repos.add(getDatacenterRepository(dclimit.getDatacenter().getId(), enterpriseId));
+            }
+            catch (Exception ex)
+            {
+                tracer.log(SeverityType.WARNING, ComponentType.DATACENTER,
+                    EventType.APPLIANCE_MANAGER_CONFIGURATION, "appliancemanager.error", dclimit
+                        .getDatacenter().getName());
+            }
         }
 
         return repos;
