@@ -37,6 +37,7 @@
 			<groupId>com.abiquo</groupId>
 			<artifactId>commons-amqp</artifactId>
 			<version>${commonsamqp.version}</version>
+			<classifier>master</classifier>
 		</dependency>
 		<!-- REST -->
 		<dependency>
