@@ -1315,7 +1315,7 @@ CREATE TABLE IF NOT EXISTS alerts (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 LOCK TABLES `alerts` WRITE;
-insert into alerts (id, type, value, tstamp) values ("1", "REGISTER", "LATER", date_sub(now(), INTERVAL 4 DAY)), ("2", "HEARTBEAT", "LATER", date_sub(now(), INTERVAL 4 DAY));
+insert into alerts (id, type, value, tstamp) values ("1", "REGISTER", "LATER", date_sub(now(), INTERVAL 4 DAY)), ("2", "HEARTBEAT", "YES", date_sub(now(), INTERVAL 4 DAY));
 UNLOCK TABLES;
 
 DROP TABLE IF EXISTS heartbeatlog;
