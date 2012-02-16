@@ -25,6 +25,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import org.apache.commons.lang.StringUtils;
 
+import com.abiquo.model.enumerator.EthernetDriverType;
 import com.abiquo.model.transport.SingleResourceTransportDto;
 
 @XmlRootElement(name = "templateDefinition")
@@ -51,6 +52,8 @@ public class TemplateDefinitionDto extends SingleResourceTransportDto
     private String diskFormatType;
 
     private long diskFileSize;
+
+    private EthernetDriverType ethernetDriverType;
 
     public Integer getId()
     {
@@ -151,4 +154,15 @@ public class TemplateDefinitionDto extends SingleResourceTransportDto
     {
         this.description = StringUtils.strip(description);
     }
+
+    public EthernetDriverType getEthernetDriverType()
+    {
+        return ethernetDriverType;
+    }
+
+    public void setEthernetDriverType(final EthernetDriverType ethernetDriverType)
+    {
+        this.ethernetDriverType = ethernetDriverType;
+    }
+
 }
