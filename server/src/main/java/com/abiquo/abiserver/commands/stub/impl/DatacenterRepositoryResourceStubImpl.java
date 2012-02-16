@@ -67,7 +67,8 @@ public class DatacenterRepositoryResourceStubImpl extends AbstractAPIStub implem
         }
         else
         {
-            populateErrors(response, result, "deleteNotManagedVirtualMachines");
+            populateErrors(response, result, "getRepository",
+                "You do not have sufficient privileges to view the contents of the appliance library");
         }
 
         return result;
