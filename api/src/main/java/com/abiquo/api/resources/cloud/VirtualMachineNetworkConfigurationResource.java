@@ -103,11 +103,14 @@ public class VirtualMachineNetworkConfigurationResource extends AbstractResource
     /** edit relation to private ips. */
     public static final String PRIVATE_IP = "privateip";
 
-    /** edit relation to private ips. */
+    /** edit relation to public ips. */
     public static final String PUBLIC_IP = "publicip";
 
-    /** edit relation to private ips. */
+    /** edit relation to external ips. */
     public static final String EXTERNAL_IP = "externalip";
+    
+    /** edit relation to external ips. */
+    public static final String UNMANAGED_IP = "unmanagedip";
 
     /** Autowired business logic service. */
     @Autowired
@@ -161,6 +164,7 @@ public class VirtualMachineNetworkConfigurationResource extends AbstractResource
      *             {@link APIExceptionMapper} exception mapper.
      */
     @GET
+    @Deprecated // There is any use case where this method could be useful
     @Path(CONFIGURATION_PATH + "/" + CONFIGURATION)
     public VMNetworkConfigurationDto getVirtualMachineConfiguration(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) @NotNull @Min(1) final Integer vdcId,
@@ -378,6 +382,7 @@ public class VirtualMachineNetworkConfigurationResource extends AbstractResource
      *             {@link APIExceptionMapper} exception mapper.
      */
     @GET
+    @Deprecated // there is any use case we need this method.
     @Path(NICS_PATH + "/" + NIC_PARAM)
     public NicDto getIp(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) @NotNull @Min(1) final Integer vdcId,

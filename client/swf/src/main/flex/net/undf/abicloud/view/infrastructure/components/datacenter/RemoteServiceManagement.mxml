@@ -150,12 +150,20 @@
 
             private function onClickDeleteRemoteService():void
             {
+                var message:String;
+                if(RemoteService(remoteServiceList.selectedItem).remoteServiceType.valueOf == RemoteServiceType.DHCP)
+                {
+                	message = ResourceManager.getInstance().getString("Infrastructure","ALERT_DELETE_DHCP_REMOTE_SERVICE_TEXT");;
+                }
+                else
+                {
+                    message = ResourceManager.getInstance().getString("Infrastructure","ALERT_DELETE_REMOTE_SERVICE_TEXT");	
+                }
                 AbiCloudAlert.showAlert(ResourceManager.getInstance().getString("Common",
                                                                                 "ALERT_TITLE_LABEL"),
                                         ResourceManager.getInstance().getString("Infrastructure",
                                                                                 "ALERT_DELETE_REMOTE_SERVICE_HEADER")+" '"+RemoteService(remoteServiceList.selectedItem).remoteServiceType.name+"'",
-                                        ResourceManager.getInstance().getString("Infrastructure",
-                                                                                "ALERT_DELETE_REMOTE_SERVICE_TEXT"),
+                                        message,
                                         Alert.YES | Alert.NO, deleteRemoteService);
             }
 

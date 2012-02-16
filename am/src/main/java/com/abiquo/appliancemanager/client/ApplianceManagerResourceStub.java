@@ -38,7 +38,7 @@ public class ApplianceManagerResourceStub
 
     private final RestClient clientTimeout;
 
-    private final String serviceUri;
+    protected final String serviceUri;
 
     private final static String REPOSITORY_PATH = "erepo";
 
