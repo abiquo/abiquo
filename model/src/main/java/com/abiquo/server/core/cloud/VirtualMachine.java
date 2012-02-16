@@ -51,6 +51,7 @@ import org.hibernate.annotations.ForeignKey;
 import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.Range;
 
+import com.abiquo.model.enumerator.EthernetDriverType;
 import com.abiquo.server.core.appslibrary.VirtualImageConversion;
 import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
 import com.abiquo.server.core.cloud.chef.RunlistElement;
@@ -735,7 +736,30 @@ public class VirtualMachine extends DefaultEntityBase
         this.runlist.remove(element);
     }
 
-    /*          ******************* Helper methods ******************* */
+    public final static String ETHERNET_DRIVER_TYPE_PROPERTY = "ethernetDriverType";
+
+    private final static boolean ETHERNET_DRIVER_TYPE_REQUIRED = false;
+
+    private final static String ETHERNET_DRIVER_TYPE_COLUMN = "ethDriverType";
+
+    private final static int ETHERNET_DRIVER_TYPE_COLUMN_LENGTH = 16;
+
+    @Enumerated(value = javax.persistence.EnumType.STRING)
+    @Column(name = ETHERNET_DRIVER_TYPE_COLUMN, nullable = !ETHERNET_DRIVER_TYPE_REQUIRED, length = ETHERNET_DRIVER_TYPE_COLUMN_LENGTH)
+    private EthernetDriverType ethernetDriverType;
+
+    @Required(value = ETHERNET_DRIVER_TYPE_REQUIRED)
+    public EthernetDriverType getEthernetDriverType()
+    {
+        return this.ethernetDriverType;
+    }
+
+    public void setEthernetDriverType(final EthernetDriverType ethernetDriverType)
+    {
+        this.ethernetDriverType = ethernetDriverType;
+    }
+
+    /* ******************* Helper methods ******************* */
 
     public boolean isChefEnabled()
     {

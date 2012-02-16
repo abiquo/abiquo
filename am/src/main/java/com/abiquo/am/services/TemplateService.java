@@ -29,9 +29,12 @@ import static com.abiquo.am.services.TemplateConventions.isBundleOvfId;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 import javax.ws.rs.core.Response;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
 import org.dmtf.schemas.ovf.envelope._1.EnvelopeType;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -229,7 +232,13 @@ public class TemplateService
     private TemplateDto fixFilePathWithRelativeTemplatePath(final TemplateDto ovfpi,
         final String relativePackagePath)
     {
-        ovfpi.setDiskFilePath(relativePackagePath + ovfpi.getDiskFilePath());
+        String diskPath = ovfpi.getDiskFilePath();
+        if (diskPath.startsWith("http://"))
+        {
+            diskPath = diskPath.substring(diskPath.lastIndexOf('/') + 1);
+        }
+
+        ovfpi.setDiskFilePath(FilenameUtils.concat(relativePackagePath, diskPath));
 
         return ovfpi;
     }
