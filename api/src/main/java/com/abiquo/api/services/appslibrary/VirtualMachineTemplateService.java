@@ -488,7 +488,7 @@ public class VirtualMachineTemplateService extends DefaultApiServiceWithApplianc
         final ApplianceManagerResourceStubImpl amClient = getApplianceManagerClient(datacenterId);
         try
         {
-            amClient.delete(enterpriseId.toString(), viOvf);
+            amClient.delete(vmtemplateToDelete.getEnterprise().getId().toString(), viOvf);
         }
         catch (ApplianceManagerStubException e)
         {
