@@ -50,6 +50,7 @@
             <groupId>com.abiquo</groupId>
             <artifactId>commons-amqp</artifactId>
             <version>${commonsamqp.version}</version>
+            <classifier>master</classifier>
         </dependency>
         <dependency>
             <groupId>com.abiquo.abicloud</groupId>

@@ -1094,6 +1094,7 @@ CREATE TABLE  `kinton`.`virtualimage` (
   `idRepository` int(3) unsigned default NULL,
   `idIcon` int(4) unsigned default NULL,
   `type` varchar(50) NOT NULL,
+  `ethDriverType` varchar(16) default NULL,
   `idMaster` int(4) unsigned default NULL,
   `idEnterprise` int(10) unsigned default null,
   `shared` int(1) unsigned NOT NULL default 0 COMMENT '0-No 1-Yes',
@@ -1154,6 +1155,7 @@ CREATE TABLE  `kinton`.`virtualmachine` (
   `password` varchar(32) default NULL,
   `network_configuration_id` int(11) unsigned, 
   `temporal` int(10) unsigned default NULL,
+  `ethDriverType` varchar(16) default NULL,
   `version_c` int(11) default 0,
   PRIMARY KEY  (`idVM`),
   KEY `VirtualMachine_FK1` (`idHypervisor`),
@@ -1319,7 +1321,7 @@ CREATE TABLE IF NOT EXISTS alerts (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 LOCK TABLES `alerts` WRITE;
-insert into alerts (id, type, value, tstamp) values ("1", "REGISTER", "LATER", date_sub(now(), INTERVAL 4 DAY)), ("2", "HEARTBEAT", "LATER", date_sub(now(), INTERVAL 4 DAY));
+insert into alerts (id, type, value, tstamp) values ("1", "REGISTER", "LATER", date_sub(now(), INTERVAL 4 DAY)), ("2", "HEARTBEAT", "YES", date_sub(now(), INTERVAL 4 DAY));
 UNLOCK TABLES;
 
 DROP TABLE IF EXISTS heartbeatlog;

@@ -79,6 +79,7 @@ import com.abiquo.api.util.URIResolver;
 import com.abiquo.api.util.snapshot.SnapshotUtils.SnapshotType;
 import com.abiquo.appliancemanager.client.ApplianceManagerResourceStubImpl;
 import com.abiquo.commons.amqp.impl.tarantino.domain.builder.VirtualMachineDescriptionBuilder;
+import com.abiquo.model.enumerator.EthernetDriverType;
 import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.model.enumerator.NetworkType;
 import com.abiquo.model.rest.RESTLink;
@@ -969,11 +970,21 @@ public class VirtualMachineService extends DefaultApiService
      * Sets the virtual machine HD requirements based on the {@link VirtualMachineTemplate}
      * <p>
      * It also set the required CPU and RAM if it wasn't specified in the requested
-     * {@link VirtualMachineDto}
+     * {@link VirtualMachineDto}.
+     * <p>
+     * Specify the {@link EthernetDriverType} if the
      */
     protected void setVirtualMachineTemplateRequirementsIfNotAlreadyDefined(
         final VirtualMachine vmachine, final VirtualMachineTemplate vmtemplate)
     {
+        if (vmtemplate.getEthernetDriverType() != null)
+        {
+            vmachine.setEthernetDriverType(vmtemplate.getEthernetDriverType());
+
+            LOGGER.debug("VirtualMachine {} will use specific EthernetDriver {}",
+                vmachine.getName(), vmtemplate.getEthernetDriverType().name());
+        }
+
         if (vmachine.getCpu() == 0)
         {
             vmachine.setCpu(vmtemplate.getCpuRequired());
