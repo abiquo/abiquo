@@ -38,7 +38,7 @@ public abstract class AbstractHierarchyProcessor<T> implements HierarchyProcesso
         String resourceId = getIdentifier(uri);
 
         // If the resource prefix is not found, ignore this processor
-        if (resourceId != null && !resourceId.isEmpty())
+        if (resourceId != null && !resourceId.isEmpty() && StringUtils.isNumeric(resourceId))
         {
             String resourceName = getResourceName(resourceId);
 

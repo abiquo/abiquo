@@ -1474,7 +1474,14 @@ INSERT INTO `kinton`.`system_properties` (`name`, `value`, `description`) VALUES
  ("client.wiki.config.heartbeat","http://community.abiquo.com/display/ABI20/Configuration+view#ConfigurationView-Heartbeating","Heartbeat configuration wiki"),
  ("client.wiki.config.licence","http://community.abiquo.com/display/ABI20/Configuration+view#ConfigurationView-LicenseManagement","Licence configuration wiki"),
  ("client.wiki.config.registration","http://community.abiquo.com/display/ABI20/Configuration+view#Configurationview-ProductRegistration","Registration wiki"),
- ("client.wiki.infra.discoverBlades","http://community.abiquo.com/display/ABI20/Manage+Physical+Machines#ManagePhysicalMachines-DiscoveringBladesonManagedRacks","discover UCS blades wiki");
+ ("client.wiki.infra.discoverBlades","http://community.abiquo.com/display/ABI20/Manage+Physical+Machines#ManagePhysicalMachines-DiscoveringBladesonManagedRacks","discover UCS blades wiki"),
+ ("client.network.defaultName","default_private_network","default private vlan name"),
+ ("client.network.defaultNetmask","2","index of available netmask"),
+ ("client.network.defaultAddress","192.168.0.0","default private vlan address"),
+ ("client.network.defaultGateway","192.168.0.1","default private vlan gateway"),
+ ("client.network.defaultPrimaryDNS","","default primary DNS"),
+ ("client.network.defaultSecondaryDNS","","default secondary DNS"),
+ ("client.network.defaultSufixDNS","","default sufix DNS");
 UNLOCK TABLES;
 
 /*!40000 ALTER TABLE `system_properties` ENABLE KEYS */;

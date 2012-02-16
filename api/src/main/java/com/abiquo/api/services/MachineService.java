@@ -43,6 +43,7 @@ import com.abiquo.api.services.stub.VsmServiceStub;
 import com.abiquo.api.tracer.TracerLogger;
 import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.model.enumerator.MachineState;
+import com.abiquo.scheduler.workload.VirtualimageAllocationService;
 import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.cloud.VirtualDatacenterRep;
 import com.abiquo.server.core.cloud.VirtualMachine;
@@ -83,6 +84,9 @@ public class MachineService extends DefaultApiService
 
     @Autowired
     protected VirtualDatacenterRep virtualDatacenterRep;
+    
+    @Autowired
+    protected VirtualMachineAllocatorService allocationService;
 
     @Autowired
     protected NodecollectorServiceStub nodecollectorServiceStub;
@@ -101,6 +105,7 @@ public class MachineService extends DefaultApiService
         virtualDatacenterRep = new VirtualDatacenterRep(em);
         remoteServiceService = new RemoteServiceService(em);
         nodecollectorServiceStub = new NodecollectorServiceStub();
+        allocationService = new VirtualMachineAllocatorService(em);
         tracer = new TracerLogger();
     }
 
@@ -350,6 +355,11 @@ public class MachineService extends DefaultApiService
             {
                 if (vm.isManaged())
                 {
+                    // even we are going to delete the physical machine we need
+                    // to deallocate the networking values.
+                    // And for shared datastores it will be usefull as well.
+                    allocationService.deallocateVirtualMachine(vm);
+                    
                     if (vm.getState() != VirtualMachineState.NOT_ALLOCATED)
                     {
                         if (!force)

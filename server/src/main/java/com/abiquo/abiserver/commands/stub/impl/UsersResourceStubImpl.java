@@ -555,26 +555,17 @@ public class UsersResourceStubImpl extends AbstractAPIStub implements UsersResou
         DataResult<RoleListResult> dataResult = new DataResult<RoleListResult>();
         RoleListResult roleListResult = new RoleListResult();
 
-        boolean desc = !roleListOptions.getAsc();
-        String orderBy = roleListOptions.getOrderBy();
-
         Map<String, String[]> queryParams = new HashMap<String, String[]>();
-        if (enterprise != null)
-        {
-            queryParams.put("identerprise", new String[] {String.valueOf(enterprise.getId())});
-        }
-        if (!StringUtils.isEmpty(roleListOptions.getFilterLike()))
-        {
-            queryParams.put("filter", new String[] {roleListOptions.getFilterLike()});
-        }
-        if (!StringUtils.isEmpty(roleListOptions.getOrderBy()))
-        {
-            queryParams.put("orderBy", new String[] {orderBy});
-        }
-        queryParams.put("desc", new String[] {String.valueOf(desc)});
 
-        String uri =
-            createRolesLink(roleListOptions.getOffset(), roleListOptions.getNumberOfNodes());
+        final boolean optionsEmpty = roleListOptions == null;
+        final Integer idEnterprise = enterprise != null ? enterprise.getId() : null;
+        final String filter = !optionsEmpty ? roleListOptions.getFilterLike() : null;
+        final String orderBy = !optionsEmpty ? roleListOptions.getOrderBy() : null;
+        final Integer offset = !optionsEmpty ? roleListOptions.getOffset() : null;
+        final boolean asc = !optionsEmpty ? roleListOptions.getAsc() : false;
+        final Integer numResults = !optionsEmpty ? roleListOptions.getNumberOfNodes() : null;
+
+        String uri = createRolesLink(idEnterprise, filter, orderBy, offset, asc, numResults);
 
         uri = UriHelper.appendQueryParamsToPath(uri, queryParams, false);
 

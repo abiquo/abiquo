@@ -34,6 +34,7 @@ import org.springframework.stereotype.Repository;
 import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
 import com.abiquo.server.core.cloud.NodeVirtualImage;
 import com.abiquo.server.core.cloud.NodeVirtualImageDAO;
+import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.stateful.DiskStatefulConversion;
@@ -231,7 +232,7 @@ public class StorageRep extends DefaultRepBase
     {
         return tierDAO.findAll();
     }
-    
+
     public List<Tier> getTiersByDatacenter(final Integer datacenterId)
     {
         return tierDAO.getTiersByDatacenter(datacenterId);
@@ -395,5 +396,10 @@ public class StorageRep extends DefaultRepBase
     public void updateVolume(final VolumeManagement volume)
     {
         volumeDAO.flush();
+    }
+
+    public List<VolumeManagement> getVolumesByVirtualAppliance(final VirtualAppliance vapp)
+    {
+        return volumeDAO.getVolumesByVirtualAppliance(vapp);
     }
 }
