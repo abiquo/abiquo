@@ -1,0 +1,61 @@
+From 9d67b483fc3a9897651970c481dbf7147534d010 Mon Sep 17 00:00:00 2001
+From: Xavier Thevenot <xthevenot@abiquo.com>
+Date: Wed, 8 Feb 2012 17:35:40 +0100
+Subject: [PATCH] Refreshing the Private/External IP list after edition
+
+---
+ .../components/privateip/PrivateIPList.mxml        |    2 +-
+ .../privatenetwork/PrivateNetworkManagement.mxml   |   17 +++++++++++++++++
+ 2 files changed, 18 insertions(+), 1 deletions(-)
+
+diff --git a/client/swf/src/main/flex/net/undf/abicloud/view/networking/components/privateip/PrivateIPList.mxml b/client/swf/src/main/flex/net/undf/abicloud/view/networking/components/privateip/PrivateIPList.mxml
+index 8f4154e..a0c8cee 100644
+--- a/client/swf/src/main/flex/net/undf/abicloud/view/networking/components/privateip/PrivateIPList.mxml
++++ b/client/swf/src/main/flex/net/undf/abicloud/view/networking/components/privateip/PrivateIPList.mxml
+@@ -96,7 +96,7 @@
+ 
+             //List of IPPoolManagement object
+             [Bindable]
+-            private var ipList:ArrayCollection;
++            public var ipList:ArrayCollection;
+ 
+             //Total number of private IPs that match the listRequest
+             [Bindable]
+diff --git a/client/swf/src/main/flex/net/undf/abicloud/view/networking/virtualdatacenter/privatenetwork/PrivateNetworkManagement.mxml b/client/swf/src/main/flex/net/undf/abicloud/view/networking/virtualdatacenter/privatenetwork/PrivateNetworkManagement.mxml
+index f3931fa..6cfbed3 100644
+--- a/client/swf/src/main/flex/net/undf/abicloud/view/networking/virtualdatacenter/privatenetwork/PrivateNetworkManagement.mxml
++++ b/client/swf/src/main/flex/net/undf/abicloud/view/networking/virtualdatacenter/privatenetwork/PrivateNetworkManagement.mxml
+@@ -162,6 +162,7 @@
+                 
+             	_virtualDatacenter.network.networks.addAll(networks);
+             	setDefaultNetwork(this._virtualDatacenter.defaultVlan,networks);
++            	refreshPrivateIPList(networks);
+             }
+             
+             private function setDefaultNetwork(vlan:VlanNetwork, networks:ArrayCollection):void{
+@@ -204,6 +205,22 @@
+ 
+                 privateIPList.init(null, _virtualDatacenter, _selectedVLAN);
+             }
++            
++            private function refreshPrivateIPList(networks:ArrayCollection):void
++            {
++            	for(var i:int = 0 ; i < networks.length; i++)
++            	{
++            	   if(_selectedVLAN && _selectedVLAN.vlanNetworkId == VlanNetwork(networks.getItemAt(i)).vlanNetworkId)
++            	   {
++            	   	   vlanList.selectedIndex = i;
++            	   	   privateIPList.init(null, _virtualDatacenter, _selectedVLAN);
++            	   	   return;
++            	   }	
++            	}
++            	
++            	//If not, delete IP list
++            	privateIPList.ipList = new ArrayCollection();
++            }
+ 
+             private function addVLAN():void
+             {
+-- 
+1.7.3.1.msysgit.0
+

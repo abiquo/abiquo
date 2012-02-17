@@ -162,6 +162,7 @@
                 
             	_virtualDatacenter.network.networks.addAll(networks);
             	setDefaultNetwork(this._virtualDatacenter.defaultVlan,networks);
+            	refreshPrivateIPList(networks);
             }
             
             private function setDefaultNetwork(vlan:VlanNetwork, networks:ArrayCollection):void{
@@ -203,6 +204,22 @@
                 dispatchEvent(new Event("selectedVLANChange"));
 
                 privateIPList.init(null, _virtualDatacenter, _selectedVLAN);
+            }
+            
+            private function refreshPrivateIPList(networks:ArrayCollection):void
+            {
+            	for(var i:int = 0 ; i < networks.length; i++)
+            	{
+            	   if(_selectedVLAN && _selectedVLAN.vlanNetworkId == VlanNetwork(networks.getItemAt(i)).vlanNetworkId)
+            	   {
+            	   	   vlanList.selectedIndex = i;
+            	   	   privateIPList.init(null, _virtualDatacenter, _selectedVLAN);
+            	   	   return;
+            	   }	
+            	}
+            	
+            	//If not, delete IP list
+            	privateIPList.ipList = new ArrayCollection();
             }
 
             private function addVLAN():void
