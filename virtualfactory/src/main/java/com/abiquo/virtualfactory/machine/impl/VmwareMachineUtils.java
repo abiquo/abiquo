@@ -84,7 +84,7 @@ public class VmwareMachineUtils
      * 
      * @param vmwareHyper, the VMWare hypervisor instance.
      */
-    public VmwareMachineUtils(VmwareHypervisor vmwareHyper)
+    public VmwareMachineUtils(final VmwareHypervisor vmwareHyper)
     {
         this.vmwareHyper = vmwareHyper;
         apputil = vmwareHyper.getAppUtil();
@@ -96,7 +96,7 @@ public class VmwareMachineUtils
      * 
      * @param vmwareHyper, the VMWare hypervisor instance.
      */
-    public VmwareMachineUtils(ExtendedAppUtil apputil)
+    public VmwareMachineUtils(final ExtendedAppUtil apputil)
     {
         this.apputil = apputil;
 
@@ -123,7 +123,7 @@ public class VmwareMachineUtils
      */
     public ServiceUtil getServiceUtil()
     {
-        ServiceUtil su = ServiceUtil.CreateServiceUtil();
+        final ServiceUtil su = ServiceUtil.CreateServiceUtil();
         su.init(apputil);
         return su;
     }
@@ -138,11 +138,11 @@ public class VmwareMachineUtils
 
     public HostSystem getHostSystem() throws InvalidProperty, RuntimeFault, RemoteException
     {
-        ManagedEntity[] mes =
+        final ManagedEntity[] mes =
             new InventoryNavigator(apputil.getServiceInstance().getRootFolder())
                 .searchManagedEntities("HostSystem");
 
-        HostSystem host = (HostSystem) mes[0];
+        final HostSystem host = (HostSystem) mes[0];
 
         return host;
     }
@@ -153,7 +153,7 @@ public class VmwareMachineUtils
      * @param key, the name of the option to get.
      * @return the option value, null if not provided.
      */
-    public String getOption(String key)
+    public String getOption(final String key)
     {
         return apputil.get_option(key);
     }
@@ -166,7 +166,7 @@ public class VmwareMachineUtils
         ManagedObjectReference dcmor;
         ManagedObjectReference hfmor;
 
-        String dcName = apputil.get_option("datacentername");
+        final String dcName = apputil.get_option("datacentername");
 
         try
         {
@@ -177,9 +177,9 @@ public class VmwareMachineUtils
                 throw new Exception();
             }
         }
-        catch (Exception e)
+        catch (final Exception e)
         {
-            String msg = "Datacenter [" + dcName + "] not found.";
+            final String msg = "Datacenter [" + dcName + "] not found.";
             logger.error(msg);
             throw new VirtualMachineException(msg);
         }
@@ -188,9 +188,9 @@ public class VmwareMachineUtils
         {
             hfmor = getServiceUtil().getMoRefProp(dcmor, "hostFolder");
         }
-        catch (Exception e)
+        catch (final Exception e)
         {
-            String msg = "Datacenter " + dcName + " not found.";
+            final String msg = "Datacenter " + dcName + " not found.";
             logger.error(msg);
             throw new VirtualMachineException(msg);
         }
@@ -204,11 +204,11 @@ public class VmwareMachineUtils
      * Gets the host system from a given datacenter and host folder. If not specified the
      * ''hostname'' option use the first decendent on the datacenter.
      */
-    public ManagedObjectReference getHostSystemMor(ManagedObjectReference dcmor,
-        ManagedObjectReference hfmor) throws VirtualMachineException
+    public ManagedObjectReference getHostSystemMor(final ManagedObjectReference dcmor,
+        final ManagedObjectReference hfmor) throws VirtualMachineException
     {
         ManagedObjectReference hostmor;
-        String hostName = apputil.get_option("hostname");
+        final String hostName = apputil.get_option("hostname");
 
         if (hostName != null)
         {
@@ -221,9 +221,9 @@ public class VmwareMachineUtils
                     throw new Exception();
                 }
             }
-            catch (Exception e)
+            catch (final Exception e)
             {
-                String message = "Host " + hostName + " not found";
+                final String message = "Host " + hostName + " not found";
                 logger.error(message);
                 throw new VirtualMachineException(message);
             }
@@ -234,9 +234,9 @@ public class VmwareMachineUtils
             {
                 hostmor = getServiceUtil().getFirstDecendentMoRef(dcmor, "HostSystem");
             }
-            catch (Exception e)
+            catch (final Exception e)
             {
-                String message = "Host " + hostName + " not found using ''FirstDecendent''";
+                final String message = "Host " + hostName + " not found using ''FirstDecendent''";
                 logger.error(message);
                 throw new VirtualMachineException(message);
             }
@@ -272,7 +272,7 @@ public class VmwareMachineUtils
 
             if (dcmor == null)
             {
-                String message = "Datacenter " + dcName + " not found.";
+                final String message = "Datacenter " + dcName + " not found.";
                 logger.error(message);
                 throw new VirtualMachineException(message);
             }
@@ -285,19 +285,19 @@ public class VmwareMachineUtils
 
             crmor = getComputerResourceFromHost(crmors, hostmor);
 
-            VMUtils vmutils = new VMUtils(apputil);
-            ConfigTarget configTarget = vmutils.getConfigTargetForHost(crmor, hostmor);
+            final VMUtils vmutils = new VMUtils(apputil);
+            final ConfigTarget configTarget = vmutils.getConfigTargetForHost(crmor, hostmor);
 
             boolean flag = false;
             if (configTarget.getNetwork() == null)
             {
                 return null;
             }
-            
+
             for (int i = 0; i < configTarget.getNetwork().length; i++)
             {
-                VirtualMachineNetworkInfo networkInfo = configTarget.getNetwork()[i];
-                NetworkSummary networkSummary = networkInfo.getNetwork();
+                final VirtualMachineNetworkInfo networkInfo = configTarget.getNetwork()[i];
+                final NetworkSummary networkSummary = networkInfo.getNetwork();
 
                 if (networkSummary.getName().equals(networkName))
                 {
@@ -321,7 +321,7 @@ public class VmwareMachineUtils
             }
 
         }
-        catch (Exception e)
+        catch (final Exception e)
         {
             throw new VirtualMachineException("Can not get the Network ", e);
         }
@@ -336,13 +336,13 @@ public class VmwareMachineUtils
      * @return the virtual machine list using this network
      * @throws VirtualMachineException
      */
-    public ManagedObjectReference[] getVmsFromNetworkName(String networkName)
+    public ManagedObjectReference[] getVmsFromNetworkName(final String networkName)
         throws VirtualMachineException
     {
 
         try
         {
-            ManagedObjectReference network = getNetwork(networkName);
+            final ManagedObjectReference network = getNetwork(networkName);
             ManagedObjectReference[] vms =
                 (ManagedObjectReference[]) getServiceUtil().getDynamicProperty(network, "vm");
             if (vms == null)
@@ -351,7 +351,7 @@ public class VmwareMachineUtils
             }
             return vms;
         }
-        catch (Exception e)
+        catch (final Exception e)
         {
             throw new VirtualMachineException("An error was found when getting the virtual machine used by this network: "
                 + networkName,
@@ -366,6 +366,7 @@ public class VmwareMachineUtils
      * @return a list of virtual machine managed object references retalted to the
      * @throws Exception
      */
+    @Deprecated
     public ArrayList<ManagedObjectReference> getVms(String vmname) throws VirtualMachineException
     {
         // String vmname = null;
@@ -434,9 +435,9 @@ public class VmwareMachineUtils
      * @return a list of virtual machine managed object references
      * @throws Exception
      */
-    public ArrayList<ManagedObjectReference> getVMs(String entity, String datacenter,
-        String folder, String pool, String vmname, String host, String[][] filter)
-        throws VirtualMachineException
+    public ArrayList<ManagedObjectReference> getVMs(final String entity, final String datacenter,
+        final String folder, final String pool, final String vmname, final String host,
+        final String[][] filter) throws VirtualMachineException
     {
         ManagedObjectReference dsMOR = null;
         ManagedObjectReference hostMOR = null;
@@ -458,7 +459,7 @@ public class VmwareMachineUtils
                     throw new Exception();
                 }
             }
-            catch (Exception e)
+            catch (final Exception e)
             {
                 final String msg = "Can get ''Datacenter'' :" + datacenter;
                 throw new VirtualMachineException(msg, e);
@@ -478,7 +479,7 @@ public class VmwareMachineUtils
                     throw new Exception();
                 }
             }
-            catch (Exception e)
+            catch (final Exception e)
             {
                 final String msg = "Can get ''Folder'' :" + folder;
                 throw new VirtualMachineException(msg, e);
@@ -497,7 +498,7 @@ public class VmwareMachineUtils
                     throw new Exception();
                 }
             }
-            catch (Exception e)
+            catch (final Exception e)
             {
                 final String msg = "Can get ''ResourcePool'' :" + pool;
                 throw new VirtualMachineException(msg, e);
@@ -517,7 +518,7 @@ public class VmwareMachineUtils
                     throw new Exception();
                 }
             }
-            catch (Exception e)
+            catch (final Exception e)
             {
                 final String msg = "Can get ''HostSystem'' :" + host;
                 throw new VirtualMachineException(msg, e);
@@ -554,12 +555,12 @@ public class VmwareMachineUtils
         {
             vmList = getVM(tempMOR, filterData);
 
-            if ((vmList == null) || (vmList.size() == 0))
+            if (vmList == null || vmList.size() == 0)
             {
                 throw new Exception();
             }
         }
-        catch (Exception e)
+        catch (final Exception e)
         {
             final String msg =
                 "The virtual machine : " + vmname + "couldn't be found in the hypervisor";
@@ -570,19 +571,17 @@ public class VmwareMachineUtils
     }
 
     @SuppressWarnings("unchecked")
-    private ArrayList<ManagedObjectReference> getVM(ManagedObjectReference tempMOR,
-        String[][] filterData) throws Exception
+    private ArrayList<ManagedObjectReference> getVM(final ManagedObjectReference tempMOR,
+        final String[][] filterData) throws Exception
     {
-        return (ArrayList<ManagedObjectReference>) getServiceUtil().getDecendentMoRefs(tempMOR,
-            "VirtualMachine", filterData);
+        return getServiceUtil().getDecendentMoRefs(tempMOR, "VirtualMachine", filterData);
     }
 
     @SuppressWarnings("unchecked")
-    private ArrayList<ManagedObjectReference> getNetwork(ManagedObjectReference tempMOR,
-        String[][] filterData) throws Exception
+    private ArrayList<ManagedObjectReference> getNetwork(final ManagedObjectReference tempMOR,
+        final String[][] filterData) throws Exception
     {
-        return (ArrayList<ManagedObjectReference>) getServiceUtil().getDecendentMoRefs(tempMOR,
-            "Network", filterData);
+        return getServiceUtil().getDecendentMoRefs(tempMOR, "Network", filterData);
     }
 
     /**
@@ -592,12 +591,12 @@ public class VmwareMachineUtils
      * @return the virtual machine state
      * @throws Exception if there is any error
      */
-    public VirtualMachinePowerState getVMState(ManagedObjectReference vmmor) throws Exception
+    public VirtualMachinePowerState getVMState(final ManagedObjectReference vmmor) throws Exception
     {
         DynamicProperty[] virtualMachineRuntimeInfoProperty;
         VirtualMachineRuntimeInfo runtimeInfo;
         virtualMachineRuntimeInfoProperty = getDynamicProarray(vmmor, "runtime");
-        runtimeInfo = ((VirtualMachineRuntimeInfo) (virtualMachineRuntimeInfoProperty[0]).getVal());
+        runtimeInfo = (VirtualMachineRuntimeInfo) virtualMachineRuntimeInfoProperty[0].getVal();
         return runtimeInfo.getPowerState();
     }
 
@@ -607,7 +606,7 @@ public class VmwareMachineUtils
      * @param taskmor the MOR to get the info from
      * @throws VirtualMachineException it there is any error.
      */
-    public void checkTaskState(ManagedObjectReference taskmor) throws VirtualMachineException
+    public void checkTaskState(final ManagedObjectReference taskmor) throws VirtualMachineException
     {
         DynamicProperty[] taskInfoProperty;
         TaskInfo tinfo;
@@ -616,9 +615,9 @@ public class VmwareMachineUtils
         try
         {
             taskInfoProperty = getDynamicProarray(taskmor, "info");
-            tinfo = ((TaskInfo) (taskInfoProperty[0]).getVal()); // TODO only the first relevant ??
+            tinfo = (TaskInfo) taskInfoProperty[0].getVal(); // TODO only the first relevant ??
         }
-        catch (Exception e)
+        catch (final Exception e)
         {
             final String msg =
                 "Can not get the Dynamic property ''info'' for task " + taskmor.get_value();
@@ -631,19 +630,20 @@ public class VmwareMachineUtils
         {
             taskResult = getServiceUtil().waitForTask(taskmor);
         }
-        catch (Exception e)
+        catch (final Exception e)
         {
             final String msg = "Exception while waiting task completion " + taskmor.get_value();
             throw new VirtualMachineException(msg, e);
         }
 
-        if (taskResult.equalsIgnoreCase("success")) 
+        if (taskResult.equalsIgnoreCase("success"))
         {
             return; // any exception
         }
         else
         {
-            throw new VirtualMachineException("Task " + taskmor.get_value() + " FAIL :" + taskResult);            
+            throw new VirtualMachineException("Task " + taskmor.get_value() + " FAIL :"
+                + taskResult);
         }
     }
 
@@ -655,13 +655,13 @@ public class VmwareMachineUtils
      * @return the array dinamy property
      * @throws Exception
      */
-    public DynamicProperty[] getDynamicProarray(ManagedObjectReference MOR, String pName)
+    public DynamicProperty[] getDynamicProarray(final ManagedObjectReference MOR, final String pName)
         throws Exception
     {
-        ObjectContent[] objContent =
+        final ObjectContent[] objContent =
             getServiceUtil().getObjectProperties(null, MOR, new String[] {pName});
-        ObjectContent contentObj = objContent[0];
-        DynamicProperty[] objArr = contentObj.getPropSet();
+        final ObjectContent contentObj = objContent[0];
+        final DynamicProperty[] objArr = contentObj.getPropSet();
 
         return objArr;
     }
@@ -672,11 +672,37 @@ public class VmwareMachineUtils
      * @param tmor the task managed object reference
      * @throws Exception
      */
-    public void monitorTask(ManagedObjectReference tmor) throws Exception
+    public void monitorTask(final ManagedObjectReference tmor) throws Exception
     {
         if (tmor != null)
         {
-            String result = getServiceUtil().waitForTask(tmor);
+            final String result = getServiceUtil().waitForTask(tmor);
+            if (result.equalsIgnoreCase("success"))
+            {
+                logger.info("Task Completed Sucessfully");
+            }
+            else
+            {
+                logger.error("Failure " + result);
+                throw new Exception("The task could not be performed");
+            }
+        }
+    }
+
+    /**
+     * Private helper to monitor the task launched
+     * 
+     * @param tmor the task managed object reference
+     * @throws Exception
+     */
+    public void monitorTaskAndAnswer(final ManagedObjectReference tmor, final String machineName,
+        final Folder rootFolder) throws Exception
+    {
+        if (tmor != null)
+        {
+            final String result =
+                getServiceUtil().waitForTaskAndAnswer(tmor, machineName, rootFolder);
+
             if (result.equalsIgnoreCase("success"))
             {
                 logger.info("Task Completed Sucessfully");
@@ -695,12 +721,12 @@ public class VmwareMachineUtils
      * @param vmName the virtual machine name
      * @throws Exception
      */
-    public ManagedObjectReference getVmMor(String vmName) throws Exception
+    public ManagedObjectReference getVmMor(final String vmName) throws Exception
     {
-        ServiceInstance si = apputil.getServiceInstance();
+        final ServiceInstance si = apputil.getServiceInstance();
 
-        Folder rootFolder = si.getRootFolder();
-        VirtualMachine vm =
+        final Folder rootFolder = si.getRootFolder();
+        final VirtualMachine vm =
             (VirtualMachine) new InventoryNavigator(rootFolder).searchManagedEntity(
                 "VirtualMachine", vmName);
         if (vm != null)
@@ -714,37 +740,41 @@ public class VmwareMachineUtils
     }
 
     // Retrieve properties from a single MoRef
-    public Object[] getProperties(ManagedObjectReference moRef, String[] properties)
+    public Object[] getProperties(final ManagedObjectReference moRef, final String[] properties)
         throws RuntimeFault, RemoteException
     {
-        ServiceContent content = apputil.getServiceInstance().getServiceContent();
-        PropertySpec pSpec = new PropertySpec();
+        final ServiceContent content = apputil.getServiceInstance().getServiceContent();
+        final PropertySpec pSpec = new PropertySpec();
         pSpec.setType(moRef.getType());
         pSpec.setPathSet(properties);
 
-        ObjectSpec oSpec = new ObjectSpec();
+        final ObjectSpec oSpec = new ObjectSpec();
         // Set the starting object
         oSpec.setObj(moRef);
-        PropertyFilterSpec pfSpec = new PropertyFilterSpec();
+        final PropertyFilterSpec pfSpec = new PropertyFilterSpec();
         pfSpec.setPropSet(new PropertySpec[] {pSpec});
         pfSpec.setObjectSet(new ObjectSpec[] {oSpec});
-        ObjectContent[] ocs =
-            apputil.getServiceInstance().getServerConnection().getVimService().retrieveProperties(
-                content.getPropertyCollector(), new PropertyFilterSpec[] {pfSpec});
+        final ObjectContent[] ocs =
+            apputil
+                .getServiceInstance()
+                .getServerConnection()
+                .getVimService()
+                .retrieveProperties(content.getPropertyCollector(),
+                    new PropertyFilterSpec[] {pfSpec});
 
-        Object[] ret = new Object[properties.length];
+        final Object[] ret = new Object[properties.length];
 
         if (ocs != null)
         {
             for (int i = 0; i < ocs.length; ++i)
             {
-                ObjectContent oc = ocs[i];
-                DynamicProperty[] dps = oc.getPropSet();
+                final ObjectContent oc = ocs[i];
+                final DynamicProperty[] dps = oc.getPropSet();
                 if (dps != null)
                 {
                     for (int j = 0; j < dps.length; ++j)
                     {
-                        DynamicProperty dp = dps[j];
+                        final DynamicProperty dp = dps[j];
                         for (int p = 0; p < ret.length; ++p)
                         {
                             if (properties[p].equals(dp.getName()))
@@ -768,7 +798,7 @@ public class VmwareMachineUtils
      * @param hostmor, reference to the host related to the current VM.
      */
     public ManagedObjectReference getComputerResourceFromHost(
-        ArrayList<ManagedObjectReference> crmors, ManagedObjectReference hostmor)
+        final ArrayList<ManagedObjectReference> crmors, final ManagedObjectReference hostmor)
         throws VirtualMachineException
     {
 
@@ -779,7 +809,7 @@ public class VmwareMachineUtils
         {
             hostName = (String) getServiceUtil().getDynamicProperty(hostmor, "name");
         }
-        catch (Exception e)
+        catch (final Exception e)
         {
             throw new VirtualMachineException("Can not get ''name'' property for the given HostMOR");
         }
@@ -788,26 +818,26 @@ public class VmwareMachineUtils
         {
             try
             {
-                ManagedObjectReference[] hrmors =
-                    (ManagedObjectReference[]) getServiceUtil().getDynamicProperty(
-                        (ManagedObjectReference) crmors.get(i), "host");
+                final ManagedObjectReference[] hrmors =
+                    (ManagedObjectReference[]) getServiceUtil().getDynamicProperty(crmors.get(i),
+                        "host");
 
                 if (hrmors != null && hrmors.length > 0)
                 {
                     for (int j = 0; j < hrmors.length; j++)
                     {
-                        String hname =
+                        final String hname =
                             (String) getServiceUtil().getDynamicProperty(hrmors[j], "name");
                         if (hname.equalsIgnoreCase(hostName))
                         {
-                            crmor = (ManagedObjectReference) crmors.get(i);
+                            crmor = crmors.get(i);
                             i = crmors.size() + 1;
                             j = hrmors.length + 1;
                         }
                     }
                 }
             }
-            catch (Exception e)
+            catch (final Exception e)
             {
                 final String msg = "Can not get host on the computer resource ";
                 throw new VirtualMachineException(msg, e);
@@ -816,7 +846,7 @@ public class VmwareMachineUtils
 
         if (crmor == null)
         {
-            String message = "No Compute Resource Found On Specified Host";
+            final String message = "No Compute Resource Found On Specified Host";
             logger.error(message);
             throw new VirtualMachineException(message);
         }
@@ -831,10 +861,10 @@ public class VmwareMachineUtils
      * @return the resource allocation information
      * @throws Exception
      */
-    public ResourceAllocationInfo getShares(String value) throws Exception
+    public ResourceAllocationInfo getShares(final String value) throws Exception
     {
-        ResourceAllocationInfo raInfo = new ResourceAllocationInfo();
-        SharesInfo sharesInfo = new SharesInfo();
+        final ResourceAllocationInfo raInfo = new ResourceAllocationInfo();
+        final SharesInfo sharesInfo = new SharesInfo();
 
         if (value.equalsIgnoreCase(SharesLevel.high.name()))
         {
@@ -874,10 +904,10 @@ public class VmwareMachineUtils
             vmwareHyper.connect(address);
             apputil = vmwareHyper.getAppUtil();
         }
-        catch (HypervisorException e)
+        catch (final HypervisorException e)
         {
-            logger.error("An error was occurred when reconnecting to the hypervisor: {}", address
-                .toExternalForm());
+            logger.error("An error was occurred when reconnecting to the hypervisor: {}",
+                address.toExternalForm());
             throw new VirtualMachineException(e);
 
         }

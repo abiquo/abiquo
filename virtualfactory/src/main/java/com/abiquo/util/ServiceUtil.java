@@ -31,7 +31,10 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import com.abiquo.virtualfactory.machine.impl.AbsVmwareMachine;
+import com.vmware.vim25.ChoiceOption;
 import com.vmware.vim25.DynamicProperty;
+import com.vmware.vim25.ElementDescription;
 import com.vmware.vim25.LocalizedMethodFault;
 import com.vmware.vim25.ManagedObjectReference;
 import com.vmware.vim25.ObjectContent;
@@ -48,6 +51,9 @@ import com.vmware.vim25.TaskInfo;
 import com.vmware.vim25.TaskInfoState;
 import com.vmware.vim25.UpdateSet;
 import com.vmware.vim25.VimPortType;
+import com.vmware.vim25.mo.Folder;
+import com.vmware.vim25.mo.InventoryNavigator;
+import com.vmware.vim25.mo.VirtualMachine;
 import com.vmware.vim25.mo.util.PropertyCollectorUtil;
 
 /**
@@ -67,7 +73,7 @@ public class ServiceUtil
         return new ServiceUtil();
     }
 
-    public void init(AppUtil cb)
+    public void init(final AppUtil cb)
     {
         appUtil = cb;
     }
@@ -79,7 +85,7 @@ public class ServiceUtil
 
     static String[] hcTree = {"HistoryCollector", "EventHistoryCollector", "TaskHistoryCollector"};
 
-    boolean typeIsA(String searchType, String foundType)
+    boolean typeIsA(final String searchType, final String foundType)
     {
         if (searchType.equals(foundType))
         {
@@ -127,17 +133,17 @@ public class ServiceUtil
      * @param name name to match
      * @return First ManagedObjectReference of the type / name pair found
      */
-    public ManagedObjectReference getDecendentMoRef(ManagedObjectReference root, String type,
-        String name) throws Exception
+    public ManagedObjectReference getDecendentMoRef(final ManagedObjectReference root,
+        final String type, final String name) throws Exception
     {
         if (name == null || name.length() == 0)
         {
             return null;
         }
 
-        String[][] typeinfo = new String[][] {new String[] {type, "name",},};
+        final String[][] typeinfo = new String[][] {new String[] {type, "name",},};
 
-        ObjectContent[] ocary = getContentsRecursively(null, root, typeinfo, true);
+        final ObjectContent[] ocary = getContentsRecursively(null, root, typeinfo, true);
 
         if (ocary == null || ocary.length == 0)
         {
@@ -182,10 +188,10 @@ public class ServiceUtil
      * @param type the type of the entity - e.g. VirtualMachine
      * @return managed object reference available
      */
-    public ManagedObjectReference getFirstDecendentMoRef(ManagedObjectReference root, String type)
-        throws Exception
+    public ManagedObjectReference getFirstDecendentMoRef(final ManagedObjectReference root,
+        final String type) throws Exception
     {
-        ArrayList morlist = getDecendentMoRefs(root, type);
+        final ArrayList morlist = getDecendentMoRefs(root, type);
 
         ManagedObjectReference mor = null;
 
@@ -204,34 +210,35 @@ public class ServiceUtil
      * @param type type of container refs to retrieve
      * @return List of MORefs
      */
-    public ArrayList getDecendentMoRefs(ManagedObjectReference root, String type) throws Exception
+    public ArrayList getDecendentMoRefs(final ManagedObjectReference root, final String type)
+        throws Exception
     {
-        ArrayList mors = getDecendentMoRefs(root, type, null);
+        final ArrayList mors = getDecendentMoRefs(root, type, null);
         return mors;
     }
 
-    public ArrayList getDecendentMoRefs(ManagedObjectReference root, String type, String[][] filter)
-        throws Exception
+    public ArrayList getDecendentMoRefs(final ManagedObjectReference root, final String type,
+        final String[][] filter) throws Exception
     {
-        String[][] typeinfo = new String[][] {new String[] {type, "name"},};
+        final String[][] typeinfo = new String[][] {new String[] {type, "name"},};
 
-        ObjectContent[] ocary = getContentsRecursively(null, root, typeinfo, true);
+        final ObjectContent[] ocary = getContentsRecursively(null, root, typeinfo, true);
 
-        ArrayList refs = new ArrayList();
+        final ArrayList refs = new ArrayList();
 
         if (ocary == null || ocary.length == 0)
         {
             return refs;
         }
 
-        for (int oci = 0; oci < ocary.length; oci++)
+        for (final ObjectContent element : ocary)
         {
-            refs.add(ocary[oci].getObj());
+            refs.add(element.getObj());
         }
 
         if (filter != null)
         {
-            ArrayList filtermors = filterMOR(refs, filter);
+            final ArrayList filtermors = filterMOR(refs, filter);
             return filtermors;
         }
         else
@@ -240,18 +247,18 @@ public class ServiceUtil
         }
     }
 
-    private ArrayList filterMOR(ArrayList mors, String[][] filter) throws Exception
+    private ArrayList filterMOR(final ArrayList mors, final String[][] filter) throws Exception
     {
-        ArrayList filteredmors = new ArrayList();
+        final ArrayList filteredmors = new ArrayList();
         for (int i = 0; i < mors.size(); i++)
         {
             boolean flag = true;
-            String guest = null;
+            final String guest = null;
             for (int k = 0; k < filter.length; k++)
             {
-                String prop = filter[k][0];
-                String reqVal = filter[k][1];
-                String value = getProp(((ManagedObjectReference) mors.get(i)), prop);
+                final String prop = filter[k][0];
+                final String reqVal = filter[k][1];
+                final String value = getProp((ManagedObjectReference) mors.get(i), prop);
                 if (reqVal == null)
                 {
                     continue;
@@ -287,14 +294,14 @@ public class ServiceUtil
         return filteredmors;
     }
 
-    private String getProp(ManagedObjectReference obj, String prop)
+    private String getProp(final ManagedObjectReference obj, final String prop)
     {
         String propVal = null;
         try
         {
             propVal = (String) getDynamicProperty(obj, prop);
         }
-        catch (Exception e)
+        catch (final Exception e)
         {
         }
         return propVal;
@@ -307,7 +314,7 @@ public class ServiceUtil
      */
     public ObjectContent[] getAllContainerContents() throws Exception
     {
-        ObjectContent[] ocary = getContentsRecursively(null, true);
+        final ObjectContent[] ocary = getContentsRecursively(null, true);
 
         return ocary;
     }
@@ -319,13 +326,13 @@ public class ServiceUtil
      * @param recurse retrieve contents recursively from the root down
      * @return retrieved object contents
      */
-    public ObjectContent[] getContentsRecursively(ManagedObjectReference root, boolean recurse)
-        throws Exception
+    public ObjectContent[] getContentsRecursively(final ManagedObjectReference root,
+        final boolean recurse) throws Exception
     {
 
-        String[][] typeinfo = new String[][] {new String[] {"ManagedEntity",},};
+        final String[][] typeinfo = new String[][] {new String[] {"ManagedEntity",},};
 
-        ObjectContent[] ocary = getContentsRecursively(null, root, typeinfo, recurse);
+        final ObjectContent[] ocary = getContentsRecursively(null, root, typeinfo, recurse);
 
         return ocary;
     }
@@ -340,8 +347,9 @@ public class ServiceUtil
      * @param recurse retrieve contents recursively from the root down
      * @return retrieved object contents
      */
-    public ObjectContent[] getContentsRecursively(ManagedObjectReference collector,
-        ManagedObjectReference root, String[][] typeinfo, boolean recurse) throws Exception
+    public ObjectContent[] getContentsRecursively(final ManagedObjectReference collector,
+        final ManagedObjectReference root, final String[][] typeinfo, final boolean recurse)
+        throws Exception
     {
         if (typeinfo == null || typeinfo.length == 0)
         {
@@ -366,14 +374,14 @@ public class ServiceUtil
             selectionSpecs = PropertyCollectorUtil.buildFullTraversal();
         }
 
-        PropertySpec[] propspecary = buildPropertySpecArray(typeinfo);
+        final PropertySpec[] propspecary = buildPropertySpecArray(typeinfo);
 
-        PropertyFilterSpec filterSpec = new PropertyFilterSpec();
+        final PropertyFilterSpec filterSpec = new PropertyFilterSpec();
         filterSpec.setPropSet(propspecary);
         filterSpec.setObjectSet(new ObjectSpec[] {PropertyCollectorUtil.creatObjectSpec(useroot,
             false, selectionSpecs)});
 
-        ObjectContent[] retoc =
+        final ObjectContent[] retoc =
             getVimService().retrieveProperties(usecoll, new PropertyFilterSpec[] {filterSpec});
 
         return retoc;
@@ -386,10 +394,10 @@ public class ServiceUtil
      * @param propName name of the property that is the MORef
      * @return ManagedObjectReference.
      */
-    public ManagedObjectReference getMoRefProp(ManagedObjectReference objMor, String propName)
-        throws Exception
+    public ManagedObjectReference getMoRefProp(final ManagedObjectReference objMor,
+        final String propName) throws Exception
     {
-        Object props = getDynamicProperty(objMor, propName);
+        final Object props = getDynamicProperty(objMor, propName);
         ManagedObjectReference propmor = null;
         if (!props.getClass().isArray())
         {
@@ -408,8 +416,8 @@ public class ServiceUtil
      * @param properties names of properties of object to retrieve
      * @return retrieved object contents
      */
-    public ObjectContent[] getObjectProperties(ManagedObjectReference collector,
-        ManagedObjectReference mobj, String[] properties) throws Exception
+    public ObjectContent[] getObjectProperties(final ManagedObjectReference collector,
+        final ManagedObjectReference mobj, final String[] properties) throws Exception
     {
         if (mobj == null)
         {
@@ -422,14 +430,14 @@ public class ServiceUtil
             usecoll = getPropertyCollector();
         }
 
-        PropertySpec propertySpec =
+        final PropertySpec propertySpec =
             createPropertySpec(mobj.getType(), new Boolean(properties == null
                 || properties.length == 0), properties);
 
-        PropertyFilterSpec spec = new PropertyFilterSpec();
+        final PropertyFilterSpec spec = new PropertyFilterSpec();
         spec.setPropSet(new PropertySpec[] {propertySpec});
 
-        ObjectSpec objectSpec = creatObjectSpec(mobj, false, new SelectionSpec[] {});
+        final ObjectSpec objectSpec = creatObjectSpec(mobj, false, new SelectionSpec[] {});
         spec.setObjectSet(new ObjectSpec[] {objectSpec});
 
         return getVimService().retrieveProperties(usecoll, new PropertyFilterSpec[] {spec});
@@ -442,22 +450,23 @@ public class ServiceUtil
      * @param propertyName of the object to retrieve
      * @return retrieved object
      */
-    public Object getDynamicProperty(ManagedObjectReference mor, String propertyName)
+    public Object getDynamicProperty(final ManagedObjectReference mor, final String propertyName)
         throws Exception
     {
-        ObjectContent[] objContent = getObjectProperties(null, mor, new String[] {propertyName});
+        final ObjectContent[] objContent =
+            getObjectProperties(null, mor, new String[] {propertyName});
 
         Object propertyValue = null;
         if (objContent != null)
         {
-            DynamicProperty[] dynamicProperty = objContent[0].getPropSet();
+            final DynamicProperty[] dynamicProperty = objContent[0].getPropSet();
             if (dynamicProperty != null)
             {
                 /*
                  * Check the dynamic propery for ArrayOfXXX object
                  */
-                Object dynamicPropertyVal = dynamicProperty[0].getVal();
-                String dynamicPropertyName = dynamicPropertyVal.getClass().getName();
+                final Object dynamicPropertyVal = dynamicProperty[0].getVal();
+                final String dynamicPropertyName = dynamicPropertyVal.getClass().getName();
                 if (dynamicPropertyName.indexOf("ArrayOf") != -1)
                 {
                     String methodName =
@@ -480,7 +489,7 @@ public class ServiceUtil
                          */
                         methodName = "get_" + methodName.toLowerCase();
                     }
-                    Method getMorMethod =
+                    final Method getMorMethod =
                         dynamicPropertyVal.getClass().getDeclaredMethod(methodName, (Class[]) null);
                     propertyValue = getMorMethod.invoke(dynamicPropertyVal, (Object[]) null);
                 }
@@ -500,7 +509,7 @@ public class ServiceUtil
         return propertyValue;
     }
 
-    public String waitForTask(ManagedObjectReference taskmor) throws Exception
+    public String waitForTask(final ManagedObjectReference taskmor) throws Exception
     {
         Object[] result =
             waitForValues(taskmor, new String[] {"info.state", "info.error"},
@@ -539,6 +548,46 @@ public class ServiceUtil
         return "Error Occurred :" + fault.getLocalizedMessage();
     }
 
+    public String waitForTaskAndAnswer(final ManagedObjectReference taskmor,
+        final String machineName, final Folder rootFolder) throws Exception
+    {
+        Object[] result =
+            waitForValuesAndAnswer(taskmor, new String[] {"info.state", "info.error"},
+                new String[] {"state"}, new Object[][] {new Object[] {TaskInfoState.success,
+                TaskInfoState.error}}, machineName, rootFolder);
+
+        if (result[0].equals(TaskInfoState.success))
+        {
+            return "success";
+        }
+
+        TaskInfo tinfo = (TaskInfo) getDynamicProperty(taskmor, "info");
+        LocalizedMethodFault fault = tinfo.getError();
+
+        // retry in 1second
+        Thread.sleep(1000);
+
+        result =
+            waitForValuesAndAnswer(taskmor, new String[] {"info.state", "info.error"},
+                new String[] {"state"}, new Object[][] {new Object[] {TaskInfoState.success,
+                TaskInfoState.error}}, machineName, rootFolder);
+
+        if (result[0].equals(TaskInfoState.success))
+        {
+            return "success";
+        }
+
+        tinfo = (TaskInfo) getDynamicProperty(taskmor, "info");
+        fault = tinfo.getError();
+
+        if (fault == null || fault.getFault() == null)
+        {
+            return "Unknown Error Occurred";
+        }
+
+        return "Error Occurred :" + fault.getLocalizedMessage();
+    }
+
     /**
      * Handle Updates for a single object. waits till expected values of properties to check are
      * reached Destroys the ObjectFilter when done.
@@ -550,20 +599,20 @@ public class ServiceUtil
      * @param expectedVals values for properties to end the wait
      * @return true indicating expected values were met, and false otherwise
      */
-    public Object[] waitForValues(ManagedObjectReference objmor, String[] filterProps,
-        String[] endWaitProps, Object[][] expectedVals) throws Exception
+    public Object[] waitForValues(final ManagedObjectReference objmor, final String[] filterProps,
+        final String[] endWaitProps, final Object[][] expectedVals) throws Exception
     {
         // version string is initially null
         String version = "";
-        Object[] endVals = new Object[endWaitProps.length];
-        Object[] filterVals = new Object[filterProps.length];
+        final Object[] endVals = new Object[endWaitProps.length];
+        final Object[] filterVals = new Object[filterProps.length];
 
-        PropertyFilterSpec spec = new PropertyFilterSpec();
+        final PropertyFilterSpec spec = new PropertyFilterSpec();
         spec.setObjectSet(new ObjectSpec[] {creatObjectSpec(objmor, false, new SelectionSpec[] {})});
 
         spec.setPropSet(new PropertySpec[] {createPropertySpec(objmor.getType(), false, filterProps)});
 
-        ManagedObjectReference filterSpecRef =
+        final ManagedObjectReference filterSpecRef =
             getVimService().createFilter(getPropertyCollector(), spec, true);
 
         boolean reached = false;
@@ -585,13 +634,13 @@ public class ServiceUtil
                     updateset = getVimService().waitForUpdates(getPropertyCollector(), version);
                     retry = false;
                 }
-                catch (Exception e)
+                catch (final Exception e)
                 {
                     if (e instanceof org.apache.axis.AxisFault)
                     {
-                        org.apache.axis.AxisFault fault = (org.apache.axis.AxisFault) e;
-                        org.w3c.dom.Element[] errors = fault.getFaultDetails();
-                        String faultString = fault.getFaultString();
+                        final org.apache.axis.AxisFault fault = (org.apache.axis.AxisFault) e;
+                        final org.w3c.dom.Element[] errors = fault.getFaultDetails();
+                        final String faultString = fault.getFaultString();
                         if (faultString.indexOf("java.net.SocketTimeoutException") != -1)
                         {
                             System.out.println("Retrying2........");
@@ -616,15 +665,15 @@ public class ServiceUtil
             // Make this code more general purpose when PropCol changes later.
             filtupary = updateset.getFilterSet();
             filtup = null;
-            for (int fi = 0; fi < filtupary.length; fi++)
+            for (final PropertyFilterUpdate element : filtupary)
             {
-                filtup = filtupary[fi];
+                filtup = element;
                 objupary = filtup.getObjectSet();
                 objup = null;
                 propchgary = null;
-                for (int oi = 0; oi < objupary.length; oi++)
+                for (final ObjectUpdate element2 : objupary)
                 {
-                    objup = objupary[oi];
+                    objup = element2;
 
                     // TODO: Handle all "kind"s of updates.
                     if (objup.getKind() == ObjectUpdateKind.modify
@@ -632,9 +681,9 @@ public class ServiceUtil
                         || objup.getKind() == ObjectUpdateKind.leave)
                     {
                         propchgary = objup.getChangeSet();
-                        for (int ci = 0; ci < propchgary.length; ci++)
+                        for (final PropertyChange element3 : propchgary)
                         {
-                            propchg = propchgary[ci];
+                            propchg = element3;
                             updateValues(endWaitProps, endVals, propchg);
                             updateValues(filterProps, filterVals, propchg);
                         }
@@ -662,7 +711,169 @@ public class ServiceUtil
         return filterVals;
     }
 
-    protected void updateValues(String[] props, Object[] vals, PropertyChange propchg)
+    /**
+     * Handle Updates for a single object. waits till expected values of properties to check are
+     * reached Destroys the ObjectFilter when done.
+     * 
+     * @param objmor MOR of the Object to wait for</param>
+     * @param filterProps Properties list to filter
+     * @param endWaitProps Properties list to check for expected values these be properties of a
+     *            property in the filter properties list
+     * @param expectedVals values for properties to end the wait
+     * @return true indicating expected values were met, and false otherwise
+     */
+    public Object[] waitForValuesAndAnswer(final ManagedObjectReference objmor,
+        final String[] filterProps, final String[] endWaitProps, final Object[][] expectedVals,
+        final String machineName, final Folder rootFolder) throws Exception
+    {
+        // version string is initially null
+        String version = "";
+        final Object[] endVals = new Object[endWaitProps.length];
+        final Object[] filterVals = new Object[filterProps.length];
+
+        final PropertyFilterSpec spec = new PropertyFilterSpec();
+        spec.setObjectSet(new ObjectSpec[] {creatObjectSpec(objmor, false, new SelectionSpec[] {})});
+
+        spec.setPropSet(new PropertySpec[] {createPropertySpec(objmor.getType(), false, filterProps)});
+
+        final ManagedObjectReference filterSpecRef =
+            getVimService().createFilter(getPropertyCollector(), spec, true);
+
+        boolean reached = false;
+
+        UpdateSet updateset = null;
+        PropertyFilterUpdate[] filtupary = null;
+        PropertyFilterUpdate filtup = null;
+        ObjectUpdate[] objupary = null;
+        ObjectUpdate objup = null;
+        PropertyChange[] propchgary = null;
+        PropertyChange propchg = null;
+        while (!reached)
+        {
+            boolean retry = true;
+            while (retry)
+            {
+                try
+                {
+                    updateset = getVimService().waitForUpdates(getPropertyCollector(), version);
+                    retry = false;
+                }
+                catch (final Exception e)
+                {
+                    if (e instanceof org.apache.axis.AxisFault)
+                    {
+                        final org.apache.axis.AxisFault fault = (org.apache.axis.AxisFault) e;
+                        final org.w3c.dom.Element[] errors = fault.getFaultDetails();
+                        final String faultString = fault.getFaultString();
+                        if (faultString.indexOf("java.net.SocketTimeoutException") != -1)
+                        {
+                            System.out.println("Retrying2........");
+                            retry = true;
+                        }
+                        else
+                        {
+                            throw e;
+                        }
+                    }
+                }
+            }
+            if (updateset == null || updateset.getFilterSet() == null)
+            {
+                continue;
+            }
+            else
+            {
+                version = updateset.getVersion();
+            }
+
+            // Make this code more general purpose when PropCol changes later.
+            filtupary = updateset.getFilterSet();
+            filtup = null;
+            for (final PropertyFilterUpdate element : filtupary)
+            {
+                filtup = element;
+                objupary = filtup.getObjectSet();
+                objup = null;
+                propchgary = null;
+                for (final ObjectUpdate element2 : objupary)
+                {
+                    objup = element2;
+
+                    // TODO: Handle all "kind"s of updates.
+                    if (objup.getKind() == ObjectUpdateKind.modify
+                        || objup.getKind() == ObjectUpdateKind.enter
+                        || objup.getKind() == ObjectUpdateKind.leave)
+                    {
+                        propchgary = objup.getChangeSet();
+                        for (final PropertyChange element3 : propchgary)
+                        {
+                            propchg = element3;
+                            updateValues(endWaitProps, endVals, propchg);
+                            updateValues(filterProps, filterVals, propchg);
+                        }
+                    }
+                }
+            }
+
+            Object expctdval = null;
+            // Check if the expected values have been reached and exit the loop if done.
+            // Also exit the WaitForUpdates loop if this is the case.
+            for (int chgi = 0; chgi < endVals.length && !reached; chgi++)
+            {
+                for (int vali = 0; vali < expectedVals[chgi].length && !reached; vali++)
+                {
+                    expctdval = expectedVals[chgi][vali];
+
+                    reached = expctdval.equals(endVals[chgi]) || reached;
+                }
+            }
+
+            answerVm(machineName, rootFolder);
+
+            Thread.sleep(1000);
+        }
+
+        // Destroy the filter when we are done.
+        getVimService().destroyPropertyFilter(filterSpecRef);
+
+        return filterVals;
+    }
+
+    protected void answerVm(final String machineName, final Folder rootFolder) throws Exception
+    {
+
+        final VirtualMachine vm =
+            (VirtualMachine) new InventoryNavigator(rootFolder).searchManagedEntity(
+                "VirtualMachine", machineName);
+
+        if (vm.getRuntime().getQuestion() != null)
+        {
+            AbsVmwareMachine.logger.info("Virtual machine need an answer to {}", vm.getRuntime()
+                .getQuestion().getText());
+
+            final String questionId = vm.getRuntime().getQuestion().getId();
+            final String answerChoice = answerChoice(vm.getRuntime().getQuestion().getChoice());
+
+            getVimService().answerVM(vm.getMOR(), questionId, answerChoice);
+
+            AbsVmwareMachine.logger.info("I move it ");
+        }
+    }
+
+    protected String answerChoice(final ChoiceOption choices)
+    {
+        for (final ElementDescription choice : choices.getChoiceInfo())
+        {
+            if (choice.getSummary().contains("move")) // I move it
+            {
+                return choice.getKey();
+            }
+        }
+        return "1"; // default is ''I move it''
+    }
+
+    protected void updateValues(final String[] props, final Object[] vals,
+        final PropertyChange propchg)
     {
         for (int findi = 0; findi < props.length; findi++)
         {
@@ -688,10 +899,10 @@ public class ServiceUtil
      * @param typeinfo 2D array of type and properties to retrieve
      * @return Array of container filter specs
      */
-    public PropertySpec[] buildPropertySpecArray(String[][] typeinfo)
+    public PropertySpec[] buildPropertySpecArray(final String[][] typeinfo)
     {
         // Eliminate duplicates
-        HashMap tInfo = new HashMap();
+        final HashMap tInfo = new HashMap();
         for (int ti = 0; ti < typeinfo.length; ++ti)
         {
             Set props = (Set) tInfo.get(typeinfo[ti][0]);
@@ -703,7 +914,7 @@ public class ServiceUtil
             boolean typeSkipped = false;
             for (int pi = 0; pi < typeinfo[ti].length; ++pi)
             {
-                String prop = typeinfo[ti][pi];
+                final String prop = typeinfo[ti][pi];
                 if (typeSkipped)
                 {
                     props.add(prop);
@@ -716,12 +927,12 @@ public class ServiceUtil
         }
 
         // Create PropertySpecs
-        ArrayList pSpecs = new ArrayList();
-        for (Iterator ki = tInfo.keySet().iterator(); ki.hasNext();)
+        final ArrayList pSpecs = new ArrayList();
+        for (final Iterator ki = tInfo.keySet().iterator(); ki.hasNext();)
         {
-            String type = (String) ki.next();
-            PropertySpec pSpec = new PropertySpec();
-            Set<String> props = (Set<String>) tInfo.get(type);
+            final String type = (String) ki.next();
+            final PropertySpec pSpec = new PropertySpec();
+            final Set<String> props = (Set<String>) tInfo.get(type);
             pSpec.setType(type);
             pSpec.setAll(props.isEmpty() ? Boolean.TRUE : Boolean.FALSE);
             pSpec.setPathSet(props.toArray(new String[props.size()]));
@@ -740,18 +951,18 @@ public class ServiceUtil
      * @param parameterTypes Array of Class objects for the parameter types
      * @return true if the method exists, false otherwise
      */
-    boolean methodExists(Object obj, String methodName, Class[] parameterTypes)
+    boolean methodExists(final Object obj, final String methodName, final Class[] parameterTypes)
     {
         boolean exists = false;
         try
         {
-            Method method = obj.getClass().getMethod(methodName, parameterTypes);
+            final Method method = obj.getClass().getMethod(methodName, parameterTypes);
             if (method != null)
             {
                 exists = true;
             }
         }
-        catch (Exception e)
+        catch (final Exception e)
         {
         }
         return exists;

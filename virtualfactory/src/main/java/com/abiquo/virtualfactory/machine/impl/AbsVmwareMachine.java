@@ -48,10 +48,6 @@ import com.vmware.vim25.HostVirtualSwitch;
 import com.vmware.vim25.ManagedObjectReference;
 import com.vmware.vim25.ResourceAllocationInfo;
 import com.vmware.vim25.VirtualDeviceConfigSpec;
-import com.vmware.vim25.VirtualDeviceConfigSpecFileOperation;
-import com.vmware.vim25.VirtualDeviceConfigSpecOperation;
-import com.vmware.vim25.VirtualDisk;
-import com.vmware.vim25.VirtualDiskFlatVer2BackingInfo;
 import com.vmware.vim25.VirtualMachineConfigSpec;
 import com.vmware.vim25.VirtualMachinePowerState;
 import com.vmware.vim25.mo.Folder;
@@ -66,7 +62,7 @@ import com.vmware.vim25.mo.VirtualMachine;
 public abstract class AbsVmwareMachine extends AbsVirtualMachine
 {
     /** The logger */
-    private static final Logger logger = LoggerFactory.getLogger(AbsVmwareMachine.class);
+    public static final Logger logger = LoggerFactory.getLogger(AbsVmwareMachine.class);
 
     /** The generic virtual machine configuration. */
     protected VirtualMachineConfiguration vmConfig;
@@ -158,91 +154,131 @@ public abstract class AbsVmwareMachine extends AbsVirtualMachine
             // if (!apputil.getServiceConnection3().isConnected())
             utils.reconnect();
 
-            // If the vCenterBridge is defined, check if there is another machine 
-            // with the same name. If it exists, stop and delete to deploy again
-            if (vCenterBridge != null)
-            {
-                vCenterBridge.seachAndCleanExistingMachine(config.getMachineName());
-            }
-            
-            if (!isVMAlreadyCreated())
+            if (vmConfig.getVirtualDiskBase().isHa())
             {
 
-                // Create the template vdestPathirtual machine
-                // <DVS>
-                Boolean shouldAttachToDVSPortGroup = Boolean.FALSE;
-                List<VirtualNIC> dvNIClist = new ArrayList<VirtualNIC>();
-                if (dvsEnabled)
+                final String dcName = utils.getOption("datacentername");
+                final ManagedObjectReference dcmor =
+                    utils.getAppUtil().getServiceUtil()
+                        .getDecendentMoRef(null, "Datacenter", dcName);
+
+                if (dcmor == null)
                 {
-                    // if any of the vnics have a "dvs" as switch, then all of them will have.
-                    // because it refeers a target machine property, not a NIC-specific property
-                    if (config.getVnicList().get(0).getVSwitchName().toLowerCase()
-                        .startsWith("dvs"))
+                    final String message = "Datacenter " + dcName + " not found.";
+                    logger.error(message);
+                    throw new VirtualMachineException(message);
+                }
+
+                final ManagedObjectReference hfmor =
+                    utils.getAppUtil().getServiceUtil().getMoRefProp(dcmor, "hostFolder");
+                final ManagedObjectReference hostmor = utils.getHostSystemMor(dcmor, hfmor);
+                final ArrayList<ManagedObjectReference> crmors =
+                    getAllComputerResourcesOnHostFolder(hfmor);
+                final ManagedObjectReference crmor =
+                    utils.getComputerResourceFromHost(crmors, hostmor);
+                final ManagedObjectReference resourcePool =
+                    utils.getAppUtil().getServiceUtil().getMoRefProp(crmor, "resourcePool");
+                final ManagedObjectReference vmFolderMor =
+                    utils.getAppUtil().getServiceUtil().getMoRefProp(dcmor, "vmFolder");
+
+                final ManagedObjectReference taskmor =
+                    utils.getService().registerVM_Task(vmFolderMor,
+                        disks.getVirtualMachineFolder(), vmConfig.getMachineName(), false,
+                        resourcePool, hostmor);
+
+                utils.checkTaskState(taskmor);
+            }
+            else
+            {
+
+                // If the vCenterBridge is defined, check if there is another machine
+                // with the same name. If it exists, stop and delete to deploy again
+                if (vCenterBridge != null)
+                {
+                    vCenterBridge.seachAndCleanExistingMachine(config.getMachineName());
+                }
+
+                if (!isVMAlreadyCreated())
+                {
+
+                    // Create the template vdestPathirtual machine
+                    // <DVS>
+                    Boolean shouldAttachToDVSPortGroup = Boolean.FALSE;
+                    final List<VirtualNIC> dvNIClist = new ArrayList<VirtualNIC>();
+                    if (dvsEnabled)
                     {
-                        // Ensure the HOST is associated to vCenter
-                        shouldAttachToDVSPortGroup = Boolean.TRUE;
-                        if (vCenterBridge == null)
+                        // if any of the vnics have a "dvs" as switch, then all of them will have.
+                        // because it refeers a target machine property, not a NIC-specific property
+                        if (config.getVnicList().get(0).getVSwitchName().toLowerCase()
+                            .startsWith("dvs"))
                         {
-                            String message =
-                                "Could not configure network. Port groups "
-                                    + "' should be created into "
-                                    + " DVS with name '"
-                                    + config.getVnicList().get(0).getVSwitchName()
-                                    + "' in a remote vCenter. However your ESXi Host is not associated to any vCenter.";
-                            logger.error(message);
-                            throw new VirtualMachineException(message);
+                            // Ensure the HOST is associated to vCenter
+                            shouldAttachToDVSPortGroup = Boolean.TRUE;
+                            if (vCenterBridge == null)
+                            {
+                                final String message =
+                                    "Could not configure network. Port groups "
+                                        + "' should be created into "
+                                        + " DVS with name '"
+                                        + config.getVnicList().get(0).getVSwitchName()
+                                        + "' in a remote vCenter. However your ESXi Host is not associated to any vCenter.";
+                                logger.error(message);
+                                throw new VirtualMachineException(message);
+                            }
+
+                            // Fill the dvNIClist and clear the common NIC list
+                            dvNIClist.addAll(config.getVnicList());
+                            config.getVnicList().clear();
+
+                            // Configure the dvNIClist
+                            for (final VirtualNIC vnic : dvNIClist)
+                            {
+                                vCenterBridge.createPortGroupInVCenter(vnic.getVSwitchName(),
+                                    vnic.getNetworkName(), vnic.getVlanTag());
+                            }
+
                         }
+                    }
 
-                        // Fill the dvNIClist and clear the common NIC list
-                        dvNIClist.addAll(config.getVnicList());
-                        config.getVnicList().clear();
+                    // Configure the port group in the common way. If a DVS is used, the internal
+                    // loop,
+                    // will not do anything because the list of vnics is empty.
+                    configureNetwork();
 
-                        // Configure the dvNIClist
-                        for (VirtualNIC vnic : dvNIClist)
+                    createVirtualMachine();
+
+                    // <DVS>
+                    // Once the machine is defined and created, attach its vnics which refeers a dvs
+                    // to a vcenter.
+                    if (dvsEnabled && shouldAttachToDVSPortGroup)
+                    {
+                        vCenterBridge.attachVMToPortGroup(config.getMachineName(), dvNIClist);
+                    }
+                    // </DVS>
+
+                    // Stateless image located on the Enterprise Repository require to be copy on
+                    // the
+                    // local fs.
+                    if (vmConfig.getVirtualDiskBase().getDiskType() == VirtualDiskType.STANDARD)
+                    {
+                        // Copy from the NAS to the template virtual machine
+
+                        if (!vmConfig.getVirtualDiskBase().isHa())
                         {
-                            vCenterBridge.createPortGroupInVCenter(vnic.getVSwitchName(),
-                                vnic.getNetworkName(), vnic.getVlanTag());
+                            cloneVirtualDisk();
                         }
 
                     }
-                }
 
-                // Configure the port group in the common way. If a DVS is used, the internal loop,
-                // will not do anything because the list of vnics is empty.
-                configureNetwork();
-
-                createVirtualMachine();
-
-                // <DVS>
-                // Once the machine is defined and created, attach its vnics which refeers a dvs
-                // to a vcenter.
-                if (dvsEnabled && shouldAttachToDVSPortGroup)
-                {
-                    vCenterBridge.attachVMToPortGroup(config.getMachineName(), dvNIClist);
-                }
-                // </DVS>
-
-                // Stateless image located on the Enterprise Repository require to be copy on the
-                // local fs.
-                if (vmConfig.getVirtualDiskBase().getDiskType() == VirtualDiskType.STANDARD)
-                {
-                    // Copy from the NAS to the template virtual machine
-
-                    if (!vmConfig.getVirtualDiskBase().isHa())
-                    {
-                        cloneVirtualDisk();
-                    }
+                    // Attach the initial extended disks
+                    initDisks();
 
                 }
 
-                // Attach the initial extended disks
-                initDisks();
-
+                checkIsCancelled();
             }
-
-            checkIsCancelled();
         }
-        catch (Exception e)
+        catch (final Exception e)
         {
             logger.error("Failed to deploy machine :{}", e);
             // The roll back in the virtual machine is done in top level when rolling back the
@@ -272,22 +308,22 @@ public abstract class AbsVmwareMachine extends AbsVirtualMachine
     {
 
         // Creating or updating the needed port group and tagging
-        for (VirtualNIC vnic : config.getVnicList())
+        for (final VirtualNIC vnic : config.getVnicList())
         {
-            String portGroupName = vnic.getNetworkName() + "_" + vnic.getVlanTag();
+            final String portGroupName = vnic.getNetworkName() + "_" + vnic.getVlanTag();
 
             // Try to find if a group corresponding the network name is found. If not create it.
-            ManagedObjectReference networkMor = utils.getNetwork(portGroupName);
-            ManagedObjectReference hostmor = utils.getHostSystemMOR();
+            final ManagedObjectReference networkMor = utils.getNetwork(portGroupName);
+            final ManagedObjectReference hostmor = utils.getHostSystemMOR();
             if (networkMor == null)
             {
-                ExtendedAppUtil apputil = utils.getAppUtil();
-                Object cmobj =
+                final ExtendedAppUtil apputil = utils.getAppUtil();
+                final Object cmobj =
                     apputil.getServiceUtil3().getDynamicProperty(hostmor, "configManager");
-                HostConfigManager configMgr = (HostConfigManager) cmobj;
-                ManagedObjectReference nwSystem = configMgr.getNetworkSystem();
+                final HostConfigManager configMgr = (HostConfigManager) cmobj;
+                final ManagedObjectReference nwSystem = configMgr.getNetworkSystem();
 
-                HostPortGroupSpec portgrp = new HostPortGroupSpec();
+                final HostPortGroupSpec portgrp = new HostPortGroupSpec();
                 portgrp.setName(portGroupName);
                 if (existsVswitch(hostmor, vnic.getVSwitchName()))
                 {
@@ -316,17 +352,17 @@ public abstract class AbsVmwareMachine extends AbsVirtualMachine
             }
             else
             {
-                ExtendedAppUtil apputil = utils.getAppUtil();
-                HostConfigInfo hostConfigInfo =
+                final ExtendedAppUtil apputil = utils.getAppUtil();
+                final HostConfigInfo hostConfigInfo =
                     (HostConfigInfo) apputil.getServiceUtil3()
                         .getDynamicProperty(hostmor, "config");
-                HostNetworkInfo network = hostConfigInfo.getNetwork();
-                for (HostVirtualSwitch vswitch : network.getVswitch())
+                final HostNetworkInfo network = hostConfigInfo.getNetwork();
+                for (final HostVirtualSwitch vswitch : network.getVswitch())
                 {
                     if (!vswitch.getName().equals(vnic.getVSwitchName()))
                     {
-                        String[] portGroups = vswitch.getPortgroup();
-                        for (String portGroup : portGroups)
+                        final String[] portGroups = vswitch.getPortgroup();
+                        for (final String portGroup : portGroups)
                         {
                             // If the port group of the vSwitch ends with the name of the port group
                             // name
@@ -359,11 +395,11 @@ public abstract class AbsVmwareMachine extends AbsVirtualMachine
     private boolean existsVswitch(final ManagedObjectReference hostmor, final String vSwitchName)
         throws Exception
     {
-        ExtendedAppUtil apputil = utils.getAppUtil();
-        Object hiobj = apputil.getServiceUtil3().getDynamicProperty(hostmor, "config");
-        HostConfigInfo hostConfigInfo = (HostConfigInfo) hiobj;
-        HostNetworkInfo network = hostConfigInfo.getNetwork();
-        for (HostVirtualSwitch vswitch : network.getVswitch())
+        final ExtendedAppUtil apputil = utils.getAppUtil();
+        final Object hiobj = apputil.getServiceUtil3().getDynamicProperty(hostmor, "config");
+        final HostConfigInfo hostConfigInfo = (HostConfigInfo) hiobj;
+        final HostNetworkInfo network = hostConfigInfo.getNetwork();
+        for (final HostVirtualSwitch vswitch : network.getVswitch())
         {
             if (vswitch.getName().equals(vSwitchName))
             {
@@ -378,7 +414,7 @@ public abstract class AbsVmwareMachine extends AbsVirtualMachine
      */
     private void initDisks() throws VirtualMachineException
     {
-        VirtualMachineConfigSpec vmConfigSpec = new VirtualMachineConfigSpec();
+        final VirtualMachineConfigSpec vmConfigSpec = new VirtualMachineConfigSpec();
         VirtualDeviceConfigSpec[] vdiskSpec;
 
         try
@@ -397,12 +433,12 @@ public abstract class AbsVmwareMachine extends AbsVirtualMachine
                 logger.debug("Any disk configruation to add");
             }
 
-            ManagedObjectReference tmor =
+            final ManagedObjectReference tmor =
                 utils.getService().reconfigVM_Task(_virtualMachine, vmConfigSpec);
 
             utils.monitorTask(tmor);
         }
-        catch (Exception e)
+        catch (final Exception e)
         {
             throw new VirtualMachineException("Can not initialize the extended disks", e);
         }
@@ -449,7 +485,7 @@ public abstract class AbsVmwareMachine extends AbsVirtualMachine
 
             if (dcmor == null)
             {
-                String message = "Datacenter " + dcName + " not found.";
+                final String message = "Datacenter " + dcName + " not found.";
                 logger.error(message);
                 throw new VirtualMachineException(message);
             }
@@ -468,12 +504,12 @@ public abstract class AbsVmwareMachine extends AbsVirtualMachine
             logger.info("Machine name :{} Machine ID: {} ready to be created", machineName,
                 config.getMachineId());
 
-            ManagedObjectReference resourcePool =
+            final ManagedObjectReference resourcePool =
                 utils.getAppUtil().getServiceUtil().getMoRefProp(crmor, "resourcePool");
-            ManagedObjectReference vmFolderMor =
+            final ManagedObjectReference vmFolderMor =
                 utils.getAppUtil().getServiceUtil().getMoRefProp(dcmor, "vmFolder");
 
-            ManagedObjectReference taskmor =
+            final ManagedObjectReference taskmor =
                 utils.getService().createVM_Task(vmFolderMor, vmConfigSpec, resourcePool, hostmor);
 
             /*
@@ -487,7 +523,7 @@ public abstract class AbsVmwareMachine extends AbsVirtualMachine
             utils.checkTaskState(taskmor);
 
         }
-        catch (Exception e)
+        catch (final Exception e)
         {
             throw new VirtualMachineException("Can not create the VM:" + e.getCause().getMessage(),
                 e);
@@ -529,7 +565,7 @@ public abstract class AbsVmwareMachine extends AbsVirtualMachine
                 {
                     vCenterBridge.unregisterVM(config.getMachineName());
                 }
-                catch (VirtualMachineException e)
+                catch (final VirtualMachineException e)
                 {
                     logger.warn("Could not unregister Virtual Machine '" + config.getMachineName()
                         + "' and it will be 'orphaned'");
@@ -556,14 +592,14 @@ public abstract class AbsVmwareMachine extends AbsVirtualMachine
                             vCenterBridge.deconfigureNetwork(config.getVnicList());
                             return;
                         }
-                        catch (VirtualMachineException e)
+                        catch (final VirtualMachineException e)
                         {
                             // do nothing if the vCenter goes ok.
                         }
                     }
 
                     // if arribes here it means something has been going wrong
-                    String message =
+                    final String message =
                         "Could not deconfigure networks related to DVS in vm with name '"
                             + config.getMachineName()
                             + "' because your ESXi Host is not associated to any vCenter.";
@@ -575,7 +611,7 @@ public abstract class AbsVmwareMachine extends AbsVirtualMachine
                     deconfigureNetwork();
                 }
             }
-            catch (Exception e)
+            catch (final Exception e)
             {
                 logger.error(
                     "An error was occurred then deconfiguring the networking resources: {}", e);
@@ -600,20 +636,21 @@ public abstract class AbsVmwareMachine extends AbsVirtualMachine
 
         try
         {
-            for (VirtualNIC vnic : config.getVnicList())
+            for (final VirtualNIC vnic : config.getVnicList())
             {
-                String portGroup = vnic.getNetworkName() + "_" + vnic.getVlanTag();
-                ManagedObjectReference[] vmsUsedByNetwork = utils.getVmsFromNetworkName(portGroup);
+                final String portGroup = vnic.getNetworkName() + "_" + vnic.getVlanTag();
+                final ManagedObjectReference[] vmsUsedByNetwork =
+                    utils.getVmsFromNetworkName(portGroup);
                 if (vmsUsedByNetwork.length == 0)
                 {
                     logger.debug("There is no virtual machine using network: " + portGroup
                         + " proceeding to delete");
-                    ExtendedAppUtil apputil = utils.getAppUtil();
-                    ManagedObjectReference hostmor = utils.getHostSystemMOR();
-                    Object cmobj =
+                    final ExtendedAppUtil apputil = utils.getAppUtil();
+                    final ManagedObjectReference hostmor = utils.getHostSystemMOR();
+                    final Object cmobj =
                         apputil.getServiceUtil3().getDynamicProperty(hostmor, "configManager");
-                    HostConfigManager configMgr = (HostConfigManager) cmobj;
-                    ManagedObjectReference nwSystem = configMgr.getNetworkSystem();
+                    final HostConfigManager configMgr = (HostConfigManager) cmobj;
+                    final ManagedObjectReference nwSystem = configMgr.getNetworkSystem();
 
                     utils.getAppUtil().getServiceUtil().getVimService()
                         .removePortGroup(nwSystem, portGroup);
@@ -622,7 +659,7 @@ public abstract class AbsVmwareMachine extends AbsVirtualMachine
 
             }
         }
-        catch (Exception e)
+        catch (final Exception e)
         {
             throw new VirtualMachineException("Can not deconfigure the network resources of virtual machine "
                 + machineName,
@@ -647,7 +684,7 @@ public abstract class AbsVmwareMachine extends AbsVirtualMachine
 
             logger.info("Powering off virtualmachine '{}'", vmName);
         }
-        catch (Exception e) // getDynamicProperty
+        catch (final Exception e) // getDynamicProperty
         {
             logger.warn("Can not get the dynamic property 'name' for the VM [{}]",
                 vmMOR.get_value());
@@ -661,7 +698,7 @@ public abstract class AbsVmwareMachine extends AbsVirtualMachine
 
             logger.info("VM {} powered off successfuly", vmName);
         }
-        catch (Exception e)
+        catch (final Exception e)
         {
             throw new VirtualMachineException("Can not destroy the VM " + vmName, e);
         }
@@ -674,13 +711,13 @@ public abstract class AbsVmwareMachine extends AbsVirtualMachine
     {
         utils.reconnect();
 
-        ServiceInstance si = utils.getAppUtil().getServiceInstance();
+        final ServiceInstance si = utils.getAppUtil().getServiceInstance();
 
-        Folder rootFolder = si.getRootFolder();
+        final Folder rootFolder = si.getRootFolder();
 
         try
         {
-            VirtualMachine vm =
+            final VirtualMachine vm =
                 (VirtualMachine) new InventoryNavigator(rootFolder).searchManagedEntity(
                     "VirtualMachine", machineName);
 
@@ -729,12 +766,12 @@ public abstract class AbsVmwareMachine extends AbsVirtualMachine
                 throw new VirtualMachineException(msg);
             }
         }
-        catch (Exception e)
+        catch (final Exception e)
         {
             String msg = "[" + task.name() + "] on " + machineName + " failed ";
             if (e instanceof GenericVmConfigFault)
             {
-                GenericVmConfigFault configFault = (GenericVmConfigFault) e;
+                final GenericVmConfigFault configFault = (GenericVmConfigFault) e;
                 msg = msg + "Raison : " + configFault.getReason();
             }
             throw new VirtualMachineException(msg);
@@ -743,7 +780,46 @@ public abstract class AbsVmwareMachine extends AbsVirtualMachine
         {
             utils.logout();
         }
+    }
 
+    private void executeHaPowerOn() throws VirtualMachineException
+    {
+        utils.reconnect();
+
+        final ServiceInstance si = utils.getAppUtil().getServiceInstance();
+
+        final Folder rootFolder = si.getRootFolder();
+
+        try
+        {
+            final VirtualMachine vm =
+                (VirtualMachine) new InventoryNavigator(rootFolder).searchManagedEntity(
+                    "VirtualMachine", machineName);
+
+            if (vm == null)
+            {
+                throw new VirtualMachineException("Error while HA-power-ON"
+                    + " the machine: any virtual machine was not found");
+            }
+
+            final Task taskMOR = vm.powerOnVM_Task(null);
+
+            utils.monitorTaskAndAnswer(taskMOR.getMOR(), machineName, rootFolder);
+        }
+        catch (final Exception e)
+        {
+            String msg = "[HA-power-ON] on " + machineName + " failed ";
+            if (e instanceof GenericVmConfigFault)
+            {
+                final GenericVmConfigFault configFault = (GenericVmConfigFault) e;
+                msg = msg + "Raison : " + configFault.getReason();
+            }
+            throw new VirtualMachineException(msg);
+        }
+        finally
+        {
+            utils.logout();
+        }
     }
 
     @Override
@@ -759,11 +835,11 @@ public abstract class AbsVmwareMachine extends AbsVirtualMachine
                 return State.NOT_DEPLOYED;
             }
 
-            ServiceInstance si = utils.getAppUtil().getServiceInstance();
+            final ServiceInstance si = utils.getAppUtil().getServiceInstance();
 
-            Folder rootFolder = si.getRootFolder();
+            final Folder rootFolder = si.getRootFolder();
 
-            VirtualMachine vm =
+            final VirtualMachine vm =
                 (VirtualMachine) new InventoryNavigator(rootFolder).searchManagedEntity(
                     "VirtualMachine", machineName);
 
@@ -772,7 +848,7 @@ public abstract class AbsVmwareMachine extends AbsVirtualMachine
                 throw new VirtualMachineException("Any virtual machine was not found");
             }
 
-            VirtualMachinePowerState vmstate = vm.getRuntime().getPowerState();
+            final VirtualMachinePowerState vmstate = vm.getRuntime().getPowerState();
             switch (vmstate)
             {
                 case poweredOff:
@@ -786,7 +862,7 @@ public abstract class AbsVmwareMachine extends AbsVirtualMachine
                     break;
             }
         }
-        catch (Exception e)
+        catch (final Exception e)
         {
             logger.error("An error was occurred when getting the virtual machine state", e);
             return State.UNKNOWN;
@@ -828,6 +904,11 @@ public abstract class AbsVmwareMachine extends AbsVirtualMachine
     @Override
     public void powerOnMachine() throws VirtualMachineException
     {
+        if (vmConfig.getVirtualDiskBase().isHa())
+        {
+            executeHaPowerOn();
+        }
+
         if (!checkState(State.POWER_UP))
         {
             executeTaskOnVM(VMTasks.POWER_ON);
@@ -856,8 +937,8 @@ public abstract class AbsVmwareMachine extends AbsVirtualMachine
     public void reconfigVM(final VirtualMachineConfiguration newConfiguration)
         throws VirtualMachineException
     {
-        ResourceAllocationInfo raRAM;
-        ResourceAllocationInfo raCPU;
+        final ResourceAllocationInfo raRAM;
+        final ResourceAllocationInfo raCPU;
 
         VirtualMachineConfigSpec vmConfigSpec;
         VirtualDeviceConfigSpec[] vdiskSpec = null;
@@ -902,7 +983,7 @@ public abstract class AbsVmwareMachine extends AbsVirtualMachine
 
             configureVNC(vmConfigSpec);
 
-            ManagedObjectReference tmor =
+            final ManagedObjectReference tmor =
                 utils.getService().reconfigVM_Task(_virtualMachine, vmConfigSpec);
             utils.monitorTask(tmor);
             // Updating configuration
@@ -911,7 +992,7 @@ public abstract class AbsVmwareMachine extends AbsVirtualMachine
             disks.setVMConfig(vmConfig);
 
         }
-        catch (Exception e)
+        catch (final Exception e)
         {
             throw new VirtualMachineException(e);
         }
@@ -939,17 +1020,17 @@ public abstract class AbsVmwareMachine extends AbsVirtualMachine
     {
         try
         {
-            ServiceInstance si = utils.getAppUtil().getServiceInstance();
-            Folder rootFolder = si.getRootFolder();
-            VirtualMachine machinemor =
+            final ServiceInstance si = utils.getAppUtil().getServiceInstance();
+            final Folder rootFolder = si.getRootFolder();
+            final VirtualMachine machinemor =
                 (VirtualMachine) new InventoryNavigator(rootFolder).searchManagedEntity(
                     "VirtualMachine", machineName);
-            VirtualMachine machinemoruuid =
+            final VirtualMachine machinemoruuid =
                 (VirtualMachine) new InventoryNavigator(rootFolder).searchManagedEntity(
                     "VirtualMachine", uuid);
             return machinemor != null || machinemoruuid != null;
         }
-        catch (Exception e)
+        catch (final Exception e)
         {
             throw new VirtualMachineException(e);
         }
