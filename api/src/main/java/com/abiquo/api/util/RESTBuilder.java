@@ -513,13 +513,20 @@ public class RESTBuilder implements IRESTBuilder
 
         Map<String, String> params = new HashMap<String, String>();
         params.put(EnterpriseResource.ENTERPRISE, String.valueOf(enterpriseId));
-        params.put(CategoryResource.CATEGORY, String.valueOf(category.getId()));
+
+        if (category != null)
+        {
+            params.put(CategoryResource.CATEGORY, String.valueOf(category.getId()));
+        }
 
         AbiquoLinkBuilder builder = AbiquoLinkBuilder.createBuilder(linkProcessor);
         links.add(builder.buildRestLink(EnterpriseResource.class, EnterpriseResource.ENTERPRISE,
             params));
-        links.add(builder.buildRestLink(CategoryResource.class, null, CategoryResource.CATEGORY,
-            category.getName(), params));
+        if (category != null)
+        {
+            links.add(builder.buildRestLink(CategoryResource.class, null,
+                CategoryResource.CATEGORY, category.getName(), params));
+        }
 
         params.put(TemplateDefinitionResource.TEMPLATE_DEFINITION, templateDefinition.getId()
             .toString());
@@ -528,8 +535,8 @@ public class RESTBuilder implements IRESTBuilder
         if (icon != null)
         {
             params.put(IconResource.ICON, String.valueOf(icon.getId()));
-            links.add(builder.buildRestLink(IconResource.class, null, IconResource.ICON,
-                icon.getPath(), params));
+            links.add(builder.buildRestLink(IconResource.class, null, IconResource.ICON, icon
+                .getPath(), params));
 
         }
 
