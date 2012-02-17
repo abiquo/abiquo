@@ -52,5 +52,11 @@
         <property name="password" type="java.lang.String">
             <column name="password" />
         </property>
+        <property name="maxMachinesOn" type="java.lang.Integer">
+            <column name="maxMachinesOn" />
+        </property>
+        <property name="defaultTemplate" type="java.lang.String">
+            <column name="defaultTemplate" />
+        </property>
     </class>
 </hibernate-mapping>

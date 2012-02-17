@@ -267,6 +267,9 @@ public class InfrastructureService extends DefaultApiService
     public Machine addMachine(final Machine machine, final Integer datacenterId,
         final Integer rackId)
     {
+        checkMachineState(datacenterId, machine.getHypervisor().getIp(), machine.getHypervisor()
+            .getType(), machine.getHypervisor().getUser(), machine.getHypervisor().getPassword(),
+            machine.getHypervisor().getPort());
         machine.setId(null);
 
         // Gets the rack. It throws the NotFoundException if needed.
