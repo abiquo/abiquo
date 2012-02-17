@@ -256,15 +256,15 @@ import com.softwarementors.bzngine.entities.PersistentEntity;
         query.setParameter("rack", rack);
         return query.list();
     }
-    
-    private final static String HQL_EMPTY_OFF_MACHINES_IN_RACK = "select h.machine "
-        + "from Hypervisor h " + "where h.machine.rack.id = :rackId " + "and h.machine.state = "
-        + MachineState.HALTED_FOR_SAVE.ordinal();
 
-    private final static String HQL_EMPTY_ON_MACHINES_IN_RACK = "select h.machine "
-        + "from Hypervisor h inner join h.machine m where m.rack.id = :rackId and h not in "
-        + "(select vm.hypervisor from VirtualMachine vm) " + "and h.machine.state = "
-        + MachineState.MANAGED.ordinal();
+    private final static String HQL_EMPTY_OFF_MACHINES_IN_RACK =
+        "select m from Machine m where m.rack.id = :rackId and m.state = "
+            + MachineState.HALTED_FOR_SAVE.ordinal();
+
+    private final static String HQL_EMPTY_ON_MACHINES_IN_RACK =
+        "select m from Machine m where m.rack.id = :rackId and m.state = "
+            + MachineState.MANAGED.ordinal()
+            + " and not exists (select vm from VirtualMachine vm where vm.hypervisor.machine = m)";
 
     /**
      * Return all machines in a rack that are empty of VM and powered off.
