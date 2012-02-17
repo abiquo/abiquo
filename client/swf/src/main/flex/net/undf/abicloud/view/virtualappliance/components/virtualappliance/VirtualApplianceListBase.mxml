@@ -355,7 +355,7 @@
                                             private var _virtualAppliance:VirtualAppliance;
                                             
                                             private function onCreationComplete():void{
-                                            	SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.VAPP_CUSTOMISE_SETTINGS,"removeChild",accessButton,vappBox);
+                                            	SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.VDC_MANAGE_VAPP,"removeChild",accessButton,vappBox);
                                             }
 
                                             override public function set data(value:Object):void

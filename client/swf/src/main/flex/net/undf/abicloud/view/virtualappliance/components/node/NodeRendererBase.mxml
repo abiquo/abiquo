@@ -118,6 +118,8 @@
                 	SecuredPrivilegeAccess.checkElementAccess("removeEditButton","condition",showConfigurationButton,buttonsContainer);
                 }
                 
+                SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.VDC_MANAGE_VAPP,"removeChild",eraseNodeButton,buttonsContainer);
+                
                 //Listener for virtualMachine state changes
                 AbiCloudModel.getInstance().virtualApplianceManager.addEventListener(VirtualApplianceEvent.VIRTUAL_MACHINE_CHANGE_STATE,updateState);
                 

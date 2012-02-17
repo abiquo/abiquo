@@ -573,10 +573,13 @@
                     if (event.dragSource.hasFormat("VirtualImage"))
                     {
                     	if(!isStatefulNodeAlreadyPresent(event.dragSource.dataForFormat("VirtualImage") as VirtualImage)){
-	                        //We can only accept VirtualImages which its Hypervisor type is
-	                        //the same than Virtual Appliances VirtualDataCenter Hypervisor type
-	                        var virtualImage:VirtualImage = event.dragSource.dataForFormat("VirtualImage") as VirtualImage;
-	                        DragManager.acceptDragDrop(nodesArea);
+	                        if(SecuredPrivilegeAccess.userHasPrivilege(PrivilegeType.VDC_MANAGE_VAPP))
+	                        {
+		                        //We can only accept VirtualImages which its Hypervisor type is
+		                        //the same than Virtual Appliances VirtualDataCenter Hypervisor type
+		                        var virtualImage:VirtualImage = event.dragSource.dataForFormat("VirtualImage") as VirtualImage;
+		                        DragManager.acceptDragDrop(nodesArea);
+	                        } 
                     	}
                     }
                 }
