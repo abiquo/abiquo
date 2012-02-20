@@ -341,7 +341,7 @@ public class VirtualMachineAllocatorService extends DefaultApiService
      *         but we wants to move it.
      */
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public VirtualMachine allocateHAVirtualMachine(final Integer vmId,
+    public VirtualMachine allocateHAVirtualMachine(final VirtualMachine vmId,
         final VirtualMachineRequirements requirements, final VirtualMachineState targetState)
         throws AllocatorException, ResourceAllocationException
     {

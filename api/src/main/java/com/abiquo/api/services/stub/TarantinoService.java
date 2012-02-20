@@ -202,10 +202,20 @@ public class TarantinoService extends DefaultApiService
         // Unsubscribe the virtual machine to prevent unlock
         Datacenter datacenter = virtualMachine.getHypervisor().getMachine().getDatacenter();
         RemoteService service = remoteServiceService.getVSMRemoteService(datacenter);
-
-        logger.debug("Unsubscribing virtual machine {} from VSM", virtualMachine.getName());
-        vsm.unsubscribe(service, virtualMachine);
-        logger.debug("Virtual machine {} unsubscribed from VSM", virtualMachine.getName());
+        if (vsm.isVirtualMachineSubscribed(service, virtualMachine.getName()))
+        {
+            logger.debug("Unsubscribing virtual machine {} from VSM", virtualMachine.getName());
+            vsm.unsubscribe(service, virtualMachine);
+            logger.debug("Virtual machine {} unsubscribed from VSM", virtualMachine.getName());
+        }
+        else
+        {
+            // The machine must be subscribed
+            logger
+                .error(
+                    "Unsubscribing virtual machine {} from VSM: Error: the virtual machine was not subscribed. Was the Subscription deleted manually outside Abiquo?",
+                    virtualMachine.getName());
+        }
 
         try
         {
@@ -337,7 +347,20 @@ public class TarantinoService extends DefaultApiService
             remoteServiceService.getRemoteService(datacenter.getId(),
                 RemoteServiceType.VIRTUAL_SYSTEM_MONITOR);
 
-        vsm.unsubscribe(vsmRS, vm);
+        if (vsm.isVirtualMachineSubscribed(vsmRS, vm.getName()))
+        {
+            logger.debug("Unsubscribing virtual machine {} from VSM", vm.getName());
+            vsm.unsubscribe(vsmRS, vm);
+            logger.debug("Virtual machine {} unsubscribed from VSM", vm.getName());
+        }
+        else
+        {
+            // The machine must be subscribed
+            logger
+                .error(
+                    "Unsubscribing virtual machine {} from VSM: Error: the virtual machine was not subscribed. Was the Subscription deleted manually outside Abiquo?",
+                    vm.getName());
+        }
 
         try
         {
@@ -409,7 +432,8 @@ public class TarantinoService extends DefaultApiService
             HypervisorConnection conn =
                 jobCreator.hypervisorConnectionConfiguration(virtualMachine.getHypervisor());
             DatacenterTaskBuilder builder =
-                new DatacenterTaskBuilder(virtualMachineDesciptionBuilder.build(), conn, "SYSTEM");
+                new DatacenterTaskBuilder(virtualMachineDesciptionBuilder.build(), conn, "admin");
+            // XXX: This should be system user
 
             DatacenterTasks deployTask = null;
 
@@ -491,7 +515,8 @@ public class TarantinoService extends DefaultApiService
             DatacenterTaskBuilder builder =
                 new DatacenterTaskBuilder(virtualMachineDesciptionBuilder.build(),
                     conn,
-                    userService.getCurrentUser().getNick());
+                /* userService.getCurrentUser().getNick() */"admin");
+            // XXX: This should be system user
 
             if (VirtualMachineState.ON.equals(currentState))
             {

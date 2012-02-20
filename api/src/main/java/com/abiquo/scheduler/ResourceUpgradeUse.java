@@ -136,8 +136,8 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
         updateUse(virtualAppliance, virtualMachine, true); // upgrade resources on the target HA
         // hypervisor
         // free resources on the original hypervisor
-        Machine sourceMachine = hypervisorDao.findById(sourceHypervisorId).getMachine();
-        updateUsagePhysicalMachine(sourceMachine, virtualMachine, true);
+        // Machine sourceMachine = hypervisorDao.findById(sourceHypervisorId).getMachine();
+        // updateUsagePhysicalMachine(sourceMachine, virtualMachine, true);
     }
 
     private void updateUse(final VirtualAppliance virtualAppliance,
