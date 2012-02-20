@@ -27,7 +27,6 @@ import java.util.List;
 import javax.xml.xpath.XPathExpressionException;
 
 import org.apache.commons.io.FilenameUtils;
-import org.libvirt.Connect;
 import org.libvirt.Domain;
 import org.libvirt.DomainInfo;
 import org.libvirt.LibvirtException;
@@ -37,6 +36,7 @@ import org.slf4j.LoggerFactory;
 
 import com.abiquo.nodecollector.aim.AimCollector;
 import com.abiquo.nodecollector.constants.MessageValues;
+import com.abiquo.nodecollector.domain.collectors.libvirt.LeaksFreeConnect;
 import com.abiquo.nodecollector.exception.CollectorException;
 import com.abiquo.nodecollector.exception.NoManagedException;
 import com.abiquo.nodecollector.exception.libvirt.AimException;
@@ -64,21 +64,45 @@ public abstract class AbstractLibvirtCollector extends AbstractCollector
     /**
      * This object encapsulates all connection features.
      */
-    private Connect conn;
+    private String connectionURL;
 
     /**
      * WsmanCollector
      */
     protected AimCollector aimcollector;
 
-    private void freeDomain(final Domain dom)
+    // private void freeDomain(final Domain dom)
+    // {
+    // try
+    // {
+    // if (dom != null)
+    // {
+    // dom.free();
+    // }
+    // }
+    // catch (LibvirtException e)
+    // {
+    // e.printStackTrace();
+    // }
+    // }
+
+    private LeaksFreeConnect login() throws CollectorException
     {
         try
         {
-            if (dom != null)
-            {
-                dom.free();
-            }
+            return new LeaksFreeConnect(getConnectionURL());
+        }
+        catch (LibvirtException e)
+        {
+            throw new CollectorException(MessageValues.CONN_EXCP_I, e);
+        }
+    }
+
+    private void logout(LeaksFreeConnect conn)
+    {
+        try
+        {
+            conn.close();
         }
         catch (LibvirtException e)
         {
@@ -91,6 +115,8 @@ public abstract class AbstractLibvirtCollector extends AbstractCollector
     {
         final int KBYTE = 1024;
         final HostDto hostInfo = new HostDto();
+
+        LeaksFreeConnect conn = login();
 
         try
         {
@@ -134,6 +160,10 @@ public abstract class AbstractLibvirtCollector extends AbstractCollector
             LOGGER.error("Unhandled exception :", e);
             throw new CollectorException(e.getMessage(), e);
         }
+        finally
+        {
+            logout(conn);
+        }
 
         return hostInfo;
     }
@@ -143,6 +173,8 @@ public abstract class AbstractLibvirtCollector extends AbstractCollector
     {
         final VirtualSystemCollectionDto vmc = new VirtualSystemCollectionDto();
         final List<Domain> listOfDomains = new ArrayList<Domain>();
+
+        LeaksFreeConnect conn = login();
 
         try
         {
@@ -179,11 +211,16 @@ public abstract class AbstractLibvirtCollector extends AbstractCollector
         }
         finally
         {
-            for (Domain dom : listOfDomains)
-            {
-                freeDomain(dom);
-            }
+            logout(conn);
         }
+
+        // finally
+        // {
+        // for (Domain dom : listOfDomains)
+        // {
+        // freeDomain(dom);
+        // }
+        // }
 
         return vmc;
 
@@ -204,37 +241,43 @@ public abstract class AbstractLibvirtCollector extends AbstractCollector
     @Override
     public void disconnect() throws CollectorException
     {
-
-        try
-        {
-            if (conn != null)
-            {
-                conn.close();
-            }
-        }
-        catch (LibvirtException e)
-        {
-            LOGGER.error("Unhandled exception when disconnect:", e);
-            throw new CollectorException(MessageValues.CONN_EXCP_III, e);
-        }
-
+        // TODO Auto-generated method stub
     }
 
-    /**
-     * @return the conn
-     */
-    public Connect getConn()
-    {
-        return conn;
-    }
+    // @Override
+    // public void disconnect() throws CollectorException
+    // {
+    //
+    // try
+    // {
+    // if (conn != null)
+    // {
+    // conn.close();
+    // }
+    // }
+    // catch (LibvirtException e)
+    // {
+    // LOGGER.error("Unhandled exception when disconnect:", e);
+    // throw new CollectorException(MessageValues.CONN_EXCP_III, e);
+    // }
+    //
+    // }
 
-    /**
-     * @param conn the conn to set
-     */
-    public void setConn(final Connect conn)
-    {
-        this.conn = conn;
-    }
+    // /**
+    // * @return the conn
+    // */
+    // public LeaksFreeConnect getConn()
+    // {
+    // return conn;
+    // }
+    //
+    // /**
+    // * @param conn the conn to set
+    // */
+    // public void setConn(final LeaksFreeConnect conn)
+    // {
+    // this.conn = conn;
+    // }
 
     /**
      * @param domain a domain defined by libvirt.
@@ -335,4 +378,13 @@ public abstract class AbstractLibvirtCollector extends AbstractCollector
 
     }
 
+    public String getConnectionURL()
+    {
+        return connectionURL;
+    }
+
+    public void setConnectionURL(String connectionURL)
+    {
+        this.connectionURL = connectionURL;
+    }
 }

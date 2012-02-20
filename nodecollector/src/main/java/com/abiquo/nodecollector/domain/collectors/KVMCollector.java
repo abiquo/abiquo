@@ -20,8 +20,6 @@
  */
 package com.abiquo.nodecollector.domain.collectors;
 
-import org.libvirt.Connect;
-import org.libvirt.LibvirtException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,31 +47,17 @@ public class KVMCollector extends AbstractLibvirtCollector
     public void connect(final String user, final String password) throws ConnectionException,
         LoginException
     {
+        // try
+        // {
+        // setConn(new LeaksFreeConnect("qemu+tcp://" + getIpAddress() + "/system?no_tty=1"));
+        setConnectionURL("qemu+tcp://" + getIpAddress() + "/system?no_tty=1");
         try
         {
-            setConn(new Connect("qemu+tcp://" + getIpAddress() + "/system?no_tty=1"));
-            try
-            {
-                aimcollector = new AimCollectorImpl(getIpAddress(), getAimPort());
-                // plugin call to see if we are authenticated
-                aimcollector.checkAIM();
-            }
-            catch (AimException e)
-            {
-                try
-                {
-                    this.disconnect();
-                }
-                catch (CollectorException e1)
-                {
-                    LOGGER.error("Error freeing libvirt connection to address " + getIpAddress(),
-                        e1);
-                    return;
-                }
-                throw new ConnectionException(MessageValues.CONN_EXCP_IV, e);
-            }
+            aimcollector = new AimCollectorImpl(getIpAddress(), getAimPort());
+            // plugin call to see if we are authenticated
+            aimcollector.checkAIM();
         }
-        catch (LibvirtException e)
+        catch (AimException e)
         {
             try
             {
@@ -81,15 +65,28 @@ public class KVMCollector extends AbstractLibvirtCollector
             }
             catch (CollectorException e1)
             {
-                // Do nothing.
                 LOGGER.error("Error freeing libvirt connection to address " + getIpAddress(), e1);
+                return;
             }
-
-            LOGGER.warn("Could not connect at hypervisor {} at cloud node {}", this
-                .getHypervisorType().name(), getIpAddress());
-            throw new ConnectionException(MessageValues.CONN_EXCP_I, e);
+            throw new ConnectionException(MessageValues.CONN_EXCP_IV, e);
         }
+        // }
+        // catch (LibvirtException e)
+        // {
+        // try
+        // {
+        // this.disconnect();
+        // }
+        // catch (CollectorException e1)
+        // {
+        // // Do nothing.
+        // LOGGER.error("Error freeing libvirt connection to address " + getIpAddress(), e1);
+        // }
+        //
+        // LOGGER.warn("Could not connect at hypervisor {} at cloud node {}", this
+        // .getHypervisorType().name(), getIpAddress());
+        // throw new ConnectionException(MessageValues.CONN_EXCP_I, e);
+        // }
 
     }
-
 }
