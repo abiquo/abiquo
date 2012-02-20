@@ -60,36 +60,33 @@ public abstract class AbstractLibvirtCollector extends AbstractCollector
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractLibvirtCollector.class);
 
-    private String connectionURL;
+    private LeaksFreeConnect connection;
 
-    /**
-     * WsmanCollector
-     */
     protected AimCollector aimcollector;
 
-    private LeaksFreeConnect login() throws CollectorException
-    {
-        try
-        {
-            return new LeaksFreeConnect(getConnectionURL());
-        }
-        catch (LibvirtException e)
-        {
-            throw new CollectorException(MessageValues.CONN_EXCP_I, e);
-        }
-    }
-
-    private void logout(LeaksFreeConnect conn)
-    {
-        try
-        {
-            conn.close();
-        }
-        catch (LibvirtException e)
-        {
-            e.printStackTrace();
-        }
-    }
+    // private LeaksFreeConnect login() throws CollectorException
+    // {
+    // try
+    // {
+    // return new LeaksFreeConnect(getConnectionURL());
+    // }
+    // catch (LibvirtException e)
+    // {
+    // throw new CollectorException(MessageValues.CONN_EXCP_I, e);
+    // }
+    // }
+    //
+    // private void logout(LeaksFreeConnect conn)
+    // {
+    // try
+    // {
+    // conn.close();
+    // }
+    // catch (LibvirtException e)
+    // {
+    // e.printStackTrace();
+    // }
+    // }
 
     @Override
     public HostDto getHostInfo() throws CollectorException
@@ -97,16 +94,16 @@ public abstract class AbstractLibvirtCollector extends AbstractCollector
         final int KBYTE = 1024;
         final HostDto hostInfo = new HostDto();
 
-        LeaksFreeConnect conn = login();
+        // LeaksFreeConnect conn = login();
 
         try
         {
-            final NodeInfo nodeInfo = conn.nodeInfo();
-            hostInfo.setName(conn.getHostName());
+            final NodeInfo nodeInfo = connection.nodeInfo();
+            hostInfo.setName(connection.getHostName());
             hostInfo.setCpu(Long.valueOf(nodeInfo.cpus));
             hostInfo.setRam(nodeInfo.memory * KBYTE);
             hostInfo.setHypervisor(getHypervisorType().getValue());
-            hostInfo.setVersion(String.valueOf(conn.getVersion()));
+            hostInfo.setVersion(String.valueOf(connection.getVersion()));
 
             List<ResourceType> datastores = aimcollector.getDatastores();
 
@@ -141,10 +138,10 @@ public abstract class AbstractLibvirtCollector extends AbstractCollector
             LOGGER.error("Unhandled exception :", e);
             throw new CollectorException(e.getMessage(), e);
         }
-        finally
-        {
-            logout(conn);
-        }
+        // finally
+        // {
+        // logout(conn);
+        // }
 
         return hostInfo;
     }
@@ -155,22 +152,20 @@ public abstract class AbstractLibvirtCollector extends AbstractCollector
         final VirtualSystemCollectionDto vmc = new VirtualSystemCollectionDto();
         final List<Domain> listOfDomains = new ArrayList<Domain>();
 
-        LeaksFreeConnect conn = login();
-
         try
         {
             // Defined domains are the closed ones!
-            for (String domainValue : conn.listDefinedDomains())
+            for (String domainValue : connection.listDefinedDomains())
             {
                 if (domainValue != null) // Why null domains are returned?
                 {
-                    listOfDomains.add(conn.domainLookupByName(domainValue));
+                    listOfDomains.add(connection.domainLookupByName(domainValue));
                 }
             }
             // Domains are the started ones
-            for (int domainInt : conn.listDomains())
+            for (int domainInt : connection.listDomains())
             {
-                listOfDomains.add(conn.domainLookupByID(domainInt));
+                listOfDomains.add(connection.domainLookupByID(domainInt));
             }
 
             // Create the list of Virtual Systems from the recovered domains
@@ -188,10 +183,6 @@ public abstract class AbstractLibvirtCollector extends AbstractCollector
         {
             LOGGER.error("Unhandled exception :", e);
             throw new CollectorException(e.getMessage(), e);
-        }
-        finally
-        {
-            logout(conn);
         }
 
         return vmc;
@@ -212,7 +203,18 @@ public abstract class AbstractLibvirtCollector extends AbstractCollector
     @Override
     public void disconnect() throws CollectorException
     {
-        // Nothing to do here. Connection is handled in each method.
+        try
+        {
+            if (getConnection() != null)
+            {
+                getConnection().close();
+            }
+        }
+        catch (LibvirtException e)
+        {
+            LOGGER.error("Unhandled exception when disconnect:", e);
+            throw new CollectorException(MessageValues.CONN_EXCP_III, e);
+        }
     }
 
     /**
@@ -314,13 +316,13 @@ public abstract class AbstractLibvirtCollector extends AbstractCollector
 
     }
 
-    public String getConnectionURL()
+    public LeaksFreeConnect getConnection()
     {
-        return connectionURL;
+        return connection;
     }
 
-    public void setConnectionURL(String connectionURL)
+    public void setConnection(LeaksFreeConnect conn)
     {
-        this.connectionURL = connectionURL;
+        this.connection = conn;
     }
 }
