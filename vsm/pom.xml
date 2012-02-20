@@ -95,14 +95,9 @@
         </dependency>
         <!-- ESXi -->
         <dependency>
-            <groupId>com.vmware.vim25</groupId>
-            <artifactId>vim25</artifactId>
-            <version>2.1</version>
-        </dependency>
-        <dependency>
-            <groupId>dom4j</groupId>
-            <artifactId>dom4j</artifactId>
-            <version>1.6.1</version>
+            <groupId>com.cloudbees.thirdparty</groupId>
+            <artifactId>vijava</artifactId>
+            <version>5.0.0</version>
         </dependency>
         <!-- Hyper-V -->
         <dependency>
