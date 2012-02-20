@@ -102,10 +102,14 @@ package net.undf.abicloud.events
         public static const VIRTUAL_DATACENTER_EDITED:String = "virtualDataCenterEditedVirtualApplianceEvent";
 
         public static const VIRTUAL_DATACENTER_DELETED:String = "virtualDataCenterDeletedVirtualApplianceEvent";
+        
+        public static const VIRTUAL_DATACENTER_RETRIEVED:String = "virtualDataCenterRetrievedVirtualApplianceEvent";
 
-	public static const CHECK_VIRTUAL_DATACENTERS_AND_APPLIANCES_BY_ENTERPRISE_AND_DATACENTER:String = "checkVirtualDatacentersAndAppliancesByEnterpriseAndDatacenterEvent";
+	   public static const CHECK_VIRTUAL_DATACENTERS_AND_APPLIANCES_BY_ENTERPRISE_AND_DATACENTER:String = "checkVirtualDatacentersAndAppliancesByEnterpriseAndDatacenterEvent";
 	
 	   public static const GET_VIRTUAL_DATACENTERS_BY_ENTERPRISE_FASTER:String = "getVirtualDataCenterByEnterpriseFasterVirtualApplianceEvent";
+	   
+	   public static const GET_VIRTUAL_APPLIANCES_BY_VIRTUAL_DATACENTER:String = "getVirtualAppliancesByVirtualDatacenterVirtualApplianceEvent";
 	
 	   public static const VIRTUAL_MACHINE_CHANGE_STATE:String = "virtualMachineChangeStateVirtualApplianceEvent";
 	   

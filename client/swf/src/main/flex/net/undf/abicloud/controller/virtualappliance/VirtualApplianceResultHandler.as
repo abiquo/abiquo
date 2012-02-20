@@ -21,8 +21,6 @@
 
 package net.undf.abicloud.controller.virtualappliance
 {
-    import flash.events.Event;
-    
     import mx.collections.ArrayCollection;
     import mx.controls.Alert;
     import mx.core.Application;
@@ -34,7 +32,6 @@ package net.undf.abicloud.controller.virtualappliance
     import net.undf.abicloud.events.VirtualApplianceEvent;
     import net.undf.abicloud.model.AbiCloudModel;
     import net.undf.abicloud.view.general.AbiCloudAlert;
-    import net.undf.abicloud.vo.infrastructure.State;
     import net.undf.abicloud.vo.networking.DHCP;
     import net.undf.abicloud.vo.networking.Host;
     import net.undf.abicloud.vo.result.BasicResult;
@@ -80,7 +77,7 @@ package net.undf.abicloud.controller.virtualappliance
                 //Adding the VirtualDataCenter list to the model
                 AbiCloudModel.getInstance().virtualApplianceManager.virtualDataCenters = DataResult(result).data as ArrayCollection;
                 
-                AbiCloudModel.getInstance().virtualApplianceManager.dispatchEvent(new Event("virtualDataCentersRetrieved"));
+                AbiCloudModel.getInstance().virtualApplianceManager.dispatchEvent(new VirtualApplianceEvent(VirtualApplianceEvent.VIRTUAL_DATACENTER_RETRIEVED));
                 
             }
             else

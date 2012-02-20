@@ -38,6 +38,7 @@
 
     <mx:Script>
         <![CDATA[
+        	import net.undf.abicloud.vo.result.ListRequest;
         	import net.undf.abicloud.vo.user.PrivilegeType;
         	import net.undf.abicloud.utils.SecuredPrivilegeAccess;
         	import net.undf.abicloud.view.main.CommonAssets;
@@ -96,6 +97,14 @@
             public function get selectedVirtualDataCenter():VirtualDataCenter
             {
                 return this._selectedVirtualDataCenter;
+            }
+            
+            [Bindable]
+            private var _listRequest:ListRequest;
+            
+            public function get listRequest():ListRequest
+            {
+                return this._listRequest;
             }
 
             public function init():void

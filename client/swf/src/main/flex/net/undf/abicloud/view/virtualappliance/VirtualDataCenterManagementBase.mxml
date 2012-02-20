@@ -170,7 +170,7 @@
                                                                                      onVirtualApplianceEdited);
 
                 //Listening for checks in VirtualDatacenters and VirtualAppliances
-                AbiCloudModel.getInstance().virtualApplianceManager.addEventListener(VirtualApplianceEvent.VIRTUAL_DATACENTERS_AND_APPLIANCES_CHECKED,
+                AbiCloudModel.getInstance().virtualApplianceManager.addEventListener(VirtualApplianceEvent.VIRTUAL_DATACENTER_RETRIEVED,
                                                                                      onVirtualDatacentersAndAppliancesChecked);
                 //refresh the list of virtual datacenters when one has been edited
 				AbiCloudModel.getInstance().virtualApplianceManager.addEventListener(VirtualApplianceEvent.VIRTUAL_DATACENTER_EDITED,
@@ -480,6 +480,12 @@
                 //Retrieve VirtualDatacenters
                 var virtualApplianceEvent:VirtualApplianceEvent = new VirtualApplianceEvent(VirtualApplianceEvent.GET_VIRTUAL_DATACENTERS_BY_ENTERPRISE);
                 virtualApplianceEvent.enterprise = AbiCloudModel.getInstance().loginManager.user.enterprise;
+                virtualApplianceEvent.listRequest = virtualDatacenterList.listRequest;
+                dispatchEvent(virtualApplianceEvent);
+                
+                //Retrieve VirtualAppliances
+                virtualApplianceEvent = new VirtualApplianceEvent(VirtualApplianceEvent.GET_VIRTUAL_APPLIANCES_BY_VIRTUAL_DATACENTER);
+                virtualApplianceEvent.virtualDataCenter = virtualDatacenterList.selectedVirtualDataCenter;
                 virtualApplianceEvent.listRequest = virtualApplianceList.listRequest;
                 dispatchEvent(virtualApplianceEvent);
             }
