@@ -30,6 +30,7 @@ package net.undf.abicloud.events
     import net.undf.abicloud.vo.infrastructure.Rack;
     import net.undf.abicloud.vo.infrastructure.VirtualMachine;
     import net.undf.abicloud.vo.networking.NetworkConfiguration;
+    import net.undf.abicloud.vo.result.ListRequest;
     import net.undf.abicloud.vo.user.Enterprise;
     import net.undf.abicloud.vo.virtualappliance.Log;
     import net.undf.abicloud.vo.virtualappliance.VirtualAppliance;
@@ -151,6 +152,8 @@ package net.undf.abicloud.events
         public var rack:Rack;
         
         public var physicalmachine:PhysicalMachine;
+        
+        public var listRequest:ListRequest;
 
 
         /* ------------- Constructor ------------- */

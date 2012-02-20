@@ -44,6 +44,7 @@
 
     <mx:Script>
         <![CDATA[
+        	import net.undf.abicloud.vo.result.ListRequest;
         	import net.undf.abicloud.utils.AbicloudUtils;
         	import net.undf.abicloud.vo.user.PrivilegeType;
         	import net.undf.abicloud.utils.SecuredPrivilegeAccess;
@@ -58,6 +59,14 @@
             //The VirtualAppliance that is currently selected
             [Bindable]
             private var _selectedVirtualAppliance:VirtualAppliance;
+            
+            [Bindable]
+            private var _listRequest:ListRequest;
+            
+            public function get listRequest():ListRequest
+            {
+            	return this._listRequest;
+            }
 
             [Bindable(event="selectedVirtualApplianceChange")]
             public function get selectedVirtualAppliance():VirtualAppliance
