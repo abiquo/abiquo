@@ -100,7 +100,7 @@ public class TemplateDefinitionListService extends DefaultApiServiceWithApplianc
         Enterprise ent = entService.getEnterprise(idEnterprise);
         prevlist = repo.findTemplateDefinitionListByNameAndEnterprise(name, ent);
 
-        if (prevlist != null) // TODO name unique on BBDD
+        if (prevlist != null)
         {
             addConflictErrors(APIError.TEMPLATE_DEFINITION_LIST_NAME_ALREADY_EXIST);
             flushErrors();
