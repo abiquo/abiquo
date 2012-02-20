@@ -3,7 +3,6 @@
     xsi:schemaLocation="
             http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
             http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd">
-    <import resource="classpath:META-INF/server/wink-core-context.xml" />
     <context:annotation-config />
     <context:component-scan base-package="com.abiquo.api,com.abiquo.server.core,com.abiquo.scheduler" />
     <bean id="dataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
@@ -29,6 +28,7 @@
         </property>
     </bean>
     <!-- load the configuration file -->
+    <import resource="wink-beans.xml" />
     <import resource="persistencebeans.xml" />
     <import resource="callback-beans.xml" />
     <import resource="security-beans.xml" />

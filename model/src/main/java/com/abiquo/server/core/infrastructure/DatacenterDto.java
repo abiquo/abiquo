@@ -22,7 +22,10 @@
 package com.abiquo.server.core.infrastructure;
 
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 
+import javax.ws.rs.core.MediaType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
@@ -31,6 +34,15 @@ import com.abiquo.model.transport.SingleResourceTransportDto;
 @XmlRootElement(name = "datacenter")
 public class DatacenterDto extends SingleResourceTransportDto implements Serializable
 {
+    public static MediaType mediaType; 
+    
+    static 
+    {    
+        Map<String, String> parameters = new HashMap<String, String>();
+        parameters.put("version", SingleResourceTransportDto.API_VERSION);
+        mediaType = new MediaType("application/xml", "application/xml", parameters);
+    }
+    
     /**
      * Identifier of the datacenter.
      */

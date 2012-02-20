@@ -31,6 +31,8 @@ import com.abiquo.model.rest.RESTLink;
 
 public abstract class SingleResourceTransportDto implements Serializable
 {
+    public static final String API_VERSION = "1.0";
+    
     private static final long serialVersionUID = 1L;
 
     protected RESTLink editLink;

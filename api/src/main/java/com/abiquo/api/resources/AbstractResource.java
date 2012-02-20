@@ -48,7 +48,7 @@ import com.abiquo.api.exceptions.NotFoundException;
 import com.abiquo.model.rest.RESTLink;
 
 public abstract class AbstractResource
-{
+{    
     public static final String FLAT_MEDIA_TYPE = "application/flat+xml";
 
     public static final String LINK_MEDIA_TYPE = "application/link+xml";
