@@ -28,6 +28,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 
+import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -94,8 +95,10 @@ public class CheckServlet extends AbstractCheckServlet
 
     public synchronized boolean checkRepositoryMounted()
     {
-        String repositoryLocatino = AMConfiguration.getRepositoryLocation();
-        String repositoryMountPoint = AMConfiguration.getRepositoryPath();
+        final String repositoryLocatino =
+            FilenameUtils.getFullPathNoEndSeparator(AMConfiguration.getRepositoryLocation());
+        final String repositoryMountPoint =
+            FilenameUtils.getFullPathNoEndSeparator(AMConfiguration.getRepositoryPath());
 
         if (repositoryLocatino.startsWith("localhost")
             || repositoryLocatino.startsWith("127.0.0.1"))
@@ -104,13 +107,6 @@ public class CheckServlet extends AbstractCheckServlet
                 + " Its a local repository", repositoryLocatino);
             return true;
         }
-
-        // mtab do not contains final /
-        if (repositoryLocatino.endsWith("/"))
-        {
-            repositoryLocatino = repositoryLocatino.substring(0, repositoryLocatino.length() - 1);
-        }
-        repositoryMountPoint = repositoryMountPoint.substring(0, repositoryMountPoint.length() - 1);
 
         final File mountFile = new File(MOUNT_FILE);
         BufferedReader mountReader = null;
@@ -122,9 +118,10 @@ public class CheckServlet extends AbstractCheckServlet
             {
                 if (line.contains(repositoryLocatino))
                 {
-                    String[] parts = line.split(" ");
+                    final String[] parts = line.split(" ");
                     if (repositoryLocatino.equals(parts[0])
-                        && repositoryMountPoint.equals(parts[1]))
+                        && repositoryMountPoint.equalsIgnoreCase(FilenameUtils
+                            .getFullPathNoEndSeparator(parts[1])))
                     {
                         return true;
                     }
@@ -139,11 +136,11 @@ public class CheckServlet extends AbstractCheckServlet
 
             return false;
         }
-        catch (FileNotFoundException e)
+        catch (final FileNotFoundException e)
         {
             throw new AMException(AMError.MOUNT_FILE_NOT_FOUND, e);
         }
-        catch (IOException e)
+        catch (final IOException e)
         {
             throw new AMException(AMError.MOUNT_FILE_READ_ERROR, e);
         }
@@ -155,7 +152,7 @@ public class CheckServlet extends AbstractCheckServlet
                 {
                     mountReader.close();
                 }
-                catch (IOException e)
+                catch (final IOException e)
                 {
                     e.printStackTrace();
                 }
@@ -165,12 +162,12 @@ public class CheckServlet extends AbstractCheckServlet
 
     public synchronized void checkRepositoryMarkExistOrCreate()
     {
-        CheckRepositoryHandler check = new CheckRepositoryHandler();
+        final CheckRepositoryHandler check = new CheckRepositoryHandler();
         try
         {
             check.canUseRepository();
         }
-        catch (AMException e)
+        catch (final AMException e)
         {
             LOGGER.warn("Repository file mark ''.abiquo_repository'' not found. Try to create it.");
             try
@@ -186,7 +183,7 @@ public class CheckServlet extends AbstractCheckServlet
                         AMConfiguration.getRepositoryLocation(), REPO_MARK);
                 }
             }
-            catch (IOException eC)
+            catch (final IOException eC)
             {
                 throw new AMException(AMError.CONFIG_REPOSITORY_MARK, REPO_MARK, eC);
             }
