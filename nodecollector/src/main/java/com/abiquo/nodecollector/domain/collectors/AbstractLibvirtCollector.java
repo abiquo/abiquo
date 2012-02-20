@@ -58,33 +58,14 @@ import com.abiquo.server.core.infrastructure.nodecollector.VirtualSystemStatusEn
  */
 public abstract class AbstractLibvirtCollector extends AbstractCollector
 {
-
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractLibvirtCollector.class);
 
-    /**
-     * This object encapsulates all connection features.
-     */
     private String connectionURL;
 
     /**
      * WsmanCollector
      */
     protected AimCollector aimcollector;
-
-    // private void freeDomain(final Domain dom)
-    // {
-    // try
-    // {
-    // if (dom != null)
-    // {
-    // dom.free();
-    // }
-    // }
-    // catch (LibvirtException e)
-    // {
-    // e.printStackTrace();
-    // }
-    // }
 
     private LeaksFreeConnect login() throws CollectorException
     {
@@ -178,7 +159,6 @@ public abstract class AbstractLibvirtCollector extends AbstractCollector
 
         try
         {
-
             // Defined domains are the closed ones!
             for (String domainValue : conn.listDefinedDomains())
             {
@@ -214,16 +194,7 @@ public abstract class AbstractLibvirtCollector extends AbstractCollector
             logout(conn);
         }
 
-        // finally
-        // {
-        // for (Domain dom : listOfDomains)
-        // {
-        // freeDomain(dom);
-        // }
-        // }
-
         return vmc;
-
     }
 
     protected void checkPhysicalState() throws NoManagedException
@@ -241,43 +212,8 @@ public abstract class AbstractLibvirtCollector extends AbstractCollector
     @Override
     public void disconnect() throws CollectorException
     {
-        // TODO Auto-generated method stub
+        // Nothing to do here. Connection is handled in each method.
     }
-
-    // @Override
-    // public void disconnect() throws CollectorException
-    // {
-    //
-    // try
-    // {
-    // if (conn != null)
-    // {
-    // conn.close();
-    // }
-    // }
-    // catch (LibvirtException e)
-    // {
-    // LOGGER.error("Unhandled exception when disconnect:", e);
-    // throw new CollectorException(MessageValues.CONN_EXCP_III, e);
-    // }
-    //
-    // }
-
-    // /**
-    // * @return the conn
-    // */
-    // public LeaksFreeConnect getConn()
-    // {
-    // return conn;
-    // }
-    //
-    // /**
-    // * @param conn the conn to set
-    // */
-    // public void setConn(final LeaksFreeConnect conn)
-    // {
-    // this.conn = conn;
-    // }
 
     /**
      * @param domain a domain defined by libvirt.
