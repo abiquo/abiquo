@@ -54,7 +54,8 @@ import javax.xml.bind.annotation.XmlType;
  * </pre>
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "BladeLocatorLedDto", propOrder = {"dn", "adminStatus", "color", "bladeDn"})
+@XmlType(name = "BladeLocatorLedDto", propOrder = {"dn", "adminStatus", "color", "bladeDn",
+"operState"})
 public class BladeLocatorLedDto
 {
     @XmlElement(required = true)
@@ -68,6 +69,9 @@ public class BladeLocatorLedDto
 
     @XmlElement(required = true)
     protected String bladeDn;
+
+    @XmlElement(required = true)
+    protected String operState;
 
     /**
      * Gets the value of the status property.
@@ -148,6 +152,26 @@ public class BladeLocatorLedDto
     public void setColor(final String color)
     {
         this.color = color;
+    }
+
+    /**
+     * Gets the value of the operState property.
+     * 
+     * @return possible object is {@link String }
+     */
+    public String getOperState()
+    {
+        return operState;
+    }
+
+    /**
+     * Sets the value of the operState property.
+     * 
+     * @param value allowed object is {@link String }
+     */
+    public void setOperState(final String operState)
+    {
+        this.operState = operState;
     }
 
 }

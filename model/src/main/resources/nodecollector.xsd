@@ -176,6 +176,7 @@
             <xs:element name="adminStatus" type="xs:string" />
             <xs:element name="color" type="xs:string" />
             <xs:element name="bladeDn" type="xs:string" />
+            <xs:element name="operState" type="xs:string" />
         </xs:sequence>
     </xs:complexType><!-- -->
     <!-- Complex helper types -->
