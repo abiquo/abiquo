@@ -57,6 +57,8 @@ public class BladeLocatorLedDto
 
     protected String adminStatus;
 
+    protected String operState;
+
     protected String color;
 
     protected String bladeDn;
@@ -123,7 +125,7 @@ public class BladeLocatorLedDto
     }
 
     /**
-     * Gets the value of the description property.
+     * Gets the value of the color property.
      * 
      * @return possible object is {@link String }
      */
@@ -140,6 +142,26 @@ public class BladeLocatorLedDto
     public void setColor(final String color)
     {
         this.color = color;
+    }
+
+    /**
+     * Gets the value of the operState property.
+     * 
+     * @return possible object is {@link String }
+     */
+    public String getOperState()
+    {
+        return operState;
+    }
+
+    /**
+     * Sets the value of the operState property.
+     * 
+     * @param value allowed object is {@link String }
+     */
+    public void setOperState(final String operState)
+    {
+        this.operState = operState;
     }
 
 }

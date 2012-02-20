@@ -41,6 +41,8 @@ public class BladeLocatorLed
 
     protected String bladeDn;
 
+    protected String operState;
+
     /**
      * Gets the value of the status property.
      * 
@@ -103,7 +105,7 @@ public class BladeLocatorLed
     }
 
     /**
-     * Gets the value of the description property.
+     * Gets the value of the color property.
      * 
      * @return possible object is {@link String }
      */
@@ -120,6 +122,26 @@ public class BladeLocatorLed
     public void setColor(final String color)
     {
         this.color = color;
+    }
+
+    /**
+     * Gets the value of the operState property.
+     * 
+     * @return possible object is {@link String }
+     */
+    public String getOperState()
+    {
+        return operState;
+    }
+
+    /**
+     * Sets the value of the operState property.
+     * 
+     * @param value allowed object is {@link String }
+     */
+    public void setOperState(final String operState)
+    {
+        this.operState = operState;
     }
 
 }
