@@ -200,6 +200,12 @@ public class MachineService extends DefaultApiService
                 .getHypervisor().getIp(), old.getHypervisor() == null ? "No Hypervisor" : old
                 .getHypervisor().getType(), old.getState());
 
+        if (old.getInitiatorIQN() == null)
+        {
+            tracer.log(SeverityType.WARNING, ComponentType.MACHINE, EventType.MACHINE_MODIFY,
+                "machine.withoutiqn", old.getName(), old.getHypervisor().getIp());
+        }
+
         return old;
     }
 
