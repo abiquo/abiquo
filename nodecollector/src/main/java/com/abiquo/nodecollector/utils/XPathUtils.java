@@ -68,11 +68,7 @@ public final class XPathUtils
     public static List<String> getValues(final String expression, final String xml)
         throws XPathExpressionException
     {
-        final InputSource source = new InputSource(new StringReader(xml));
-        final XPathFactory factory = XPathFactory.newInstance();
-        final XPath xpath = factory.newXPath();
-        final NodeList xpathResults =
-            (NodeList) xpath.evaluate(expression, source, XPathConstants.NODESET);
+        final NodeList xpathResults = getNodes(expression, xml);
         final List<String> results = new ArrayList<String>(xpathResults.getLength());
 
         for (int i = 0; i < xpathResults.getLength(); i++)
@@ -81,6 +77,23 @@ public final class XPathUtils
         }
 
         return results;
+    }
+
+    /**
+     * Evaluates the XPath expression against the <code>xml</code> and returns the selected nodes.
+     * 
+     * @param expression Expression to evaluate.
+     * @param xml The xml to query.
+     * @return The selected nodes.
+     * @throws XPathExpressionException If an error occurs evaluating the expression.
+     */
+    public static NodeList getNodes(final String expression, final String xml)
+        throws XPathExpressionException
+    {
+        final InputSource source = new InputSource(new StringReader(xml));
+        final XPathFactory factory = XPathFactory.newInstance();
+        final XPath xpath = factory.newXPath();
+        return (NodeList) xpath.evaluate(expression, source, XPathConstants.NODESET);
     }
 
     /**

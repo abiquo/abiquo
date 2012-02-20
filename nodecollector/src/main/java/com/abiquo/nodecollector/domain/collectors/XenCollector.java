@@ -22,6 +22,7 @@
 package com.abiquo.nodecollector.domain.collectors;
 
 import org.libvirt.Connect;
+import org.libvirt.Domain;
 import org.libvirt.LibvirtException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -88,5 +89,11 @@ public class XenCollector extends AbstractLibvirtCollector
             throw new ConnectionException(MessageValues.CONN_EXCP_IV, e);
         }
 
+    }
+
+    @Override
+    protected boolean isDomain0(final Domain domain) throws LibvirtException
+    {
+        return domain.getUUIDString().equals("00000000-0000-0000-0000-000000000000");
     }
 }
