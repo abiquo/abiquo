@@ -33,6 +33,8 @@ import org.libvirt.LibvirtException;
 import org.libvirt.NodeInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 import com.abiquo.nodecollector.aim.AimCollector;
 import com.abiquo.nodecollector.constants.MessageValues;
@@ -171,7 +173,10 @@ public abstract class AbstractLibvirtCollector extends AbstractCollector
             // Create the list of Virtual Systems from the recovered domains
             for (Domain domain : listOfDomains)
             {
-                vmc.getVirtualSystems().add(createVirtualSystemFromDomain(domain));
+                if (!isDomain0(domain))
+                {
+                    vmc.getVirtualSystems().add(createVirtualSystemFromDomain(domain));
+                }
             }
         }
         catch (LibvirtException e1)
@@ -226,6 +231,7 @@ public abstract class AbstractLibvirtCollector extends AbstractCollector
     private VirtualSystemDto createVirtualSystemFromDomain(final Domain domain)
         throws LibvirtException, XPathExpressionException
     {
+
         final int KBYTE = 1024;
         final DomainInfo domainInfo = domain.getInfo();
         final String domainXML = domain.getXMLDesc(0);
@@ -260,11 +266,27 @@ public abstract class AbstractLibvirtCollector extends AbstractCollector
 
         // Evaluate the libvirt XML desc of the domain to get the image files
         // using the XPath features
-        final List<String> imageValues = XPathUtils.getValues("//disk/source/@file", domainXML);
 
-        for (String imageValue : imageValues)
+        // final List<String> imageValues = XPathUtils.getValues("//disk/source/@file",
+        // domainXML);
+        // for (String imageValue : imageValues)
+        // {
+        // vSys.getResources().add(createDiskFromImagePath(imageValue));
+        // }
+
+        NodeList systemdisk = XPathUtils.getNodes("//disk[target[@dev='hda']]/source", domainXML);
+        if (systemdisk.item(0) != null)
         {
-            vSys.getResources().add(createDiskFromImagePath(imageValue));
+            Node image = systemdisk.item(0).getAttributes().getNamedItem("file");
+            if (image != null)
+            {
+                vSys.getResources().add(createDiskFromImagePath(image.getNodeValue()));
+            }
+            else
+            {
+                image = systemdisk.item(0).getAttributes().getNamedItem("dev");
+                vSys.getResources().add(createDiskFromVolumePath(image.getNodeValue()));
+            }
         }
 
         // Homogenize the status
@@ -316,12 +338,50 @@ public abstract class AbstractLibvirtCollector extends AbstractCollector
 
     }
 
+    /**
+     * Create a {@link Disk} objet from an image value.
+     * 
+     * @param imagePath image where the disk is stored
+     * @return a Disk object filled with the information
+     */
+    private ResourceType createDiskFromVolumePath(final String imagePath)
+    {
+
+        final ResourceType currentHardDisk = new ResourceType();
+        currentHardDisk.setResourceType(ResourceEnumType.VOLUME_DISK);
+        currentHardDisk.setAddress(""); // Datastore directory
+        try
+        {
+
+            long diskSize = aimcollector.getDiskFileSize(imagePath);
+            currentHardDisk.setUnits(diskSize);
+
+        }
+        catch (AimException e)
+        {
+            currentHardDisk.setUnits(0L);
+        }
+        currentHardDisk.setResourceSubType(VirtualDiskEnumType.STATEFUL.value());
+        currentHardDisk.setConnection(""); // Datastore root path
+        return currentHardDisk;
+
+    }
+
+    /**
+     * Returns true if given domain is "Domain-0"
+     * 
+     * @param domain to evaluate
+     * @return true if given domain is "Domain-0"
+     * @throws LibvirtException exception
+     */
+    protected abstract boolean isDomain0(Domain domain) throws LibvirtException;
+
     public LeaksFreeConnect getConnection()
     {
         return connection;
     }
 
-    public void setConnection(LeaksFreeConnect conn)
+    public void setConnection(final LeaksFreeConnect conn)
     {
         this.connection = conn;
     }
