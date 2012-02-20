@@ -356,19 +356,20 @@ public enum APIError
         "The remote service is configured with a different datacenter UUID, please adjust the *abiquo.datacenter.id* property in the remote service."), REMOTE_SERVICE_UNDEFINED_PORT(
         "RS-15", "A port must be defined in the uri"), APPLIANCE_MANAGER_CALL("AM-1",
         "Failed Appliance Manager communication"),
-        //
-        AM_CLIENT("AM-0","Failed Appliance Manager communication"),
-        AM_TIMEOUT("AM-1","Timeout during Appliance Manager communication"),
-        AM_UNAVAILABE("AM-2","AM service unavailable, check the URL service."),
-        AM_FAILED_REQUEST("AM-3","Failed Appliance Manager request."),
+    //
+    AM_CLIENT("AM-0", "Failed Appliance Manager communication"), AM_TIMEOUT("AM-1",
+        "Timeout during Appliance Manager communication"), AM_UNAVAILABE("AM-2",
+        "AM service unavailable, check the URL service."), AM_FAILED_REQUEST("AM-3",
+        "Failed Appliance Manager request."),
 
     // OVF PACKAGE LIST
     TEMPLATE_DEFINITION_LIST_NAME_ALREADY_EXIST("OVF-PACKAGE-LIST-0",
-        "OVF Package list name already exists"), TEMPLATE_DEFINITION_LIST_REFRESH_NO_URL(
+        "OVF Package list name already exists"), //
+    TEMPLATE_DEFINITION_LIST_REFRESH_NO_URL(
         "OVF-PACKAGE-LIST-1",
-        "The template definition list isn't associated to any url (ovfindex.xml), so it can't be refreshed form the source"),
-        "OVF Package list name already exists"), TEMPLATE_DEFINITION_LIST_NAME_NOT_FOUND(
-        "OVF-PACKAGE-LIST-2", "OVF Package list name is required"),
+        "The template definition list isn't associated to any url (ovfindex.xml), so it can't be refreshed form the source"), //
+    TEMPLATE_DEFINITION_LIST_NAME_NOT_FOUND("OVF-PACKAGE-LIST-2",
+        "OVF Package list name is required"),
 
     // OVF PACKAGE
     NON_EXISTENT_OVF_PACKAGE("OVF-PACKAGE-0", "The requested OVF package does not exist"), NON_EXISTENT_TEMPLATE_DEFINITION_LIST(
