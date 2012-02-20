@@ -199,7 +199,7 @@
         <security:intercept-url pattern="/admin/datacenters/*/racks/*/machines/*/action/ledon" method="POST" access="ROLE_PHYS_DC_ALLOW_MODIFY_SERVERS" />
         <security:intercept-url pattern="/admin/datacenters/*/racks/*/machines/*/led" method="GET" access="ROLE_PHYS_DC_RETRIEVE_DETAILS" />
         <security:intercept-url pattern="/admin/datacenters/*/racks/*/machines/*/logicserver" method="GET" access="ROLE_PHYS_DC_RETRIEVE_DETAILS" />
-        <security:intercept-url pattern="/admin/datacenters/*/racks/*/machines/*/virtualmachines" method="GET" access="ROLE_PHYS_DC_ALLOW_MODIFY_SERVERS" />
+        <security:intercept-url pattern="/admin/datacenters/*/racks/*/machines/*/virtualmachines" method="GET" access="ROLE_PHYS_DC_RETRIEVE_DETAILS, ROLE_PHYS_DC_ALLOW_MODIFY_SERVERS" />
         <security:intercept-url pattern="/admin/datacenters/*/racks/*/machines/*/virtualmachines" method="DELETE" access="ROLE_PHYS_DC_ALLOW_MODIFY_SERVERS" />
         <security:intercept-url pattern="/admin/datacenters/*/racks/*/machines/*/virtualmachines/*" method="GET" access="ROLE_PHYS_DC_ALLOW_MODIFY_SERVERS" />
         <security:intercept-url pattern="/admin/datacenters/*/racks/*/machines/*/virtualmachines/*/action/capture" method="POST" access="ROLE_PHYS_DC_ALLOW_MODIFY_SERVERS" />
