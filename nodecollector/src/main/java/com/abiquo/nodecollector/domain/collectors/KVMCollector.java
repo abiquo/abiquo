@@ -93,6 +93,9 @@ public class KVMCollector extends AbstractLibvirtCollector
 
     }
 
+    /**
+     * @see com.abiquo.nodecollector.domain.collectors.AbstractLibvirtCollector#isDomain0(org.libvirt.Domain)
+     */
     @Override
     protected boolean isDomain0(final Domain domain) throws LibvirtException
     {

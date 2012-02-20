@@ -386,6 +386,13 @@ public abstract class AbstractLibvirtCollector extends AbstractCollector
 
     }
 
+    /**
+     * Returns true if given domain is "Domain-0"
+     * 
+     * @param domain to evaluate
+     * @return true if given domain is "Domain-0"
+     * @throws LibvirtException exception
+     */
     protected abstract boolean isDomain0(Domain domain) throws LibvirtException;
 
 }
