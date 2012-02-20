@@ -95,10 +95,11 @@ public class CheckServlet extends AbstractCheckServlet
 
     public synchronized boolean checkRepositoryMounted()
     {
+
         final String repositoryLocatino =
-            FilenameUtils.getFullPathNoEndSeparator(AMConfiguration.getRepositoryLocation());
+            FilenameUtils.normalizeNoEndSeparator(AMConfiguration.getRepositoryLocation());
         final String repositoryMountPoint =
-            FilenameUtils.getFullPathNoEndSeparator(AMConfiguration.getRepositoryPath());
+            FilenameUtils.normalizeNoEndSeparator(AMConfiguration.getRepositoryPath());
 
         if (repositoryLocatino.startsWith("localhost")
             || repositoryLocatino.startsWith("127.0.0.1"))
@@ -119,9 +120,9 @@ public class CheckServlet extends AbstractCheckServlet
                 if (line.contains(repositoryLocatino))
                 {
                     final String[] parts = line.split(" ");
-                    if (repositoryLocatino.equals(parts[0])
+                    if (repositoryLocatino.equals(FilenameUtils.normalizeNoEndSeparator(parts[0]))
                         && repositoryMountPoint.equalsIgnoreCase(FilenameUtils
-                            .getFullPathNoEndSeparator(parts[1])))
+                            .normalizeNoEndSeparator(parts[1])))
                     {
                         return true;
                     }
