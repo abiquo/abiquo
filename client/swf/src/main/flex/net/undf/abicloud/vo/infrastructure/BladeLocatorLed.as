@@ -36,6 +36,9 @@ package net.undf.abicloud.vo.infrastructure
         public var color:String;
 
         public var bladeDn:String;
+        
+        public var operState:String;
+        
 	    //Constants  
 	    
 	    public static const ON:String = "on";
@@ -48,6 +51,7 @@ package net.undf.abicloud.vo.infrastructure
 	        adminStatus = "";	
 	        color = "";	
 	        bladeDn = "";
+		operState= "";
 		}
 
 	}
