@@ -367,7 +367,8 @@ public enum APIError
 
     // OVF PACKAGE LIST
     TEMPLATE_DEFINITION_LIST_NAME_ALREADY_EXIST("OVF-PACKAGE-LIST-0",
-        "OVF Package list name already exists"),
+        "OVF Package list name already exists"), TEMPLATE_DEFINITION_LIST_NAME_NOT_FOUND(
+        "OVF-PACKAGE-LIST-1", "OVF Package list name is required"),
 
     // OVF PACKAGE
     NON_EXISTENT_OVF_PACKAGE("OVF-PACKAGE-0", "The requested OVF package does not exist"), NON_EXISTENT_TEMPLATE_DEFINITION_LIST(

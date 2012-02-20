@@ -30,10 +30,12 @@ package com.abiquo.server.core.infrastructure;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
+import com.abiquo.model.transport.SingleResourceTransportDto;
+
 /**
  */
 @XmlRootElement(name = "organization")
-public class OrganizationDto
+public class OrganizationDto extends SingleResourceTransportDto
 {
     protected String dn;
 

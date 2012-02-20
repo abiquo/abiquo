@@ -21,18 +21,15 @@
 
 package com.abiquo.ovfmanager.ovf.xml;
 
-
 import java.io.InputStream;
 import java.io.OutputStream;
 
 import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
 
 import org.codehaus.stax2.XMLInputFactory2;
-import org.codehaus.stax2.XMLOutputFactory2;
 
 import com.ctc.wstx.api.WstxOutputProperties;
 import com.ctc.wstx.stax.WstxInputFactory;
@@ -70,26 +67,25 @@ public final class Stax2Factory
      */
     private final boolean isEscapingOutputCR = false;
 
-    /** Configure Woodstox as StAX XML implementation (actually stax2). */
-    static
-    {
-        final String inputFactoryImpl = "com.ctc.wstx.stax.WstxInputFactory";
-        final String outputFactoryImpl = "com.ctc.wstx.stax.WstxOutputFactory";
-        final String eventFactoryImpl = "com.ctc.wstx.stax.WstxEventFactory";
-
-        System.setProperty("javax.xml.stream.XMLInputFactory", inputFactoryImpl);
-        System.setProperty("javax.xml.stream.XMLOutputFactory", outputFactoryImpl);
-        System.setProperty("javax.xml.stream.XMLEventFactory", eventFactoryImpl);
-
-    }
+    // /** Configure Woodstox as StAX XML implementation (actually stax2). */
+    // private static void configureWstx()
+    // {
+    // System.setProperty("javax.xml.stream.XMLInputFactory",//
+    // "com.ctc.wstx.stax.WstxInputFactory");
+    // System.setProperty("javax.xml.stream.XMLOutputFactory",//
+    // "com.ctc.wstx.stax.WstxOutputFactory");
+    // System.setProperty("javax.xml.stream.XMLEventFactory", //
+    // "com.ctc.wstx.stax.WstxEventFactory");
+    // }
 
     /**
      * Configure and creates the factories instances.
      */
     private Stax2Factory()
     {
-        inputFact = (WstxInputFactory) XMLInputFactory.newInstance();
-        outputFact = (WstxOutputFactory) XMLOutputFactory.newInstance();
+
+        inputFact = new WstxInputFactory(); // (WstxInputFactory) XMLInputFactory.newInstance();
+        outputFact = new WstxOutputFactory();// (WstxOutputFactory) XMLOutputFactory.newInstance();
 
         inputFact.setProperty(XMLInputFactory.IS_NAMESPACE_AWARE, isNamespaceAware);
         inputFact.setProperty(XMLInputFactory2.P_REPORT_PROLOG_WHITESPACE, Boolean.FALSE);
@@ -102,7 +98,7 @@ public final class Stax2Factory
      * 
      * @return The output factory.
      */
-    public static XMLOutputFactory2 getStreamWriterFactory()
+    public static WstxOutputFactory getStreamWriterFactory()
     {
         synchronized (Stax2Factory.class)
         {
@@ -120,7 +116,7 @@ public final class Stax2Factory
      * 
      * @return The input factory.
      */
-    public static XMLInputFactory2 getStreamReaderFactory()
+    public static WstxInputFactory getStreamReaderFactory()
     {
         synchronized (Stax2Factory.class)
         {
@@ -132,14 +128,15 @@ public final class Stax2Factory
 
         return instance.inputFact;
     }
-    
-    
-    public static XMLStreamWriter createXMLStreamWriter(OutputStream os) throws XMLStreamException
+
+    public static XMLStreamWriter createXMLStreamWriter(final OutputStream os)
+        throws XMLStreamException
     {
         return getStreamWriterFactory().createXMLStreamWriter(os);
     }
-    
-    public static XMLStreamReader createXMLStreamReader(InputStream is) throws XMLStreamException 
+
+    public static XMLStreamReader createXMLStreamReader(final InputStream is)
+        throws XMLStreamException
     {
         return getStreamReaderFactory().createXMLStreamReader(is);
     }
