@@ -35,6 +35,8 @@ import org.apache.wink.common.annotations.Parent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
+import com.abiquo.api.exceptions.APIError;
+import com.abiquo.api.exceptions.BadRequestException;
 import com.abiquo.api.resources.AbstractResource;
 import com.abiquo.api.resources.EnterpriseResource;
 import com.abiquo.api.services.appslibrary.TemplateDefinitionListService;
@@ -62,7 +64,8 @@ public class TemplateDefinitionListsResource extends AbstractResource
         @PathParam(EnterpriseResource.ENTERPRISE) final Integer idEnterprise,
         @Context final IRESTBuilder restBuilder) throws Exception
     {
-        List<TemplateDefinitionList> all = service.getTemplateDefinitionListsByEnterprise(idEnterprise);
+        List<TemplateDefinitionList> all =
+            service.getTemplateDefinitionListsByEnterprise(idEnterprise);
 
         TemplateDefinitionListsDto templateDefListsDto = new TemplateDefinitionListsDto();
 
@@ -82,7 +85,8 @@ public class TemplateDefinitionListsResource extends AbstractResource
     }
 
     /**
-     * if TEMPLATE_DEFINITION_POST_QUERY_PARM is set do not use the content body {@link TemplateDefinitionListDto}.
+     * if TEMPLATE_DEFINITION_POST_QUERY_PARM is set do not use the content body
+     * {@link TemplateDefinitionListDto}.
      */
     @POST
     @Consumes(MediaType.APPLICATION_XML)
@@ -91,6 +95,11 @@ public class TemplateDefinitionListsResource extends AbstractResource
         final TemplateDefinitionListDto templateDefList, @Context final IRESTBuilder restBuilder)
         throws Exception
     {
+        // Validate template definition list name
+        if (templateDefList.getName() == null)
+        {
+            throw new BadRequestException(APIError.TEMPLATE_DEFINITION_LIST_NAME_NOT_FOUND);
+        }
 
         TemplateDefinitionList opl = transformer.createPersistenceObject(templateDefList);
         opl = service.addTemplateDefinitionList(opl, idEnterprise);
@@ -99,7 +108,8 @@ public class TemplateDefinitionListsResource extends AbstractResource
     }
 
     /**
-     * if TEMPLATE_DEFINITION_POST_QUERY_PARM is set do not use the content body {@link TemplateDefinitionListDto}.
+     * if TEMPLATE_DEFINITION_POST_QUERY_PARM is set do not use the content body
+     * {@link TemplateDefinitionListDto}.
      */
     @POST
     @Consumes(MediaType.TEXT_PLAIN)

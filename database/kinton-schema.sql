@@ -1497,7 +1497,7 @@ UNLOCK TABLES;
 -- -----------------------------------------------------
 CREATE  TABLE IF NOT EXISTS `kinton`.`ovf_package_list` (
   `id_ovf_package_list` INT NOT NULL auto_increment,
-  `name` VARCHAR(45) NULL,
+  `name` VARCHAR(45) NOT NULL UNIQUE,
   `url` VARCHAR(255) NULL,
   `id_apps_library` INT UNSIGNED NOT NULL ,
   `version_c` int(11) default 0,
