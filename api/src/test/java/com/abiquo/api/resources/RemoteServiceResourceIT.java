@@ -101,7 +101,7 @@ public class RemoteServiceResourceIT extends AbstractJpaGeneratorIT
     @Test
     public void modifyRemoteService() throws ClientWebException
     {
-        RemoteService rs = remoteServiceGenerator.createInstance(RemoteServiceType.NODE_COLLECTOR);
+        RemoteService rs = remoteServiceGenerator.createInstance(RemoteServiceType.DHCP_SERVICE);
         setup(rs.getDatacenter(), rs);
 
         String uri = resolveRemoteServiceURI(rs.getDatacenter().getId(), rs.getType());
