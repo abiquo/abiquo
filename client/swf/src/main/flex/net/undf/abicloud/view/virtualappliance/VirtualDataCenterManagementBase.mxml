@@ -492,15 +492,18 @@
             private function onVirtualDatacentersAndAppliancesChecked(event:Event):void
             {
                 virtualDatacenterList.setVirtualDataCenters(AbiCloudModel.getInstance().virtualApplianceManager.virtualDataCenters);
-                setVirtualAppliances(AbiCloudModel.getInstance().virtualApplianceManager.virtualAppliances);
+                //setVirtualAppliances(AbiCloudModel.getInstance().virtualApplianceManager.virtualAppliances);
             }
             
             private function retrieveVirtualDatacenters():void
             {
-            	var virtualApplianceEvent:VirtualApplianceEvent = new VirtualApplianceEvent(VirtualApplianceEvent.GET_VIRTUAL_DATACENTERS_BY_ENTERPRISE);
-                virtualApplianceEvent.enterprise = AbiCloudModel.getInstance().loginManager.user.enterprise;
-                virtualApplianceEvent.listRequest = virtualApplianceList.listRequest;
-                dispatchEvent(virtualApplianceEvent);
+            	if(virtualApplianceList)
+            	{
+	            	var virtualApplianceEvent:VirtualApplianceEvent = new VirtualApplianceEvent(VirtualApplianceEvent.GET_VIRTUAL_DATACENTERS_BY_ENTERPRISE);
+	                virtualApplianceEvent.enterprise = AbiCloudModel.getInstance().loginManager.user.enterprise;
+	                virtualApplianceEvent.listRequest = virtualApplianceList.listRequest;
+	                dispatchEvent(virtualApplianceEvent);
+            	}
             }
             
             private function retrieveVirtualAppliances(event:Event = null):void

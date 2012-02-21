@@ -29,6 +29,7 @@
     paddingTop="0"
     verticalGap="0"
     initialize="onInitialize()"
+    creationComplete="onCreationComplete()"
     xmlns:mx="http://www.adobe.com/2006/mxml"
     xmlns:general="net.undf.abicloud.view.general.*">
 
@@ -85,6 +86,11 @@
                 this._listRequest.orderBy = "name";
                 
             }
+            
+            private function onCreationComplete():void
+            {
+                retrieveVirtualDatacenters();	
+            }
 
             override protected function createChildren():void
             {
@@ -123,8 +129,6 @@
                 _virtualDataCenters = new ArrayCollection();
                 _selectedVirtualDataCenter = null;
                 virtualDataCenterFilter.text = "";
-                
-                
             }
             
             public function cleanVirtualDatacenterList():void
@@ -369,6 +373,8 @@
     <mx:List id="virtualDataCenterList"
         width="100%" height="100%"
         borderStyle="none"
+        dataProvider="{this._virtualDataCenters}"
+        labelField="name"
         click="onClickVirtualDataCenterList()"
         itemRenderer="net.undf.abicloud.view.virtualappliance.components.virtualdatacenter.VirtualDataCenterListRenderer"/>
 
