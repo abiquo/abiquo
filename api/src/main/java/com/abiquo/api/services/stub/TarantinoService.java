@@ -486,7 +486,7 @@ public class TarantinoService extends DefaultApiService
                     conn,
                     userService.getCurrentUser().getNick());
 
-            if (VirtualMachineState.ON.equals(currentState))
+            if (mustPowerOffToUndeploy(currentState))
             {
                 builder.add(VirtualMachineStateTransition.POWEROFF);
             }
@@ -551,7 +551,7 @@ public class TarantinoService extends DefaultApiService
                     conn,
                     userService.getCurrentUser().getNick());
 
-            if (VirtualMachineState.ON.equals(currentState))
+            if (mustPowerOffToUndeploy(currentState))
             {
                 builder.add(VirtualMachineStateTransition.POWEROFF);
             }
@@ -595,6 +595,12 @@ public class TarantinoService extends DefaultApiService
             flushErrors();
         }
         return null;
+    }
+
+    protected boolean mustPowerOffToUndeploy(VirtualMachineState currentState)
+    {
+        return VirtualMachineState.ON.equals(currentState)
+            || VirtualMachineState.PAUSED.equals(currentState);
     }
 
     /**
