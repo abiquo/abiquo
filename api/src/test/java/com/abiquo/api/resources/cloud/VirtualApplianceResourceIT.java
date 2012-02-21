@@ -227,4 +227,27 @@ public class VirtualApplianceResourceIT extends AbstractJpaGeneratorIT
         assertEquals(responseDto.getName(), expectedName);
     }
 
+    @Test
+    public void updateVirtualApplianceWithNode() throws Exception
+    {
+        VirtualAppliance vapp = vappGenerator.createInstance(vdc);
+        vapp.setNodeconnections("1,4");
+        setup(vapp);
+
+        VirtualApplianceDto dto =
+            ModelTransformer.transportFromPersistence(VirtualApplianceDto.class, vapp);
+
+        String nodeconnections = "4,1";
+
+        dto.setNodeconnections(nodeconnections);
+
+        String uri = resolveVirtualApplianceURI(vdc.getId(), vapp.getId());
+        ClientResponse response = put(uri, dto, SYSADMIN, SYSADMIN);
+
+        assertEquals(response.getStatusCode(), 200);
+        VirtualApplianceDto responseDto = response.getEntity(VirtualApplianceDto.class);
+
+        assertEquals(responseDto.getNodeconnections(), nodeconnections);
+    }
+
 }
