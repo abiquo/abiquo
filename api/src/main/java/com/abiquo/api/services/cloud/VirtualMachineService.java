@@ -1269,7 +1269,8 @@ public class VirtualMachineService extends DefaultApiService
      * 
      * @param virtualMachine void
      */
-    protected void initiatorMappings(final VirtualMachine virtualMachine)
+    @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
+    public void initiatorMappings(final VirtualMachine virtualMachine)
     {
         // PREMIUM
         LOGGER.debug("initiatorMappings community edition");
