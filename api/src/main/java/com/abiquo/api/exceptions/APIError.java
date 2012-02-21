@@ -388,7 +388,9 @@ public enum APIError
         "VIMAGE-9",
         "Cannot delete the requested shared virtual machine template, because it belongs to another enterprise"), VMTEMPLATE_TEMPLATE_USED_BY_VIRTUAL_MACHINES_CANNOT_BE_DELETED(
         "VIMAGE-10",
-        "The Virtual Machine Template is being used by Virtual Machines and cannot be deleted"),
+        "The Virtual Machine Template is being used by Virtual Machines and cannot be deleted"), VMTEMPLATE_TEMPLATE_USED_BY_VIRTUAL_MACHINES_CANNOT_BE_UNSHARED(
+        "VIMAGE-11",
+        "The Virtual Machine Template is being used by Virtual Machines and cannot be modified to not shared"),
 
     // NODE COLLECTOR
     NON_EXISTENT_IP("NC-0", "The requested IP does not exist"), MISSING_IP_PARAMETER("NC-1",

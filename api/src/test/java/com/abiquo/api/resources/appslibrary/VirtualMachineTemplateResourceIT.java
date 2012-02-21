@@ -37,6 +37,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.ws.rs.core.Response.Status;
+
 import org.apache.wink.client.ClientResponse;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -566,4 +568,61 @@ public class VirtualMachineTemplateResourceIT extends AbstractJpaGeneratorIT
             "erepos/{erepo}/templates/{template}", params);
     }
 
+    @Test
+    public void editVirtualMachineTemplateUnsharedWithNoVm()
+    {
+        VirtualMachineTemplate vmtemplate =
+            virtualMachineTemplateGenerator.createInstance(ent, repository);
+        vmtemplate.setShared(Boolean.TRUE);
+
+        vmtemplate.setOvfid(null);
+        setup(vmtemplate.getCategory(), vmtemplate);
+
+        String uri =
+            resolveVirtualMachineTemplateURI(ent.getId(), datacenter.getId(), vmtemplate.getId());
+        ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
+        assertEquals(response.getStatusCode(), 200);
+
+        VirtualMachineTemplateDto dto = response.getEntity(VirtualMachineTemplateDto.class);
+        dto.setShared(Boolean.FALSE);
+        String masterUri =
+            resolveVirtualMachineTemplateURI(ent.getId(), datacenter.getId(), vmtemplate.getId());
+
+        response = put(uri, dto, SYSADMIN, SYSADMIN);
+
+        assertEquals(response.getStatusCode(), Status.OK.getStatusCode());
+    }
+
+    @Test
+    public void editVirtualMachineTemplateUnsharedWithVmRises409()
+    {
+        // TODO Use EnvironmentGenerator in all test
+        // tearDown();
+        env = new EnvironmentGenerator(seed);
+        env.generateEnterprise();
+        env.generateInfrastructure();
+        env.generateVirtualDatacenter();
+        env.generateAllocatedVirtualMachine();
+        VirtualMachineTemplate vmtemplate = env.get(VirtualMachineTemplate.class);
+        vmtemplate.setShared(Boolean.TRUE);
+
+        setup(env.getEnvironment().toArray());
+
+        Datacenter datacenter = env.get(Datacenter.class);
+        Enterprise enterprise = env.get(Enterprise.class);
+
+        String uri =
+            resolveVirtualMachineTemplateURI(enterprise.getId(), datacenter.getId(),
+                vmtemplate.getId());
+        ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
+        assertEquals(response.getStatusCode(), 200);
+
+        VirtualMachineTemplateDto dto = response.getEntity(VirtualMachineTemplateDto.class);
+        dto.setShared(Boolean.FALSE);
+
+        response = put(uri, dto, SYSADMIN, SYSADMIN);
+
+        assertError(response, 409,
+            APIError.VMTEMPLATE_TEMPLATE_USED_BY_VIRTUAL_MACHINES_CANNOT_BE_UNSHARED);
+    }
 }
