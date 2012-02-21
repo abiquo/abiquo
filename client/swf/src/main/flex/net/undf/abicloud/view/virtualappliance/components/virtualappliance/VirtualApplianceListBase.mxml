@@ -40,10 +40,12 @@
 		[Event(name="addVirtualAppliance", type="flash.events.Event")]
 		[Event(name="editVirtualAppliance", type="flash.events.Event")]
 		[Event(name="deleteVirtualAppliance", type="flash.events.Event")]
+		[Event(name="requestVirtualAppliances", type="flash.events.Event")]
 	</mx:Metadata>
 
     <mx:Script>
         <![CDATA[
+        	import net.undf.abicloud.model.AbiCloudModel;
         	import net.undf.abicloud.vo.result.ListRequest;
         	import net.undf.abicloud.utils.AbicloudUtils;
         	import net.undf.abicloud.vo.user.PrivilegeType;
@@ -62,6 +64,9 @@
             
             [Bindable]
             private var _listRequest:ListRequest;
+            
+            [Bindable]
+            private var VAPP_RESULTS_PER_PAGE:int = AbiCloudModel.getInstance().configurationManager.config.client_user_numberUsersPerPage.value;
             
             public function get listRequest():ListRequest
             {
@@ -84,9 +89,6 @@
             [Bindable]
             private var _virtualAppliances:ArrayCollection = new ArrayCollection();
 
-            //The array of VirtualAppliances that will be shown
-            [Bindable]
-            private var _virtualAppliancesFiltered:ArrayCollection = new ArrayCollection();
 
             public function get virtualAppliances():ArrayCollection
             {
@@ -101,11 +103,18 @@
             private function onCreationComplete():void{
             	//Checking privilege
             	SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.VDC_MANAGE_VAPP,"visible",vappTools);
+            	
+            	this._listRequest = new ListRequest();
+                this._listRequest.asc = true; 
+                this._listRequest.numberOfNodes = VAPP_RESULTS_PER_PAGE;
+                this._listRequest.offset = 0 ;
+                this._listRequest.orderBy = "name";
             }
             
             public function cleanVirtualApplianceList():void
             {
-                this._virtualAppliancesFiltered = new ArrayCollection();
+                AbiCloudModel.getInstance().virtualApplianceManager.virtualAppliances = new ArrayCollection();
+                AbiCloudModel.getInstance().virtualApplianceManager.totalVirtualAppliances = 0;
             }
             
 
@@ -197,17 +206,10 @@
 
             private var _virtualDatacenter:VirtualDataCenter;
             
-            public function filterVirtualAppliancesByVirtualDataCenter(virtualDataCenter:VirtualDataCenter):void
+            /* public function filterVirtualAppliancesByVirtualDataCenter(virtualDataCenter:VirtualDataCenter):void
             {
                 this._virtualDatacenter = virtualDataCenter;
                 
-                /* if (virtualDataCenter == null)
-                {
-                    //Virtual Appliances are not filtered. Showing them all
-                    this._virtualAppliancesFiltered = this._virtualAppliances;
-                }
-                else
-                { */
                     //Filtering virtualAppliances by virtualDataCenter
                     var virtualAppliancesFiltered:ArrayCollection = new ArrayCollection();
                     var virtualAppliance:VirtualAppliance;
@@ -225,7 +227,6 @@
 
                     //Showing the filtered VirtualAppliances
                     this._virtualAppliancesFiltered = virtualAppliancesFiltered;
-                //}
 
                 //Update view if _virtualAppliancesFiltered is not null
                 if(this._virtualAppliancesFiltered){
@@ -235,7 +236,7 @@
 	                    virtualApplianceTile.selectedIndex = this._virtualAppliancesFiltered.getItemIndex(this._selectedVirtualAppliance);                	
                 }
             }
-
+ */
             /**
              * Announces that user wants to create a new Virtual Appliance
              */
@@ -282,8 +283,17 @@
              */
              private function filterVappsList():void
              {
-                filterVirtualAppliancesByVirtualDataCenter(this._virtualDatacenter);
+                //filterVirtualAppliancesByVirtualDataCenter(this._virtualDatacenter);
              }
+             
+             private function retrieveVirtualAppliances():void
+            {
+                this._listRequest.filterLike = vappsFilter.text;
+                this._listRequest.numberOfNodes = VAPP_RESULTS_PER_PAGE;
+                this._listRequest.offset = (virtualappliancesPaginatorSlider.value - 1) * VAPP_RESULTS_PER_PAGE ;
+                
+                dispatchEvent(new Event("requestVirtualAppliances"));
+            }
         ]]>
     </mx:Script>
 
@@ -315,12 +325,12 @@
                 useHandCursor="true"
                 buttonMode="true"
                 mouseChildren="false"
-                click="filterVappsList()"/>
+                click="retrieveVirtualAppliances()"/>
 
         <mx:TextInput id="vappsFilter"
             height="20"
             toolTip="@Resource(bundle='Common', key='BUTTON_FILTER_TOOLTIP')"
-            change="filterVappsList()"/>
+            enter="retrieveVirtualAppliances()"/>
     </mx:HBox>
 
 
@@ -333,7 +343,7 @@
             verticalScrollPolicy="off" horizontalScrollPolicy="off">
             <mx:DataGrid id="virtualApplianceDataGrid"
                 width="100%" height="100%"
-                dataProvider="{this._virtualAppliancesFiltered}"
+                dataProvider="{AbiCloudModel.getInstance().virtualApplianceManager.virtualAppliances}"
                 doubleClickEnabled="true"
                 click="onClickVirtualApplianceDataGrid()"
                 doubleClick="onDoubleClickVirtualApplianceDataGrid()"
@@ -528,7 +538,7 @@
                 paddingLeft="0"
                 paddingRight="0"
                 paddingTop="0"
-                dataProvider="{this._virtualAppliancesFiltered}"
+                dataProvider="{AbiCloudModel.getInstance().virtualApplianceManager.virtualAppliances}"
                 doubleClickEnabled="true"
                 itemRenderer="net.undf.abicloud.view.virtualappliance.components.virtualappliance.VirtualApplianceMiniature"
                 click="onClickVirtualApplianceTile()"
@@ -541,7 +551,9 @@
     <!-- Tool Box -->
     <general:GeneralPanelToolBox 
         width="100%" height="32"
-        styleName="GeneralDataPanelBottomSkin">
+        styleName="GeneralDataPanelBottomSkin"
+        bottom="0">
+        
         <mx:HBox id="vappTools" width="100%" verticalAlign="middle">        	
 	        <mx:Button id="addVirtualApplianceButton"
 	            styleName="AddButton"
@@ -555,7 +567,27 @@
 	            toolTip="@Resource(bundle='Common', key='BUTTON_DEL_TOOLTIP')"
 	            click="deleteVirtualAppliance()"/>
 	
-	        <mx:Spacer width="100%"/>
+	        <mx:Canvas 
+                width="100%" height="100%"
+                verticalScrollPolicy="off" horizontalScrollPolicy="off">
+                <mx:Label 
+                    top="2"
+                    horizontalCenter="0"
+                    styleName="paginatorTextOnColor"
+                    text="{virtualappliancesPaginatorSlider.value +
+                          ' / ' + 
+                          (int(Math.ceil(AbiCloudModel.getInstance().virtualApplianceManager.totalVirtualAppliances / VAPP_RESULTS_PER_PAGE)) > 0 ?
+                          int(Math.ceil(AbiCloudModel.getInstance().virtualApplianceManager.totalVirtualAppliances / VAPP_RESULTS_PER_PAGE)) : '1')}"/>
+    
+                <mx:HSlider id="virtualappliancesPaginatorSlider"
+                    width="75"
+                    bottom="3"
+                    horizontalCenter="0"
+                    minimum="1" snapInterval="1"
+                    maximum="{int(Math.ceil(AbiCloudModel.getInstance().virtualApplianceManager.totalVirtualAppliances / VAPP_RESULTS_PER_PAGE))}"
+                    liveDragging="true" showDataTip="false"
+                    change="retrieveVirtualAppliances()"/>
+            </mx:Canvas>
 	
 	        <mx:Button id="editVirtualApplianceButton"
 	            enabled="{this._selectedVirtualAppliance != null &amp;&amp; 

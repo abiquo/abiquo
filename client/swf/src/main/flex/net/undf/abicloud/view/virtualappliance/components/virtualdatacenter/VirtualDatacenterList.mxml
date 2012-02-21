@@ -34,6 +34,7 @@
 
     <mx:Metadata>
 		[Event(name="selectedVirtualDataCenterChange", type="flash.events.Event")]
+		[Event(name="requestVirtualDataCenters", type="flash.events.Event")]
 	</mx:Metadata>
 
     <mx:Script>
@@ -61,6 +62,9 @@
             
             private var  _virtualDatacenterAddFormManagement:VirtualDataCenterAddFormManagement;
             
+            [Bindable]
+            private var VDC_RESULTS_PER_PAGE:int = AbiCloudModel.getInstance().configurationManager.config.client_user_numberUsersPerPage.value;
+            
             private function onInitialize():void
             {
                 //Checking for privileges
@@ -73,6 +77,13 @@
                                                                                      onVirtualDatacenterCRUD);				                                                                                    
                 AbiCloudModel.getInstance().virtualApplianceManager.addEventListener(VirtualApplianceEvent.VIRTUAL_DATACENTER_DELETED,
                                                                                      onVirtualDatacenterCRUD);
+                                                                                     
+                this._listRequest = new ListRequest();
+                this._listRequest.asc = true; 
+                this._listRequest.numberOfNodes = VDC_RESULTS_PER_PAGE;
+                this._listRequest.offset = 0 ;
+                this._listRequest.orderBy = "name";
+                
             }
 
             override protected function createChildren():void
@@ -136,9 +147,6 @@
             {
                 this._virtualDataCenters = value;
 
-                //Setting virtualDataCenterlists data provider (calling this function because maybe they are filtered)
-                onChangeVirtualDataCenterFilter();
-
                 //Trying to get again the VirtualDataCenter that we had selected
                 if (this._selectedVirtualDataCenter)
                 {
@@ -195,7 +203,7 @@
                 dispatchEvent(new Event("selectedVirtualDataCenterChange"));
 
                 virtualDataCenterFilter.text = "";
-                onChangeVirtualDataCenterFilter();
+                retrieveVirtualDatacenters();
             }
 
             /**
@@ -286,7 +294,7 @@
             /**
              * To filter the VirtualDataCenter list
              */
-            private function onChangeVirtualDataCenterFilter():void
+            /* private function onChangeVirtualDataCenterFilter():void
             {
                 var filterText:String = virtualDataCenterFilter.text;
 
@@ -310,6 +318,15 @@
                 }
 
                 virtualDataCenterList.selectedIndex = ArrayCollection(virtualDataCenterList.dataProvider).getItemIndex(this._selectedVirtualDataCenter);
+            } */
+            
+            private function retrieveVirtualDatacenters():void
+            {
+                this._listRequest.filterLike = virtualDataCenterFilter.text;
+                this._listRequest.numberOfNodes = VDC_RESULTS_PER_PAGE;
+                this._listRequest.offset = (virtualdatacentersPaginatorSlider.value - 1) * VDC_RESULTS_PER_PAGE ;
+                
+                dispatchEvent(new Event("requestVirtualDataCenters"));
             }
         ]]>
     </mx:Script>
@@ -322,12 +339,13 @@
         verticalAlign="middle"
         styleName="GeneralDataPanelTopSkin">
 
-        <mx:Image source="{CommonAssets.magnifier}"/>
+        <mx:Image source="{CommonAssets.magnifier}"
+        	click="retrieveVirtualDatacenters()"/>
 
         <mx:TextInput id="virtualDataCenterFilter"
             width="100%" height="20"
             toolTip="@Resource(bundle='Common', key='BUTTON_FILTER_TOOLTIP')"
-            change="onChangeVirtualDataCenterFilter()"/>
+            enter="retrieveVirtualDatacenters()"/>
     </mx:HBox>
 
     <mx:HBox 
@@ -355,10 +373,11 @@
         itemRenderer="net.undf.abicloud.view.virtualappliance.components.virtualdatacenter.VirtualDataCenterListRenderer"/>
 
     <!-- VirtualDataCenter Tool Bar -->
-    <general:GeneralPanelToolBox>
+    <general:GeneralPanelToolBox width="100%" height="32"
+        bottom="0">
     	<mx:HBox 
     		id="securableVDCAccionsBox"
-		    width="100%" 
+		    width="100%" height="100%"
 		    verticalAlign="middle"
 		    horizontalScrollPolicy="off">
 	        <mx:Button id="addVirtualDataCenterButton"
@@ -371,8 +390,28 @@
 	            styleName="RemoveButton"
 	            toolTip="@Resource(bundle='Common', key='BUTTON_DEL_TOOLTIP')"
 	            click="askVirtualDataCenterDeletion()"/>
-	        <mx:Spacer 
-	            width="100%" height="10"/>
+	        
+	        <mx:Canvas 
+	            width="100%" height="100%"
+	            verticalScrollPolicy="off" horizontalScrollPolicy="off">
+	            <mx:Label 
+	                top="2"
+	                horizontalCenter="0"
+	                styleName="paginatorTextOnColor"
+	                text="{virtualdatacentersPaginatorSlider.value +
+	                      ' / ' + 
+	                      (int(Math.ceil(AbiCloudModel.getInstance().virtualApplianceManager.totalVirtualDatacenters / VDC_RESULTS_PER_PAGE)) > 0 ?
+	                      int(Math.ceil(AbiCloudModel.getInstance().virtualApplianceManager.totalVirtualDatacenters / VDC_RESULTS_PER_PAGE)) : '1')}"/>
+	
+	            <mx:HSlider id="virtualdatacentersPaginatorSlider"
+	                width="75"
+	                bottom="3"
+	                horizontalCenter="0"
+	                minimum="1" snapInterval="1"
+	                maximum="{int(Math.ceil(AbiCloudModel.getInstance().virtualApplianceManager.totalVirtualDatacenters / VDC_RESULTS_PER_PAGE))}"
+	                liveDragging="true" showDataTip="false"
+	                change="retrieveVirtualDatacenters()"/>
+	        </mx:Canvas>
 	
 	        <mx:Button id="editVirtualDataCenterButton"
                 enabled="{this._selectedVirtualDataCenter != null}"

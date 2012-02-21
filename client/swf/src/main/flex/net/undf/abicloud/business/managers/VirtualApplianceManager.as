@@ -80,6 +80,23 @@ package net.undf.abicloud.business.managers
             this._virtualDataCenters = value;
             dispatchEvent(new Event("virtualDataCentersChange"));
         }
+        
+        private var _totalVirtualDatacenters:int;
+
+        /**
+         * Total of Virtual Datacenters
+         */
+        [Bindable(event="totalVirtualDatacentersChange")]
+        public function get totalVirtualDatacenters():int
+        {
+            return this._totalVirtualDatacenters;
+        }
+
+        public function set totalVirtualDatacenters(value:int):void
+        {
+            this._totalVirtualDatacenters = value;
+            dispatchEvent(new Event("totalVirtualDatacentersChange"));
+        }
 
         /**
          * Retuns the VirtualDatacenter from model given its id, or null if no VirtualDatacenter exists
@@ -217,6 +234,25 @@ package net.undf.abicloud.business.managers
             this._virtualAppliances = array;
             dispatchEvent(new Event("virtualAppliancesChange"));
         }
+        
+        private var _totalVirtualAppliances:int;
+
+        /**
+         * Total number of Virtual Appliances
+         **/
+        [Bindable(event="totalVirtualAppliancesChange")]
+        public function get totalVirtualAppliances():int
+        {
+            return this._totalVirtualAppliances;
+        }
+
+        public function set totalVirtualAppliances(value:int):void
+        {
+            this._totalVirtualAppliances = value;
+            dispatchEvent(new Event("totalVirtualAppliancesChange"));
+        }
+        
+        
 
         /**
          * Retuns the VirtualAppliance from model given its id, or null if no VirtualAppliance exists

@@ -55,7 +55,9 @@
 
         <RemoteObjectInvoker instance="{services.virtualApplianceService}"
             method="getVirtualDataCentersByEnterprise"
-            arguments="{[AbiCloudModel.getInstance().loginManager.session, event.enterprise]}">
+            arguments="{[AbiCloudModel.getInstance().loginManager.session, 
+            event.enterprise,
+            event.listRequest]}">
 
             <resultHandlers>
                 <MethodInvoker generator="{VirtualApplianceResultHandler}"
@@ -92,7 +94,7 @@
 
             <resultHandlers>
                 <MethodInvoker generator="{VirtualApplianceResultHandler}"
-                    method="handleGetVirtualDataCentersByEnterprise"
+                    method="handleGetVirtualDataCentersFasterByEnterprise"
                     arguments="{[resultObject]}"/>
 
                 <!-- Unblock screen -->
@@ -111,8 +113,7 @@
         </RemoteObjectInvoker>
 
     </EventHandlers>
-
-
+    
     <!-- VirtualApplianceEvent.GET_VIRTUALAPPLIANCE_NODES _________________________________________________________ -->
     <EventHandlers type="{VirtualApplianceEvent.GET_VIRTUALAPPLIANCE_NODES}">
 
@@ -253,8 +254,8 @@
     </EventHandlers>
 
     <!-- ********************************************************************************************************************* -->
-    <!-- VirtualApplianceEvent.GET_VIRTUALAPPLIANCES_BY_ENTERPRISE ________________________________________________________________________ -->
-    <EventHandlers type="{VirtualApplianceEvent.GET_VIRTUALAPPLIANCES_BY_ENTERPRISE}">
+    <!-- VirtualApplianceEvent.GET_VIRTUAL_APPLIANCES_BY_VIRTUAL_DATACENTER _________________________________________________________ -->
+    <EventHandlers type="{VirtualApplianceEvent.GET_VIRTUAL_APPLIANCES_BY_VIRTUAL_DATACENTER}">
 
         <!-- Blocking screen -->
         <InlineInvoker method="ScreenBlocker.blockScreen"/>
@@ -263,7 +264,9 @@
 
         <RemoteObjectInvoker instance="{services.virtualApplianceService}"
             method="getVirtualAppliancesByEnterprise"
-            arguments="{[AbiCloudModel.getInstance().loginManager.session, event.enterprise]}">
+            arguments="{[AbiCloudModel.getInstance().loginManager.session, 
+            event.virtualDataCenter,
+            event.listRequest]}">
 
             <resultHandlers>
                 <MethodInvoker generator="{VirtualApplianceResultHandler}"

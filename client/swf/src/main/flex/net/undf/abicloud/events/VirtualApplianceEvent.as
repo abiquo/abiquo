@@ -39,8 +39,6 @@ package net.undf.abicloud.events
     public class VirtualApplianceEvent extends Event
     {
         /* ------------- Constants------------- */
-        public static const GET_VIRTUALAPPLIANCES_BY_ENTERPRISE:String = "getVirtualAppliancesByEnterpriseVirtualApplianceEvent";
-
         public static const GET_VIRTUALAPPLIANCE_NODES:String = "getVirtualApplianceNodes_VirtualApplianceEvent";
 
         public static const CREATE_VIRTUALAPPLIANCE:String = "createVirtualApplianceVirtualApplianceEvent";
@@ -75,6 +73,8 @@ package net.undf.abicloud.events
 
         public static const CREATE_VIRTUAL_APPLIANCE_BUNDLE_AND_UPDATE:String = "createVirtualApplianceBundleAndUpdateVirtualApplianceEvent";
 
+        public static const VIRTUAL_APPLIANCES_RETRIEVED:String = "virtualAppliancesRetrievedVirtualAppliancesEvent"; 
+        
         public static const VIRTUAL_APPLIANCE_NODES_RETRIEVED:String = "virtualApplianceNodesRetrievedVirtualApplianceEvent";
 
         public static const VIRTUAL_APPLIANCE_CREATED:String = "virtualApplianceCreatedVirtualApplianceEvent"
