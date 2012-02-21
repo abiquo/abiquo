@@ -365,7 +365,8 @@ CREATE TABLE  `kinton`.`icon` (
   `idIcon` int(10) unsigned NOT NULL auto_increment,
   `path` varchar(200) NOT NULL,
   `name` varchar(20) NOT NULL DEFAULT 'icon',
-  PRIMARY KEY  (`idIcon`)
+  PRIMARY KEY  (`idIcon`),
+  UNIQUE KEY (`path`)
 ) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8;
 
 --
