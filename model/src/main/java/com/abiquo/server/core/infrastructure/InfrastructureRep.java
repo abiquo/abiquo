@@ -941,4 +941,20 @@ public class InfrastructureRep extends DefaultRepBase
         return rackDao.findUsedVrdpPorts(rack);
     }
 
+    /**
+     * Returns the total number of cores currently used in the platform.
+     */
+    public Long getTotalUsedCores()
+    {
+        return machineDao.getTotalUsedCores();
+    }
+
+    /**
+     * Returns the total number of cores currently used in the platform ignoring the given machine.
+     */
+    public Long getTotalUsedCoresExceptMachine(final Machine machine)
+    {
+        return machineDao.getTotalUsedCoresExceptMachine(machine);
+    }
+
 }
