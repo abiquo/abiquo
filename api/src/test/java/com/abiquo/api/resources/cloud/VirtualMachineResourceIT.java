@@ -1027,4 +1027,5 @@ public class VirtualMachineResourceIT extends AbstractJpaGeneratorIT
         assertNotNull(vmDto);
 
     }
+
 }

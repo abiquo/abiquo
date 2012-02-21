@@ -203,7 +203,7 @@ public class VirtualApplianceService extends DefaultApiService
 
         vapp.setHighDisponibility(dto.getHighDisponibility());
         vapp.setPublicApp(dto.getPublicApp());
-        vapp.setNodeconnections(dto.getNodecollections());
+        vapp.setNodeconnections(dto.getNodeconnections());
 
         if (!vapp.isValid())
         {
@@ -242,7 +242,7 @@ public class VirtualApplianceService extends DefaultApiService
         userService.checkCurrentEnterpriseForPostMethods(vapp.getEnterprise());
 
         vapp.setName(dto.getName());
-
+        vapp.setNodeconnections(dto.getNodeconnections());
         repo.updateVirtualAppliance(vapp);
 
         return vapp;
