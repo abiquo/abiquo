@@ -273,4 +273,9 @@ public class VirtualMachineRep extends DefaultRepBase
     {
         JPAConfiguration.enableDefaultFilters(this.entityManager);
     }
+
+    public boolean existsVirtualMachineFromTemplate(final Integer virtualMachineTemplateId)
+    {
+        return dao.hasVirtualMachineTemplate(virtualMachineTemplateId);
+    }
 }
