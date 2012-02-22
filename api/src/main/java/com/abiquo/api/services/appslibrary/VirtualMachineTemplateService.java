@@ -50,11 +50,14 @@ import com.abiquo.api.resources.appslibrary.VirtualMachineTemplateResource;
 import com.abiquo.api.resources.appslibrary.VirtualMachineTemplatesResource;
 import com.abiquo.api.services.EnterpriseService;
 import com.abiquo.api.services.InfrastructureService;
+import com.abiquo.api.services.UserService;
+import com.abiquo.api.spring.security.SecurityService;
 import com.abiquo.api.util.URIResolver;
 import com.abiquo.appliancemanager.client.ApplianceManagerResourceStubImpl;
 import com.abiquo.appliancemanager.client.ApplianceManagerResourceStubImpl.ApplianceManagerStubException;
 import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.model.enumerator.HypervisorType;
+import com.abiquo.model.enumerator.Privileges;
 import com.abiquo.model.enumerator.StatefulInclusion;
 import com.abiquo.model.rest.RESTLink;
 import com.abiquo.model.transport.error.CommonError;
@@ -69,6 +72,8 @@ import com.abiquo.server.core.cloud.VirtualDatacenterRep;
 import com.abiquo.server.core.cloud.VirtualMachineRep;
 import com.abiquo.server.core.enterprise.DatacenterLimits;
 import com.abiquo.server.core.enterprise.Enterprise;
+import com.abiquo.server.core.enterprise.Privilege;
+import com.abiquo.server.core.enterprise.Role;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.Repository;
 import com.abiquo.server.core.infrastructure.RepositoryDAO;
@@ -103,6 +108,12 @@ public class VirtualMachineTemplateService extends DefaultApiServiceWithApplianc
 
     @Autowired
     private VirtualDatacenterRep virtualDatacenterRep;
+
+    @Autowired
+    private SecurityService securityService;
+
+    @Autowired
+    private UserService userService;
 
     public VirtualMachineTemplateService()
     {
@@ -472,7 +483,11 @@ public class VirtualMachineTemplateService extends DefaultApiServiceWithApplianc
         if (vmtemplateToDelete.isShared())
         {
             // assert if the enterprise is the enterprise of the virtual machine template
-            if (!vmtemplateToDelete.getEnterprise().getId().equals(ent.getId()))
+            // moreover check if the current user doesn't have the privelige to impersonate between
+            // enterprises
+            if (!vmtemplateToDelete.getEnterprise().getId().equals(ent.getId())
+                && !securityService.hasPrivilege(Privileges.ENTERPRISE_ADMINISTER_ALL, userService
+                    .getCurrentUser()))
             {
                 addConflictErrors(APIError.VMTEMPLATE_SHARED_TEMPLATE_FROM_OTHER_ENTERPRISE);
                 flushErrors();
@@ -492,7 +507,7 @@ public class VirtualMachineTemplateService extends DefaultApiServiceWithApplianc
         final ApplianceManagerResourceStubImpl amClient = getApplianceManagerClient(datacenterId);
         try
         {
-            amClient.delete(enterpriseId.toString(), viOvf);
+            amClient.delete(vmtemplateToDelete.getEnterprise().getId().toString(), viOvf);
         }
         catch (ApplianceManagerStubException e)
         {
