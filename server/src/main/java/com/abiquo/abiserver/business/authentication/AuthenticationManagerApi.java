@@ -26,6 +26,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.wink.client.ClientAuthenticationException;
 import org.apache.wink.client.ClientConfig;
 import org.apache.wink.client.handlers.BasicAuthSecurityHandler;
 import org.slf4j.Logger;
@@ -270,6 +271,28 @@ public class AuthenticationManagerApi implements IAuthenticationManager
 
             dataResult.setResultCode(BasicResult.USER_INVALID);
             throw e;
+        }
+        catch (ClientAuthenticationException e)
+        {
+            if (getFactory().isTransactionActive())
+            {
+                getFactory().rollbackConnection();
+            }
+            errorManager.reportError(resourceManger, dataResult, "doLogin.passwordUserIncorrect");
+
+            dataResult.setResultCode(BasicResult.USER_INVALID);
+        }
+        catch (RuntimeException e)
+        {
+            if (getFactory().isTransactionActive())
+            {
+                getFactory().rollbackConnection();
+            }
+            logger.error(e.getMessage());
+            logger
+                .info("Could not communicate with the Abiquo API, please check if the API is responding");
+
+            dataResult.setMessage("Could not communicate with the Abiquo API");
         }
         catch (Exception e)
         {

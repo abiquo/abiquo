@@ -757,4 +757,84 @@ public class MachineDAOTest extends DefaultDAOTestBase<MachineDAO, Machine>
         machine.setVirtualSwitch(new BigInteger(4444, new Random()).toString(32));
         ds().persistAll(machine);
     }
+
+    @Test
+    public void testGetTotalUsedCores()
+    {
+        DatacenterGenerator datacenterGenerator = new DatacenterGenerator(getSeed());
+        RackGenerator rackGenerator = new RackGenerator(getSeed());
+        MachineGenerator machineGenerator = new MachineGenerator(getSeed());
+
+        Datacenter datacenter = datacenterGenerator.createUniqueInstance();
+        Rack rack = rackGenerator.createInstance(datacenter);
+
+        Machine machine1 = machineGenerator.createMachine(datacenter, rack);
+        Machine machine2 = machineGenerator.createMachine(datacenter, rack);
+
+        machine1.setVirtualCpuCores(5);
+        machine2.setVirtualCpuCores(7);
+
+        ds().persistAll(datacenter, rack, machine1, machine2);
+
+        MachineDAO dao = createDaoForRollbackTransaction();
+        Long totalCores = dao.getTotalUsedCores();
+
+        assertEquals(totalCores.longValue(),
+            machine1.getVirtualCpuCores() + machine2.getVirtualCpuCores());
+    }
+
+    @Test
+    public void testGetTotalUsedCoresWithoutMachines()
+    {
+        MachineDAO dao = createDaoForRollbackTransaction();
+        Long totalCores = dao.getTotalUsedCores();
+
+        assertEquals(totalCores.longValue(), 0L);
+    }
+
+    @Test
+    public void testGetTotalUsedCoresExceptMachine()
+    {
+        DatacenterGenerator datacenterGenerator = new DatacenterGenerator(getSeed());
+        RackGenerator rackGenerator = new RackGenerator(getSeed());
+        MachineGenerator machineGenerator = new MachineGenerator(getSeed());
+
+        Datacenter datacenter = datacenterGenerator.createUniqueInstance();
+        Rack rack = rackGenerator.createInstance(datacenter);
+
+        Machine machine1 = machineGenerator.createMachine(datacenter, rack);
+        Machine machine2 = machineGenerator.createMachine(datacenter, rack);
+
+        machine1.setVirtualCpuCores(5);
+        machine2.setVirtualCpuCores(7);
+
+        ds().persistAll(datacenter, rack, machine1, machine2);
+
+        MachineDAO dao = createDaoForRollbackTransaction();
+        Long totalCores = dao.getTotalUsedCoresExceptMachine(machine2);
+
+        assertEquals(totalCores.longValue(), machine1.getVirtualCpuCores().longValue());
+    }
+
+    @Test
+    public void testGetTotalUsedCoresExceptMachineWithoutOthers()
+    {
+        DatacenterGenerator datacenterGenerator = new DatacenterGenerator(getSeed());
+        RackGenerator rackGenerator = new RackGenerator(getSeed());
+        MachineGenerator machineGenerator = new MachineGenerator(getSeed());
+
+        Datacenter datacenter = datacenterGenerator.createUniqueInstance();
+        Rack rack = rackGenerator.createInstance(datacenter);
+
+        Machine machine1 = machineGenerator.createMachine(datacenter, rack);
+
+        machine1.setVirtualCpuCores(5);
+
+        ds().persistAll(datacenter, rack, machine1);
+
+        MachineDAO dao = createDaoForRollbackTransaction();
+        Long totalCores = dao.getTotalUsedCoresExceptMachine(machine1);
+
+        assertEquals(totalCores.longValue(), 0L);
+    }
 }

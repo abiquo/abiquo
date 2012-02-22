@@ -153,6 +153,20 @@ public class MachineResource extends AbstractResource
     {
         validatePathParameters(datacenterId, rackId, machineId);
 
+        Machine old = service.getMachine(machineId);
+
+        // if we enable the machine then we force a check
+        if (old.getState().equals(MachineState.HALTED)
+            && !machine.getState().equals(MachineState.HALTED))
+        {
+            MachineState newState =
+                infraService.checkMachineState(datacenterId, machine.getIp(), machine.getType(),
+                    old.getHypervisor().getUser(), old.getHypervisor().getPassword(),
+                    machine.getPort());
+            // machine will be updated with the given state
+            machine.setState(newState);
+        }
+
         Machine m = service.modifyMachine(machineId, machine);
 
         return createTransferObject(m, restBuilder);

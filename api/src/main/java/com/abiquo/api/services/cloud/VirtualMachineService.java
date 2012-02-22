@@ -371,7 +371,8 @@ public class VirtualMachineService extends DefaultApiService
     }
 
     /**
-     * updates the {@link NodeVirtualImage} name. <br>
+     * updates the {@link NodeVirtualImage} name, y and x (those setted in the virtual appliance
+     * builder. <br>
      * This method must persist the changes even if the reconfigure of the {@link VirtualMachine}
      * fails.
      * 
@@ -388,6 +389,8 @@ public class VirtualMachineService extends DefaultApiService
         NodeVirtualImage nodeVirtualImage = getNodeVirtualImage(vdcId, vappId, vmId);
 
         nodeVirtualImage.setName(dto.getNodeName());
+        nodeVirtualImage.setY(dto.getY());
+        nodeVirtualImage.setX(dto.getX());
     }
 
     /**
@@ -1269,7 +1272,8 @@ public class VirtualMachineService extends DefaultApiService
      * 
      * @param virtualMachine void
      */
-    protected void initiatorMappings(final VirtualMachine virtualMachine)
+    @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
+    public void initiatorMappings(final VirtualMachine virtualMachine)
     {
         // PREMIUM
         LOGGER.debug("initiatorMappings community edition");

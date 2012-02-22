@@ -31,8 +31,6 @@ import static com.abiquo.model.enumerator.DiskFormatType.VMWARE_COMPATIBLES;
 import static com.abiquo.model.enumerator.DiskFormatType.XENSERVER_COMPATIBLES;
 import static com.abiquo.model.enumerator.DiskFormatType.XEN_COMPATIBLES;
 
-import org.apache.commons.lang.ArrayUtils;
-
 public enum HypervisorType
 {
     VBOX(8889, VDI_FLAT, VBOX_COMPATIBLES), KVM(8889, VMDK_FLAT, KVM_COMPATIBLES), XEN_3(8889,
@@ -62,7 +60,14 @@ public enum HypervisorType
 
     public boolean isCompatible(final DiskFormatType type)
     {
-        return ArrayUtils.contains(compatibilityTable, type);
+        for (DiskFormatType compatible : compatibilityTable)
+        {
+            if (compatible == type)
+            {
+                return true;
+            }
+        }
+        return false;
     }
 
     public static HypervisorType fromId(final int id)

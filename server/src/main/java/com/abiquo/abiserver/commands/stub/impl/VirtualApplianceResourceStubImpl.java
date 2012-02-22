@@ -293,6 +293,7 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
     {
         VirtualApplianceDto dto = new VirtualApplianceDto();
         dto.setName(virtualAppliance.getName());
+        dto.setNodeconnections(virtualAppliance.getNodeConnections());
         return dto;
     }
 
@@ -330,7 +331,11 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
         app.setId(virtualApplianceDto.getId());
         app.setIsPublic(virtualApplianceDto.getPublicApp() == 1 ? Boolean.TRUE : Boolean.FALSE);
         app.setName(virtualApplianceDto.getName());
-        app.setNodeConnections(virtualApplianceDto.getNodecollections());
+
+        StringBuilder nodeconnections = new StringBuilder();
+        nodeconnections.append(StringUtils.isBlank(virtualApplianceDto.getNodeconnections())
+            ? "<connections></connections>" : virtualApplianceDto.getNodeconnections());
+        app.setNodeConnections(nodeconnections.toString());
         app.setState(new State(StateEnum.valueOf(virtualApplianceDto.getState().name())));
         app.setId(virtualApplianceDto.getId());
         Integer enterpriseId = virtualApplianceDto.getIdFromLink("enterprise");
@@ -373,7 +378,13 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
         app.setId(virtualApplianceDto.getId());
         app.setIsPublic(virtualApplianceDto.getPublicApp() == 1 ? Boolean.TRUE : Boolean.FALSE);
         app.setName(virtualApplianceDto.getName());
-        app.setNodeConnections(virtualApplianceDto.getNodecollections());
+
+        StringBuilder nodeconnections = new StringBuilder();
+
+        nodeconnections.append(StringUtils.isBlank(virtualApplianceDto.getNodeconnections())
+            ? "<connections></connections>" : virtualApplianceDto.getNodeconnections());
+
+        app.setNodeConnections(nodeconnections.toString());
         app.setState(new State(StateEnum.valueOf(virtualApplianceDto.getState().name())));
         app.setId(virtualApplianceDto.getId());
         Integer enterpriseId = virtualApplianceDto.getIdFromLink("enterprise");
