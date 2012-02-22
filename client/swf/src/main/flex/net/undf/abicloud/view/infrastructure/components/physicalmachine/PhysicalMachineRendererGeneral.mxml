@@ -252,7 +252,7 @@
 	        <mx:NumericStepper id="cpuInput"
 	            width="100" height="17"
 	            styleName="PhysicalMachinesRendererGeneralNumericStepper"
-	
+	            enabled="false"
 	            minimum="1" stepSize="1" includeInLayout="{_editMode}"
 	            maximum="{AbiCloudModel.MAX_NUMBER_OF_CPU}"
 	            visible="{_editMode}"/>
@@ -270,6 +270,7 @@
 	
 	        <mx:NumericStepper id="ramInput"
 	            width="100" height="17"
+	            enabled="false"
 	            styleName="PhysicalMachinesRendererGeneralNumericStepper"
 	            minimum="{ramUnitsSelector.selectedItem.minimum}"
 	            maximum="{ramUnitsSelector.selectedItem.maximum}"
