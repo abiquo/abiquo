@@ -36,8 +36,7 @@
 		<dependency>
 			<groupId>com.abiquo</groupId>
 			<artifactId>commons-amqp</artifactId>
-			<version>${commonsamqp.version}</version>
-			<classifier>master</classifier>
+			<version>${commonsamqp.version}</version>			
 		</dependency>
 		<!-- Script execution 
 		<dependency>
