@@ -21,7 +21,6 @@
 
 package com.abiquo.api.services.appslibrary;
 
-import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -39,8 +38,8 @@ import com.abiquo.appliancemanager.client.ApplianceManagerResourceStubImpl.Appli
 import com.abiquo.appliancemanager.transport.EnterpriseRepositoryDto;
 import com.abiquo.appliancemanager.transport.TemplateDto;
 import com.abiquo.appliancemanager.transport.TemplateStateDto;
-import com.abiquo.appliancemanager.transport.TemplatesStateDto;
 import com.abiquo.appliancemanager.transport.TemplateStatusEnumType;
+import com.abiquo.appliancemanager.transport.TemplatesStateDto;
 import com.abiquo.server.core.appslibrary.DatacenterRepositoryDto;
 import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
 import com.abiquo.server.core.enterprise.Enterprise;
@@ -146,7 +145,7 @@ public class DatacenterRepositoryService extends DefaultApiServiceWithApplianceM
             toVmtemplate.insertVirtualMachineTemplates(disks, repo);
 
         // Process existing vmtemplates
-        processExistingVirtualMachineTemplates(insertedVmtemplates);
+        processExistingVirtualMachineTemplates(insertedVmtemplates, repo.getDatacenter());
     }
 
     /**
@@ -181,17 +180,29 @@ public class DatacenterRepositoryService extends DefaultApiServiceWithApplianceM
     }
 
     /**
-     * Post process AM existing vmtemplates.
+     * Post process AM existing images.
      * <p>
-     * This method may be overriden in enterprise version to manage virtual machine template
-     * conversions.
+     * This method may be overriden in enterprise version to manage virtual image conversions.
      * 
-     * @param vmtemplates The existing vmtemplates.
+     * @param images The existing images.
      */
     protected void processExistingVirtualMachineTemplates(
-        final Collection<VirtualMachineTemplate> vmtemplates)
+        final List<VirtualMachineTemplate> vmtemplates, final Datacenter datacenter)
     {
-        // Do nothing
+        if (vmtemplates.isEmpty())
+        {
+            return;
+        }
+
+        if (Boolean.valueOf(System.getProperty("am.conversions.skip", "false")) == Boolean.FALSE)
+        {
+            toVmtemplate.generateConversions(vmtemplates, datacenter);
+        }
+        else
+        {
+            logger.warn("VirtualMachine template conversion avoid after refresh "
+                + "(see ''am.conversions.skip'' property)");
+        }
     }
 
 }
