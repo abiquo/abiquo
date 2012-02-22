@@ -21,7 +21,11 @@
 
 package com.abiquo.api.resources;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Set;
 
@@ -33,6 +37,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
@@ -54,6 +59,7 @@ import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.model.enumerator.MachineState;
 import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.model.rest.RESTLink;
+import com.abiquo.model.transport.SingleResourceTransportDto;
 import com.abiquo.model.util.ModelTransformer;
 import com.abiquo.model.validation.Hypervisor;
 import com.abiquo.model.validation.Ip;
@@ -63,6 +69,7 @@ import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.EnterprisesDto;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.DatacenterDto;
+import com.abiquo.server.core.infrastructure.DatacenterVersionAntDto;
 import com.abiquo.server.core.infrastructure.Machine;
 import com.abiquo.server.core.infrastructure.MachineDto;
 import com.abiquo.server.core.infrastructure.MachineStateDto;
@@ -146,6 +153,7 @@ public class DatacenterResource extends AbstractResource
     UriInfo uriInfo;
 
     @GET
+    @Produces(DatacenterDto.mediaType)
     public DatacenterDto getDatacenter(@PathParam(DATACENTER) final Integer datacenterId,
         @Context final IRESTBuilder restBuilder) throws Exception
     {
@@ -403,7 +411,16 @@ public class DatacenterResource extends AbstractResource
     {
         DatacenterDto dto =
             ModelTransformer.transportFromPersistence(DatacenterDto.class, datacenter);
+        dto.setJaumeRocks(Boolean.TRUE);
         dto = addLinks(builder, dto);
+        return dto;
+    }
+    
+    private DatacenterVersionAntDto createTransferObjectVersionAnt(Datacenter datacenter,
+        IRESTBuilder restBuilder) throws Exception
+    {
+        DatacenterVersionAntDto dto =
+            ModelTransformer.transportFromPersistence(DatacenterVersionAntDto.class, datacenter);
         return dto;
     }
 

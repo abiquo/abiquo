@@ -206,8 +206,9 @@ public class VirtualMachineDto extends SingleResourceTransportDto implements
     }
 
     @Override
-    public int compareTo(final VirtualMachineDto vm2)
+    public int compareTo(final VirtualMachineDto dto)
     {
+        VirtualMachineDto vm2 = (VirtualMachineDto) dto;
         if (StringUtils.hasText(this.getName()) && StringUtils.hasText(vm2.getName()))
         {
             return this.getName().compareTo(vm2.getName());

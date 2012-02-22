@@ -29,6 +29,7 @@ import static com.abiquo.api.resources.RemoteServiceResource.createTransferObjec
 import java.util.Collection;
 import java.util.List;
 
+import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -149,6 +150,8 @@ public class DatacentersResource extends AbstractResource
     }
 
     @POST
+    @Produces(DatacenterDto.mediaType)
+    @Consumes(DatacenterDto.mediaType)
     public DatacenterDto postDatacenter(final DatacenterDto datacenterDto,
         @Context final IRESTBuilder restBuilder) throws Exception
 

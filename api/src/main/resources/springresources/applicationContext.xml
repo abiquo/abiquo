@@ -28,8 +28,8 @@
         </property>
     </bean>
     <!-- load the configuration file -->
-    <import resource="wink-beans.xml" />
     <import resource="persistencebeans.xml" />
+    <import resource="wink-beans.xml" />
     <import resource="callback-beans.xml" />
     <import resource="security-beans.xml" />
     <import resource="security-abiquo-beans.xml" />

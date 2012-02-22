@@ -40,7 +40,10 @@ public enum APIError
         "403-FORBIDDEN", "Access is denied"), STATUS_NOT_FOUND("404-NOT FOUND",
         "The requested resource does not exist"), STATUS_METHOD_NOT_ALLOWED(
         "405-METHOD NOT ALLOWED", "The resource does not expose this method"), STATUS_CONFLICT(
-        "409-CONFLICT", "Conflict"), STATUS_UNSUPPORTED_MEDIA_TYPE("415-UNSUPPORTED MEDIA TYPE",
+        "409-CONFLICT", "Conflict"), STATUS_HEADER_VERSION_MANDATORY("412-PRECONDITION FAILED",
+        "Header 'X-abiquo-version' is mandatory"), STATUS_HEADER_VERSION_INVALID(
+        "412-PRECONDITION_FAILED", "Invalid header 'X-abiquo-version'"), STATUS_UNSUPPORTED_MEDIA_TYPE(
+        "415-UNSUPPORTED MEDIA TYPE",
         "The Abiquo API currently only supports application/XML Media Type"), STATUS_INTERNAL_SERVER_ERROR(
         "500-INTERNAL SERVER ERROR", "Unexpected exception"), STATUS_UNPROVISIONED(
         "412 - Unprovisioned", "Error releasing resources on the hypervisor"), SERVICE_UNAVAILABLE_ERROR(
@@ -689,8 +692,8 @@ public enum APIError
         // Outputs all errors in wiki table format
         for (APIError error : errors)
         {
-            System.out.println(String.format("| %s | %s | %s |", error.code, error.message, error
-                .name()));
+            System.out.println(String.format("| %s | %s | %s |", error.code, error.message,
+                error.name()));
         }
 
         System.out.println("\n ************ Flex client labels ************** \n");
