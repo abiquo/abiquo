@@ -445,7 +445,8 @@ public enum APIError
         "VSM-3", "An error occurred when unsubscribing the virtual machine"), REFRESH_STATE_PROBLEM(
         "VSM-4", "An error occurred when refreshing the virtual machine state"), VSMCLIENTFROMPOOL_PROBLEM(
         "VSM-5", "A VSMClient instance cannot be returned from connection pool."), INVALIDATE_STATE_PROBLEM(
-        "VSM-6", "An error occurred when resetting the last known state of the virtual machine"),
+        "VSM-6", "An error occurred when resetting the last known state of the virtual machine"), VSM_UNAVAILABE(
+        "VSM-7", "VSM service unavailable, check the URL service."),
 
     // LICENSE
     LICENSE_UNEXISTING("LICENSE-0", "The requested license does not exist"), LICENSE_INVALID(
