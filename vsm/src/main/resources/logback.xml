@@ -67,7 +67,7 @@
         <level value="ERROR" />
     </logger>
     <logger name="com.abiquo.vsm.monitor.esxi">
-        <level value="DEBUG" />
+        <level value="TRACE" />
         <appender-ref ref="ESX" />
     </logger>
     <logger name="com.abiquo.vsm.monitor.hyperv">
@@ -83,7 +83,7 @@
         <appender-ref ref="XENSERVER" />
     </logger>
     <logger name="com.abiquo.vsm.redis.pubsub.notifier.GenericNotifier">
-        <level value="DEBUG" />
+        <level value="TRACE" />
         <appender-ref ref="ESX" />
         <appender-ref ref="HYPERV" />
         <appender-ref ref="VBOX" />
