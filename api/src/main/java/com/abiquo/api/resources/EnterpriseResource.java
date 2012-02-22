@@ -69,6 +69,7 @@ import com.abiquo.server.core.enterprise.EnterpriseDto;
 import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
 import com.abiquo.server.core.infrastructure.network.IpsPoolManagementDto;
+import com.abiquo.server.core.util.FilterOptions;
 import com.abiquo.server.core.util.PagedList;
 
 @Parent(EnterprisesResource.class)
@@ -249,12 +250,19 @@ public class EnterpriseResource extends AbstractResource
     @Path(EnterpriseResource.ENTERPRISE_ACTION_GET_VIRTUALDATACENTERS_PATH)
     public VirtualDatacentersDto getVirtualDatacenters(
         @PathParam(EnterpriseResource.ENTERPRISE) final Integer enterpriseId,
+        @QueryParam(START_WITH) @DefaultValue("0") @Min(0) final Integer startwith,
+        @QueryParam(LIMIT) @DefaultValue(DEFAULT_PAGE_LENGTH_STRING) @Min(1) final Integer limit,
+        @QueryParam(BY) @DefaultValue("name") final String orderBy,
+        @QueryParam(FILTER) @DefaultValue("") final String filter,
+        @QueryParam(ASC) @DefaultValue("true") final Boolean asc,
         @Context final IRESTBuilder restBuilder) throws Exception
     {
+        FilterOptions filterOptions = new FilterOptions(startwith, limit, filter, orderBy, asc);
 
         Enterprise enterprise = service.getEnterprise(enterpriseId);
 
-        Collection<VirtualDatacenter> all = vdcService.getVirtualDatacenters(enterprise, null);
+        Collection<VirtualDatacenter> all =
+            vdcService.getVirtualDatacenters(enterprise, null, filterOptions);
         VirtualDatacentersDto vdcs = new VirtualDatacentersDto();
 
         for (VirtualDatacenter d : all)

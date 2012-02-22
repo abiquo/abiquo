@@ -40,11 +40,13 @@ import com.abiquo.abiserver.pojo.authentication.UserSession;
 import com.abiquo.abiserver.pojo.infrastructure.DataCenter;
 import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.result.DataResult;
+import com.abiquo.abiserver.pojo.result.ListRequest;
 import com.abiquo.abiserver.pojo.user.Enterprise;
 import com.abiquo.abiserver.pojo.virtualappliance.Log;
 import com.abiquo.abiserver.pojo.virtualappliance.Node;
 import com.abiquo.abiserver.pojo.virtualappliance.VirtualAppliance;
 import com.abiquo.abiserver.pojo.virtualappliance.VirtualDataCenter;
+import com.abiquo.abiserver.pojo.virtualappliance.VirtualDatacentersListResult;
 import com.abiquo.abiserver.pojo.virtualimage.VirtualImageConversions;
 
 public interface VirtualApplianceCommand
@@ -171,6 +173,9 @@ public interface VirtualApplianceCommand
      */
     public abstract DataResult<Collection<VirtualDataCenter>> getVirtualDataCentersByEnterprise(
         UserSession userSession, final Enterprise enterprise);
+
+    public DataResult<VirtualDatacentersListResult> getVirtualDataCentersByEnterprise(
+        final UserSession userSession, final Enterprise enterprise, final ListRequest listRequest);
 
     public abstract DataResult<Collection<VirtualDataCenter>> getVirtualDataCentersByEnterpriseFaster(
         UserSession userSession, final Enterprise enterprise);

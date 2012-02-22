@@ -26,8 +26,11 @@ import static java.lang.String.valueOf;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
+import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.wink.client.ClientResponse;
+import org.apache.wink.common.internal.utils.UriHelper;
 
 import com.abiquo.abiserver.business.hibernate.pojohb.networking.NetworkConfigurationHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.networking.NetworkHB;
@@ -38,8 +41,10 @@ import com.abiquo.abiserver.persistence.hibernate.HibernateDAOFactory;
 import com.abiquo.abiserver.pojo.infrastructure.DataCenter;
 import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.result.DataResult;
+import com.abiquo.abiserver.pojo.result.ListRequest;
 import com.abiquo.abiserver.pojo.user.Enterprise;
 import com.abiquo.abiserver.pojo.virtualappliance.VirtualDataCenter;
+import com.abiquo.abiserver.pojo.virtualappliance.VirtualDatacentersListResult;
 import com.abiquo.abiserver.pojo.virtualhardware.Limit;
 import com.abiquo.abiserver.pojo.virtualhardware.ResourceAllocationLimit;
 import com.abiquo.model.enumerator.HypervisorType;
@@ -94,8 +99,8 @@ public class VirtualDatacenterResourceStubImpl extends AbstractAPIStub implement
         vlanDto.setSufixDNS(netConfig.getSufixDNS());
 
         String datacenterLink =
-            URIResolver.resolveURI(apiUri, "admin/datacenters/{datacenter}",
-                Collections.singletonMap("datacenter", String.valueOf(vdc.getIdDataCenter())));
+            URIResolver.resolveURI(apiUri, "admin/datacenters/{datacenter}", Collections
+                .singletonMap("datacenter", String.valueOf(vdc.getIdDataCenter())));
 
         String enterpriseLink = createEnterpriseLink(vdc.getEnterprise().getId());
         URIResolver.resolveURI(apiUri, "cloud/virtualdatacenters", new HashMap<String, String>());
@@ -331,4 +336,93 @@ public class VirtualDatacenterResourceStubImpl extends AbstractAPIStub implement
 
         return result;
     }
+
+    @Override
+    public DataResult<VirtualDatacentersListResult> getVirtualDatacentersByEnterprise(
+        final Enterprise enterprise, final ListRequest listRequest)
+    {
+        DataResult<VirtualDatacentersListResult> result =
+            new DataResult<VirtualDatacentersListResult>();
+
+        // Build request URI
+        String uri = null;
+        VirtualDatacentersListResult listResult = new VirtualDatacentersListResult();
+
+        if (listRequest != null)
+        {
+            boolean desc = !listRequest.getAsc();
+            String orderBy = listRequest.getOrderBy();
+
+            Map<String, String[]> queryParams = new HashMap<String, String[]>();
+            if (!StringUtils.isEmpty(listRequest.getFilterLike()))
+            {
+                queryParams.put("filter", new String[] {listRequest.getFilterLike()});
+            }
+            if (!StringUtils.isEmpty(listRequest.getOrderBy()))
+            {
+                queryParams.put("orderBy", new String[] {orderBy});
+            }
+            queryParams.put("desc", new String[] {String.valueOf(desc)});
+
+            uri =
+                createVirtualDatacentersFromEnterpriseLink(enterprise.getId(), listRequest
+                    .getOffset(), listRequest.getNumberOfNodes());
+
+            uri = UriHelper.appendQueryParamsToPath(uri, queryParams, false);
+        }
+        else
+        {
+            uri = createVirtualDatacentersFromEnterpriseLink(enterprise.getId(), null, 0);
+        }
+
+        // Request virtual datacenters
+        ClientResponse response = get(uri);
+
+        if (response.getStatusCode() == 200)
+        {
+            VirtualDatacentersDto dto = response.getEntity(VirtualDatacentersDto.class);
+            Collection<VirtualDataCenter> collection = new LinkedHashSet<VirtualDataCenter>();
+
+            for (VirtualDatacenterDto vdc : dto.getCollection())
+            {
+                // TODO set all limits
+                ResourceAllocationLimit limits = new ResourceAllocationLimit();
+
+                Limit publicIpLimit = new Limit();
+                publicIpLimit.setHard(vdc.getPublicIpsHard());
+                publicIpLimit.setSoft(vdc.getPublicIpsSoft());
+                limits.setPublicIP(publicIpLimit);
+
+                VirtualDataCenter pojo = new VirtualDataCenter();
+                pojo.setId(vdc.getId());
+                pojo.setName(vdc.getName());
+                pojo.setLimits(limits);
+
+                // Get the default network of the vdc.
+                RESTLink link = vdc.searchLink("defaultnetwork");
+                response = get(link.getHref());
+                VLANNetworkDto vlanDto = response.getEntity(VLANNetworkDto.class);
+
+                pojo.setDefaultVlan(NetworkResourceStubImpl.createFlexObject(vlanDto));
+
+                collection.add(pojo);
+            }
+
+            Integer total =
+                dto.getTotalSize() != null ? dto.getTotalSize() : dto.getCollection().size();
+
+            listResult.setTotalVirtualDatacenters(total);
+            listResult.setVirtualDatacentersList(collection);
+
+            result.setSuccess(true);
+            result.setData(listResult);
+        }
+        else
+        {
+            populateErrors(response, result, "getVirtualDatacenters");
+        }
+
+        return result;
+    }
+
 }

@@ -24,8 +24,6 @@ package com.abiquo.api.resources.cloud;
 import static com.abiquo.api.resources.DatacenterResource.DATACENTER;
 import static com.abiquo.api.resources.EnterpriseResource.ENTERPRISE;
 import static com.abiquo.api.resources.cloud.VirtualDatacenterResource.createTransferObject;
-import static com.abiquo.api.util.URIResolver.buildPath;
-import static com.abiquo.api.util.URIResolver.resolveFromURI;
 
 import java.util.Collection;
 
@@ -35,7 +33,6 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MultivaluedMap;
 
 import org.apache.wink.common.annotations.Workspace;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -116,7 +113,8 @@ public class VirtualDatacentersResource extends AbstractResource
             enterprise = getEnterprise(enterpriseId);
         }
 
-        Collection<VirtualDatacenter> all = service.getVirtualDatacenters(enterprise, datacenter);
+        Collection<VirtualDatacenter> all =
+            service.getVirtualDatacenters(enterprise, datacenter, null);
         VirtualDatacentersDto vdcs = new VirtualDatacentersDto();
 
         for (VirtualDatacenter d : all)

@@ -34,6 +34,7 @@ import com.abiquo.abiserver.pojo.authentication.UserSession;
 import com.abiquo.abiserver.pojo.networking.NetworkConfiguration;
 import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.result.DataResult;
+import com.abiquo.abiserver.pojo.result.ListRequest;
 import com.abiquo.abiserver.pojo.user.Enterprise;
 import com.abiquo.abiserver.pojo.virtualappliance.Log;
 import com.abiquo.abiserver.pojo.virtualappliance.VirtualAppliance;
@@ -69,11 +70,8 @@ public class VirtualApplianceService
         try
         {
             virtualApplianceCommand =
-                (VirtualApplianceCommand) Thread
-                    .currentThread()
-                    .getContextClassLoader()
-                    .loadClass(
-                        "com.abiquo.abiserver.commands.impl.VirtualApplianceCommandPremiumImpl")
+                (VirtualApplianceCommand) Thread.currentThread().getContextClassLoader().loadClass(
+                    "com.abiquo.abiserver.commands.impl.VirtualApplianceCommandPremiumImpl")
                     .newInstance();
         }
         catch (Exception e)
@@ -83,9 +81,8 @@ public class VirtualApplianceService
         try
         {
             userCommand =
-                (UserCommand) Thread.currentThread().getContextClassLoader()
-                    .loadClass("com.abiquo.abiserver.commands.impl.UserCommandPremiumImpl")
-                    .newInstance();
+                (UserCommand) Thread.currentThread().getContextClassLoader().loadClass(
+                    "com.abiquo.abiserver.commands.impl.UserCommandPremiumImpl").newInstance();
         }
         catch (Exception e)
         {
@@ -122,18 +119,19 @@ public class VirtualApplianceService
      * 
      * @param userSession The UserSession with the user that called this method
      * @param enterprise The Enterprise of which the VirtualDataCenter will be returned
+     * @param listRequest To filter the number of results
      * @return a BasicResult object, containing an ArrayList<VirtualDataCenter>, with the
      *         VirtualDataCenter assigned to the enterprise
      */
     public BasicResult getVirtualDataCentersByEnterprise(final UserSession userSession,
-        final Enterprise enterprise)
+        final Enterprise enterprise, final ListRequest listRequest)
     {
 
         VirtualApplianceCommand command = proxyCommand(userSession);
 
         try
         {
-            return command.getVirtualDataCentersByEnterprise(userSession, enterprise);
+            return command.getVirtualDataCentersByEnterprise(userSession, enterprise, listRequest);
         }
         catch (UserSessionException e)
         {
@@ -250,8 +248,7 @@ public class VirtualApplianceService
         final Enterprise enterprise)
     {
         // VirtualApplianceCommand command = proxyCommand(userSession);
-        return proxyVirtualApplianceResourceStub(userSession).getVirtualAppliancesByEnterprise(
-            userSession, enterprise);
+        return proxyStub(userSession).getVirtualAppliancesByEnterprise(userSession, enterprise);
         // return command.getVirtualAppliancesByEnterprise(userSession, enterprise);
     }
 
@@ -267,7 +264,7 @@ public class VirtualApplianceService
     {
 
         // VirtualApplianceCommand command = proxyCommand(userSession);
-        return proxyVirtualApplianceResourceStub(userSession).getAppNodes(virtualAppliance);
+        return proxyStub(userSession).getAppNodes(virtualAppliance);
         // return command.getVirtualApplianceNodes(virtualAppliance);
     }
 
@@ -297,7 +294,7 @@ public class VirtualApplianceService
     {
 
         // VirtualApplianceCommand command = proxyCommand(session);
-        return proxyVirtualApplianceResourceStub(session).updateVirtualApplianceNodes(
+        return proxyStub(session).updateVirtualApplianceNodes(
             virtualAppliance.getVirtualDataCenter().getId(), virtualAppliance);
         // BasicResult result = command.editVirtualAppliance(session, virtualAppliance);
 
@@ -337,8 +334,7 @@ public class VirtualApplianceService
         // return dr;
         // }
 
-        return proxyVirtualApplianceResourceStub(session).deleteVirtualAppliance(virtualAppliance,
-            false);
+        return proxyStub(session).deleteVirtualAppliance(virtualAppliance, false);
         // return command.deleteVirtualAppliance(session, virtualAppliance);
     }
 
@@ -386,7 +382,7 @@ public class VirtualApplianceService
     {
         // VirtualApplianceCommand command = proxyCommand(session);
         DataResult<VirtualAppliance> virtualApplianceNodes =
-            proxyVirtualApplianceResourceStub(session).getVirtualApplianceNodes(
+            proxyStub(session).getVirtualApplianceNodes(
                 virtualAppliance.getVirtualDataCenter().getId(), virtualAppliance.getId(),
                 "forceRefreshVirtualApplianceState");
         return virtualApplianceNodes;
