@@ -427,7 +427,7 @@ BEGIN
 	-- /* ABICLOUDPREMIUM-2878 - For consistency porpouse, changed vharchar(30) to varchar(256) */
 	ALTER TABLE kinton.metering MODIFY COLUMN physicalmachine VARCHAR(256)  CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL;
 	ALTER TABLE kinton.repository MODIFY COLUMN URL VARCHAR(255) NOT NULL;
-    ALTER TABLE kinton.ovf_package_list MODIFY COLUMN name VARCHAR(45) NOT NULL UNIQUE;
+	ALTER TABLE kinton.ovf_package_list MODIFY COLUMN name VARCHAR(45) NOT NULL;
 	-- ############################################ --	
 	-- ######## SCHEMA: CONSTRAINTS MODIFIED ###### --
 	-- ############################################ --	
