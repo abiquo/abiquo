@@ -31,6 +31,7 @@ import java.util.Set;
 
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
@@ -163,6 +164,8 @@ public class DatacenterResource extends AbstractResource
     }
 
     @PUT
+    @Consumes(DatacenterDto.mediaType)
+    @Produces(DatacenterDto.mediaType)
     public DatacenterDto modifyDatacenter(final DatacenterDto datacenterDto,
         @PathParam(DATACENTER) final Integer datacenterId, @Context final IRESTBuilder restBuilder)
         throws Exception
@@ -413,14 +416,6 @@ public class DatacenterResource extends AbstractResource
             ModelTransformer.transportFromPersistence(DatacenterDto.class, datacenter);
         dto.setJaumeRocks(Boolean.TRUE);
         dto = addLinks(builder, dto);
-        return dto;
-    }
-    
-    private DatacenterVersionAntDto createTransferObjectVersionAnt(Datacenter datacenter,
-        IRESTBuilder restBuilder) throws Exception
-    {
-        DatacenterVersionAntDto dto =
-            ModelTransformer.transportFromPersistence(DatacenterVersionAntDto.class, datacenter);
         return dto;
     }
 
