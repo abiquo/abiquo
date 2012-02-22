@@ -21,11 +21,7 @@
 
 package com.abiquo.api.resources;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
 import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.List;
 import java.util.Set;
 
@@ -60,7 +56,6 @@ import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.model.enumerator.MachineState;
 import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.model.rest.RESTLink;
-import com.abiquo.model.transport.SingleResourceTransportDto;
 import com.abiquo.model.util.ModelTransformer;
 import com.abiquo.model.validation.Hypervisor;
 import com.abiquo.model.validation.Ip;
@@ -70,7 +65,6 @@ import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.EnterprisesDto;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.DatacenterDto;
-import com.abiquo.server.core.infrastructure.DatacenterVersionAntDto;
 import com.abiquo.server.core.infrastructure.Machine;
 import com.abiquo.server.core.infrastructure.MachineDto;
 import com.abiquo.server.core.infrastructure.MachineStateDto;
