@@ -34,9 +34,17 @@ import com.abiquo.model.transport.WrapperDto;
 @XmlRootElement(name = "racks")
 public class RacksDto extends WrapperDto<RackDto>
 {
+    public static final String mediaType = "application/vnd.abiquo.racks+xml";
+    
     @XmlElement(name = "rack")
     public List<RackDto> getCollection()
     {
         return collection;
+    }
+    
+    @Override
+    public String getMediaType()
+    {
+        return RacksDto.mediaType;
     }
 }

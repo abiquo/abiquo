@@ -26,6 +26,8 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement(name = "ucsrack")
 public class UcsRackDto extends RackDto
 {
+    public static final String mediaType = "application/vnd.abiquo.ucsrack+xml";
+    
     private static final long serialVersionUID = 1L;
 
     private Integer port;
@@ -98,5 +100,11 @@ public class UcsRackDto extends RackDto
     public void setMaxMachinesOn(final Integer maxMachinesOn)
     {
         this.maxMachinesOn = maxMachinesOn;
+    }
+    
+    @Override
+    public String getMediaType()
+    {
+        return UcsRackDto.mediaType;
     }
 }

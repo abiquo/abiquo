@@ -138,14 +138,4 @@ public class DatacenterDto extends SingleResourceTransportDto implements Seriali
     {
         return DatacenterDto.mediaType;
     }
-
-    public void setJaumeRocks(Boolean jaumeRocks)
-    {
-        this.jaumeRocks = jaumeRocks;
-    }
-
-    public Boolean getJaumeRocks()
-    {
-        return jaumeRocks;
-    }
 }

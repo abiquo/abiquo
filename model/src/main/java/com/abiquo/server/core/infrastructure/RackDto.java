@@ -30,6 +30,8 @@ import com.abiquo.model.transport.SingleResourceTransportDto;
 @XmlRootElement(name = "rack")
 public class RackDto extends SingleResourceTransportDto implements Serializable
 {
+    public static final String mediaType = "application/vnd.abiquo.rack+xml";
+    
     private static final long serialVersionUID = 1L;
 
     private Integer id;
@@ -140,5 +142,11 @@ public class RackDto extends SingleResourceTransportDto implements Serializable
     public void setHaEnabled(final boolean haEnabled)
     {
         this.haEnabled = haEnabled;
+    }
+    
+    @Override
+    public String getMediaType()
+    {
+        return RackDto.mediaType;
     }
 }

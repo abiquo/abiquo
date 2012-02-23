@@ -30,11 +30,15 @@ package com.abiquo.server.core.infrastructure;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
+import com.abiquo.model.transport.SingleResourceTransportDto;
+
 /**
  */
 @XmlRootElement(name = "organization")
-public class OrganizationDto
+public class OrganizationDto extends SingleResourceTransportDto
 {
+    public static final String mediaType = "application/vnd.abiquo.organization+xml";
+    
     protected String dn;
 
     protected String name;
@@ -144,6 +148,12 @@ public class OrganizationDto
     public void setDescription(final String value)
     {
         this.description = value;
+    }
+    
+    @Override
+    public String getMediaType()
+    {
+        return OrganizationDto.mediaType;
     }
 
 }

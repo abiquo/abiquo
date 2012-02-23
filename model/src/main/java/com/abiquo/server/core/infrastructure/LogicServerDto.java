@@ -36,12 +36,16 @@ import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlElements;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import com.abiquo.model.transport.SingleResourceTransportDto;
+
 /**
  */
 @XmlRootElement(name = "logicServer")
-public class LogicServerDto
+public class LogicServerDto extends SingleResourceTransportDto
 {
 
+    public static final String mediaType = "application/vnd.abiquo.logicserver+xml";
+    
     protected String name;
 
     // It can be template (update or initial) or instance
@@ -179,5 +183,11 @@ public class LogicServerDto
             policies = new ArrayList<LogicServerPolicyDto>();
         }
         return this.policies;
+    }
+    
+    @Override
+    public String getMediaType()
+    {
+        return LogicServerDto.mediaType;
     }
 }

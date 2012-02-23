@@ -36,6 +36,8 @@ import com.abiquo.model.transport.error.ErrorsDto;
 @XmlRootElement(name = "machines")
 public class MachinesDto extends WrapperDto<MachineDto>
 {
+    public static final String mediaType = "application/vnd.abiquo.machines+xml";
+    
     private ErrorsDto errors;
 
     public ErrorsDto getErrors()
@@ -57,5 +59,11 @@ public class MachinesDto extends WrapperDto<MachineDto>
             collection = new ArrayList<MachineDto>();
         }
         return collection;
+    }
+    
+    @Override
+    public String getMediaType()
+    {
+        return MachinesDto.mediaType;
     }
 }

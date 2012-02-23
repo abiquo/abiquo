@@ -51,6 +51,8 @@ import com.abiquo.model.transport.SingleResourceTransportDto;
 @XmlRootElement(name = "datastore")
 public class DatastoreDto extends SingleResourceTransportDto implements Serializable
 {
+    public static final String mediaType = "application/vnd.abiquo.datastore+xml";
+    
     private Integer id;
 
     public Integer getId()
@@ -147,4 +149,9 @@ public class DatastoreDto extends SingleResourceTransportDto implements Serializ
         return datastoreUUID;
     }
 
+    @Override
+    public String getMediaType()
+    {
+        return DatastoreDto.mediaType;
+    }
 }
