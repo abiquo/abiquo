@@ -383,6 +383,10 @@ public class MachineResource extends AbstractResource
      */
     protected APIException translateException(final Exception e)
     {
+        if (e instanceof APIException)
+        {
+            return (APIException) e;
+        }
         return new ConflictException(APIError.NODECOLLECTOR_ERROR);
     }
 }
