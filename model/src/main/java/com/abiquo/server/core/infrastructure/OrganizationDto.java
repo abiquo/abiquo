@@ -37,7 +37,7 @@ import com.abiquo.model.transport.SingleResourceTransportDto;
 @XmlRootElement(name = "organization")
 public class OrganizationDto extends SingleResourceTransportDto
 {
-    public static final String mediaType = "application/vnd.abiquo.organization+xml";
+    public static final String MEDIA_TYPE = "application/vnd.abiquo.organization+xml";
     
     protected String dn;
 
@@ -153,7 +153,7 @@ public class OrganizationDto extends SingleResourceTransportDto
     @Override
     public String getMediaType()
     {
-        return OrganizationDto.mediaType;
+        return OrganizationDto.MEDIA_TYPE;
     }
 
 }

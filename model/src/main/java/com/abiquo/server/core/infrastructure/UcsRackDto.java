@@ -26,7 +26,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement(name = "ucsrack")
 public class UcsRackDto extends RackDto
 {
-    public static final String mediaType = "application/vnd.abiquo.ucsrack+xml";
+    public static final String MEDIA_TYPE = "application/vnd.abiquo.ucsrack+xml";
     
     private static final long serialVersionUID = 1L;
 
@@ -105,6 +105,6 @@ public class UcsRackDto extends RackDto
     @Override
     public String getMediaType()
     {
-        return UcsRackDto.mediaType;
+        return UcsRackDto.MEDIA_TYPE;
     }
 }

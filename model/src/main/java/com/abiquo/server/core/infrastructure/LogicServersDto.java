@@ -43,7 +43,7 @@ public class LogicServersDto extends WrapperDto<LogicServerDto>
 {
 
 
-    public static final String mediaType = "application/vnd.abiquo.logicservers+xml";
+    public static final String MEDIA_TYPE = "application/vnd.abiquo.logicservers+xml";
     
     /**
      * 
@@ -79,7 +79,7 @@ public class LogicServersDto extends WrapperDto<LogicServerDto>
     @Override
     public String getMediaType()
     {
-        return LogicServersDto.mediaType;
+        return LogicServersDto.MEDIA_TYPE;
     }
 
 }

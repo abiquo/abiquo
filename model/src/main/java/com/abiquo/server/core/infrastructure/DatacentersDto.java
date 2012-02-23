@@ -34,7 +34,7 @@ import com.abiquo.model.transport.WrapperDto;
 @XmlRootElement(name = "datacenters")
 public class DatacentersDto extends WrapperDto<DatacenterDto>
 {
-    public static final String mediaType = "application/vnd.abiquo.datacenters+xml";
+    public static final String MEDIA_TYPE = "application/vnd.abiquo.datacenters+xml";
     
     @XmlElement(name = "datacenter")
     public List<DatacenterDto> getCollection()
@@ -45,6 +45,6 @@ public class DatacentersDto extends WrapperDto<DatacenterDto>
     @Override
     public String getMediaType()
     {
-        return DatacentersDto.mediaType;
+        return DatacentersDto.MEDIA_TYPE;
     }
 }

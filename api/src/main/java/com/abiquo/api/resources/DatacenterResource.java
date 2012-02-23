@@ -148,7 +148,7 @@ public class DatacenterResource extends AbstractResource
     UriInfo uriInfo;
 
     @GET
-    @Produces(DatacenterDto.mediaType)
+    @Produces(DatacenterDto.MEDIA_TYPE)
     public DatacenterDto getDatacenter(@PathParam(DATACENTER) final Integer datacenterId,
         @Context final IRESTBuilder restBuilder) throws Exception
     {
@@ -158,8 +158,8 @@ public class DatacenterResource extends AbstractResource
     }
 
     @PUT
-    @Consumes(DatacenterDto.mediaType)
-    @Produces(DatacenterDto.mediaType)
+    @Consumes(DatacenterDto.MEDIA_TYPE)
+    @Produces(DatacenterDto.MEDIA_TYPE)
     public DatacenterDto modifyDatacenter(final DatacenterDto datacenterDto,
         @PathParam(DATACENTER) final Integer datacenterId, @Context final IRESTBuilder restBuilder)
         throws Exception

@@ -150,8 +150,8 @@ public class DatacentersResource extends AbstractResource
     }
 
     @POST
-    @Produces(DatacenterDto.mediaType)
-    @Consumes(DatacenterDto.mediaType)
+    @Produces(DatacenterDto.MEDIA_TYPE)
+    @Consumes(DatacenterDto.MEDIA_TYPE)
     public DatacenterDto postDatacenter(final DatacenterDto datacenterDto,
         @Context final IRESTBuilder restBuilder) throws Exception
 

@@ -46,7 +46,7 @@ public class OrganizationsDto extends WrapperDto<OrganizationDto>
      * 
      */
     private static final long serialVersionUID = 5643469409057556537L;
-    public static final String mediaType = "application/vnd.abiquo.organizations+xml";
+    public static final String MEDIA_TYPE = "application/vnd.abiquo.organizations+xml";
     
     /**
      * Gets the value of the host property.
@@ -77,7 +77,7 @@ public class OrganizationsDto extends WrapperDto<OrganizationDto>
     @Override
     public String getMediaType()
     {
-        return OrganizationsDto.mediaType;
+        return OrganizationsDto.MEDIA_TYPE;
     }
 
 }

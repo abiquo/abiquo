@@ -33,7 +33,7 @@ import com.abiquo.model.transport.SingleResourceTransportDto;
 @XmlRootElement(name = "machine")
 public class MachineDto extends SingleResourceTransportDto implements Serializable
 {
-    public static final String mediaType = "application/vnd.abiquo.machine+xml";
+    public static final String MEDIA_TYPE = "application/vnd.abiquo.machine+xml";
     
     private static final long serialVersionUID = -4971248626582072165L;
 
@@ -352,6 +352,6 @@ public class MachineDto extends SingleResourceTransportDto implements Serializab
     @Override
     public String getMediaType()
     {
-        return MachineDto.mediaType;
+        return MachineDto.MEDIA_TYPE;
     }
 }

@@ -36,7 +36,7 @@ public class UcsRacksDto extends WrapperDto<UcsRackDto>
      * UUID.
      */
     private static final long serialVersionUID = -7212986377206988619L;
-    public static final String mediaType = "application/vnd.abiquo.ucsracks+xml";
+    public static final String MEDIA_TYPE = "application/vnd.abiquo.ucsracks+xml";
     
     @Override
     @XmlElement(name = "ucsrack")
@@ -52,7 +52,7 @@ public class UcsRacksDto extends WrapperDto<UcsRackDto>
     @Override
     public String getMediaType()
     {
-        return UcsRacksDto.mediaType;
+        return UcsRacksDto.MEDIA_TYPE;
     }
 
 }
