@@ -33,6 +33,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.abiquo.api.services.DatacenterService;
+import com.abiquo.api.tracer.TracerLogger;
 import com.abiquo.appliancemanager.transport.TemplateDto;
 import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.server.core.appslibrary.AppsLibraryRep;
@@ -43,6 +45,7 @@ import com.abiquo.server.core.appslibrary.TemplateDefinitionDAO;
 import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.EnterpriseRep;
+import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.Repository;
 import com.abiquo.tracer.User;
 
@@ -53,7 +56,7 @@ import com.abiquo.tracer.User;
 @Service
 public class TemplateFactory
 {
-    private final static Logger logger = LoggerFactory.getLogger(TemplateFactory.class);
+    protected final static Logger logger = LoggerFactory.getLogger(TemplateFactory.class);
 
     @Autowired
     private AppsLibraryRep appslibraryRep;
@@ -63,6 +66,12 @@ public class TemplateFactory
 
     @Autowired
     private EnterpriseRep entRepo;
+
+    @Autowired
+    protected DatacenterService dcService;
+
+    @Autowired
+    protected TracerLogger tracer;
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public List<VirtualMachineTemplate> insertVirtualMachineTemplates(
@@ -140,6 +149,13 @@ public class TemplateFactory
         }
 
         return notInsertedDisks;
+    }
+
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    public void generateConversions(final List<VirtualMachineTemplate> templates,
+        final Datacenter datacenter)
+    {
+        // community do nothing
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
