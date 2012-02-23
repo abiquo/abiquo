@@ -23,9 +23,13 @@ package com.abiquo.server.core.enterprise;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
+import com.abiquo.server.core.infrastructure.DatacenterDto;
+
 @XmlRootElement(name = "roleWithLdap")
 public class RoleWithLdapDto extends RoleDto
 {
+    public static final String MEDIA_TYPE = "application/vnd.abiquo.rolewithldap+xml";
+    
     public RoleWithLdapDto()
     {
     }
@@ -75,4 +79,9 @@ public class RoleWithLdapDto extends RoleDto
         return dto;
     }
 
+    @Override
+    public String getMediaType()
+    {
+        return RoleWithLdapDto.MEDIA_TYPE;
+    }
 }

@@ -24,6 +24,7 @@ package com.abiquo.server.core.cloud;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.abiquo.model.transport.SingleResourceTransportDto;
+import com.abiquo.server.core.infrastructure.DatacenterDto;
 
 @XmlRootElement(name = "virtualAppliance")
 public class VirtualApplianceDto extends SingleResourceTransportDto
@@ -32,6 +33,7 @@ public class VirtualApplianceDto extends SingleResourceTransportDto
      * 
      */
     private static final long serialVersionUID = 6614050007994524638L;
+    public static final String MEDIA_TYPE = "application/vnd.abiquo.virtualappliance+xml";
 
     private Integer id;
 
@@ -127,6 +129,12 @@ public class VirtualApplianceDto extends SingleResourceTransportDto
     public void setState(final VirtualApplianceState state)
     {
         this.state = state;
+    }
+    
+    @Override
+    public String getMediaType()
+    {
+        return VirtualApplianceDto.MEDIA_TYPE;
     }
 
 }

@@ -33,6 +33,7 @@ import com.abiquo.model.transport.WrapperDto;
 public class InitiatorMappingsDto extends WrapperDto<InitiatorMappingDto>
 {
     private static final long serialVersionUID = 1L;
+    public static final String MEDIA_TYPE = "application/vnd.abiquo.initiatormappings+xml";
 
     @Override
     @XmlElement(name = "initiatorMapping")
@@ -43,6 +44,12 @@ public class InitiatorMappingsDto extends WrapperDto<InitiatorMappingDto>
             collection = new ArrayList<InitiatorMappingDto>();
         }
         return collection;
+    }
+    
+    @Override
+    public String getMediaType()
+    {
+        return InitiatorMappingsDto.MEDIA_TYPE;
     }
 
 }

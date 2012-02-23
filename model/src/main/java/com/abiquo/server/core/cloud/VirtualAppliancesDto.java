@@ -39,9 +39,17 @@ import com.abiquo.model.transport.WrapperDto;
 @XmlRootElement(name = "virtualAppliances")
 public class VirtualAppliancesDto extends WrapperDto<VirtualApplianceDto>
 {
+    public static final String MEDIA_TYPE = "application/vnd.abiquo.virtualappliances+xml";
+    
     @XmlElement(name = "virtualAppliance")
     public List<VirtualApplianceDto> getCollection()
     {
         return collection;
+    }
+    
+    @Override
+    public String getMediaType()
+    {
+        return VirtualAppliancesDto.MEDIA_TYPE;
     }
 }

@@ -27,6 +27,7 @@ import org.springframework.util.StringUtils;
 
 import com.abiquo.model.transport.SingleResourceTransportDto;
 import com.abiquo.server.core.cloud.chef.RunlistElementsDto;
+import com.abiquo.server.core.infrastructure.DatacenterDto;
 
 @XmlRootElement(name = "virtualMachine")
 public class VirtualMachineDto extends SingleResourceTransportDto implements
@@ -36,6 +37,7 @@ public class VirtualMachineDto extends SingleResourceTransportDto implements
      * 
      */
     private static final long serialVersionUID = -8877350185009627544L;
+    public static final String MEDIA_TYPE = "application/vnd.abiquo.virtualmachine+xml";
 
     private Integer id;
 
@@ -237,6 +239,12 @@ public class VirtualMachineDto extends SingleResourceTransportDto implements
     public void setRunlist(final RunlistElementsDto runlistElements)
     {
         this.runlistElements = runlistElements;
+    }
+    
+    @Override
+    public String getMediaType()
+    {
+        return VirtualMachineDto.MEDIA_TYPE;
     }
 
 }
