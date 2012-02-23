@@ -26,6 +26,8 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement(name = "userWithRole")
 public class UserWithRoleDto extends UserDto
 {
+    public static final String MEDIA_TYPE = "application/vnd.abiquo.userwithroles+xml";
+    
     private RoleWithPrivilegesDto role;
 
     private EnterpriseDto enterprise;
@@ -48,6 +50,12 @@ public class UserWithRoleDto extends UserDto
     public void setEnterprise(final EnterpriseDto enterprise)
     {
         this.enterprise = enterprise;
+    }
+    
+    @Override
+    public String getMediaType()
+    {
+        return UserWithRoleDto.MEDIA_TYPE;
     }
 
 }

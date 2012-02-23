@@ -24,10 +24,13 @@ package com.abiquo.server.core.statistics;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.abiquo.model.transport.SingleResourceTransportDto;
+import com.abiquo.server.core.infrastructure.DatacenterDto;
 
 @XmlRootElement(name = "dcresources")
 public class DatacenterResourcesDto extends SingleResourceTransportDto
 {
+    public static final String MEDIA_TYPE = "application/vnd.abiquo.datacenterresources+xml";
+    
     private Integer id;
 
     public Integer getId()
@@ -231,5 +234,10 @@ public class DatacenterResourcesDto extends SingleResourceTransportDto
     {
         this.idEnterprise = idEnterprise;
     }
-
+    
+    @Override
+    public String getMediaType()
+    {
+        return DatacenterResourcesDto.MEDIA_TYPE;
+    }
 }

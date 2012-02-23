@@ -45,6 +45,7 @@ import org.hibernate.validator.constraints.Range;
 import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.server.core.common.DefaultEntityBase;
 import com.abiquo.server.core.enterprise.Enterprise;
+import com.abiquo.server.core.infrastructure.DatacenterDto;
 import com.abiquo.server.core.infrastructure.Repository;
 import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
 import com.softwarementors.validation.constraints.LeadingOrTrailingWhitespace;
@@ -56,7 +57,7 @@ import com.softwarementors.validation.constraints.Required;
 public class VirtualMachineTemplate extends DefaultEntityBase
 {
     public static final String TABLE_NAME = "virtualimage";
-
+    
     // DO NOT ACCESS: present due to needs of infrastructure support. *NEVER* call from business
     // code
     public VirtualMachineTemplate()
@@ -652,4 +653,5 @@ public class VirtualMachineTemplate extends DefaultEntityBase
     {
         conversions.add(conversion);
     }
+
 }

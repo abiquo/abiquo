@@ -26,10 +26,12 @@ import java.util.Map;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.abiquo.model.transport.SingleResourceTransportDto;
+import com.abiquo.server.core.infrastructure.DatacenterDto;
 
 @XmlRootElement(name = "enterpriseProperties")
 public class EnterprisePropertiesDto extends SingleResourceTransportDto
 {
+    public static final String MEDIA_TYPE = "application/vnd.abiquo.enterpriseproperties+xml";
     private Integer id;
 
     Map<String, String> properties;
@@ -52,5 +54,11 @@ public class EnterprisePropertiesDto extends SingleResourceTransportDto
     public void setProperties(final Map<String, String> properties)
     {
         this.properties = properties;
+    }
+    
+    @Override
+    public String getMediaType()
+    {
+        return EnterprisePropertiesDto.MEDIA_TYPE;
     }
 }

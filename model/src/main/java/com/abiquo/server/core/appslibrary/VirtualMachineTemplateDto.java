@@ -35,6 +35,7 @@ import com.abiquo.model.transport.SingleResourceTransportDto;
 public class VirtualMachineTemplateDto extends SingleResourceTransportDto
 {
     private static final long serialVersionUID = 1L;
+    public static final String MEDIA_TYPE = "application/vnd.abiquo.virtualmachinetemplate+xml";
 
     private Integer id;
 
@@ -120,7 +121,7 @@ public class VirtualMachineTemplateDto extends SingleResourceTransportDto
     }
 
     public void setPath(final String path)
-    {
+    {public static final String MEDIA_TYPE = "application/vnd.abiquo.virtualmachinetemplate+xml";
         this.path = path;
     }
 
@@ -204,4 +205,10 @@ public class VirtualMachineTemplateDto extends SingleResourceTransportDto
         this.creationUser = creationUser;
     }
 
+    
+    @Override
+    public String getMediaType()
+    {
+        return VirtualMachineTemplateDto.MEDIA_TYPE;
+    }
 }

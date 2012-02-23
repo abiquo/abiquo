@@ -31,6 +31,7 @@ import com.abiquo.model.transport.SingleResourceTransportDto;
 public class TemplateDefinitionDto extends SingleResourceTransportDto
 {
     private static final long serialVersionUID = -2655629613600887997L;
+    public static final String MEDIA_TYPE = "application/vnd.abiquo.templatedefinition+xml";
 
     private Integer id;
 
@@ -150,5 +151,11 @@ public class TemplateDefinitionDto extends SingleResourceTransportDto
     public void setDescription(final String description)
     {
         this.description = StringUtils.strip(description);
+    }
+    
+    @Override
+    public String getMediaType()
+    {
+        return TemplateDefinitionDto.MEDIA_TYPE;
     }
 }

@@ -31,9 +31,17 @@ import com.abiquo.model.transport.WrapperDto;
 @XmlRootElement(name = "limits")
 public class DatacentersLimitsDto extends WrapperDto<DatacenterLimitsDto>
 {
+    public static final String MEDIA_TYPE = "application/vnd.abiquo.limits+xml";
+    
     @XmlElement(name = "limit")
     public List<DatacenterLimitsDto> getCollection()
     {
         return collection;
+    }
+    
+    @Override
+    public String getMediaType()
+    {
+        return DatacentersLimitsDto.MEDIA_TYPE;
     }
 }

@@ -28,6 +28,8 @@ import com.abiquo.model.transport.SingleResourceTransportDto;
 @XmlRootElement(name = "enterpriseExclusionRule")
 public class EnterpriseExclusionRuleDto extends SingleResourceTransportDto
 {
+    public static final String MEDIA_TYPE = "application/vnd.abiquo.enterpriseexclusionrule+xml";
+    
     private static final long serialVersionUID = 1L;
 
     private Integer id;
@@ -40,6 +42,12 @@ public class EnterpriseExclusionRuleDto extends SingleResourceTransportDto
     public void setId(Integer id)
     {
         this.id = id;
+    }
+    
+    @Override
+    public String getMediaType()
+    {
+        return EnterpriseExclusionRuleDto.MEDIA_TYPE;
     }
 
 }

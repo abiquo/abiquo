@@ -24,11 +24,13 @@ package com.abiquo.server.core.enterprise;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.abiquo.model.transport.SingleResourceTransportDto;
+import com.abiquo.server.core.infrastructure.DatacenterDto;
 
 @XmlRootElement(name = "roleLdap")
 public class RoleLdapDto extends SingleResourceTransportDto
 {
-
+    public static final String MEDIA_TYPE = "application/vnd.abiquo.roleldap+xml";
+    
     public RoleLdapDto()
     {
         super();
@@ -65,4 +67,9 @@ public class RoleLdapDto extends SingleResourceTransportDto
         this.roleLdap = roleLdap;
     }
 
+    @Override
+    public String getMediaType()
+    {
+        return RoleLdapDto.MEDIA_TYPE;
+    }
 }

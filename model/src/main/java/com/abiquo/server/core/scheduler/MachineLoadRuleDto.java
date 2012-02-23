@@ -28,6 +28,8 @@ import com.abiquo.model.transport.SingleResourceTransportDto;
 @XmlRootElement(name = "machineLoadRule")
 public class MachineLoadRuleDto extends SingleResourceTransportDto
 {
+    public static final String MEDIA_TYPE = "application/vnd.abiquo.machineloadrule+xml";
+    
     private Integer id;
 
     public Integer getId()
@@ -63,5 +65,10 @@ public class MachineLoadRuleDto extends SingleResourceTransportDto
     {
         this.ramLoadPercentage = ramLoadPercentage;
     }
-
+ 
+    @Override
+    public String getMediaType()
+    {
+        return MachineLoadRuleDto.MEDIA_TYPE;
+    }
 }

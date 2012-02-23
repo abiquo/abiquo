@@ -27,15 +27,23 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.abiquo.model.transport.WrapperDto;
+import com.abiquo.server.core.infrastructure.DatacenterDto;
 
 @XmlRootElement(name = "datacenterRepositories")
 public class DatacenterRepositoriesDto extends WrapperDto<DatacenterRepositoryDto>
 {
     private static final long serialVersionUID = 1810037128474030040L;
+    public static final String MEDIA_TYPE = "application/vnd.abiquo.datacenterrepositories+xml";
 
     @XmlElement(name = "datacenterRepository")
     public List<DatacenterRepositoryDto> getCollection()
     {
         return collection;
+    }
+    
+    @Override
+    public String getMediaType()
+    {
+        return DatacenterRepositoriesDto.MEDIA_TYPE;
     }
 }

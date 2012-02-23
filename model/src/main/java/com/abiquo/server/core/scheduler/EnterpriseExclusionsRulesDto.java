@@ -27,6 +27,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.abiquo.model.transport.WrapperDto;
+import com.abiquo.server.core.infrastructure.DatacenterDto;
 
 /**
  * Represent a collection of enterpriseExclusionRules
@@ -34,10 +35,18 @@ import com.abiquo.model.transport.WrapperDto;
 @XmlRootElement(name = "enterpriseExclusionRules")
 public class EnterpriseExclusionsRulesDto extends WrapperDto<EnterpriseExclusionRuleDto>
 {
+    public static final String MEDIA_TYPE = "application/vnd.abiquo.enterpriseexclusionrules+xml";
+    
     @Override
     @XmlElement(name = "enterpriseExclusionRule")
     public List<EnterpriseExclusionRuleDto> getCollection()
     {
         return collection;
+    }
+    
+    @Override
+    public String getMediaType()
+    {
+        return EnterpriseExclusionsRulesDto.MEDIA_TYPE;
     }
 }

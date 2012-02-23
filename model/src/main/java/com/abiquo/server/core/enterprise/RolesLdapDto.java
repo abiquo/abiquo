@@ -31,10 +31,18 @@ import com.abiquo.model.transport.WrapperDto;
 @XmlRootElement(name = "roles")
 public class RolesLdapDto extends WrapperDto<RoleLdapDto>
 {
+    public static final String MEDIA_TYPE = "application/vnd.abiquo.rolesldap+xml";
+    
     @Override
     @XmlElement(name = "role")
     public List<RoleLdapDto> getCollection()
     {
         return collection;
+    }
+    
+    @Override
+    public String getMediaType()
+    {
+        return RolesLdapDto.MEDIA_TYPE;
     }
 }

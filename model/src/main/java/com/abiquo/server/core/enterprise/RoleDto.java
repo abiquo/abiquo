@@ -24,10 +24,13 @@ package com.abiquo.server.core.enterprise;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.abiquo.model.transport.SingleResourceTransportDto;
+import com.abiquo.server.core.infrastructure.DatacenterDto;
 
 @XmlRootElement(name = "role")
 public class RoleDto extends SingleResourceTransportDto
 {
+    public static final String MEDIA_TYPE = "application/vnd.abiquo.role+xml";
+    
     public RoleDto()
     {
         super();
@@ -102,6 +105,12 @@ public class RoleDto extends SingleResourceTransportDto
     public void setIdEnterprise(final Integer idEnterprise)
     {
         this.idEnterprise = idEnterprise;
+    }
+    
+    @Override
+    public String getMediaType()
+    {
+        return RoleDto.MEDIA_TYPE;
     }
 
 }
