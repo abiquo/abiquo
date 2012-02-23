@@ -24,11 +24,13 @@ package com.abiquo.server.core.appslibrary;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.abiquo.model.transport.SingleResourceTransportDto;
+import com.abiquo.server.core.infrastructure.DatacenterDto;
 
 @XmlRootElement(name = "icon")
 public class IconDto extends SingleResourceTransportDto
 {
     private static final long serialVersionUID = 1L;
+    public static final String MEDIA_TYPE = "application/vnd.abiquo.icon+xml";
 
     private Integer id;
 
@@ -65,5 +67,10 @@ public class IconDto extends SingleResourceTransportDto
     {
         this.path = path;
     }
-
+    
+    @Override
+    public String getMediaType()
+    {
+        return IconDto.MEDIA_TYPE;
+    }
 }

@@ -24,11 +24,13 @@ package com.abiquo.server.core.appslibrary;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.abiquo.model.transport.SingleResourceTransportDto;
+import com.abiquo.server.core.infrastructure.DatacenterDto;
 import com.sun.xml.txw2.annotation.XmlElement;
 
 @XmlRootElement(name = "category")
 public class CategoryDto extends SingleResourceTransportDto
 {
+    public static final String MEDIA_TYPE = "application/vnd.abiquo.category+xml";
     private static final long serialVersionUID = 1L;
 
     private Integer id;
@@ -80,4 +82,10 @@ public class CategoryDto extends SingleResourceTransportDto
         this.defaultCategory = defaultCategory;
     }
 
+    @Override
+    public String getMediaType()
+    {
+        return CategoryDto.MEDIA_TYPE;
+    }
+    
 }

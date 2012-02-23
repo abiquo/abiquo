@@ -24,11 +24,13 @@ package com.abiquo.model.transport.error;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.abiquo.model.transport.SingleResourceTransportDto;
+import com.abiquo.server.core.infrastructure.DatacenterDto;
 
 @XmlRootElement(name = "error")
 public class ErrorDto extends SingleResourceTransportDto
 {
     private static final long serialVersionUID = 1L;
+    public static final String MEDIA_TYPE = "application/vnd.abiquo.error+xml";
 
     private String code;
 
@@ -75,5 +77,11 @@ public class ErrorDto extends SingleResourceTransportDto
     public int hashCode()
     {
         return 31 * toString().hashCode();
+    }
+    
+    @Override
+    public String getMediaType()
+    {
+        return ErrorDto.MEDIA_TYPE;
     }
 }

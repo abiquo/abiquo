@@ -32,12 +32,19 @@ import com.abiquo.model.transport.WrapperDto;
 public class IconsDto extends WrapperDto<IconDto>
 {
     private static final long serialVersionUID = 1L;
+    public static final String MEDIA_TYPE = "application/vnd.abiquo.icons+xml";
 
     @Override
     @XmlElement(name = "icon")
     public List<IconDto> getCollection()
     {
         return collection;
+    }
+    
+    @Override
+    public String getMediaType()
+    {
+        return IconsDto.MEDIA_TYPE;
     }
 
 }

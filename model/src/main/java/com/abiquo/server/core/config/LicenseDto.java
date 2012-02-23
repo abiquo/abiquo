@@ -31,6 +31,7 @@ import com.abiquo.model.transport.SingleResourceTransportDto;
 public class LicenseDto extends SingleResourceTransportDto
 {
     private static final long serialVersionUID = 1L;
+    public static final String MEDIA_TYPE = "application/vnd.abiquo.license+xml";
 
     /** The license id **/
     private Integer id;
@@ -110,6 +111,12 @@ public class LicenseDto extends SingleResourceTransportDto
     public void setExpiration(String expiration)
     {
         this.expiration = expiration;
+    }
+    
+    @Override
+    public String getMediaType()
+    {
+        return LicenseDto.MEDIA_TYPE;
     }
 
 }

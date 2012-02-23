@@ -37,6 +37,7 @@ import com.abiquo.model.transport.WrapperDto;
 public class ErrorsDto extends WrapperDto<ErrorDto>
 {
     private static final long serialVersionUID = 1L;
+    public static final String MEDIA_TYPE = "application/vnd.abiquo.error+xml";
 
     @Override
     @XmlElement(name = "error")
@@ -78,5 +79,11 @@ public class ErrorsDto extends WrapperDto<ErrorDto>
         {
             this.getCollection().add(new ErrorDto(commonError.getCode(), commonError.getMessage()));
         }
+    }
+    
+    @Override
+    public String getMediaType()
+    {
+        return ErrorsDto.MEDIA_TYPE;
     }
 }

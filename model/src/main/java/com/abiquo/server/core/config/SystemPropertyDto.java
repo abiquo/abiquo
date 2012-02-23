@@ -23,11 +23,13 @@ package com.abiquo.server.core.config;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.abiquo.model.transport.SingleResourceTransportDto;
+import com.abiquo.server.core.infrastructure.DatacenterDto;
 
 @XmlRootElement(name = "property")
 public class SystemPropertyDto extends SingleResourceTransportDto
 {
     private static final long serialVersionUID = 1L;
+    public static final String MEDIA_TYPE = "application/vnd.abiquo.systemproperty+xml";
 
     private Integer id;
 
@@ -75,6 +77,12 @@ public class SystemPropertyDto extends SingleResourceTransportDto
     public void setDescription(String description)
     {
         this.description = description;
+    }
+    
+    @Override
+    public String getMediaType()
+    {
+        return SystemPropertyDto.MEDIA_TYPE;
     }
 
 }

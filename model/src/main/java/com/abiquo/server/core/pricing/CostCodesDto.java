@@ -36,11 +36,18 @@ public class CostCodesDto extends WrapperDto<CostCodeDto>
      * 
      */
     private static final long serialVersionUID = 1L;
+    public static final String MEDIA_TYPE = "application/vnd.abiquo.costcodes+xml";
 
     @Override
     @XmlElement(name = "costCode")
     public List<CostCodeDto> getCollection()
     {
         return collection;
+    }
+    
+    @Override
+    public String getMediaType()
+    {
+        return CostCodesDto.MEDIA_TYPE;
     }
 }
