@@ -225,6 +225,7 @@ ALTER TABLE `kinton`.`ovf_package_list_has_ovf_package` ADD CONSTRAINT `fk_ovf_p
     ON DELETE CASCADE
     ON UPDATE NO ACTION;
 
+
 ALTER TABLE `kinton`.`physicalmachine` DROP COLUMN realram, DROP COLUMN realcpu, DROP COLUMN realStorage, DROP COLUMN hd, DROP COLUMN hdUsed;
 
 ALTER TABLE `kinton`.`virtualappliance` DROP COLUMN `state`;
@@ -242,6 +243,7 @@ ALTER TABLE `kinton`.`vappstateful_conversions` DROP COLUMN `substate`;
 ALTER TABLE `kinton`.`node_virtual_image_stateful_conversions` ADD COLUMN `state` VARCHAR(50)  DEFAULT NULL AFTER `idDiskStatefulConversion`;
 ALTER TABLE `kinton`.`node_virtual_image_stateful_conversions` ADD COLUMN `subState` VARCHAR(50)  DEFAULT NULL AFTER `state`;
 ALTER TABLE `kinton`.`ovf_package` MODIFY COLUMN `name` VARCHAR(255)  CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL;
+ALTER TABLE `kinton`.`ovf_package` MODIFY COLUMN `productName` VARCHAR(255)  CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL;
 
 ALTER TABLE `kinton`.`datacenter` ADD COLUMN `uuid` VARCHAR(40) DEFAULT NULL AFTER `idDataCenter`;
 

@@ -1518,7 +1518,7 @@ CREATE  TABLE IF NOT EXISTS `kinton`.`ovf_package` (
   `url` VARCHAR(255) NULL NOT NULL,
   `name` VARCHAR(255) NULL ,
   `description` VARCHAR(255) NULL ,
-  `productName` VARCHAR(45) NULL ,
+  `productName` VARCHAR(255) NULL ,
   `productUrl` VARCHAR(45) NULL ,
   `productVersion` VARCHAR(45) NULL ,
   `productVendor` VARCHAR(45) NULL ,
