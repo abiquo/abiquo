@@ -28,7 +28,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
-import java.net.SocketTimeoutException;
 import java.net.URI;
 
 import javax.ws.rs.Consumes;
@@ -36,13 +35,14 @@ import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.Providers;
 
-import org.apache.catalina.util.URLEncoder;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.wink.common.annotations.Parent;
@@ -66,6 +66,7 @@ import com.abiquo.appliancemanager.exceptions.EventException;
 import com.abiquo.appliancemanager.transport.TemplateDto;
 import com.abiquo.appliancemanager.transport.TemplateStatusEnumType;
 import com.abiquo.appliancemanager.transport.TemplatesStateDto;
+import com.abiquo.ovfmanager.ovf.xml.OVFSerializer;
 
 @Parent(EnterpriseRepositoryResource.class)
 @Path(TemplatesResource.OVFPI_PATH)
@@ -221,11 +222,26 @@ public class TemplatesResource
     }
 
     @POST
-    @Path("actions/validate")
-    public TemplateDto validate(final EnvelopeType envelope)
+    @Consumes("text/plain")
+    @Path("/actions/validate")
+    public TemplateDto validate(final String envelopetxt)
     {
+
+        EnvelopeType envelope;
+        try
+        {
+            envelope =
+                OVFSerializer.getInstance().readXMLEnvelope(
+                    new ByteArrayInputStream(envelopetxt.getBytes()));
+        }
+        catch (Exception e)
+        {
+            throw new WebApplicationException(Response.status(Status.BAD_REQUEST).entity(e).build());
+        }
+
         return TemplateFromOVFEnvelope.createTemplateDto("http://am/validation/OK.ovf",
             validate.checkEnvelopeIsValid(envelope));
+
     }
 
     private TemplateDto readTemplateDtoFromMultipart(final InPart diskInfoPart,
