@@ -31,6 +31,9 @@ import com.abiquo.model.transport.WrapperDto;
 @XmlRootElement(name = "enterprises")
 public class EnterprisesDto extends WrapperDto<EnterpriseDto>
 {
+
+    public static final String MEDIA_TYPE = "application/vnd.abiquo.enterprises+xml";
+    
     @Override
     @XmlElement(name = "enterprise")
     public List<EnterpriseDto> getCollection()
@@ -42,5 +45,11 @@ public class EnterprisesDto extends WrapperDto<EnterpriseDto>
     {
         collection = enterprises;
 
+    }
+    
+    @Override
+    public String getMediaType()
+    {
+        return EnterprisesDto.MEDIA_TYPE;
     }
 }

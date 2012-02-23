@@ -24,10 +24,14 @@ package com.abiquo.server.core.infrastructure.network;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.abiquo.model.transport.SingleResourceTransportDto;
+import com.abiquo.server.core.infrastructure.MachineDto;
 
 @XmlRootElement(name = "ipPoolManagement")
 public class IpPoolManagementDto extends SingleResourceTransportDto
 {
+ 
+    public static final String MEDIA_TYPE = "application/vnd.abiquo.ip+xml";
+    
     private Integer id;
 
     public Integer getId()
@@ -110,6 +114,12 @@ public class IpPoolManagementDto extends SingleResourceTransportDto
     public void setAvailable(final boolean available)
     {
         this.available = available;
+    }
+    
+    @Override
+    public String getMediaType()
+    {
+        return IpPoolManagementDto.MEDIA_TYPE;
     }
 
 }

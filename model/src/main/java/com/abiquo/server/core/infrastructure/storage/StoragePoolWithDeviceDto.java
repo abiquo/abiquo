@@ -42,5 +42,11 @@ public class StoragePoolWithDeviceDto extends StoragePoolDto
     {
         return device;
     }
+    
+    @Override
+    public String getMediaType()
+    {
+        return StoragePoolWithDeviceDto.MEDIA_TYPE;
+    }
 
 }

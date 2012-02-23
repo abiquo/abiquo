@@ -29,7 +29,7 @@ public class StoragePoolWithTierDto extends StoragePoolDto
 
     private static final long serialVersionUID = 1L;
 
-    public static final String MEDIA_TYPE = "application/storagepoolwithtierdto+xml";
+    public static final String MEDIA_TYPE = "application/storagepoolwithtier+xml";
 
     private TierDto tier;
 
@@ -41,5 +41,11 @@ public class StoragePoolWithTierDto extends StoragePoolDto
     public TierDto getTier()
     {
         return tier;
+    }
+    
+    @Override
+    public String getMediaType()
+    {
+        return StoragePoolWithTierDto.MEDIA_TYPE;
     }
 }

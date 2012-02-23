@@ -42,12 +42,19 @@ public class StorageDevicesDto extends WrapperDto<StorageDeviceDto>
      * Generated serial version UID
      */
     private static final long serialVersionUID = -8258548072929133424L;
+    public static final String MEDIA_TYPE = "application/vnd.abiquo.storagedevices+xml";
 
     @Override
     @XmlElement(name = "device")
     public List<StorageDeviceDto> getCollection()
     {
         return collection;
+    }
+    
+    @Override
+    public String getMediaType()
+    {
+        return StorageDevicesDto.MEDIA_TYPE;
     }
 
 }

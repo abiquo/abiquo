@@ -35,12 +35,19 @@ public class DhcpOptionsDto extends WrapperDto<DhcpOptionDto>
      * 
      */
     private static final long serialVersionUID = 1L;
+    public static final String MEDIA_TYPE = "application/vnd.abiquo.dhcpoptions+xml";
 
     @Override
     @XmlElement(name = "dhcpoption")
     public List<DhcpOptionDto> getCollection()
     {
         return collection;
+    }
+    
+    @Override
+    public String getMediaType()
+    {
+        return DhcpOptionsDto.MEDIA_TYPE;
     }
 
 }

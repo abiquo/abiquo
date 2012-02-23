@@ -27,10 +27,13 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import com.abiquo.model.enumerator.NetworkType;
 import com.abiquo.model.transport.SingleResourceTransportDto;
+import com.abiquo.server.core.infrastructure.RemoteServicesDto;
 
 @XmlRootElement(name = "network")
 public class VLANNetworkDto extends SingleResourceTransportDto implements Serializable
 {
+    public static final String MEDIA_TYPE = "application/vnd.abiquo.vlan+xml";
+    
     private Integer id;
 
     private String name;
@@ -187,4 +190,10 @@ public class VLANNetworkDto extends SingleResourceTransportDto implements Serial
         this.unmanaged = unmanaged;
     }
 
+    @Override
+    public String getMediaType()
+    {
+        return VLANNetworkDto.MEDIA_TYPE;
+    }
+    
 }

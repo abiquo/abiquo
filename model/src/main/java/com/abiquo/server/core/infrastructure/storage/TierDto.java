@@ -32,6 +32,7 @@ public class TierDto extends SingleResourceTransportDto
      * 
      */
     private static final long serialVersionUID = 1L;
+    public static final String MEDIA_TYPE = "application/vnd.abiquo.tier+xml";
 
     private Integer id;
 
@@ -84,6 +85,12 @@ public class TierDto extends SingleResourceTransportDto
     public void setDescription(final String description)
     {
         this.description = description;
+    }
+    
+    @Override
+    public String getMediaType()
+    {
+        return TierDto.MEDIA_TYPE;
     }
 
 }

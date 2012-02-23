@@ -37,7 +37,7 @@ public class StoragePoolsWithDeviceDto extends WrapperDto<StoragePoolWithDeviceD
 {
     private static final long serialVersionUID = 1L;
 
-    public static final String MEDIA_TYPE = "application/storagepoolswithdevicedto+xml";
+    public static final String MEDIA_TYPE = "application/storagepoolswithdevice+xml";
 
     @Override
     @XmlElement(name = "storagePoolWithDevice")
@@ -48,5 +48,11 @@ public class StoragePoolsWithDeviceDto extends WrapperDto<StoragePoolWithDeviceD
             collection = new ArrayList<StoragePoolWithDeviceDto>();
         }
         return collection;
+    }
+    
+    @Override
+    public String getMediaType()
+    {
+        return StoragePoolsWithDeviceDto.MEDIA_TYPE;
     }
 }

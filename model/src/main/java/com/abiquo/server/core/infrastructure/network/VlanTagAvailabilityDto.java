@@ -27,6 +27,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import com.abiquo.model.enumerator.VlanTagAvailabilityType;
 import com.abiquo.model.transport.SingleResourceTransportDto;
+import com.abiquo.server.core.infrastructure.MachineDto;
 
 /**
  * Set the transfer object for the type VlanTagAvialiabilityType
@@ -40,7 +41,8 @@ public class VlanTagAvailabilityDto extends SingleResourceTransportDto implement
      * Generated serial version UID.
      */
     private static final long serialVersionUID = 8354795972402115520L;
-
+    public static final String MEDIA_TYPE = "application/vnd.abiquo.vlantagavailability+xml";
+    
     private VlanTagAvailabilityType available;
 
     private String message;
@@ -63,5 +65,11 @@ public class VlanTagAvailabilityDto extends SingleResourceTransportDto implement
     public void setMessage(final String message)
     {
         this.message = message;
+    }
+    
+    @Override
+    public String getMediaType()
+    {
+        return VlanTagAvailabilityDto.MEDIA_TYPE;
     }
 }

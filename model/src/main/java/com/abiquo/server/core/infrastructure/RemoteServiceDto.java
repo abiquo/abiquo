@@ -31,6 +31,8 @@ import com.abiquo.model.transport.error.ErrorsDto;
 @XmlRootElement(name = "remoteService")
 public class RemoteServiceDto extends SingleResourceTransportDto
 {
+    public static final String MEDIA_TYPE = "application/vnd.abiquo.remoteservice+xml";
+    
     private Integer id;
 
     public Integer getId()
@@ -90,6 +92,12 @@ public class RemoteServiceDto extends SingleResourceTransportDto
     public void setConfigurationErrors(ErrorsDto configurationErrors)
     {
         this.configurationErrors = configurationErrors;
+    }
+    
+    @Override
+    public String getMediaType()
+    {
+        return RemoteServiceDto.MEDIA_TYPE;
     }
 
 }

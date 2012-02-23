@@ -31,6 +31,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.abiquo.model.transport.WrapperDto;
+import com.abiquo.server.core.infrastructure.network.DhcpOptionDto;
 
 /**
  * @author jdevesa@abiquo.com
@@ -39,6 +40,8 @@ import com.abiquo.model.transport.WrapperDto;
 public class TiersDto extends WrapperDto<TierDto>
 {
 
+    public static final String MEDIA_TYPE = "application/vnd.abiquo.tiers+xml";
+    
     /**
      * Generated serial version UID.
      */
@@ -54,6 +57,12 @@ public class TiersDto extends WrapperDto<TierDto>
             collection = new ArrayList<TierDto>();
         }
         return collection;
+    }
+    
+    @Override
+    public String getMediaType()
+    {
+        return TiersDto.MEDIA_TYPE;
     }
 
 }
