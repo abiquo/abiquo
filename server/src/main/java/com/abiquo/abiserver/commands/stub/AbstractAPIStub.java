@@ -491,7 +491,7 @@ public class AbstractAPIStub
         }
     }
 
-    protected String createEnterprisesLink(final String filter, Integer offset,
+    protected String createEnterprisesLink(final String filter, final Integer firstElem,
         final Integer numResults)
     {
         String uri = URIResolver.resolveURI(apiUri, "admin/enterprises", Collections.emptyMap());
@@ -500,11 +500,10 @@ public class AbstractAPIStub
         {
             queryParams.put("filter", new String[] {filter});
         }
-        if (offset != null && numResults != null)
+        if (firstElem != null && numResults != null)
         {
-            offset = offset / numResults;
 
-            queryParams.put("page", new String[] {offset.toString()});
+            queryParams.put("START_WITH", new String[] {firstElem.toString()});
             queryParams.put("numResults", new String[] {numResults.toString()});
         }
 
