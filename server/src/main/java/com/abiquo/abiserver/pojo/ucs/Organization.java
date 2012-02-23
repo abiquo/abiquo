@@ -28,12 +28,13 @@
 
 package com.abiquo.abiserver.pojo.ucs;
 
+import com.abiquo.model.transport.SingleResourceTransportDto;
 import com.abiquo.server.core.infrastructure.OrganizationDto;
 
 /**
  * This class is not persisted in Abiquo but we needed to provide compatibility with the server.
  */
-public class Organization
+public class Organization extends SingleResourceTransportDto
 {
 
     protected String name;
