@@ -25,6 +25,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
 import com.abiquo.model.transport.SingleResourceTransportDto;
+import com.abiquo.server.core.infrastructure.DatacenterDto;
 
 @XmlRootElement(name = "element")
 @XmlType(propOrder = {"name", "description", "priority", "selected"})
@@ -32,7 +33,7 @@ public class RunlistElementDto extends SingleResourceTransportDto
 {
     private static final long serialVersionUID = 1L;
 
-    public static final String EXTENDED_RUNLIST_MIME_TYPE = "application/vnd.extended-runlist+xml";
+    public static final String MEDIA_TYPE = "application/vnd.abiquo.extended-runlist+xml";
 
     // Runlist elements should not return the ID, since the resource is not a regular resource in
     // the DB. It is synchronized with the Chef Server every time it is requested
@@ -85,4 +86,9 @@ public class RunlistElementDto extends SingleResourceTransportDto
         this.priority = priority;
     }
 
+    @Override
+    public String getMediaType()
+    {
+        return RunlistElementDto.MEDIA_TYPE;
+    }
 }

@@ -50,5 +50,11 @@ public class CostCodeCurrenciesDto extends WrapperDto<CostCodeCurrencyDto>
         }
         return collection;
     }
+    
+    @Override
+    public String getMediaType()
+    {
+        return CostCodeCurrenciesDto.MEDIA_TYPE;
+    }
 
 }

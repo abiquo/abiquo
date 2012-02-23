@@ -34,6 +34,7 @@ public class PricingCostCodeDto extends SingleResourceTransportDto
      * 
      */
     private static final long serialVersionUID = 1L;
+    public static final String MEDIA_TYPE = "application/vnd.abiquo.pricingcostcode+xml";
 
     private Integer id;
 
@@ -69,6 +70,12 @@ public class PricingCostCodeDto extends SingleResourceTransportDto
     public void setIdCostCode(final Integer idCostCode)
     {
         this.idCostCode = idCostCode;
+    }
+    
+    @Override
+    public String getMediaType()
+    {
+        return PricingCostCodeDto.MEDIA_TYPE;
     }
 
 }

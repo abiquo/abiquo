@@ -25,11 +25,14 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.model.transport.SingleResourceTransportDto;
+import com.abiquo.server.core.infrastructure.DatacenterDto;
 
 @XmlRootElement(name = "hypervisortype")
 public class HypervisorTypeDto extends SingleResourceTransportDto
 {
 
+    public static final String MEDIA_TYPE = "application/vnd.abiquo.hypervisortype+xml";
+    
     private static final long serialVersionUID = -6899075534020087650L;
 
     private int defaultPort;
@@ -90,5 +93,11 @@ public class HypervisorTypeDto extends SingleResourceTransportDto
     public void setName(final String name)
     {
         this.name = name;
+    }
+    
+    @Override
+    public String getMediaType()
+    {
+        return HypervisorTypeDto.MEDIA_TYPE;
     }
 }

@@ -24,10 +24,12 @@ package com.abiquo.server.core.statistics;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.abiquo.model.transport.SingleResourceTransportDto;
+import com.abiquo.server.core.infrastructure.DatacenterDto;
 
 @XmlRootElement(name = "cloudusage")
 public class CloudUsageDto extends SingleResourceTransportDto
 {
+    public static final String MEDIA_TYPE = "application/vnd.abiquo.cloudusage+xml";
     private Integer id;
 
     public Integer getId()
@@ -314,6 +316,12 @@ public class CloudUsageDto extends SingleResourceTransportDto
     public void setVirtualMachinesRunning(long virtualMachinesRunning)
     {
         this.virtualMachinesRunning = virtualMachinesRunning;
+    }
+    
+    @Override
+    public String getMediaType()
+    {
+        return CloudUsageDto.MEDIA_TYPE;
     }
 
 }

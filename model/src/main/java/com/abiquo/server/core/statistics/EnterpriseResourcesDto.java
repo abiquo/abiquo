@@ -24,10 +24,12 @@ package com.abiquo.server.core.statistics;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.abiquo.model.transport.SingleResourceTransportDto;
+import com.abiquo.server.core.infrastructure.DatacenterDto;
 
 @XmlRootElement(name = "enterpriseresources")
 public class EnterpriseResourcesDto extends SingleResourceTransportDto
 {
+    public static final String MEDIA_TYPE = "application/vnd.abiquo.enterpriseresources+xml";
     private Integer id;
 
     public Integer getId()
@@ -206,6 +208,12 @@ public class EnterpriseResourcesDto extends SingleResourceTransportDto
     public void setMemoryUsed(long memoryUsed)
     {
         this.memoryUsed = memoryUsed;
+    }
+    
+    @Override
+    public String getMediaType()
+    {
+        return EnterpriseResourcesDto.MEDIA_TYPE;
     }
 
 }

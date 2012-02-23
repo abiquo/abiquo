@@ -25,10 +25,12 @@ import java.math.BigDecimal;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.abiquo.model.transport.SingleResourceTransportDto;
+import com.abiquo.server.core.infrastructure.DatacenterDto;
 
 @XmlRootElement(name = "pricingTier")
 public class PricingTierDto extends SingleResourceTransportDto
 {
+    public static final String MEDIA_TYPE = "application/vnd.abiquo.pricingtier+xml";
     /**
      * 
      */
@@ -56,6 +58,12 @@ public class PricingTierDto extends SingleResourceTransportDto
     public void setPrice(final BigDecimal price)
     {
         this.price = price;
+    }
+    
+    @Override
+    public String getMediaType()
+    {
+        return PricingTierDto.MEDIA_TYPE;
     }
 
 }

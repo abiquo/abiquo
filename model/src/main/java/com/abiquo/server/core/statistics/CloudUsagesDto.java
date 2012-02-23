@@ -31,10 +31,18 @@ import com.abiquo.model.transport.WrapperDto;
 @XmlRootElement(name = "cloudusages")
 public class CloudUsagesDto extends WrapperDto<CloudUsageDto>
 {
+    public static final String MEDIA_TYPE = "application/vnd.abiquo.cloudusages+xml";
+    
     @XmlElement(name = "cloudusage")
     public List<CloudUsageDto> getCollection()
     {
         return collection;
+    }
+    
+    @Override
+    public String getMediaType()
+    {
+        return CloudUsagesDto.MEDIA_TYPE;
     }
 
 }

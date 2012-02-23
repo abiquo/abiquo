@@ -35,7 +35,7 @@ public class PricingTemplatesDto extends WrapperDto<PricingTemplateDto>
      * 
      */
     private static final long serialVersionUID = 1L;
-    public static final String MEDIA_TYPE = "application/vnd.abiquo.pricingtemplatesxml";
+    public static final String MEDIA_TYPE = "application/vnd.abiquo.pricingtemplates+xml";
 
     @Override
     @XmlElement(name = "pricingTemplate")

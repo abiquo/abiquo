@@ -24,10 +24,13 @@ package com.abiquo.server.core.statistics;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.abiquo.model.transport.SingleResourceTransportDto;
+import com.abiquo.server.core.infrastructure.DatacenterDto;
 
 @XmlRootElement(name = "vdcResources")
 public class VirtualDatacenterResourcesDto extends SingleResourceTransportDto
 {
+    public static final String MEDIA_TYPE = "application/vnd.abiquo.virtualdatacenterresources+xml";
+    
     private Integer id;
 
     public Integer getId()
@@ -254,6 +257,12 @@ public class VirtualDatacenterResourcesDto extends SingleResourceTransportDto
     public void setIdEnterprise(int idEnterprise)
     {
         this.idEnterprise = idEnterprise;
+    }
+    
+    @Override
+    public String getMediaType()
+    {
+        return VirtualDatacenterResourcesDto.MEDIA_TYPE;
     }
 
 }

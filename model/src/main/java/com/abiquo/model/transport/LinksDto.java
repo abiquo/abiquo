@@ -26,6 +26,8 @@ package com.abiquo.model.transport;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
+import com.abiquo.server.core.infrastructure.DatacenterDto;
+
 /**
  * Just a single Dto with links to stablish relations.
  * 
@@ -35,5 +37,11 @@ import javax.xml.bind.annotation.XmlRootElement;
 public class LinksDto extends SingleResourceTransportDto
 {
     private static final long serialVersionUID = -8659042159324422045L;
+    public static final String MEDIA_TYPE = "application/vnd.abiquo.links+xml";
+    @Override
+    public String getMediaType()
+    {
+        return LinksDto.MEDIA_TYPE;
+    }
 
 }
