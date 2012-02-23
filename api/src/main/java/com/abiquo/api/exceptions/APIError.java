@@ -186,7 +186,8 @@ public enum APIError
         "The virtual appliance is not running"), VIRTUALAPPLIANCE_DEPLOYED("VAPP-1",
         "The virtual appliance is deployed"), VIRTUALAPPLIANCE_NON_MANAGED_IMAGES("VAPP-4",
         "The virtual appliance has non-managed VM templates"), VIRTUALAPPLIANCE_INVALID_STATE_DELETE(
-        "VAPP-4", "The virtual appliance has non-managed VM templates"),
+        "VAPP-4", "The virtual appliance has non-managed VM templates"), VIRTUALAPPLIANCE_EMPTY(
+        "VAPP-5", "The virtual appliance does not contain any virtual machine"),
 
     // VIRTUAL CONVERSION
     NON_EXISTENT_VIRTUALAPPLIANCE_STATEFULCONVERSION("VASC-0",
@@ -693,8 +694,8 @@ public enum APIError
         // Outputs all errors in wiki table format
         for (APIError error : errors)
         {
-            System.out.println(String.format("| %s | %s | %s |", error.code, error.message,
-                error.name()));
+            System.out.println(String.format("| %s | %s | %s |", error.code, error.message, error
+                .name()));
         }
 
         System.out.println("\n ************ Flex client labels ************** \n");
