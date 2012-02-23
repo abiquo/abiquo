@@ -36,10 +36,12 @@ import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlElements;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import com.abiquo.model.transport.SingleResourceTransportDto;
+
 /**
  */
 @XmlRootElement(name = "logicServer")
-public class LogicServerDto
+public class LogicServerDto extends SingleResourceTransportDto
 {
 
     protected String name;
