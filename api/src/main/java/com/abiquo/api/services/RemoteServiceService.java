@@ -203,7 +203,8 @@ public class RemoteServiceService extends DefaultApiService
                     remoteService.setStatus(STATUS_ERROR);
                     APIError error = APIError.REMOTE_SERVICE_CONNECTION_FAILED;
                     configurationErrors.add(new ErrorDto(error.getCode(), remoteService.getType()
-                        .getName() + ", " + amEx.getMessage()));
+                        .getName()
+                        + ", " + amEx.getMessage()));
 
                     return configurationErrors;
 
@@ -230,7 +231,8 @@ public class RemoteServiceService extends DefaultApiService
                 remoteService.setStatus(STATUS_ERROR);
                 APIError error = APIError.REMOTE_SERVICE_CONNECTION_FAILED;
                 configurationErrors.add(new ErrorDto(error.getCode(), remoteService.getType()
-                    .getName() + ", " + error.getMessage()));
+                    .getName()
+                    + ", " + error.getMessage()));
                 return configurationErrors;
             }
         }
@@ -294,10 +296,26 @@ public class RemoteServiceService extends DefaultApiService
             flushErrors();
         }
 
+        // if it's the same uri, we must check the rs to update the state
+        // (it can change [stop, redis,rabbit,...])
         if (old.getUri().equals(dto.getUri()))
         {
-            // no other checks to determine if its of the same type etc
-            dto.setStatus(old.getStatus());
+            final ErrorsDto checkError =
+                checkRemoteServiceStatus(old.getDatacenter(), dto.getType(), dto.getUri());
+            if (checkError.isEmpty())
+            {
+                old.setStatus(STATUS_SUCCESS);
+                dto.setStatus(STATUS_SUCCESS);
+            }
+            else
+            {
+                old.setStatus(STATUS_ERROR);
+                dto.setStatus(STATUS_ERROR);
+            }
+            infrastructureRepo.updateRemoteService(old);
+            tracer
+                .log(SeverityType.INFO, ComponentType.DATACENTER, EventType.REMOTE_SERVICES_UPDATE,
+                    "remoteServices.updated", dto.getType().getName());
             return dto;
         }
 
@@ -636,8 +654,8 @@ public class RemoteServiceService extends DefaultApiService
     {
         ErrorsDto configurationErrors = new ErrorsDto();
 
-        if (infrastructureRepo.existAnyRemoteServiceWithTypeInDatacenter(datacenter,
-            remoteService.getType()))
+        if (infrastructureRepo.existAnyRemoteServiceWithTypeInDatacenter(datacenter, remoteService
+            .getType()))
         {
             APIError error = APIError.REMOTE_SERVICE_TYPE_EXISTS;
             configurationErrors.add(new ErrorDto(error.getCode(), remoteService.getType().getName()
@@ -656,7 +674,8 @@ public class RemoteServiceService extends DefaultApiService
             {
                 APIError error = APIError.REMOTE_SERVICE_UNDEFINED_PORT;
                 configurationErrors.add(new ErrorDto(error.getCode(), remoteService.getType()
-                    .getName() + " : " + error.getMessage()));
+                    .getName()
+                    + " : " + error.getMessage()));
                 if (flushErrors)
                 {
                     addConflictErrors(error);
@@ -670,7 +689,8 @@ public class RemoteServiceService extends DefaultApiService
                     {
                         APIError error = APIError.REMOTE_SERVICE_URL_ALREADY_EXISTS;
                         configurationErrors.add(new ErrorDto(error.getCode(), remoteService
-                            .getType().getName() + " : " + error.getMessage()));
+                            .getType().getName()
+                            + " : " + error.getMessage()));
                         if (flushErrors)
                         {
                             addConflictErrors(error);
