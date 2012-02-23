@@ -107,55 +107,55 @@ import org.w3c.dom.Element;
 })
 public class CIMResourceAllocationSettingDataType {
 
-    @XmlElement(name = "Address", nillable = true)
+    @XmlElement(name = "Address", nillable = true, required=false)
     protected CimString address;
-    @XmlElement(name = "AddressOnParent", nillable = true)
+    @XmlElement(name = "AddressOnParent", nillable = true, required=false)
     protected CimString addressOnParent;
-    @XmlElement(name = "AllocationUnits", nillable = true)
+    @XmlElement(name = "AllocationUnits", nillable = true, required=false)
     protected CimString allocationUnits;
-    @XmlElement(name = "AutomaticAllocation", nillable = true)
+    @XmlElement(name = "AutomaticAllocation", nillable = true, required=false)
     protected CimBoolean automaticAllocation;
-    @XmlElement(name = "AutomaticDeallocation", nillable = true)
+    @XmlElement(name = "AutomaticDeallocation", nillable = true, required=false)
     protected CimBoolean automaticDeallocation;
-    @XmlElement(name = "Caption", nillable = true)
+    @XmlElement(name = "Caption", nillable = true, required=false)
     protected Caption caption;
-    @XmlElement(name = "ChangeableType", nillable = true)
+    @XmlElement(name = "ChangeableType", nillable = true, required=false)
     protected ChangeableType changeableType;
-    @XmlElement(name = "ConfigurationName", nillable = true)
+    @XmlElement(name = "ConfigurationName", nillable = true, required=false)
     protected CimString configurationName;
-    @XmlElement(name = "Connection", nillable = true)
+    @XmlElement(name = "Connection", nillable = true, required=false)
     protected List<CimString> connection;
-    @XmlElement(name = "ConsumerVisibility", nillable = true)
+    @XmlElement(name = "ConsumerVisibility", nillable = true, required=false)
     protected ConsumerVisibility consumerVisibility;
-    @XmlElement(name = "Description", nillable = true)
+    @XmlElement(name = "Description", nillable = true, required=false)
     protected CimString description;
     @XmlElement(name = "ElementName", required = true)
     protected CimString elementName;
-    @XmlElement(name = "Generation", nillable = true)
+    @XmlElement(name = "Generation", nillable = true, required=false)
     protected CimUnsignedLong generation;
-    @XmlElement(name = "HostResource", nillable = true)
+    @XmlElement(name = "HostResource", nillable = true, required=false)
     protected List<CimString> hostResource;
     @XmlElement(name = "InstanceID", required = true)
     protected CimString instanceID;
-    @XmlElement(name = "Limit", nillable = true)
+    @XmlElement(name = "Limit", nillable = true, required=false)
     protected CimUnsignedLong limit;
-    @XmlElement(name = "MappingBehavior", nillable = true)
+    @XmlElement(name = "MappingBehavior", nillable = true, required=false)
     protected MappingBehavior mappingBehavior;
-    @XmlElement(name = "OtherResourceType", nillable = true)
+    @XmlElement(name = "OtherResourceType", nillable = true, required=false)
     protected CimString otherResourceType;
-    @XmlElement(name = "Parent", nillable = true)
+    @XmlElement(name = "Parent", nillable = true, required=false)
     protected CimString parent;
-    @XmlElement(name = "PoolID", nillable = true)
+    @XmlElement(name = "PoolID", nillable = true, required=false)
     protected CimString poolID;
-    @XmlElement(name = "Reservation", nillable = true)
+    @XmlElement(name = "Reservation", nillable = true, required=false)
     protected CimUnsignedLong reservation;
-    @XmlElement(name = "ResourceSubType", nillable = true)
+    @XmlElement(name = "ResourceSubType", nillable = true, required=false)
     protected CimString resourceSubType;
     @XmlElement(name = "ResourceType", nillable = true)
     protected ResourceType resourceType;
-    @XmlElement(name = "VirtualQuantity", nillable = true)
+    @XmlElement(name = "VirtualQuantity", nillable = true, required=false)
     protected CimUnsignedLong virtualQuantity;
-    @XmlElement(name = "Weight", nillable = true)
+    @XmlElement(name = "Weight", nillable = true, required=false)
     protected CimUnsignedInt weight;
     @XmlAnyElement(lax = true)
     protected List<Object> any;
