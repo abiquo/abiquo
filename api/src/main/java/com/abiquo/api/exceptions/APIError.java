@@ -195,7 +195,8 @@ public enum APIError
         "VAPP-10",
         "The virtual appliance cannot be moved nor copied since it contains incompatible virtual machines templates with the hypervisor to be moved"), VIRTUALAPPLIANCE_COPY_PERSISTENT_VM(
         "VAPP-11",
-        "The virtual appliance cannot be copied since it contains persistent virtual machines templates with the hypervisor to be moved"),
+        "The virtual appliance cannot be copied since it contains persistent virtual machines templates with the hypervisor to be moved"), VIRTUALAPPLIANCE_EMPTY(
+        "VAPP-12", "The virtual appliance does not contain any virtual machine"),
 
     // VIRTUAL CONVERSION
     NON_EXISTENT_VIRTUALAPPLIANCE_STATEFULCONVERSION("VASC-0",
