@@ -35,12 +35,10 @@ import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
-import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.Providers;
 
 import org.apache.commons.io.IOUtils;
@@ -48,7 +46,6 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.wink.common.annotations.Parent;
 import org.apache.wink.common.model.multipart.InMultiPart;
 import org.apache.wink.common.model.multipart.InPart;
-import org.dmtf.schemas.ovf.envelope._1.EnvelopeType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,15 +55,12 @@ import com.abiquo.am.exceptions.AMError;
 import com.abiquo.am.services.ErepoFactory;
 import com.abiquo.am.services.TemplateConventions;
 import com.abiquo.am.services.TemplateService;
-import com.abiquo.am.services.download.OVFDocumentFetch;
 import com.abiquo.am.services.notify.AMNotifier;
-import com.abiquo.am.services.ovfformat.TemplateFromOVFEnvelope;
 import com.abiquo.appliancemanager.exceptions.AMException;
 import com.abiquo.appliancemanager.exceptions.EventException;
 import com.abiquo.appliancemanager.transport.TemplateDto;
 import com.abiquo.appliancemanager.transport.TemplateStatusEnumType;
 import com.abiquo.appliancemanager.transport.TemplatesStateDto;
-import com.abiquo.ovfmanager.ovf.xml.OVFSerializer;
 
 @Parent(EnterpriseRepositoryResource.class)
 @Path(TemplatesResource.OVFPI_PATH)
@@ -82,9 +76,6 @@ public class TemplatesResource
 
     @Autowired
     TemplateService templateService;
-
-    @Autowired
-    OVFDocumentFetch validate;
 
     /**
      * include bundles <br>
@@ -219,29 +210,6 @@ public class TemplatesResource
             sb.append("/").append(java.net.URLEncoder.encode(part, "UTF-8"));
         }
         return sb.toString();
-    }
-
-    @POST
-    @Consumes("text/plain")
-    @Path("/actions/validate")
-    public TemplateDto validate(final String envelopetxt)
-    {
-
-        EnvelopeType envelope;
-        try
-        {
-            envelope =
-                OVFSerializer.getInstance().readXMLEnvelope(
-                    new ByteArrayInputStream(envelopetxt.getBytes()));
-        }
-        catch (Exception e)
-        {
-            throw new WebApplicationException(Response.status(Status.BAD_REQUEST).entity(e).build());
-        }
-
-        return TemplateFromOVFEnvelope.createTemplateDto("http://am/validation/OK.ovf",
-            validate.checkEnvelopeIsValid(envelope));
-
     }
 
     private TemplateDto readTemplateDtoFromMultipart(final InPart diskInfoPart,
