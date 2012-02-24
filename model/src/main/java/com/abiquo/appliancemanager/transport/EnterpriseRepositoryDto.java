@@ -21,6 +21,7 @@
 
 package com.abiquo.appliancemanager.transport;
 
+import javax.ws.rs.core.MediaType;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.abiquo.server.core.appslibrary.DatacenterRepositoryDto;
@@ -62,5 +63,11 @@ public class EnterpriseRepositoryDto extends RepositoryConfigurationDto
     public void setEnterpriseUsedMb(final long repositoryEnterpriseUsedMb)
     {
         this.enterpriseUsedMb = repositoryEnterpriseUsedMb;
+    }
+    
+    @Override
+    public String getMediaType()
+    {
+        return MediaType.APPLICATION_XML;
     }
 }

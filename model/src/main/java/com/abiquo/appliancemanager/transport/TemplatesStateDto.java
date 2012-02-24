@@ -23,6 +23,7 @@ package com.abiquo.appliancemanager.transport;
 
 import java.util.List;
 
+import javax.ws.rs.core.MediaType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
@@ -38,6 +39,12 @@ public class TemplatesStateDto extends WrapperDto<TemplateStateDto>
     public List<TemplateStateDto> getCollection()
     {
         return collection;
+    }
+    
+    @Override
+    public String getMediaType()
+    {
+        return MediaType.APPLICATION_XML;
     }
 
 }

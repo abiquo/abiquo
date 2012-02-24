@@ -43,6 +43,7 @@ import org.testng.annotations.Test;
 import com.abiquo.model.enumerator.Privileges;
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.model.rest.RESTLink;
+import com.abiquo.model.transport.LinksDto;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.Privilege;
 import com.abiquo.server.core.enterprise.Role;
@@ -464,7 +465,7 @@ public class UsersResourceIT extends AbstractJpaGeneratorIT
     @Override
     protected ClientResponse get(final String uri, final String username, final String password)
     {
-        return super.get(uri, username, password, AbstractResource.LINK_MEDIA_TYPE,
-            AbstractResource.LINK_MEDIA_TYPE);
+        return super.get(uri, username, password, LinksDto.MEDIA_TYPE,
+            LinksDto.MEDIA_TYPE);
     }
 }

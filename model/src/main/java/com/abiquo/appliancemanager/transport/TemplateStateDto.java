@@ -21,6 +21,7 @@
 
 package com.abiquo.appliancemanager.transport;
 
+import javax.ws.rs.core.MediaType;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
@@ -112,6 +113,12 @@ public class TemplateStateDto extends SingleResourceTransportDto
     public void setMasterOvf(final String masterOvf)
     {
         this.masterOvf = masterOvf;
+    }
+    
+    @Override
+    public String getMediaType()
+    {
+        return MediaType.APPLICATION_XML;
     }
 
 }

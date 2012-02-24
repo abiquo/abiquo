@@ -187,8 +187,5 @@ public abstract class SingleResourceTransportDto implements Serializable
         return Integer.valueOf(id);
     }
 
-    public String getMediaType()
-    {
-        throw new IllegalStateException("All the resources should extend this method");
-    }
+    public abstract String getMediaType();
 }

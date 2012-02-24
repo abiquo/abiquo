@@ -21,6 +21,7 @@
 
 package com.abiquo.server.core.appslibrary;
 
+import javax.ws.rs.core.MediaType;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.abiquo.model.transport.SingleResourceTransportDto;
@@ -52,6 +53,12 @@ public class AppsLibraryDto extends SingleResourceTransportDto
     public void setIdAppsLibrary(final int idAppsLibrary)
     {
         this.idAppsLibrary = idAppsLibrary;
+    }
+    
+    @Override
+    public String getMediaType()
+    {
+        return MediaType.APPLICATION_XML;
     }
 
 }

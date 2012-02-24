@@ -21,6 +21,7 @@
 
 package com.abiquo.appliancemanager.transport;
 
+import javax.ws.rs.core.MediaType;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.abiquo.model.transport.SingleResourceTransportDto;
@@ -79,4 +80,9 @@ public class RepositoryConfigurationDto extends SingleResourceTransportDto
         this.location = location;
     }
 
+    @Override
+    public String getMediaType()
+    {
+        return MediaType.APPLICATION_XML;
+    }
 }

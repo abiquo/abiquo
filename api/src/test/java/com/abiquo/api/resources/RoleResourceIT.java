@@ -36,6 +36,7 @@ import org.apache.wink.client.ClientWebException;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import com.abiquo.model.transport.LinksDto;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.Privilege;
 import com.abiquo.server.core.enterprise.Role;
@@ -79,7 +80,7 @@ public class RoleResourceIT extends AbstractJpaGeneratorIT
         setup(entitiesToSetup.toArray());
 
         ClientResponse response =
-            get(resolveRoleURI(12345), "sysadmin", "sysadmin", AbstractResource.LINK_MEDIA_TYPE);
+            get(resolveRoleURI(12345), "sysadmin", "sysadmin", LinksDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), 404);
     }
 
@@ -99,7 +100,7 @@ public class RoleResourceIT extends AbstractJpaGeneratorIT
 
         ClientResponse response =
             get(resolveRoleURI(role.getId()), "sysadmin", "sysadmin",
-                AbstractResource.LINK_MEDIA_TYPE);
+                LinksDto.MEDIA_TYPE);
 
         RoleDto dto = response.getEntity(RoleDto.class);
 
@@ -129,7 +130,7 @@ public class RoleResourceIT extends AbstractJpaGeneratorIT
         String privilegesUri = resolveRoleActionGetPrivilegesURI(role.getId());
 
         RoleDto dto =
-            get(href, "sysadmin", "sysadmin", AbstractResource.LINK_MEDIA_TYPE).getEntity(
+            get(href, "sysadmin", "sysadmin", LinksDto.MEDIA_TYPE).getEntity(
                 RoleDto.class);
 
         assertNotNull(dto.getLinks());

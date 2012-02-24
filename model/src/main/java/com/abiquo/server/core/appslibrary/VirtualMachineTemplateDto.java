@@ -121,7 +121,7 @@ public class VirtualMachineTemplateDto extends SingleResourceTransportDto
     }
 
     public void setPath(final String path)
-    {public static final String MEDIA_TYPE = "application/vnd.abiquo.virtualmachinetemplate+xml";
+    {
         this.path = path;
     }
 

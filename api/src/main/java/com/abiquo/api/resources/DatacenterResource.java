@@ -408,7 +408,6 @@ public class DatacenterResource extends AbstractResource
     {
         DatacenterDto dto =
             ModelTransformer.transportFromPersistence(DatacenterDto.class, datacenter);
-        dto.setJaumeRocks(Boolean.TRUE);
         dto = addLinks(builder, dto);
         return dto;
     }
