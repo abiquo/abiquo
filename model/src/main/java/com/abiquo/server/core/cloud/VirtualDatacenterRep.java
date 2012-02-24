@@ -139,7 +139,7 @@ public class VirtualDatacenterRep extends DefaultRepBase
 
     public boolean containsVirtualAppliances(final VirtualDatacenter virtualDatacenter)
     {
-        return !findVirtualAppliancesByVirtualDatacenter(virtualDatacenter).isEmpty();
+        return !findVirtualAppliancesByVirtualDatacenter(virtualDatacenter, null).isEmpty();
     }
 
     public void delete(final VirtualDatacenter vdc)
@@ -514,9 +514,9 @@ public class VirtualDatacenterRep extends DefaultRepBase
     }
 
     public Collection<VirtualAppliance> findVirtualAppliancesByVirtualDatacenter(
-        final VirtualDatacenter virtualDatacenter)
+        final VirtualDatacenter virtualDatacenter, final FilterOptions filterOptions)
     {
-        return virtualApplianceDAO.findByVirtualDatacenter(virtualDatacenter);
+        return virtualApplianceDAO.findByVirtualDatacenter(virtualDatacenter, filterOptions);
     }
 
     public VirtualMachine findVirtualMachineById(final Integer virtualMachineId)

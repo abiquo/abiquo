@@ -1914,6 +1914,26 @@ public class AbstractAPIStub
             params, queryParams);
     }
 
+    protected String createVirtualAppliancesByVirtualDatacenterLink(final Integer vdcId,
+        Integer offset, final Integer numResults)
+    {
+        String uri = createVirtualDatacenterLink(vdcId) + "/virtualappliances";
+
+        Map<String, String[]> queryParams = new HashMap<String, String[]>();
+        if (numResults != null)
+        {
+            queryParams.put("numResults", new String[] {numResults.toString()});
+            if (offset != null)
+            {
+                offset = offset / numResults;
+
+                queryParams.put("page", new String[] {offset.toString()});
+            }
+        }
+
+        return UriHelper.appendQueryParamsToPath(uri, queryParams, false);
+    }
+
     /**
      * Returns the id, if exists, of a RESTLink. If not exists, returns {@code null}.
      * 

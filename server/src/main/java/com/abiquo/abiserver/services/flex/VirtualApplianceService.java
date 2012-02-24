@@ -253,6 +253,23 @@ public class VirtualApplianceService
     }
 
     /**
+     * Retrieves a list of Virtual Appliances that belong to the same VirtualDataCenter. The
+     * VirtualAppliance retrieved will not contain their Node list, for performance purposes. It
+     * will also return those VirtualAppliance marked as public
+     * 
+     * @param userSession The UserSession object with the user that called this method
+     * @param vdc The VirtualDataCenter to retrieve the VirtualAppliance list
+     * @return a DataResult<ArrayList<VirtualAppliance>> object with the VirtualAppliance that
+     *         belong to the given enterprise
+     */
+    public BasicResult getVirtualAppliancesByVirtualDatacenter(final UserSession userSession,
+        final VirtualDataCenter vdc, final ListRequest listRequest)
+    {
+        return proxyStub(userSession).getVirtualAppliancesByVirtualDatacenter(userSession, vdc,
+            listRequest);
+    }
+
+    /**
      * Given a VirtualAppliance, retrieves its node list
      * 
      * @param userSession The UserSession object with the user that called this method
