@@ -540,10 +540,17 @@ public class VirtualApplianceService extends DefaultApiService
     {
         VirtualAppliance virtualAppliance = getVirtualAppliance(vdcId, vappId);
 
+        List<NodeVirtualImage> vappNodes = virtualAppliance.getNodes();
+        if (vappNodes.isEmpty())
+        {
+            addConflictErrors(APIError.VIRTUALAPPLIANCE_EMPTY);
+            flushErrors();
+        }
+
         allocateVirtualAppliance(virtualAppliance, forceLimits);
 
         Map<Integer, String> dto = new HashMap<Integer, String>();
-        for (NodeVirtualImage nodevi : virtualAppliance.getNodes())
+        for (NodeVirtualImage nodevi : vappNodes)
         {
             VirtualMachine vmachine = nodevi.getVirtualMachine();
 
