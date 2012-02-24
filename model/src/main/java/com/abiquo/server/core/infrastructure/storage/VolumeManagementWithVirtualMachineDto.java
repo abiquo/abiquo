@@ -26,11 +26,13 @@ import javax.xml.bind.annotation.XmlRootElement;
 import com.abiquo.server.core.cloud.VirtualApplianceDto;
 import com.abiquo.server.core.cloud.VirtualDatacenterWithDatacenterDto;
 import com.abiquo.server.core.cloud.VirtualMachineDto;
+import com.abiquo.server.core.infrastructure.DatacenterDto;
 
 @XmlRootElement(name = "volume")
 public class VolumeManagementWithVirtualMachineDto extends VolumeManagementDto
 {
     private static final long serialVersionUID = 1L;
+    public static final String MEDIA_TYPE = "application/vnd.abiquo.iscsivolumewithvirtualmachine+xml";
 
     private VirtualMachineDto virtualMachine;
 
@@ -79,5 +81,11 @@ public class VolumeManagementWithVirtualMachineDto extends VolumeManagementDto
     public VirtualApplianceDto getVirtualAppliance()
     {
         return virtualAppliance;
+    }
+    
+    @Override
+    public String getMediaType()
+    {
+        return VolumeManagementWithVirtualMachineDto.MEDIA_TYPE;
     }
 }

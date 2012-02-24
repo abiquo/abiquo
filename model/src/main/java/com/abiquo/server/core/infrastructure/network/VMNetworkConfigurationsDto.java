@@ -39,12 +39,19 @@ import com.abiquo.model.transport.WrapperDto;
 @XmlRootElement(name = "vmnetworkconfigurations")
 public class VMNetworkConfigurationsDto extends WrapperDto<VMNetworkConfigurationDto>
 {
-
+    public static final String MEDIA_TYPE = "application/vnd.abiquo.virtualmachinenetworkconfigurations+xml";
+    
     @Override
     @XmlElement(name = "vmnetworkconfiguration")
     public List<VMNetworkConfigurationDto> getCollection()
     {
         return collection;
+    }
+    
+    @Override
+    public String getMediaType()
+    {
+        return VMNetworkConfigurationsDto.MEDIA_TYPE;
     }
 
 }

@@ -31,6 +31,7 @@ import com.abiquo.server.core.task.Job.JobType;
 public class JobDto extends SingleResourceTransportDto
 {
     private static final long serialVersionUID = 3441968794948596375L;
+    public static final String MEDIA_TYPE = "application/vnd.abiquo.job+xml";
 
     protected String id;
 
@@ -114,5 +115,11 @@ public class JobDto extends SingleResourceTransportDto
     public void setTimestamp(final long timestamp)
     {
         this.timestamp = timestamp;
+    }
+    
+    @Override
+    public String getMediaType()
+    {
+        return JobDto.MEDIA_TYPE;
     }
 }

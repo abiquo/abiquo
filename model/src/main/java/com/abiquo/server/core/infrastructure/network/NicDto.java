@@ -40,6 +40,7 @@ public class NicDto extends SingleResourceTransportDto
      * 
      */
     private static final long serialVersionUID = 3595021795100699222L;
+    public static final String MEDIA_TYPE = "application/vnd.abiquo.nic+xml";
 
     private Integer id;
 
@@ -88,5 +89,11 @@ public class NicDto extends SingleResourceTransportDto
     }
 
     private Integer sequence;
+    
+    @Override
+    public String getMediaType()
+    {
+        return NicDto.MEDIA_TYPE;
+    }
 
 }

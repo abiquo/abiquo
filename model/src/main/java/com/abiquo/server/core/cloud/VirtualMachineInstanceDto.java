@@ -26,6 +26,7 @@ import java.io.Serializable;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.abiquo.model.transport.SingleResourceTransportDto;
+import com.abiquo.server.core.infrastructure.DatacenterDto;
 
 /**
  * DTO for instance parameters of the virtual machine.
@@ -36,6 +37,7 @@ import com.abiquo.model.transport.SingleResourceTransportDto;
 public class VirtualMachineInstanceDto extends SingleResourceTransportDto implements Serializable
 {
     private static final long serialVersionUID = -372239566628574960L;
+    public static final String MEDIA_TYPE = "application/vnd.abiquo.virtualmachineinstance+xml";
 
     protected String instanceName;
 
@@ -47,5 +49,11 @@ public class VirtualMachineInstanceDto extends SingleResourceTransportDto implem
     public void setInstanceName(String snapshotName)
     {
         this.instanceName = snapshotName;
+    }
+    
+    @Override
+    public String getMediaType()
+    {
+        return VirtualMachineInstanceDto.MEDIA_TYPE;
     }
 }

@@ -30,6 +30,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.abiquo.model.transport.WrapperDto;
+import com.abiquo.server.core.infrastructure.DatacenterDto;
 
 /**
  * @author jdevesa
@@ -41,11 +42,18 @@ public class NicsDto extends WrapperDto<NicDto>
      * Generated serial version UID.
      */
     private static final long serialVersionUID = 7750745888159232062L;
+    public static final String MEDIA_TYPE = "application/vnd.abiquo.nics+xml";
 
     @Override
     @XmlElement(name = "nic")
     public List<NicDto> getCollection()
     {
         return collection;
+    }
+    
+    @Override
+    public String getMediaType()
+    {
+        return NicsDto.MEDIA_TYPE;
     }
 }

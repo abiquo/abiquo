@@ -26,6 +26,7 @@ package com.abiquo.model.transport;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
+import com.abiquo.server.core.infrastructure.DatacenterDto;
 import com.abiquo.server.core.task.TaskDto;
 
 /**
@@ -37,6 +38,7 @@ import com.abiquo.server.core.task.TaskDto;
 public class SeeOtherDto extends TaskDto
 {
     private static final long serialVersionUID = 4645761892464380938L;
+    public static final String MEDIA_TYPE = "application/vnd.abiquo.seeother+xml";
 
     protected String location;
 
@@ -53,5 +55,11 @@ public class SeeOtherDto extends TaskDto
     public void setLocation(String location)
     {
         this.location = location;
+    }
+    
+    @Override
+    public String getMediaType()
+    {
+        return SeeOtherDto.MEDIA_TYPE;
     }
 }

@@ -26,6 +26,7 @@ import java.io.Serializable;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.abiquo.model.transport.SingleResourceTransportDto;
+import com.abiquo.server.core.infrastructure.DatacenterDto;
 
 /**
  * DTO to deploy parameters of the virtual machine.
@@ -40,6 +41,7 @@ public class VirtualMachineTaskDto extends SingleResourceTransportDto implements
      * 
      */
     private static final long serialVersionUID = -272879466628574960L;
+    public static final String MEDIA_TYPE = "application/vnd.abiquo.virtualmachinetask+xml";
 
     /**
      * Force the soft limits defined for the enterprise in the deploy. <br>
@@ -109,5 +111,11 @@ public class VirtualMachineTaskDto extends SingleResourceTransportDto implements
     public Boolean getForceUndeploy()
     {
         return forceUndeploy;
+    }
+    
+    @Override
+    public String getMediaType()
+    {
+        return VirtualMachineTaskDto.MEDIA_TYPE;
     }
 }

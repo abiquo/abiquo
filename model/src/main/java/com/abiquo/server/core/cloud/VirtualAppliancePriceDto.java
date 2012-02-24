@@ -26,6 +26,7 @@ import java.math.BigDecimal;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.abiquo.model.transport.SingleResourceTransportDto;
+import com.abiquo.server.core.infrastructure.DatacenterDto;
 
 @XmlRootElement(name = "virtualAppliancePrice")
 public class VirtualAppliancePriceDto extends SingleResourceTransportDto
@@ -35,6 +36,7 @@ public class VirtualAppliancePriceDto extends SingleResourceTransportDto
      * 
      */
     private static final long serialVersionUID = 1L;
+    public static final String MEDIA_TYPE = "application/vnd.abiquo.virtualapplianceprice+xml";
 
     public VirtualAppliancePriceDto()
     {
@@ -166,5 +168,11 @@ public class VirtualAppliancePriceDto extends SingleResourceTransportDto
     public void setTotalCost(final BigDecimal totalCost)
     {
         this.totalCost = totalCost;
+    }
+    
+    @Override
+    public String getMediaType()
+    {
+        return VirtualAppliancePriceDto.MEDIA_TYPE;
     }
 }

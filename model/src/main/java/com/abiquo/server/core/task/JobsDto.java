@@ -28,11 +28,13 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.abiquo.model.transport.WrapperDto;
+import com.abiquo.server.core.infrastructure.DatacenterDto;
 
 @XmlRootElement(name = "jobs")
 public class JobsDto extends WrapperDto<JobDto>
 {
     private static final long serialVersionUID = 3057333912886315999L;
+    public static final String MEDIA_TYPE = "application/vnd.abiquo.jobs+xml";
 
     @Override
     @XmlElement(name = "job")
@@ -44,5 +46,11 @@ public class JobsDto extends WrapperDto<JobDto>
         }
 
         return collection;
+    }
+    
+    @Override
+    public String getMediaType()
+    {
+        return JobsDto.MEDIA_TYPE;
     }
 }

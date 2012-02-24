@@ -33,6 +33,7 @@ import com.abiquo.model.transport.WrapperDto;
 public class TasksDto extends WrapperDto<TaskDto>
 {
     private static final long serialVersionUID = 3057333912886315999L;
+    public static final String MEDIA_TYPE = "application/vnd.abiquo.tasks+xml";
 
     @Override
     @XmlElement(name = "task")
@@ -44,5 +45,11 @@ public class TasksDto extends WrapperDto<TaskDto>
         }
 
         return collection;
+    }
+    
+    @Override
+    public String getMediaType()
+    {
+        return TasksDto.MEDIA_TYPE;
     }
 }

@@ -56,8 +56,6 @@ public class DatacenterDto extends SingleResourceTransportDto implements Seriali
      * List of remote services of the datacenter.
      */
     private RemoteServicesDto remoteServices;
-    
-    private Boolean jaumeRocks;
 
     /**
      * @return the id
