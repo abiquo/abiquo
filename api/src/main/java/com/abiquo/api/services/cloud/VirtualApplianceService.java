@@ -209,8 +209,8 @@ public class VirtualApplianceService extends DefaultApiService
         {
             StringBuilder sb = extractErrorsInAString(vapp);
             logger.error(
-                "Error create virtual appliance with name {} due to validation errors: {}",
-                dto.getName(), sb.toString());
+                "Error create virtual appliance with name {} due to validation errors: {}", dto
+                    .getName(), sb.toString());
             tracer.log(SeverityType.CRITICAL, ComponentType.VIRTUAL_APPLIANCE,
                 EventType.VAPP_CREATE, "virtualAppliance.deleteErrorValidations", dto.getName());
             addValidationErrors(vapp.getValidationErrors());
@@ -228,8 +228,8 @@ public class VirtualApplianceService extends DefaultApiService
         StringBuilder sb = new StringBuilder();
         for (CommonError e : errors)
         {
-            sb.append("Error code: ").append(e.getCode()).append(", Message: ")
-                .append(e.getMessage());
+            sb.append("Error code: ").append(e.getCode()).append(", Message: ").append(
+                e.getMessage());
         }
         return sb;
     }
@@ -267,9 +267,9 @@ public class VirtualApplianceService extends DefaultApiService
                 price.replace(PricingModelVariables.CHARGE_PERIOD.getText(), pricingTemplate
                     .getChargingPeriod().name());
             price =
-                price.replace(PricingModelVariables.MIN_CHARGE.getText(),
-                    priceDto.getMinimumChargePeriod() + " "
-                        + pricingTemplate.getCurrency().getSymbol());
+                price.replace(PricingModelVariables.MIN_CHARGE.getText(), priceDto
+                    .getMinimumChargePeriod()
+                    + " " + pricingTemplate.getCurrency().getSymbol());
             price =
                 price.replace(PricingModelVariables.MIN_PERIOD.getText(), pricingTemplate
                     .getMinimumCharge().name());
@@ -312,22 +312,23 @@ public class VirtualApplianceService extends DefaultApiService
                 addVirtualMachineCost(virtualMachinesCost, node.getVirtualMachine(),
                     virtualMachineRequirements, pricingTemplate);
         }
-        dto.setAdditionalVolumCost(rounded(significantDigits,
-            virtualMachinesCost.get(VirtualMachineCost.ADDITIONAL_VOLUME)));
-        dto.setCostCodeCost(rounded(significantDigits,
-            virtualMachinesCost.get(VirtualMachineCost.COST_CODE)));
-        dto.setComputeCost(rounded(significantDigits,
-            virtualMachinesCost.get(VirtualMachineCost.COMPUTE)));
-        dto.setStorageCost(rounded(significantDigits,
-            virtualMachinesCost.get(VirtualMachineCost.STORAGE)));
-        dto.setNetworkCost(rounded(significantDigits,
-            virtualMachinesCost.get(VirtualMachineCost.NETWORK)));
-        dto.setStandingCharge(rounded(significantDigits, pricingTemplate.getStandingChargePeriod()));
+        dto.setAdditionalVolumCost(rounded(significantDigits, virtualMachinesCost
+            .get(VirtualMachineCost.ADDITIONAL_VOLUME)));
+        dto.setCostCodeCost(rounded(significantDigits, virtualMachinesCost
+            .get(VirtualMachineCost.COST_CODE)));
+        dto.setComputeCost(rounded(significantDigits, virtualMachinesCost
+            .get(VirtualMachineCost.COMPUTE)));
+        dto.setStorageCost(rounded(significantDigits, virtualMachinesCost
+            .get(VirtualMachineCost.STORAGE)));
+        dto.setNetworkCost(rounded(significantDigits, virtualMachinesCost
+            .get(VirtualMachineCost.NETWORK)));
+        dto
+            .setStandingCharge(rounded(significantDigits, pricingTemplate.getStandingChargePeriod()));
         dto.setMinimumCharge(pricingTemplate.getMinimumCharge().ordinal());
-        dto.setMinimumChargePeriod(rounded(significantDigits,
-            pricingTemplate.getMinimumChargePeriod()));
-        dto.setTotalCost(rounded(significantDigits,
-            virtualMachinesCost.get(VirtualMachineCost.TOTAL)));
+        dto.setMinimumChargePeriod(rounded(significantDigits, pricingTemplate
+            .getMinimumChargePeriod()));
+        dto.setTotalCost(rounded(significantDigits, virtualMachinesCost
+            .get(VirtualMachineCost.TOTAL)));
         // It is for enterprise so we don't have to add to the price
         // .add( pricingTemplate.getStandingChargePeriod())
 
@@ -353,37 +354,33 @@ public class VirtualApplianceService extends DefaultApiService
         Collection<RasdManagement> resources = rasdManDao.findByVirtualMachine(virtualMachine);
         getAdditionalStorageCost(virtualMachinesCost, resources, pricingTemplate);
 
-        virtualMachinesCost.put(
-            VirtualMachineCost.COMPUTE,
-            virtualMachinesCost.get(VirtualMachineCost.COMPUTE).add(
+        virtualMachinesCost.put(VirtualMachineCost.COMPUTE, virtualMachinesCost.get(
+            VirtualMachineCost.COMPUTE)
+            .add(
                 pricingTemplate.getVcpu().multiply(
                     new BigDecimal(virtualMachineRequirements.getCpu()))));
-        virtualMachinesCost.put(
-            VirtualMachineCost.COMPUTE,
+        virtualMachinesCost.put(VirtualMachineCost.COMPUTE, virtualMachinesCost.get(
+            VirtualMachineCost.COMPUTE).add(
+            pricingTemplate.getMemoryMB().multiply(
+                new BigDecimal(virtualMachineRequirements.getRam()))));
+
+        virtualMachinesCost.put(VirtualMachineCost.STORAGE, virtualMachinesCost.get(
+            VirtualMachineCost.STORAGE).add(
+            pricingTemplate.getHdGB().multiply(
+                new BigDecimal(virtualMachineRequirements.getHd()).divide(BYTES_TO_GB, 2,
+                    BigDecimal.ROUND_HALF_EVEN))));
+
+        virtualMachinesCost.put(VirtualMachineCost.NETWORK, virtualMachinesCost.get(
+            VirtualMachineCost.NETWORK).add(
+            pricingTemplate.getPublicIp().multiply(
+                new BigDecimal(virtualMachineRequirements.getPublicIP()))));
+
+        virtualMachinesCost.put(VirtualMachineCost.TOTAL, virtualMachinesCost.get(
+            VirtualMachineCost.COST_CODE).add(
             virtualMachinesCost.get(VirtualMachineCost.COMPUTE).add(
-                pricingTemplate.getMemoryMB().multiply(
-                    new BigDecimal(virtualMachineRequirements.getRam()))));
-
-        virtualMachinesCost.put(
-            VirtualMachineCost.STORAGE,
-            virtualMachinesCost.get(VirtualMachineCost.STORAGE).add(
-                pricingTemplate.getHdGB().multiply(
-                    new BigDecimal(virtualMachineRequirements.getHd()).divide(BYTES_TO_GB, 2,
-                        BigDecimal.ROUND_HALF_EVEN))));
-
-        virtualMachinesCost.put(
-            VirtualMachineCost.NETWORK,
-            virtualMachinesCost.get(VirtualMachineCost.NETWORK).add(
-                pricingTemplate.getPublicIp().multiply(
-                    new BigDecimal(virtualMachineRequirements.getPublicIP()))));
-
-        virtualMachinesCost.put(
-            VirtualMachineCost.TOTAL,
-            virtualMachinesCost.get(VirtualMachineCost.COST_CODE).add(
-                virtualMachinesCost.get(VirtualMachineCost.COMPUTE).add(
-                    virtualMachinesCost.get(VirtualMachineCost.STORAGE).add(
-                        virtualMachinesCost.get(VirtualMachineCost.ADDITIONAL_VOLUME).add(
-                            virtualMachinesCost.get(VirtualMachineCost.NETWORK))))));
+                virtualMachinesCost.get(VirtualMachineCost.STORAGE).add(
+                    virtualMachinesCost.get(VirtualMachineCost.ADDITIONAL_VOLUME).add(
+                        virtualMachinesCost.get(VirtualMachineCost.NETWORK))))));
         return virtualMachinesCost;
     }
 
@@ -396,10 +393,8 @@ public class VirtualApplianceService extends DefaultApiService
         PricingCostCode pricingCostCode = pricingRep.findPricingCostCode(cc, pricing);
         if (pricingCostCode != null)
         {
-            virtualMachinesCost.put(
-                VirtualMachineCost.COST_CODE,
-                virtualMachinesCost.get(VirtualMachineCost.COST_CODE).add(
-                    pricingCostCode.getPrice()));
+            virtualMachinesCost.put(VirtualMachineCost.COST_CODE, virtualMachinesCost.get(
+                VirtualMachineCost.COST_CODE).add(pricingCostCode.getPrice()));
         }
 
     }
@@ -422,8 +417,7 @@ public class VirtualApplianceService extends DefaultApiService
                 {
                     BigDecimal volum = new BigDecimal(volman.getSizeInMB());
                     BigDecimal toGB = new BigDecimal(1024);
-                    virtualMachinesCost.put(
-                        VirtualMachineCost.ADDITIONAL_VOLUME,
+                    virtualMachinesCost.put(VirtualMachineCost.ADDITIONAL_VOLUME,
                         virtualMachinesCost.get(VirtualMachineCost.ADDITIONAL_VOLUME).add(
                             pricingTier.getPrice().multiply(volum.divide(toGB))));// multiplicar
                     // por
@@ -510,10 +504,17 @@ public class VirtualApplianceService extends DefaultApiService
     {
         VirtualAppliance virtualAppliance = getVirtualAppliance(vdcId, vappId);
 
+        List<NodeVirtualImage> vappNodes = virtualAppliance.getNodes();
+        if (vappNodes.isEmpty())
+        {
+            addConflictErrors(APIError.VIRTUALAPPLIANCE_EMPTY);
+            flushErrors();
+        }
+
         allocateVirtualAppliance(virtualAppliance, forceLimits);
 
         Map<Integer, String> dto = new HashMap<Integer, String>();
-        for (NodeVirtualImage nodevi : virtualAppliance.getNodes())
+        for (NodeVirtualImage nodevi : vappNodes)
         {
             VirtualMachine vmachine = nodevi.getVirtualMachine();
 
@@ -579,8 +580,8 @@ public class VirtualApplianceService extends DefaultApiService
 
                 // For the Admin to know all errors
                 tracer.systemLog(SeverityType.CRITICAL, ComponentType.VIRTUAL_APPLIANCE,
-                    EventType.VM_UNDEPLOY, "virtualAppliance.deployError", e.toString(),
-                    machine.getName(), e.getMessage());
+                    EventType.VM_UNDEPLOY, "virtualAppliance.deployError", e.toString(), machine
+                        .getName(), e.getMessage());
                 logger
                     .error(
                         "Error undeploying virtual appliance name {}. But we continue with next virtual machine: {}",
@@ -607,7 +608,8 @@ public class VirtualApplianceService extends DefaultApiService
             vmService.deleteVirtualMachine(vmId, virtualAppliance.getId(), n.getVirtualAppliance()
                 .getVirtualDatacenter().getId(), originalStates.get(vmId));
             logger.trace("Deleting the virtual machine with name {}", n.getVirtualMachine()
-                .getName() + " successful!");
+                .getName()
+                + " successful!");
         }
         virtualApplianceRepo.deleteVirtualAppliance(virtualAppliance);
         logger.debug("Deleting the virtual appliance name {} ok!", virtualAppliance.getName());

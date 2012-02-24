@@ -36,8 +36,6 @@ import org.apache.wink.common.annotations.Parent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
-import com.abiquo.api.exceptions.APIError;
-import com.abiquo.api.exceptions.BadRequestException;
 import com.abiquo.api.resources.AbstractResource;
 import com.abiquo.api.services.cloud.VirtualApplianceService;
 import com.abiquo.api.services.cloud.VirtualDatacenterService;
@@ -183,11 +181,6 @@ public class VirtualMachinesResource extends AbstractResource
         vappService.getVirtualAppliance(vdcId, vappId);
         final List<NodeVirtualImage> all = service.getNodeVirtualImages(vdcId, vappId);
         final VirtualMachinesWithNodeExtendedDto vmsDto = new VirtualMachinesWithNodeExtendedDto();
-
-        if (all.isEmpty())
-        {
-            throw new BadRequestException(APIError.VIRTUALAPPLIANCE_EMPTY);
-        }
 
         for (final NodeVirtualImage n : all)
         {
