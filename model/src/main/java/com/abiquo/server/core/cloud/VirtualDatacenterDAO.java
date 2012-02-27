@@ -233,6 +233,10 @@ public class VirtualDatacenterDAO extends DefaultDAOBase<Integer, VirtualDatacen
         "select sum(r.limitResource) from rasd r, rasd_management rm where r.instanceID = rm.idResource "
             + "and rm.idResourceType = '8' and rm.idVirtualDatacenter = :virtualDatacenterId";
 
+    private static final String SUM_EXTRA_HD_RESOURCES =
+        "select sum(r.limitResource) from rasd r, rasd_management rm where r.instanceID = rm.idResource "
+            + "and rm.idResourceType = '17' and rm.idVirtualDatacenter = :virtualDatacenterId";
+
     private static final String COUNT_PUBLIC_IP_RESOURCES =
         "select count(*) from ip_pool_management ipm, rasd_management rm, vlan_network vn, virtualdatacenter vdc "
             + " where ipm.vlan_network_id = vn.vlan_network_id "
@@ -262,6 +266,11 @@ public class VirtualDatacenterDAO extends DefaultDAOBase<Integer, VirtualDatacen
         Long ram = vmResources[1] == null ? 0 : ((BigDecimal) vmResources[1]).longValue();
         Long hd = vmResources[2] == null ? 0 : ((BigDecimal) vmResources[2]).longValue();
 
+        BigDecimal extraHd =
+            (BigDecimal) getSession().createSQLQuery(SUM_EXTRA_HD_RESOURCES).setParameter(
+                "virtualDatacenterId", virtualDatacenterId).uniqueResult();
+        Long hdTot = extraHd == null ? hd : hd + extraHd.longValue() * 1024 * 1024;
+
         BigDecimal storage =
             (BigDecimal) getSession().createSQLQuery(SUM_VOLUMES_RESOURCES).setParameter(
                 "virtualDatacenterId", virtualDatacenterId).uniqueResult();
@@ -270,7 +279,7 @@ public class VirtualDatacenterDAO extends DefaultDAOBase<Integer, VirtualDatacen
             (BigInteger) getSession().createSQLQuery(COUNT_PUBLIC_IP_RESOURCES).setParameter(
                 "virtualDatacenterId", virtualDatacenterId).uniqueResult();
 
-        DefaultEntityCurrentUsed used = new DefaultEntityCurrentUsed(cpu.intValue(), ram, hd);
+        DefaultEntityCurrentUsed used = new DefaultEntityCurrentUsed(cpu.intValue(), ram, hdTot);
 
         // Storage usage is stored in MB
         used.setStorage(storage == null ? 0 : storage.longValue() * 1024 * 1024);

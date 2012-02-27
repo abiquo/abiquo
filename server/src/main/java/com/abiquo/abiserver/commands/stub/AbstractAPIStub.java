@@ -423,7 +423,8 @@ public class AbstractAPIStub
                     result.setResultCode(0);
                 }
             }
-            else if (errors.getCollection().get(0).getCode().equals("LIMIT_EXCEEDED"))
+            else if (errors.getCollection().get(0).getCode().equals("LIMIT_EXCEEDED")
+                || errors.getCollection().get(0).getCode().equals("LIMIT-1"))
             {
                 result.setResultCode(BasicResult.HARD_LIMT_EXCEEDED);
                 // limit exceeded does not include the detail
