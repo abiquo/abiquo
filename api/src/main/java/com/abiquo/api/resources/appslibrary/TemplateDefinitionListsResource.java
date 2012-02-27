@@ -97,7 +97,7 @@ public class TemplateDefinitionListsResource extends AbstractResource
         throws Exception
     {
         // Validate template definition list name
-        if (templateDefList.getName() == null)
+        if (templateDefList.getName() == null || templateDefList.getName().isEmpty())
         {
             throw new BadRequestException(APIError.TEMPLATE_DEFINITION_LIST_NAME_NOT_FOUND);
         }
