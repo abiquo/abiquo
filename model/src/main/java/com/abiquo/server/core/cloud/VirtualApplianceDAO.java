@@ -25,12 +25,15 @@ import java.util.List;
 
 import javax.persistence.EntityManager;
 
+import org.apache.commons.lang.StringUtils;
 import org.hibernate.Criteria;
 import org.hibernate.criterion.Criterion;
+import org.hibernate.criterion.Disjunction;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 
+import com.abiquo.server.core.cloud.VirtualAppliance.OrderByEnum;
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.util.FilterOptions;
@@ -84,34 +87,77 @@ public class VirtualApplianceDAO extends DefaultDAOBase<Integer, VirtualApplianc
     public List<VirtualAppliance> findByVirtualDatacenter(
         final VirtualDatacenter virtualDatacenter, final FilterOptions filterOptions)
     {
-        Criteria criteria = createCriteria(sameVirtualDatacenter(virtualDatacenter));
+        // Check if the orderBy element is actually one of the available ones
+        VirtualAppliance.OrderByEnum orderByEnum =
+            VirtualAppliance.OrderByEnum.valueOf(filterOptions.getOrderBy().toUpperCase());
 
-        if (filterOptions != null)
+        Integer limit = filterOptions.getLimit();
+        Integer startwith = filterOptions.getStartwith();
+        String filter = filterOptions.getFilter();
+        boolean asc = filterOptions.getAsc();
+
+        Criteria criteria = createCriteria(virtualDatacenter, filter, orderByEnum, asc);
+
+        // Check if the page requested is bigger than the last one
+        Long total = count(criteria);
+        criteria = createCriteria(virtualDatacenter, filter, orderByEnum, asc);
+        Integer totalResults = total.intValue();
+        limit = limit != 0 ? limit : totalResults;
+        if (limit != null)
         {
-            // Check if the orderBy element is actually one of the available ones
-            VirtualAppliance.OrderByEnum orderByEnum =
-                VirtualAppliance.OrderByEnum.valueOf(filterOptions.getOrderBy().toUpperCase());
-
-            criteria.addOrder(filterOptions.getAsc() == true ? Order
-                .asc(orderByEnum.getColumnSQL()) : Order.desc(orderByEnum.getColumnSQL()));
-
-            Integer size = criteria.list().size();
-
-            criteria.setFirstResult(filterOptions.getStartwith());
-            criteria.setMaxResults(filterOptions.getLimit());
-
-            PagedList<VirtualAppliance> vappList = new PagedList<VirtualAppliance>(criteria.list());
-            vappList.setTotalResults(size);
-            vappList.setPageSize(filterOptions.getLimit() > size ? size : filterOptions.getLimit());
-            vappList.setCurrentElement(filterOptions.getStartwith());
-
-            return vappList;
+            criteria.setMaxResults(limit);
         }
-        else
+
+        if (startwith >= totalResults)
         {
-            criteria.addOrder(Order.asc(VirtualAppliance.NAME_PROPERTY));
-
-            return criteria.list();
+            startwith = totalResults - limit;
         }
+        criteria.setFirstResult(startwith);
+        criteria.setMaxResults(limit);
+
+        List<VirtualAppliance> result = getResultList(criteria);
+
+        PagedList<VirtualAppliance> page = new PagedList<VirtualAppliance>();
+        page.addAll(result);
+        page.setCurrentElement(startwith);
+        page.setPageSize(limit);
+        page.setTotalResults(totalResults);
+
+        return page;
+    }
+
+    private Criteria createCriteria(final VirtualDatacenter virtualDatacenter, final String filter,
+        final OrderByEnum orderby, final boolean asc)
+    {
+        Criteria criteria = createCriteria();
+
+        criteria.add(sameVirtualDatacenter(virtualDatacenter));
+
+        if (!StringUtils.isEmpty(filter))
+        {
+            criteria.add(filterBy(filter));
+        }
+
+        if (!StringUtils.isEmpty(orderby.getColumnSQL()))
+        {
+            Order order = Order.desc(orderby.getColumnSQL());
+            if (asc)
+            {
+                order = Order.asc(orderby.getColumnSQL());
+            }
+            criteria.addOrder(order);
+        }
+
+        return criteria;
+    }
+
+    private Criterion filterBy(final String filter)
+    {
+        Disjunction filterDisjunction = Restrictions.disjunction();
+
+        filterDisjunction
+            .add(Restrictions.like(VirtualAppliance.NAME_PROPERTY, '%' + filter + '%'));
+
+        return filterDisjunction;
     }
 }

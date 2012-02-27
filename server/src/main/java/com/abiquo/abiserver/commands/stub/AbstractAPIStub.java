@@ -491,7 +491,7 @@ public class AbstractAPIStub
         }
     }
 
-    protected String createEnterprisesLink(final String filter, Integer offset,
+    protected String createEnterprisesLink(final String filter, final Integer firstElem,
         final Integer numResults)
     {
         String uri = URIResolver.resolveURI(apiUri, "admin/enterprises", Collections.emptyMap());
@@ -500,11 +500,10 @@ public class AbstractAPIStub
         {
             queryParams.put("filter", new String[] {filter});
         }
-        if (offset != null && numResults != null)
+        if (firstElem != null && numResults != null)
         {
-            offset = offset / numResults;
 
-            queryParams.put("page", new String[] {offset.toString()});
+            queryParams.put("START_WITH", new String[] {firstElem.toString()});
             queryParams.put("numResults", new String[] {numResults.toString()});
         }
 
@@ -591,6 +590,20 @@ public class AbstractAPIStub
             .resolveURI(apiUri,
                 "admin/enterprises/{enterprise}/limits/{limit}/externalnetworks/action/default",
                 params);
+    }
+
+    protected String createExternalNetworkIPLink(final Integer enterpriseId,
+        final Integer limitsId, final Integer networkId, final Integer ipId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("enterprise", enterpriseId.toString());
+        params.put("limit", limitsId.toString());
+        params.put("network", networkId.toString());
+        params.put("ip", ipId.toString());
+
+        return resolveURI(apiUri,
+            "admin/enterprises/{enterprise}/limits/{limit}/externalnetworks/{network}/ips/{ip}",
+            params);
     }
 
     protected String getReservedMachinesUri(final Integer enterpriseId, final Integer machineId)
@@ -1914,24 +1927,9 @@ public class AbstractAPIStub
             params, queryParams);
     }
 
-    protected String createVirtualAppliancesByVirtualDatacenterLink(final Integer vdcId,
-        Integer offset, final Integer numResults)
+    protected String createVirtualAppliancesByVirtualDatacenterLink(final Integer vdcId)
     {
-        String uri = createVirtualDatacenterLink(vdcId) + "/virtualappliances";
-
-        Map<String, String[]> queryParams = new HashMap<String, String[]>();
-        if (numResults != null)
-        {
-            queryParams.put("numResults", new String[] {numResults.toString()});
-            if (offset != null)
-            {
-                offset = offset / numResults;
-
-                queryParams.put("page", new String[] {offset.toString()});
-            }
-        }
-
-        return UriHelper.appendQueryParamsToPath(uri, queryParams, false);
+        return createVirtualDatacenterLink(vdcId) + "/virtualappliances";
     }
 
     /**

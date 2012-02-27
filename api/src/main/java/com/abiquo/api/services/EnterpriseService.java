@@ -111,21 +111,11 @@ public class EnterpriseService extends DefaultApiService
     }
 
     @Transactional(readOnly = true)
-    public Collection<Enterprise> getEnterprises(final int idPricingTempl, final boolean included,
-        final String filterName, final Integer offset, final Integer numResults,
-        final String orderBy, final boolean desc)
+    public Collection<Enterprise> getEnterprises(final Integer startwith, final int idPricingTempl,
+        final boolean included, final String filterName, final Integer numResults)
     {
         User user = userService.getCurrentUser();
         PricingTemplate pt = null;
-
-        if (idPricingTempl != -1)
-        {
-            if (idPricingTempl != 0)
-            {
-                pt = findPricingTemplate(idPricingTempl);
-            }
-        }
-
         // if (user.getRole().getType() == Role.Type.ENTERPRISE_ADMIN)
         if (!securityService.hasPrivilege(Privileges.ENTERPRISE_ENUMERATE)
             && !securityService.hasPrivilege(Privileges.USERS_MANAGE_OTHER_ENTERPRISES)
@@ -133,16 +123,22 @@ public class EnterpriseService extends DefaultApiService
         {
             if (idPricingTempl != -1)
             {
-                return repo.findByPricingTemplate(pt, included, filterName, offset, numResults,
-                    orderBy, desc, user.getEnterprise().getId());
+                if (idPricingTempl != 0)
+                {
+                    pt = findPricingTemplate(idPricingTempl);
+                }
+                return repo.findByPricingTemplate(startwith, pt, included, filterName, numResults);
             }
             return Collections.singletonList(user.getEnterprise());
         }
 
         if (idPricingTempl != -1)
         {
-            return repo.findByPricingTemplate(pt, included, filterName, offset, numResults,
-                orderBy, desc, null);
+            if (idPricingTempl != 0)
+            {
+                pt = findPricingTemplate(idPricingTempl);
+            }
+            return repo.findByPricingTemplate(startwith, pt, included, filterName, numResults);
         }
 
         if (!StringUtils.isEmpty(filterName))
@@ -150,7 +146,7 @@ public class EnterpriseService extends DefaultApiService
             return repo.findByNameAnywhere(filterName);
         }
 
-        return repo.findAll(offset, numResults);
+        return repo.findAll(startwith, numResults);
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)

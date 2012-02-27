@@ -32,7 +32,6 @@ import javax.ws.rs.core.Response.Status;
 import org.apache.commons.lang.StringUtils;
 import org.apache.wink.client.ClientResponse;
 import org.apache.wink.common.http.HttpStatus;
-import org.apache.wink.common.internal.utils.UriHelper;
 import org.jclouds.abiquo.domain.DomainWrapper;
 import org.jclouds.abiquo.domain.cloud.VirtualDatacenter;
 import org.jclouds.abiquo.domain.exception.AbiquoException;
@@ -237,7 +236,8 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
                         ClientResponse put =
                             put(linkVirtualMachine, virtualMachineDto, VM_NODE_MEDIA_TYPE);
                         if (put.getStatusCode() != Status.OK.getStatusCode()
-                            && put.getStatusCode() != Status.NO_CONTENT.getStatusCode())
+                            && put.getStatusCode() != Status.NO_CONTENT.getStatusCode()
+                            && put.getStatusCode() != Status.ACCEPTED.getStatusCode())
                         {
                             addErrors(result, errors, put, "updateVirtualApplianceNodes");
                             result.setSuccess(Boolean.FALSE);
@@ -296,6 +296,7 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
     {
         VirtualApplianceDto dto = new VirtualApplianceDto();
         dto.setName(virtualAppliance.getName());
+        dto.setNodeconnections(virtualAppliance.getNodeConnections());
         return dto;
     }
 
@@ -333,7 +334,11 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
         app.setId(virtualApplianceDto.getId());
         app.setIsPublic(virtualApplianceDto.getPublicApp() == 1 ? Boolean.TRUE : Boolean.FALSE);
         app.setName(virtualApplianceDto.getName());
-        app.setNodeConnections(virtualApplianceDto.getNodecollections());
+
+        StringBuilder nodeconnections = new StringBuilder();
+        nodeconnections.append(StringUtils.isBlank(virtualApplianceDto.getNodeconnections())
+            ? "<connections></connections>" : virtualApplianceDto.getNodeconnections());
+        app.setNodeConnections(nodeconnections.toString());
         app.setState(new State(StateEnum.valueOf(virtualApplianceDto.getState().name())));
         app.setId(virtualApplianceDto.getId());
         Integer enterpriseId = virtualApplianceDto.getIdFromLink("enterprise");
@@ -376,7 +381,13 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
         app.setId(virtualApplianceDto.getId());
         app.setIsPublic(virtualApplianceDto.getPublicApp() == 1 ? Boolean.TRUE : Boolean.FALSE);
         app.setName(virtualApplianceDto.getName());
-        app.setNodeConnections(virtualApplianceDto.getNodecollections());
+
+        StringBuilder nodeconnections = new StringBuilder();
+
+        nodeconnections.append(StringUtils.isBlank(virtualApplianceDto.getNodeconnections())
+            ? "<connections></connections>" : virtualApplianceDto.getNodeconnections());
+
+        app.setNodeConnections(nodeconnections.toString());
         app.setState(new State(StateEnum.valueOf(virtualApplianceDto.getState().name())));
         app.setId(virtualApplianceDto.getId());
         Integer enterpriseId = virtualApplianceDto.getIdFromLink("enterprise");
@@ -960,37 +971,26 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
         DataResult<VirtualAppliancesListResult> result =
             new DataResult<VirtualAppliancesListResult>();
 
-        String uri = null;
+        StringBuilder buildRequest =
+            new StringBuilder(createVirtualAppliancesByVirtualDatacenterLink(vdc.getId()));
         VirtualAppliancesListResult listResult = new VirtualAppliancesListResult();
 
         if (listRequest != null)
         {
-            boolean desc = !listRequest.getAsc();
-            String orderBy = listRequest.getOrderBy();
-
-            Map<String, String[]> queryParams = new HashMap<String, String[]>();
-            if (!StringUtils.isEmpty(listRequest.getFilterLike()))
+            buildRequest.append("?startwith=" + listRequest.getOffset());
+            buildRequest.append("&limit=" + listRequest.getNumberOfNodes());
+            if (listRequest.getOrderBy() != null && !listRequest.getOrderBy().isEmpty())
             {
-                queryParams.put("filter", new String[] {listRequest.getFilterLike()});
+                buildRequest.append("&by=" + listRequest.getOrderBy());
             }
-            if (!StringUtils.isEmpty(listRequest.getOrderBy()))
+            buildRequest.append("&asc=" + (listRequest.getAsc() == true ? "true" : "false"));
+            if (!listRequest.getFilterLike().isEmpty())
             {
-                queryParams.put("orderBy", new String[] {orderBy});
+                buildRequest.append("&has=" + listRequest.getFilterLike());
             }
-            queryParams.put("desc", new String[] {String.valueOf(desc)});
-
-            uri =
-                createVirtualAppliancesByVirtualDatacenterLink(vdc.getId(),
-                    listRequest.getOffset(), listRequest.getNumberOfNodes());
-
-            uri = UriHelper.appendQueryParamsToPath(uri, queryParams, false);
-        }
-        else
-        {
-            uri = createVirtualAppliancesByVirtualDatacenterLink(vdc.getId(), null, 0);
         }
 
-        ClientResponse response = get(uri);
+        ClientResponse response = get(buildRequest.toString());
 
         if (response.getStatusCode() == 200)
         {

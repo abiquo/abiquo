@@ -21,8 +21,11 @@
 package com.abiquo.vsm.monitor.xenserver;
 
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -153,11 +156,22 @@ public class XenServerConnector
      * @return The information of all virtual machines in the target physical machine.
      * @throws MonitorException If the list of virtual machine information cannot be obtained.
      */
-    public Iterable<VM> getAllVMs() throws MonitorException
+    public List<VM.Record> getAllVMs() throws MonitorException
     {
         try
         {
-            return VM.getAll(connection);
+            List<VM.Record> vms = new ArrayList<VM.Record>();
+            Map<VM, VM.Record> retrievedVMs = VM.getAllRecords(getConnection());
+
+            for (VM.Record vm : retrievedVMs.values())
+            {
+                if (!vm.isControlDomain && !vm.isATemplate)
+                {
+                    vms.add(vm);
+                }
+            }
+
+            return vms;
         }
         catch (Exception ex)
         {
@@ -171,11 +185,11 @@ public class XenServerConnector
      * @param vm The virtual machine to check.
      * @return Boolean indicating if the current virtual machine is being rebooted.
      */
-    public boolean isBeingRebooted(final VM vm) throws MonitorException
+    public boolean isBeingRebooted(final VM.Record vm) throws MonitorException
     {
         try
         {
-            Collection<VmOperations> ops = vm.getCurrentOperations(connection).values();
+            Collection<VmOperations> ops = vm.currentOperations.values();
 
             for (VmOperations op : ops)
             {
