@@ -27,8 +27,10 @@ import com.abiquo.abiserver.business.hibernate.pojohb.networking.NetworkConfigur
 import com.abiquo.abiserver.pojo.infrastructure.DataCenter;
 import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.result.DataResult;
+import com.abiquo.abiserver.pojo.result.ListRequest;
 import com.abiquo.abiserver.pojo.user.Enterprise;
 import com.abiquo.abiserver.pojo.virtualappliance.VirtualDataCenter;
+import com.abiquo.abiserver.pojo.virtualappliance.VirtualDatacentersListResult;
 import com.abiquo.util.resources.ResourceManager;
 
 public interface VirtualDatacenterResourceStub
@@ -47,4 +49,7 @@ public interface VirtualDatacenterResourceStub
 
     public DataResult<Collection<VirtualDataCenter>> getVirtualDatacentersByEnterprise(
         final Enterprise enterprise);
+
+    public DataResult<VirtualDatacentersListResult> getVirtualDatacentersByEnterprise(
+        final Enterprise enterprise, final ListRequest listRequest);
 }

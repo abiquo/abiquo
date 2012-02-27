@@ -33,6 +33,8 @@ import org.springframework.stereotype.Repository;
 
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
 import com.abiquo.server.core.enterprise.Enterprise;
+import com.abiquo.server.core.util.FilterOptions;
+import com.abiquo.server.core.util.PagedList;
 import com.softwarementors.bzngine.entities.PersistentEntity;
 
 @Repository("jpaVirtualApplianceDAO")
@@ -79,11 +81,37 @@ public class VirtualApplianceDAO extends DefaultDAOBase<Integer, VirtualApplianc
         return findUniqueByProperty(VirtualAppliance.NAME_PROPERTY, name);
     }
 
-    public List<VirtualAppliance> findByVirtualDatacenter(final VirtualDatacenter virtualDatacenter)
+    public List<VirtualAppliance> findByVirtualDatacenter(
+        final VirtualDatacenter virtualDatacenter, final FilterOptions filterOptions)
     {
         Criteria criteria = createCriteria(sameVirtualDatacenter(virtualDatacenter));
-        criteria.addOrder(Order.asc(VirtualAppliance.NAME_PROPERTY));
 
-        return criteria.list();
+        if (filterOptions != null)
+        {
+            // Check if the orderBy element is actually one of the available ones
+            VirtualAppliance.OrderByEnum orderByEnum =
+                VirtualAppliance.OrderByEnum.valueOf(filterOptions.getOrderBy().toUpperCase());
+
+            criteria.addOrder(filterOptions.getAsc() == true ? Order
+                .asc(orderByEnum.getColumnSQL()) : Order.desc(orderByEnum.getColumnSQL()));
+
+            Integer size = criteria.list().size();
+
+            criteria.setFirstResult(filterOptions.getStartwith());
+            criteria.setMaxResults(filterOptions.getLimit());
+
+            PagedList<VirtualAppliance> vappList = new PagedList<VirtualAppliance>(criteria.list());
+            vappList.setTotalResults(size);
+            vappList.setPageSize(filterOptions.getLimit() > size ? size : filterOptions.getLimit());
+            vappList.setCurrentElement(filterOptions.getStartwith());
+
+            return vappList;
+        }
+        else
+        {
+            criteria.addOrder(Order.asc(VirtualAppliance.NAME_PROPERTY));
+
+            return criteria.list();
+        }
     }
 }

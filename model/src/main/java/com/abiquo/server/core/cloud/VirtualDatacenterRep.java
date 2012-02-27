@@ -39,7 +39,6 @@ import com.abiquo.server.core.infrastructure.management.RasdDAO;
 import com.abiquo.server.core.infrastructure.management.RasdManagement;
 import com.abiquo.server.core.infrastructure.management.RasdManagementDAO;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
-import com.abiquo.server.core.infrastructure.network.IpPoolManagement.OrderByEnum;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagementDAO;
 import com.abiquo.server.core.infrastructure.network.Network;
 import com.abiquo.server.core.infrastructure.network.NetworkAssignment;
@@ -49,8 +48,10 @@ import com.abiquo.server.core.infrastructure.network.NetworkConfigurationDAO;
 import com.abiquo.server.core.infrastructure.network.NetworkDAO;
 import com.abiquo.server.core.infrastructure.network.VLANNetwork;
 import com.abiquo.server.core.infrastructure.network.VLANNetworkDAO;
+import com.abiquo.server.core.infrastructure.network.IpPoolManagement.OrderByEnum;
 import com.abiquo.server.core.infrastructure.storage.DiskManagement;
 import com.abiquo.server.core.infrastructure.storage.DiskManagementDAO;
+import com.abiquo.server.core.util.FilterOptions;
 
 @Repository
 public class VirtualDatacenterRep extends DefaultRepBase
@@ -138,7 +139,7 @@ public class VirtualDatacenterRep extends DefaultRepBase
 
     public boolean containsVirtualAppliances(final VirtualDatacenter virtualDatacenter)
     {
-        return !findVirtualAppliancesByVirtualDatacenter(virtualDatacenter).isEmpty();
+        return !findVirtualAppliancesByVirtualDatacenter(virtualDatacenter, null).isEmpty();
     }
 
     public void delete(final VirtualDatacenter vdc)
@@ -221,6 +222,21 @@ public class VirtualDatacenterRep extends DefaultRepBase
     {
         return this.virtualDatacenterDAO
             .findByEnterpriseAndDatacenter(enterprise, datacenter, user);
+    }
+
+    public Collection<VirtualDatacenter> findByEnterpriseAndDatacenterFilter(
+        final Enterprise enterprise, final Datacenter datacenter, final FilterOptions filterOptions)
+    {
+        return this.virtualDatacenterDAO.findByEnterpriseAndDatacenterFilter(enterprise,
+            datacenter, filterOptions);
+    }
+
+    public Collection<VirtualDatacenter> findByEnterpriseAndDatacenterFilter(
+        final Enterprise enterprise, final Datacenter datacenter, final User user,
+        final FilterOptions filterOptions)
+    {
+        return this.virtualDatacenterDAO.findByEnterpriseAndDatacenterFilter(enterprise,
+            datacenter, user, filterOptions);
     }
 
     public VirtualDatacenter findById(final Integer id)
@@ -389,8 +405,7 @@ public class VirtualDatacenterRep extends DefaultRepBase
         return ipManagementDAO.findIpsByVlan(vlan);
     }
 
-    public List<IpPoolManagement> findIpsWithConfigurationIdInVirtualMachine(
-        final VirtualMachine vm)
+    public List<IpPoolManagement> findIpsWithConfigurationIdInVirtualMachine(final VirtualMachine vm)
     {
         return ipManagementDAO.findIpsByVirtualMachineWithConfigurationId(vm);
     }
@@ -499,9 +514,9 @@ public class VirtualDatacenterRep extends DefaultRepBase
     }
 
     public Collection<VirtualAppliance> findVirtualAppliancesByVirtualDatacenter(
-        final VirtualDatacenter virtualDatacenter)
+        final VirtualDatacenter virtualDatacenter, final FilterOptions filterOptions)
     {
-        return virtualApplianceDAO.findByVirtualDatacenter(virtualDatacenter);
+        return virtualApplianceDAO.findByVirtualDatacenter(virtualDatacenter, filterOptions);
     }
 
     public VirtualMachine findVirtualMachineById(final Integer virtualMachineId)
@@ -680,7 +695,5 @@ public class VirtualDatacenterRep extends DefaultRepBase
     {
         vlanDAO.flush();
     }
-
-
 
 }
