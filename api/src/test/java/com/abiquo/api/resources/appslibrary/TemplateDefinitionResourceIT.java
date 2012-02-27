@@ -108,7 +108,7 @@ public class TemplateDefinitionResourceIT extends AbstractJpaGeneratorIT
         setup(entitiesToSetup.toArray());
         ClientResponse response =
             get(resolveTemplateDefinitionURI(enterprise.getId(), templateDef.getId()), SYSADMIN,
-                SYSADMIN);
+                SYSADMIN, TemplateDefinitionDto.MEDIA_TYPE);
 
         assertEquals(response.getStatusCode(), 200);
 
@@ -134,7 +134,7 @@ public class TemplateDefinitionResourceIT extends AbstractJpaGeneratorIT
 
         setup(entitiesToSetup.toArray());
         ClientResponse response =
-            get(resolveTemplateDefinitionURI(enterprise.getId(), templateDef.getId()));
+            get(resolveTemplateDefinitionURI(enterprise.getId(), templateDef.getId()), TemplateDefinitionDto.MEDIA_TYPE);
 
         assertEquals(response.getStatusCode(), 200);
 
@@ -151,7 +151,7 @@ public class TemplateDefinitionResourceIT extends AbstractJpaGeneratorIT
         assertEquals(response.getStatusCode(), 200);
         response =
             get(resolveTemplateDefinitionURI(enterprise.getId(), templateDef.getId()), SYSADMIN,
-                SYSADMIN);
+                SYSADMIN, TemplateDefinitionDto.MEDIA_TYPE);
         TemplateDefinitionDto retrievedPackageDto = response.getEntity(TemplateDefinitionDto.class);
         assertEquals(retrievedPackageDto.getDescription(), "new_description");
     }
@@ -182,7 +182,7 @@ public class TemplateDefinitionResourceIT extends AbstractJpaGeneratorIT
 
         response =
             get(resolveTemplateDefinitionURI(enterprise.getId(), templateDef.getId()), SYSADMIN,
-                SYSADMIN);
+                SYSADMIN, TemplateDefinitionDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), 404);
 
     }

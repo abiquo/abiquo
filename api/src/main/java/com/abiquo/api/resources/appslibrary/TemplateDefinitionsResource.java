@@ -23,10 +23,12 @@ package com.abiquo.api.resources.appslibrary;
 
 import java.util.List;
 
+import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 
 import org.apache.wink.common.annotations.Parent;
@@ -56,6 +58,7 @@ public class TemplateDefinitionsResource extends AbstractResource
     private AppsLibraryTransformer transformer;
 
     @GET
+    @Produces(TemplateDefinitionsDto.MEDIA_TYPE)
     public TemplateDefinitionsDto getTemplateDefinitions(
         @PathParam(EnterpriseResource.ENTERPRISE) final Integer idEnterprise,
         @Context final IRESTBuilder restBuilder) throws Exception
@@ -75,6 +78,8 @@ public class TemplateDefinitionsResource extends AbstractResource
     }
 
     @POST
+    @Consumes(TemplateDefinitionDto.MEDIA_TYPE)
+    @Produces(TemplateDefinitionDto.MEDIA_TYPE)
     public TemplateDefinitionDto postTemplateDefinition(
         @PathParam(EnterpriseResource.ENTERPRISE) final Integer idEnterprise,
         final TemplateDefinitionDto templateDef, @Context final IRESTBuilder restBuilder)

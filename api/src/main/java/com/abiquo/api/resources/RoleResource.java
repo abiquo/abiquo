@@ -89,7 +89,7 @@ public class RoleResource extends AbstractResource
     SecurityService securityService;
 
     @GET
-    @Produces(LinksDto.MEDIA_TYPE)
+    @Produces(RoleDto.MEDIA_TYPE)
     public RoleDto getRole(@PathParam(ROLE) final Integer roleId,
         @Context final IRESTBuilder restBuilder) throws Exception
     {
@@ -130,7 +130,7 @@ public class RoleResource extends AbstractResource
      */
     @GET
     @Path(RoleResource.ROLE_ACTION_GET_PRIVILEGES_PATH)
-    @Produces(LinksDto.MEDIA_TYPE)
+    @Produces(PrivilegesDto.MEDIA_TYPE)
     public PrivilegesDto getPrivileges(@PathParam(RoleResource.ROLE) final Integer roleId,
         @Context final IRESTBuilder restBuilder) throws Exception
     {

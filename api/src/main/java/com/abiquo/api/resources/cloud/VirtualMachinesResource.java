@@ -102,7 +102,7 @@ public class VirtualMachinesResource extends AbstractResource
      * @throws Exception
      */
     @POST
-    @Consumes(MediaType.APPLICATION_XML)
+    @Consumes(VirtualMachineDto.MEDIA_TYPE)
     public VirtualMachineDto createVirtualMachine(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
@@ -132,7 +132,7 @@ public class VirtualMachinesResource extends AbstractResource
      * @throws Exception
      */
     @POST
-    @Consumes(VirtualMachineResource.VM_NODE_MEDIA_TYPE)
+    @Consumes(VirtualMachineWithNodeDto.MEDIA_TYPE)
     public VirtualMachineDto createVirtualMachineWithNode(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,

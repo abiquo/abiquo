@@ -80,7 +80,7 @@ public class RoleResourceIT extends AbstractJpaGeneratorIT
         setup(entitiesToSetup.toArray());
 
         ClientResponse response =
-            get(resolveRoleURI(12345), "sysadmin", "sysadmin", LinksDto.MEDIA_TYPE);
+            get(resolveRoleURI(12345), "sysadmin", "sysadmin", RoleDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), 404);
     }
 
@@ -100,7 +100,7 @@ public class RoleResourceIT extends AbstractJpaGeneratorIT
 
         ClientResponse response =
             get(resolveRoleURI(role.getId()), "sysadmin", "sysadmin",
-                LinksDto.MEDIA_TYPE);
+                RoleDto.MEDIA_TYPE);
 
         RoleDto dto = response.getEntity(RoleDto.class);
 
@@ -130,7 +130,7 @@ public class RoleResourceIT extends AbstractJpaGeneratorIT
         String privilegesUri = resolveRoleActionGetPrivilegesURI(role.getId());
 
         RoleDto dto =
-            get(href, "sysadmin", "sysadmin", LinksDto.MEDIA_TYPE).getEntity(
+            get(href, "sysadmin", "sysadmin", RoleDto.MEDIA_TYPE).getEntity(
                 RoleDto.class);
 
         assertNotNull(dto.getLinks());

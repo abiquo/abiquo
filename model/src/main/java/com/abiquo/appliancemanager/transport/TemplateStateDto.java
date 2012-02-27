@@ -40,6 +40,8 @@ public class TemplateStateDto extends SingleResourceTransportDto
 {
     private static final long serialVersionUID = -4115162963051770344L;
 
+    public static final String MEDIA_TYPE = "application/vnd.abiquo.templatestate+xml";
+
     /**
      * Original location of the {@link TemplateDefinition}. Identify the entity combined with the
      * {@link Enterprise} identifier (id of the ApplianceManager EnterpriseRepository). Datacenter
@@ -118,7 +120,7 @@ public class TemplateStateDto extends SingleResourceTransportDto
     @Override
     public String getMediaType()
     {
-        return MediaType.APPLICATION_XML;
+        return MEDIA_TYPE;
     }
 
 }

@@ -32,6 +32,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.UriInfo;
@@ -121,6 +122,7 @@ public class EnterpriseResource extends AbstractResource
     SecurityService securityService;
 
     @GET
+    @Produces(EnterpriseDto.MEDIA_TYPE)
     public EnterpriseDto getEnterprise(@PathParam(ENTERPRISE) final Integer enterpriseId,
         @Context final IRESTBuilder restBuilder) throws Exception
     {
@@ -153,6 +155,7 @@ public class EnterpriseResource extends AbstractResource
     }
 
     @PUT
+    @Produces(EnterpriseDto.MEDIA_TYPE)
     public EnterpriseDto modifyEnterprise(final EnterpriseDto enterprise,
         @PathParam(ENTERPRISE) final Integer enterpriseId, @Context final IRESTBuilder restBuilder)
         throws Exception
@@ -171,6 +174,7 @@ public class EnterpriseResource extends AbstractResource
     @SuppressWarnings("unchecked")
     @GET
     @Path(EnterpriseResource.ENTERPRISE_ACTION_GET_IPS_PATH)
+    @Produces(IpsPoolManagementDto.MEDIA_TYPE)
     public IpsPoolManagementDto getIPsByEnterprise(@PathParam(ENTERPRISE) @Min(0) final Integer id,
         @QueryParam(START_WITH) @DefaultValue("0") @Min(0) final Integer startwith,
         @QueryParam(BY) @DefaultValue("ip") final String orderBy,
@@ -215,6 +219,7 @@ public class EnterpriseResource extends AbstractResource
      */
     @GET
     @Path(EnterpriseResource.ENTERPRISE_ACTION_GET_VIRTUALMACHINES_PATH)
+    @Produces(VirtualMachinesDto.MEDIA_TYPE)
     public VirtualMachinesDto getVirtualMachines(
         @PathParam(EnterpriseResource.ENTERPRISE) final Integer enterpriseId,
         @Context final IRESTBuilder restBuilder) throws Exception
@@ -247,6 +252,7 @@ public class EnterpriseResource extends AbstractResource
      */
     @GET
     @Path(EnterpriseResource.ENTERPRISE_ACTION_GET_VIRTUALDATACENTERS_PATH)
+    @Produces(VirtualDatacentersDto.MEDIA_TYPE)
     public VirtualDatacentersDto getVirtualDatacenters(
         @PathParam(EnterpriseResource.ENTERPRISE) final Integer enterpriseId,
         @Context final IRESTBuilder restBuilder) throws Exception

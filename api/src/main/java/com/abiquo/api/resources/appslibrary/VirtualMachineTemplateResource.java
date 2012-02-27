@@ -23,11 +23,13 @@ package com.abiquo.api.resources.appslibrary;
 
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 
 import org.apache.wink.client.Resource;
@@ -63,6 +65,7 @@ public class VirtualMachineTemplateResource extends AbstractResource
     private InfrastructureService infrastructureService;
 
     @GET
+    @Produces(VirtualMachineTemplateDto.MEDIA_TYPE)
     public VirtualMachineTemplateDto getVirtualMachineTemplate(
         @PathParam(EnterpriseResource.ENTERPRISE) final Integer enterpriseId,
         @PathParam(DatacenterRepositoryResource.DATACENTER_REPOSITORY) final Integer datacenterId,
@@ -81,6 +84,8 @@ public class VirtualMachineTemplateResource extends AbstractResource
     }
 
     @PUT
+    @Consumes(VirtualMachineTemplateDto.MEDIA_TYPE)
+    @Produces(VirtualMachineTemplateDto.MEDIA_TYPE)
     public VirtualMachineTemplateDto editVirtualMachineTemplate(
         @PathParam(EnterpriseResource.ENTERPRISE) @NotNull @Min(1) final Integer enterpriseId,
         @PathParam(DatacenterRepositoryResource.DATACENTER_REPOSITORY) @NotNull @Min(1) final Integer datacenterId,

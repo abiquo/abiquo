@@ -86,9 +86,9 @@ public class DatacenterResourceIT extends AbstractJpaGeneratorIT
     @Test
     public void getDatacenterDoesntExist() throws ClientWebException
     {
-        ClientResponse response = get(resolveDatacenterURI(12345));
-        assertEquals(404, response.getStatusCode());
-        assertErrors(response, 404, APIError.NON_EXISTENT_DATACENTER.getCode());
+        ClientResponse response = get(resolveDatacenterURI(12345), DatacenterDto.MEDIA_TYPE);
+        assertEquals(response.getStatusCode(), Status.NOT_FOUND.getStatusCode());
+        assertErrors(response, Status.NOT_FOUND.getStatusCode(), APIError.NON_EXISTENT_DATACENTER.getCode());
     }
 
     @Test
@@ -114,13 +114,13 @@ public class DatacenterResourceIT extends AbstractJpaGeneratorIT
         DatacenterDto dc = createDatacenter();
         String uri = dc.getEditLink().getHref();
 
-        DatacenterDto datacenter = get(uri).getEntity(DatacenterDto.class);
+        DatacenterDto datacenter = get(uri, DatacenterDto.MEDIA_TYPE).getEntity(DatacenterDto.class);
 
         datacenter.setLocation("datacenter_situation_changed");
         ClientResponse response = put(uri, datacenter);
-        assertEquals(200, response.getStatusCode());
+        assertEquals(response.getStatusCode(), Status.OK.getStatusCode());
 
-        datacenter = get(uri).getEntity(DatacenterDto.class);
+        datacenter = get(uri, datacenter.getMediaType()).getEntity(DatacenterDto.class);
         assertEquals("datacenter_situation_changed", datacenter.getLocation());
     }
 
@@ -141,16 +141,16 @@ public class DatacenterResourceIT extends AbstractJpaGeneratorIT
 
         String uri = resolveHypervisorTypesURI(datacenter.getId());
 
-        ClientResponse response = get(uri);
-        assertEquals(response.getStatusCode(), 200);
+        ClientResponse response = get(uri, HypervisorTypesDto.MEDIA_TYPE);
+        assertEquals(response.getStatusCode(), Status.OK.getStatusCode());
 
         HypervisorTypesDto types = response.getEntity(HypervisorTypesDto.class);
         assertNotNull(types);
         assertEquals(types.getCollection().isEmpty(), false);
 
-        response = get(resolveHypervisorTypesURI(12345));
-        assertEquals(404, response.getStatusCode());
-        assertErrors(response, 404, APIError.NON_EXISTENT_DATACENTER.getCode());
+        response = get(resolveHypervisorTypesURI(12345), HypervisorTypesDto.MEDIA_TYPE);
+        assertEquals(response.getStatusCode(), Status.NOT_FOUND.getStatusCode());
+        assertErrors(response, Status.NOT_FOUND.getStatusCode(), APIError.NON_EXISTENT_DATACENTER.getCode());
     }
 
     @Test
@@ -165,8 +165,8 @@ public class DatacenterResourceIT extends AbstractJpaGeneratorIT
 
         String uri = resolveEnterprisesByDatacenterURI(datacenterId);
 
-        ClientResponse response = get(uri);
-        assertEquals(response.getStatusCode(), 200);
+        ClientResponse response = get(uri, EnterprisesDto.MEDIA_TYPE);
+        assertEquals(response.getStatusCode(), Status.OK.getStatusCode());
 
         EnterprisesDto enterprises = response.getEntity(EnterprisesDto.class);
         assertNotNull(enterprises);
@@ -200,12 +200,12 @@ public class DatacenterResourceIT extends AbstractJpaGeneratorIT
         String uri0 = resolveEnterprisesByDatacenterURI(datacenterId);
         String uri1 = uri0 + "?network=true";
         String uri2 = uri0 + "?network=true&startwith=2&limit=1";
-        ClientResponse response0 = get(uri0);
-        ClientResponse response1 = get(uri1);
-        ClientResponse response2 = get(uri2);
-        assertEquals(response0.getStatusCode(), 200);
-        assertEquals(response1.getStatusCode(), 200);
-        assertEquals(response2.getStatusCode(), 200);
+        ClientResponse response0 = get(uri0, EnterprisesDto.MEDIA_TYPE);
+        ClientResponse response1 = get(uri1, EnterprisesDto.MEDIA_TYPE);
+        ClientResponse response2 = get(uri2, EnterprisesDto.MEDIA_TYPE);
+        assertEquals(response0.getStatusCode(), Status.OK.getStatusCode());
+        assertEquals(response1.getStatusCode(), Status.OK.getStatusCode());
+        assertEquals(response2.getStatusCode(), Status.OK.getStatusCode());
 
         EnterprisesDto enterprises0 = response0.getEntity(EnterprisesDto.class);
         EnterprisesDto enterprises1 = response1.getEntity(EnterprisesDto.class);
@@ -236,7 +236,7 @@ public class DatacenterResourceIT extends AbstractJpaGeneratorIT
 
         String href = resolveDatacenterURI(datacenter.getId());
 
-        return get(href).getEntity(DatacenterDto.class);
+        return get(href, DatacenterDto.MEDIA_TYPE).getEntity(DatacenterDto.class);
     }
 
     /**

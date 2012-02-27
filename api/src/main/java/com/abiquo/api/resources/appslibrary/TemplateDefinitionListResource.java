@@ -27,6 +27,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
@@ -70,6 +71,7 @@ public class TemplateDefinitionListResource extends AbstractResource
     protected AppsLibraryTransformer transformer;
 
     @GET
+    @Produces(TemplateDefinitionListDto.MEDIA_TYPE)
     public TemplateDefinitionListDto getTemplateDefinitionList(
         @PathParam(TEMPLATE_DEFINITION_LIST) final Integer TemplateDefinitionListId,
         @Context final IRESTBuilder restBuilder) throws Exception
@@ -81,6 +83,8 @@ public class TemplateDefinitionListResource extends AbstractResource
     }
 
     @PUT
+    @Consumes(TemplateDefinitionListDto.MEDIA_TYPE)
+    @Produces(TemplateDefinitionListDto.MEDIA_TYPE)
     public TemplateDefinitionListDto updateTemplateDefinitionList(
         final TemplateDefinitionListDto templateDefinitionList,
         @PathParam(TEMPLATE_DEFINITION_LIST) final Integer templateDefinitionListId,
@@ -95,7 +99,7 @@ public class TemplateDefinitionListResource extends AbstractResource
     }
 
     @PUT
-    @Consumes(MediaType.TEXT_PLAIN)
+    @Produces(TemplateDefinitionListDto.MEDIA_TYPE)
     public TemplateDefinitionListDto refreshTemplateDefinitionListFromUrl(
         @PathParam(TEMPLATE_DEFINITION_LIST) final Integer templateDefinitionListId,
         @PathParam(EnterpriseResource.ENTERPRISE) final Integer idEnterprise,
@@ -121,6 +125,7 @@ public class TemplateDefinitionListResource extends AbstractResource
      */
     @GET
     @Path(TemplateDefinitionListResource.TEMPLATE_DEFINITION_LIST_REPOSITORY_STATUS_PATH)
+    @Produces(TemplatesStateDto.MEDIA_TYPE)
     public TemplatesStateDto getTemplateStatusList(
         @PathParam(TEMPLATE_DEFINITION_LIST) final Integer templateDefinitionId,
         @PathParam(EnterpriseResource.ENTERPRISE) final Integer idEnterprise,

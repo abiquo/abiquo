@@ -97,7 +97,7 @@ public class UsersResourceIT extends AbstractJpaGeneratorIT
         setup(entitiesToSetup.toArray());
 
         ClientResponse response =
-            get(resolveUsersURI(user.getEnterprise().getId()), SYSADMIN, SYSADMIN);
+            get(resolveUsersURI(user.getEnterprise().getId()), SYSADMIN, SYSADMIN, UsersDto.MEDIA_TYPE);
 
         assertEquals(response.getStatusCode(), 200);
 
@@ -138,7 +138,7 @@ public class UsersResourceIT extends AbstractJpaGeneratorIT
             UriHelper.appendQueryParamsToPath(uri, Collections.singletonMap("filter",
                 new String[] {u1.getNick()}), false);
 
-        ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
+        ClientResponse response = get(uri, SYSADMIN, SYSADMIN, UsersDto.MEDIA_TYPE);
 
         assertEquals(response.getStatusCode(), 200);
 
@@ -175,7 +175,7 @@ public class UsersResourceIT extends AbstractJpaGeneratorIT
             UriHelper.appendQueryParamsToPath(uri, Collections.singletonMap("desc",
                 new String[] {"true"}), false);
 
-        ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
+        ClientResponse response = get(uri, SYSADMIN, SYSADMIN, UsersDto.MEDIA_TYPE);
 
         assertEquals(response.getStatusCode(), 200);
 
@@ -219,14 +219,14 @@ public class UsersResourceIT extends AbstractJpaGeneratorIT
 
         // Test the get response depending on the user who performs the request
         String wildwardURI = resolveUsersURI("_");
-        assertUsersCount(get(wildwardURI, SYSADMIN, SYSADMIN), 3);
-        assertUsersCount(get(wildwardURI, ENTADMIN, ENTADMIN), 2);
-        assertUsersCount(get(wildwardURI, USER, USER), 1);
+        assertUsersCount(get(wildwardURI, SYSADMIN, SYSADMIN, UsersDto.MEDIA_TYPE), 3);
+        assertUsersCount(get(wildwardURI, ENTADMIN, ENTADMIN, UsersDto.MEDIA_TYPE), 2);
+        assertUsersCount(get(wildwardURI, USER, USER, UsersDto.MEDIA_TYPE), 1);
 
         String uri = resolveUsersURI(ent.getId());
-        assertUsersCount(get(uri, SYSADMIN, SYSADMIN), 2);
-        assertUsersCount(get(uri, ENTADMIN, ENTADMIN), 2);
-        assertUsersCount(get(uri, USER, USER), 1);
+        assertUsersCount(get(uri, SYSADMIN, SYSADMIN, UsersDto.MEDIA_TYPE), 2);
+        assertUsersCount(get(uri, ENTADMIN, ENTADMIN, UsersDto.MEDIA_TYPE), 2);
+        assertUsersCount(get(uri, USER, USER, UsersDto.MEDIA_TYPE), 1);
     }
 
     @Test
@@ -264,9 +264,9 @@ public class UsersResourceIT extends AbstractJpaGeneratorIT
 
         // Test the get response depending on the user who performs the request
         String uri = resolveUsersURI(ent2.getId());
-        assertUsersCount(get(uri, SYSADMIN, SYSADMIN), 0);
-        assertAccessDenied(get(uri, ENTADMIN, ENTADMIN));
-        assertAccessDenied(get(uri, USER, USER));
+        assertUsersCount(get(uri, SYSADMIN, SYSADMIN, UsersDto.MEDIA_TYPE), 0);
+        assertAccessDenied(get(uri, ENTADMIN, ENTADMIN, UsersDto.MEDIA_TYPE ));
+        assertAccessDenied(get(uri, USER, USER, UsersDto.MEDIA_TYPE));
     }
 
     @Test
@@ -391,7 +391,7 @@ public class UsersResourceIT extends AbstractJpaGeneratorIT
             UriHelper.appendQueryParamsToPath(uri, Collections.singletonMap("connected",
                 new String[] {"true"}), false);
 
-        ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
+        ClientResponse response = get(uri, SYSADMIN, SYSADMIN, UsersDto.MEDIA_TYPE);
 
         assertEquals(response.getStatusCode(), 200);
         UsersDto entity = response.getEntity(UsersDto.class);

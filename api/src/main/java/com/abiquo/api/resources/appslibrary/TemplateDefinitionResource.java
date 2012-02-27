@@ -28,6 +28,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
@@ -77,6 +78,7 @@ public class TemplateDefinitionResource extends AbstractResource
     private AppsLibraryTransformer transformer;
 
     @GET
+    @Produces(TemplateDefinitionDto.MEDIA_TYPE)
     public TemplateDefinitionDto getTemplateDefinition(
         @PathParam(TEMPLATE_DEFINITION) final Integer templateDefinitionId,
         @Context final IRESTBuilder restBuilder) throws Exception
@@ -87,6 +89,7 @@ public class TemplateDefinitionResource extends AbstractResource
 
     @GET
     @Path(TEMPLATE_DEFINITION_REPOSITORY_STATUS_PATH)
+    @Produces(TemplateStateDto.MEDIA_TYPE)
     public TemplateStateDto getTemplateState(
         @PathParam(TEMPLATE_DEFINITION) final Integer templateDefId,
         @PathParam(EnterpriseResource.ENTERPRISE) final Integer idEnterprise,
@@ -98,6 +101,8 @@ public class TemplateDefinitionResource extends AbstractResource
     }
 
     @PUT
+    @Consumes(TemplateDefinitionDto.MEDIA_TYPE)
+    @Produces(TemplateDefinitionDto.MEDIA_TYPE)
     public TemplateDefinitionDto updateTemplateDefinition(final TemplateDefinitionDto templateDef,
         @PathParam(TEMPLATE_DEFINITION) final Integer templateDefId,
         @PathParam(EnterpriseResource.ENTERPRISE) final Integer idEnterprise,
@@ -120,7 +125,6 @@ public class TemplateDefinitionResource extends AbstractResource
      * TODO use the datacenter URI on the post
      */
     @POST
-    @Consumes(MediaType.TEXT_PLAIN)
     @Path(TemplateDefinitionResource.TEMPLATE_DEFINITION_INSTALL_ACTION_PATH)
     public Void installTemplateOnDatacenterRepository(
         @PathParam(EnterpriseResource.ENTERPRISE) final Integer idEnterprise,
@@ -136,7 +140,6 @@ public class TemplateDefinitionResource extends AbstractResource
      * TODO use the datacenter URI on the post
      */
     @POST
-    @Consumes(MediaType.TEXT_PLAIN)
     @Path(TemplateDefinitionResource.TEMPLATE_DEFINITION_UN_INSTALL_ACTION_PATH)
     public Void uninstallTemplateOnDatacenterRepository(
         @PathParam(EnterpriseResource.ENTERPRISE) final Integer idEnterprise,

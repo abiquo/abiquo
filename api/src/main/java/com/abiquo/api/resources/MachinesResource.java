@@ -63,10 +63,6 @@ public class MachinesResource extends AbstractResource
 {
     public static final String MACHINES_PATH = "machines";
 
-    public static final String SINGLE_MACHINE_MIME_TYPE = "application/machinedto+xml";
-
-    public static final String MULTIPLE_MACHINES_MIME_TYPE = "application/machinesdto+xml";
-
     @Autowired
     protected MachineService machineService;
 
@@ -91,8 +87,8 @@ public class MachinesResource extends AbstractResource
     }
 
     @POST
-    @Consumes(SINGLE_MACHINE_MIME_TYPE + "," + MediaType.APPLICATION_XML)
-    @Produces(SINGLE_MACHINE_MIME_TYPE + "," + MediaType.APPLICATION_XML)
+    @Consumes(MachineDto.MEDIA_TYPE)
+    @Produces(MachineDto.MEDIA_TYPE)
     public MachineDto postMachine(
         @PathParam(DatacenterResource.DATACENTER) @NotNull @Min(0) final Integer datacenterId,
         @PathParam(RackResource.RACK) @Min(0) final Integer rackId, final MachineDto machine,
@@ -107,8 +103,8 @@ public class MachinesResource extends AbstractResource
     }
 
     @POST
-    @Consumes(MULTIPLE_MACHINES_MIME_TYPE)
-    @Produces(MULTIPLE_MACHINES_MIME_TYPE)
+    @Consumes(MachinesToCreateDto.MEDIA_TYPE)
+    @Produces(MachinesToCreateDto.MEDIA_TYPE)
     @SuppressWarnings("unchecked")
     public MachinesDto postMultipleMachines(
         @PathParam(DatacenterResource.DATACENTER) @NotNull @Min(0) final Integer datacenterId,

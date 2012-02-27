@@ -26,6 +26,7 @@ import static com.abiquo.api.resources.UserResource.createUsersTransferObjectWit
 
 import java.util.Collection;
 
+import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -72,7 +73,7 @@ public class UsersResource extends AbstractResource
 
     @GET
     // @Consumes({MediaType.APPLICATION_XML, LINK_MEDIA_TYPE})
-    @Produces({MediaType.APPLICATION_XML, LinksDto.MEDIA_TYPE})
+    @Produces({UsersDto.MEDIA_TYPE, LinksDto.MEDIA_TYPE})
     public UsersDto getUsers(@PathParam(EnterpriseResource.ENTERPRISE) final String enterpriseId,
         @QueryParam("filter") final String filter, @QueryParam("orderBy") final String orderBy,
         @QueryParam("desc") final boolean desc, @QueryParam("connected") final boolean connected,
@@ -162,6 +163,8 @@ public class UsersResource extends AbstractResource
     }
 
     @POST
+    @Consumes(UserDto.MEDIA_TYPE)
+    @Produces(UserDto.MEDIA_TYPE)
     public UserDto postUser(@PathParam(EnterpriseResource.ENTERPRISE) final Integer enterpriseId,
         final UserDto user, @Context final IRESTBuilder restBuilder) throws Exception
     {

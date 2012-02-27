@@ -44,10 +44,12 @@ package com.abiquo.api.resources;
 
 import java.util.List;
 
+import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 
 import org.apache.wink.common.annotations.Parent;
@@ -78,6 +80,7 @@ public class DatastoresResource
     MachineService machineService;
 
     @GET
+    @Produces(DatastoresDto.MEDIA_TYPE)
     public DatastoresDto getDatastores(
         @PathParam(DatacenterResource.DATACENTER) Integer datacenterId,
         @PathParam(RackResource.RACK) Integer rackId,
@@ -101,6 +104,8 @@ public class DatastoresResource
     }
 
     @POST
+    @Consumes(DatastoreDto.MEDIA_TYPE)
+    @Produces(DatastoreDto.MEDIA_TYPE)
     public DatastoreDto postDatastore(
         @PathParam(DatacenterResource.DATACENTER) Integer datacenterId,
         @PathParam(RackResource.RACK) Integer rackId,

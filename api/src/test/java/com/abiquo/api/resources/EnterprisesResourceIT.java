@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response.Status;
 
 import org.apache.wink.client.ClientResponse;
 import org.apache.wink.client.Resource;
@@ -52,9 +53,6 @@ public class EnterprisesResourceIT extends AbstractJpaGeneratorIT
 {
 
     private String enterprisesURI = resolveEnterprisesURI();
-
-    private Resource enterpriseResource = client.resource(enterprisesURI).accept(
-        MediaType.APPLICATION_XML);
 
     @Test
     public void getEnterpriseList()
@@ -88,13 +86,13 @@ public class EnterprisesResourceIT extends AbstractJpaGeneratorIT
 
         setup(entitiesToSetup.toArray());
 
-        ClientResponse response = get(enterprisesURI, u1.getNick(), "foo");
+        ClientResponse response = get(enterprisesURI, u1.getNick(), "foo", EnterprisesDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), 200);
 
         EnterprisesDto entity = response.getEntity(EnterprisesDto.class);
         Assert.assertSize(entity.getCollection(), 2);
 
-        response = get(enterprisesURI, u2.getNick(), "bar");
+        response = get(enterprisesURI, u2.getNick(), "bar", EnterprisesDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), 200);
 
         entity = response.getEntity(EnterprisesDto.class);
@@ -117,7 +115,7 @@ public class EnterprisesResourceIT extends AbstractJpaGeneratorIT
 
         String uri = UriHelper.appendQueryParamsToPath(enterprisesURI, queryParams, false);
 
-        ClientResponse response = get(uri, u1.getNick(), "foo");
+        ClientResponse response = get(uri, u1.getNick(), "foo", EnterprisesDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), 200);
 
         EnterprisesDto entity = response.getEntity(EnterprisesDto.class);
@@ -171,8 +169,8 @@ public class EnterprisesResourceIT extends AbstractJpaGeneratorIT
 
         String uri = UriHelper.appendQueryParamsToPath(enterprisesURI, queryParams, false);
 
-        ClientResponse response = get(uri, u1.getNick(), "foo");
-        assertEquals(response.getStatusCode(), 200);
+        ClientResponse response = get(uri, u1.getNick(), "foo", EnterprisesDto.MEDIA_TYPE);
+        assertEquals(response.getStatusCode(), Status.OK.getStatusCode());
 
         EnterprisesDto entity = response.getEntity(EnterprisesDto.class);
         Assert.assertSize(entity.getCollection(), 3);
@@ -184,8 +182,8 @@ public class EnterprisesResourceIT extends AbstractJpaGeneratorIT
 
         uri = UriHelper.appendQueryParamsToPath(enterprisesURI, queryParams2, false);
 
-        response = get(uri, u1.getNick(), "foo");
-        assertEquals(response.getStatusCode(), 200);
+        response = get(uri, u1.getNick(), "foo", EnterprisesDto.MEDIA_TYPE);
+        assertEquals(response.getStatusCode(), Status.OK.getStatusCode());
         entity = response.getEntity(EnterprisesDto.class);
         Assert.assertSize(entity.getCollection(), 2);
     }
@@ -195,8 +193,8 @@ public class EnterprisesResourceIT extends AbstractJpaGeneratorIT
     {
         EnterpriseDto e = validEnterprise();
 
-        ClientResponse response = postEnterprise(e);
-        assertEquals(response.getStatusCode(), 201);
+        ClientResponse response = post(enterprisesURI, e);
+        assertEquals(response.getStatusCode(), Status.CREATED.getStatusCode());
 
         EnterpriseDto entityPost = response.getEntity(EnterpriseDto.class);
         assertNotNull(entityPost);
@@ -214,11 +212,11 @@ public class EnterprisesResourceIT extends AbstractJpaGeneratorIT
     {
         EnterpriseDto e = validEnterprise();
 
-        ClientResponse response = postEnterprise(e);
-        assertEquals(response.getStatusCode(), 201);
+        ClientResponse response = post(enterprisesURI, e);
+        assertEquals(response.getStatusCode(), Status.CREATED.getStatusCode());
 
-        response = postEnterprise(e);
-        assertErrors(response, 409, APIError.ENTERPRISE_DUPLICATED_NAME.getCode());
+        response = post(enterprisesURI, e);
+        assertErrors(response, Status.CONFLICT.getStatusCode(), APIError.ENTERPRISE_DUPLICATED_NAME.getCode());
     }
 
     @Test
@@ -227,8 +225,8 @@ public class EnterprisesResourceIT extends AbstractJpaGeneratorIT
         EnterpriseDto e = validEnterprise();
         e.setRepositoryLimits(0, 1);
 
-        ClientResponse response = postEnterprise(e);
-        assertEquals(response.getStatusCode(), 400);
+        ClientResponse response = post(enterprisesURI, e);
+        assertEquals(response.getStatusCode(), Status.BAD_REQUEST.getStatusCode());
     }
 
     @Test
@@ -237,8 +235,8 @@ public class EnterprisesResourceIT extends AbstractJpaGeneratorIT
         EnterpriseDto e = validEnterprise();
         e.setVlansLimits(0, 1);
 
-        ClientResponse response = postEnterprise(e);
-        assertEquals(response.getStatusCode(), 400);
+        ClientResponse response = post(enterprisesURI, e);
+        assertEquals(response.getStatusCode(), Status.BAD_REQUEST.getStatusCode());
     }
 
     @Test
@@ -247,8 +245,8 @@ public class EnterprisesResourceIT extends AbstractJpaGeneratorIT
         EnterpriseDto e = validEnterprise();
         e.setCpuCountSoftLimit(-1);
 
-        ClientResponse response = postEnterprise(e);
-        assertEquals(response.getStatusCode(), 400);
+        ClientResponse response = post(enterprisesURI, e);
+        assertEquals(response.getStatusCode(), Status.BAD_REQUEST.getStatusCode());
     }
 
     @Test
@@ -257,8 +255,8 @@ public class EnterprisesResourceIT extends AbstractJpaGeneratorIT
         EnterpriseDto e = validEnterprise();
         e.setHdHardLimitInMb(-1);
 
-        ClientResponse response = postEnterprise(e);
-        assertEquals(response.getStatusCode(), 400);
+        ClientResponse response = post(enterprisesURI, e);
+        assertEquals(response.getStatusCode(), Status.BAD_REQUEST.getStatusCode());
     }
 
     @Test
@@ -267,13 +265,8 @@ public class EnterprisesResourceIT extends AbstractJpaGeneratorIT
         EnterpriseDto e = validEnterprise();
         e.setRamHardLimitInMb(-1);
 
-        ClientResponse response = postEnterprise(e);
-        assertEquals(response.getStatusCode(), 400);
-    }
-
-    private ClientResponse postEnterprise(final EnterpriseDto e)
-    {
-        return enterpriseResource.contentType(MediaType.APPLICATION_XML).post(e);
+        ClientResponse response = post(enterprisesURI, e);
+        assertEquals(response.getStatusCode(), Status.BAD_REQUEST.getStatusCode());
     }
 
     private EnterpriseDto validEnterprise()

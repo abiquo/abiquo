@@ -32,7 +32,6 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
 
 import org.apache.wink.common.annotations.Parent;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -112,7 +111,7 @@ public class RackResource extends AbstractResource
     // nor lesser than 1. You don't have to do anything with it. Only declare it. A custom handler
     // previous to this call is the responsible of manage it.
     @GET
-    @Produces(MediaType.APPLICATION_XML)
+    @Produces(RackDto.MEDIA_TYPE)     
     public RackDto getRack(
         @PathParam(DatacenterResource.DATACENTER) @NotNull @Min(1) final Integer datacenterId,
         @PathParam(RACK) @NotNull @Min(1) final Integer rackId,
@@ -129,8 +128,8 @@ public class RackResource extends AbstractResource
     // previous to this call is the responsible of manage it. Please note the entity Rack does not
     // have any constraint. Constraints inside the entity are checked later.
     @PUT
-    @Consumes(MediaType.APPLICATION_XML)
-    @Produces(MediaType.APPLICATION_XML)
+    @Consumes(RackDto.MEDIA_TYPE)
+    @Produces(RackDto.MEDIA_TYPE)
     public RackDto modifyRack(
         @PathParam(DatacenterResource.DATACENTER) @NotNull @Min(1) final Integer datacenterId,
         @PathParam(RACK) @NotNull @Min(1) final Integer rackId, final RackDto rackDto,

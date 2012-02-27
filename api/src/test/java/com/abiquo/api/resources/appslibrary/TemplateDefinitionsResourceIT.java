@@ -104,7 +104,7 @@ public class TemplateDefinitionsResourceIT extends AbstractJpaGeneratorIT
 
         ClientResponse response =
             get(resolveTemplateDefinitionsURI(appsLibrary.getEnterprise().getId()), SYSADMIN,
-                SYSADMIN);
+                SYSADMIN, TemplateDefinitionsDto.MEDIA_TYPE);
 
         assertEquals(response.getStatusCode(), 200);
 

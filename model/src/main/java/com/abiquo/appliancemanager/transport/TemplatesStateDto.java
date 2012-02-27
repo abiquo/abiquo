@@ -33,6 +33,7 @@ import com.abiquo.model.transport.WrapperDto;
 public class TemplatesStateDto extends WrapperDto<TemplateStateDto>
 {
     private static final long serialVersionUID = -5521047055700500865L;
+    public static final String MEDIA_TYPE = "application/vnd.abiquo.templatestates+xml";
 
     @Override
     @XmlElement(name = "ovfInstanceState")
@@ -44,7 +45,7 @@ public class TemplatesStateDto extends WrapperDto<TemplateStateDto>
     @Override
     public String getMediaType()
     {
-        return MediaType.APPLICATION_XML;
+        return MEDIA_TYPE;
     }
 
 }

@@ -172,6 +172,7 @@ public class DatacenterResource extends AbstractResource
 
     @GET
     @Path(ENTERPRISES_PATH)
+    @Produces(EnterprisesDto.MEDIA_TYPE)
     public EnterprisesDto getEnterprises(@PathParam(DATACENTER) final Integer datacenterId,
         @QueryParam(START_WITH) @Min(0) final Integer startwith,
         @QueryParam(NETWORK) Boolean network,
@@ -204,6 +205,7 @@ public class DatacenterResource extends AbstractResource
 
     @GET
     @Path(HYPERVISORS_PATH)
+    @Produces(HypervisorTypesDto.MEDIA_TYPE)
     public HypervisorTypesDto getAvailableHypervisors(
         @PathParam(DATACENTER) final Integer datacenterId, @Context final IRESTBuilder restBuilder)
         throws Exception
@@ -282,6 +284,7 @@ public class DatacenterResource extends AbstractResource
      */
     @GET
     @Path(ACTION_DISCOVER_SINGLE)
+    @Produces(MachineDto.MEDIA_TYPE)
     public MachineDto discoverSingleMachine(
         @PathParam(DATACENTER) @NotNull @Min(1) final Integer datacenterId,
         @QueryParam(IP) @Ip final String ip,
@@ -316,6 +319,7 @@ public class DatacenterResource extends AbstractResource
      */
     @GET
     @Path(ACTION_DISCOVER_MULTIPLE)
+    @Produces(MachinesDto.MEDIA_TYPE)
     public MachinesDto discoverMultipleMachine(
         @PathParam(DATACENTER) @NotNull @Min(1) final Integer datacenterId,
         @QueryParam(IP_FROM) @Ip final String ipFrom, @QueryParam(IP_TO) @Ip final String ipTo,
@@ -346,6 +350,7 @@ public class DatacenterResource extends AbstractResource
      */
     @GET
     @Path(ACTION_MACHINES_CHECK)
+    @Produces(MachineStateDto.MEDIA_TYPE)
     public MachineStateDto checkMachineState(
         @PathParam(DatacenterResource.DATACENTER) final Integer datacenterId,
         @PathParam(RackResource.RACK) final Integer rackId,

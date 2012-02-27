@@ -25,6 +25,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 
@@ -86,6 +87,7 @@ public class DatacenterRepositoryResource extends AbstractResource
      *            datacenter service) in order to include the repository filesytem usage.
      */
     @GET
+    @Produces(DatacenterRepositoryDto.MEDIA_TYPE)
     public DatacenterRepositoryDto getDatacenterRepository(
         @PathParam(EnterpriseResource.ENTERPRISE) final Integer enterpId,
         @PathParam(DatacenterRepositoryResource.DATACENTER_REPOSITORY) final Integer dcId,

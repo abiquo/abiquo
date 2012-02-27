@@ -26,6 +26,8 @@ import static com.abiquo.api.common.Assert.assertLinkExist;
 import static com.abiquo.api.common.UriTestResolver.resolveCategoryURI;
 import static org.testng.Assert.assertEquals;
 
+import javax.ws.rs.core.Response.Status;
+
 import org.apache.wink.client.ClientResponse;
 import org.apache.wink.client.ClientWebException;
 import org.testng.annotations.BeforeMethod;
@@ -53,8 +55,8 @@ public class CategoryResourceIT extends AbstractJpaGeneratorIT
     {
         String categoryURI = resolveCategoryURI(category.getId());
 
-        ClientResponse response = get(categoryURI);
-        assertEquals(response.getStatusCode(), 200);
+        ClientResponse response = get(categoryURI, CategoryDto.MEDIA_TYPE);
+        assertEquals(response.getStatusCode(), Status.OK.getStatusCode());
 
         CategoryDto catDto = response.getEntity(CategoryDto.class);
 
@@ -67,8 +69,8 @@ public class CategoryResourceIT extends AbstractJpaGeneratorIT
     @Test
     public void getCategoryRaises404WhenNotFound() throws ClientWebException
     {
-        ClientResponse response = get(resolveCategoryURI(12345));
-        assertError(response, 404, APIError.NON_EXISTENT_CATEGORY);
+        ClientResponse response = get(resolveCategoryURI(12345), CategoryDto.MEDIA_TYPE);
+        assertError(response, Status.NOT_FOUND.getStatusCode(), APIError.NON_EXISTENT_CATEGORY);
     }
 
     @Test
@@ -78,7 +80,7 @@ public class CategoryResourceIT extends AbstractJpaGeneratorIT
         setup(cat);
 
         String categoryURI = resolveCategoryURI(cat.getId());
-        ClientResponse response = get(categoryURI);
+        ClientResponse response = get(categoryURI, CategoryDto.MEDIA_TYPE);
         CategoryDto dto = response.getEntity(CategoryDto.class);
         dto.setName("Name_modified");
 
@@ -96,7 +98,7 @@ public class CategoryResourceIT extends AbstractJpaGeneratorIT
         setup(cat);
 
         String categoryURI = resolveCategoryURI(cat.getId());
-        ClientResponse response = get(categoryURI);
+        ClientResponse response = get(categoryURI, CategoryDto.MEDIA_TYPE);
         CategoryDto dto = response.getEntity(CategoryDto.class);
         dto.setName("Name_modified");
 
@@ -111,7 +113,7 @@ public class CategoryResourceIT extends AbstractJpaGeneratorIT
         setup(cat);
 
         String categoryURI = resolveCategoryURI(cat.getId());
-        ClientResponse response = get(categoryURI);
+        ClientResponse response = get(categoryURI, CategoryDto.MEDIA_TYPE);
         CategoryDto dto = response.getEntity(CategoryDto.class);
         dto.setName(category.getName()); // Duplicated name
 
@@ -127,7 +129,7 @@ public class CategoryResourceIT extends AbstractJpaGeneratorIT
         ClientResponse response = delete(categoryURL);
         assertEquals(response.getStatusCode(), 204);
 
-        response = get(categoryURL);
+        response = get(categoryURL, CategoryDto.MEDIA_TYPE);
         assertError(response, 404, APIError.NON_EXISTENT_CATEGORY);
     }
 

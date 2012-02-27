@@ -28,6 +28,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 
@@ -58,6 +59,7 @@ public class TemplateDefinitionListsResource extends AbstractResource
     private AppsLibraryTransformer transformer;
 
     @GET
+    @Produces(TemplateDefinitionListsDto.MEDIA_TYPE)
     public TemplateDefinitionListsDto getTemplateDefinitionLists(
         @PathParam(EnterpriseResource.ENTERPRISE) final Integer idEnterprise,
         @Context final IRESTBuilder restBuilder) throws Exception
@@ -85,7 +87,8 @@ public class TemplateDefinitionListsResource extends AbstractResource
      * if TEMPLATE_DEFINITION_POST_QUERY_PARM is set do not use the content body {@link TemplateDefinitionListDto}.
      */
     @POST
-    @Consumes(MediaType.APPLICATION_XML)
+    @Consumes(TemplateDefinitionListDto.MEDIA_TYPE)
+    @Produces(TemplateDefinitionListDto.MEDIA_TYPE)
     public TemplateDefinitionListDto postTemplateDefinitionList(
         @PathParam(EnterpriseResource.ENTERPRISE) final Integer idEnterprise,
         final TemplateDefinitionListDto templateDefList, @Context final IRESTBuilder restBuilder)
@@ -102,6 +105,7 @@ public class TemplateDefinitionListsResource extends AbstractResource
      * if TEMPLATE_DEFINITION_POST_QUERY_PARM is set do not use the content body {@link TemplateDefinitionListDto}.
      */
     @POST
+    @Produces(TemplateDefinitionListDto.MEDIA_TYPE)
     @Consumes(MediaType.TEXT_PLAIN)
     public TemplateDefinitionListDto postTemplateDefinitionListFromOVFIndexUrl(
         @PathParam(EnterpriseResource.ENTERPRISE) final Integer idEnterprise,

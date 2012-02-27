@@ -105,7 +105,7 @@ public class TemplateDefinitionListsResourceIT extends AbstractJpaGeneratorIT
 
         validURI = resolveTemplateDefinitionListsURI(enterprise.getId());
 
-        ClientResponse response = get(validURI, SYSADMIN, SYSADMIN);
+        ClientResponse response = get(validURI, SYSADMIN, SYSADMIN, TemplateDefinitionListsDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), 200);
 
         TemplateDefinitionListsDto entity = response.getEntity(TemplateDefinitionListsDto.class);
@@ -118,7 +118,7 @@ public class TemplateDefinitionListsResourceIT extends AbstractJpaGeneratorIT
     public void getTemplateDefinitionListsByNonExistentEnterpriseRises404() throws Exception
     {
         validURI = resolveTemplateDefinitionListsURI(2);
-        ClientResponse response = get(validURI);
+        ClientResponse response = get(validURI, TemplateDefinitionListsDto.MEDIA_TYPE);
         assertError(response, 404, APIError.NON_EXISTENT_ENTERPRISE);
     }
 
@@ -158,7 +158,7 @@ public class TemplateDefinitionListsResourceIT extends AbstractJpaGeneratorIT
         String basicAuth = basicAuth(SYSADMIN, SYSADMIN);
 
         ClientResponse response =
-            client.resource(validURI).accept(MediaType.APPLICATION_XML)
+            client.resource(validURI).accept(TemplateDefinitionListDto.MEDIA_TYPE)
                 .contentType(MediaType.TEXT_PLAIN).header("Authorization", "Basic " + basicAuth)
                 .post(xmlindexURI);
 
@@ -184,9 +184,10 @@ public class TemplateDefinitionListsResourceIT extends AbstractJpaGeneratorIT
         String basicAuth = basicAuth(SYSADMIN, SYSADMIN);
 
         ClientResponse response =
-            client.resource(validURI).accept(MediaType.APPLICATION_XML)
+            client.resource(validURI).accept(TemplateDefinitionListDto.MEDIA_TYPE)
                 .contentType(MediaType.TEXT_PLAIN).header("Authorization", "Basic " + basicAuth)
                 .post(xmlindexURI);
+        
 
         assertEquals(response.getStatusCode(), 201);
 
@@ -210,7 +211,7 @@ public class TemplateDefinitionListsResourceIT extends AbstractJpaGeneratorIT
         String basicAuth = basicAuth(SYSADMIN, SYSADMIN);
 
         ClientResponse response =
-            client.resource(validURI).accept(MediaType.APPLICATION_XML)
+            client.resource(validURI).accept(TemplateDefinitionListDto.MEDIA_TYPE)
                 .contentType(MediaType.TEXT_PLAIN).header("Authorization", "Basic " + basicAuth)
                 .post(badURL);
 
@@ -230,7 +231,7 @@ public class TemplateDefinitionListsResourceIT extends AbstractJpaGeneratorIT
         String xmlindexURI = "http://localhost:7979/testovf/invalidovfindex/ovfindex.xml";
 
         ClientResponse response =
-            client.resource(validURI).accept(MediaType.APPLICATION_XML)
+            client.resource(validURI).accept(TemplateDefinitionListDto.MEDIA_TYPE)
                 .contentType(MediaType.TEXT_PLAIN).post(xmlindexURI);
 
         assertError(response, 400, APIError.INVALID_OVF_INDEX_XML);
