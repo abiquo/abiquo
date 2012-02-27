@@ -43,6 +43,7 @@ import com.abiquo.model.transport.SingleResourceTransportDto;
 @XmlRootElement(name = "logicServer")
 public class LogicServerDto extends SingleResourceTransportDto
 {
+    private static final long serialVersionUID = -3508955420063569772L;
 
     protected String name;
 
