@@ -31,12 +31,10 @@ package com.abiquo.server.core.infrastructure;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.abiquo.model.transport.SingleResourceTransportDto;
-
 /**
  * This class is not persisted in Abiquo but we needed to provide compatibility with the server.
  */
-public class LogicServer extends SingleResourceTransportDto
+public class LogicServer
 {
 
     protected String name;
