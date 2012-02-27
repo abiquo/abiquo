@@ -30,6 +30,7 @@
     paddingTop="10"
     verticalGap="0"
     creationComplete="onCreationComplete()"
+    show="retrieveVirtualAppliances()"
     xmlns:mx="http://www.adobe.com/2006/mxml"
     xmlns:utils="net.undf.abicloud.utils.*"
     xmlns:general="net.undf.abicloud.view.general.*"
@@ -57,6 +58,7 @@
             import net.undf.abicloud.vo.infrastructure.State;
             import net.undf.abicloud.vo.virtualappliance.VirtualAppliance;
             import net.undf.abicloud.vo.virtualappliance.VirtualDataCenter;
+            import mx.events.DataGridEvent;
 
             //The VirtualAppliance that is currently selected
             [Bindable]
@@ -64,6 +66,10 @@
             
             [Bindable]
             private var _listRequest:ListRequest;
+            
+            private var _vappsAsc:Boolean;
+
+            private var _vappsOrderBy:String;
             
             [Bindable]
             private var VAPP_RESULTS_PER_PAGE:int = AbiCloudModel.getInstance().configurationManager.config.client_user_numberUsersPerPage.value;
@@ -104,11 +110,18 @@
             	//Checking privilege
             	SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.VDC_MANAGE_VAPP,"visible",vappTools);
             	
-            	this._listRequest = new ListRequest();
+            	resetListRequest();
+            }
+            
+            public function resetListRequest():void
+            {
+            	this._vappsOrderBy = "name";
+                
+                this._listRequest = new ListRequest();
                 this._listRequest.asc = true; 
                 this._listRequest.numberOfNodes = VAPP_RESULTS_PER_PAGE;
                 this._listRequest.offset = 0 ;
-                this._listRequest.orderBy = "name";
+                this._listRequest.orderBy = this._vappsOrderBy;
             }
             
             public function cleanVirtualApplianceList():void
@@ -206,37 +219,6 @@
 
             private var _virtualDatacenter:VirtualDataCenter;
             
-            /* public function filterVirtualAppliancesByVirtualDataCenter(virtualDataCenter:VirtualDataCenter):void
-            {
-                this._virtualDatacenter = virtualDataCenter;
-                
-                    //Filtering virtualAppliances by virtualDataCenter
-                    var virtualAppliancesFiltered:ArrayCollection = new ArrayCollection();
-                    var virtualAppliance:VirtualAppliance;
-                    var length:int = this._virtualAppliances ? this._virtualAppliances.length:0;
-                    var i:int;
-                    for (i = 0; i < length; i++)
-                    {
-                        virtualAppliance = this._virtualAppliances.getItemAt(i) as VirtualAppliance;
-                        if ((!virtualDataCenter || virtualAppliance.virtualDataCenter.id == virtualDataCenter.id)
-                        && (vappsFilter.text == "" || virtualAppliance.name.toLowerCase().search(vappsFilter.text.toLowerCase()) != -1))
-                        {
-                            virtualAppliancesFiltered.addItem(virtualAppliance);
-                        }
-                    }
-
-                    //Showing the filtered VirtualAppliances
-                    this._virtualAppliancesFiltered = virtualAppliancesFiltered;
-
-                //Update view if _virtualAppliancesFiltered is not null
-                if(this._virtualAppliancesFiltered){
-	                if (virtualApplianceDataGrid)
-	                    virtualApplianceDataGrid.selectedIndex = this._virtualAppliancesFiltered.getItemIndex(this._selectedVirtualAppliance);
-	                if (virtualApplianceTile)
-	                    virtualApplianceTile.selectedIndex = this._virtualAppliancesFiltered.getItemIndex(this._selectedVirtualAppliance);                	
-                }
-            }
- */
             /**
              * Announces that user wants to create a new Virtual Appliance
              */
@@ -277,23 +259,36 @@
             	
             	return ObjectUtil.stringCompare(virtualMachineState1, virtualMachineState2);
             }
-            
-            /**
-             * Filter Vapps
-             */
-             private function filterVappsList():void
-             {
-                //filterVirtualAppliancesByVirtualDataCenter(this._virtualDatacenter);
-             }
-             
+
              private function retrieveVirtualAppliances():void
             {
                 this._listRequest.filterLike = vappsFilter.text;
                 this._listRequest.numberOfNodes = VAPP_RESULTS_PER_PAGE;
                 this._listRequest.offset = (virtualappliancesPaginatorSlider.value - 1) * VAPP_RESULTS_PER_PAGE ;
+                this._listRequest.orderBy = this._vappsOrderBy;
+                this._listRequest.asc = this._vappsAsc;
                 
-                dispatchEvent(new Event("requestVirtualAppliances"));
+                if(this.visible)
+                {
+	                dispatchEvent(new Event("requestVirtualAppliances"));
+                }
             }
+            
+            /**
+             * To sort the Data Grid by column
+             **/
+             private function onDGColumnHeaderRelease(event:DataGridEvent):void
+            {
+                 event.preventDefault();
+
+                if (this._vappsOrderBy == event.dataField)
+                    this._vappsAsc = !this._vappsAsc;
+                else
+                    this._vappsOrderBy = event.dataField;
+
+                virtualappliancesPaginatorSlider.value = 1; 
+                retrieveVirtualAppliances();
+            } 
         ]]>
     </mx:Script>
 
@@ -330,6 +325,7 @@
         <mx:TextInput id="vappsFilter"
             height="20"
             toolTip="@Resource(bundle='Common', key='BUTTON_FILTER_TOOLTIP')"
+            change="this._listRequest.filterLike = vappsFilter.text"
             enter="retrieveVirtualAppliances()"/>
     </mx:HBox>
 
@@ -347,6 +343,7 @@
                 doubleClickEnabled="true"
                 click="onClickVirtualApplianceDataGrid()"
                 doubleClick="onDoubleClickVirtualApplianceDataGrid()"
+                headerRelease="onDGColumnHeaderRelease(event)"
                 sortableColumns="true">
 
                 <mx:columns>
@@ -430,6 +427,7 @@
                     <mx:DataGridColumn 
                         width="24"
                         sortCompareFunction="compareVirtualImageState"
+                        dataField="state"
                         sortable="true"
                         resizable="false"
                         headerText="">

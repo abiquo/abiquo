@@ -89,7 +89,7 @@
             
             private function onCreationComplete():void
             {
-                retrieveVirtualDatacenters();	
+                //retrieveVirtualDatacenters();	
             }
 
             override protected function createChildren():void
