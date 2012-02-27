@@ -52,7 +52,7 @@ public class MachineProcessor extends AbstractHierarchyProcessor<Machine>
     protected String getResourceName(final String resourceId)
     {
         Machine machine = dao.findMachineById(Integer.valueOf(resourceId));
-        return machine.getName();
+        return machine != null ? machine.getName() : null;
     }
 
 }
