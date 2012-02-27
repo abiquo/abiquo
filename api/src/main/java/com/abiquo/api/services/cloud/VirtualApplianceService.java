@@ -533,7 +533,7 @@ public class VirtualApplianceService extends DefaultApiService
             {
                 logger
                     .error(
-                        "Error already loggegd in the sendDeploy deploying virtual appliance name {}. {}",
+                        "Error already logged in the sendDeploy deploying virtual appliance name {}. {}",
                         virtualAppliance.getName(), e.toString());
             }
         }
