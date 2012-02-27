@@ -200,9 +200,13 @@ public class VirtualDatacenterRep extends DefaultRepBase
         return this.vlanDAO.findAll();
     }
 
-    public Collection<VirtualDatacenter> findByDatacenter(final Datacenter datacenter)
+    public Collection<VirtualDatacenter> findByDatacenter(final Datacenter datacenter,
+        final Integer startwith, final Integer limit, final String filter,
+        final com.abiquo.server.core.cloud.VirtualDatacenter.OrderByEnum orderByEnum,
+        final Boolean asc)
     {
-        return this.virtualDatacenterDAO.findByDatacenter(datacenter);
+        return this.virtualDatacenterDAO.findByDatacenter(datacenter, startwith, limit, filter,
+            orderByEnum, asc);
     }
 
     public Collection<VirtualDatacenter> findByEnterprise(final Enterprise enterprise)
@@ -211,16 +215,23 @@ public class VirtualDatacenterRep extends DefaultRepBase
     }
 
     public Collection<VirtualDatacenter> findByEnterpriseAndDatacenter(final Enterprise enterprise,
-        final Datacenter datacenter)
+        final Datacenter datacenter, final Integer startwith, final Integer limit,
+        final String filter,
+        final com.abiquo.server.core.cloud.VirtualDatacenter.OrderByEnum orderByEnum,
+        final Boolean asc)
     {
-        return this.virtualDatacenterDAO.findByEnterpriseAndDatacenter(enterprise, datacenter);
+        return this.virtualDatacenterDAO.findByEnterpriseAndDatacenter(enterprise, datacenter,
+            startwith, limit, filter, orderByEnum, asc);
     }
 
     public Collection<VirtualDatacenter> findByEnterpriseAndDatacenter(final Enterprise enterprise,
-        final Datacenter datacenter, final User user)
+        final Datacenter datacenter, final User user, final Integer startwith, final Integer limit,
+        final String filter,
+        final com.abiquo.server.core.cloud.VirtualDatacenter.OrderByEnum orderByEnum,
+        final Boolean asc)
     {
-        return this.virtualDatacenterDAO
-            .findByEnterpriseAndDatacenter(enterprise, datacenter, user);
+        return this.virtualDatacenterDAO.findByEnterpriseAndDatacenter(enterprise, datacenter,
+            user, startwith, limit, filter, orderByEnum, asc);
     }
 
     public VirtualDatacenter findById(final Integer id)
