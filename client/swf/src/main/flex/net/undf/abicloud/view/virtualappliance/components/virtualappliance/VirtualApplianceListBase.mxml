@@ -547,14 +547,12 @@
 
     </mx:ViewStack>
 
-
     <!-- Tool Box -->
     <general:GeneralPanelToolBox 
-        width="100%" height="32"
-        styleName="GeneralDataPanelBottomSkin"
-        bottom="0">
+        width="100%" 
+        styleName="GeneralDataPanelBottomSkin">
         
-        <mx:HBox id="vappTools" width="100%" verticalAlign="middle">        	
+        <mx:HBox id="vappTools" width="100%" verticalAlign="middle" height="100%">        	
 	        <mx:Button id="addVirtualApplianceButton"
 	            styleName="AddButton"
 	            toolTip="@Resource(bundle='Common', key='BUTTON_NEW_TOOLTIP')"
@@ -568,19 +566,16 @@
 	            click="deleteVirtualAppliance()"/>
 	
 	        <mx:Canvas 
-                width="100%" height="100%"
-                verticalScrollPolicy="off" horizontalScrollPolicy="off">
+                width="100%" height="100%">
                 <mx:Label 
                     top="2"
                     horizontalCenter="0"
-                    styleName="paginatorTextOnColor"
                     text="{virtualappliancesPaginatorSlider.value +
                           ' / ' + 
                           (int(Math.ceil(AbiCloudModel.getInstance().virtualApplianceManager.totalVirtualAppliances / VAPP_RESULTS_PER_PAGE)) > 0 ?
                           int(Math.ceil(AbiCloudModel.getInstance().virtualApplianceManager.totalVirtualAppliances / VAPP_RESULTS_PER_PAGE)) : '1')}"/>
     
                 <mx:HSlider id="virtualappliancesPaginatorSlider"
-                    width="75"
                     bottom="3"
                     horizontalCenter="0"
                     minimum="1" snapInterval="1"
