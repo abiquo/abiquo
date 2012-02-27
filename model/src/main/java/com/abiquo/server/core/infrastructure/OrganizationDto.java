@@ -37,6 +37,8 @@ import com.abiquo.model.transport.SingleResourceTransportDto;
 @XmlRootElement(name = "organization")
 public class OrganizationDto extends SingleResourceTransportDto
 {
+    private static final long serialVersionUID = -7014110112768405520L;
+
     protected String dn;
 
     protected String name;
