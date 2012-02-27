@@ -248,7 +248,8 @@ public class VirtualApplianceService
         final Enterprise enterprise)
     {
         // VirtualApplianceCommand command = proxyCommand(userSession);
-        return proxyStub(userSession).getVirtualAppliancesByEnterprise(userSession, enterprise);
+        return proxyVirtualApplianceResourceStub(userSession).getVirtualAppliancesByEnterprise(
+            userSession, enterprise);
         // return command.getVirtualAppliancesByEnterprise(userSession, enterprise);
     }
 
@@ -265,8 +266,8 @@ public class VirtualApplianceService
     public BasicResult getVirtualAppliancesByVirtualDatacenter(final UserSession userSession,
         final VirtualDataCenter vdc, final ListRequest listRequest)
     {
-        return proxyStub(userSession).getVirtualAppliancesByVirtualDatacenter(userSession, vdc,
-            listRequest);
+        return proxyVirtualApplianceResourceStub(userSession)
+            .getVirtualAppliancesByVirtualDatacenter(userSession, vdc, listRequest);
     }
 
     /**
@@ -281,7 +282,7 @@ public class VirtualApplianceService
     {
 
         // VirtualApplianceCommand command = proxyCommand(userSession);
-        return proxyStub(userSession).getAppNodes(virtualAppliance);
+        return proxyVirtualApplianceResourceStub(userSession).getAppNodes(virtualAppliance);
         // return command.getVirtualApplianceNodes(virtualAppliance);
     }
 
@@ -311,7 +312,7 @@ public class VirtualApplianceService
     {
 
         // VirtualApplianceCommand command = proxyCommand(session);
-        return proxyStub(session).updateVirtualApplianceNodes(
+        return proxyVirtualApplianceResourceStub(session).updateVirtualApplianceNodes(
             virtualAppliance.getVirtualDataCenter().getId(), virtualAppliance);
         // BasicResult result = command.editVirtualAppliance(session, virtualAppliance);
 
@@ -351,7 +352,8 @@ public class VirtualApplianceService
         // return dr;
         // }
 
-        return proxyStub(session).deleteVirtualAppliance(virtualAppliance, false);
+        return proxyVirtualApplianceResourceStub(session).deleteVirtualAppliance(virtualAppliance,
+            false);
         // return command.deleteVirtualAppliance(session, virtualAppliance);
     }
 
@@ -399,7 +401,7 @@ public class VirtualApplianceService
     {
         // VirtualApplianceCommand command = proxyCommand(session);
         DataResult<VirtualAppliance> virtualApplianceNodes =
-            proxyStub(session).getVirtualApplianceNodes(
+            proxyVirtualApplianceResourceStub(session).getVirtualApplianceNodes(
                 virtualAppliance.getVirtualDataCenter().getId(), virtualAppliance.getId(),
                 "forceRefreshVirtualApplianceState");
         return virtualApplianceNodes;

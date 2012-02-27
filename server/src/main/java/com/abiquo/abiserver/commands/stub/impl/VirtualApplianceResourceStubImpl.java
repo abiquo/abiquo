@@ -29,6 +29,8 @@ import java.util.Map;
 
 import javax.ws.rs.core.Response.Status;
 
+import org.apache.commons.httpclient.URIException;
+import org.apache.commons.httpclient.util.URIUtil;
 import org.apache.commons.lang.StringUtils;
 import org.apache.wink.client.ClientResponse;
 import org.apache.wink.common.http.HttpStatus;
@@ -984,9 +986,15 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
                 buildRequest.append("&by=" + listRequest.getOrderBy());
             }
             buildRequest.append("&asc=" + (listRequest.getAsc() == true ? "true" : "false"));
-            if (!listRequest.getFilterLike().isEmpty())
+            if (listRequest.getFilterLike() != null && !listRequest.getFilterLike().isEmpty())
             {
-                buildRequest.append("&has=" + listRequest.getFilterLike());
+                try
+                {
+                    buildRequest.append("&has=" + URIUtil.encodeQuery(listRequest.getFilterLike()));
+                }
+                catch (URIException e)
+                {
+                }
             }
         }
 
