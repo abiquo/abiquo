@@ -327,7 +327,8 @@ public class VirtualAppliance extends DefaultEntityBase
 
     public static enum OrderByEnum
     {
-        NAME("name", "vapp.name"), STATE("state", "vapp.state"), ID("id", "vapp.id");
+        NAME("name", "vapp.name"), STATE("state", "vapp.state"), ID("id", "vapp.id"), ERROR(
+            "error", "vapp.error");
 
         private String columnSQL;
 

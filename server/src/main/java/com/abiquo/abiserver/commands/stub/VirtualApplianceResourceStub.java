@@ -79,6 +79,9 @@ public interface VirtualApplianceResourceStub
     public DataResult<Collection<VirtualAppliance>> getVirtualAppliancesByEnterprise(
         UserSession userSession, Enterprise enterprise);
 
+    public DataResult<VirtualAppliancesListResult> getVirtualAppliancesByEnterprise(
+        UserSession userSession, Enterprise enterprise, ListRequest listRequest);
+
     public DataResult<VirtualAppliancesListResult> getVirtualAppliancesByVirtualDatacenter(
         final UserSession userSession, final VirtualDataCenter vdc, final ListRequest listRequest);
 

@@ -967,6 +967,75 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
     }
 
     @Override
+    public DataResult<VirtualAppliancesListResult> getVirtualAppliancesByEnterprise(
+        final UserSession userSession, final Enterprise enterprise, final ListRequest listRequest)
+    {
+        DataResult<VirtualAppliancesListResult> result =
+            new DataResult<VirtualAppliancesListResult>();
+
+        result.setSuccess(Boolean.TRUE);
+
+        StringBuilder buildRequest =
+            new StringBuilder(createVirtualDatacentersFromEnterpriseLink(enterprise.getId()));
+        VirtualAppliancesListResult listResult = new VirtualAppliancesListResult();
+
+        if (listRequest != null)
+        {
+            buildRequest.append("?startwith=" + listRequest.getOffset());
+            buildRequest.append("&limit=" + listRequest.getNumberOfNodes());
+            if (listRequest.getOrderBy() != null && !listRequest.getOrderBy().isEmpty())
+            {
+                buildRequest.append("&by=" + listRequest.getOrderBy());
+            }
+            buildRequest.append("&asc=" + (listRequest.getAsc() == true ? "true" : "false"));
+            if (listRequest.getFilterLike() != null && !listRequest.getFilterLike().isEmpty())
+            {
+                try
+                {
+                    buildRequest.append("&has=" + URIUtil.encodeQuery(listRequest.getFilterLike()));
+                }
+                catch (URIException e)
+                {
+                }
+            }
+        }
+
+        ClientResponse eResponse = get(buildRequest.toString());
+
+        try
+        {
+            VirtualDatacentersDto dtos = eResponse.getEntity(VirtualDatacentersDto.class);
+            List<VirtualAppliance> list = new ArrayList<VirtualAppliance>();
+
+            for (VirtualDatacenterDto dto : dtos.getCollection())
+            {
+                VirtualDataCenter virtualDatacenter = dtoToVirtualDatacenter(dto, enterprise);
+                RESTLink app = dto.searchLink("virtualappliances");
+                ClientResponse response = get(app.getHref());
+                VirtualAppliancesDto virtualAppliancesDto =
+                    response.getEntity(VirtualAppliancesDto.class);
+                list
+                    .addAll(dtosToVirtualAppliance(virtualAppliancesDto, virtualDatacenter, result));
+            }
+
+            Integer total =
+                dtos.getTotalSize() != null ? dtos.getTotalSize() : dtos.getCollection().size();
+
+            listResult.setTotalVirtualAppliances(total);
+            listResult.setVirtualAppliancesList(list);
+
+            result.setSuccess(true);
+            result.setData(listResult);
+        }
+        catch (Exception e)
+        {
+            populateErrors(eResponse, result, "getVirtualAppliancesByEnterprise");
+        }
+
+        return result;
+    }
+
+    @Override
     public DataResult<VirtualAppliancesListResult> getVirtualAppliancesByVirtualDatacenter(
         final UserSession userSession, final VirtualDataCenter vdc, final ListRequest listRequest)
     {

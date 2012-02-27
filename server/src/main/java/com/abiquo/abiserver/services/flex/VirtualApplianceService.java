@@ -253,6 +253,15 @@ public class VirtualApplianceService
         // return command.getVirtualAppliancesByEnterprise(userSession, enterprise);
     }
 
+    public BasicResult getVirtualAppliancesByEnterprise(final UserSession userSession,
+        final Enterprise enterprise, final ListRequest listRequest)
+    {
+        // VirtualApplianceCommand command = proxyCommand(userSession);
+        return proxyVirtualApplianceResourceStub(userSession).getVirtualAppliancesByEnterprise(
+            userSession, enterprise);
+        // return command.getVirtualAppliancesByEnterprise(userSession, enterprise);
+    }
+
     /**
      * Retrieves a list of Virtual Appliances that belong to the same VirtualDataCenter. The
      * VirtualAppliance retrieved will not contain their Node list, for performance purposes. It
