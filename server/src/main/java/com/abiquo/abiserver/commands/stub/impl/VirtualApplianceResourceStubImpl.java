@@ -973,45 +973,45 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
         DataResult<VirtualAppliancesListResult> result =
             new DataResult<VirtualAppliancesListResult>();
 
-        result.setSuccess(Boolean.TRUE);
-
-        StringBuilder buildRequest =
-            new StringBuilder(createVirtualDatacentersFromEnterpriseLink(enterprise.getId()));
+        String uri = createVirtualDatacentersFromEnterpriseLink(enterprise.getId());
         VirtualAppliancesListResult listResult = new VirtualAppliancesListResult();
 
-        if (listRequest != null)
-        {
-            buildRequest.append("?startwith=" + listRequest.getOffset());
-            buildRequest.append("&limit=" + listRequest.getNumberOfNodes());
-            if (listRequest.getOrderBy() != null && !listRequest.getOrderBy().isEmpty())
-            {
-                buildRequest.append("&by=" + listRequest.getOrderBy());
-            }
-            buildRequest.append("&asc=" + (listRequest.getAsc() == true ? "true" : "false"));
-            if (listRequest.getFilterLike() != null && !listRequest.getFilterLike().isEmpty())
-            {
-                try
-                {
-                    buildRequest.append("&has=" + URIUtil.encodeQuery(listRequest.getFilterLike()));
-                }
-                catch (URIException e)
-                {
-                }
-            }
-        }
-
-        ClientResponse eResponse = get(buildRequest.toString());
+        ClientResponse eResponse = get(uri);
 
         try
         {
             VirtualDatacentersDto dtos = eResponse.getEntity(VirtualDatacentersDto.class);
             List<VirtualAppliance> list = new ArrayList<VirtualAppliance>();
 
+            StringBuilder buildRequest = new StringBuilder();
+            if (listRequest != null)
+            {
+                buildRequest.append("?startwith=" + listRequest.getOffset());
+                buildRequest.append("&limit=" + listRequest.getNumberOfNodes());
+                if (listRequest.getOrderBy() != null && !listRequest.getOrderBy().isEmpty())
+                {
+                    buildRequest.append("&by=" + listRequest.getOrderBy());
+                }
+                buildRequest.append("&asc=" + (listRequest.getAsc() == true ? "true" : "false"));
+                if (listRequest.getFilterLike() != null && !listRequest.getFilterLike().isEmpty())
+                {
+                    try
+                    {
+                        buildRequest.append("&has="
+                            + URIUtil.encodeQuery(listRequest.getFilterLike()));
+                    }
+                    catch (URIException e)
+                    {
+                    }
+                }
+            }
+
             for (VirtualDatacenterDto dto : dtos.getCollection())
             {
                 VirtualDataCenter virtualDatacenter = dtoToVirtualDatacenter(dto, enterprise);
                 RESTLink app = dto.searchLink("virtualappliances");
-                ClientResponse response = get(app.getHref());
+
+                ClientResponse response = get(app.getHref() + buildRequest.toString());
                 VirtualAppliancesDto virtualAppliancesDto =
                     response.getEntity(VirtualAppliancesDto.class);
                 list
