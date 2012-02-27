@@ -263,7 +263,7 @@
         <!-- Make call to the server here -->
 
         <RemoteObjectInvoker instance="{services.virtualApplianceService}"
-            method="getVirtualAppliancesByEnterprise"
+            method="getVirtualAppliancesByVirtualDatacenter"
             arguments="{[AbiCloudModel.getInstance().loginManager.session, 
             event.virtualDataCenter,
             event.listRequest]}">
