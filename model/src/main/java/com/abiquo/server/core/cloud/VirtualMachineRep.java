@@ -139,6 +139,17 @@ public class VirtualMachineRep extends DefaultRepBase
         return dao.findById(vmId);
     }
 
+    /**
+     * * Sets the {@link VirtualMachine#setState(VirtualMachineState)} to
+     * {@link VirtualMachineState#UNKNOWN}.
+     * 
+     * @param vmId id void
+     */
+    public void setVirtualMachineToUnknown(final Integer vmId)
+    {
+        dao.unknownState(vmId);
+    }
+
     public VirtualMachine findVirtualMachineByHypervisor(final Hypervisor hypervisor,
         final Integer virtualMachineId)
     {

@@ -2762,8 +2762,8 @@ public class VirtualMachineService extends DefaultApiService
         return null;
     }
 
-    /*
-     * @param vmId
+    /**
+     * @param vmId to return
      * @return VirtualMachine with DC.
      */
     public VirtualMachine getVirtualMachineInitialized(final Integer vmId)
@@ -2793,6 +2793,16 @@ public class VirtualMachineService extends DefaultApiService
         }
 
         return virtualMachine;
+    }
+
+    /**
+     * Sets the {@link VirtualMachine#setState(VirtualMachineState)} to
+     * {@link VirtualMachineState#UNKNOWN}.
+     */
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void setVirtualMachineToUnknown(final Integer vmId)
+    {
+        repo.setVirtualMachineToUnknown(vmId);
     }
 
     /**
