@@ -71,7 +71,7 @@ public class VirtualDatacenter extends DefaultEntityWithLimits
 
     public final static String NAME_PROPERTY = "name";
 
-    private final static boolean NAME_REQUIRED = false;
+    private final static boolean NAME_REQUIRED = true;
 
     public final static int NAME_LENGTH_MIN = 1;
 
