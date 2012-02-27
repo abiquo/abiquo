@@ -110,6 +110,8 @@ package net.undf.abicloud.events
 	   public static const GET_VIRTUAL_DATACENTERS_BY_ENTERPRISE_FASTER:String = "getVirtualDataCenterByEnterpriseFasterVirtualApplianceEvent";
 	   
 	   public static const GET_VIRTUAL_APPLIANCES_BY_VIRTUAL_DATACENTER:String = "getVirtualAppliancesByVirtualDatacenterVirtualApplianceEvent";
+	   
+	   public static const GET_VIRTUAL_APPLIANCES_BY_ENTERPRISE:String = "getVirtualAppliancesByEnterpriseVirtualApplianceEvent";
 	
 	   public static const VIRTUAL_MACHINE_CHANGE_STATE:String = "virtualMachineChangeStateVirtualApplianceEvent";
 	   
