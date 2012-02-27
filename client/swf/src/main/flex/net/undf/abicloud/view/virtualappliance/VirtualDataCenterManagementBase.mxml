@@ -508,8 +508,18 @@
             
             private function retrieveVirtualAppliances(event:Event = null):void
             {
-            	var virtualApplianceEvent:VirtualApplianceEvent = new VirtualApplianceEvent(VirtualApplianceEvent.GET_VIRTUAL_APPLIANCES_BY_VIRTUAL_DATACENTER);
-                virtualApplianceEvent.virtualDataCenter = virtualDatacenterList.selectedVirtualDataCenter;
+            	//Retrieves Vapp by VDC or by Enterprise
+            	var virtualApplianceEvent:VirtualApplianceEvent;
+            	if(virtualDatacenterList.selectedVirtualDataCenter)
+            	{
+	                virtualApplianceEvent = new VirtualApplianceEvent(VirtualApplianceEvent.GET_VIRTUAL_APPLIANCES_BY_VIRTUAL_DATACENTER);
+	                virtualApplianceEvent.virtualDataCenter = virtualDatacenterList.selectedVirtualDataCenter;
+            	}
+            	else
+            	{
+            		virtualApplianceEvent = new VirtualApplianceEvent(VirtualApplianceEvent.GET_VIRTUAL_APPLIANCES_BY_ENTERPRISE);
+            		virtualApplianceEvent.enterprise = AbiCloudModel.getInstance().loginManager.user.enterprise;
+            	}
                 virtualApplianceEvent.listRequest = virtualApplianceList.listRequest;
                 dispatchEvent(virtualApplianceEvent);
             }
