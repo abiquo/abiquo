@@ -334,6 +334,6 @@ import com.softwarementors.bzngine.entities.PersistentEntity;
         {
             return null;
         }
-        return machines.subList(0, howMany < machines.size() ? howMany : machines.size() - 1);
+        return machines.subList(0, howMany < machines.size() ? howMany : machines.size());
     }
 }
