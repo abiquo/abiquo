@@ -478,9 +478,6 @@
             	}else{
             		AbiCloudModel.getInstance().virtualApplianceManager.serverCallType = false;
             	}
-                /* var virtualApplianceEvent:VirtualApplianceEvent = new VirtualApplianceEvent(VirtualApplianceEvent.CHECK_VIRTUAL_DATACENTERS_AND_APPLIANCES_BY_ENTERPRISE);
-                virtualApplianceEvent.enterprise = AbiCloudModel.getInstance().loginManager.user.enterprise;
-                dispatchEvent(virtualApplianceEvent); */
                 
                 //Retrieve VirtualDatacenters
                 retrieveVirtualDatacenters();
@@ -520,8 +517,18 @@
             		virtualApplianceEvent = new VirtualApplianceEvent(VirtualApplianceEvent.GET_VIRTUAL_APPLIANCES_BY_ENTERPRISE);
             		virtualApplianceEvent.enterprise = AbiCloudModel.getInstance().loginManager.user.enterprise;
             	}
+            	//Reset the listRequest object
+            	if(!event)
+            	{
+            		virtualApplianceList.resetListRequest();
+            	}
+            	
                 virtualApplianceEvent.listRequest = virtualApplianceList.listRequest;
-                dispatchEvent(virtualApplianceEvent);
+                
+                if(virtualApplianceList.visible)
+                {
+	                dispatchEvent(virtualApplianceEvent);
+                }
             }
         ]]>
     </mx:Script>
