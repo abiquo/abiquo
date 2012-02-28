@@ -26,7 +26,7 @@ import java.util.Comparator;
 
 public enum RemoteServiceType
 {
-    TARANTINO("Virtualization Manager", "tarantino", "http://", 80), STORAGE_SYSTEM_MONITOR(
+    TARANTINO("Virtualization Manager", "virtualfactory", "http://", 80), STORAGE_SYSTEM_MONITOR(
         "Storage Manager", "ssm", "http://", 80), VIRTUAL_SYSTEM_MONITOR("Monitor Manager", "vsm",
         "http://", 80), NODE_COLLECTOR("Discovery Manager", "nodecollector", "http://", 80), DHCP_SERVICE(
         "DHCP Service", "dhcp", "omapi://", 7911), BPM_SERVICE("Business Process Manager",

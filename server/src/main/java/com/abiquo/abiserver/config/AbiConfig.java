@@ -58,11 +58,6 @@ public class AbiConfig
         return limits;
     }
 
-    public int getVirtualCpuPerCore()
-    {
-        return Integer.valueOf(System.getProperty("abiquo.server.virtualCpuPerCore", "0"));
-    }
-
     public long getTimeout()
     {
         return Long.valueOf(System.getProperty("abiquo.server.timeout", "0"));
@@ -108,7 +103,7 @@ public class AbiConfig
         return System.getProperty("abiquo.server.costCode");
     }
 
-    private LimitHB createLimit(String type)
+    private LimitHB createLimit(final String type)
     {
         long hard =
             Long.valueOf(System.getProperty("abiquo.server.resourcelimits." + type + ".hard", "0"));

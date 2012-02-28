@@ -27,6 +27,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.SocketTimeoutException;
 import java.net.URI;
 
@@ -41,6 +42,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.Providers;
 
+import org.apache.catalina.util.URLEncoder;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.wink.common.annotations.Parent;
@@ -177,6 +179,7 @@ public class TemplatesResource
 
         // XXX notify DOWNLOADING
 
+        diskInfo.setUrl(decodedUrl(diskInfo.getUrl()));
         final String ovfId = diskInfo.getUrl();
         if (templateService.getTemplateStatusIncludeProgress(ovfId, erId).getStatus() == TemplateStatusEnumType.ERROR)
         {
@@ -200,6 +203,21 @@ public class TemplatesResource
         templateService.upload(diskInfo, diskFile, errorMsg);
 
         return Response.created(URI.create(diskInfo.getUrl())).build();
+    }
+
+    /**
+     * Check each part of the url is properly encoded (uploading a template name with blanks)
+     */
+    private String decodedUrl(final String url) throws UnsupportedEncodingException
+    {
+        String[] parts = url.replaceFirst("http://", "").split("/");
+        StringBuffer sb = new StringBuffer();
+        sb.append("http:/");
+        for (String part : parts)
+        {
+            sb.append("/").append(java.net.URLEncoder.encode(part, "UTF-8"));
+        }
+        return sb.toString();
     }
 
     @POST

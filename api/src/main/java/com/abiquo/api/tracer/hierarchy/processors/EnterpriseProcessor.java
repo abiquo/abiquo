@@ -52,7 +52,7 @@ public class EnterpriseProcessor extends AbstractHierarchyProcessor<Enterprise>
     protected String getResourceName(final String resourceId)
     {
         Enterprise enterprise = dao.findById(Integer.valueOf(resourceId));
-        return enterprise.getName();
+        return enterprise != null ? enterprise.getName() : null;
     }
 
 }

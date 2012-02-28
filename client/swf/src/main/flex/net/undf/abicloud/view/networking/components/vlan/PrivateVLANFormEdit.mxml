@@ -122,6 +122,7 @@
                 }else{
                 	event = new NetworkingEvent(NetworkingEvent.EDIT_VLAN);
                 	event.staticRules = this._staticRules.staticRules;
+                	event.tag = this._vlanNetwork.vlanTag;
                 }
                 
                 event.virtualDatacenter = _virtualDatacenter;

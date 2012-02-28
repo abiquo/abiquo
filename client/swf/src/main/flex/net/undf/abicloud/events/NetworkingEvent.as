@@ -149,6 +149,8 @@ package net.undf.abicloud.events
         
         public var staticRules:ArrayCollection;
         
+        public var tag:int;
+
         public var rack:Rack;
         
         public var physicalMachine:PhysicalMachine;
