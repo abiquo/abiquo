@@ -102,7 +102,7 @@ public class EnterpriseResourceIT extends AbstractJpaGeneratorIT
 
     }
 
-    @Test(enabled = false)
+    @Test(enabled = true)
     public void getEnterpriseDoesntExist() throws ClientWebException
     {
         ClientResponse response =
@@ -110,7 +110,7 @@ public class EnterpriseResourceIT extends AbstractJpaGeneratorIT
         assertEquals(response.getStatusCode(), 404);
     }
 
-    @Test(enabled = false)
+    @Test(enabled = true)
     public void getEnterprise() throws Exception
     {
         Enterprise enterprise = enterpriseGenerator.createUniqueInstance();
@@ -125,7 +125,7 @@ public class EnterpriseResourceIT extends AbstractJpaGeneratorIT
         assertNotNull(dto);
     }
 
-    @Test(enabled = false)
+    @Test(enabled = true)
     public void enterpriseContainCorrectLinks() throws ClientWebException
     {
         Enterprise enterprise = enterpriseGenerator.createUniqueInstance();
@@ -149,7 +149,7 @@ public class EnterpriseResourceIT extends AbstractJpaGeneratorIT
             VirtualMachinesResource.VIRTUAL_MACHINES_PATH);
     }
 
-    @Test(enabled = false)
+    @Test(enabled = true)
     public void modifyEnterprise() throws ClientWebException
     {
         Enterprise enterprise = enterpriseGenerator.createUniqueInstance();
@@ -169,7 +169,7 @@ public class EnterpriseResourceIT extends AbstractJpaGeneratorIT
         assertEquals("enterprise_changed", modified.getName());
     }
 
-    @Test(enabled = false)
+    @Test(enabled = true)
     public void modifyEnterpriseWithDuplicatedName()
     {
         Enterprise enterprise = enterpriseGenerator.createUniqueInstance();
@@ -196,7 +196,7 @@ public class EnterpriseResourceIT extends AbstractJpaGeneratorIT
     /**
      * Check if the action of get the IPs by an enterprise exists.
      */
-    @Test(groups = {NETWORK_INTEGRATION_TESTS}, enabled = false)
+    @Test(groups = {NETWORK_INTEGRATION_TESTS}, enabled = true)
     public void createAndGetPrivateNetworkIPsByEnterprise()
     {
         RemoteService rs = remoteServiceGenerator.createInstance(RemoteServiceType.DHCP_SERVICE);
@@ -244,7 +244,7 @@ public class EnterpriseResourceIT extends AbstractJpaGeneratorIT
     /**
      * Check if the request 'action/ips' of the enterprise resource allows the 'by=ip' query param
      */
-    @Test(enabled = false)
+    @Test(enabled = true)
     public void getPrivateNetworkIPsByEnterpriseOrderByIp()
     {
         VirtualDatacenter vdc = vdcGenerator.createUniqueInstance();
@@ -262,7 +262,7 @@ public class EnterpriseResourceIT extends AbstractJpaGeneratorIT
      * Check if the request 'action/ips' of the enterprise resource allows the 'by=quarantine' query
      * param
      */
-    @Test(enabled = false)
+    @Test(enabled = true)
     public void getPrivateNetworkIPsByEnterpriseOrderByQuarantine()
     {
         VirtualDatacenter vdc = vdcGenerator.createUniqueInstance();
@@ -279,7 +279,7 @@ public class EnterpriseResourceIT extends AbstractJpaGeneratorIT
     /**
      * Check if the request 'action/ips' of the enterprise resource allows the 'by=mac' query param
      */
-    @Test(enabled = false)
+    @Test(enabled = true)
     public void getPrivateNetworkIPsByEnterpriseOrderByMAC()
     {
         VirtualDatacenter vdc = vdcGenerator.createUniqueInstance();
@@ -297,7 +297,7 @@ public class EnterpriseResourceIT extends AbstractJpaGeneratorIT
      * Check if the request 'action/ips' of the enterprise resource allows the 'by=lease' query
      * param
      */
-    @Test(enabled = false)
+    @Test(enabled = true)
     public void getPrivateNetworkIPsByEnterpriseOrderByLease()
     {
         VirtualDatacenter vdc = vdcGenerator.createUniqueInstance();
@@ -314,7 +314,7 @@ public class EnterpriseResourceIT extends AbstractJpaGeneratorIT
     /**
      * Check if the request 'action/ips' of the enterprise resource allows the 'by=vlan' query param
      */
-    @Test(enabled = false)
+    @Test(enabled = true)
     public void getPrivateNetworkIPsByEnterpriseOrderByVlan()
     {
         VirtualDatacenter vdc = vdcGenerator.createUniqueInstance();
@@ -332,7 +332,7 @@ public class EnterpriseResourceIT extends AbstractJpaGeneratorIT
      * Check if the request 'action/ips' of the enterprise resource allows the
      * 'by=virtualdatacenter' query param
      */
-    @Test(enabled = false)
+    @Test(enabled = true)
     public void getPrivateNetworkIPsByEnterpriseOrderByVirtualDatacenter()
     {
         VirtualDatacenter vdc = vdcGenerator.createUniqueInstance();
@@ -350,7 +350,7 @@ public class EnterpriseResourceIT extends AbstractJpaGeneratorIT
      * Check if the request 'action/ips' of the enterprise resource doesnt allow a
      * 'by={randomvalue}' query param
      */
-    @Test(enabled = false)
+    @Test(enabled = true)
     public void getPrivateNetworkIPsByEnterpriseRaises400WhenOrderByRandomParameter()
     {
         VirtualDatacenter vdc = vdcGenerator.createUniqueInstance();
@@ -368,7 +368,7 @@ public class EnterpriseResourceIT extends AbstractJpaGeneratorIT
      * Check if the request 'action/ips' of the enterprise resource allows the 'by=virtualmachine'
      * query param
      */
-    @Test(enabled = false)
+    @Test(enabled = true)
     public void getPrivateNetworkIPsByEnterpriseOrderByVirtualMachine()
     {
         VirtualDatacenter vdc = vdcGenerator.createUniqueInstance();
@@ -386,7 +386,7 @@ public class EnterpriseResourceIT extends AbstractJpaGeneratorIT
      * Check if the request 'action/ips' of the enterprise resource allows the 'by=virtualappliance'
      * query param
      */
-    @Test(enabled = false)
+    @Test(enabled = true)
     public void getPrivateNetworkIPsByEnterpriseOrderByVirtualAppliance()
     {
         VirtualDatacenter vdc = vdcGenerator.createUniqueInstance();
@@ -403,7 +403,7 @@ public class EnterpriseResourceIT extends AbstractJpaGeneratorIT
     /**
      * Create an Enterprise without VDC (an so, without IPs) and check the empty list
      */
-    @Test(enabled = false)
+    @Test(enabled = true)
     public void createEnterpriseReturnNoContentWhenNoVirtualDatacenterCreated()
     {
         Enterprise enterprise = enterpriseGenerator.createUniqueInstance();
@@ -416,7 +416,7 @@ public class EnterpriseResourceIT extends AbstractJpaGeneratorIT
         assertTrue(ips.getCollection().isEmpty());
     }
 
-    @Test(enabled = false)
+    @Test(enabled = true)
     public void getVirtualMachinesByEnterprise()
     {
         VirtualMachine vm = vmGenerator.createUniqueInstance();

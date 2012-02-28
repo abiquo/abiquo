@@ -131,9 +131,22 @@ public class VirtualApplianceDAO extends DefaultDAOBase<Integer, VirtualApplianc
         return findUniqueByProperty(VirtualAppliance.NAME_PROPERTY, name);
     }
 
+    public List<VirtualAppliance> findByVirtualDatacenter(final VirtualDatacenter virtualDatacenter)
+    {
+        Criteria criteria = createCriteria(sameVirtualDatacenter(virtualDatacenter));
+        criteria.addOrder(Order.asc(VirtualAppliance.NAME_PROPERTY));
+
+        return criteria.list();
+    }
+
     public List<VirtualAppliance> findByVirtualDatacenter(
         final VirtualDatacenter virtualDatacenter, final FilterOptions filterOptions)
     {
+        if (filterOptions == null)
+        {
+            return findByVirtualDatacenter(virtualDatacenter);
+        }
+
         // Check if the orderBy element is actually one of the available ones
         VirtualAppliance.OrderByEnum orderByEnum =
             VirtualAppliance.OrderByEnum.valueOf(filterOptions.getOrderBy().toUpperCase());
