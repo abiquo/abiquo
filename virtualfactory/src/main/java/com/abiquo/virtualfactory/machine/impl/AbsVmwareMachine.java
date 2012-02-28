@@ -48,10 +48,6 @@ import com.vmware.vim25.HostVirtualSwitch;
 import com.vmware.vim25.ManagedObjectReference;
 import com.vmware.vim25.ResourceAllocationInfo;
 import com.vmware.vim25.VirtualDeviceConfigSpec;
-import com.vmware.vim25.VirtualDeviceConfigSpecFileOperation;
-import com.vmware.vim25.VirtualDeviceConfigSpecOperation;
-import com.vmware.vim25.VirtualDisk;
-import com.vmware.vim25.VirtualDiskFlatVer2BackingInfo;
 import com.vmware.vim25.VirtualMachineConfigSpec;
 import com.vmware.vim25.VirtualMachinePowerState;
 import com.vmware.vim25.mo.Folder;
@@ -158,13 +154,13 @@ public abstract class AbsVmwareMachine extends AbsVirtualMachine
             // if (!apputil.getServiceConnection3().isConnected())
             utils.reconnect();
 
-            // If the vCenterBridge is defined, check if there is another machine 
+            // If the vCenterBridge is defined, check if there is another machine
             // with the same name. If it exists, stop and delete to deploy again
             if (vCenterBridge != null)
             {
                 vCenterBridge.seachAndCleanExistingMachine(config.getMachineName());
             }
-            
+
             if (!isVMAlreadyCreated())
             {
 
@@ -415,13 +411,6 @@ public abstract class AbsVmwareMachine extends AbsVirtualMachine
     protected void cloneVirtualDisk() throws VirtualMachineException
     {
         disks.moveVirtualDiskToDataStore();
-
-        configureSparse();
-    }
-
-    protected void configureSparse() throws VirtualMachineException
-    {
-        // bu! empty community impl
     }
 
     /**

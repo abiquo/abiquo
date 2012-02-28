@@ -27,6 +27,7 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,8 +42,10 @@ import com.vmware.vim25.VirtualDevice;
 import com.vmware.vim25.VirtualDeviceConfigSpec;
 import com.vmware.vim25.VirtualDeviceConfigSpecFileOperation;
 import com.vmware.vim25.VirtualDeviceConfigSpecOperation;
+import com.vmware.vim25.VirtualDiskAdapterType;
 import com.vmware.vim25.VirtualDiskFlatVer2BackingInfo;
 import com.vmware.vim25.VirtualDiskMode;
+import com.vmware.vim25.VirtualDiskSpec;
 import com.vmware.vim25.VirtualMachineConfigInfo;
 import com.vmware.vim25.VirtualSCSIController;
 
@@ -76,6 +79,8 @@ public class VmwareMachineDisk
 
     /** Current machine name. */
     protected final String machineName;
+
+    public final static boolean USE_COPY_DISK = Boolean.TRUE;
 
     /**
      * Default constructor with the configuration from the VmwareMachine
@@ -129,6 +134,15 @@ public class VmwareMachineDisk
     }
 
     /**
+     * Codify the disk destination path on the target datastore (VMFS).
+     */
+    private String getDestinationDiskPathContainer()
+    {
+        return "[" + vmConfig.getVirtualDiskBase().getTargetDatastore() + "] " + machineName + "/"
+            + machineName + ".vmdk";
+    }
+
+    /**
      * Private helper to clone a virtual disk from the repository to the datastore. (RImp
      * substitution)
      * 
@@ -161,23 +175,61 @@ public class VmwareMachineDisk
         fileManager = utils.getServiceContent().getFileManager();
 
         sourcePath = getSourceDiskPath();
-        destPath = getDestinationDiskPath();
 
-        logger.info(
-            "Moving image from source repository path [{}] into destination datastore [{}] ",
-            sourcePath, destPath);
+        boolean isSparse = vmConfig.getVirtualDiskBase().getFormatUri().contains("sparse");
+
         try
         {
-            taskCopyMor =
-                utils.getService().copyDatastoreFile_Task(fileManager, sourcePath, dcmor, destPath,
-                    dcmor, true);
+            if (USE_COPY_DISK && isSparse)
+            {
+                com.vmware.vim25.VirtualDiskType vdt =
+                    com.vmware.vim25.VirtualDiskType.sparseMonolithic;
+
+                destPath = getDestinationDiskPathContainer();
+
+                // clean the default created VD form the vmFolder
+                utils.checkTaskState(utils.getService().deleteDatastoreFile_Task(fileManager,
+                    getDestinationDiskPath(), dcmor));
+                utils.checkTaskState(utils.getService().deleteDatastoreFile_Task(fileManager,
+                    getDestinationDiskPathContainer(), dcmor));
+
+                logger.info("Using copyVirtualDisk:from source repository [{}] into [{}] ",
+                    sourcePath, destPath);
+
+                long starttime = System.currentTimeMillis();
+                VirtualDiskSpec desiredDisk = new VirtualDiskSpec();
+                desiredDisk.setAdapterType(VirtualDiskAdapterType.ide.name());
+                desiredDisk.setDiskType(vdt.name());
+                utils.checkTaskState(utils.getService().copyVirtualDisk_Task(
+                    utils.getServiceContent().getVirtualDiskManager(), sourcePath, dcmor, destPath,
+                    dcmor, desiredDisk, true));
+                logger.info("copy virtual disk take {}ms", System.currentTimeMillis() - starttime);
+            }
+            else
+            {
+                destPath = getDestinationDiskPath();
+                logger
+                    .info(
+                        "Moving image from source repository path [{}] into destination datastore [{}] ",
+                        sourcePath, destPath);
+
+                long starttime = System.currentTimeMillis();
+
+                taskCopyMor =
+                    utils.getService().copyDatastoreFile_Task(fileManager, sourcePath, dcmor,
+                        destPath, dcmor, true);
+
+                utils.checkTaskState(taskCopyMor);
+
+                logger.info("copy virtual disk file take {}ms", System.currentTimeMillis()
+                    - starttime);
+            }
+
         }
         catch (Exception e)
         {
             throw new VirtualMachineException("Virtual Machine could not be cloned.");
         }
-
-        utils.checkTaskState(taskCopyMor);
 
         logger.info("Virtual Machine cloned Sucessfully");
     }
@@ -231,30 +283,89 @@ public class VmwareMachineDisk
             throw new VirtualMachineException(msg);
         }
 
-        fileManager = utils.getServiceContent().getFileManager();
-
-        sourcePathComposed = getSourceDiskPathToBundle(sourceDatastoreName, sourcePath, isManaged);
-
-        destPath =
-            getDestinationPathToBundle(destinationDatastoreName, destinationPath, snapShotName);
-
-        logger.info(
-            "Moving image from source repository path [{}] into destination datastore [{}] ",
-            sourcePathComposed, destPath);
-        try
+        if (USE_COPY_DISK)
         {
-            taskCopyMor =
-                utils.getService().copyDatastoreFile_Task(fileManager, sourcePathComposed, dcmor,
-                    destPath, dcmor, true);
-        }
-        catch (Exception e)
-        {
-            throw new VirtualMachineException("Virtual Machine could not be cloned.");
-        }
 
-        utils.checkTaskState(taskCopyMor);
+            final String origin = getDestinationDiskPathContainer();
+            final String destinationConatiner =
+                getDestinationPathToBundle(destinationDatastoreName, destinationPath, snapShotName);
+
+            final String destinationFlat =
+                getDestinationPathToBundle(destinationDatastoreName, destinationPath,
+                    getDestinationFlat(snapShotName));
+
+            logger.info("Instance using copyVirtualDisk:from source repository [{}] into [{}] ",
+                origin, destinationConatiner);
+
+            VirtualDiskSpec desiredDisk = new VirtualDiskSpec();
+            desiredDisk.setAdapterType(VirtualDiskAdapterType.lsiLogic.name());
+            desiredDisk.setDiskType(com.vmware.vim25.VirtualDiskType.flatMonolithic.name());
+
+            try
+            {
+                long starttime = System.currentTimeMillis();
+
+                utils.checkTaskState(utils.getService().copyVirtualDisk_Task(
+                    utils.getServiceContent().getVirtualDiskManager(), origin, dcmor,
+                    destinationConatiner, dcmor, desiredDisk, true));
+
+                logger.info("copy virtual disk take {}ms", System.currentTimeMillis() - starttime);
+
+                // we doesn't need the .vmdk metadata, we only want the data file (-flat)
+                utils.checkTaskState(utils.getService().deleteDatastoreFile_Task(
+                    utils.getServiceContent().getFileManager(), destinationConatiner, dcmor));
+                logger.info("deleted metadata file");
+
+                utils.checkTaskState(utils.getService().moveDatastoreFile_Task(
+                    utils.getServiceContent().getFileManager(), destinationFlat, dcmor,
+                    destinationConatiner, dcmor, true));
+                logger.info("moved");
+
+                // utils.checkTaskState(utils.getService().moveDatastoreFile_Task(
+                // utils.getServiceContent().getFileManager(), destination, dcmor,
+                // destinationConatiner, dcmor, true));
+                // logger.info("moved");
+
+                // utils.checkTaskState(utils.getService().deleteDatastoreFile_Task(
+                // utils.getServiceContent().getFileManager(), destinationConatiner, dcmor));
+            }
+            catch (Exception e)
+            {
+                throw new VirtualMachineException("Can't create instance", e);
+            }
+        }
+        else
+        {
+            sourcePathComposed =
+                getSourceDiskPathToBundle(sourceDatastoreName, sourcePath, isManaged);
+
+            destPath =
+                getDestinationPathToBundle(destinationDatastoreName, destinationPath, snapShotName);
+
+            logger.info(
+                "Moving image from source repository path [{}] into destination datastore [{}] ",
+                sourcePathComposed, destPath);
+            try
+            {
+                taskCopyMor =
+                    utils.getService().copyDatastoreFile_Task(
+                        utils.getServiceContent().getFileManager(), sourcePathComposed, dcmor,
+                        destPath, dcmor, true);
+            }
+            catch (Exception e)
+            {
+                throw new VirtualMachineException("Virtual Machine could not be cloned.");
+            }
+
+            utils.checkTaskState(taskCopyMor);
+        }
 
         logger.info("Virtual Machine cloned Sucessfully");
+    }
+
+    private String getDestinationFlat(final String path)
+    {
+        return FilenameUtils.getBaseName(path) + "-flat." + FilenameUtils.getExtension(path);
     }
 
     /**
@@ -299,6 +410,11 @@ public class VmwareMachineDisk
 
         boolean isSparse = vmConfig.getVirtualDiskBase().getFormatUri().contains("sparse");
 
+        if (isManaged && isSparse && VmwareMachineDisk.USE_COPY_DISK)
+        {
+            return "[" + sourceDatastoreName + "] " + machineName + "/" + machineName
+                + "-s001.vmdk";
+        }
         if (isManaged && isSparse)
         {
             return "[" + sourceDatastoreName + "] " + machineName + "/" + machineName
@@ -434,8 +550,8 @@ public class VmwareMachineDisk
         com.vmware.vim25.VirtualDisk virtualDisk;
         VirtualDeviceConfigSpec diskSpec = new VirtualDeviceConfigSpec();
 
-        logger.debug("Adding disk Id[{}] location [{}] type[" + vd.getDiskType().name() + "]", vd
-            .getId(), vd.getLocation());
+        logger.debug("Adding disk Id[{}] location [{}] type[" + vd.getDiskType().name() + "]",
+            vd.getId(), vd.getLocation());
 
         if (vd.getDiskType() == VirtualDiskType.STANDARD)
         {
@@ -465,8 +581,8 @@ public class VmwareMachineDisk
         com.vmware.vim25.VirtualDisk virtualDisk;
         VirtualDeviceConfigSpec diskSpec = new VirtualDeviceConfigSpec();
 
-        logger.debug("Remove disk Id[{}] location [{}] type [" + vd.getDiskType().name() + "]", vd
-            .getId(), vd.getLocation());
+        logger.debug("Remove disk Id[{}] location [{}] type [" + vd.getDiskType().name() + "]",
+            vd.getId(), vd.getLocation());
 
         if (vd.getDiskType() == VirtualDiskType.STANDARD)
         {
@@ -592,11 +708,11 @@ public class VmwareMachineDisk
         int unitNumber = 0;
 
         VirtualDevice[] test = vmConfigInfo.getHardware().getDevice();
-        for (int k = 0; k < test.length; k++)
+        for (VirtualDevice element : test)
         {
-            if (test[k].getDeviceInfo().getLabel().equalsIgnoreCase("SCSI Controller 0"))
+            if (element.getDeviceInfo().getLabel().equalsIgnoreCase("SCSI Controller 0"))
             {
-                ckey = test[k].getKey();
+                ckey = element.getKey();
             }
         }
 

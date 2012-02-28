@@ -54,6 +54,7 @@ import com.abiquo.abiserver.commands.BundleCommand;
 import com.abiquo.abiserver.exception.BundleException;
 import com.abiquo.abiserver.exception.InfrastructureCommandException;
 import com.abiquo.abiserver.exception.PersistenceException;
+import com.abiquo.abiserver.persistence.DAOFactory;
 import com.abiquo.abiserver.persistence.dao.user.UserDAO;
 import com.abiquo.abiserver.persistence.dao.virtualappliance.NodeVirtualImageDAO;
 import com.abiquo.abiserver.persistence.dao.virtualappliance.VirtualApplianceDAO;
@@ -70,6 +71,7 @@ import com.abiquo.abiserver.pojo.virtualappliance.VirtualAppliance;
 import com.abiquo.abiserver.pojo.virtualimage.VirtualImage;
 import com.abiquo.appliancemanager.client.ApplianceManagerResourceStubImpl;
 import com.abiquo.model.enumerator.DiskFormatType;
+import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.tracer.ComponentType;
 import com.abiquo.tracer.EventType;
 import com.abiquo.tracer.Platform;
@@ -102,12 +104,14 @@ public class BundleCommandImpl extends BasicCommand implements BundleCommand
         try
         {
             virtualApplianceWs =
-                (IVirtualApplianceWS) Thread.currentThread().getContextClassLoader().loadClass(
-                    "com.abiquo.abiserver.abicloudws.VirtualApplianceWSPremium").newInstance();
+                (IVirtualApplianceWS) Thread.currentThread().getContextClassLoader()
+                    .loadClass("com.abiquo.abiserver.abicloudws.VirtualApplianceWSPremium")
+                    .newInstance();
 
             infrastructureWS =
-                (IInfrastructureWS) Thread.currentThread().getContextClassLoader().loadClass(
-                    "com.abiquo.abiserver.abicloudws.InfrastructureWSPremium").newInstance();
+                (IInfrastructureWS) Thread.currentThread().getContextClassLoader()
+                    .loadClass("com.abiquo.abiserver.abicloudws.InfrastructureWSPremium")
+                    .newInstance();
         }
         catch (Exception e)
         {
@@ -133,8 +137,9 @@ public class BundleCommandImpl extends BasicCommand implements BundleCommand
         VirtualAppliance bundle = null;
 
         user =
-            new UserInfo(userSession.getUser(), new Long(userSession.getId()), userSession
-                .getEnterpriseName());
+            new UserInfo(userSession.getUser(),
+                new Long(userSession.getId()),
+                userSession.getEnterpriseName());
 
         platform =
             Platform.platform("abicloud").enterprise(
@@ -185,7 +190,7 @@ public class BundleCommandImpl extends BasicCommand implements BundleCommand
     public VirtualAppliance bundleVirtualAppliance(final int idVirtualApp,
         final Collection<Integer> nodeIds, final String userName) throws BundleException
     {
-        //        
+        //
         // // Block the virtual appliance
         factory.beginConnection();
 
@@ -234,8 +239,8 @@ public class BundleCommandImpl extends BasicCommand implements BundleCommand
 
         if (!nodes.isEmpty())
         {
-            virtualApp.setNodesHB(CollectionUtils.collect(nodes, InvokerTransformer
-                .getInstance("toPojoHB")));
+            virtualApp.setNodesHB(CollectionUtils.collect(nodes,
+                InvokerTransformer.getInstance("toPojoHB")));
         }
 
         boolean completed = completeBundleProcess(virtualAppPojo);
@@ -243,8 +248,8 @@ public class BundleCommandImpl extends BasicCommand implements BundleCommand
         checkTransaction();
 
         // Power on the bundled nodes
-        if (!powerOnNodes(getNodes(CollectionUtils.collect(nodes, InvokerTransformer
-            .getInstance("getId")))))
+        if (!powerOnNodes(getNodes(CollectionUtils.collect(nodes,
+            InvokerTransformer.getInstance("getId")))))
         {
             throw new BundleException("bundleVirtualAppliance.powerOnError",
                 new State(StateEnum.RUNNING));
@@ -430,9 +435,9 @@ public class BundleCommandImpl extends BasicCommand implements BundleCommand
         {
             if (!virtualApp.getNodes().isEmpty())
             {
-                for(Node node:virtualApp.getNodes())
+                for (Node node : virtualApp.getNodes())
                 {
-                    String message = "Bundle process started in "+ node.getName();
+                    String message = "Bundle process started in " + node.getName();
                     TracerFactory.getTracer().log(SeverityType.INFO, ComponentType.VIRTUAL_MACHINE,
                         EventType.VAPP_BUNDLE, message, user, platform);
                 }
@@ -504,6 +509,17 @@ public class BundleCommandImpl extends BasicCommand implements BundleCommand
         return imageBundled;
     }
 
+    protected HypervisorType getType(final Integer idApp)
+    {
+        DAOFactory factory = HibernateDAOFactory.instance();
+
+        factory.beginConnection();
+
+        return factory.getVirtualApplianceDAO().findByIdNamedExtended(idApp)
+            .getVirtualDataCenterHB().getHypervisorType();
+
+    }
+
     /**
      * Gets the OVF id of the master virtual image (if master is a bundle look its master)
      * 
@@ -538,8 +554,8 @@ public class BundleCommandImpl extends BasicCommand implements BundleCommand
      */
     public static String getSnapshotFomPath(final String bundlePath)
     {
-        return bundlePath.substring(bundlePath.lastIndexOf('/') + 1, bundlePath
-            .indexOf(OVF_BUNDLE_PATH_IDENTIFIER));
+        return bundlePath.substring(bundlePath.lastIndexOf('/') + 1,
+            bundlePath.indexOf(OVF_BUNDLE_PATH_IDENTIFIER));
     }
 
     /**
