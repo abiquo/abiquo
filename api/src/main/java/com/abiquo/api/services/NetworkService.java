@@ -53,6 +53,7 @@ import com.abiquo.server.core.enterprise.DatacenterLimits;
 import com.abiquo.server.core.enterprise.EnterpriseRep;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.InfrastructureRep;
+import com.abiquo.server.core.infrastructure.Machine;
 import com.abiquo.server.core.infrastructure.management.Rasd;
 import com.abiquo.server.core.infrastructure.network.DhcpOption;
 import com.abiquo.server.core.infrastructure.network.DhcpOptionDto;
@@ -755,6 +756,47 @@ public class NetworkService extends DefaultApiService
         LOGGER.debug("Returning the list of IPs used by Virtual Machine '" + vm.getName() + "'.");
         return ips;
     }
+    
+    public List<IpPoolManagement> getListIpPoolManagementByInfrastructureVirtualMachine(
+        Integer datacenterId, Integer rackId, Integer machineId, Integer vmId)
+    {
+        Machine pm = datacenterRepo.findMachineByIds(datacenterId, rackId, machineId);
+        if (pm == null)
+        {
+            addNotFoundErrors(APIError.NON_EXISTENT_MACHINE);
+            flushErrors();
+        }
+        
+        VirtualMachine vm = vmService.getVirtualMachineByHypervisor(pm.getHypervisor(), vmId);
+        VirtualAppliance vapp = repo.findVirtualApplianceByVirtualMachine(vm);
+        if (vapp == null)
+        {
+            // If vapp is 'null' it means the virtual machine does not belong
+            // to any virtual appliance and hence, is an imported virtual machine.
+            // since we don't manage NICs in imported Virtual Machines, return an empty lise
+            return new ArrayList<IpPoolManagement>();
+        }
+        
+        VirtualDatacenter vdc = vapp.getVirtualDatacenter();
+        
+        List<IpPoolManagement> ips = repo.findIpsByVirtualMachine(vm);
+
+        for (IpPoolManagement ip : ips)
+        {
+            Hibernate.initialize(ip.getVlanNetwork().getEnterprise());
+            if (ip.getVlanNetwork().getEnterprise() != null)
+            {
+                // needed for REST links.
+                DatacenterLimits dl =
+                    datacenterRepo.findDatacenterLimits(ip.getVlanNetwork().getEnterprise(),
+                        vdc.getDatacenter());
+                ip.getVlanNetwork().setLimitId(dl.getId());
+            }
+        }
+
+        LOGGER.debug("Returning the list of IPs used by Virtual Machine '" + vm.getName() + "'.");
+        return ips;
+    }
 
     /**
      * Asks for all the Private IPs managed by a VLAN.
@@ -1083,12 +1125,12 @@ public class NetworkService extends DefaultApiService
             .equalsIgnoreCase(newNetwork.getConfiguration().getAddress())
             || !oldNetwork.getConfiguration().getMask()
                 .equals(newNetwork.getConfiguration().getMask())
-            || oldNetwork.getTag() == null
-            && newNetwork.getTag() != null
-            || oldNetwork.getTag() != null
-            && newNetwork.getTag() == null
-            || oldNetwork.getTag() != null
-            && newNetwork.getTag() != null && !oldNetwork.getTag().equals(newNetwork.getTag()))
+            || (oldNetwork.getTag() == null
+            && newNetwork.getTag() != null)
+            || (oldNetwork.getTag() != null
+            && newNetwork.getTag() == null)
+            || (oldNetwork.getTag() != null
+            && newNetwork.getTag() != null && !oldNetwork.getTag().equals(newNetwork.getTag())))
         {
             addConflictErrors(APIError.VLANS_EDIT_INVALID_VALUES);
             flushErrors();

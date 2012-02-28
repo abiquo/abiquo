@@ -30,11 +30,15 @@ package com.abiquo.server.core.infrastructure;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
+import com.abiquo.model.transport.SingleResourceTransportDto;
+
 /**
  */
 @XmlRootElement(name = "logicServer")
-public class FsmDto
+public class FsmDto extends SingleResourceTransportDto
 {
+    private static final long serialVersionUID = 1149618910307871880L;
+
     protected String dn;
 
     protected String status;

@@ -154,7 +154,7 @@ public class VirtualDatacenterDAO extends DefaultDAOBase<Integer, VirtualDatacen
     private static final String SUM_VM_RESOURCES =
         "select sum(vm.cpu), sum(vm.ram), sum(vm.hd) from virtualmachine vm, nodevirtualimage vi, node n, virtualapp a "
             + "where vi.idVM = vm.idVM and vi.idNode = n.idNode and n.idVirtualApp = a.idVirtualApp "
-            + "and a.idVirtualDataCenter = :virtualDatacenterId and STRCMP(vm.state, :not_deployed) != 0";
+            + "and a.idVirtualDataCenter = :virtualDatacenterId and vm.state != 'NOT_ALLOCATED' and vm.idHypervisor is not null";
 
     // +
     // "and hy.id = vm.idHypervisor and pm.idPhysicalMachine = hy.idPhysicalMachine and pm.idState != 7";
@@ -187,9 +187,7 @@ public class VirtualDatacenterDAO extends DefaultDAOBase<Integer, VirtualDatacen
     {
         Object[] vmResources =
             (Object[]) getSession().createSQLQuery(SUM_VM_RESOURCES)
-                .setParameter("virtualDatacenterId", virtualDatacenterId)
-                .setParameter("not_deployed", VirtualMachineState.NOT_ALLOCATED.name())
-                .uniqueResult();
+                .setParameter("virtualDatacenterId", virtualDatacenterId).uniqueResult();
 
         Long cpu = vmResources[0] == null ? 0 : ((BigDecimal) vmResources[0]).longValue();
         Long ram = vmResources[1] == null ? 0 : ((BigDecimal) vmResources[1]).longValue();

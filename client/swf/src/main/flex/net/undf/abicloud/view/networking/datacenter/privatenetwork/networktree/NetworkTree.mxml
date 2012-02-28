@@ -31,6 +31,21 @@
     verticalGap="-1"
     xmlns:mx="http://www.adobe.com/2006/mxml"
     xmlns:general="net.undf.abicloud.view.general.*">
+    <mx:Script>
+    	<![CDATA[
+    		import net.undf.abicloud.vo.networking.VlanNetwork;
+    	]]>
+    </mx:Script>
+    <mx:Script>
+    	<![CDATA[
+    		import net.undf.abicloud.vo.virtualappliance.VirtualDataCenter;
+    	]]>
+    </mx:Script>
+    <mx:Script>
+    	<![CDATA[
+    		import mx.collections.ArrayCollection;
+    	]]>
+    </mx:Script>
 
     <mx:Metadata>
 		[Event(name="itemSelected", type="flash.events.Event")]
@@ -129,11 +144,34 @@
 
             private function setEnterprisePrivateNetworks(privateNetworks:ArrayCollection):void
             {
+	            setDefaultNetwork(privateNetworks);
                 //The Private Networks of an Enterprises are contained in its Virtual Datacenters
                 networkTreeItemRequesting.virtualDatacenters = privateNetworks;
 
                 //Update the Network Tree
                 networkTreeDP.itemUpdated(networkTreeItemRequesting);
+            }
+            
+            private function setDefaultNetwork(virtualDatacenters:ArrayCollection):void
+            {
+                for(var i:int = 0 ; i < virtualDatacenters.length ; i++)
+                {
+                	var testedVlan:VlanNetwork;
+                	var defaultVlan:VlanNetwork = VirtualDataCenter(virtualDatacenters.getItemAt(i)).defaultVlan;
+                	var networks:ArrayCollection = new ArrayCollection();
+                	if(VirtualDataCenter(virtualDatacenters.getItemAt(i)).network)
+                	{
+                		networks = VirtualDataCenter(virtualDatacenters.getItemAt(i)).network.networks;
+                	}
+	                for(var y:int = 0 ; y < networks.length ; y++){
+	                    testedVlan = VlanNetwork(networks.getItemAt(y)) as VlanNetwork;
+	                    if(defaultVlan.vlanNetworkId == testedVlan.vlanNetworkId){
+	                        testedVlan.defaultNetwork = true;
+	                    }else{
+	                        testedVlan.defaultNetwork = false;
+	                    }
+	                }
+                }
             }
 
             private function onClickNetworkTree():void

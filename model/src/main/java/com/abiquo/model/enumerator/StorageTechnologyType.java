@@ -23,7 +23,7 @@ package com.abiquo.model.enumerator;
 
 public enum StorageTechnologyType
 {
-    OPENSOLARIS(8080, 3260),
+    // OPENSOLARIS(8080, 3260),
 
     NEXENTA(8080, 3260),
 

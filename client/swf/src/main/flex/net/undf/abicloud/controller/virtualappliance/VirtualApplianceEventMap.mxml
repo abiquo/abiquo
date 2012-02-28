@@ -846,6 +846,43 @@
         </RemoteObjectInvoker>
     </EventHandlers>
     
+    <!-- VirtualApplianceEvent.GET_HARD_DISKS_BY_VIRTUAL_MACHINE_FROM_INFRASTRUCTURE ____________________________________ -->
+    <EventHandlers type="{VirtualApplianceEvent.GET_HARD_DISKS_BY_VIRTUAL_MACHINE_FROM_INFRASTRUCTURE}">
+
+        <!-- Blocking screen -->
+        <InlineInvoker method="ScreenBlocker.blockScreen"/>
+
+        <!-- Make call to the server here -->
+
+        <RemoteObjectInvoker instance="{services.storageService}"
+            method="getHardDisksByVirtualMachine"
+            arguments="{[AbiCloudModel.getInstance().loginManager.session, 
+            event.datacenter.id, 
+            event.rack.id,
+            event.physicalmachine.id,
+            event.virtualMachine.id]}">
+
+            <resultHandlers>
+                <MethodInvoker generator="{VirtualApplianceResultHandler}"
+                    method="getDisksByVirtualMachineHandler"
+                    arguments="{[resultObject , event.callback]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </resultHandlers>
+
+            <faultHandlers>
+                <MethodInvoker generator="{FaultHandler}"
+                    method="handleFault"
+                    arguments="{[fault]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </faultHandlers>
+            
+        </RemoteObjectInvoker>
+    </EventHandlers>
+    
     <!-- VirtualApplianceEvent.DELETE_HARD_DISK ____________________________________ -->
     <EventHandlers type="{VirtualApplianceEvent.DELETE_HARD_DISK}">
 

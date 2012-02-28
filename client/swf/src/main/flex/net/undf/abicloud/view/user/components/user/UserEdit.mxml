@@ -602,7 +602,6 @@
             required="true">
             <mx:TextInput id="oldPasswordInput"
                 height="20"
-                maxChars="14"
                 change="validateForm()"
                 displayAsPassword="true"/>
 
@@ -617,7 +616,6 @@
             required="false">
             <mx:TextInput id="passwordInput"
                 height="20"
-                maxChars="14"
                 change="validateForm()"
                 displayAsPassword="true"/>
         </mx:FormItem>
@@ -628,7 +626,6 @@
             required="false">
             <mx:TextInput id="passwordRepeatInput"
                 height="20"
-                maxChars="14"
                 change="validateForm()"
                 displayAsPassword="true"/>
 

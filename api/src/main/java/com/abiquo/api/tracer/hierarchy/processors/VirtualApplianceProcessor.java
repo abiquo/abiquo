@@ -52,7 +52,7 @@ public class VirtualApplianceProcessor extends AbstractHierarchyProcessor<Virtua
     protected String getResourceName(final String resourceId)
     {
         VirtualAppliance vapp = dao.findById(Integer.valueOf(resourceId));
-        return vapp.getName();
+        return vapp != null ? vapp.getName() : null;
     }
 
 }
