@@ -576,7 +576,7 @@ public enum APIError
 
     // TASKS
     NON_EXISTENT_TASK("TASK-1", "The requested task does not exist"), TASK_OWNER_NOT_FOUND(
-        "TASK-2", ""),
+        "TASK-2", "The owner of the requested task could not be found"),
 
     // PRICING TEMPLATE
     CURRENCY_PARAM_NOT_FOUND("PRICINGTEMPLATE-0", "Missing currency parameter"), ENT_PARAM_NOT_FOUND(
