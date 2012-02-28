@@ -122,6 +122,8 @@
                 this._listRequest.numberOfNodes = VAPP_RESULTS_PER_PAGE;
                 this._listRequest.offset = 0 ;
                 this._listRequest.orderBy = this._vappsOrderBy;
+                
+                virtualappliancesPaginatorSlider.value = 1;
             }
             
             public function cleanVirtualApplianceList():void
