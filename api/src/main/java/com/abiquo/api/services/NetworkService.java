@@ -662,39 +662,6 @@ public class NetworkService extends DefaultApiService
         return ips;
     }
 
-    public List<IpPoolManagement> getListIpPoolManagementByInfrastructureVirtualMachine(
-        Integer datacenterId, Integer rackId, Integer machineId, Integer vmId)
-    {
-        Machine pm = datacenterRepo.findMachineByIds(datacenterId, rackId, machineId);
-        if (pm == null)
-        {
-            addNotFoundErrors(APIError.NON_EXISTENT_MACHINE);
-            flushErrors();
-        }
-        
-        VirtualMachine vm = vmService.getVirtualMachineByHypervisor(pm.getHypervisor(), vmId);
-        
-        VirtualDatacenter vdc = repo.findVirtualApplianceByVirtualMachine(vm).getVirtualDatacenter();
-        
-        List<IpPoolManagement> ips = repo.findIpsByVirtualMachine(vm);
-
-        for (IpPoolManagement ip : ips)
-        {
-            Hibernate.initialize(ip.getVlanNetwork().getEnterprise());
-            if (ip.getVlanNetwork().getEnterprise() != null)
-            {
-                // needed for REST links.
-                DatacenterLimits dl =
-                    datacenterRepo.findDatacenterLimits(ip.getVlanNetwork().getEnterprise(),
-                        vdc.getDatacenter());
-                ip.getVlanNetwork().setLimitId(dl.getId());
-            }
-        }
-
-        LOGGER.debug("Returning the list of IPs used by Virtual Machine '" + vm.getName() + "'.");
-        return ips;
-    }
-
     /**
      * Asks for all the Private IPs managed by a Virtual Datacenter.
      * 
