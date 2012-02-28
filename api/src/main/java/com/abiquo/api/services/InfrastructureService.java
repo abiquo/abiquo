@@ -320,7 +320,6 @@ public class InfrastructureService extends DefaultApiService
         }
 
         validate(machine.getHypervisor());
-        validate(machine);
 
         // [ABICLOUDPREMIUM-2996] These values cannot be changed. Must always reflect the real ones.
         // Even if the POST to create the machine was made with the information from NodeCollector,
@@ -333,6 +332,7 @@ public class InfrastructureService extends DefaultApiService
         machine.setVirtualRamInMb(remoteMachine.getVirtualRamInMb());
         machine.setVirtualCpuCores(remoteMachine.getVirtualCpuCores());
 
+        validate(machine);
         // Part 2: Insert the and machine into database.
         if (repo
             .existAnyHypervisorWithIpInDatacenter(machine.getHypervisor().getIp(), datacenterId))
