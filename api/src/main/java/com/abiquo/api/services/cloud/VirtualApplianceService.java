@@ -43,6 +43,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.exceptions.APIException;
 import com.abiquo.api.services.DefaultApiService;
+import com.abiquo.api.services.EnterpriseService;
 import com.abiquo.api.services.UserService;
 import com.abiquo.api.services.VirtualMachineAllocatorService;
 import com.abiquo.api.services.stub.TarantinoService;
@@ -61,6 +62,7 @@ import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualDatacenterRep;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineState;
+import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.infrastructure.management.RasdManagement;
 import com.abiquo.server.core.infrastructure.management.RasdManagementDAO;
 import com.abiquo.server.core.infrastructure.storage.Tier;
@@ -117,6 +119,9 @@ public class VirtualApplianceService extends DefaultApiService
     @Autowired
     private VirtualMachineAllocatorService vmallocator;
 
+    @Autowired
+    private EnterpriseService entService;
+
     public VirtualApplianceService()
     {
 
@@ -141,7 +146,6 @@ public class VirtualApplianceService extends DefaultApiService
      * @param vdcId identifier of the virtualdatacenter.
      * @return the list of {@link VirtualAppliance} pojo
      */
-
     @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
     public List<VirtualAppliance> getVirtualAppliancesByVirtualDatacenter(final Integer vdcId,
         final FilterOptions filterOptions)
@@ -149,6 +153,21 @@ public class VirtualApplianceService extends DefaultApiService
         VirtualDatacenter vdc = vdcService.getVirtualDatacenter(vdcId);
         return (List<VirtualAppliance>) repo.findVirtualAppliancesByVirtualDatacenter(vdc,
             filterOptions);
+    }
+
+    /**
+     * Retrieves the list of virtual appliances by enterprise
+     * 
+     * @param entId identifier of the enterprise.
+     * @param filterOptions use to filter the results. <code>null</code> if no filtering required
+     * @return the list of {@link VirtualAppliance} pojo
+     */
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
+    public List<VirtualAppliance> getVirtualAppliancesByEnterprise(final Integer entId,
+        final FilterOptions filterOptions)
+    {
+        Enterprise enterprise = entService.getEnterprise(entId);
+        return virtualApplianceRepo.findVirtualAppliancesByEnterprise(enterprise, filterOptions);
     }
 
     @Transactional(readOnly = true, propagation = Propagation.REQUIRED)

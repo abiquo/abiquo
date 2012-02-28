@@ -71,6 +71,53 @@ public class VirtualApplianceDAO extends DefaultDAOBase<Integer, VirtualApplianc
         return criteria.list();
     }
 
+    public List<VirtualAppliance> findByEnterprise(final Enterprise enterprise,
+        final FilterOptions filterOptions)
+    {
+        if (filterOptions == null)
+        {
+            return findByEnterprise(enterprise);
+        }
+
+        // Check if the orderBy element is actually one of the available ones
+        VirtualAppliance.OrderByEnum orderByEnum =
+            VirtualAppliance.OrderByEnum.valueOf(filterOptions.getOrderBy().toUpperCase());
+
+        Integer limit = filterOptions.getLimit();
+        Integer startwith = filterOptions.getStartwith();
+        String filter = filterOptions.getFilter();
+        boolean asc = filterOptions.getAsc();
+
+        Criteria criteria = createCriteria(enterprise, filter, orderByEnum, asc);
+
+        // Check if the page requested is bigger than the last one
+        Long total = count(criteria);
+        criteria = createCriteria(enterprise, filter, orderByEnum, asc);
+        Integer totalResults = total.intValue();
+        limit = limit != 0 ? limit : totalResults;
+        if (limit != null)
+        {
+            criteria.setMaxResults(limit);
+        }
+
+        if (startwith >= totalResults)
+        {
+            startwith = totalResults - limit;
+        }
+        criteria.setFirstResult(startwith);
+        criteria.setMaxResults(limit);
+
+        List<VirtualAppliance> result = getResultList(criteria);
+
+        PagedList<VirtualAppliance> page = new PagedList<VirtualAppliance>();
+        page.addAll(result);
+        page.setCurrentElement(startwith);
+        page.setPageSize(limit);
+        page.setTotalResults(totalResults);
+
+        return page;
+    }
+
     public VirtualAppliance findById(final VirtualDatacenter vdc, final Integer vappId)
     {
         Criteria criteria = createCriteria(sameVirtualDatacenter(vdc));
@@ -132,6 +179,31 @@ public class VirtualApplianceDAO extends DefaultDAOBase<Integer, VirtualApplianc
         Criteria criteria = createCriteria();
 
         criteria.add(sameVirtualDatacenter(virtualDatacenter));
+
+        if (!StringUtils.isEmpty(filter))
+        {
+            criteria.add(filterBy(filter));
+        }
+
+        if (!StringUtils.isEmpty(orderby.getColumnSQL()))
+        {
+            Order order = Order.desc(orderby.getColumnSQL());
+            if (asc)
+            {
+                order = Order.asc(orderby.getColumnSQL());
+            }
+            criteria.addOrder(order);
+        }
+
+        return criteria;
+    }
+
+    private Criteria createCriteria(final Enterprise enterprise, final String filter,
+        final OrderByEnum orderby, final boolean asc)
+    {
+        Criteria criteria = createCriteria();
+
+        criteria.add(sameEnterprise(enterprise));
 
         if (!StringUtils.isEmpty(filter))
         {

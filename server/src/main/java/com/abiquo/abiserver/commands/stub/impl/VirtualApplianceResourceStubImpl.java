@@ -973,63 +973,50 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
         DataResult<VirtualAppliancesListResult> result =
             new DataResult<VirtualAppliancesListResult>();
 
-        String uri = createVirtualDatacentersFromEnterpriseLink(enterprise.getId());
+        StringBuilder buildRequest =
+            new StringBuilder(createVirtualAppliancesByEnterpriseLink(enterprise.getId()));
         VirtualAppliancesListResult listResult = new VirtualAppliancesListResult();
 
-        ClientResponse eResponse = get(uri);
-
-        try
+        if (listRequest != null)
         {
-            VirtualDatacentersDto dtos = eResponse.getEntity(VirtualDatacentersDto.class);
-            List<VirtualAppliance> list = new ArrayList<VirtualAppliance>();
-
-            StringBuilder buildRequest = new StringBuilder();
-            if (listRequest != null)
+            buildRequest.append("?startwith=" + listRequest.getOffset());
+            buildRequest.append("&limit=" + listRequest.getNumberOfNodes());
+            if (listRequest.getOrderBy() != null && !listRequest.getOrderBy().isEmpty())
             {
-                buildRequest.append("?startwith=" + listRequest.getOffset());
-                buildRequest.append("&limit=" + listRequest.getNumberOfNodes());
-                if (listRequest.getOrderBy() != null && !listRequest.getOrderBy().isEmpty())
+                buildRequest.append("&by=" + listRequest.getOrderBy());
+            }
+            buildRequest.append("&asc=" + (listRequest.getAsc() == true ? "true" : "false"));
+            if (listRequest.getFilterLike() != null && !listRequest.getFilterLike().isEmpty())
+            {
+                try
                 {
-                    buildRequest.append("&by=" + listRequest.getOrderBy());
+                    buildRequest.append("&has=" + URIUtil.encodeQuery(listRequest.getFilterLike()));
                 }
-                buildRequest.append("&asc=" + (listRequest.getAsc() == true ? "true" : "false"));
-                if (listRequest.getFilterLike() != null && !listRequest.getFilterLike().isEmpty())
+                catch (URIException e)
                 {
-                    try
-                    {
-                        buildRequest.append("&has="
-                            + URIUtil.encodeQuery(listRequest.getFilterLike()));
-                    }
-                    catch (URIException e)
-                    {
-                    }
                 }
             }
+        }
 
-            for (VirtualDatacenterDto dto : dtos.getCollection())
-            {
-                VirtualDataCenter virtualDatacenter = dtoToVirtualDatacenter(dto, enterprise);
-                RESTLink app = dto.searchLink("virtualappliances");
+        ClientResponse response = get(buildRequest.toString());
 
-                ClientResponse response = get(app.getHref() + buildRequest.toString());
-                VirtualAppliancesDto virtualAppliancesDto =
-                    response.getEntity(VirtualAppliancesDto.class);
-                list
-                    .addAll(dtosToVirtualAppliance(virtualAppliancesDto, virtualDatacenter, result));
-            }
+        if (response.getStatusCode() == 200)
+        {
+            VirtualAppliancesDto dto = response.getEntity(VirtualAppliancesDto.class);
+            List<VirtualAppliance> collection = dtosToVirtualAppliance(dto, result);
 
             Integer total =
-                dtos.getTotalSize() != null ? dtos.getTotalSize() : dtos.getCollection().size();
+                dto.getTotalSize() != null ? dto.getTotalSize() : dto.getCollection().size();
 
             listResult.setTotalVirtualAppliances(total);
-            listResult.setVirtualAppliancesList(list);
+            listResult.setVirtualAppliancesList(collection);
 
             result.setSuccess(true);
             result.setData(listResult);
         }
-        catch (Exception e)
+        else
         {
-            populateErrors(eResponse, result, "getVirtualAppliancesByEnterprise");
+            populateErrors(response, result, "getVirtualAppliancesByEnterprise");
         }
 
         return result;
