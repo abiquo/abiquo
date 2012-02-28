@@ -623,7 +623,7 @@ public class NodecollectorServiceStub extends DefaultApiService
                 long bytesHD = rt.getUnits();
                 vm.setHdInBytes(bytesHD);
 
-                if (StringUtils.hasText(rt.getAddress()) && StringUtils.hasText(rt.getConnection()))
+                if (StringUtils.hasText(rt.getConnection()))
                 {
                     Datastore ds = new Datastore();
                     ds.setDirectory(rt.getAddress());
