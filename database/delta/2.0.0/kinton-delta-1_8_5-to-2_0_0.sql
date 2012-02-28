@@ -329,6 +329,8 @@ UNLOCK TABLES;
 UPDATE `kinton`.`virtualimage` set creation_user = 'ABIQUO-BEFORE-2.0', creation_date = CURRENT_TIMESTAMP;
 UPDATE `kinton`.`virtualimage` set idRepository = null where stateful = 1;
 
+UPDATE `kinton`.`alerts` set value = 'YES' where type = 'HEARTBEAT';
+
 /* ABICLOUDPREMIUM-2878 - For consistency porpouse, changed vharchar(30) to varchar(256) */
 ALTER TABLE `kinton`.`metering` MODIFY COLUMN `physicalmachine` VARCHAR(256)  CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL;
 
