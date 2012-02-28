@@ -32,7 +32,8 @@ import com.abiquo.server.core.infrastructure.DatacenterDto;
 /* "availableSizeInMB", "usedSizeInMB", */"idScsi", "idImage"})
 public class VolumeManagementDto extends SingleResourceTransportDto
 {
-    public static final String MEDIA_TYPE = "application/vnd.abiquo.iscsivolume+xml";
+    public static final String MEDIA_TYPE = "application/vnd.abiquo.volume+xml";
+    public static final String ISCSI_MEDIA_TYPE = "application/vnd.abiquo.iscsivolume+xml";
 
     private static final long serialVersionUID = 1L;
 

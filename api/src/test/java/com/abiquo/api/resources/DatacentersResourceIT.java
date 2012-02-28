@@ -154,7 +154,7 @@ public class DatacentersResourceIT extends AbstractJpaGeneratorIT
         d.setRemoteServices(rsList);
 
         // Assert creation
-        ClientResponse response = post(resolveDatacentersURI(), d, SYSADMIN, SYSADMIN, DatacenterDto.MEDIA_TYPE);
+        ClientResponse response = post(resolveDatacentersURI(), d, SYSADMIN, SYSADMIN);
         // System.out.println(response.getStatusCode() + ' ' + response.getMessage());
         assertEquals(response.getStatusCode(), Status.CREATED.getStatusCode());
 

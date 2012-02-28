@@ -23,9 +23,13 @@ package com.abiquo.server.core.scheduler;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
+import com.abiquo.model.transport.SingleResourceTransportDto;
+
 @XmlRootElement(name = "rules")
-public class RulesDto
+public class RulesDto extends SingleResourceTransportDto
 {
+
+    public static final String MEDIA_TYPE = "application/vnd.abiquo.rules+xml";
 
     private FitPolicyRulesDto fitPolicyRules;
 
@@ -62,6 +66,12 @@ public class RulesDto
         final EnterpriseExclusionsRulesDto enterpriseExclusionRules)
     {
         this.enterpriseExclusionRules = enterpriseExclusionRules;
+    }
+
+    @Override
+    public String getMediaType()
+    {
+        return MEDIA_TYPE;
     }
 
 }

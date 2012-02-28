@@ -156,7 +156,7 @@ public class DatacenterResource extends AbstractResource
 
         return createTransferObject(datacenter, restBuilder);
     }
-
+    
     @PUT
     @Consumes(DatacenterDto.MEDIA_TYPE)
     @Produces(DatacenterDto.MEDIA_TYPE)

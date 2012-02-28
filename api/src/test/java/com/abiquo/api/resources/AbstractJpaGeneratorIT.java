@@ -158,12 +158,20 @@ public class AbstractJpaGeneratorIT extends AbstractGeneratorTest
     }
 
     protected ClientResponse post(final String uri, final SingleResourceTransportDto dto, final String username,
-        final String password, final String mediaType)
+        final String password, final String produces, final String consumes)
     {
         String basicAuth = basicAuth(username, password);
 
-        return client.resource(uri).accept(mediaType).contentType(mediaType)
-            .header("Authorization", "Basic " + basicAuth).post(dto);
+        Resource res = client.resource(uri).header("Authorization", "Basic " + basicAuth);
+        if (produces != null)
+        {
+            res.accept(produces);
+        }
+        if (consumes != null)
+        {
+            res.contentType(consumes);
+        }
+        return res.post(dto);
     }
 
     protected ClientResponse put(final String uri, final SingleResourceTransportDto dto)

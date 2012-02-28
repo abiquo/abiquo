@@ -146,7 +146,6 @@ public class VirtualMachineResource extends AbstractResource
      * @throws Exception
      */
     @GET
-    @Produces(MediaType.APPLICATION_XML)
     public VirtualMachineDto getVirtualMachine(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) @NotNull @Min(1) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) @NotNull @Min(1) final Integer vappId,
@@ -169,7 +168,6 @@ public class VirtualMachineResource extends AbstractResource
      * @throws Exception AcceptedRequestDto
      */
     @PUT
-    @Consumes(MediaType.APPLICATION_XML)
     public AcceptedRequestDto<String> updateVirtualMachine(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) @NotNull @Min(1) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) @NotNull @Min(1) final Integer vappId,
