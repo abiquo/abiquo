@@ -25,9 +25,6 @@
         <property name="cpu" type="int">
             <column name="cpu" not-null="true" />
         </property>
-        <property name="cpuRatio" type="int">
-            <column name="cpuRatio" not-null="true" />
-        </property>
         <property name="ramUsed" type="int">
             <column name="ramUsed" not-null="true" />
         </property>
