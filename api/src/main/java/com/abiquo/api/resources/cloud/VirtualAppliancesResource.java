@@ -45,6 +45,7 @@ import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualApplianceDto;
 import com.abiquo.server.core.cloud.VirtualAppliancesDto;
 import com.abiquo.server.core.util.FilterOptions;
+import com.abiquo.server.core.util.PagedList;
 
 @Parent(VirtualDatacenterResource.class)
 @Path(VirtualAppliancesResource.VIRTUAL_APPLIANCES_PATH)
@@ -76,8 +77,13 @@ public class VirtualAppliancesResource extends AbstractResource
         {
             for (VirtualAppliance v : all)
             {
-                vappsDto.add(createTransferObject(v, restBuilder));
+                vappsDto.getCollection().add(createTransferObject(v, restBuilder));
             }
+        }
+
+        if (all.isEmpty() == false)
+        {
+            vappsDto.setTotalSize(((PagedList< ? >) all).getTotalResults());
         }
 
         return vappsDto;
