@@ -116,10 +116,10 @@ public class VmwareMachineDisk
     private String getSourceDiskPath()
     {
         // TODO get only disk imagePath (repository from WS configuration )
-        String virtualDiskPath = vmConfig.getVirtualDiskBase().getLocation();
+        final String virtualDiskPath = vmConfig.getVirtualDiskBase().getLocation();
 
-        int pos = virtualDiskPath.lastIndexOf("]");
-        String fileName = virtualDiskPath.substring(pos + 1);
+        final int pos = virtualDiskPath.lastIndexOf("]");
+        final String fileName = virtualDiskPath.substring(pos + 1);
 
         return "[" + vmwareConfig.getDatastoreSanName() + "] " + fileName;
     }
@@ -131,6 +131,12 @@ public class VmwareMachineDisk
     {
         return "[" + vmConfig.getVirtualDiskBase().getTargetDatastore() + "] " + machineName + "/"
             + machineName + "-flat.vmdk";
+    }
+
+    public String getVirtualMachineFolder()
+    {
+        return "[" + vmConfig.getVirtualDiskBase().getTargetDatastore() + "] " + machineName + '/'
+            + machineName + ".vmx";
     }
 
     /**
@@ -159,14 +165,14 @@ public class VmwareMachineDisk
 
         try
         {
-            String dcName = vmwareConfig.getDatacenterName();
+            final String dcName = vmwareConfig.getDatacenterName();
             dcmor = utils.getServiceUtils().getDecendentMoRef(null, "Datacenter", dcName);
             if (dcmor == null)
             {
                 throw new Exception("No such Datacenter : " + dcName);
             }
         }
-        catch (Exception e)
+        catch (final Exception e)
         {
             final String msg = "VMWare [" + machineName + "] can not get 'Datacenter' MoRef";
             throw new VirtualMachineException(msg);
@@ -226,7 +232,7 @@ public class VmwareMachineDisk
             }
 
         }
-        catch (Exception e)
+        catch (final Exception e)
         {
             throw new VirtualMachineException("Virtual Machine could not be cloned.");
         }
@@ -270,14 +276,14 @@ public class VmwareMachineDisk
 
         try
         {
-            String dcName = vmwareConfig.getDatacenterName();
+            final String dcName = vmwareConfig.getDatacenterName();
             dcmor = utils.getServiceUtils().getDecendentMoRef(null, "Datacenter", dcName);
             if (dcmor == null)
             {
                 throw new Exception("No such Datacenter : " + dcName);
             }
         }
-        catch (Exception e)
+        catch (final Exception e)
         {
             final String msg = "VMWare [" + machineName + "] can not get 'Datacenter' MoRef";
             throw new VirtualMachineException(msg);
@@ -382,16 +388,16 @@ public class VmwareMachineDisk
 
         if (finalPath == null)
         {
-            String virtualDiskPath = vmConfig.getVirtualDiskBase().getLocation();
+            final String virtualDiskPath = vmConfig.getVirtualDiskBase().getLocation();
 
-            int pos = virtualDiskPath.lastIndexOf("]");
-            String fileName = virtualDiskPath.substring(pos + 1);
+            final int pos = virtualDiskPath.lastIndexOf("]");
+            final String fileName = virtualDiskPath.substring(pos + 1);
 
-            int pos2 = fileName.lastIndexOf(File.separatorChar);
+            final int pos2 = fileName.lastIndexOf(File.separatorChar);
             finalPath = fileName.substring(0, pos2);
         }
 
-        String destinationFile =
+        final String destinationFile =
             "[" + destinationDatastoreName + "] " + finalPath + "/" + snapShotName;
         return destinationFile;
     }
@@ -408,7 +414,7 @@ public class VmwareMachineDisk
         final String sourcePath, final boolean isManaged)
     {
 
-        boolean isSparse = vmConfig.getVirtualDiskBase().getFormatUri().contains("sparse");
+        final boolean isSparse = vmConfig.getVirtualDiskBase().getFormatUri().contains("sparse");
 
         if (isManaged && isSparse && VmwareMachineDisk.USE_COPY_DISK)
         {
@@ -436,12 +442,13 @@ public class VmwareMachineDisk
      */
     public VirtualDeviceConfigSpec[] initialDiskDeviceConfigSpec() throws Exception
     {
-        ArrayList<VirtualDeviceConfigSpec> deviceConfig = new ArrayList<VirtualDeviceConfigSpec>();
+        final ArrayList<VirtualDeviceConfigSpec> deviceConfig =
+            new ArrayList<VirtualDeviceConfigSpec>();
 
-        List<VirtualDisk> extendedDiskList = vmConfig.getExtendedVirtualDiskList();
+        final List<VirtualDisk> extendedDiskList = vmConfig.getExtendedVirtualDiskList();
 
         // added disks
-        for (VirtualDisk vDisk : extendedDiskList)
+        for (final VirtualDisk vDisk : extendedDiskList)
         {
             // adds the new disk
             deviceConfig.add(addVirtualDiskFromConfiguration(vDisk));
@@ -461,30 +468,31 @@ public class VmwareMachineDisk
     public VirtualDeviceConfigSpec[] getDiskDeviceConfigSpec(
         final VirtualMachineConfiguration newConfiguration) throws Exception
     {
-        ArrayList<VirtualDeviceConfigSpec> deviceConfig = new ArrayList<VirtualDeviceConfigSpec>();
+        final ArrayList<VirtualDeviceConfigSpec> deviceConfig =
+            new ArrayList<VirtualDeviceConfigSpec>();
 
         // Compares the two lists and adds or remove the disks
-        List<VirtualDisk> newExtendedDiskList = newConfiguration.getExtendedVirtualDiskList();
-        List<VirtualDisk> oldExtendedDiskList = vmConfig.getExtendedVirtualDiskList();
+        final List<VirtualDisk> newExtendedDiskList = newConfiguration.getExtendedVirtualDiskList();
+        final List<VirtualDisk> oldExtendedDiskList = vmConfig.getExtendedVirtualDiskList();
 
         // all the previously added disk id.
-        Map<String, VirtualDisk> htOldDiskId = new Hashtable<String, VirtualDisk>();
-        for (VirtualDisk ovd : oldExtendedDiskList)
+        final Map<String, VirtualDisk> htOldDiskId = new Hashtable<String, VirtualDisk>();
+        for (final VirtualDisk ovd : oldExtendedDiskList)
         {
             logger.debug("old disk [{}]", ovd.getId());
             htOldDiskId.put(ovd.getId(), ovd);
         }
 
         // all the new added disk id.
-        Map<String, VirtualDisk> htNewDiskId = new Hashtable<String, VirtualDisk>();
-        for (VirtualDisk nvd : newExtendedDiskList)
+        final Map<String, VirtualDisk> htNewDiskId = new Hashtable<String, VirtualDisk>();
+        for (final VirtualDisk nvd : newExtendedDiskList)
         {
             logger.debug("new disk [{}]", nvd.getId());
             htNewDiskId.put(nvd.getId(), nvd);
         }
 
         // check removed disks
-        for (String oldId : htOldDiskId.keySet())
+        for (final String oldId : htOldDiskId.keySet())
         {
             if (!htNewDiskId.keySet().contains(oldId))
             {
@@ -495,7 +503,7 @@ public class VmwareMachineDisk
         }
 
         // check added disks
-        for (String newId : htNewDiskId.keySet())
+        for (final String newId : htNewDiskId.keySet())
         {
             if (!htOldDiskId.keySet().contains(newId))
             {
@@ -548,7 +556,7 @@ public class VmwareMachineDisk
         throws Exception
     {
         com.vmware.vim25.VirtualDisk virtualDisk;
-        VirtualDeviceConfigSpec diskSpec = new VirtualDeviceConfigSpec();
+        final VirtualDeviceConfigSpec diskSpec = new VirtualDeviceConfigSpec();
 
         logger.debug("Adding disk Id[{}] location [{}] type[" + vd.getDiskType().name() + "]",
             vd.getId(), vd.getLocation());
@@ -578,8 +586,8 @@ public class VmwareMachineDisk
     public VirtualDeviceConfigSpec removeVirtualDiskFromConfig(final VirtualDisk vd)
         throws Exception
     {
-        com.vmware.vim25.VirtualDisk virtualDisk;
-        VirtualDeviceConfigSpec diskSpec = new VirtualDeviceConfigSpec();
+        final com.vmware.vim25.VirtualDisk virtualDisk;
+        final VirtualDeviceConfigSpec diskSpec = new VirtualDeviceConfigSpec();
 
         logger.debug("Remove disk Id[{}] location [{}] type [" + vd.getDiskType().name() + "]",
             vd.getId(), vd.getLocation());
@@ -603,20 +611,20 @@ public class VmwareMachineDisk
     public com.vmware.vim25.VirtualDisk createStandardDisk(final VirtualDisk newVirtualDisk)
         throws Exception
     {
-        ManagedObjectReference _virtualMachine = utils.getVmMor(vmConfig.getMachineName());
-        VirtualMachineConfigInfo vmConfigInfo =
+        final ManagedObjectReference _virtualMachine = utils.getVmMor(vmConfig.getMachineName());
+        final VirtualMachineConfigInfo vmConfigInfo =
             (VirtualMachineConfigInfo) utils.getServiceUtils().getDynamicProperty(_virtualMachine,
                 "config");
-        com.vmware.vim25.VirtualDisk disk = new com.vmware.vim25.VirtualDisk();
-        VirtualDiskFlatVer2BackingInfo diskfileBacking = new VirtualDiskFlatVer2BackingInfo();
-        String dsName = vmConfig.getVirtualDiskBase().getTargetDatastore();
+        final com.vmware.vim25.VirtualDisk disk = new com.vmware.vim25.VirtualDisk();
+        final VirtualDiskFlatVer2BackingInfo diskfileBacking = new VirtualDiskFlatVer2BackingInfo();
+        final String dsName = vmConfig.getVirtualDiskBase().getTargetDatastore();
 
         int unitNumber;
-        VirtualDevice[] devices = vmConfigInfo.getHardware().getDevice();
-        int ckey = getSCSIControllerKey();// getControllerKey("SCSI Controller 0");
+        final VirtualDevice[] devices = vmConfigInfo.getHardware().getDevice();
+        final int ckey = getSCSIControllerKey();// getControllerKey("SCSI Controller 0");
 
         unitNumber = devices.length + 1;
-        String fileName =
+        final String fileName =
             "[" + dsName + "] " + machineName + "/" + newVirtualDisk.getId() + ".vmdk";
 
         diskfileBacking.setFileName(fileName);
@@ -628,12 +636,12 @@ public class VmwareMachineDisk
         disk.setUnitNumber(unitNumber);
         disk.setBacking(diskfileBacking);
 
-        Description des = new Description();
+        final Description des = new Description();
         des.setLabel(newVirtualDisk.getId());
         des.setSummary(newVirtualDisk.getId());
         disk.setDeviceInfo(des);
 
-        int size = (int) (newVirtualDisk.getCapacity() / 1024);
+        final int size = (int) (newVirtualDisk.getCapacity() / 1024);
         disk.setCapacityInKB(size);
         disk.setKey(-1);
 
@@ -662,14 +670,15 @@ public class VmwareMachineDisk
         try
         {
 
-            ManagedObjectReference _virtualMachine = utils.getVmMor(vmConfig.getMachineName());
-            VirtualMachineConfigInfo vmConfigInfo =
+            final ManagedObjectReference _virtualMachine =
+                utils.getVmMor(vmConfig.getMachineName());
+            final VirtualMachineConfigInfo vmConfigInfo =
                 (VirtualMachineConfigInfo) utils.getServiceUtils().getDynamicProperty(
                     _virtualMachine, "config");
 
-            VirtualDevice[] devices = vmConfigInfo.getHardware().getDevice();
+            final VirtualDevice[] devices = vmConfigInfo.getHardware().getDevice();
 
-            for (VirtualDevice device : devices)
+            for (final VirtualDevice device : devices)
             {
                 if (device instanceof VirtualSCSIController)
                 {
@@ -678,7 +687,7 @@ public class VmwareMachineDisk
             }
 
         }
-        catch (Exception e)
+        catch (final Exception e)
         {
             // If is not already configured is being configured right now, we configure it on ''1''
             ckey = 1;
@@ -697,18 +706,18 @@ public class VmwareMachineDisk
     protected String reduceVirtualDisk(final VirtualDisk newVirtualDisk,
         final VirtualDeviceConfigSpec diskSpec) throws Exception
     {
-        ManagedObjectReference _virtualMachine = utils.getVmMor(vmConfig.getMachineName());
-        VirtualMachineConfigInfo vmConfigInfo =
+        final ManagedObjectReference _virtualMachine = utils.getVmMor(vmConfig.getMachineName());
+        final VirtualMachineConfigInfo vmConfigInfo =
             (VirtualMachineConfigInfo) utils.getServiceUtils().getDynamicProperty(_virtualMachine,
                 "config");
-        com.vmware.vim25.VirtualDisk disk = new com.vmware.vim25.VirtualDisk();
-        VirtualDiskFlatVer2BackingInfo diskfileBacking = new VirtualDiskFlatVer2BackingInfo();
-        String dsName = vmConfig.getVirtualDiskBase().getTargetDatastore();
+        final com.vmware.vim25.VirtualDisk disk = new com.vmware.vim25.VirtualDisk();
+        final VirtualDiskFlatVer2BackingInfo diskfileBacking = new VirtualDiskFlatVer2BackingInfo();
+        final String dsName = vmConfig.getVirtualDiskBase().getTargetDatastore();
         int ckey = 0;
         int unitNumber = 0;
 
-        VirtualDevice[] test = vmConfigInfo.getHardware().getDevice();
-        for (VirtualDevice element : test)
+        final VirtualDevice[] test = vmConfigInfo.getHardware().getDevice();
+        for (final VirtualDevice element : test)
         {
             if (element.getDeviceInfo().getLabel().equalsIgnoreCase("SCSI Controller 0"))
             {
@@ -717,7 +726,7 @@ public class VmwareMachineDisk
         }
 
         unitNumber = test.length + 1;
-        String fileName =
+        final String fileName =
             "[" + dsName + "] " + machineName + "/" + newVirtualDisk.getId() + ".vmdk";
 
         // virtualDiskId = newVirtualDisk.getId();
@@ -730,7 +739,7 @@ public class VmwareMachineDisk
         disk.setControllerKey(ckey);
         disk.setUnitNumber(unitNumber);
         disk.setBacking(diskfileBacking);
-        int size = (int) (newVirtualDisk.getCapacity() / 1024);
+        final int size = (int) (newVirtualDisk.getCapacity() / 1024);
         disk.setCapacityInKB(size);
         disk.setKey(-1);
 
@@ -748,21 +757,21 @@ public class VmwareMachineDisk
     protected void shrinkVirtualDisk(final String virtualDiskLocation, final long diffSize)
         throws Exception
     {
-        ManagedObjectReference virtualDiskManager =
+        final ManagedObjectReference virtualDiskManager =
             utils.getServiceContent().getVirtualDiskManager();
 
-        String dcName = utils.getOption("datacentername");
-        ManagedObjectReference dcmor =
+        final String dcName = utils.getOption("datacentername");
+        final ManagedObjectReference dcmor =
             utils.getServiceUtils().getDecendentMoRef(null, "Datacenter", dcName);
 
         if (dcmor == null)
         {
-            String message = "Datacenter " + dcName + " not found.";
+            final String message = "Datacenter " + dcName + " not found.";
             logger.error(message);
             throw new VirtualMachineException(message);
         }
         // TODO Defragment the disk
-        ManagedObjectReference tmor =
+        final ManagedObjectReference tmor =
             utils.getService().shrinkVirtualDisk_Task(virtualDiskManager, virtualDiskLocation,
                 dcmor, false);
         utils.monitorTask(tmor);

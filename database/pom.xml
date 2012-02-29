@@ -10,7 +10,7 @@
     <parent>
         <groupId>com.abiquo.abicloud</groupId>
         <artifactId>platform</artifactId>
-        <version>1.8.5-HF7-SNAPSHOT</version>
+        <version>1.8.5-HF8</version>
     </parent>
     <!-- -->
     <!-- PROJECT INFORMATION -->
