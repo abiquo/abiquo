@@ -201,7 +201,22 @@ package net.undf.abicloud.controller.virtualappliance
                 super.handleResult(result);
             }
         }
-
+        
+        public function handleGetVirtualAppliancesByEnterpriseAndDatacenter(result:BasicResult, callback:Function):void
+        {
+            if (result.success)
+            {
+                var virtualAppliancesResult:VirtualAppliancesListResult = DataResult(result).data as VirtualAppliancesListResult;
+                
+                callback(virtualAppliancesResult.virtualAppliancesList);
+            }
+            else
+            {
+                //There was a problem retrieving the VirtualDataCenter list
+                super.handleResult(result);
+            }
+        }
+        
         public function handleGetVirtualApplianceUpdatedLogs(result:BasicResult,
                                                              virtualAppliance:VirtualAppliance):void
         {
@@ -415,10 +430,8 @@ package net.undf.abicloud.controller.virtualappliance
 
             if (result.success)
             {
-                //Announcing that the state of a Virtual Appliance has been changed
-                var virtualApplianceEvent:VirtualApplianceEvent = new VirtualApplianceEvent(VirtualApplianceEvent.CHECK_VIRTUAL_DATACENTERS_AND_APPLIANCES_BY_ENTERPRISE);
-                virtualApplianceEvent.enterprise = AbiCloudModel.getInstance().loginManager.user.enterprise;
-                Application.application.dispatchEvent(virtualApplianceEvent);
+                //Do nothing
+                
             }
             else
             {
@@ -560,32 +573,6 @@ package net.undf.abicloud.controller.virtualappliance
                     AbiCloudModel.getInstance().virtualApplianceManager.changeVirtualApplianceState(DataResult(result).data as VirtualAppliance);
 
                 super.handleResultInBackground(result);
-            }
-        }
-
-        public function handleCheckVirtualDatacentersAndAppliancesByEnterprise(result:BasicResult):void
-        {
-            if (result.success)
-            {
-                //VirtualDatacenters and Appliance's checked successfully
-                var virtualDatacentersAndAppliancesChecked:ArrayCollection = DataResult(result).data as ArrayCollection;
-
-                var virtualDatacentersChecked:ArrayCollection = virtualDatacentersAndAppliancesChecked.getItemAt(0) as ArrayCollection;
-                var virtualAppliancesChecked:ArrayCollection = virtualDatacentersAndAppliancesChecked.getItemAt(1) as ArrayCollection;
-                AbiCloudModel.getInstance().virtualApplianceManager.checkVirtualDatacentersAndAppliances(virtualDatacentersChecked,
-                                                                                                         virtualAppliancesChecked);
-            }
-            else
-            {
-                //There was a problem checking the virtual datacenters or appliance's state
-                //We check if it's a manual user interaction or a background process
-                if(AbiCloudModel.getInstance().virtualApplianceManager.serverCallType){
-                	super.handleResultInBackground(result);                	
-                }else{
-                	super.handleResult(result);
-                }
-                AbiCloudModel.getInstance().virtualApplianceManager.callProcessComplete = true;
-                
             }
         }
 

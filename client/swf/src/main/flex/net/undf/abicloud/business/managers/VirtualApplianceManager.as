@@ -59,7 +59,6 @@ package net.undf.abicloud.business.managers
 
 		//use to differenciate server calls type
 		public var serverCallType:Boolean;
-		public var callProcessComplete:Boolean;
 		
         //////////////////////////////////////////////
         //Virtual Data Centers
@@ -439,20 +438,6 @@ package net.undf.abicloud.business.managers
                 virtualAppliance.logs.removeItemAt(index);
         }
 
-        /**
-         * Updates the whole list of model's VirtualDatacenters and Appliances
-         */
-        public function checkVirtualDatacentersAndAppliances(virtualDatacentersChecked:ArrayCollection,
-                                                             virtualAppliancesChecked:ArrayCollection):void
-        {
-            this._virtualDataCenters = virtualDatacentersChecked;
-            this._virtualAppliances = virtualAppliancesChecked;
-
-            //Announcing that VirtualDatacenters and Appliances list has been updated
-            var event:VirtualApplianceEvent = new VirtualApplianceEvent(VirtualApplianceEvent.VIRTUAL_DATACENTERS_AND_APPLIANCES_CHECKED);
-            dispatchEvent(event)
-        }
-
         public function changeVirtualApplianceState(vaNewValues:VirtualAppliance):void
         {
             var vaChanged:VirtualAppliance = updateVAWithNewValues(vaNewValues);
@@ -499,7 +484,6 @@ package net.undf.abicloud.business.managers
         	   {
         	   	   taskStatus = NodeVirtualImage(virtualAppliance.nodes.getItemAt(i)).taskStatus;
         	   	   taskStatus.tasks = new ArrayCollection();
-        	   	   //taskStatus.statusName = TaskStatus.STARTED;
         	   }
         	}
         	

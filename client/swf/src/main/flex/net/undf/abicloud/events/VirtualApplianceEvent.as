@@ -63,11 +63,7 @@ package net.undf.abicloud.events
 
         public static const CANCEL_VIRTUAL_APPLIANCE_DEPLOYMENT:String = "cancelVirtualApplianceDeploymentVirtualApplianceEvent";
 
-        public static const CHECK_VIRTUAL_DATACENTERS_AND_APPLIANCES_BY_ENTERPRISE:String = "checkVirtualDatacentersAndAppliancesByEnterpriseVirtualApplianceEvent";
-
         public static const CHECK_VIRTUAL_APPLIANCE:String = "checkVirtualApplianceVirtualApplianceEvent"
-
-        public static const VIRTUAL_DATACENTERS_AND_APPLIANCES_CHECKED:String = "virtualDatacentersAndAppliancesCheckedVirtualApplianceEvent";
 
         public static const CREATE_VIRTUAL_APPLIANCE_BUNDLE:String = "createVirtualApplianceBundleVirtualApplianceEvent";
 
@@ -105,7 +101,7 @@ package net.undf.abicloud.events
         
         public static const VIRTUAL_DATACENTER_RETRIEVED:String = "virtualDataCenterRetrievedVirtualApplianceEvent";
 
-	   public static const CHECK_VIRTUAL_DATACENTERS_AND_APPLIANCES_BY_ENTERPRISE_AND_DATACENTER:String = "checkVirtualDatacentersAndAppliancesByEnterpriseAndDatacenterEvent";
+	   public static const GET_VIRTUAL_APPLIANCES_BY_ENTERPRISE_AND_DATACENTER:String = "checkVirtualDatacentersAndAppliancesByEnterpriseAndDatacenterEvent";
 	
 	   public static const GET_VIRTUAL_DATACENTERS_BY_ENTERPRISE_FASTER:String = "getVirtualDataCenterByEnterpriseFasterVirtualApplianceEvent";
 	   

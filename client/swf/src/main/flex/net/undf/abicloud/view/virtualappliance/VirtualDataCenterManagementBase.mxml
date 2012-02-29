@@ -170,6 +170,8 @@
                                                                                      onVirtualApplianceCRUD);
                 AbiCloudModel.getInstance().virtualApplianceManager.addEventListener(VirtualApplianceEvent.VIRTUAL_APPLIANCE_EDITED,
                                                                                      onVirtualApplianceEdited);
+                AbiCloudModel.getInstance().virtualApplianceManager.addEventListener(VirtualApplianceEvent.VIRTUAL_APPLIANCES_RETRIEVED,
+                                                                                     onVirtualApplianceCRUD);                                                                                     
 
                 //Listening for checks in VirtualDatacenters and VirtualAppliances
                 AbiCloudModel.getInstance().virtualApplianceManager.addEventListener(VirtualApplianceEvent.VIRTUAL_DATACENTER_RETRIEVED,
@@ -261,6 +263,8 @@
                         if (selectedVirtualAppliance.id == VirtualAppliance(virtualAppliances.getItemAt(i)).id)
                         {
                             selectedVirtualAppliance = virtualAppliances.getItemAt(i) as VirtualAppliance;
+                            virtualApplianceList.virtualApplianceDataGrid.selectedIndex = i;
+                            virtualApplianceList.virtualApplianceTile.selectedIndex = i;
                             virtualApplianceFound = true;
                             break;
                         }
@@ -275,10 +279,6 @@
                 //Setting the VirtualApplianceList component
                 virtualApplianceList.virtualAppliances = virtualAppliances;
                 virtualApplianceList.selectedVirtualAppliance = selectedVirtualAppliance;
-
-                //Showing againg the VirtualAppliances
-                //virtualApplianceList.filterVirtualAppliancesByVirtualDataCenter(virtualDatacenterList.selectedVirtualDataCenter);
-                retrieveVirtualAppliances()
             }
 
             /**
@@ -472,7 +472,6 @@
             	//We need to differenciate the background process 
             	//from the manual user interaction in order to show the
             	//appropriate message in case of session expried
-            	AbiCloudModel.getInstance().virtualApplianceManager.callProcessComplete = false;
             	if(event){
             		AbiCloudModel.getInstance().virtualApplianceManager.serverCallType = true;
             	}else{
@@ -489,7 +488,6 @@
             private function onVirtualDatacentersAndAppliancesChecked(event:Event):void
             {
                 virtualDatacenterList.setVirtualDataCenters(AbiCloudModel.getInstance().virtualApplianceManager.virtualDataCenters);
-                //setVirtualAppliances(AbiCloudModel.getInstance().virtualApplianceManager.virtualAppliances);
             }
             
             private function retrieveVirtualDatacenters():void
