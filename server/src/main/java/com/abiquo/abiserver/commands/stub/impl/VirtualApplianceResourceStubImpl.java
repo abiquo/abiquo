@@ -254,19 +254,27 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
         }
         String linkApp = createVirtualApplianceUrl(virtualDatacenterId, virtualAppliance.getId());
 
-        VirtualApplianceDto appDto = virtualApplianceToDto(virtualAppliance);
-        ClientResponse put = put(linkApp, appDto);
-        if (put.getStatusCode() != Status.OK.getStatusCode())
-        {
-            addErrors(result, errors, put, "updateVirtualApplianceNodes");
-        }
-
         ClientResponse response = get(linkApp);
         if (response.getStatusCode() == Status.OK.getStatusCode())
         {
             VirtualApplianceDto entity = response.getEntity(VirtualApplianceDto.class);
             try
             {
+                VirtualApplianceDto appDto = virtualApplianceToDto(virtualAppliance);
+                if (!appDto.getName().equals(entity.getName())
+                    || appDto.getNodecollections() != null
+                    && !appDto.getNodecollections().equals(entity.getNodecollections()))
+                {
+                    ClientResponse put = put(linkApp, appDto);
+                    if (put.getStatusCode() != Status.OK.getStatusCode())
+                    {
+                        addErrors(result, errors, put, "updateVirtualApplianceNodes");
+                    }
+                    else
+                    {
+                        entity = response.getEntity(VirtualApplianceDto.class);
+                    }
+                }
                 VirtualAppliance app = dtoToVirtualAppliance(entity, virtualDatacenterId, result);
                 result.setData(app);
             }
@@ -572,7 +580,8 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
         }
         else
         {
-            populateErrors(response, result, methodName);
+            populateErrors(response, result, methodName,
+                "You do not have sufficient privileges to view the contents of the virtual appliance");
         }
 
         return result;
@@ -596,7 +605,8 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
             }
             catch (Exception ex)
             {
-                populateErrors(ex, result, "getVirtualApplianceNodes");
+                populateErrors(ex, result, "getVirtualApplianceNodes",
+                    "You do not have sufficient privileges to view the contents of the appliance library");
             }
             finally
             {
@@ -1269,7 +1279,7 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
         result.setSuccess(false);
         if (ex instanceof AuthorizationException)
         {
-            populateErrors((AuthorizationException) ex, result, methodName);
+            populateErrors(ex, result, methodName);
         }
         else if (ex instanceof AbiquoException)
         {
