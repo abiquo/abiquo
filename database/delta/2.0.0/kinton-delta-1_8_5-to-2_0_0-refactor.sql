@@ -764,6 +764,8 @@ DROP TRIGGER IF EXISTS kinton.update_physicalmachine_update_stats;
 DROP TRIGGER IF EXISTS kinton.create_virtualmachine_update_stats;
 DROP TRIGGER IF EXISTS kinton.delete_virtualmachine_update_stats;
 DROP TRIGGER IF EXISTS kinton.update_virtualmachine_update_stats;
+-- NEW TRIGGER (was removed and it's back)
+DROP TRIGGER IF EXISTS kinton.create_nodevirtualimage_update_stats;
 DROP TRIGGER IF EXISTS kinton.delete_nodevirtualimage_update_stats;
 DROP TRIGGER IF EXISTS kinton.delete_rasd_management_update_stats;
 DROP TRIGGER IF EXISTS kinton.virtualdatacenter_updated;
@@ -1013,7 +1015,75 @@ CREATE TRIGGER kinton.delete_virtualmachine_update_stats AFTER DELETE ON kinton.
 	END IF;
     END;
 |
-SELECT "Recreating trigger update_virtualmachine_update_stats..." as " ";
+SELECT "Recreating trigger create_nodevirtualimage_update_stats..." as " ";
+CREATE TRIGGER kinton.create_nodevirtualimage_update_stats AFTER INSERT ON kinton.nodevirtualimage
+  FOR EACH ROW BEGIN
+    DECLARE idDataCenterObj INTEGER;
+    DECLARE idVirtualAppObj INTEGER;
+    DECLARE idVirtualDataCenterObj INTEGER;
+    DECLARE idEnterpriseObj INTEGER;
+    DECLARE costCodeObj int(4);
+    DECLARE type INTEGER;
+    DECLARE state VARCHAR(50);
+    DECLARE ram INTEGER;
+    DECLARE cpu INTEGER;
+    DECLARE hd bigint;
+    IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN
+    SELECT vapp.idVirtualApp, vapp.idVirtualDataCenter, vdc.idDataCenter, vdc.idEnterprise  INTO idVirtualAppObj, idVirtualDataCenterObj, idDataCenterObj, idEnterpriseObj
+      FROM node n, virtualapp vapp, virtualdatacenter vdc
+      WHERE vdc.idVirtualDataCenter = vapp.idVirtualDataCenter
+      AND n.idNode = NEW.idNode
+      AND n.idVirtualApp = vapp.idVirtualApp;
+      SELECT vm.idType, vm.state, vm.cpu, vm.ram, vm.hd INTO type, state, cpu, ram, hd
+     FROM virtualmachine vm
+	WHERE vm.idVM = NEW.idVM;
+      --  INSERT INTO debug_msg (msg) VALUES (CONCAT('createNVI ', type, ' - ', state, ' - ', IFNULL(idDataCenterObj,'NULL'), ' - ',IFNULL(idVirtualAppObj,'NULL'), ' - ',IFNULL(idVirtualDataCenterObj,'NULL')));
+    IF type=1 THEN
+    	-- Imported !!!
+		UPDATE IGNORE cloud_usage_stats SET vMachinesTotal = vMachinesTotal+1
+                WHERE idDataCenter = idDataCenterObj;
+                UPDATE IGNORE vapp_enterprise_stats SET vmCreated = vmCreated+1
+                WHERE idVirtualApp = idVirtualAppObj;
+                UPDATE IGNORE vdc_enterprise_stats SET vmCreated = vmCreated+1
+                WHERE idVirtualDataCenter = idVirtualDataCenterObj;
+          IF state = "ON" THEN 	
+			UPDATE IGNORE vapp_enterprise_stats SET vmActive = vmActive+1
+		        WHERE idVirtualApp = idVirtualAppObj;
+		        UPDATE IGNORE vdc_enterprise_stats SET vmActive = vmActive+1
+		        WHERE idVirtualDataCenter = idVirtualDataCenterObj;
+		        UPDATE IGNORE cloud_usage_stats SET vMachinesRunning = vMachinesRunning+1
+		        WHERE idDataCenter = idDataCenterObj;       
+		        UPDATE IGNORE enterprise_resources_stats 
+		            SET vCpuUsed = vCpuUsed + cpu,
+		                memoryUsed = memoryUsed + ram,
+		                localStorageUsed = localStorageUsed + hd
+		        WHERE idEnterprise = idEnterpriseObj;
+		        UPDATE IGNORE dc_enterprise_stats 
+		        SET     vCpuUsed = vCpuUsed + cpu,
+		            memoryUsed = memoryUsed + ram,
+		            localStorageUsed = localStorageUsed + hd
+		        WHERE idEnterprise = idEnterpriseObj AND idDataCenter = idDataCenterObj;
+		        UPDATE IGNORE vdc_enterprise_stats 
+		        SET     vCpuUsed = vCpuUsed + cpu,
+		            memoryUsed = memoryUsed + ram,
+		            localStorageUsed = localStorageUsed + hd
+		        WHERE idVirtualDataCenter = idVirtualDataCenterObj;	
+		END IF;
+    END IF;    
+    SELECT IF(vi.cost_code IS NULL, 0, vi.cost_code) INTO costCodeObj
+        FROM virtualimage vi
+        WHERE vi.idImage = NEW.idImage;
+    IF EXISTS( SELECT * FROM information_schema.ROUTINES WHERE ROUTINE_SCHEMA='kinton' AND ROUTINE_TYPE='PROCEDURE' AND ROUTINE_NAME='AccountingVMRegisterEvents' ) THEN
+       IF EXISTS(SELECT * FROM virtualimage vi WHERE vi.idImage=NEW.idImage AND vi.idRepository IS NOT NULL) THEN 
+	          CALL AccountingVMRegisterEvents(NEW.idVM, type, "NOT_ALLOCATED", state, "NOT_ALLOCATED", ram, cpu, hd, costCodeObj);
+        END IF;              
+     END IF;
+    END IF;
+  END;
+--
+|
+--
+SELECT "Recreating trigger update_virtualmachine_update_stats ..." as " ";
 CREATE TRIGGER kinton.update_virtualmachine_update_stats AFTER UPDATE ON kinton.virtualmachine
     FOR EACH ROW BEGIN
         DECLARE idDataCenterObj INTEGER;
@@ -1021,8 +1091,7 @@ CREATE TRIGGER kinton.update_virtualmachine_update_stats AFTER UPDATE ON kinton.
         DECLARE idVirtualDataCenterObj INTEGER;
         DECLARE costCodeObj int(4);
 	DECLARE previousState VARCHAR(50);
-	-- For debugging purposes only
-        -- INSERT INTO debug_msg (msg) VALUES (CONCAT('UPDATE: ', OLD.idType, NEW.idType, OLD.state, NEW.state));	
+	-- For debugging purposes only        
         IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN   
 	-- We always store previous state when starting a transaction
 	IF NEW.state != OLD.state AND NEW.state='LOCKED' THEN
@@ -1032,6 +1101,7 @@ CREATE TRIGGER kinton.update_virtualmachine_update_stats AFTER UPDATE ON kinton.
 	SELECT vmts.previousState INTO previousState
         FROM virtualmachinetrackedstate vmts
 	WHERE vmts.idVM = NEW.idVM;
+	-- INSERT INTO debug_msg (msg) VALUES (CONCAT('UPDATE: ', NEW.idVM, ' - ', OLD.idType, ' - ', NEW.idType, ' - ', OLD.state, ' - ', NEW.state, ' - ', previousState));	
         --  Updating enterprise_resources_stats: VCPU Used, Memory Used, Local Storage Used
         IF OLD.idHypervisor IS NULL OR (OLD.idHypervisor != NEW.idHypervisor) THEN
             SELECT pm.idDataCenter INTO idDataCenterObj
@@ -1050,40 +1120,12 @@ CREATE TRIGGER kinton.update_virtualmachine_update_stats AFTER UPDATE ON kinton.
         WHERE NEW.idVM = nvi.idVM
         AND nvi.idNode = n.idNode
         AND vapp.idVirtualApp = n.idVirtualApp;   
+-- INSERT INTO debug_msg (msg) VALUES (CONCAT('update values ', IFNULL(idDataCenterObj,'NULL'), ' - ',IFNULL(idVirtualAppObj,'NULL'), ' - ',IFNULL(idVirtualDataCenterObj,'NULL'), ' - ',IFNULL(previousState,'NULL')));
 	--
-	IF NEW.idType = 1 AND OLD.idType = 0 THEN
-		-- Imported !!!
-		UPDATE IGNORE cloud_usage_stats SET vMachinesTotal = vMachinesTotal+1
-                WHERE idDataCenter = idDataCenterObj;
-                UPDATE IGNORE vapp_enterprise_stats SET vmCreated = vmCreated+1
-                WHERE idVirtualApp = idVirtualAppObj;
-                UPDATE IGNORE vdc_enterprise_stats SET vmCreated = vmCreated+1
-                WHERE idVirtualDataCenter = idVirtualDataCenterObj;
-		IF NEW.state = "ON" AND previousState != "ON" THEN 	
-			UPDATE IGNORE vapp_enterprise_stats SET vmActive = vmActive+1
-		        WHERE idVirtualApp = idVirtualAppObj;
-		        UPDATE IGNORE vdc_enterprise_stats SET vmActive = vmActive+1
-		        WHERE idVirtualDataCenter = idVirtualDataCenterObj;
-		        UPDATE IGNORE cloud_usage_stats SET vMachinesRunning = vMachinesRunning+1
-		        WHERE idDataCenter = idDataCenterObj;       
-		        UPDATE IGNORE enterprise_resources_stats 
-		            SET vCpuUsed = vCpuUsed + NEW.cpu,
-		                memoryUsed = memoryUsed + NEW.ram,
-		                localStorageUsed = localStorageUsed + NEW.hd
-		        WHERE idEnterprise = NEW.idEnterprise;
-		        UPDATE IGNORE dc_enterprise_stats 
-		        SET     vCpuUsed = vCpuUsed + NEW.cpu,
-		            memoryUsed = memoryUsed + NEW.ram,
-		            localStorageUsed = localStorageUsed + NEW.hd
-		        WHERE idEnterprise = NEW.idEnterprise AND idDataCenter = idDataCenterObj;
-		        UPDATE IGNORE vdc_enterprise_stats 
-		        SET     vCpuUsed = vCpuUsed + NEW.cpu,
-		            memoryUsed = memoryUsed + NEW.ram,
-		            localStorageUsed = localStorageUsed + NEW.hd
-		        WHERE idVirtualDataCenter = idVirtualDataCenterObj;	
-		END IF;
+	-- Imported VMs will be updated on create_node_virtual_image
+	-- Used Stats (vCpuUsed, vMemoryUsed, vStorageUsed) are updated from delete_nodevirtualimage_update_stats ON DELETE nodevirtualimage when updating the VApp
 	-- Main case: an imported VM changes its state (from LOCKED to ...)
-	ELSEIF NEW.idType = 1 AND (NEW.state != OLD.state) THEN
+	IF NEW.idType = 1 AND (NEW.state != OLD.state) THEN
             IF NEW.state = "ON" AND previousState != "ON" THEN 
                 -- New Active
                 UPDATE IGNORE vapp_enterprise_stats SET vmActive = vmActive+1
@@ -1107,10 +1149,8 @@ CREATE TRIGGER kinton.update_virtualmachine_update_stats AFTER UPDATE ON kinton.
                     memoryUsed = memoryUsed + NEW.ram,
                     localStorageUsed = localStorageUsed + NEW.hd
                 WHERE idVirtualDataCenter = idVirtualDataCenterObj;
--- cloud_usage_stats Used Stats (vCpuUsed, vMemoryUsed, vStorageUsed) are updated from update_physical_machine_update_stats trigger
-            -- ELSEIF OLD.state = "ON" THEN           * This has to change, OLD.state is always LOCKED
-		ELSEIF (NEW.state IN ("PAUSED","OFF","NOT_ALLOCATED") AND previousState = "ON") THEN
-                -- Active Out
+	    ELSEIF (NEW.state IN ("PAUSED","OFF","NOT_ALLOCATED") AND previousState = "ON") THEN
+                -- When Undeploying a full Vapp
                 UPDATE IGNORE vapp_enterprise_stats SET vmActive = vmActive-1
                 WHERE idVirtualApp = idVirtualAppObj;
                 UPDATE IGNORE vdc_enterprise_stats SET vmActive = vmActive-1
@@ -1132,10 +1172,9 @@ CREATE TRIGGER kinton.update_virtualmachine_update_stats AFTER UPDATE ON kinton.
                     memoryUsed = memoryUsed - NEW.ram,
                     localStorageUsed = localStorageUsed - NEW.hd
                 WHERE idVirtualDataCenter = idVirtualDataCenterObj; 
--- cloud_usage_stats Used Stats (vCpuUsed, vMemoryUsed, vStorageUsed) are updated from update_physical_machine_update_stats trigger
-            END IF;     	    
-            IF NEW.state = "ON" AND previousState = "NOT_ALLOCATED" THEN -- OR OLD.idType != NEW.idType
-                -- VMachine Deployed or VMachine imported
+            END IF;
+            IF NEW.state = "ON" AND previousState = "NOT_ALLOCATED" THEN 
+                -- VMachine Deployed
                 UPDATE IGNORE cloud_usage_stats SET vMachinesTotal = vMachinesTotal+1
                 WHERE idDataCenter = idDataCenterObj;
                 UPDATE IGNORE vapp_enterprise_stats SET vmCreated = vmCreated+1
@@ -1171,24 +1210,55 @@ CREATE TRIGGER kinton.delete_nodevirtualimage_update_stats AFTER DELETE ON kinto
     DECLARE idDataCenterObj INTEGER;
     DECLARE idVirtualAppObj INTEGER;
     DECLARE idVirtualDataCenterObj INTEGER;
+    DECLARE idEnterpriseObj INTEGER;   
+    DECLARE costCodeObj int(4); 
     DECLARE previousState VARCHAR(50);
+    DECLARE state VARCHAR(50);
+    DECLARE ram INTEGER;
+    DECLARE cpu INTEGER;
+    DECLARE hd bigint;
     DECLARE type INTEGER;
     DECLARE isUsingIP INTEGER;
     IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN
-    SELECT vapp.idVirtualApp, vapp.idVirtualDataCenter, vdc.idDataCenter INTO idVirtualAppObj, idVirtualDataCenterObj, idDataCenterObj
+    SELECT vapp.idVirtualApp, vapp.idVirtualDataCenter, vdc.idDataCenter, vdc.idEnterprise INTO idVirtualAppObj, idVirtualDataCenterObj, idDataCenterObj, idEnterpriseObj
       FROM node n, virtualapp vapp, virtualdatacenter vdc
       WHERE vdc.idVirtualDataCenter = vapp.idVirtualDataCenter
       AND n.idNode = OLD.idNode
       AND n.idVirtualApp = vapp.idVirtualApp;
-      SELECT vm.idType INTO type
+      SELECT vm.idType, vm.cpu, vm.ram, vm.hd, vm.state INTO type, cpu, ram, hd, state
      FROM virtualmachine vm
 	WHERE vm.idVM = OLD.idVM;
     SELECT vmts.previousState INTO previousState
      FROM virtualmachinetrackedstate vmts
 	WHERE vmts.idVM = OLD.idVM;
-    -- INSERT INTO debug_msg (msg) VALUES (CONCAT('previousState ', previousState));
+    -- INSERT INTO debug_msg (msg) VALUES (CONCAT('deleteNVI ', IFNULL(idDataCenterObj,'NULL'), ' - ',IFNULL(idVirtualAppObj,'NULL'), ' - ',IFNULL(idVirtualDataCenterObj,'NULL'), ' - ',IFNULL(previousState,'NULL')));
+-- INSERT INTO debug_msg (msg) VALUES (CONCAT('deleteNVI values', IFNULL(cpu,'NULL'), ' - ',IFNULL(ram,'NULL'), ' - ',IFNULL(hd,'NULL')));						
     --
     IF type = 1 THEN
+      IF previousState != "NOT_ALLOCATED" AND previousState != "UNKNOWN" THEN      	
+        UPDATE IGNORE cloud_usage_stats SET vMachinesTotal = vMachinesTotal-1
+          WHERE idDataCenter = idDataCenterObj;
+        UPDATE IGNORE vapp_enterprise_stats SET vmCreated = vmCreated-1
+          WHERE idVirtualApp = idVirtualAppObj;
+        UPDATE IGNORE vdc_enterprise_stats SET vmCreated = vmCreated-1
+          WHERE idVirtualDataCenter = idVirtualDataCenterObj;
+           UPDATE IGNORE enterprise_resources_stats 
+               SET vCpuUsed = vCpuUsed - cpu,
+                   memoryUsed = memoryUsed - ram,
+                   localStorageUsed = localStorageUsed - hd
+           WHERE idEnterprise = idEnterpriseObj;
+           UPDATE IGNORE dc_enterprise_stats 
+           SET     vCpuUsed = vCpuUsed - cpu,
+               memoryUsed = memoryUsed - ram,
+               localStorageUsed = localStorageUsed - hd
+           WHERE idEnterprise = idEnterpriseObj AND idDataCenter = idDataCenterObj;
+           UPDATE IGNORE vdc_enterprise_stats 
+           SET     vCpuUsed = vCpuUsed - cpu,
+               memoryUsed = memoryUsed - ram,
+               localStorageUsed = localStorageUsed - hd
+           WHERE idVirtualDataCenter = idVirtualDataCenterObj;                 
+      END IF;
+      --
       IF previousState != "NOT_ALLOCATED" AND previousState != "UNKNOWN" THEN      	
         UPDATE IGNORE cloud_usage_stats SET vMachinesTotal = vMachinesTotal-1
           WHERE idDataCenter = idDataCenterObj;
@@ -1207,10 +1277,19 @@ CREATE TRIGGER kinton.delete_nodevirtualimage_update_stats AFTER DELETE ON kinto
         WHERE idVirtualDataCenter = idVirtualDataCenterObj;
       END IF;
     END IF;
+    SELECT IF(vi.cost_code IS NULL, 0, vi.cost_code) INTO costCodeObj
+        FROM virtualimage vi
+        WHERE vi.idImage = OLD.idImage;
+    IF EXISTS( SELECT * FROM information_schema.ROUTINES WHERE ROUTINE_SCHEMA='kinton' AND ROUTINE_TYPE='PROCEDURE' AND ROUTINE_NAME='AccountingVMRegisterEvents' ) THEN
+       IF EXISTS(SELECT * FROM virtualimage vi WHERE vi.idImage=OLD.idImage AND vi.idRepository IS NOT NULL) THEN 
+	          CALL AccountingVMRegisterEvents(OLD.idVM, type, "-", "NOT_ALLOCATED", previousState, ram, cpu, hd, costCodeObj);
+        END IF;              
+     END IF;
   END IF;
   END;
-
+--
 |
+--
 SELECT "Recreating trigger delete_rasd_management_update_stats..." as " ";
 CREATE TRIGGER kinton.delete_rasd_management_update_stats AFTER DELETE ON kinton.rasd_management
     FOR EACH ROW BEGIN
@@ -1335,7 +1414,9 @@ CREATE TRIGGER kinton.virtualdatacenter_deleted BEFORE DELETE ON kinton.virtuald
         CLOSE curIpFreed;
         END IF;
     END;
+--
 |
+--
 SELECT "Recreating trigger update_rasd_management_update_stats..." as " ";
 CREATE TRIGGER kinton.update_rasd_management_update_stats AFTER UPDATE ON kinton.rasd_management
     FOR EACH ROW BEGIN
@@ -1391,11 +1472,7 @@ CREATE TRIGGER kinton.update_rasd_management_update_stats AFTER UPDATE ON kinton
 				WHERE r.instanceID = OLD.idResource;
 				-- INSERT INTO debug_msg (msg) VALUES (CONCAT('Updating ExtStorage: ',idState,' - ', IFNULL(idDataCenterObj, 'idDataCenterObj es NULL'), IFNULL(idEnterpriseObj, 'idEnterpriseObj es NULL'), reservedSize));	
 				UPDATE IGNORE cloud_usage_stats SET storageUsed = storageUsed-reservedSize WHERE idDataCenter = idDataCenterObj;
-				
-			
 				UPDATE IGNORE vapp_enterprise_stats SET volAttached = volAttached-1 WHERE idVirtualApp = OLD.idVirtualApp;
-				
-				
 				UPDATE IGNORE enterprise_resources_stats 
 				    SET     extStorageUsed = extStorageUsed - reservedSize
 				    WHERE idEnterprise = idEnterpriseObj;
@@ -1405,7 +1482,6 @@ CREATE TRIGGER kinton.update_rasd_management_update_stats AFTER UPDATE ON kinton
 				UPDATE IGNORE vdc_enterprise_stats 
 				    SET     volAttached = volAttached - 1, extStorageUsed = extStorageUsed - reservedSize
 				WHERE idVirtualDataCenter = OLD.idVirtualDatacenter;
-				UPDATE IGNORE vapp_enterprise_stats SET volAttached = volAttached-1 WHERE idVirtualApp = OLD.idVirtualApp;
 			    END IF;                 
 			END IF;
 			-- Volume added to VDC
