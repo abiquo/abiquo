@@ -40,6 +40,7 @@ import com.abiquo.model.transport.WrapperDto;
 public class RunlistElementsDto extends WrapperDto<RunlistElementDto>
 {
     private static final long serialVersionUID = 1L;
+
     public static final String MEDIA_TYPE = "application/vnd.abiquo.extended-runlists+xml";
 
     @Override
@@ -48,7 +49,7 @@ public class RunlistElementsDto extends WrapperDto<RunlistElementDto>
     {
         return collection;
     }
-    
+
     @Override
     public String getMediaType()
     {

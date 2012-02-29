@@ -25,12 +25,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.UriInfo;
 
@@ -105,6 +107,7 @@ public class VirtualApplianceResource
      * @throws Exception
      */
     @GET
+    @Produces(VirtualApplianceDto.MEDIA_TYPE)
     public VirtualApplianceDto getVirtualAppliance(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
@@ -128,6 +131,7 @@ public class VirtualApplianceResource
 
     @GET
     @Path(VirtualApplianceResource.VIRTUAL_APPLIANCE_GET_IPS_PATH)
+    @Produces(IpsPoolManagementDto.MEDIA_TYPE)
     public IpsPoolManagementDto getIPsByVirtualAppliance(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
@@ -193,6 +197,7 @@ public class VirtualApplianceResource
 
     @GET
     @Path(VIRTUAL_APPLIANCE_STATE_REL)
+    @Produces(VirtualApplianceStateDto.MEDIA_TYPE)
     public VirtualApplianceStateDto getChangeState(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
@@ -207,6 +212,8 @@ public class VirtualApplianceResource
 
     @POST
     @Path(VIRTUAL_APPLIANCE_DEPLOY_PATH)
+    @Consumes(AcceptedRequestDto.MEDIA_TYPE)
+    @Produces(AcceptedRequestDto.MEDIA_TYPE)
     public AcceptedRequestDto<String> deploy(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
@@ -247,6 +254,8 @@ public class VirtualApplianceResource
 
     @POST
     @Path(VIRTUAL_APPLIANCE_UNDEPLOY_PATH)
+    @Consumes(AcceptedRequestDto.MEDIA_TYPE)
+    @Produces(AcceptedRequestDto.MEDIA_TYPE)
     public AcceptedRequestDto<String> undeploy(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,

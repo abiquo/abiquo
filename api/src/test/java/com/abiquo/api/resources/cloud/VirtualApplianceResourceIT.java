@@ -105,7 +105,8 @@ public class VirtualApplianceResourceIT extends AbstractJpaGeneratorIT
 
         // Check for vapp1
         ClientResponse response =
-            get(resolveVirtualApplianceURI(vdc.getId(), vapp1.getId()), SYSADMIN, SYSADMIN);
+            get(resolveVirtualApplianceURI(vdc.getId(), vapp1.getId()), SYSADMIN, SYSADMIN,
+                VirtualApplianceDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), Status.OK.getStatusCode());
         VirtualApplianceDto vappdto = response.getEntity(VirtualApplianceDto.class);
         assertNotNull(vappdto);
@@ -116,7 +117,9 @@ public class VirtualApplianceResourceIT extends AbstractJpaGeneratorIT
             VirtualMachinesResource.VIRTUAL_MACHINES_PATH);
 
         // Check for vapp2
-        response = get(resolveVirtualApplianceURI(vdc.getId(), vapp2.getId()));
+        response =
+            get(resolveVirtualApplianceURI(vdc.getId(), vapp2.getId()),
+                VirtualApplianceDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), Status.OK.getStatusCode());
         vappdto = response.getEntity(VirtualApplianceDto.class);
         assertNotNull(vappdto);
@@ -135,7 +138,8 @@ public class VirtualApplianceResourceIT extends AbstractJpaGeneratorIT
     public void getVirtualApplianceRaises404ErrorWhenVappRandomIdentifier()
     {
         ClientResponse response =
-            get(resolveVirtualApplianceURI(vdc.getId(), new Random().nextInt()), SYSADMIN, SYSADMIN);
+            get(resolveVirtualApplianceURI(vdc.getId(), new Random().nextInt()), SYSADMIN,
+                SYSADMIN, VirtualApplianceDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), Status.NOT_FOUND.getStatusCode());
     }
 
@@ -152,7 +156,7 @@ public class VirtualApplianceResourceIT extends AbstractJpaGeneratorIT
         setup(vapp1);
         ClientResponse response =
             get(resolveVirtualApplianceURI(new Random().nextInt(), vapp1.getId()), SYSADMIN,
-                SYSADMIN);
+                SYSADMIN, VirtualApplianceDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), Status.NOT_FOUND.getStatusCode());
     }
 
@@ -169,7 +173,7 @@ public class VirtualApplianceResourceIT extends AbstractJpaGeneratorIT
 
         ClientResponse response =
             get(resolveVirtualApplianceActionGetIPsURI(vdc.getId(), vapp1.getId()), SYSADMIN,
-                SYSADMIN);
+                SYSADMIN, IpsPoolManagementDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), Status.OK.getStatusCode());
 
         IpsPoolManagementDto entity = response.getEntity(IpsPoolManagementDto.class);
@@ -186,7 +190,7 @@ public class VirtualApplianceResourceIT extends AbstractJpaGeneratorIT
     {
         ClientResponse response =
             get(resolveVirtualApplianceActionGetIPsURI(vdc.getId(), new Random().nextInt()),
-                SYSADMIN, SYSADMIN);
+                SYSADMIN, SYSADMIN, IpsPoolManagementDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), Status.NOT_FOUND.getStatusCode());
     }
 
@@ -201,7 +205,7 @@ public class VirtualApplianceResourceIT extends AbstractJpaGeneratorIT
         setup(vapp1);
         ClientResponse response =
             get(resolveVirtualApplianceActionGetIPsURI(new Random().nextInt(), vapp1.getId()),
-                SYSADMIN, SYSADMIN);
+                SYSADMIN, SYSADMIN, IpsPoolManagementDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), Status.NOT_FOUND.getStatusCode());
     }
 
@@ -219,7 +223,7 @@ public class VirtualApplianceResourceIT extends AbstractJpaGeneratorIT
         dto.setName(expectedName);
 
         String uri = resolveVirtualApplianceURI(vdc.getId(), vapp.getId());
-        ClientResponse response = put(uri, dto, SYSADMIN, SYSADMIN);
+        ClientResponse response = put(uri, dto, SYSADMIN, SYSADMIN, VirtualApplianceDto.MEDIA_TYPE);
 
         assertEquals(response.getStatusCode(), 200);
         VirtualApplianceDto responseDto = response.getEntity(VirtualApplianceDto.class);

@@ -25,12 +25,14 @@ import java.util.List;
 
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 
 import org.apache.wink.common.annotations.Parent;
@@ -108,7 +110,7 @@ public class VirtualMachineNetworkConfigurationResource extends AbstractResource
 
     /** edit relation to external ips. */
     public static final String EXTERNAL_IP = "externalip";
-    
+
     /** edit relation to external ips. */
     public static final String UNMANAGED_IP = "unmanagedip";
 
@@ -133,6 +135,7 @@ public class VirtualMachineNetworkConfigurationResource extends AbstractResource
      */
     @GET
     @Path(CONFIGURATION_PATH)
+    @Produces(VMNetworkConfigurationsDto.MEDIA_TYPE)
     public VMNetworkConfigurationsDto getListOfVirtualMachineConfigurations(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) @NotNull @Min(1) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) @NotNull @Min(1) final Integer vappId,
@@ -164,8 +167,10 @@ public class VirtualMachineNetworkConfigurationResource extends AbstractResource
      *             {@link APIExceptionMapper} exception mapper.
      */
     @GET
-    @Deprecated // There is any use case where this method could be useful
+    @Deprecated
+    // There is any use case where this method could be useful
     @Path(CONFIGURATION_PATH + "/" + CONFIGURATION)
+    @Produces(VMNetworkConfigurationDto.MEDIA_TYPE)
     public VMNetworkConfigurationDto getVirtualMachineConfiguration(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) @NotNull @Min(1) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) @NotNull @Min(1) final Integer vappId,
@@ -245,6 +250,7 @@ public class VirtualMachineNetworkConfigurationResource extends AbstractResource
      */
     @GET
     @Path(NICS_PATH)
+    @Produces(NicsDto.MEDIA_TYPE)
     public NicsDto getVirtualMachineNics(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) @NotNull @Min(1) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) @NotNull @Min(1) final Integer vappId,
@@ -281,6 +287,8 @@ public class VirtualMachineNetworkConfigurationResource extends AbstractResource
      */
     @POST
     @Path(NICS_PATH)
+    @Consumes(AcceptedRequestDto.MEDIA_TYPE)
+    @Produces(AcceptedRequestDto.MEDIA_TYPE)
     public AcceptedRequestDto< ? > attachNICs(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) @NotNull @Min(1) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) @NotNull @Min(1) final Integer vappId,
@@ -382,8 +390,10 @@ public class VirtualMachineNetworkConfigurationResource extends AbstractResource
      *             {@link APIExceptionMapper} exception mapper.
      */
     @GET
-    @Deprecated // there is any use case we need this method.
+    @Deprecated
+    // there is any use case we need this method.
     @Path(NICS_PATH + "/" + NIC_PARAM)
+    @Produces(NicDto.MEDIA_TYPE)
     public NicDto getIp(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) @NotNull @Min(1) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) @NotNull @Min(1) final Integer vappId,

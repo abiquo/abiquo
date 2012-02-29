@@ -67,8 +67,8 @@ public class VirtualMachinesResource extends AbstractResource
     @Autowired
     protected VirtualDatacenterService vdcService;
 
-    @Produces(MediaType.APPLICATION_XML)
     @GET
+    @Produces({MediaType.APPLICATION_XML, VirtualMachinesDto.MEDIA_TYPE})
     public VirtualMachinesDto getVirtualMachines(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
@@ -103,6 +103,7 @@ public class VirtualMachinesResource extends AbstractResource
      */
     @POST
     @Consumes(VirtualMachineDto.MEDIA_TYPE)
+    @Produces(VirtualMachineDto.MEDIA_TYPE)
     public VirtualMachineDto createVirtualMachine(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
@@ -133,6 +134,7 @@ public class VirtualMachinesResource extends AbstractResource
      */
     @POST
     @Consumes(VirtualMachineWithNodeDto.MEDIA_TYPE)
+    @Produces(VirtualMachineDto.MEDIA_TYPE)
     public VirtualMachineDto createVirtualMachineWithNode(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
@@ -151,7 +153,7 @@ public class VirtualMachinesResource extends AbstractResource
     }
 
     @GET
-    @Produces(VirtualMachineResource.VM_NODE_MEDIA_TYPE)
+    @Produces({VirtualMachinesWithNodeDto.MEDIA_TYPE})
     public VirtualMachinesWithNodeDto getVirtualMachinesWithNode(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
@@ -172,7 +174,7 @@ public class VirtualMachinesResource extends AbstractResource
     }
 
     @GET
-    @Produces(VirtualMachineResource.VM_NODE_EXTENDED_MEDIA_TYPE)
+    @Produces(VirtualMachinesWithNodeExtendedDto.MEDIA_TYPE)
     public VirtualMachinesWithNodeExtendedDto getVirtualMachinesWithNodeExtended(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,

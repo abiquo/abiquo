@@ -24,18 +24,17 @@ package com.abiquo.api.resources.cloud;
 import static com.abiquo.api.resources.DatacenterResource.DATACENTER;
 import static com.abiquo.api.resources.EnterpriseResource.ENTERPRISE;
 import static com.abiquo.api.resources.cloud.VirtualDatacenterResource.createTransferObject;
-import static com.abiquo.api.util.URIResolver.buildPath;
-import static com.abiquo.api.util.URIResolver.resolveFromURI;
 
 import java.util.Collection;
 
 import javax.annotation.Resource;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MultivaluedMap;
 
 import org.apache.wink.common.annotations.Workspace;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -86,6 +85,7 @@ public class VirtualDatacentersResource extends AbstractResource
     private SecurityService securityService;
 
     @GET
+    @Produces(VirtualDatacentersDto.MEDIA_TYPE)
     public VirtualDatacentersDto getVirtualDatacenters(
         @QueryParam(ENTERPRISE) final Integer enterpriseId,
         @QueryParam(DATACENTER) final Integer datacenterId, @Context final IRESTBuilder restBuilder)
@@ -128,6 +128,8 @@ public class VirtualDatacentersResource extends AbstractResource
     }
 
     @POST
+    @Consumes(VirtualDatacenterDto.MEDIA_TYPE)
+    @Produces(VirtualDatacenterDto.MEDIA_TYPE)
     public VirtualDatacenterDto postVirtualDatacenter(final VirtualDatacenterDto dto,
         @QueryParam(DATACENTER) final Integer datacenterId,
         @QueryParam(ENTERPRISE) final Integer enterpriseId, @Context final IRESTBuilder restBuilder)

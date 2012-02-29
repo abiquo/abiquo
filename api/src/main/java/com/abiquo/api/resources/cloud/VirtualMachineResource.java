@@ -146,6 +146,7 @@ public class VirtualMachineResource extends AbstractResource
      * @throws Exception
      */
     @GET
+    @Produces({MediaType.APPLICATION_XML, VirtualMachineDto.MEDIA_TYPE})
     public VirtualMachineDto getVirtualMachine(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) @NotNull @Min(1) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) @NotNull @Min(1) final Integer vappId,
@@ -288,6 +289,7 @@ public class VirtualMachineResource extends AbstractResource
      */
     @GET
     @Path(VIRTUAL_MACHINE_STATE_PATH)
+    @Produces(VirtualMachineStateDto.MEDIA_TYPE)
     public VirtualMachineStateDto stateVirtualMachine(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
@@ -399,7 +401,8 @@ public class VirtualMachineResource extends AbstractResource
      */
     @POST
     @Path(VIRTUAL_MACHINE_DEPLOY_PATH)
-    @Consumes(MediaType.APPLICATION_XML)
+    @Consumes(VirtualMachineTaskDto.MEDIA_TYPE)
+    @Produces(AcceptedRequestDto.MEDIA_TYPE)
     public AcceptedRequestDto<String> deployVirtualMachine(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
@@ -460,6 +463,7 @@ public class VirtualMachineResource extends AbstractResource
      */
     @POST
     @Path(VIRTUAL_MACHINE_DEPLOY_PATH)
+    @Produces(AcceptedRequestDto.MEDIA_TYPE)
     public AcceptedRequestDto<String> deployVirtualMachine(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
@@ -493,6 +497,8 @@ public class VirtualMachineResource extends AbstractResource
      */
     @POST
     @Path(VIRTUAL_MACHINE_UNDEPLOY_PATH)
+    @Consumes(VirtualMachineTaskDto.MEDIA_TYPE)
+    @Produces(AcceptedRequestDto.MEDIA_TYPE)
     public AcceptedRequestDto<String> undeployVirtualMachine(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
@@ -545,7 +551,8 @@ public class VirtualMachineResource extends AbstractResource
      */
     @POST
     @Path(VIRTUAL_MACHINE_ACTION_SNAPSHOT)
-    @Consumes(MediaType.APPLICATION_XML)
+    @Consumes(VirtualMachineInstanceDto.MEDIA_TYPE)
+    @Produces(AcceptedRequestDto.MEDIA_TYPE)
     public AcceptedRequestDto<String> snapshotVirtualMachine(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
@@ -835,7 +842,7 @@ public class VirtualMachineResource extends AbstractResource
      * @throws Exception
      */
     @GET
-    @Produces(VM_NODE_MEDIA_TYPE)
+    @Produces({VM_NODE_MEDIA_TYPE, VirtualMachineWithNodeDto.MEDIA_TYPE})
     public VirtualMachineWithNodeDto getVirtualMachineWithNode(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) @NotNull @Min(1) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) @NotNull @Min(1) final Integer vappId,
@@ -850,7 +857,7 @@ public class VirtualMachineResource extends AbstractResource
     }
 
     @GET
-    @Produces(MediaType.APPLICATION_XML)
+    @Produces({MediaType.APPLICATION_XML, TasksDto.MEDIA_TYPE})
     @Path(TaskResourceUtils.TASKS_PATH)
     public TasksDto getTasks(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) @NotNull @Min(1) final Integer vdcId,
@@ -865,7 +872,7 @@ public class VirtualMachineResource extends AbstractResource
     }
 
     @GET
-    @Produces(MediaType.APPLICATION_XML)
+    @Produces({MediaType.APPLICATION_XML, TaskDto.MEDIA_TYPE})
     @Path(TaskResourceUtils.TASK_PATH)
     public TaskDto getTask(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) @NotNull @Min(1) final Integer vdcId,
@@ -908,6 +915,7 @@ public class VirtualMachineResource extends AbstractResource
      */
     @POST
     @Path(VIRTUAL_MACHINE_ACTION_RESET)
+    @Produces(AcceptedRequestDto.MEDIA_TYPE)
     public AcceptedRequestDto<String> resetVirtualMachine(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
