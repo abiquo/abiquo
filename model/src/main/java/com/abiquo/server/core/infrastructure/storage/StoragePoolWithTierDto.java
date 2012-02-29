@@ -49,4 +49,10 @@ public class StoragePoolWithTierDto extends StoragePoolDto
     {
         return StoragePoolWithTierDto.MEDIA_TYPE;
     }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
+    }
 }

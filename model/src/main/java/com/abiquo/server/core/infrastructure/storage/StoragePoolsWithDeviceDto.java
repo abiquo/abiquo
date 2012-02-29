@@ -56,4 +56,11 @@ public class StoragePoolsWithDeviceDto extends WrapperDto<StoragePoolWithDeviceD
     {
         return StoragePoolsWithDeviceDto.MEDIA_TYPE;
     }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
+    }
+    
 }

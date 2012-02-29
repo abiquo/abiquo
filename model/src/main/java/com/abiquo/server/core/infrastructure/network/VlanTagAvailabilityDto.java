@@ -73,4 +73,10 @@ public class VlanTagAvailabilityDto extends SingleResourceTransportDto implement
     {
         return VlanTagAvailabilityDto.MEDIA_TYPE;
     }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
+    }
 }

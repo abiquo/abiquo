@@ -49,4 +49,10 @@ public class MachineLoadRulesDto extends WrapperDto<MachineLoadRuleDto>
     {
         return MachineLoadRulesDto.MEDIA_TYPE;
     }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
+    }
 }

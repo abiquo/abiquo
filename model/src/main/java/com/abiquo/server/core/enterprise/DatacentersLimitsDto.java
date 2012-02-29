@@ -45,4 +45,10 @@ public class DatacentersLimitsDto extends WrapperDto<DatacenterLimitsDto>
     {
         return DatacentersLimitsDto.MEDIA_TYPE;
     }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
+    }
 }

@@ -56,4 +56,10 @@ public class RunlistElementsDto extends WrapperDto<RunlistElementDto>
     {
         return RunlistElementsDto.MEDIA_TYPE;
     }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
+    }
 }

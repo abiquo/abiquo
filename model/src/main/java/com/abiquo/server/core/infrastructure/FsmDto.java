@@ -156,4 +156,10 @@ public class FsmDto extends SingleResourceTransportDto
     {
         return FsmDto.MEDIA_TYPE;
     }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
+    }
 }

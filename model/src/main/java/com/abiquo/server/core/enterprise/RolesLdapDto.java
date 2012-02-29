@@ -46,4 +46,10 @@ public class RolesLdapDto extends WrapperDto<RoleLdapDto>
     {
         return RolesLdapDto.MEDIA_TYPE;
     }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
+    }
 }

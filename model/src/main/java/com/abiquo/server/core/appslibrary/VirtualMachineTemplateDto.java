@@ -27,6 +27,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
 import com.abiquo.model.transport.SingleResourceTransportDto;
+import com.abiquo.server.core.infrastructure.DatacenterDto;
 
 @XmlRootElement(name = "virtualMachineTemplate")
 @XmlType(propOrder = {"id", "name", "description", "path", "diskFormatType", "diskFileSize",
@@ -211,5 +212,11 @@ public class VirtualMachineTemplateDto extends SingleResourceTransportDto
     public String getMediaType()
     {
         return VirtualMachineTemplateDto.MEDIA_TYPE;
+    }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
     }
 }

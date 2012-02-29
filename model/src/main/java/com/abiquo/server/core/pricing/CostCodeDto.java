@@ -90,5 +90,11 @@ public class CostCodeDto extends SingleResourceTransportDto
     {
         return CostCodeDto.MEDIA_TYPE;
     }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
+    }
 
 }

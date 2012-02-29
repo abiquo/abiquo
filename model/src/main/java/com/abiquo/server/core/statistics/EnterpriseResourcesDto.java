@@ -217,5 +217,10 @@ public class EnterpriseResourcesDto extends SingleResourceTransportDto
     {
         return EnterpriseResourcesDto.MEDIA_TYPE;
     }
-
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
+    }
 }

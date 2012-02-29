@@ -94,5 +94,11 @@ public class TierDto extends SingleResourceTransportDto
     {
         return TierDto.MEDIA_TYPE;
     }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
+    }
 
 }

@@ -188,4 +188,6 @@ public abstract class SingleResourceTransportDto implements Serializable
     }
 
     public abstract String getMediaType();
+    
+    public abstract String getBaseMediaType();
 }

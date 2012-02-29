@@ -57,4 +57,10 @@ public class VirtualMachineInstanceDto extends SingleResourceTransportDto implem
     {
         return VirtualMachineInstanceDto.MEDIA_TYPE;
     }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
+    }
 }

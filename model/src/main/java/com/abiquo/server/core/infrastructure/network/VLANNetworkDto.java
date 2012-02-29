@@ -197,4 +197,10 @@ public class VLANNetworkDto extends SingleResourceTransportDto implements Serial
         return VLANNetworkDto.MEDIA_TYPE;
     }
     
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
+    }
+    
 }

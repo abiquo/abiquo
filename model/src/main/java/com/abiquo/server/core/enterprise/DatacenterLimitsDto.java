@@ -76,5 +76,11 @@ public class DatacenterLimitsDto extends SingleResourceWithLimitsDto
     {
         return DatacenterLimitsDto.MEDIA_TYPE;
     }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
+    }
 
 }

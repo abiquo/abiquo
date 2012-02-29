@@ -155,4 +155,10 @@ public class DatastoreDto extends SingleResourceTransportDto implements Serializ
     {
         return DatastoreDto.MEDIA_TYPE;
     }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
+    }
 }

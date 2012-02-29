@@ -138,4 +138,10 @@ public class DhcpOptionDto extends SingleResourceTransportDto
     {
         return DhcpOptionDto.MEDIA_TYPE;
     }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
+    }
 }

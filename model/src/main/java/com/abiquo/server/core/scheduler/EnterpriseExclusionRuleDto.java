@@ -50,5 +50,11 @@ public class EnterpriseExclusionRuleDto extends SingleResourceTransportDto
     {
         return EnterpriseExclusionRuleDto.MEDIA_TYPE;
     }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
+    }
 
 }

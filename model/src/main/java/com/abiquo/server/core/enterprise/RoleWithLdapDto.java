@@ -85,4 +85,11 @@ public class RoleWithLdapDto extends RoleDto
     {
         return RoleWithLdapDto.MEDIA_TYPE;
     }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
+    }
+    
 }

@@ -122,5 +122,11 @@ public class HypervisorDiscoveryDto extends SingleResourceTransportDto
     {
         return HypervisorDiscoveryDto.MEDIA_TYPE;
     }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
+    }
 
 }

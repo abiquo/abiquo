@@ -72,4 +72,10 @@ public class MachineLoadRuleDto extends SingleResourceTransportDto
     {
         return MachineLoadRuleDto.MEDIA_TYPE;
     }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
+    }
 }

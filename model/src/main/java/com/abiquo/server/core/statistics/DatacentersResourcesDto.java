@@ -45,5 +45,11 @@ public class DatacentersResourcesDto extends WrapperDto<DatacenterResourcesDto>
     {
         return DatacentersResourcesDto.MEDIA_TYPE;
     }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
+    }
 
 }

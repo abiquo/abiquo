@@ -54,5 +54,11 @@ public class VMNetworkConfigurationsDto extends WrapperDto<VMNetworkConfiguratio
     {
         return VMNetworkConfigurationsDto.MEDIA_TYPE;
     }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
+    }
 
 }

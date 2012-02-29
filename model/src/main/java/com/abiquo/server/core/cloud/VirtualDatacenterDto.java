@@ -93,4 +93,10 @@ public class VirtualDatacenterDto extends SingleResourceWithLimitsDto
     {
         return VirtualDatacenterDto.MEDIA_TYPE;
     }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
+    }
 }

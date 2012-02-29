@@ -49,4 +49,10 @@ public class VirtualDatacentersDto extends WrapperDto<VirtualDatacenterDto>
     {
         return VirtualDatacentersDto.MEDIA_TYPE;
     }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
+    }
 }

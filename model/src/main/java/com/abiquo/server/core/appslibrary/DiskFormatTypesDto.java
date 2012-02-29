@@ -50,5 +50,11 @@ public class DiskFormatTypesDto extends WrapperDto<DiskFormatTypeDto>
     {
         return DiskFormatTypesDto.MEDIA_TYPE;
     }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
+    }
 
 }

@@ -54,4 +54,9 @@ public class InitiatorMappingsDto extends WrapperDto<InitiatorMappingDto>
         return InitiatorMappingsDto.MEDIA_TYPE;
     }
 
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
+    }
 }

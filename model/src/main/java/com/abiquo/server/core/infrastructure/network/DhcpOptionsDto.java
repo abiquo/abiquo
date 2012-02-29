@@ -51,4 +51,9 @@ public class DhcpOptionsDto extends WrapperDto<DhcpOptionDto>
         return DhcpOptionsDto.MEDIA_TYPE;
     }
 
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
+    }
 }

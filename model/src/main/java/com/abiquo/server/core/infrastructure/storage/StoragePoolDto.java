@@ -112,5 +112,11 @@ public class StoragePoolDto extends SingleResourceTransportDto
     {
         return StoragePoolDto.MEDIA_TYPE;
     }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
+    }
 
 }

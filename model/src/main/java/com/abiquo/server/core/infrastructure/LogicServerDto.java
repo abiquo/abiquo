@@ -191,4 +191,10 @@ public class LogicServerDto extends SingleResourceTransportDto
     {
         return LogicServerDto.MEDIA_TYPE;
     }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
+    }
 }

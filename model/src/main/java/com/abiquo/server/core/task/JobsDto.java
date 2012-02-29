@@ -54,4 +54,10 @@ public class JobsDto extends WrapperDto<JobDto>
     {
         return JobsDto.MEDIA_TYPE;
     }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
+    }
 }

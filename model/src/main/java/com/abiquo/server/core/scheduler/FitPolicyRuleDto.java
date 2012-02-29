@@ -62,5 +62,11 @@ public class FitPolicyRuleDto extends SingleResourceTransportDto
     {
         return FitPolicyRuleDto.MEDIA_TYPE;
     }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
+    }
 
 }

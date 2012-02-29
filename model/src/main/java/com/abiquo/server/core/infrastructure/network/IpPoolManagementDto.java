@@ -122,5 +122,11 @@ public class IpPoolManagementDto extends SingleResourceTransportDto
     {
         return IpPoolManagementDto.MEDIA_TYPE;
     }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
+    }
 
 }

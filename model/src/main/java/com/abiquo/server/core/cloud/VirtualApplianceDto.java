@@ -137,5 +137,11 @@ public class VirtualApplianceDto extends SingleResourceTransportDto
     {
         return VirtualApplianceDto.MEDIA_TYPE;
     }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
+    }
 
 }

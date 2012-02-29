@@ -78,5 +78,11 @@ public class AcceptedRequestDto<T> extends SingleResourceTransportDto
     {
         return AcceptedRequestDto.MEDIA_TYPE;
     }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
+    }
 
 }

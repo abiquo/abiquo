@@ -49,4 +49,10 @@ public class FitPolicyRulesDto extends WrapperDto<FitPolicyRuleDto>
     {
         return FitPolicyRulesDto.MEDIA_TYPE;
     }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
+    }
 }

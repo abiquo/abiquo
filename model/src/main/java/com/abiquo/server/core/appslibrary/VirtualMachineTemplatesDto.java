@@ -55,4 +55,10 @@ public class VirtualMachineTemplatesDto extends WrapperDto<VirtualMachineTemplat
     {
         return VirtualMachineTemplatesDto.MEDIA_TYPE;
     }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
+    }
 }

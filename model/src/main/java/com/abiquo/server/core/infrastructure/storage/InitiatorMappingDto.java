@@ -92,4 +92,10 @@ public class InitiatorMappingDto extends SingleResourceTransportDto
     {
         return InitiatorMappingDto.MEDIA_TYPE;
     }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
+    }
 }

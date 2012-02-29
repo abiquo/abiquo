@@ -265,5 +265,10 @@ public class VirtualDatacenterResourcesDto extends SingleResourceTransportDto
     {
         return VirtualDatacenterResourcesDto.MEDIA_TYPE;
     }
-
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
+    }
 }

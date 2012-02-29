@@ -86,4 +86,10 @@ public class ErrorDto extends SingleResourceTransportDto
     {
         return ErrorDto.MEDIA_TYPE;
     }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
+    }
 }

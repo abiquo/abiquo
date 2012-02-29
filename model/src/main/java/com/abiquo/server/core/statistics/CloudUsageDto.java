@@ -325,5 +325,11 @@ public class CloudUsageDto extends SingleResourceTransportDto
     {
         return CloudUsageDto.MEDIA_TYPE;
     }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
+    }
 
 }

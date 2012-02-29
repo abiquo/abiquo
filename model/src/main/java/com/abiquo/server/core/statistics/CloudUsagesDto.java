@@ -46,4 +46,9 @@ public class CloudUsagesDto extends WrapperDto<CloudUsageDto>
         return CloudUsagesDto.MEDIA_TYPE;
     }
 
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
+    }
 }

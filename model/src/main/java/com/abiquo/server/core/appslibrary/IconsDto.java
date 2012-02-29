@@ -49,4 +49,9 @@ public class IconsDto extends WrapperDto<IconDto>
         return IconsDto.MEDIA_TYPE;
     }
 
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
+    }
 }

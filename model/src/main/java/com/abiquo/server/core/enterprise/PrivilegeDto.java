@@ -73,5 +73,11 @@ public class PrivilegeDto extends SingleResourceTransportDto
     {
         return PrivilegeDto.MEDIA_TYPE;
     }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
+    }
 
 }

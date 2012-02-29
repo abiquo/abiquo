@@ -75,4 +75,10 @@ public class IconDto extends SingleResourceTransportDto
     {
         return IconDto.MEDIA_TYPE;
     }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
+    }
 }

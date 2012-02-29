@@ -288,4 +288,9 @@ public class PricingTemplateDto extends SingleResourceTransportDto
         return PricingTemplateDto.MEDIA_TYPE;
     }
 
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
+    }
 }

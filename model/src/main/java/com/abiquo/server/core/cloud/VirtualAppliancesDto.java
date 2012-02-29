@@ -53,4 +53,10 @@ public class VirtualAppliancesDto extends WrapperDto<VirtualApplianceDto>
     {
         return VirtualAppliancesDto.MEDIA_TYPE;
     }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
+    }
 }

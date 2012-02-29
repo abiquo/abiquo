@@ -72,4 +72,10 @@ public class HypervisorTypesDto extends WrapperDto<HypervisorTypeDto>
     {
         return HypervisorTypesDto.MEDIA_TYPE;
     }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
+    }
 }

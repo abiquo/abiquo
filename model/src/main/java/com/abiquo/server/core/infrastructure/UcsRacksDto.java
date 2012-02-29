@@ -55,5 +55,11 @@ public class UcsRacksDto extends WrapperDto<UcsRackDto>
     {
         return UcsRacksDto.MEDIA_TYPE;
     }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
+    }
 
 }

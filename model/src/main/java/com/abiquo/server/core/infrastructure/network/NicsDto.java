@@ -58,4 +58,10 @@ public class NicsDto extends WrapperDto<NicDto>
     {
         return NicsDto.MEDIA_TYPE;
     }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
+    }
 }

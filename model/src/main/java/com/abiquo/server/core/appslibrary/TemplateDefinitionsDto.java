@@ -52,4 +52,10 @@ public class TemplateDefinitionsDto extends WrapperDto<TemplateDefinitionDto>
     {
         return TemplateDefinitionsDto.MEDIA_TYPE;
     }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
+    }
 }

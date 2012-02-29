@@ -64,5 +64,11 @@ public class PricingTierDto extends SingleResourceTransportDto
     {
         return PricingTierDto.MEDIA_TYPE;
     }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
+    }
 
 }

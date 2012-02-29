@@ -45,4 +45,10 @@ public class UsersDto extends WrapperDto<UserDto>
     {
         return UsersDto.MEDIA_TYPE;
     }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
+    }
 }

@@ -46,5 +46,11 @@ public class LinksDto extends SingleResourceTransportDto
     {
         return LinksDto.MEDIA_TYPE;
     }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
+    }
 
 }

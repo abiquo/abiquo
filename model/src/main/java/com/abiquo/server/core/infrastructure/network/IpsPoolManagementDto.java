@@ -53,4 +53,10 @@ public class IpsPoolManagementDto extends WrapperDto<IpPoolManagementDto>
     {
         return IpsPoolManagementDto.MEDIA_TYPE;
     }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
+    }
 }

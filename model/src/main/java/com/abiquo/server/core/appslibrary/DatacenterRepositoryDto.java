@@ -109,5 +109,11 @@ public class DatacenterRepositoryDto extends SingleResourceTransportDto
     {
         return DatacenterRepositoryDto.MEDIA_TYPE;
     }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
+    }
 
 }

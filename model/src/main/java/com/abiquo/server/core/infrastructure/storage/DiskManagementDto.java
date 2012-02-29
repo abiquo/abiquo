@@ -65,4 +65,10 @@ public class DiskManagementDto extends SingleResourceTransportDto
     {
         return DiskManagementDto.MEDIA_TYPE;
     }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
+    }
 }

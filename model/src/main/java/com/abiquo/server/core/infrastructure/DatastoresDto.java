@@ -72,5 +72,11 @@ public class DatastoresDto extends WrapperDto<DatastoreDto> implements Serializa
     {
         return DatastoresDto.MEDIA_TYPE;
     }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
+    }
 
 }

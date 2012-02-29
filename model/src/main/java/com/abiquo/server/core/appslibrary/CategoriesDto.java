@@ -47,4 +47,10 @@ public class CategoriesDto extends WrapperDto<CategoryDto>
     {
         return CategoriesDto.MEDIA_TYPE;
     }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
+    }
 }

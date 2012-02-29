@@ -49,4 +49,9 @@ public class PricingTemplatesDto extends WrapperDto<PricingTemplateDto>
         return PricingTemplatesDto.MEDIA_TYPE;
     }
 
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
+    }
 }

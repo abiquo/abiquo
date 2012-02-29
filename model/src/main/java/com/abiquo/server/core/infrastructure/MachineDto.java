@@ -355,4 +355,10 @@ public class MachineDto extends SingleResourceTransportDto implements Serializab
     {
         return MachineDto.MEDIA_TYPE;
     }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
+    }
 }

@@ -51,4 +51,10 @@ public class VirtualMachinesWithNodeDto extends WrapperDto<VirtualMachineWithNod
     {
         return VirtualMachinesWithNodeDto.MEDIA_TYPE;
     }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
+    }
 }

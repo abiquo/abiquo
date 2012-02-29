@@ -108,4 +108,10 @@ public class UcsRackDto extends RackDto
     {
         return UcsRackDto.MEDIA_TYPE;
     }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
+    }
 }

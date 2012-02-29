@@ -53,4 +53,9 @@ public class PricingCostCodesDto extends WrapperDto<PricingCostCodeDto>
         return PricingCostCodesDto.MEDIA_TYPE;
     }
 
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
+    }
 }

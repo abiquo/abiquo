@@ -89,4 +89,10 @@ public class VolumeManagementWithVirtualMachineDto extends VolumeManagementDto
     {
         return VolumeManagementWithVirtualMachineDto.MEDIA_TYPE;
     }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
+    }
 }

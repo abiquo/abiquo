@@ -51,4 +51,10 @@ public class CurrenciesDto extends WrapperDto<CurrencyDto>
     {
         return CurrenciesDto.MEDIA_TYPE;
     }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
+    }
 }

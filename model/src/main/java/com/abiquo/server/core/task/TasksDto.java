@@ -53,4 +53,10 @@ public class TasksDto extends WrapperDto<TaskDto>
     {
         return TasksDto.MEDIA_TYPE;
     }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
+    }
 }

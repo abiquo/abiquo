@@ -156,5 +156,11 @@ public class OrganizationDto extends SingleResourceTransportDto
     {
         return OrganizationDto.MEDIA_TYPE;
     }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
+    }
 
 }

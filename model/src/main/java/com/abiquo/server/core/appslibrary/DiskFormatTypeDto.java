@@ -98,5 +98,11 @@ public class DiskFormatTypeDto extends SingleResourceTransportDto
     {
         return DiskFormatTypeDto.MEDIA_TYPE;
     }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
+    }
 
 }

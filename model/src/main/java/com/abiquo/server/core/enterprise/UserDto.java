@@ -249,4 +249,10 @@ public class UserDto extends SingleResourceTransportDto
     {
         return UserDto.MEDIA_TYPE;
     }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
+    }
 }

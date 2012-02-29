@@ -102,5 +102,11 @@ public class CostCodeCurrencyDto extends SingleResourceTransportDto
     {
         return CostCodeCurrencyDto.MEDIA_TYPE;
     }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
+    }
 
 }

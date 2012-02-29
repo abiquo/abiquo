@@ -51,4 +51,10 @@ public class VirtualMachinesWithNodeExtendedDto extends
     {
         return VirtualMachinesWithNodeExtendedDto.MEDIA_TYPE;
     }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
+    }
 }

@@ -124,4 +124,10 @@ public class JobDto extends SingleResourceTransportDto
     {
         return JobDto.MEDIA_TYPE;
     }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
+    }
 }

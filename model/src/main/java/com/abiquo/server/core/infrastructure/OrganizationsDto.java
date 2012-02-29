@@ -78,5 +78,11 @@ public class OrganizationsDto extends WrapperDto<OrganizationDto>
     {
         return OrganizationsDto.MEDIA_TYPE;
     }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
+    }
 
 }

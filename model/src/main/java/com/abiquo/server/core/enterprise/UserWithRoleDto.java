@@ -58,5 +58,11 @@ public class UserWithRoleDto extends UserDto
     {
         return UserWithRoleDto.MEDIA_TYPE;
     }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
+    }
 
 }

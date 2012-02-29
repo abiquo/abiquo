@@ -138,5 +138,11 @@ public class MachinesToCreateDto extends SingleResourceTransportDto implements S
     {
         return MachinesToCreateDto.MEDIA_TYPE;
     }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
+    }
 
 }

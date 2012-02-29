@@ -46,4 +46,9 @@ public class EnterprisesResourcesDto extends WrapperDto<EnterpriseResourcesDto>
         return EnterprisesResourcesDto.MEDIA_TYPE;
     }
 
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
+    }
 }

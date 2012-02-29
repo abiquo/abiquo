@@ -150,4 +150,10 @@ public class RackDto extends SingleResourceTransportDto implements Serializable
     {
         return RackDto.MEDIA_TYPE;
     }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
+    }
 }

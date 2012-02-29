@@ -60,4 +60,10 @@ public class VolumesManagementDto extends WrapperDto<VolumeManagementDto>
     {
         return VolumesManagementDto.MEDIA_TYPE;
     }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
+    }
 }

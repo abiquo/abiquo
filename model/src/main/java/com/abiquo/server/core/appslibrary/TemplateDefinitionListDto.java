@@ -88,4 +88,9 @@ public class TemplateDefinitionListDto extends SingleResourceTransportDto
         return TemplateDefinitionListDto.MEDIA_TYPE;
     }
 
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
+    }
 }

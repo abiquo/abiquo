@@ -121,4 +121,9 @@ public class LicenseDto extends SingleResourceTransportDto
         return LicenseDto.MEDIA_TYPE;
     }
 
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
+    }
 }

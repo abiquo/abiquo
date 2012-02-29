@@ -100,5 +100,11 @@ public class RemoteServiceDto extends SingleResourceTransportDto
     {
         return RemoteServiceDto.MEDIA_TYPE;
     }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
+    }
 
 }

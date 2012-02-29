@@ -126,5 +126,11 @@ public class VMNetworkConfigurationDto extends SingleResourceTransportDto
     {
         return VMNetworkConfigurationDto.MEDIA_TYPE;
     }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
+    }
 
 }
