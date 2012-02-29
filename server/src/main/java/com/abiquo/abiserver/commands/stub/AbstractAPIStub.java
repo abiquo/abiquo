@@ -417,7 +417,8 @@ public class AbstractAPIStub
                     result.setResultCode(0);
                 }
             }
-            else if (errors.getCollection().get(0).getCode().equals("LIMIT_EXCEEDED"))
+            else if (errors.getCollection().get(0).getCode().equals("LIMIT_EXCEEDED")
+                || errors.getCollection().get(0).getCode().equals("LIMIT-1"))
             {
                 result.setResultCode(BasicResult.HARD_LIMT_EXCEEDED);
                 // limit exceeded does not include the detail
@@ -1070,9 +1071,9 @@ public class AbstractAPIStub
             "cloud/virtualdatacenters/{vdcid}/virtualappliances/{vappid}/virtualmachines/{vmid}/network/nics",
             params);
     }
-    
-    protected String createInfrastructureVirtualMachineNICsLink(Integer datacenterId, Integer rackId,
-        Integer machineId, Integer virtualMachineId)
+
+    protected String createInfrastructureVirtualMachineNICsLink(final Integer datacenterId,
+        final Integer rackId, final Integer machineId, final Integer virtualMachineId)
     {
         Map<String, String> params = new HashMap<String, String>();
         params.put("datacenter", datacenterId.toString());
@@ -1080,7 +1081,8 @@ public class AbstractAPIStub
         params.put("machine", machineId.toString());
         params.put("vm", virtualMachineId.toString());
 
-        return resolveURI(apiUri,
+        return resolveURI(
+            apiUri,
             "admin/datacenters/{datacenter}/racks/{rack}/machines/{machine}/virtualmachines/{vm}/action/nics",
             params);
     }
