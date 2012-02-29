@@ -41,7 +41,8 @@ public class VirtualMachineTaskDto extends SingleResourceTransportDto implements
      * 
      */
     private static final long serialVersionUID = -272879466628574960L;
-    public static final String MEDIA_TYPE = "application/vnd.abiquo.virtualmachinetask+xml";
+    public static final String BASE_MEDIA_TYPE = "application/vnd.abiquo.virtualmachinetask+xml";
+    public static final String MEDIA_TYPE = BASE_MEDIA_TYPE + "; version=" + API_VERSION;
 
     /**
      * Force the soft limits defined for the enterprise in the deploy. <br>

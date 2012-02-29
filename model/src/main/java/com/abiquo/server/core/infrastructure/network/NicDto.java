@@ -36,11 +36,10 @@ import com.abiquo.server.core.cloud.VirtualMachine;
 public class NicDto extends SingleResourceTransportDto
 {
 
-    /**
-     * 
-     */
     private static final long serialVersionUID = 3595021795100699222L;
-    public static final String MEDIA_TYPE = "application/vnd.abiquo.nic+xml";
+    
+    public static final String BASE_MEDIA_TYPE = "application/vnd.abiquo.nic+xml";
+    public static final String MEDIA_TYPE = BASE_MEDIA_TYPE + "; version=" + API_VERSION;
 
     private Integer id;
 

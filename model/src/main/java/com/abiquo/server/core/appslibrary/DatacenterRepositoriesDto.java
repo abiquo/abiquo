@@ -34,6 +34,7 @@ public class DatacenterRepositoriesDto extends WrapperDto<DatacenterRepositoryDt
 {
     private static final long serialVersionUID = 1810037128474030040L;
     public static final String MEDIA_TYPE = "application/vnd.abiquo.datacenterrepositories+xml";
+    public static final String BASE_MEDIA_TYPE = BASE_MEDIA_TYPE + "; version=" + API_VERSION;
 
     @XmlElement(name = "datacenterRepository")
     public List<DatacenterRepositoryDto> getCollection()

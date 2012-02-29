@@ -32,7 +32,8 @@ import com.abiquo.server.core.infrastructure.RemoteServicesDto;
 @XmlRootElement(name = "network")
 public class VLANNetworkDto extends SingleResourceTransportDto implements Serializable
 {
-    public static final String MEDIA_TYPE = "application/vnd.abiquo.vlan+xml";
+    public static final String BASE_MEDIA_TYPE = "application/vnd.abiquo.vlan+xml";
+    public static final String MEDIA_TYPE = BASE_MEDIA_TYPE + "; version=" + API_VERSION;
     
     private Integer id;
 

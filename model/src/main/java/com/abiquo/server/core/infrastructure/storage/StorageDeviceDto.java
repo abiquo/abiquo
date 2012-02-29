@@ -36,7 +36,9 @@ public class StorageDeviceDto extends SingleResourceTransportDto implements Seri
      * Default serial version UID.
      */
     private static final long serialVersionUID = 1L;
-    public static final String MEDIA_TYPE = "application/vnd.abiquo.storagedevice+xml";
+    
+    public static final String BASE_MEDIA_TYPE = "application/vnd.abiquo.storagedevice+xml";
+    public static final String MEDIA_TYPE = BASE_MEDIA_TYPE + "; version=" + API_VERSION;
 
     private Integer id;
 

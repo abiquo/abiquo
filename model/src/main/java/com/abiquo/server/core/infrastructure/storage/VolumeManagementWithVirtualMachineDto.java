@@ -32,7 +32,8 @@ import com.abiquo.server.core.infrastructure.DatacenterDto;
 public class VolumeManagementWithVirtualMachineDto extends VolumeManagementDto
 {
     private static final long serialVersionUID = 1L;
-    public static final String MEDIA_TYPE = "application/vnd.abiquo.iscsivolumewithvirtualmachine+xml";
+    public static final String BASE_MEDIA_TYPE = "application/vnd.abiquo.iscsivolumewithvirtualmachine+xml";
+    public static final String MEDIA_TYPE = BASE_MEDIA_TYPE + "; version=" + API_VERSION;
 
     private VirtualMachineDto virtualMachine;
 

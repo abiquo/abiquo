@@ -31,7 +31,8 @@ import com.abiquo.model.transport.WrapperDto;
 @XmlRootElement(name = "dcsresources")
 public class DatacentersResourcesDto extends WrapperDto<DatacenterResourcesDto>
 {
-    public static final String MEDIA_TYPE = "application/vnd.abiquo.datacentersresources+xml";
+    public static final String BASE_MEDIA_TYPE = "application/vnd.abiquo.datacentersresources+xml";
+    public static final String MEDIA_TYPE = BASE_MEDIA_TYPE + "; version=" + API_VERSION;
     
     @XmlElement(name = "dcresources")
     public List<DatacenterResourcesDto> getCollection()

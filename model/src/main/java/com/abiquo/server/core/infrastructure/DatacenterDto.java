@@ -30,7 +30,8 @@ import com.abiquo.model.transport.SingleResourceTransportDto;
 @XmlRootElement(name = "datacenter")
 public class DatacenterDto extends SingleResourceTransportDto implements Serializable
 {
-    public static final String MEDIA_TYPE = "application/vnd.abiquo.datacenter+xml;";
+    public static final String BASE_MEDIA_TYPE = "application/vnd.abiquo.datacenter+xml";
+    public static final String MEDIA_TYPE = BASE_MEDIA_TYPE + "; version=" + API_VERSION;
 
     /**
      * Identifier of the datacenter.

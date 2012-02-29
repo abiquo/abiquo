@@ -41,7 +41,8 @@ public class VMNetworkConfigurationDto extends SingleResourceTransportDto
      * Generated serial version id.
      */
     private static final long serialVersionUID = -3866622562676820662L;
-    public static final String MEDIA_TYPE = "application/vnd.abiquo.virtualmachinenetworkconfiguration+xml";
+    public static final String BASE_MEDIA_TYPE = "application/vnd.abiquo.virtualmachinenetworkconfiguration+xml";
+    public static final String MEDIA_TYPE = BASE_MEDIA_TYPE + "; version=" + API_VERSION;
 
     public VMNetworkConfigurationDto()
     {

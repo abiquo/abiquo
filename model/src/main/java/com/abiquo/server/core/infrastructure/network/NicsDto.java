@@ -42,7 +42,9 @@ public class NicsDto extends WrapperDto<NicDto>
      * Generated serial version UID.
      */
     private static final long serialVersionUID = 7750745888159232062L;
-    public static final String MEDIA_TYPE = "application/vnd.abiquo.nics+xml";
+    
+    public static final String BASE_MEDIA_TYPE = "application/vnd.abiquo.nics+xml";
+    public static final String MEDIA_TYPE = BASE_MEDIA_TYPE + "; version=" + API_VERSION;
 
     @Override
     @XmlElement(name = "nic")

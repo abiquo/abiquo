@@ -57,7 +57,7 @@ public class AbiquoLinkBuilder extends SingleLinkBuilderImpl
         return link;
 
     }
-    
+
     public RESTLink buildRestLink(final Class< ? > resource, final String rel,
         final Map<String, String> params, String mediaType)
     {
@@ -68,7 +68,8 @@ public class AbiquoLinkBuilder extends SingleLinkBuilderImpl
     }
 
     public RESTLink buildRestLink(final Class< ? > resource, final String subResource,
-        final String rel, final String title, final Map<String, String> params, final String mediaType)
+        final String rel, final String title, final Map<String, String> params,
+        final String mediaType)
     {
         RESTLink link = buildRestLink(resource, subResource, rel, title, params);
         link.setType(mediaType);
@@ -85,6 +86,14 @@ public class AbiquoLinkBuilder extends SingleLinkBuilderImpl
         return new RESTLink(links.get(0));
     }
 
+    public RESTLink buildRestLink(final Class< ? > resource, final String subResource,
+        final String rel, final Map<String, String> params, final String mediaType)
+    {
+        RESTLink link = buildRestLink(resource, subResource, rel, params);
+        link.setType(mediaType);
+        
+        return link;
+    }
 
     public RESTLink buildRelLink(final Class< ? > resource, final String subResource,
         final String rel, final Map<String, String> params, final String title)
@@ -92,12 +101,13 @@ public class AbiquoLinkBuilder extends SingleLinkBuilderImpl
         List<SyndLink> links =
             setResource(resource).rel(rel).pathParams(params).subResource(subResource).build(null);
 
-SyndLink first = links.get(0);
+        SyndLink first = links.get(0);
         RESTLink link = new RESTLink(first);
-                link.setTitle(title);
-                        return link;
+        link.setTitle(title);
+        return link;
     }
-        // TODO this method should desapear since action links are not defined this way anymore. Check:
+
+    // TODO this method should desapear since action links are not defined this way anymore. Check:
     // http://wiki.abiquo.com/display/Abiquo/API+links+and+MIME+types
     public RESTLink buildActionLink(final Class< ? > resource, final String subResource,
         final String title, final Map<String, String> params)

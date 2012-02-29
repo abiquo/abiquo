@@ -35,7 +35,8 @@ import com.abiquo.model.transport.WrapperDto;
 public class VirtualDatacentersDto extends WrapperDto<VirtualDatacenterDto>
 {
     
-    public static final String MEDIA_TYPE = "application/vnd.abiquo.virtualdatacenters+xml";
+    public static final String BASE_MEDIA_TYPE = "application/vnd.abiquo.virtualdatacenters+xml";
+    public static final String MEDIA_TYPE = BASE_MEDIA_TYPE + "; version=" + API_VERSION;
     
     @XmlElement(name = "virtualDatacenter")
     public List<VirtualDatacenterDto> getCollection()

@@ -40,7 +40,8 @@ import com.abiquo.server.core.infrastructure.network.DhcpOptionDto;
 public class TiersDto extends WrapperDto<TierDto>
 {
 
-    public static final String MEDIA_TYPE = "application/vnd.abiquo.tiers+xml";
+    public static final String BASE_MEDIA_TYPE = "application/vnd.abiquo.tiers+xml";
+    public static final String MEDIA_TYPE = BASE_MEDIA_TYPE + "; version=" + API_VERSION;
     
     /**
      * Generated serial version UID.

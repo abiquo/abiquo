@@ -37,7 +37,8 @@ public class VirtualMachineDto extends SingleResourceTransportDto implements
      * 
      */
     private static final long serialVersionUID = -8877350185009627544L;
-    public static final String MEDIA_TYPE = "application/vnd.abiquo.virtualmachine+xml";
+    public static final String BASE_MEDIA_TYPE = "application/vnd.abiquo.virtualmachine+xml";
+    public static final String MEDIA_TYPE = BASE_MEDIA_TYPE + "; version=" + API_VERSION;
 
     private Integer id;
 

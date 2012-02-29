@@ -30,7 +30,9 @@ import com.sun.xml.txw2.annotation.XmlElement;
 @XmlRootElement(name = "category")
 public class CategoryDto extends SingleResourceTransportDto
 {
-    public static final String MEDIA_TYPE = "application/vnd.abiquo.category+xml";
+    public static final String BASE_MEDIA_TYPE = "application/vnd.abiquo.category+xml";
+    public static final String MEDIA_TYPE = BASE_MEDIA_TYPE + "; version=" + API_VERSION;
+    
     private static final long serialVersionUID = 1L;
 
     private Integer id;

@@ -36,7 +36,8 @@ public class VirtualMachinesWithNodeDto extends WrapperDto<VirtualMachineWithNod
      * 
      */
     private static final long serialVersionUID = -1891560795147901395L;
-    public static final String MEDIA_TYPE = "application/vnd.abiquo.virtualmachineswithnode+xml";
+    public static final String BASE_MEDIA_TYPE = "application/vnd.abiquo.virtualmachineswithnode+xml";
+    public static final String MEDIA_TYPE = BASE_MEDIA_TYPE + "; version=" + API_VERSION;
 
     @Override
     @XmlElement(name = "virtualmachinewithnode")

@@ -41,7 +41,8 @@ public class VlanTagAvailabilityDto extends SingleResourceTransportDto implement
      * Generated serial version UID.
      */
     private static final long serialVersionUID = 8354795972402115520L;
-    public static final String MEDIA_TYPE = "application/vnd.abiquo.vlantagavailability+xml";
+    public static final String BASE_MEDIA_TYPE = "application/vnd.abiquo.vlantagavailability+xml";
+    public static final String MEDIA_TYPE = BASE_MEDIA_TYPE + "; version=" + API_VERSION;
     
     private VlanTagAvailabilityType available;
 

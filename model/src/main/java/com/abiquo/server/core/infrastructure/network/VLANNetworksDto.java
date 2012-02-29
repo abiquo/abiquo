@@ -34,7 +34,8 @@ import com.abiquo.model.transport.WrapperDto;
 @XmlRootElement(name = "networks")
 public class VLANNetworksDto extends WrapperDto<VLANNetworkDto>
 {
-    public static final String MEDIA_TYPE = "application/vnd.abiquo.vlans+xml";
+    public static final String BASE_MEDIA_TYPE = "application/vnd.abiquo.vlans+xml";
+    public static final String MEDIA_TYPE = BASE_MEDIA_TYPE + "; version=" + API_VERSION;
     
     @XmlElement(name = "network")
     public List<VLANNetworkDto> getCollection()

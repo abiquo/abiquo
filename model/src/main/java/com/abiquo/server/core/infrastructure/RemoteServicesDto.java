@@ -33,7 +33,8 @@ import com.abiquo.model.transport.error.ErrorsDto;
 @XmlRootElement(name = "remoteServices")
 public class RemoteServicesDto extends WrapperDto<RemoteServiceDto>
 {
-    public static final String MEDIA_TYPE = "application/vnd.abiquo.remoteservices+xml";
+    public static final String BASE_MEDIA_TYPE = "application/vnd.abiquo.remoteservices+xml";
+    public static final String MEDIA_TYPE = BASE_MEDIA_TYPE + "; version=" + API_VERSION;
     /**
      * Default serial version.
      */

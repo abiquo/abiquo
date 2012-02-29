@@ -33,7 +33,8 @@ public class RunlistElementDto extends SingleResourceTransportDto
 {
     private static final long serialVersionUID = 1L;
 
-    public static final String MEDIA_TYPE = "application/vnd.abiquo.extended-runlist+xml";
+    public static final String BASE_MEDIA_TYPE = "application/vnd.abiquo.extended-runlist+xml";
+    public static final String MEDIA_TYPE = BASE_MEDIA_TYPE + "; version=" + API_VERSION;
 
     // Runlist elements should not return the ID, since the resource is not a regular resource in
     // the DB. It is synchronized with the Chef Server every time it is requested

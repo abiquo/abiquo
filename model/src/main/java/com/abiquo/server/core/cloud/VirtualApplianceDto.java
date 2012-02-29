@@ -33,7 +33,8 @@ public class VirtualApplianceDto extends SingleResourceTransportDto
      * 
      */
     private static final long serialVersionUID = 6614050007994524638L;
-    public static final String MEDIA_TYPE = "application/vnd.abiquo.virtualappliance+xml";
+    public static final String BASE_MEDIA_TYPE = "application/vnd.abiquo.virtualappliance+xml";
+    public static final String MEDIA_TYPE = BASE_MEDIA_TYPE + "; version=" + API_VERSION;
 
     private Integer id;
 

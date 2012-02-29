@@ -36,7 +36,8 @@ public class CostCodeCurrencyDto extends SingleResourceTransportDto
      */
     private static final long serialVersionUID = -5240459003907673943L;
     
-    public static final String MEDIA_TYPE = "application/vnd.abiquo.costcodecurrency+xml";
+    public static final String BASE_MEDIA_TYPE = "application/vnd.abiquo.costcodecurrency+xml";
+    public static final String MEDIA_TYPE = BASE_MEDIA_TYPE + "; version=" + API_VERSION;
 
     public CostCodeCurrencyDto()
     {

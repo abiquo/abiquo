@@ -41,7 +41,8 @@ public class VirtualMachineStateDto extends SingleResourceTransportDto implement
      * 
      */
     private static final long serialVersionUID = 7891496375111061310L;
-    public static final String MEDIA_TYPE = "application/vnd.abiquo.virtualmachinestate+xml";
+    public static final String BASE_MEDIA_TYPE = "application/vnd.abiquo.virtualmachinestate+xml";
+    public static final String MEDIA_TYPE = BASE_MEDIA_TYPE + "; version=" + API_VERSION;
 
     /**
      * Machine state state. <br>

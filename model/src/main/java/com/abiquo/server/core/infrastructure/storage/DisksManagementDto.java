@@ -38,7 +38,9 @@ import com.abiquo.model.transport.WrapperDto;
 @XmlRootElement(name = "disks")
 public class DisksManagementDto extends WrapperDto<DiskManagementDto>
 {
-    public static final String MEDIA_TYPE = "application/vnd.abiquo.harddisks+xml";
+    public static final String BASE_MEDIA_TYPE = "application/vnd.abiquo.harddisks+xml";
+    public static final String MEDIA_TYPE = BASE_MEDIA_TYPE + "; version=" + API_VERSION;
+    
     @Override
     @XmlElement(name = "disk")
     public List<DiskManagementDto> getCollection()

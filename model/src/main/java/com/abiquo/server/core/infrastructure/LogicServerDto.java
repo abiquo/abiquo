@@ -44,7 +44,8 @@ import com.abiquo.model.transport.SingleResourceTransportDto;
 public class LogicServerDto extends SingleResourceTransportDto
 {
 
-    public static final String MEDIA_TYPE = "application/vnd.abiquo.logicserver+xml";
+    public static final String BASE_MEDIA_TYPE = "application/vnd.abiquo.logicserver+xml";
+    public static final String MEDIA_TYPE = BASE_MEDIA_TYPE + "; version=" + API_VERSION;
     
     protected String name;
 

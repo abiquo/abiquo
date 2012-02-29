@@ -38,7 +38,9 @@ import com.abiquo.server.core.task.TaskDto;
 public class SeeOtherDto extends TaskDto
 {
     private static final long serialVersionUID = 4645761892464380938L;
-    public static final String MEDIA_TYPE = "application/vnd.abiquo.seeother+xml";
+    
+    public static final String BASE_MEDIA_TYPE = "application/vnd.abiquo.seeother+xml";
+    public static final String MEDIA_TYPE = BASE_MEDIA_TYPE + "; version=" + API_VERSION;
 
     protected String location;
 
