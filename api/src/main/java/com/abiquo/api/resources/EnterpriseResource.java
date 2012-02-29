@@ -101,31 +101,31 @@ public class EnterpriseResource extends AbstractResource
     protected static final Logger LOGGER = LoggerFactory.getLogger(EnterpriseResource.class);
 
     @Autowired
-    EnterpriseService service;
+    protected EnterpriseService service;
 
     @Autowired
-    NetworkService netService;
+    private NetworkService netService;
 
     @Autowired
-    VirtualMachineService vmService;
+    private VirtualMachineService vmService;
 
     @Autowired
-    DatacenterService dcService;
+    private DatacenterService dcService;
 
     @Autowired
-    VirtualDatacenterService vdcService;
+    private VirtualDatacenterService vdcService;
 
     @Autowired
-    VirtualApplianceService vappService;
+    private VirtualApplianceService vappService;
 
     @Context
-    UriInfo uriInfo;
+    protected UriInfo uriInfo;
 
     @Autowired
-    UserService userService;
+    private UserService userService;
 
     @Autowired
-    SecurityService securityService;
+    private SecurityService securityService;
 
     @GET
     public EnterpriseDto getEnterprise(@PathParam(ENTERPRISE) final Integer enterpriseId,

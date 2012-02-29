@@ -27,6 +27,7 @@ import javax.persistence.EntityManager;
 
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.Criteria;
+import org.hibernate.Query;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Disjunction;
 import org.hibernate.criterion.Order;
@@ -43,6 +44,11 @@ import com.softwarementors.bzngine.entities.PersistentEntity;
 @Repository("jpaVirtualApplianceDAO")
 public class VirtualApplianceDAO extends DefaultDAOBase<Integer, VirtualAppliance>
 {
+    private static final String GET_VAPPS_BY_ENTERPRISE_AND_DATACENTER = " SELECT vapp "//
+        + "FROM VirtualAppliance vapp "//
+        + "WHERE vapp.enterprise.id = :entId "//
+        + "and vapp.virtualDatacenter.datacenter = :dcId";
+
     private static Criterion sameEnterprise(final Enterprise enterprise)
     {
         return Restrictions.eq(VirtualAppliance.ENTERPRISE_PROPERTY, enterprise);
@@ -116,6 +122,16 @@ public class VirtualApplianceDAO extends DefaultDAOBase<Integer, VirtualApplianc
         page.setTotalResults(totalResults);
 
         return page;
+    }
+
+    public List<VirtualAppliance> findByEnterpriseAndDatacenter(final Integer entId,
+        final Integer dcId)
+    {
+        Query query = getSession().createQuery(GET_VAPPS_BY_ENTERPRISE_AND_DATACENTER);
+        query.setInteger("entId", entId);
+        query.setInteger("dcId", dcId);
+
+        return query.list();
     }
 
     public VirtualAppliance findById(final VirtualDatacenter vdc, final Integer vappId)

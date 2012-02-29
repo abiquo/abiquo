@@ -26,11 +26,10 @@ import static java.lang.String.valueOf;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
-import java.util.Map;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.httpclient.URIException;
+import org.apache.commons.httpclient.util.URIUtil;
 import org.apache.wink.client.ClientResponse;
-import org.apache.wink.common.internal.utils.UriHelper;
 
 import com.abiquo.abiserver.business.hibernate.pojohb.networking.NetworkConfigurationHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.networking.NetworkHB;
@@ -38,7 +37,6 @@ import com.abiquo.abiserver.commands.stub.AbstractAPIStub;
 import com.abiquo.abiserver.commands.stub.VirtualDatacenterResourceStub;
 import com.abiquo.abiserver.persistence.DAOFactory;
 import com.abiquo.abiserver.persistence.hibernate.HibernateDAOFactory;
-import com.abiquo.abiserver.pojo.infrastructure.DataCenter;
 import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.result.DataResult;
 import com.abiquo.abiserver.pojo.result.ListRequest;
@@ -237,58 +235,6 @@ public class VirtualDatacenterResourceStubImpl extends AbstractAPIStub implement
     }
 
     @Override
-    public DataResult<Collection<VirtualDataCenter>> getVirtualDatacenters(
-        final Enterprise enterprise, final DataCenter datacenter)
-    {
-        DataResult<Collection<VirtualDataCenter>> result =
-            new DataResult<Collection<VirtualDataCenter>>();
-
-        String uri = createVirtualDatacentersLink(enterprise, datacenter);
-
-        ClientResponse response = get(uri);
-        if (response.getStatusCode() == 200)
-        {
-            result.setSuccess(true);
-            DAOFactory factory = HibernateDAOFactory.instance();
-
-            VirtualDatacentersDto dto = response.getEntity(VirtualDatacentersDto.class);
-            Collection<VirtualDataCenter> datacenters = new LinkedHashSet<VirtualDataCenter>();
-
-            for (VirtualDatacenterDto vdc : dto.getCollection())
-            {
-                int datacenterId =
-                    URIResolver.getLinkId(vdc.searchLink("datacenter"), "admin/datacenters",
-                        "{datacenter}", "datacenter");
-
-                // factory.beginConnection();
-                // NetworkHB network = factory.getNetworkDAO().findByVirtualDatacenter(vdc.getId());
-                // factory.endConnection();
-
-                VirtualDataCenter vdctoadd =
-                    VirtualDataCenter.create(vdc, datacenterId, enterprise);
-
-                // Get the default network of the vdc.
-                RESTLink link = vdc.searchLink("defaultnetwork");
-                response = get(link.getHref());
-                VLANNetworkDto vlanDto = response.getEntity(VLANNetworkDto.class);
-
-                vdctoadd.setDefaultVlan(NetworkResourceStubImpl.createFlexObject(vlanDto));
-
-                datacenters.add(vdctoadd);
-
-            }
-            result.setData(datacenters);
-
-        }
-        else
-        {
-            populateErrors(response, result, "getVirtualDatacenters");
-        }
-
-        return result;
-    }
-
-    @Override
     public DataResult<Collection<VirtualDataCenter>> getVirtualDatacentersByEnterprise(
         final Enterprise enterprise)
     {
@@ -344,39 +290,32 @@ public class VirtualDatacenterResourceStubImpl extends AbstractAPIStub implement
         DataResult<VirtualDatacentersListResult> result =
             new DataResult<VirtualDatacentersListResult>();
 
-        // Build request URI
-        String uri = null;
+        StringBuilder buildRequest =
+            new StringBuilder(createVirtualDatacentersFromEnterpriseLink(enterprise.getId()));
         VirtualDatacentersListResult listResult = new VirtualDatacentersListResult();
 
         if (listRequest != null)
         {
-            boolean desc = !listRequest.getAsc();
-            String orderBy = listRequest.getOrderBy();
-
-            Map<String, String[]> queryParams = new HashMap<String, String[]>();
-            if (!StringUtils.isEmpty(listRequest.getFilterLike()))
+            buildRequest.append("?startwith=" + listRequest.getOffset());
+            buildRequest.append("&limit=" + listRequest.getNumberOfNodes());
+            if (listRequest.getOrderBy() != null && !listRequest.getOrderBy().isEmpty())
             {
-                queryParams.put("filter", new String[] {listRequest.getFilterLike()});
+                buildRequest.append("&by=" + listRequest.getOrderBy());
             }
-            if (!StringUtils.isEmpty(listRequest.getOrderBy()))
+            buildRequest.append("&asc=" + (listRequest.getAsc() == true ? "true" : "false"));
+            if (listRequest.getFilterLike() != null && !listRequest.getFilterLike().isEmpty())
             {
-                queryParams.put("orderBy", new String[] {orderBy});
+                try
+                {
+                    buildRequest.append("&has=" + URIUtil.encodeQuery(listRequest.getFilterLike()));
+                }
+                catch (URIException e)
+                {
+                }
             }
-            queryParams.put("desc", new String[] {String.valueOf(desc)});
-
-            uri =
-                createVirtualDatacentersFromEnterpriseLink(enterprise.getId(), listRequest
-                    .getOffset(), listRequest.getNumberOfNodes());
-
-            uri = UriHelper.appendQueryParamsToPath(uri, queryParams, false);
-        }
-        else
-        {
-            uri = createVirtualDatacentersFromEnterpriseLink(enterprise.getId(), null, 0);
         }
 
-        // Request virtual datacenters
-        ClientResponse response = get(uri);
+        ClientResponse response = get(buildRequest.toString());
 
         if (response.getStatusCode() == 200)
         {

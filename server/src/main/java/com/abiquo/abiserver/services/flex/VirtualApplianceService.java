@@ -31,6 +31,7 @@ import com.abiquo.abiserver.commands.stub.APIStubFactory;
 import com.abiquo.abiserver.commands.stub.VirtualApplianceResourceStub;
 import com.abiquo.abiserver.commands.stub.impl.VirtualApplianceResourceStubImpl;
 import com.abiquo.abiserver.pojo.authentication.UserSession;
+import com.abiquo.abiserver.pojo.infrastructure.DataCenter;
 import com.abiquo.abiserver.pojo.networking.NetworkConfiguration;
 import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.result.DataResult;
@@ -277,6 +278,13 @@ public class VirtualApplianceService
     {
         return proxyVirtualApplianceResourceStub(userSession)
             .getVirtualAppliancesByVirtualDatacenter(userSession, vdc, listRequest);
+    }
+
+    public BasicResult getVirtualAppliancesByEnterpriseAndDatacenter(final UserSession userSession,
+        final Enterprise enterprise, final DataCenter datacenter)
+    {
+        return proxyVirtualApplianceResourceStub(userSession)
+            .getVirtualAppliancesByEnterpriseAndDatacenter(userSession, enterprise, datacenter);
     }
 
     /**

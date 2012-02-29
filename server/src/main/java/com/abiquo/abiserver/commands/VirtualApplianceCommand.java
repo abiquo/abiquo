@@ -65,24 +65,6 @@ public interface VirtualApplianceCommand
         final VirtualAppliance virtualAppliance);
 
     /**
-     * Retrieves an updated list of VirtualDatacenters and Virtual Appliances that belong to the
-     * same Enterprise The Virtual Appliances retrieved will not contain their list of nodes, for
-     * performance purposes Method used in the enterprise version to retrieve the virtual appliances
-     * to fetch a non managed machine.
-     * 
-     * @param enterprise The Enterprise to retrieve the VirtualAppliance list
-     * @return a DataResult<ArrayList> object. The first position will contain an
-     *         ArrayList<VirtualDatacenter> object, and second an ArrayList<VirtualAppliance> object
-     */
-    @SuppressWarnings("unchecked")
-    public abstract DataResult<ArrayList<Collection>> checkVirtualDatacentersAndAppliancesByEnterprise(
-        UserSession userSession, final Enterprise enterprise);
-
-    @SuppressWarnings("unchecked")
-    public abstract DataResult<ArrayList<Collection>> checkVirtualDatacentersAndAppliancesByEnterpriseAndDatacenter(
-        UserSession userSession, final Enterprise enterprise, final DataCenter datacenter);
-
-    /**
      * Creates a new Virtual Appliance, that belongs to the user who called this method
      * 
      * @param userSession the user connected.
@@ -163,25 +145,11 @@ public interface VirtualApplianceCommand
 
     public abstract BasicResult markLogAsDeleted(final Log log);
 
-    /**
-     * Retrieves a list of VirtualDataCenter that belongs to the same Enterprise
-     * 
-     * @param enterprise The Enterprise of which the virtualdatacenter will be returned. If null, an
-     *            empty Array will be returned
-     * @return a DataResult object, containing an ArrayList<VirtualDataCenter>, with the
-     *         VirtualDataCenter assigned to the enterprise
-     */
-    public abstract DataResult<Collection<VirtualDataCenter>> getVirtualDataCentersByEnterprise(
-        UserSession userSession, final Enterprise enterprise);
-
     public DataResult<VirtualDatacentersListResult> getVirtualDataCentersByEnterprise(
         final UserSession userSession, final Enterprise enterprise, final ListRequest listRequest);
 
     public abstract DataResult<Collection<VirtualDataCenter>> getVirtualDataCentersByEnterpriseFaster(
         UserSession userSession, final Enterprise enterprise);
-
-    public abstract DataResult<Collection<VirtualDataCenter>> getVirtualDataCentersByEnterpriseAndDatacenter(
-        UserSession userSession, final Enterprise enterprise, final DataCenter datacenter);
 
     public abstract boolean blockVirtualAppliance(final VirtualAppliance virtualAppliance,
         final StateEnum subState) throws PersistenceException;

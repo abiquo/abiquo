@@ -49,6 +49,7 @@ import com.abiquo.abiserver.commands.stub.AbstractAPIStub;
 import com.abiquo.abiserver.commands.stub.VirtualApplianceResourceStub;
 import com.abiquo.abiserver.exception.VirtualApplianceCommandException;
 import com.abiquo.abiserver.pojo.authentication.UserSession;
+import com.abiquo.abiserver.pojo.infrastructure.DataCenter;
 import com.abiquo.abiserver.pojo.infrastructure.HyperVisor;
 import com.abiquo.abiserver.pojo.infrastructure.HyperVisorType;
 import com.abiquo.abiserver.pojo.infrastructure.State;
@@ -87,6 +88,8 @@ import com.abiquo.server.core.cloud.VirtualMachineTaskDto;
 import com.abiquo.server.core.cloud.VirtualMachineWithNodeDto;
 import com.abiquo.server.core.cloud.VirtualMachineWithNodeExtendedDto;
 import com.abiquo.server.core.cloud.VirtualMachinesWithNodeExtendedDto;
+import com.abiquo.server.core.enterprise.DatacenterLimitsDto;
+import com.abiquo.server.core.enterprise.DatacentersLimitsDto;
 import com.abiquo.server.core.enterprise.EnterpriseDto;
 import com.abiquo.server.core.enterprise.UserDto;
 import com.abiquo.server.core.enterprise.User.AuthType;
@@ -1074,6 +1077,64 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
         {
             populateErrors(response, result, "getVirtualAppliancesByVirtualDatacenter");
         }
+
+        return result;
+    }
+
+    @Override
+    public DataResult<VirtualAppliancesListResult> getVirtualAppliancesByEnterpriseAndDatacenter(
+        final UserSession userSession, final Enterprise enterprise, final DataCenter datacenter)
+    {
+        DataResult<VirtualAppliancesListResult> result =
+            new DataResult<VirtualAppliancesListResult>();
+
+        String uri = createEnterpriseLimitsByDatacenterLink(enterprise.getId());
+        ClientResponse response = get(uri);
+        VirtualAppliancesListResult listResult = new VirtualAppliancesListResult();
+
+        if (response.getStatusCode() == Status.NOT_FOUND.getStatusCode())
+        {
+            result.setData(listResult);
+            result.setSuccess(Boolean.TRUE);
+
+            return result;
+        }
+
+        DatacentersLimitsDto limits = response.getEntity(DatacentersLimitsDto.class);
+        for (DatacenterLimitsDto limitDto : limits.getCollection())
+        {
+            RESTLink dcLink = limitDto.searchLink("datacenter");
+            Integer dcId =
+                Integer.valueOf(dcLink.getHref().substring(dcLink.getHref().lastIndexOf("/") + 1));
+            if (dcId.equals(datacenter.getId()))
+            {
+                response = get(limitDto.searchLink("action", "virtualappliances").getHref());
+                if (response.getStatusCode() == 200)
+                {
+                    VirtualAppliancesDto dto = response.getEntity(VirtualAppliancesDto.class);
+                    List<VirtualAppliance> collection = dtosToVirtualAppliance(dto, result);
+
+                    Integer total =
+                        dto.getTotalSize() != null ? dto.getTotalSize() : dto.getCollection()
+                            .size();
+
+                    listResult.setTotalVirtualAppliances(total);
+                    listResult.setVirtualAppliancesList(collection);
+
+                    result.setSuccess(true);
+                    result.setData(listResult);
+                }
+                else
+                {
+                    populateErrors(response, result, "getExternalVlansByVirtualDatacenter");
+                }
+
+                return result;
+            }
+        }
+
+        result.setSuccess(Boolean.FALSE);
+        result.setMessage("Unknown exception. External networks not found.");
 
         return result;
     }

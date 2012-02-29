@@ -24,7 +24,6 @@ package com.abiquo.abiserver.commands.stub;
 import java.util.Collection;
 
 import com.abiquo.abiserver.business.hibernate.pojohb.networking.NetworkConfigurationHB;
-import com.abiquo.abiserver.pojo.infrastructure.DataCenter;
 import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.result.DataResult;
 import com.abiquo.abiserver.pojo.result.ListRequest;
@@ -43,9 +42,6 @@ public interface VirtualDatacenterResourceStub
 
     public BasicResult deleteVirtualDatacenter(VirtualDataCenter vdc,
         ResourceManager resourceManager);
-
-    public DataResult<Collection<VirtualDataCenter>> getVirtualDatacenters(Enterprise enterprise,
-        DataCenter datacenter);
 
     public DataResult<Collection<VirtualDataCenter>> getVirtualDatacentersByEnterprise(
         final Enterprise enterprise);

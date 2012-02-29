@@ -92,6 +92,12 @@ public class VirtualApplianceRep extends DefaultRepBase
         return virtualApplianceDao.findByEnterprise(ent, filterOptions);
     }
 
+    public List<VirtualAppliance> findVirtualAppliancesByEnterpriseAndDatacenter(
+        final Integer entId, final Integer dcId)
+    {
+        return virtualApplianceDao.findByEnterpriseAndDatacenter(entId, dcId);
+    }
+
     public VirtualAppliance findById(final Integer id)
     {
         return virtualApplianceDao.findById(id);

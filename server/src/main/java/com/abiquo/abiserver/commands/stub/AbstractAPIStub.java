@@ -540,6 +540,17 @@ public class AbstractAPIStub
             params);
     }
 
+    protected String createEnterpriseLimitByDatacenterVirtualAppliancesLink(final int enterpriseId,
+        final int limitId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("enterprise", valueOf(enterpriseId));
+        params.put("limit", valueOf(limitId));
+
+        return URIResolver.resolveURI(apiUri,
+            "admin/enterprises/{enterprise}/limits/{limit}/action/virtualappliances", params);
+    }
+
     protected String createExternalNetworkLink(final Integer entId, final Integer vlanId)
     {
         Map<String, String> params = new HashMap<String, String>();
@@ -957,26 +968,6 @@ public class AbstractAPIStub
 
         return URIResolver.resolveURI(apiUri,
             "admin/enterprises/{enterprise}/action/virtualdatacenters", params);
-    }
-
-    protected String createVirtualDatacentersFromEnterpriseLink(final Integer idEnterprise,
-        Integer offset, final Integer numResults)
-    {
-        String uri = createVirtualDatacentersFromEnterpriseLink(idEnterprise);
-
-        Map<String, String[]> queryParams = new HashMap<String, String[]>();
-        if (numResults != null)
-        {
-            queryParams.put("numResults", new String[] {numResults.toString()});
-            if (offset != null)
-            {
-                offset = offset / numResults;
-
-                queryParams.put("page", new String[] {offset.toString()});
-            }
-        }
-
-        return UriHelper.appendQueryParamsToPath(uri, queryParams, false);
     }
 
     protected String createVirtualDatacenterPrivateIPsLink(final Integer vdcId)

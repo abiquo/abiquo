@@ -27,6 +27,7 @@ import java.util.List;
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualmachineHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.ResourceManagementHB;
 import com.abiquo.abiserver.pojo.authentication.UserSession;
+import com.abiquo.abiserver.pojo.infrastructure.DataCenter;
 import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.result.DataResult;
 import com.abiquo.abiserver.pojo.result.ListRequest;
@@ -81,6 +82,9 @@ public interface VirtualApplianceResourceStub
 
     public DataResult<VirtualAppliancesListResult> getVirtualAppliancesByEnterprise(
         UserSession userSession, Enterprise enterprise, ListRequest listRequest);
+
+    public DataResult<VirtualAppliancesListResult> getVirtualAppliancesByEnterpriseAndDatacenter(
+        UserSession userSession, Enterprise enterprise, DataCenter datacenter);
 
     public DataResult<VirtualAppliancesListResult> getVirtualAppliancesByVirtualDatacenter(
         final UserSession userSession, final VirtualDataCenter vdc, final ListRequest listRequest);

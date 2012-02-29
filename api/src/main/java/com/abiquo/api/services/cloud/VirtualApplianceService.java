@@ -42,6 +42,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.exceptions.APIException;
+import com.abiquo.api.services.DatacenterService;
 import com.abiquo.api.services.DefaultApiService;
 import com.abiquo.api.services.EnterpriseService;
 import com.abiquo.api.services.UserService;
@@ -63,6 +64,7 @@ import com.abiquo.server.core.cloud.VirtualDatacenterRep;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineState;
 import com.abiquo.server.core.enterprise.Enterprise;
+import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.management.RasdManagement;
 import com.abiquo.server.core.infrastructure.management.RasdManagementDAO;
 import com.abiquo.server.core.infrastructure.storage.Tier;
@@ -90,7 +92,7 @@ public class VirtualApplianceService extends DefaultApiService
     private final static Logger logger = LoggerFactory.getLogger(VirtualMachineService.class);
 
     @Autowired
-    TarantinoService tarantino;
+    private TarantinoService tarantino;
 
     @Autowired
     private VirtualDatacenterRep repo;
@@ -121,6 +123,9 @@ public class VirtualApplianceService extends DefaultApiService
 
     @Autowired
     private EnterpriseService entService;
+
+    @Autowired
+    private DatacenterService dcServbice;
 
     public VirtualApplianceService()
     {
@@ -168,6 +173,23 @@ public class VirtualApplianceService extends DefaultApiService
     {
         Enterprise enterprise = entService.getEnterprise(entId);
         return virtualApplianceRepo.findVirtualAppliancesByEnterprise(enterprise, filterOptions);
+    }
+
+    /**
+     * Retrieves the list of virtual appliances by enterprise and datacenter
+     * 
+     * @param entId identifier of the enterprise.
+     * @param dcId identifier of the datacenter.
+     * @return the list of {@link VirtualAppliance} pojo
+     */
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
+    public List<VirtualAppliance> getVirtualAppliancesByEnterpriseAndDatacenter(
+        final Integer entId, final Integer dcId)
+    {
+        Enterprise enterprise = entService.getEnterprise(entId);
+        Datacenter datacenter = dcServbice.getDatacenter(dcId);
+
+        return virtualApplianceRepo.findVirtualAppliancesByEnterpriseAndDatacenter(entId, dcId);
     }
 
     @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
