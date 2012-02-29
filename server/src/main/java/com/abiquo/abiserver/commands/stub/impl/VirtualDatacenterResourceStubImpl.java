@@ -324,6 +324,14 @@ public class VirtualDatacenterResourceStubImpl extends AbstractAPIStub implement
 
             for (VirtualDatacenterDto vdc : dto.getCollection())
             {
+
+                int datacenterId =
+                    URIResolver.getLinkId(vdc.searchLink("datacenter"), "admin/datacenters",
+                        "{datacenter}", "datacenter");
+
+                VirtualDataCenter vdctoadd =
+                    VirtualDataCenter.create(vdc, datacenterId, enterprise);
+
                 // TODO set all limits
                 ResourceAllocationLimit limits = new ResourceAllocationLimit();
 
@@ -332,19 +340,16 @@ public class VirtualDatacenterResourceStubImpl extends AbstractAPIStub implement
                 publicIpLimit.setSoft(vdc.getPublicIpsSoft());
                 limits.setPublicIP(publicIpLimit);
 
-                VirtualDataCenter pojo = new VirtualDataCenter();
-                pojo.setId(vdc.getId());
-                pojo.setName(vdc.getName());
-                pojo.setLimits(limits);
+                vdctoadd.setLimits(limits);
 
                 // Get the default network of the vdc.
                 RESTLink link = vdc.searchLink("defaultnetwork");
                 response = get(link.getHref());
                 VLANNetworkDto vlanDto = response.getEntity(VLANNetworkDto.class);
 
-                pojo.setDefaultVlan(NetworkResourceStubImpl.createFlexObject(vlanDto));
+                vdctoadd.setDefaultVlan(NetworkResourceStubImpl.createFlexObject(vlanDto));
 
-                collection.add(pojo);
+                collection.add(vdctoadd);
             }
 
             Integer total =
