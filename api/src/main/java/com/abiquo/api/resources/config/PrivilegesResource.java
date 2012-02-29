@@ -26,6 +26,7 @@ import java.util.List;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 
 import org.apache.wink.common.annotations.Workspace;
@@ -52,6 +53,7 @@ public class PrivilegesResource extends AbstractResource
     private EnterpriseService service;
 
     @GET
+    @Produces(PrivilegesDto.MEDIA_TYPE)
     public PrivilegesDto getPrivileges(@Context final IRESTBuilder restBuilder) throws Exception
     {
         Collection<Privilege> ps = service.findAllPrivileges();

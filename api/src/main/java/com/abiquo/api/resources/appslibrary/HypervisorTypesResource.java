@@ -27,6 +27,7 @@ import java.util.Collection;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 
 import org.apache.wink.common.annotations.Workspace;
@@ -50,6 +51,7 @@ public class HypervisorTypesResource extends AbstractResource
     private HypervisorTypeService service;
 
     @GET
+    @Produces(HypervisorTypesDto.MEDIA_TYPE)
     public HypervisorTypesDto getHypervisorTypes(@Context final IRESTBuilder restBuilder)
         throws Exception
     {
