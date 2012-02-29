@@ -135,8 +135,8 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
         updateUse(virtualAppliance, virtualMachine, true); // upgrade resources on the target HA
         // hypervisor
         // free resources on the original hypervisor
-        Machine sourceMachine = hypervisorDao.findById(sourceHypervisorId).getMachine();
-        updateUsagePhysicalMachine(sourceMachine, virtualMachine, true);
+        // Machine sourceMachine = hypervisorDao.findById(sourceHypervisorId).getMachine();
+        // updateUsagePhysicalMachine(sourceMachine, virtualMachine, true);
     }
 
     private void updateUse(final VirtualAppliance virtualAppliance,
@@ -192,6 +192,32 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
             e.printStackTrace(); // FIXME
             throw new ResourceUpgradeUseException("Can not update resource utilization: "
                 + e.getMessage());
+        }
+    }
+
+    @Override
+    public void rollbackUseHA(final VirtualMachine virtualMachine)
+    {
+        final Machine physicalMachine = virtualMachine.getHypervisor().getMachine();
+
+        try
+        {
+            updateUsageDatastore(virtualMachine, true);
+            updateUsagePhysicalMachine(physicalMachine, virtualMachine, true);
+            rollbackNetworkingResources(physicalMachine, virtualMachine);
+
+            virtualMachine.setState(VirtualMachineState.UNKNOWN);
+        }
+        catch (final Exception e)
+        {
+            throw new ResourceUpgradeUseException("Can not update resource use" + e.getMessage());
+        }
+
+        if (physicalMachine != null
+            && getAllocationFitPolicyOnDatacenter(physicalMachine.getDatacenter().getId()).equals(
+                FitPolicy.PROGRESSIVE))
+        {
+            infrastructureService.adjustPoweredMachinesInRack(physicalMachine.getRack());
         }
     }
 

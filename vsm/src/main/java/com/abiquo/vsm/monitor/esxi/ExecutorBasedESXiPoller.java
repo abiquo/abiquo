@@ -182,29 +182,31 @@ public class ExecutorBasedESXiPoller extends AbstractMonitor
                         // Get states
                         ObjectContent[] vms = esx.getAllVMs();
 
-                        for (ObjectContent vm : vms)
+                        if (vms != null)
                         {
-                            VirtualMachineConfigInfo vmConfig =
-                                esx.getVMConfigFromObjectContent(vm);
-
-                            if (vmConfig == null)
+                            for (ObjectContent vm : vms)
                             {
-                                continue;
+                                VirtualMachineConfigInfo vmConfig = esx.getVMConfigFromObjectContent(vm);
+
+                                if (vmConfig == null)
+                                {
+                                    continue;
+                                }
+
+                                // Save the VM in the list of current VMs
+                                String vmName = decodeURLRawString(vmConfig.getName());
+                                currentVMs.add(vmName);
+
+                                // Get the new state of the VM
+                                VMEventType state = esx.getStateForObject(vm);
+                                LOGGER.trace("Found VM {} in state {}", vmName, state.name());
+
+                                VMEvent event = new VMEvent(state, physicalMachineAddress, vmName);
+
+                                // Propagate the event. RedisSubscriber will decide if it must be
+                                // notified, based on subscription information
+                                ExecutorBasedESXiPoller.this.notify(event);
                             }
-
-                            // Save the VM in the list of current VMs
-                            String vmName = decodeURLRawString(vmConfig.getName());
-                            currentVMs.add(vmName);
-
-                            // Get the new state of the VM
-                            VMEventType state = esx.getStateForObject(vm);
-                            LOGGER.trace("Found VM {} in state {}", vmName, state.name());
-
-                            VMEvent event = new VMEvent(state, physicalMachineAddress, vmName);
-
-                            // Propagate the event. RedisSubscriber will decide if it must be
-                            // notified, based on subscription information
-                            ExecutorBasedESXiPoller.this.notify(event);
                         }
 
                         if (LOGGER.isTraceEnabled())
