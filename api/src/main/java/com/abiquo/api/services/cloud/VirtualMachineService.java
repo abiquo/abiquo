@@ -101,6 +101,7 @@ import com.abiquo.server.core.cloud.VirtualMachineRep;
 import com.abiquo.server.core.cloud.VirtualMachineState;
 import com.abiquo.server.core.cloud.VirtualMachineStateTransition;
 import com.abiquo.server.core.cloud.VirtualMachineWithNodeDto;
+import com.abiquo.server.core.cloud.VirtualMachine.OrderByEnum;
 import com.abiquo.server.core.enterprise.DatacenterLimits;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.EnterpriseRep;
@@ -232,9 +233,21 @@ public class VirtualMachineService extends DefaultApiService
         return repo.findVirtualMachinesByUser(enterprise, user);
     }
 
-    public List<VirtualMachine> findByVirtualAppliance(final VirtualAppliance vapp)
+    public List<VirtualMachine> findByVirtualAppliance(final VirtualAppliance vapp,
+        final Integer startwith, final String orderBy, final String filter, final Integer limit,
+        final Boolean descOrAsc)
     {
-        return repo.findVirtualMachinesByVirtualAppliance(vapp.getId());
+        // Check if the orderBy element is actually one of the available ones
+        VirtualMachine.OrderByEnum orderByEnum = VirtualMachine.OrderByEnum.fromValue(orderBy);
+        if (orderByEnum == null)
+        {
+            LOGGER
+                .info("Bad parameter 'by' in request to get the virtual machines by virtual appliance.");
+            addValidationErrors(APIError.QUERY_INVALID_PARAMETER);
+            flushErrors();
+        }
+        return repo.findVirtualMachinesByVirtualAppliance(vapp.getId(), startwith, limit, filter,
+            orderByEnum, descOrAsc);
     }
 
     public VirtualMachine findByUUID(final String uuid)
@@ -706,7 +719,8 @@ public class VirtualMachineService extends DefaultApiService
      */
     public boolean isAssignedTo(final Integer vmId, final Integer vappId)
     {
-        List<VirtualMachine> vms = repo.findVirtualMachinesByVirtualAppliance(vappId);
+        List<VirtualMachine> vms =
+            repo.findVirtualMachinesByVirtualAppliance(vappId, 0, 0, "", OrderByEnum.NAME, true);
         for (VirtualMachine vm : vms)
         {
             if (vm.getId().equals(vmId))
@@ -2748,8 +2762,8 @@ public class VirtualMachineService extends DefaultApiService
         return null;
     }
 
-    /*
-     * @param vmId
+    /**
+     * @param vmId to return
      * @return VirtualMachine with DC.
      */
     public VirtualMachine getVirtualMachineInitialized(final Integer vmId)
@@ -2779,6 +2793,16 @@ public class VirtualMachineService extends DefaultApiService
         }
 
         return virtualMachine;
+    }
+
+    /**
+     * Sets the {@link VirtualMachine#setState(VirtualMachineState)} to
+     * {@link VirtualMachineState#UNKNOWN}.
+     */
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void setVirtualMachineToUnknown(final Integer vmId)
+    {
+        repo.setVirtualMachineToUnknown(vmId);
     }
 
     /**
