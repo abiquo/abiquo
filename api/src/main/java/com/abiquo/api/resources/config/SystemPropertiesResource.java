@@ -109,8 +109,8 @@ public class SystemPropertiesResource extends AbstractResource
     }
 
     @PUT
-    @Consumes(SystemPropertyDto.MEDIA_TYPE)
-    @Produces(SystemPropertyDto.MEDIA_TYPE)
+    @Consumes(SystemPropertiesDto.MEDIA_TYPE)
+    @Produces(SystemPropertiesDto.MEDIA_TYPE)
     public SystemPropertiesDto modifySystemProperties(final SystemPropertiesDto systemProperties,
         @QueryParam(COMPONENT_QUERY_PARAM) final String component,
         @Context final IRESTBuilder restBuilder) throws Exception
