@@ -56,7 +56,8 @@ public class SystemPropertyResourceIT extends AbstractJpaGeneratorIT
     @Test
     public void getUnexistingSystemProperty() throws ClientWebException
     {
-        ClientResponse response = get(resolveSystemPropertyURI(12345));
+        ClientResponse response =
+            get(resolveSystemPropertyURI(12345), SystemPropertyDto.MEDIA_TYPE);
         assertErrors(response, 404, APIError.NON_EXISTENT_SYSTEM_PROPERTY.getCode());
     }
 

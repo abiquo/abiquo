@@ -49,7 +49,7 @@ public class IconResourceIT extends AbstractJpaGeneratorIT
 
         String validURI = resolveIconURI(icon.getId());
 
-        ClientResponse response = get(validURI);
+        ClientResponse response = get(validURI, IconDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), 200);
 
         IconDto iconDto = response.getEntity(IconDto.class);
@@ -63,7 +63,7 @@ public class IconResourceIT extends AbstractJpaGeneratorIT
     @Test
     public void getIconRaises404WhenNotFound()
     {
-        ClientResponse response = get(resolveIconURI(12345));
+        ClientResponse response = get(resolveIconURI(12345), IconDto.MEDIA_TYPE);
         assertError(response, 404, APIError.NON_EXISTENT_ICON);
     }
 
@@ -114,7 +114,7 @@ public class IconResourceIT extends AbstractJpaGeneratorIT
         ClientResponse response = delete(validURI);
         assertEquals(response.getStatusCode(), 204);
 
-        response = get(validURI);
+        response = get(validURI, IconDto.MEDIA_TYPE);
         assertError(response, 404, APIError.NON_EXISTENT_ICON);
     }
 
@@ -130,11 +130,13 @@ public class IconResourceIT extends AbstractJpaGeneratorIT
     public void deleteIconRaises409WhenInUseInVirtualImages()
     {
         Icon icon = iconGenerator.createUniqueInstance();
-        VirtualMachineTemplate virtualImage = virtualMachineTemplateGenerator.createUniqueInstance();
+        VirtualMachineTemplate virtualImage =
+            virtualMachineTemplateGenerator.createUniqueInstance();
         virtualImage.setIcon(icon);
 
         List<Object> entitiesToPersist = new ArrayList<Object>();
-        virtualMachineTemplateGenerator.addAuxiliaryEntitiesToPersist(virtualImage, entitiesToPersist);
+        virtualMachineTemplateGenerator.addAuxiliaryEntitiesToPersist(virtualImage,
+            entitiesToPersist);
         entitiesToPersist.add(virtualImage);
 
         setup(entitiesToPersist.toArray());

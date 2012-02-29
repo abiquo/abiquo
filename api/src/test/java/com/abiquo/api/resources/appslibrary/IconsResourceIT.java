@@ -82,7 +82,7 @@ public class IconsResourceIT extends AbstractJpaGeneratorIT
 
         StringBuilder URI = new StringBuilder(validURI + "?path=" + icon.getPath());
 
-        ClientResponse response = get(URI.toString());
+        ClientResponse response = get(URI.toString(), IconsDto.MEDIA_TYPE);
 
         IconsDto iconsDto = response.getEntity(IconsDto.class);
         assertNotNull(iconsDto);

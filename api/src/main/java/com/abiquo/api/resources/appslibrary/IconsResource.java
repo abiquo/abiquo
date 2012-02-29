@@ -26,9 +26,11 @@ import static com.abiquo.api.resources.appslibrary.IconResource.createTransferOb
 import java.util.ArrayList;
 import java.util.Collection;
 
+import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 
@@ -56,6 +58,7 @@ public class IconsResource extends AbstractResource
     private IconService service;
 
     @GET
+    @Produces(IconsDto.MEDIA_TYPE)
     public IconsDto getIcons(@QueryParam(PATH) final String path,
         @Context final IRESTBuilder restBuilder)
     {
@@ -81,6 +84,8 @@ public class IconsResource extends AbstractResource
     }
 
     @POST
+    @Consumes(IconDto.MEDIA_TYPE)
+    @Produces(IconDto.MEDIA_TYPE)
     public IconDto addIcon(final IconDto iconDto, @Context final IRESTBuilder restBuilder)
     {
         Icon icon = service.addIcon(iconDto, restBuilder);
