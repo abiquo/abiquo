@@ -10,7 +10,7 @@
     <parent>
         <artifactId>platform</artifactId>
         <groupId>com.abiquo.abicloud</groupId>
-        <version>1.8.5-HF8</version>
+        <version>1.8.5-HF7</version>
     </parent>
     <!-- -->
     <!-- POM RELATIONSHIPS -->
