@@ -213,27 +213,10 @@
 
             public function set virtualMachine(value:VirtualMachine):void
             {
-                /*var update:Boolean = true;
-                
-                
-                 if(this._virtualMachine){
-                	if(this._virtualMachine.id != value.id){
-		                update = true;                		
-                	}else{
-                		if(this._virtualMachine.state.id != value.state.id){
-                			update = true;
-                		}
-                	}
-                }else{
-                	update = true;	       
-                } 
-                
-                if(update){*/
-                	this._virtualMachine = value;
-	                nodeName = null;
-	                dispatchEvent(new Event("virtualMachineChange"));
-	                setVNCIconEnable(); 
-                //}
+            	this._virtualMachine = value;
+                nodeName = null;
+                dispatchEvent(new Event("virtualMachineChange"));
+                setVNCIconEnable(); 
             }
             
             private function setVNCIconEnable():void{
@@ -952,7 +935,8 @@
         <mx:Button id="pauseButton"
             width="57" height="47"
             styleName="StandardPauseButton"
-            enabled="{_virtualMachine.state.description == State.PAUSED.description || _virtualMachine.state.description == State.ON.description}"
+            enabled="{(_virtualMachine.state.description == State.PAUSED.description || _virtualMachine.state.description == State.ON.description)
+            &amp;&amp; HyperVisor(this._virtualMachine.assignedTo).type.id != HyperVisorType.XEN}"
             selected="{_virtualMachine.state.description == State.PAUSED.description}"
             click="onClickPauseButton()"
             useHandCursor="true"

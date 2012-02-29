@@ -1441,11 +1441,6 @@ public class VirtualMachineService extends DefaultApiService
 
         try
         {
-            LOGGER.debug("Check remote services");
-            // The remote services must be up for this Datacenter if we are to deploy
-            checkRemoteServicesByVirtualDatacenter(vdcId);
-            LOGGER.debug("Remote services are ok!");
-
             // Tasks needs the definition of the virtual machine
             VirtualMachineDescriptionBuilder vmDesc =
                 jobCreator.toTarantinoDto(virtualMachine, virtualAppliance);
@@ -1504,10 +1499,6 @@ public class VirtualMachineService extends DefaultApiService
 
         try
         {
-            LOGGER.debug("Check remote services");
-            // The remote services must be up for this Datacenter if we are to deploy
-            checkRemoteServicesByVirtualDatacenter(vdcId);
-            LOGGER.debug("Remote services are ok!");
 
             // Tasks needs the definition of the virtual machine
             VirtualMachineDescriptionBuilder vmDesc =
