@@ -498,7 +498,7 @@
             	{
 	            	var virtualApplianceEvent:VirtualApplianceEvent = new VirtualApplianceEvent(VirtualApplianceEvent.GET_VIRTUAL_DATACENTERS_BY_ENTERPRISE);
 	                virtualApplianceEvent.enterprise = AbiCloudModel.getInstance().loginManager.user.enterprise;
-	                virtualApplianceEvent.listRequest = virtualApplianceList.listRequest;
+	                virtualApplianceEvent.listRequest = virtualDatacenterList.listRequest;
 	                dispatchEvent(virtualApplianceEvent);
             	}
             }
