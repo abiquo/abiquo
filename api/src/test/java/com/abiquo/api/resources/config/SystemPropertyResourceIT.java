@@ -80,13 +80,14 @@ public class SystemPropertyResourceIT extends AbstractJpaGeneratorIT
         SystemPropertyDto p = createSystemproperty();
         String uri = p.getEditLink().getHref();
 
-        SystemPropertyDto property = get(uri).getEntity(SystemPropertyDto.class);
+        SystemPropertyDto property =
+            get(uri, SystemPropertyDto.MEDIA_TYPE).getEntity(SystemPropertyDto.class);
         property.setValue("new property value");
 
         ClientResponse response = put(uri, property);
         assertEquals(200, response.getStatusCode());
 
-        property = get(uri).getEntity(SystemPropertyDto.class);
+        property = get(uri, SystemPropertyDto.MEDIA_TYPE).getEntity(SystemPropertyDto.class);
         assertEquals(property.getValue(), "new property value");
     }
 
@@ -112,7 +113,7 @@ public class SystemPropertyResourceIT extends AbstractJpaGeneratorIT
 
         String href = resolveSystemPropertyURI(property.getId());
 
-        return get(href, sysadmin.getNick(), "foo").getEntity(SystemPropertyDto.class);
+        return get(href, sysadmin.getNick(), "foo", SystemPropertyDto.MEDIA_TYPE).getEntity(
+            SystemPropertyDto.class);
     }
-
 }
