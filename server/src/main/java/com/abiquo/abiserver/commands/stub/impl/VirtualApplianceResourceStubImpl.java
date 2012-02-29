@@ -262,8 +262,8 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
             {
                 VirtualApplianceDto appDto = virtualApplianceToDto(virtualAppliance);
                 if (!appDto.getName().equals(entity.getName())
-                    || appDto.getNodecollections() != null
-                    && !appDto.getNodecollections().equals(entity.getNodecollections()))
+                    || appDto.getNodeconnections() != null
+                    && !appDto.getNodeconnections().equals(entity.getNodeconnections()))
                 {
                     ClientResponse put = put(linkApp, appDto);
                     if (put.getStatusCode() != Status.OK.getStatusCode())
