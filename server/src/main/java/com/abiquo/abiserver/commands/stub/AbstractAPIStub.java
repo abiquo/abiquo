@@ -893,19 +893,13 @@ public class AbstractAPIStub
         return resolveURI(apiUri, "config/diskformattypes", params);
     }
 
-    protected String createIconLink(final Integer iconId)
-    {
-        Map<String, String> params = new HashMap<String, String>();
-        params.put("icon", valueOf(iconId));
-
-        return resolveURI(apiUri, "config/icons/{icon}", params);
-    }
-
-    protected String createIconsLink()
+    protected String createIconsLink(final Integer idEnterprise)
     {
         Map<String, String> params = new HashMap<String, String>();
 
-        return resolveURI(apiUri, "config/icons", params);
+        params.put("enterprise", idEnterprise.toString());
+
+        return resolveURI(apiUri, "admin/enterprises/{enterprise}/icons", params);
     }
 
     protected String createCategoryLink(final Integer categoryId)

@@ -43,7 +43,6 @@ import com.abiquo.abiserver.persistence.hibernate.HibernateDAOFactory;
 import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.result.DataResult;
 import com.abiquo.abiserver.pojo.virtualimage.Category;
-import com.abiquo.abiserver.pojo.virtualimage.Icon;
 import com.abiquo.abiserver.pojo.virtualimage.OVFPackage;
 import com.abiquo.abiserver.pojo.virtualimage.OVFPackageInstanceStatus;
 import com.abiquo.abiserver.pojo.virtualimage.OVFPackageList;
@@ -58,7 +57,6 @@ import com.abiquo.server.core.appslibrary.CategoriesDto;
 import com.abiquo.server.core.appslibrary.CategoryDto;
 import com.abiquo.server.core.appslibrary.DiskFormatTypeDto;
 import com.abiquo.server.core.appslibrary.DiskFormatTypesDto;
-import com.abiquo.server.core.appslibrary.IconDto;
 import com.abiquo.server.core.appslibrary.IconsDto;
 import com.abiquo.server.core.appslibrary.TemplateDefinitionDto;
 import com.abiquo.server.core.appslibrary.TemplateDefinitionListDto;
@@ -75,28 +73,6 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
     public static final String TEMPLATE_DEFINITION_PATH = "appslib/templateDefinitions";
 
     public static final String TEMPLATE_DEFINITION_LISTS_PATH = "appslib/templateDefinitionList";
-
-    @Override
-    public DataResult<Icon> createIcon(final IconDto icon)
-    {
-        DataResult<Icon> result = new DataResult<Icon>();
-
-        String uri = createIconsLink();
-
-        ClientResponse response = post(uri, icon);
-
-        if (response.getStatusType().getFamily() == Family.SUCCESSFUL)
-        {
-            result.setSuccess(Boolean.TRUE);
-            result.setData(createFlexIconObject(response.getEntity(IconDto.class)));
-        }
-        else
-        {
-            populateErrors(response, result, "createIcon");
-        }
-
-        return result;
-    }
 
     private Category createFlexCategoryObject(final CategoryDto dto)
     {
@@ -575,60 +551,12 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
     }
 
     @Override
-    public BasicResult deleteIcon(final Integer idIcon)
-    {
-        BasicResult result = new BasicResult();
-
-        final String uri = createIconLink(idIcon);
-
-        ClientResponse response = delete(uri);
-
-        if (response.getStatusType().getFamily() == Family.SUCCESSFUL)
-        {
-            result.setSuccess(Boolean.TRUE);
-        }
-        else
-        {
-            populateErrors(response, result, "deleteIcon");
-        }
-        return result;
-    }
-
-    @Override
-    public BasicResult editIcon(final Icon icon)
-    {
-        DataResult<Icon> result = new DataResult<Icon>();
-
-        final String uri = createIconLink(icon.getId());
-
-        IconDto iconDto = new IconDto();
-
-        iconDto.setId(icon.getId());
-        iconDto.setName(icon.getName());
-        iconDto.setPath(icon.getPath());
-
-        ClientResponse response = put(uri, iconDto);
-
-        if (response.getStatusType().getFamily() == Family.SUCCESSFUL)
-        {
-            result.setSuccess(Boolean.TRUE);
-            result.setData(createFlexIconObject(response.getEntity(IconDto.class)));
-        }
-        else
-        {
-            populateErrors(response, result, "editIcon");
-        }
-        return result;
-
-    }
-
-    @Override
-    public DataResult<List<Icon>> getIcons()
+    public DataResult<List<String>> getIcons(final Integer idEnterprise)
     {
 
-        DataResult<List<Icon>> result = new DataResult<List<Icon>>();
+        DataResult<List<String>> result = new DataResult<List<String>>();
 
-        final String uri = createIconsLink();
+        final String uri = createIconsLink(idEnterprise);
 
         ClientResponse response = get(uri);
 
@@ -636,12 +564,7 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
         {
             result.setSuccess(Boolean.TRUE);
             IconsDto icons = response.getEntity(IconsDto.class);
-            List<Icon> listIcon = new ArrayList<Icon>();
-            for (IconDto icon : icons.getCollection())
-            {
-                listIcon.add(createFlexIconObject(icon));
-            }
-            result.setData(listIcon);
+            result.setData(icons.getCollection());
         }
         else
         {
@@ -650,15 +573,6 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
 
         return result;
 
-    }
-
-    public static Icon createFlexIconObject(final IconDto iconDto)
-    {
-        Icon icon = new Icon();
-        icon.setName(iconDto.getName());
-        icon.setPath(iconDto.getPath());
-        icon.setId(iconDto.getId());
-        return icon;
     }
 
     @Override

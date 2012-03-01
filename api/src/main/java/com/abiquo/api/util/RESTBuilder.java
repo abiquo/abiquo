@@ -50,7 +50,6 @@ import com.abiquo.api.resources.UsersResource;
 import com.abiquo.api.resources.VirtualMachinesInfrastructureResource;
 import com.abiquo.api.resources.appslibrary.CategoryResource;
 import com.abiquo.api.resources.appslibrary.DatacenterRepositoryResource;
-import com.abiquo.api.resources.appslibrary.IconResource;
 import com.abiquo.api.resources.appslibrary.TemplateDefinitionListResource;
 import com.abiquo.api.resources.appslibrary.TemplateDefinitionListsResource;
 import com.abiquo.api.resources.appslibrary.TemplateDefinitionResource;
@@ -76,8 +75,6 @@ import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.model.rest.RESTLink;
 import com.abiquo.server.core.appslibrary.Category;
 import com.abiquo.server.core.appslibrary.CategoryDto;
-import com.abiquo.server.core.appslibrary.Icon;
-import com.abiquo.server.core.appslibrary.IconDto;
 import com.abiquo.server.core.appslibrary.TemplateDefinitionDto;
 import com.abiquo.server.core.appslibrary.TemplateDefinitionListDto;
 import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
@@ -503,7 +500,7 @@ public class RESTBuilder implements IRESTBuilder
 
     @Override
     public List<RESTLink> buildTemplateDefinitionLinks(final Integer enterpriseId,
-        final TemplateDefinitionDto templateDefinition, final Category category, final Icon icon)
+        final TemplateDefinitionDto templateDefinition, final Category category)
     {
         List<RESTLink> links = new ArrayList<RESTLink>();
 
@@ -527,14 +524,6 @@ public class RESTBuilder implements IRESTBuilder
         params.put(TemplateDefinitionResource.TEMPLATE_DEFINITION, templateDefinition.getId()
             .toString());
         links.add(builder.buildRestLink(TemplateDefinitionResource.class, REL_EDIT, params));
-
-        if (icon != null)
-        {
-            params.put(IconResource.ICON, String.valueOf(icon.getId()));
-            links.add(builder.buildRestLink(IconResource.class, null, IconResource.ICON, icon
-                .getPath(), params));
-
-        }
 
         return links;
     }
@@ -741,19 +730,6 @@ public class RESTBuilder implements IRESTBuilder
     }
 
     @Override
-    public List<RESTLink> buildIconLinks(final IconDto icon)
-    {
-        List<RESTLink> links = new ArrayList<RESTLink>();
-        Map<String, String> params = new HashMap<String, String>();
-        params.put(IconResource.ICON, icon.getId().toString());
-
-        AbiquoLinkBuilder builder = AbiquoLinkBuilder.createBuilder(linkProcessor);
-        links.add(builder.buildRestLink(IconResource.class, REL_EDIT, params));
-
-        return links;
-    }
-
-    @Override
     public List<RESTLink> buildVirtualMachineCloudLinks(final Integer vdcId, final Integer vappId,
         final VirtualMachine vm, final boolean chefEnabled, final Integer[] volumeIds,
         final Integer[] diskIds, final List<IpPoolManagement> ips)
@@ -914,15 +890,6 @@ public class RESTBuilder implements IRESTBuilder
         vmtemplateLink.setTitle(vmtemplate.getName());
         links.add(vmtemplateLink);
 
-        if (vmtemplate.getIcon() != null)
-        {
-            params.put(IconResource.ICON, vmtemplate.getIcon().getId().toString());
-            RESTLink iconLink =
-                builder.buildRestLink(IconResource.class, IconResource.ICON, params);
-            iconLink.setTitle(vmtemplate.getIcon().getPath()); // TODO do not use title (altRef)
-            links.add(iconLink);
-        }
-
         // TODO: How to build a link for an imported one??
 
         if (master != null)
@@ -1082,8 +1049,10 @@ public class RESTBuilder implements IRESTBuilder
             builder.buildRestLink(PrivateNetworkResource.class,
                 PrivateNetworkResource.PRIVATE_NETWORK, params);
         link.setTitle(ip.getVlanNetwork().getName());
-        
-        RESTLink ipLink = builder.buildRestLink(IpAddressesResource.class, IpAddressesResource.IP_ADDRESS_PARAM, REL_SELF, params);
+
+        RESTLink ipLink =
+            builder.buildRestLink(IpAddressesResource.class, IpAddressesResource.IP_ADDRESS_PARAM,
+                REL_SELF, params);
         ipLink.setTitle(VirtualMachineNetworkConfigurationResource.PRIVATE_IP);
 
         links.add(link);

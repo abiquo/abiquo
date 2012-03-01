@@ -34,13 +34,11 @@ import com.abiquo.abiserver.pojo.authentication.UserSession;
 import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.result.DataResult;
 import com.abiquo.abiserver.pojo.virtualimage.Category;
-import com.abiquo.abiserver.pojo.virtualimage.Icon;
 import com.abiquo.abiserver.pojo.virtualimage.OVFPackageInstanceStatus;
 import com.abiquo.abiserver.pojo.virtualimage.OVFPackageList;
 import com.abiquo.abiserver.pojo.virtualimage.Repository;
 import com.abiquo.abiserver.pojo.virtualimage.VirtualImage;
 import com.abiquo.server.core.appslibrary.CategoryDto;
-import com.abiquo.server.core.appslibrary.IconDto;
 
 public class AppsLibraryService
 {
@@ -224,29 +222,12 @@ public class AppsLibraryService
     // todo con idRepo
 
     /** Icon */
-    public DataResult<Icon> createIcon(final UserSession userSession, final Icon icon)
-    {
-        IconDto dto = new IconDto();
-        dto.setName(icon.getName());
-        dto.setPath(icon.getPath());
 
-        return proxyStub(userSession).createIcon(dto);
-    }
-
-    public BasicResult editIcon(final UserSession userSession, final Icon icon)
-    {
-        return proxyStub(userSession).editIcon(icon);
-    }
-
-    public BasicResult deleteIcon(final UserSession userSession, final Integer idIcon)
-    {
-        return proxyStub(userSession).deleteIcon(idIcon);
-    }
-
-    public DataResult<List<Icon>> getIcons(final UserSession userSession)
+    public DataResult<List<String>> getIcons(final UserSession userSession,
+        final Integer idEnterprise)
     {
 
-        return proxyStub(userSession).getIcons();
+        return proxyStub(userSession).getIcons(idEnterprise);
     }
 
     /**

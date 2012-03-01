@@ -38,7 +38,6 @@ import com.abiquo.api.resources.AbstractJpaGeneratorIT;
 import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.server.core.appslibrary.AppsLibrary;
 import com.abiquo.server.core.appslibrary.Category;
-import com.abiquo.server.core.appslibrary.Icon;
 import com.abiquo.server.core.appslibrary.TemplateDefinition;
 import com.abiquo.server.core.appslibrary.TemplateDefinitionDto;
 import com.abiquo.server.core.enterprise.Enterprise;
@@ -59,8 +58,6 @@ public class TemplateDefinitionResourceIT extends AbstractJpaGeneratorIT
 
     protected AppsLibrary appsLibrary;
 
-    protected Icon icon;
-
     private static final String SYSADMIN = "sysadmin";
 
     @BeforeMethod(groups = {APPS_INTEGRATION_TESTS})
@@ -69,7 +66,6 @@ public class TemplateDefinitionResourceIT extends AbstractJpaGeneratorIT
         enterprise = enterpriseGenerator.createUniqueInstance();
         datacenter = datacenterGenerator.createUniqueInstance();
         category = categoryGenerator.createUniqueInstance();
-        icon = iconGenerator.createUniqueInstance();
 
         Role role = roleGenerator.createInstanceSysAdmin();
         User user = userGenerator.createInstance(enterprise, role, SYSADMIN, SYSADMIN);
@@ -93,7 +89,7 @@ public class TemplateDefinitionResourceIT extends AbstractJpaGeneratorIT
     {
         appsLibrary = appsLibraryGenerator.createUniqueInstance();
         appsLibrary.setEnterprise(enterprise);
-        templateDef = templateDefGenerator.createInstance(appsLibrary, category, icon);
+        templateDef = templateDefGenerator.createInstance(appsLibrary, category);
         templateDef.setDescription("templateDef_1");
         category.setName("category_1");
         templateDef.setType(DiskFormatType.UNKNOWN);
@@ -102,7 +98,6 @@ public class TemplateDefinitionResourceIT extends AbstractJpaGeneratorIT
 
         entitiesToSetup.add(appsLibrary);
         entitiesToSetup.add(category);
-        entitiesToSetup.add(icon);
         entitiesToSetup.add(templateDef);
 
         setup(entitiesToSetup.toArray());
@@ -123,13 +118,12 @@ public class TemplateDefinitionResourceIT extends AbstractJpaGeneratorIT
     {
         appsLibrary = appsLibraryGenerator.createUniqueInstance();
         appsLibrary.setEnterprise(enterprise);
-        templateDef = templateDefGenerator.createInstance(appsLibrary, category, icon);
+        templateDef = templateDefGenerator.createInstance(appsLibrary, category);
 
         List<Object> entitiesToSetup = new ArrayList<Object>();
 
         entitiesToSetup.add(appsLibrary);
         entitiesToSetup.add(category);
-        entitiesToSetup.add(icon);
         entitiesToSetup.add(templateDef);
 
         setup(entitiesToSetup.toArray());
@@ -161,7 +155,7 @@ public class TemplateDefinitionResourceIT extends AbstractJpaGeneratorIT
     {
         appsLibrary = appsLibraryGenerator.createUniqueInstance();
         appsLibrary.setEnterprise(enterprise);
-        templateDef = templateDefGenerator.createInstance(appsLibrary, category, icon);
+        templateDef = templateDefGenerator.createInstance(appsLibrary, category);
         templateDef.setDescription("templateDef_1");
         templateDef.setType(DiskFormatType.UNKNOWN);
 
@@ -169,7 +163,6 @@ public class TemplateDefinitionResourceIT extends AbstractJpaGeneratorIT
 
         entitiesToSetup.add(appsLibrary);
         entitiesToSetup.add(category);
-        entitiesToSetup.add(icon);
         entitiesToSetup.add(templateDef);
 
         setup(entitiesToSetup.toArray());

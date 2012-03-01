@@ -31,6 +31,7 @@ import javax.persistence.EntityManager;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.hibernate.Criteria;
+import org.hibernate.Query;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
@@ -56,6 +57,11 @@ import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
 /* package */class VirtualMachineTemplateDAO extends
     DefaultDAOBase<Integer, VirtualMachineTemplate>
 {
+
+    private final String FIND_ICONS_BY_ENTERPRISE = " SELECT distinct vtd.iconUrl "//
+        + "FROM com.abiquo.server.core.appslibrary.VirtualMachineTemplate vtd "//
+        + "WHERE vtd.enterprise.id = :enterpriseId";
+
     public VirtualMachineTemplateDAO()
     {
         super(VirtualMachineTemplate.class);
@@ -322,17 +328,17 @@ import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
         switch (stateful)
         {
             case ALL:
-                Restrictions.and(cri,
-                    Restrictions.isNotNull(VirtualMachineTemplate.VOLUME_PROPERTY));
+                Restrictions.and(cri, Restrictions
+                    .isNotNull(VirtualMachineTemplate.VOLUME_PROPERTY));
                 break;
             case USED:
                 // use function criteriaWithStatefulNavigation before
-                return Restrictions.and(cri,
-                    Restrictions.eq("vl." + VolumeManagement.STATE_PROPERTY, VolumeState.ATTACHED));
+                return Restrictions.and(cri, Restrictions.eq("vl."
+                    + VolumeManagement.STATE_PROPERTY, VolumeState.ATTACHED));
             case NOTUSED:
                 // use function criteriaWithStatefulNavigation before
-                return Restrictions.and(cri,
-                    Restrictions.eq("vl." + VolumeManagement.STATE_PROPERTY, VolumeState.DETACHED));
+                return Restrictions.and(cri, Restrictions.eq("vl."
+                    + VolumeManagement.STATE_PROPERTY, VolumeState.DETACHED));
         }
         return cri;
     }
@@ -345,16 +351,16 @@ import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
     private static Criterion sameEnterpriseOrSharedInRepo(final Enterprise enterprise,
         final com.abiquo.server.core.infrastructure.Repository repository)
     {
-        return Restrictions.and(sameRepositoryAndNotStatefull(repository),
-            Restrictions.or(sameEnterprise(enterprise), sharedVirtualMachineTemplate()));
+        return Restrictions.and(sameRepositoryAndNotStatefull(repository), Restrictions.or(
+            sameEnterprise(enterprise), sharedVirtualMachineTemplate()));
     }
 
     private static Criterion sameEnterpriseOrSharedInRepo(final Enterprise enterprise,
         final com.abiquo.server.core.infrastructure.Repository repository, final String path)
     {
         Criterion sameEnterpriseOrSharedInRepo =
-            Restrictions.and(sameRepositoryAndNotStatefull(repository),
-                Restrictions.or(sameEnterprise(enterprise), sharedVirtualMachineTemplate()));
+            Restrictions.and(sameRepositoryAndNotStatefull(repository), Restrictions.or(
+                sameEnterprise(enterprise), sharedVirtualMachineTemplate()));
 
         return Restrictions.and(Restrictions.eq(VirtualMachineTemplate.PATH_PROPERTY, path),
             sameEnterpriseOrSharedInRepo);
@@ -374,6 +380,12 @@ import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
     {
         return Restrictions.eq("vl." + RasdManagement.VIRTUAL_DATACENTER_PROPERTY,
             virtualDatacenter);
+    }
+
+    public List<String> findIconsByEnterprise(final Integer enterpriseId)
+    {
+        Query query = getSession().createQuery(FIND_ICONS_BY_ENTERPRISE);
+        return query.setParameter("enterpriseId", enterpriseId).list();
     }
 
     private Criteria criteriaWithStatefulNavigation()

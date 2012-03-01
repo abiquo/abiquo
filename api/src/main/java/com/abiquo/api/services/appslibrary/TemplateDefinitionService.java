@@ -48,7 +48,6 @@ import com.abiquo.model.transport.error.CommonError;
 import com.abiquo.ovfmanager.ovf.xml.OVFSerializer;
 import com.abiquo.server.core.appslibrary.AppsLibraryRep;
 import com.abiquo.server.core.appslibrary.Category;
-import com.abiquo.server.core.appslibrary.Icon;
 import com.abiquo.server.core.appslibrary.TemplateDefinition;
 import com.abiquo.server.core.appslibrary.TemplateDefinitionRep;
 import com.abiquo.server.core.enterprise.Enterprise;
@@ -140,8 +139,8 @@ public class TemplateDefinitionService extends DefaultApiServiceWithApplianceMan
         }
         catch (ApplianceManagerStubException e)
         {
-            addConflictErrors(new CommonError(APIError.APPLIANCE_MANAGER_CALL.getCode(),
-                e.getMessage()));
+            addConflictErrors(new CommonError(APIError.APPLIANCE_MANAGER_CALL.getCode(), e
+                .getMessage()));
             flushErrors();
             return null;
         }
@@ -165,8 +164,8 @@ public class TemplateDefinitionService extends DefaultApiServiceWithApplianceMan
         }
         catch (ApplianceManagerStubException e)
         {
-            addConflictErrors(new CommonError(APIError.APPLIANCE_MANAGER_CALL.getCode(),
-                e.getMessage()));
+            addConflictErrors(new CommonError(APIError.APPLIANCE_MANAGER_CALL.getCode(), e
+                .getMessage()));
             flushErrors();
         }
     }
@@ -186,8 +185,8 @@ public class TemplateDefinitionService extends DefaultApiServiceWithApplianceMan
         }
         catch (ApplianceManagerStubException e)
         {
-            addConflictErrors(new CommonError(APIError.APPLIANCE_MANAGER_CALL.getCode(),
-                e.getMessage()));
+            addConflictErrors(new CommonError(APIError.APPLIANCE_MANAGER_CALL.getCode(), e
+                .getMessage()));
             flushErrors();
         }
     }
@@ -228,9 +227,7 @@ public class TemplateDefinitionService extends DefaultApiServiceWithApplianceMan
         {
             String iconPath = descr.getIcon().get(0).getFileRef();
             // TODO start with http://
-
-            Icon icon = appslibraryRep.findByIconPathOrCreateNew(iconPath);
-            pack.setIcon(icon);
+            pack.setIconUrl(iconPath);
         }
 
         DiskFormatType format = findByDiskFormatNameOrUnknow(descr.getDiskFormat());

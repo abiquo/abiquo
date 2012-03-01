@@ -53,8 +53,6 @@ public class VirtualImage implements IPojo<VirtualimageHB>
 
     private Repository repository;
 
-    private Icon icon;
-
     private DiskFormatType diskFormatType;
 
     private VirtualImage master;
@@ -68,6 +66,8 @@ public class VirtualImage implements IPojo<VirtualimageHB>
     private boolean stateful;
 
     private boolean chefEnabled;
+
+    private String iconUrl;
 
     /** Size of the file containing the Disk. in bytes */
     private Long diskFileSize;
@@ -180,16 +180,6 @@ public class VirtualImage implements IPojo<VirtualimageHB>
     public void setRepository(final Repository repository)
     {
         this.repository = repository;
-    }
-
-    public Icon getIcon()
-    {
-        return icon;
-    }
-
-    public void setIcon(final Icon icon)
-    {
-        this.icon = icon;
     }
 
     public DiskFormatType getDiskFormatType()
@@ -327,14 +317,7 @@ public class VirtualImage implements IPojo<VirtualimageHB>
             virtualImageHB.setRepository(null);
         }
 
-        if (icon != null)
-        {
-            virtualImageHB.setIcon(icon.toPojoHB());
-        }
-        else
-        {
-            virtualImageHB.setIcon(null);
-        }
+        virtualImageHB.setIconUrl(iconUrl);
         virtualImageHB.setCategory(category.toPojoHB());
         virtualImageHB.setName(getName());
         virtualImageHB.setDescription(description);
@@ -373,6 +356,16 @@ public class VirtualImage implements IPojo<VirtualimageHB>
         {
             setPath(path + ".vhd");
         }
+    }
+
+    public void setIconUrl(final String iconUrl)
+    {
+        this.iconUrl = iconUrl;
+    }
+
+    public String getIconUrl()
+    {
+        return iconUrl;
     }
 
 }
