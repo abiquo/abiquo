@@ -59,8 +59,8 @@ import com.abiquo.tracer.SeverityType;
 public class TemplateDefinitionListService extends DefaultApiServiceWithApplianceManagerClient
 {
 
-    private final static Logger LOGGER = LoggerFactory
-        .getLogger(TemplateDefinitionListService.class);
+    private final static Logger LOGGER =
+        LoggerFactory.getLogger(TemplateDefinitionListService.class);
 
     @Autowired
     protected AppsLibraryDAO appsLibraryDao;
@@ -99,7 +99,7 @@ public class TemplateDefinitionListService extends DefaultApiServiceWithApplianc
         Enterprise ent = entService.getEnterprise(idEnterprise);
         prevlist = repo.findTemplateDefinitionListByNameAndEnterprise(name, ent);
 
-        if (prevlist != null) // TODO name unique on BBDD
+        if (prevlist != null)
         {
             addConflictErrors(APIError.TEMPLATE_DEFINITION_LIST_NAME_ALREADY_EXIST);
             flushErrors();
@@ -159,8 +159,8 @@ public class TemplateDefinitionListService extends DefaultApiServiceWithApplianc
         {
             try
             {
-                stateList.add(amClient.getTemplateStatus(String.valueOf(enterpriseId),
-                    templateDef.getUrl()));
+                stateList.add(amClient.getTemplateStatus(String.valueOf(enterpriseId), templateDef
+                    .getUrl()));
             }
             catch (Exception e)
             {
