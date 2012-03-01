@@ -21,9 +21,6 @@
 
 package com.abiquo.abiserver.commands.stub;
 
-import static com.abiquo.util.URIResolver.resolveURI;
-import static java.lang.String.valueOf;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -60,6 +57,7 @@ import com.abiquo.abiserver.pojo.infrastructure.Rack;
 import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.user.Enterprise;
 import com.abiquo.model.rest.RESTLink;
+import com.abiquo.model.transport.SingleResourceTransportDto;
 import com.abiquo.model.transport.error.ErrorsDto;
 import com.abiquo.server.core.enterprise.User.AuthType;
 import com.abiquo.util.ErrorManager;
@@ -73,9 +71,6 @@ import edu.emory.mathcs.backport.java.util.Collections;
 @SuppressWarnings("unchecked")
 public class AbstractAPIStub
 {
-    public static final String FLAT_MEDIA_TYPE = "application/flat+xml";
-
-    public static final String LINK_MEDIA_TYPE = "application/link+xml";
 
     protected RestClient client;
 
@@ -170,59 +165,32 @@ public class AbstractAPIStub
         return user;
     }
 
-    protected ClientResponse get(final String uri, final String user, final String password)
-    {
-        return resource(uri, user, password).get();
-    }
-
-    /**
-     * Adds the content-type and accept headers with appropiate {@link MediaType}.
-     * 
-     * @param uri remote location.
-     * @param user login.
-     * @param password password.
-     * @return ClientResponse
-     */
-    protected ClientResponse get(final String uri, final MediaType mediaType)
-    {
-        UserHB user = getCurrentUser();
-        return resource(uri, user.getUser(), user.getPassword(), mediaType).accept(mediaType).get();
-    }
-
-    protected ClientResponse getWithMediaType(final String uri, final String accept,
-        final String contentType)
-    {
-        UserHB user = getCurrentUserCredentials();
-        return resource(uri, user.getUser(), user.getPassword(), accept).contentType(contentType)
-            .get();
-    }
-
-    protected ClientResponse post(final String uri, final Object dto, final String user,
-        final String password)
+    protected ClientResponse post(final String uri, final SingleResourceTransportDto dto,
+        final String user, final String password)
     {
         Resource resource = resource(uri, user, password);
         if (dto != null)
         {
-            // Only add the headers if the request has a body
-            resource.contentType(MediaType.APPLICATION_XML);
+            resource.contentType(dto.getMediaType());
+            resource.accept(dto.getMediaType());
         }
         return resource.post(dto);
     }
 
-    protected ClientResponse put(final String uri, final Object dto, final String user,
-        final String password)
+    protected ClientResponse put(final String uri, final SingleResourceTransportDto dto,
+        final String user, final String password)
     {
         Resource resource = resource(uri, user, password);
         if (dto != null)
         {
-            // Only add the headers if the request has a body
-            resource.contentType(MediaType.APPLICATION_XML);
+            resource.contentType(dto.getMediaType());
+            resource.accept(dto.getMediaType());
         }
         return resource.put(dto);
     }
 
-    protected ClientResponse put(final String uri, final Object dto, final String user,
-        final String password, final String mediaType)
+    protected ClientResponse put(final String uri, final SingleResourceTransportDto dto,
+        final String user, final String password, final String mediaType)
     {
         return resource(uri, user, password, mediaType).contentType(mediaType).put(dto);
     }
@@ -238,31 +206,26 @@ public class AbstractAPIStub
         return resource(uri, user, password, mediaType).delete();
     }
 
-    protected ClientResponse get(final String uri)
-    {
-        UserHB user = getCurrentUserCredentials();
-        return resource(uri, user.getUser(), user.getPassword()).get();
-    }
-
     protected ClientResponse get(final String uri, final String mediaType)
     {
         UserHB user = getCurrentUserCredentials();
         return resource(uri, user.getUser(), user.getPassword(), mediaType).get();
     }
 
-    protected ClientResponse post(final String uri, final Object dto)
+    protected ClientResponse post(final String uri, final SingleResourceTransportDto dto)
     {
         UserHB user = getCurrentUserCredentials();
         Resource resource = resource(uri, user.getUser(), user.getPassword());
         if (dto != null)
         {
-            // Only add the headers if the request has a body
-            resource.contentType(MediaType.APPLICATION_XML);
+            resource.contentType(dto.getMediaType());
+            resource.accept(dto.getMediaType());
         }
         return resource.post(dto);
     }
 
-    protected ClientResponse post(final String uri, final Object dto, final String mediaType)
+    protected ClientResponse post(final String uri, final SingleResourceTransportDto dto,
+        final String mediaType)
     {
         UserHB user = getCurrentUserCredentials();
         return resource(uri, user.getUser(), user.getPassword()).contentType(mediaType)
@@ -276,26 +239,20 @@ public class AbstractAPIStub
             MediaType.APPLICATION_XML);
     }
 
-    protected ClientResponse put(final String uri)
-    {
-        UserHB user = getCurrentUser();
-        return resource(uri, user.getUser(), user.getPassword()).contentType(
-            MediaType.APPLICATION_XML).put(null);
-    }
-
-    protected ClientResponse put(final String uri, final Object dto)
+    protected ClientResponse put(final String uri, final SingleResourceTransportDto dto)
     {
         UserHB user = getCurrentUserCredentials();
         Resource resource = resource(uri, user.getUser(), user.getPassword());
         if (dto != null)
         {
-            // Only add the headers if the request has a body
-            resource.contentType(MediaType.APPLICATION_XML);
+            resource.contentType(dto.getMediaType());
+            resource.accept(dto.getMediaType());
         }
         return resource.put(dto);
     }
 
-    protected ClientResponse put(final String uri, final Object dto, final String mediaType)
+    protected ClientResponse put(final String uri, final SingleResourceTransportDto dto,
+        final String mediaType)
     {
         UserHB user = getCurrentUserCredentials();
         return resource(uri, user.getUser(), user.getPassword(), mediaType).contentType(mediaType)
@@ -1057,9 +1014,9 @@ public class AbstractAPIStub
             "cloud/virtualdatacenters/{vdcid}/virtualappliances/{vappid}/virtualmachines/{vmid}/network/nics",
             params);
     }
-    
-    protected String createInfrastructureVirtualMachineNICsLink(Integer datacenterId, Integer rackId,
-        Integer machineId, Integer virtualMachineId)
+
+    protected String createInfrastructureVirtualMachineNICsLink(final Integer datacenterId,
+        final Integer rackId, final Integer machineId, final Integer virtualMachineId)
     {
         Map<String, String> params = new HashMap<String, String>();
         params.put("datacenter", datacenterId.toString());
@@ -1067,7 +1024,8 @@ public class AbstractAPIStub
         params.put("machine", machineId.toString());
         params.put("vm", virtualMachineId.toString());
 
-        return resolveURI(apiUri,
+        return resolveURI(
+            apiUri,
             "admin/datacenters/{datacenter}/racks/{rack}/machines/{machine}/virtualmachines/{vm}/action/nics",
             params);
     }
