@@ -26,6 +26,8 @@ import java.net.SocketTimeoutException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response.Status;
 
+import org.apache.commons.httpclient.URIException;
+import org.apache.commons.httpclient.util.URIUtil;
 import org.apache.wink.client.ClientConfig;
 import org.apache.wink.client.ClientResponse;
 import org.apache.wink.client.ClientRuntimeException;
@@ -263,8 +265,8 @@ public class NodeCollectorRESTClient
         String uri = appendPathToBaseUri(remoteServiceURI, hypervisorIP, hostPath);
 
         Resource resource =
-            client.resource(uri).queryParam(hypervisorKey, hypervisorType.getValue())
-                .queryParam(userKey, user).queryParam(passwordKey, password);
+            client.resource(uri).queryParam(hypervisorKey, hypervisorType.getValue()).queryParam(
+                userKey, user).queryParam(passwordKey, password);
 
         if (aimport != null)
         {
@@ -322,8 +324,8 @@ public class NodeCollectorRESTClient
     {
         String uri = appendPathToBaseUri(remoteServiceURI, hypervisorIP, virtualSystemPath);
         Resource resource =
-            client.resource(uri).queryParam(hypervisorKey, hypervisorType.getValue())
-                .queryParam(userKey, user).queryParam(passwordKey, password);
+            client.resource(uri).queryParam(hypervisorKey, hypervisorType.getValue()).queryParam(
+                userKey, user).queryParam(passwordKey, password);
 
         if (aimport != null)
         {
@@ -531,8 +533,8 @@ public class NodeCollectorRESTClient
         String uri =
             appendPathToBaseUri(remoteServiceURI, hypervisorIP, virtualSystemPath, byUUIDPath, uuid);
         Resource resource =
-            client.resource(uri).queryParam(hypervisorKey, hypervisorType.getValue())
-                .queryParam(userKey, user).queryParam(passwordKey, password);
+            client.resource(uri).queryParam(hypervisorKey, hypervisorType.getValue()).queryParam(
+                userKey, user).queryParam(passwordKey, password);
 
         if (aimport != null)
         {
@@ -587,11 +589,24 @@ public class NodeCollectorRESTClient
         final String password, final Integer aimport) throws BadRequestException, LoginException,
         ConnectionException, UnprovisionedException, CollectorException, CannotExecuteException
     {
+        // Manage the case where the virtual machine's name contains spaces to avoid problems with
+        // the URL
+        String encodedName = null;
+        try
+        {
+            encodedName = URIUtil.encodeQuery(name);
+        }
+        catch (URIException ex)
+        {
+            throw new ConnectionException(NodeCollectorRESTClient.UNREACHABLE);
+        }
+
         String uri =
-            appendPathToBaseUri(remoteServiceURI, hypervisorIP, virtualSystemPath, byNamePath, name);
+            appendPathToBaseUri(remoteServiceURI, hypervisorIP, virtualSystemPath, byNamePath,
+                encodedName);
         Resource resource =
-            client.resource(uri).queryParam(hypervisorKey, hypervisorType.getValue())
-                .queryParam(userKey, user).queryParam(passwordKey, password);
+            client.resource(uri).queryParam(hypervisorKey, hypervisorType.getValue()).queryParam(
+                userKey, user).queryParam(passwordKey, password);
 
         if (aimport != null)
         {
