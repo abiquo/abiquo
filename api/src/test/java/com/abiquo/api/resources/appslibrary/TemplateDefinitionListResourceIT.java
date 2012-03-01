@@ -40,7 +40,6 @@ import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.resources.AbstractJpaGeneratorIT;
 import com.abiquo.server.core.appslibrary.AppsLibrary;
 import com.abiquo.server.core.appslibrary.Category;
-import com.abiquo.server.core.appslibrary.Icon;
 import com.abiquo.server.core.appslibrary.TemplateDefinition;
 import com.abiquo.server.core.appslibrary.TemplateDefinitionList;
 import com.abiquo.server.core.appslibrary.TemplateDefinitionListDto;
@@ -67,8 +66,6 @@ public class TemplateDefinitionListResourceIT extends AbstractJpaGeneratorIT
     protected TemplateDefinitionList list;
 
     protected AppsLibrary appsLibrary;
-
-    protected Icon icon;
 
     @BeforeMethod(groups = {APPS_INTEGRATION_TESTS})
     public void setUpUser()
@@ -97,15 +94,14 @@ public class TemplateDefinitionListResourceIT extends AbstractJpaGeneratorIT
     public void getTemplateDefinitionList()
     {
         category = categoryGenerator.createUniqueInstance();
-        icon = iconGenerator.createUniqueInstance();
         appsLibrary = appsLibraryGenerator.createUniqueInstance();
         appsLibrary.setEnterprise(enterprise);
-        templateDefinition = templateDefGenerator.createInstance(appsLibrary, category, icon);
+        templateDefinition = templateDefGenerator.createInstance(appsLibrary, category);
 
         TemplateDefinition templateDef1 =
-            templateDefGenerator.createInstance(appsLibrary, category, icon);
+            templateDefGenerator.createInstance(appsLibrary, category);
         TemplateDefinition templateDef2 =
-            templateDefGenerator.createInstance(appsLibrary, category, icon);
+            templateDefGenerator.createInstance(appsLibrary, category);
         List<TemplateDefinition> listofpackages = new ArrayList<TemplateDefinition>();
 
         list = new TemplateDefinitionList("templateDefinitionList_1", "http://www.abiquo.com");
@@ -122,7 +118,6 @@ public class TemplateDefinitionListResourceIT extends AbstractJpaGeneratorIT
 
         entitiesToSetup.add(appsLibrary);
         entitiesToSetup.add(category);
-        entitiesToSetup.add(icon);
         entitiesToSetup.add(templateDefinition);
         entitiesToSetup.add(templateDef1);
         entitiesToSetup.add(templateDef2);
@@ -154,15 +149,14 @@ public class TemplateDefinitionListResourceIT extends AbstractJpaGeneratorIT
     {
 
         category = categoryGenerator.createUniqueInstance();
-        icon = iconGenerator.createUniqueInstance();
         appsLibrary = appsLibraryGenerator.createUniqueInstance();
         appsLibrary.setEnterprise(enterprise);
-        templateDefinition = templateDefGenerator.createInstance(appsLibrary, category, icon);
+        templateDefinition = templateDefGenerator.createInstance(appsLibrary, category);
 
         TemplateDefinition templateDef1 =
-            templateDefGenerator.createInstance(appsLibrary, category, icon);
+            templateDefGenerator.createInstance(appsLibrary, category);
         TemplateDefinition templateDef2 =
-            templateDefGenerator.createInstance(appsLibrary, category, icon);
+            templateDefGenerator.createInstance(appsLibrary, category);
         List<TemplateDefinition> listofpackages = new ArrayList<TemplateDefinition>();
 
         list = new TemplateDefinitionList("templateDefinitionList_1", "http://www.abiquo.com");
@@ -179,7 +173,6 @@ public class TemplateDefinitionListResourceIT extends AbstractJpaGeneratorIT
 
         entitiesToSetup.add(appsLibrary);
         entitiesToSetup.add(category);
-        entitiesToSetup.add(icon);
         entitiesToSetup.add(templateDefinition);
         entitiesToSetup.add(templateDef1);
         entitiesToSetup.add(templateDef2);
@@ -205,7 +198,8 @@ public class TemplateDefinitionListResourceIT extends AbstractJpaGeneratorIT
             assertEquals(result.getName(), "templateDefinitionList_1");
             result.setName("newName");
             response =
-                put(UriTestResolver.resolveTemplateDefinitionListURI(enterprise.getId(), o.getId()),
+                put(
+                    UriTestResolver.resolveTemplateDefinitionListURI(enterprise.getId(), o.getId()),
                     result, SYSADMIN, SYSADMIN);
             result = response.getEntity(TemplateDefinitionListDto.class);
             assertEquals(result.getName(), "newName");
@@ -228,15 +222,14 @@ public class TemplateDefinitionListResourceIT extends AbstractJpaGeneratorIT
     public void deleteTemplateDefinitionList()
     {
         category = categoryGenerator.createUniqueInstance();
-        icon = iconGenerator.createUniqueInstance();
         appsLibrary = appsLibraryGenerator.createUniqueInstance();
         appsLibrary.setEnterprise(enterprise);
-        templateDefinition = templateDefGenerator.createInstance(appsLibrary, category, icon);
+        templateDefinition = templateDefGenerator.createInstance(appsLibrary, category);
 
         TemplateDefinition templateDef1 =
-            templateDefGenerator.createInstance(appsLibrary, category, icon);
+            templateDefGenerator.createInstance(appsLibrary, category);
         TemplateDefinition templateDef2 =
-            templateDefGenerator.createInstance(appsLibrary, category, icon);
+            templateDefGenerator.createInstance(appsLibrary, category);
         List<TemplateDefinition> listofpackages = new ArrayList<TemplateDefinition>();
 
         list = new TemplateDefinitionList("templateDefinitionList_1", "http://www.abiquo.com");
@@ -253,7 +246,6 @@ public class TemplateDefinitionListResourceIT extends AbstractJpaGeneratorIT
 
         entitiesToSetup.add(appsLibrary);
         entitiesToSetup.add(category);
-        entitiesToSetup.add(icon);
         entitiesToSetup.add(templateDefinition);
         entitiesToSetup.add(templateDef1);
         entitiesToSetup.add(templateDef2);
@@ -273,9 +265,8 @@ public class TemplateDefinitionListResourceIT extends AbstractJpaGeneratorIT
         for (TemplateDefinitionListDto o : lists.getCollection())
         {
             response =
-                delete(
-                    UriTestResolver.resolveTemplateDefinitionListURI(enterprise.getId(), o.getId()),
-                    SYSADMIN, SYSADMIN);
+                delete(UriTestResolver.resolveTemplateDefinitionListURI(enterprise.getId(), o
+                    .getId()), SYSADMIN, SYSADMIN);
             assertEquals(response.getStatusCode(), 204);
         }
     }
@@ -285,15 +276,14 @@ public class TemplateDefinitionListResourceIT extends AbstractJpaGeneratorIT
     {
         {
             category = categoryGenerator.createUniqueInstance();
-            icon = iconGenerator.createUniqueInstance();
             appsLibrary = appsLibraryGenerator.createUniqueInstance();
             appsLibrary.setEnterprise(enterprise);
-            templateDefinition = templateDefGenerator.createInstance(appsLibrary, category, icon);
+            templateDefinition = templateDefGenerator.createInstance(appsLibrary, category);
 
             TemplateDefinition templateDef1 =
-                templateDefGenerator.createInstance(appsLibrary, category, icon);
+                templateDefGenerator.createInstance(appsLibrary, category);
             TemplateDefinition templateDef2 =
-                templateDefGenerator.createInstance(appsLibrary, category, icon);
+                templateDefGenerator.createInstance(appsLibrary, category);
             List<TemplateDefinition> listofpackages = new ArrayList<TemplateDefinition>();
 
             list = new TemplateDefinitionList("templateDefinitionList_1", "http://www.abiquo.com");
@@ -310,7 +300,6 @@ public class TemplateDefinitionListResourceIT extends AbstractJpaGeneratorIT
 
             entitiesToSetup.add(appsLibrary);
             entitiesToSetup.add(category);
-            entitiesToSetup.add(icon);
             entitiesToSetup.add(templateDefinition);
             entitiesToSetup.add(templateDef1);
             entitiesToSetup.add(templateDef2);
@@ -335,8 +324,8 @@ public class TemplateDefinitionListResourceIT extends AbstractJpaGeneratorIT
             for (TemplateDefinitionListDto o : lists.getCollection())
             {
                 response =
-                    get(UriTestResolver.resolveTemplateDefinitionListURI(enterprise.getId(),
-                        o.getId()), SYSADMIN, SYSADMIN);
+                    get(UriTestResolver.resolveTemplateDefinitionListURI(enterprise.getId(), o
+                        .getId()), SYSADMIN, SYSADMIN);
                 assertEquals(response.getStatusCode(), 200);
                 TemplateDefinitionListDto result =
                     response.getEntity(TemplateDefinitionListDto.class);

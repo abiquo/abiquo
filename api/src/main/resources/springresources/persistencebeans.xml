@@ -87,8 +87,6 @@
                 <ref bean="systemPropertyResource" />
                 <ref bean="categoriesResource" />
                 <ref bean="categoryResource" />
-                <ref bean="iconsResource" />
-                <ref bean="iconResource" />
                 <ref bean="diskFormatTypeResource" />
                 <ref bean="diskFormatTypesResource" />
                 <ref bean="hypervisorTypeResource" />

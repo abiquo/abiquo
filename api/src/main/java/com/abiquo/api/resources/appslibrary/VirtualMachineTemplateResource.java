@@ -53,8 +53,8 @@ public class VirtualMachineTemplateResource extends AbstractResource
 {
     public final static String VIRTUAL_MACHINE_TEMPLATE = "virtualmachinetemplate";
 
-    public final static String VIRTUAL_MACHINE_TEMPLATE_PARAM = "{" + VIRTUAL_MACHINE_TEMPLATE
-        + "}";
+    public final static String VIRTUAL_MACHINE_TEMPLATE_PARAM =
+        "{" + VIRTUAL_MACHINE_TEMPLATE + "}";
 
     @Autowired
     private VirtualMachineTemplateService vmtemplateService;
@@ -134,6 +134,7 @@ public class VirtualMachineTemplateResource extends AbstractResource
         dto.setChefEnabled(vmtemplate.isChefEnabled());
         dto.setCreationDate(vmtemplate.getCreationDate());
         dto.setCreationUser(vmtemplate.getCreationUser());
+        dto.setIconUrl(vmtemplate.getIconUrl());
 
         return addLinks(builder, dto, enterpId, dcId, vmtemplate, amUri);
     }

@@ -52,6 +52,9 @@
 		<property name="chefEnabled" type="boolean">
 			<column name="chefEnabled" />
 		</property>
+        <property name="iconUrl" type="string">
+            <column length="255" name="iconUrl" not-null="false" />
+        </property>        
 		<property name="creationUser" type="string">
 			<column length="128" name="creation_user" not-null="true" />
 		</property>
@@ -63,10 +66,6 @@
 		<many-to-one class="RepositoryHB" name="repository" fetch="select"
 			lazy="false">
 			<column name="idRepository" not-null="false" />
-		</many-to-one>
-		<many-to-one class="IconHB" name="icon" lazy="false"
-			fetch="select">
-			<column name="idIcon" />
 		</many-to-one>
 		<many-to-one class="CategoryHB" name="category" fetch="select"
 			lazy="false">

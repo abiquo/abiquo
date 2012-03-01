@@ -46,11 +46,7 @@ public class VirtualImageDecorator extends VirtualImage
         decorator.setCpuRequired(virtualImage.getCpuRequired());
         decorator.setDescription(virtualImage.getDescription());
         decorator.setHdRequired(virtualImage.getHdRequired());
-
-        if (virtualImage.getIcon() != null)
-        {
-            decorator.setIcon(virtualImage.getIcon());
-        }
+        decorator.setIconUrl(virtualImage.getIconUrl());
 
         decorator.setId(virtualImage.getId());
         decorator.setName(virtualImage.getName());
