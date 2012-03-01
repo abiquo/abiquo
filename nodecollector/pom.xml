@@ -146,7 +146,7 @@
         <dependency>
             <groupId>org.libvirt</groupId>
             <artifactId>libvirt</artifactId>
-            <version>0.4.0</version>
+            <version>0.4.7</version>
         </dependency>
         <dependency>
             <groupId>com.sun.jna</groupId>
@@ -229,14 +229,9 @@
         </dependency>
         <!-- new vmware api -->
         <dependency>
-            <groupId>com.vmware.vim25</groupId>
-            <artifactId>vim25</artifactId>
-            <version>2.1</version>
-        </dependency>
-        <dependency>
-            <groupId>dom4j</groupId>
-            <artifactId>dom4j</artifactId>
-            <version>1.6.1</version>
+            <groupId>com.cloudbees.thirdparty</groupId>
+            <artifactId>vijava</artifactId>
+            <version>5.0.0</version>
         </dependency>
         <!-- Stonith resource dependencies -->
         <dependency>

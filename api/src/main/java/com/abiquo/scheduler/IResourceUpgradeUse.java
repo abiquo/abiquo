@@ -55,11 +55,17 @@ public interface IResourceUpgradeUse
     /**
      * Decrements the physical machine resource utilization
      * 
-     * @param machine, the target physical machine to decrements its resource utilization.
      * @param virtualMachine, the resource requirements to be deallocated (based on its virtual
      *            machine template and additional resource configuration).
      */
     public void rollbackUse(VirtualMachine virtual);
+
+    /**
+     * Decrements the physical machine resource utilization after a failed VM deploy operation by HA
+     * 
+     * @param virtualMachine
+     */
+    public void rollbackUseHA(VirtualMachine virtualMachine);
 
     /**
      * Increase the ram and cpu resources on the provided machine.

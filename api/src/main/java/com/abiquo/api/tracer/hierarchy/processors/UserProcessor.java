@@ -52,7 +52,7 @@ public class UserProcessor extends AbstractHierarchyProcessor<User>
     protected String getResourceName(final String resourceId)
     {
         User user = dao.findUserById(Integer.valueOf(resourceId));
-        return user.getName();
+        return user != null ? user.getName() : null;
     }
 
 }

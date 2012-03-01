@@ -39,7 +39,6 @@ import com.abiquo.server.core.infrastructure.management.RasdDAO;
 import com.abiquo.server.core.infrastructure.management.RasdManagement;
 import com.abiquo.server.core.infrastructure.management.RasdManagementDAO;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
-import com.abiquo.server.core.infrastructure.network.IpPoolManagement.OrderByEnum;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagementDAO;
 import com.abiquo.server.core.infrastructure.network.Network;
 import com.abiquo.server.core.infrastructure.network.NetworkAssignment;
@@ -49,6 +48,7 @@ import com.abiquo.server.core.infrastructure.network.NetworkConfigurationDAO;
 import com.abiquo.server.core.infrastructure.network.NetworkDAO;
 import com.abiquo.server.core.infrastructure.network.VLANNetwork;
 import com.abiquo.server.core.infrastructure.network.VLANNetworkDAO;
+import com.abiquo.server.core.infrastructure.network.IpPoolManagement.OrderByEnum;
 import com.abiquo.server.core.infrastructure.storage.DiskManagement;
 import com.abiquo.server.core.infrastructure.storage.DiskManagementDAO;
 
@@ -200,9 +200,13 @@ public class VirtualDatacenterRep extends DefaultRepBase
         return this.vlanDAO.findAll();
     }
 
-    public Collection<VirtualDatacenter> findByDatacenter(final Datacenter datacenter)
+    public Collection<VirtualDatacenter> findByDatacenter(final Datacenter datacenter,
+        final Integer startwith, final Integer limit, final String filter,
+        final com.abiquo.server.core.cloud.VirtualDatacenter.OrderByEnum orderByEnum,
+        final Boolean asc)
     {
-        return this.virtualDatacenterDAO.findByDatacenter(datacenter);
+        return this.virtualDatacenterDAO.findByDatacenter(datacenter, startwith, limit, filter,
+            orderByEnum, asc);
     }
 
     public Collection<VirtualDatacenter> findByEnterprise(final Enterprise enterprise)
@@ -211,16 +215,23 @@ public class VirtualDatacenterRep extends DefaultRepBase
     }
 
     public Collection<VirtualDatacenter> findByEnterpriseAndDatacenter(final Enterprise enterprise,
-        final Datacenter datacenter)
+        final Datacenter datacenter, final Integer startwith, final Integer limit,
+        final String filter,
+        final com.abiquo.server.core.cloud.VirtualDatacenter.OrderByEnum orderByEnum,
+        final Boolean asc)
     {
-        return this.virtualDatacenterDAO.findByEnterpriseAndDatacenter(enterprise, datacenter);
+        return this.virtualDatacenterDAO.findByEnterpriseAndDatacenter(enterprise, datacenter,
+            startwith, limit, filter, orderByEnum, asc);
     }
 
     public Collection<VirtualDatacenter> findByEnterpriseAndDatacenter(final Enterprise enterprise,
-        final Datacenter datacenter, final User user)
+        final Datacenter datacenter, final User user, final Integer startwith, final Integer limit,
+        final String filter,
+        final com.abiquo.server.core.cloud.VirtualDatacenter.OrderByEnum orderByEnum,
+        final Boolean asc)
     {
-        return this.virtualDatacenterDAO
-            .findByEnterpriseAndDatacenter(enterprise, datacenter, user);
+        return this.virtualDatacenterDAO.findByEnterpriseAndDatacenter(enterprise, datacenter,
+            user, startwith, limit, filter, orderByEnum, asc);
     }
 
     public VirtualDatacenter findById(final Integer id)
@@ -389,8 +400,7 @@ public class VirtualDatacenterRep extends DefaultRepBase
         return ipManagementDAO.findIpsByVlan(vlan);
     }
 
-    public List<IpPoolManagement> findIpsWithConfigurationIdInVirtualMachine(
-        final VirtualMachine vm)
+    public List<IpPoolManagement> findIpsWithConfigurationIdInVirtualMachine(final VirtualMachine vm)
     {
         return ipManagementDAO.findIpsByVirtualMachineWithConfigurationId(vm);
     }
@@ -501,7 +511,16 @@ public class VirtualDatacenterRep extends DefaultRepBase
     public Collection<VirtualAppliance> findVirtualAppliancesByVirtualDatacenter(
         final VirtualDatacenter virtualDatacenter)
     {
-        return virtualApplianceDAO.findByVirtualDatacenter(virtualDatacenter);
+        return virtualApplianceDAO.findByVirtualDatacenter(virtualDatacenter, 0, 0, "",
+            VirtualAppliance.OrderByEnum.NAME, true);
+    }
+
+    public Collection<VirtualAppliance> findVirtualAppliancesByVirtualDatacenter(
+        final VirtualDatacenter virtualDatacenter, final Integer startwith, final Integer limit,
+        final String filter, final VirtualAppliance.OrderByEnum orderByEnum, final Boolean descOrAsc)
+    {
+        return virtualApplianceDAO.findByVirtualDatacenter(virtualDatacenter, startwith, limit,
+            filter, orderByEnum, descOrAsc);
     }
 
     public VirtualMachine findVirtualMachineById(final Integer virtualMachineId)
@@ -680,7 +699,5 @@ public class VirtualDatacenterRep extends DefaultRepBase
     {
         vlanDAO.flush();
     }
-
-
 
 }

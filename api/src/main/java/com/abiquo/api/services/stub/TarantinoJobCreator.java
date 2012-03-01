@@ -134,7 +134,7 @@ public class TarantinoJobCreator extends DefaultApiService
      */
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public VirtualMachineDescriptionBuilder toTarantinoDto(final VirtualMachine virtualMachine,
-        final VirtualAppliance virtualAppliance)
+        final VirtualAppliance virtualAppliance, final boolean isHA)
     {
         final VirtualDatacenter virtualDatacenter = virtualAppliance.getVirtualDatacenter();
         final Integer dcId = virtualDatacenter.getDatacenter().getId();
@@ -144,7 +144,7 @@ public class TarantinoJobCreator extends DefaultApiService
         vmDesc.setBasics(virtualMachine.getUuid(), virtualMachine.getName());
 
         logger.debug("Creating disk information");
-        primaryDiskDefinitionConfiguration(virtualMachine, vmDesc, dcId);
+        primaryDiskDefinitionConfiguration(virtualMachine, vmDesc, dcId, isHA);
         logger.debug("Disk information created!");
 
         vmDesc.hardware(virtualMachine.getCpu(), virtualMachine.getRam());
@@ -169,6 +169,11 @@ public class TarantinoJobCreator extends DefaultApiService
         logger.debug("Configure secondary Hard Disks done!");
 
         return vmDesc;
+    }
+
+    public VirtualMachineDescriptionBuilder toTarantinoDto(final VirtualMachine virtualMachine,
+        final VirtualAppliance virtualAppliance){
+        return toTarantinoDto(virtualMachine, virtualAppliance, false);
     }
 
     /**
@@ -323,7 +328,8 @@ public class TarantinoJobCreator extends DefaultApiService
      */
     @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
     protected void primaryDiskDefinitionConfiguration(final VirtualMachine virtualMachine,
-        final VirtualMachineDescriptionBuilder vmDesc, final Integer idDatacenter)
+        final VirtualMachineDescriptionBuilder vmDesc, final Integer idDatacenter,
+        final boolean isHA)
     {
         String datastore = "";
         if (virtualMachine.getDatastore() != null)
@@ -382,7 +388,7 @@ public class TarantinoJobCreator extends DefaultApiService
             url = virtualMachine.getVirtualMachineTemplate().getRepository().getUrl();
         }
         vmDesc.primaryDisk(DiskDescription.DiskFormatType.valueOf(format.name()), size, url, path,
-            datastore, repositoryManager.getUri(), cntrlType);
+            datastore, repositoryManager.getUri(), cntrlType, isHA);
     }
 
     /**

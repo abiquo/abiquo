@@ -355,54 +355,40 @@
              */
             private function onClickPauseButton():void
             {
-                //Pause action is not supported with XEN Hypervisors
-                if (HyperVisor(_virtualMachine.assignedTo).type.id == HyperVisorType.XEN)
-                {
-                    AbiCloudAlert.showAlert(ResourceManager.getInstance().getString("Common",
-                                                                                    "ALERT_TITLE_LABEL"),
-                                            ResourceManager.getInstance().getString("Infrastructure",
-                                                                                    "ALERT_PAUSE_NOTSUPPORTED_HEADER"),
-                                            ResourceManager.getInstance().getString("Infrastructure",
-                                                                                    "ALERT_PAUSE_NOTSUPPORTED_TEXT"),
-                                            Alert.OK);
-                }
-                else
-                {
-                    var event:InfrastructureEvent;
+                var event:InfrastructureEvent;
 
-                    if (_virtualMachine.state.description == State.PAUSED.description)
+                if (_virtualMachine.state.description == State.PAUSED.description)
+                {
+                    //The virtual machine is paused. We proceed to resume it
+                    if(this._type == "INFRASTRUCTURE")
                     {
-                        //The virtual machine is paused. We proceed to resume it
-                        if(this._type == "INFRASTRUCTURE")
-	                    {
-	                        event = new InfrastructureEvent(InfrastructureEvent.START_VIRTUALMACHINE_IN_INFRASTRUCTURE);
-	                    }else
-	                    {
-	                        event = new InfrastructureEvent(InfrastructureEvent.START_VIRTUALMACHINE_IN_VAPP);
-	                        event.virtualAppliance = this._virtualAppliance;
-	                        event.virtualDatacenter = this._virtualDatacenter;
-	                    }
-                    }
-                    else if (_virtualMachine.state.description == State.ON.description)
+                        event = new InfrastructureEvent(InfrastructureEvent.START_VIRTUALMACHINE_IN_INFRASTRUCTURE);
+                    }else
                     {
-                        //The virtual machine is running. We procced to pause it
-                        if(this._type == "INFRASTRUCTURE")
-                        {
-                            event = new InfrastructureEvent(InfrastructureEvent.PAUSE_VIRTUALMACHINE_IN_INFRASTRUCTURE);
-                        }else
-                        {
-                            event = new InfrastructureEvent(InfrastructureEvent.PAUSE_VIRTUALMACHINE_IN_VAPP);
-                            event.virtualAppliance = this._virtualAppliance;
-                            event.virtualDatacenter = this._virtualDatacenter;
-                        }
+                        event = new InfrastructureEvent(InfrastructureEvent.START_VIRTUALMACHINE_IN_VAPP);
+                        event.virtualAppliance = this._virtualAppliance;
+                        event.virtualDatacenter = this._virtualDatacenter;
                     }
-
-                    event.infrastructureElement = this._virtualMachine;
-                    dispatchEvent(event);
-                    updateBackgroundProcess(AbiCloudModel.getInstance().configurationManager.config.client_virtual_virtualAppliancesUpdateInterval.value);
-                    //Update VNC eye
-                    setVNCIconEnable();
                 }
+                else if (_virtualMachine.state.description == State.ON.description)
+                {
+                    //The virtual machine is running. We procced to pause it
+                    if(this._type == "INFRASTRUCTURE")
+                    {
+                        event = new InfrastructureEvent(InfrastructureEvent.PAUSE_VIRTUALMACHINE_IN_INFRASTRUCTURE);
+                    }else
+                    {
+                        event = new InfrastructureEvent(InfrastructureEvent.PAUSE_VIRTUALMACHINE_IN_VAPP);
+                        event.virtualAppliance = this._virtualAppliance;
+                        event.virtualDatacenter = this._virtualDatacenter;
+                    }
+                }
+
+                event.infrastructureElement = this._virtualMachine;
+                dispatchEvent(event);
+                updateBackgroundProcess(AbiCloudModel.getInstance().configurationManager.config.client_virtual_virtualAppliancesUpdateInterval.value);
+                //Update VNC eye
+                setVNCIconEnable();
             }
 
             /**
@@ -966,7 +952,8 @@
         <mx:Button id="pauseButton"
             width="57" height="47"
             styleName="StandardPauseButton"
-            enabled="{_virtualMachine.state.description == State.PAUSED.description || _virtualMachine.state.description == State.ON.description}"
+            enabled="{(_virtualMachine.state.description == State.PAUSED.description || _virtualMachine.state.description == State.ON.description)
+            &amp;&amp; HyperVisor(this._virtualMachine.assignedTo).type.id != HyperVisorType.XEN}"
             selected="{_virtualMachine.state.description == State.PAUSED.description}"
             click="onClickPauseButton()"
             useHandCursor="true"
