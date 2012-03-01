@@ -1,676 +1,713 @@
-/**
- * Abiquo community edition
- * cloud management application for hybrid clouds
- * Copyright (C) 2008-2010 - Abiquo Holdings S.L.
- *
- * This application is free software; you can redistribute it and/or
- * modify it under the terms of the GNU LESSER GENERAL PUBLIC
- * LICENSE as published by the Free Software Foundation under
- * version 3 of the License
- *
- * This software is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * LESSER GENERAL PUBLIC LICENSE v.3 for more details.
- *
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the
- * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
- * Boston, MA 02111-1307, USA.
- */
-
-package com.abiquo.server.core.infrastructure.network;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
-import javax.persistence.EntityManager;
-
-import org.apache.commons.lang.StringUtils;
-import org.hibernate.Criteria;
-import org.hibernate.Query;
-import org.hibernate.criterion.Criterion;
-import org.hibernate.criterion.ProjectionList;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Restrictions;
-import org.springframework.stereotype.Repository;
-
-import com.abiquo.model.enumerator.NetworkType;
-import com.abiquo.server.core.cloud.VirtualAppliance;
-import com.abiquo.server.core.cloud.VirtualMachine;
-import com.abiquo.server.core.common.persistence.DefaultDAOBase;
-import com.abiquo.server.core.infrastructure.management.RasdManagement;
-import com.abiquo.server.core.infrastructure.network.IpPoolManagement.OrderByEnum;
-import com.abiquo.server.core.util.PagedList;
-import com.softwarementors.bzngine.entities.PersistentEntity;
-
-@Repository("jpaIpPoolManagementDAO")
-@SuppressWarnings("unchecked")
-public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagement>
-{
-
-    // public static final String BY_DATACENTER = " SELECT ip FROM "
-    // + "Datacenter dc INNER JOIN dc.network net, VLANNetwork vlan "
-    // + "INNER JOIN vlan.configuration conf INNER JOIN conf.dhcp dhcp, "
-    // + "IpPoolManagement ip LEFT JOIN ip.virtualMachine vm LEFT JOIN ip.virtualAppliance vapp "
-    // + "LEFT JOIN ip.virtualDatacenter vdc JOIN vdc.enterprise ent "
-    // + "WHERE net.id = vlan.network.id AND dhcp.id = ip.dhcp.id AND dc.id = :datacenter_id";
-
-    public static final String BY_DATACENTER =
-        " SELECT ip FROM "
-            + "Datacenter dc INNER JOIN dc.network net, VLANNetwork vlan "
-            + "INNER JOIN vlan.configuration conf, "
-            // "INNER JOIN conf.dhcp dhcp, "
-            + "IpPoolManagement ip LEFT JOIN ip.virtualMachine vm LEFT JOIN ip.virtualAppliance vapp "
-            + "LEFT JOIN ip.virtualDatacenter vdc LEFT JOIN vlan.enterprise ent "
-            + "WHERE net.id = vlan.network.id "
-            // +"AND dhcp.id = ip.dhcp.id"
-            + "AND ip.vlanNetwork.id = vlan.id "
-            + " AND dc.id = :datacenter_id AND "
-            + "( ip.ip LIKE :filterLike OR ip.mac LIKE :filterLike OR ip.networkName LIKE :filterLike OR "
-            + " vm.name like :filterLike OR vapp.name LIKE :filterLike OR ent.name LIKE :filterLike )";//
-
-    public static final String BY_DATACENTER_AND_ENTERPRISE =
-        " SELECT ip FROM "
-            + "Datacenter dc INNER JOIN dc.network net, VLANNetwork vlan "
-            + "INNER JOIN vlan.configuration conf, "
-            // "INNER JOIN conf.dhcp dhcp, "
-            + "IpPoolManagement ip LEFT JOIN ip.virtualMachine vm LEFT JOIN ip.virtualAppliance vapp "
-            + "LEFT JOIN ip.virtualDatacenter vdc LEFT JOIN vlan.enterprise ent "
-            + "WHERE net.id = vlan.network.id "
-            // +"AND dhcp.id = ip.dhcp.id"
-            + "AND ip.vlanNetwork.id = vlan.id "
-            + " AND dc.id = :datacenter_id AND "
-            + "( ip.ip LIKE :filterLike OR ip.mac LIKE :filterLike OR ip.networkName LIKE :filterLike OR "
-            + " vm.name like :filterLike OR vapp.name LIKE :filterLike OR ent.name LIKE :filterLike )";//
-
-    public static final String BY_DEFAULT_VLAN_USED_BY_ANY_VDC =
-        " SELECT ip FROM  virtualdatacenter vdc, ip_pool_management ip where "
-            + "vdc.default_vlan_network_id=ip.vlan_network_id and vdc.default_vlan_network_id=:vlan_id";
-
-    public static final String BY_ENT =
-        " SELECT ip FROM IpPoolManagement ip " + " left join ip.virtualMachine vm "
-            + " left join ip.virtualAppliance vapp, "
-            + " NetworkConfiguration nc, "
-            + " VirtualDatacenter vdc, "
-            + " VLANNetwork vn, "
-            + " Enterprise ent "
-            // + " WHERE ip.dhcp.id = nc.dhcp.id "
-            + "WHERE ip.vlanNetwork.id = vn.id " + " AND nc.id = vn.configuration.id "
-            + " AND vn.network.id = vdc.network.id" + " AND vdc.enterprise.id = ent.id"
-            + " AND ent.id = :ent_id " + " AND " + "( ip.ip like :filterLike "
-            + " OR ip.mac like :filterLike " + " OR ip.vlanNetwork.name like :filterLike "
-            + " OR vapp.name like :filterLike " + " OR vm.name like :filterLike " + ")";
-
-    public static final String BY_EXTERNAL_VLAN =
-        "SELECT ip FROM IpPoolManagement ip "
-            + " left join ip.virtualMachine vm "
-            + " left join ip.virtualAppliance vapp "
-            + " left join ip.virtualDatacenter vdc, "
-            + " NetworkConfiguration nc, "
-            + " VLANNetwork vn "
-            + " join vn.enterprise ent, "
-            + " DatacenterLimits dcl"
-            // + " WHERE ip.dhcp.id = nc.dhcp.id "
-            + " WHERE ip.vlanNetwork.id = vn.id " + " AND nc.id = vn.configuration.id "
-            + " AND vn.id = :vlan_id " + " AND ent.id = :ent_id AND "
-            + " dcl.enterprise.id = ent.id AND " + " ip.available = 1 AND "
-            + " dcl.id = :dc_limit_id AND " + "( ip.ip like :filterLike "
-            + " OR ip.mac like :filterLike " + " OR ip.vlanNetwork.name like :filterLike "
-            + " OR vapp.name like :filterLike " + " OR vm.name like :filterLike " + ")";
-
-    public static final String BY_IP_PURCHASED =
-        " SELECT ip FROM "
-            + "Datacenter dc INNER JOIN dc.network net, VLANNetwork vlan "
-            + "INNER JOIN vlan.configuration conf,"
-            // +" INNER JOIN conf.dhcp dhcp, "
-            + "IpPoolManagement ip LEFT JOIN ip.virtualMachine vm LEFT JOIN ip.virtualAppliance vapp, "
-            + "VirtualDatacenter vdc LEFT JOIN vdc.enterprise ent "
-            + "WHERE net.id = vlan.network.id "
-            // +"AND dhcp.id = ip.dhcp.id "
-            + "AND ip.vlanNetwork.id = vlan.id " + "AND vdc.id = :vdc_id AND "
-            + "vdc.datacenter.id = dc.id AND ip.id = :ip_id AND "
-            + "ip.available = 1 AND vlan.enterprise is null AND ip.virtualDatacenter.id = :vdc_id";
-
-    public static final String BY_IP_TO_PURCHASE =
-        " SELECT ip FROM "
-            + "Datacenter dc INNER JOIN dc.network net, VLANNetwork vlan "
-            + "INNER JOIN vlan.configuration conf,"
-            // +" INNER JOIN conf.dhcp dhcp, "
-            + "IpPoolManagement ip LEFT JOIN ip.virtualMachine vm LEFT JOIN ip.virtualAppliance vapp, "
-            + "VirtualDatacenter vdc LEFT JOIN vdc.enterprise ent "
-            + "WHERE net.id = vlan.network.id "
-            // +"AND dhcp.id = ip.dhcp.id "
-            + "AND ip.vlanNetwork.id = vlan.id " + "AND vdc.id = :vdc_id AND "
-            + "vdc.datacenter.id = dc.id AND ip.id = :ip_id AND "
-            + "ip.available = 1 AND vlan.enterprise is null AND ip.virtualDatacenter is null";
-
-    public static final String BY_NETWORK =
-        " SELECT ip FROM IpPoolManagement ip "
-            + " left join ip.virtualMachine vm "
-            + " left join ip.virtualAppliance vapp, "
-            + " NetworkConfiguration nc, "
-            + " VLANNetwork vn "
-            // + " WHERE ip.dhcp.id = nc.dhcp.id "
-            + "WHERE ip.vlanNetwork.id = vn.id " + " AND nc.id = vn.configuration.id "
-            + " AND vn.id = :vlan_id " + " AND vn.network.id = :net_id AND "
-            + "( ip.ip like :filterLike " + " OR ip.mac like :filterLike "
-            + " OR ip.vlanNetwork.name like :filterLike " + " OR vapp.name like :filterLike "
-            + " OR vm.name like :filterLike " + ")";
-
-    public static final String BY_PUBLIC_VLAN =
-        " SELECT ip FROM "
-            + "Datacenter dc INNER JOIN dc.network net, VLANNetwork vlan "
-            + "INNER JOIN vlan.configuration conf,"
-            // +" INNER JOIN conf.dhcp dhcp, "
-            + "IpPoolManagement ip LEFT JOIN ip.virtualDatacenter vdc LEFT JOIN ip.virtualAppliance vapp "
-            + "LEFT JOIN ip.virtualMachine vm LEFT JOIN vdc.enterprise ent "
-            + "WHERE net.id = vlan.network.id"
-            // +"AND dhcp.id = ip.dhcp.id "
-            + " AND ip.vlanNetwork.id = vlan.id "
-            + " AND dc.id = :datacenter_id AND "
-            + "vlan.id = :vlan_id AND"
-            + "( ip.ip LIKE :filterLike OR ip.mac LIKE :filterLike OR ip.networkName LIKE :filterLike OR "
-            + " vm.name like :filterLike OR vapp.name LIKE :filterLike OR ent.name LIKE :filterLike )";
-
-    public static final String BY_VDC =
-        " SELECT ip FROM IpPoolManagement ip "
-            + " left join ip.virtualMachine vm "
-            + " left join ip.virtualAppliance vapp, "
-            + " NetworkConfiguration nc, "
-            + " VirtualDatacenter vdc, "
-            + " VLANNetwork vn "
-            // + " WHERE ip.dhcp.id = nc.dhcp.id "
-            + "WHERE ip.vlanNetwork.id = vn.id " + " AND nc.id = vn.configuration.id "
-            + " AND vn.network.id = vdc.network.id" + " AND vdc.id = :vdc_id AND"
-            + "( ip.ip like :filterLike " + " OR ip.mac like :filterLike "
-            + " OR ip.vlanNetwork.name like :filterLike " + " OR vapp.name like :filterLike "
-            + " OR vm.name like :filterLike " + ")";//
-
-    public static final String BY_VDC_PURCHASED =
-        " SELECT ip FROM "
-            + "Datacenter dc INNER JOIN dc.network net, VLANNetwork vlan "
-            + "INNER JOIN vlan.configuration conf,"
-            // +" INNER JOIN conf.dhcp dhcp, "
-            + "IpPoolManagement ip LEFT JOIN ip.virtualMachine vm LEFT JOIN ip.virtualAppliance vapp, "
-            + "VirtualDatacenter vdc LEFT JOIN vdc.enterprise ent "
-            + "WHERE net.id = vlan.network.id "
-            // +"AND dhcp.id = ip.dhcp.id "
-            + "AND ip.vlanNetwork.id = vlan.id "
-            + "AND vdc.id = :vdc_id AND "
-            + "vdc.datacenter.id = dc.id AND "
-            + "ip.available = 1 AND vlan.enterprise is null AND ip.virtualDatacenter.id = :vdc_id AND "
-            + "( ip.ip LIKE :filterLike OR ip.mac LIKE :filterLike OR ip.networkName LIKE :filterLike OR "
-            + " vm.name like :filterLike OR vapp.name LIKE :filterLike OR ent.name LIKE :filterLike )";
-
-    public static final String BY_VDC_TO_PURCHASE =
-        " SELECT ip FROM "
-            + "Datacenter dc INNER JOIN dc.network net, VLANNetwork vlan "
-            + "INNER JOIN vlan.configuration conf,"
-            // +" INNER JOIN conf.dhcp dhcp, "
-            + "IpPoolManagement ip LEFT JOIN ip.virtualMachine vm LEFT JOIN ip.virtualAppliance vapp, "
-            + "VirtualDatacenter vdc LEFT JOIN vdc.enterprise ent "
-            + "WHERE net.id = vlan.network.id "
-            // +"AND dhcp.id = ip.dhcp.id "
-            + "AND ip.vlanNetwork.id = vlan.id "
-            + "AND vdc.id = :vdc_id AND "
-            + "vdc.datacenter.id = dc.id AND "
-            + "ip.available = 1 AND ip.quarantine = 0  AND vlan.enterprise is null AND ip.virtualDatacenter is null AND "
-            + "( ip.ip LIKE :filterLike OR ip.mac LIKE :filterLike OR ip.networkName LIKE :filterLike OR "
-            + " vm.name like :filterLike OR vapp.name LIKE :filterLike OR ent.name LIKE :filterLike )";
-
-    public static final String BY_VIRTUAL_MACHINE =
-        "SELECT ip " + "FROM IpPoolManagement ip INNER JOIN ip.virtualMachine vm "
-            + "WHERE vm.id = :vm_id " + "ORDER BY ip.sequence";
-
-    public static final String BY_VLAN =
-        " SELECT ip FROM IpPoolManagement ip "
-            + " left join ip.virtualMachine vm "
-            + " left join ip.virtualAppliance vapp, "
-            + " NetworkConfiguration nc, "
-            + " VirtualDatacenter vdc, "
-            + " VLANNetwork vn "
-            // + " WHERE ip.dhcp.id = nc.dhcp.id "
-            + "WHERE ip.vlanNetwork.id = vn.id " + " AND nc.id = vn.configuration.id "
-            + " AND vn.id = :vlan_id " + " AND vn.network.id = vdc.network.id"
-            + " AND vdc.id = :vdc_id AND" + "( ip.ip like :filterLike "
-            + " OR ip.mac like :filterLike " + " OR ip.vlanNetwork.name like :filterLike "
-            + " OR vapp.name like :filterLike " + " OR vm.name like :filterLike " + ")";
-
-    public static final String BY_VLAN_USED_BY_ANY_VDC =
-        " SELECT ip FROM ip_pool_management ip  , rasd_management rasd, virtualdatacenter vdc "
-            + "  WHERE ip.idManagement= rasd.idManagement and rasd.idVirtualDatacenter "
-            + "= vdc.idVirtualDatacenter and ip.vlan_network_id =:vlan_id";
-
-    public static final String BY_VLAN_USED_BY_ANY_VM =
-        " SELECT ip FROM IpPoolManagement ip "
-            + " left join ip.virtualMachine vm "
-            + " left join ip.virtualAppliance vapp, "
-            + " NetworkConfiguration nc, "
-            + " VLANNetwork vn "
-            // + " WHERE ip.dhcp.id = nc.dhcp.id "
-            + "WHERE ip.vlanNetwork.id = vn.id " + " AND nc.id = vn.configuration.id "
-            + " AND vn.id = :vlan_id " + " AND ( ip.ip like :filterLike "
-            + " OR ip.mac like :filterLike " + " OR ip.vlanNetwork.name like :filterLike "
-            + " OR vapp.name like :filterLike " + " OR vm.name like :filterLike " + ")";
-
-    public static final String BY_VLAN_WITHOUT_USED_IPS =
-        " SELECT ip FROM IpPoolManagement ip "
-            + " left join ip.virtualMachine vm "
-            + " left join ip.virtualAppliance vapp, "
-            + " NetworkConfiguration nc, "
-            + " VirtualDatacenter vdc, "
-            + " VLANNetwork vn "
-            // + " WHERE ip.dhcp.id = nc.dhcp.id "
-            + "WHERE ip.vlanNetwork.id = vn.id " + " AND nc.id = vn.configuration.id "
-            + " AND vn.id = :vlan_id " + " AND vn.network.id = vdc.network.id"
-            + " AND vdc.id = :vdc_id " + " AND vm is null AND " + "( ip.ip like :filterLike "
-            + " OR ip.mac like :filterLike " + " OR ip.vlanNetwork.name like :filterLike "
-            + " OR vapp.name like :filterLike " + " OR vm.name like :filterLike " + ")";
-
-    private final static String GET_IPPOOLMANAGEMENT_ASSIGNED_TO_DIFFERENT_VM_AND_DIFFERENT_FROM_NOT_DEPLOYED_SQL =
-        "SELECT * " //
-            + "FROM ip_pool_management ip, " //
-            + "rasd_management rasd " //
-            + "JOIN virtualmachine vm " //
-            + "ON vm.idVM = rasd.idVM " + "WHERE rasd.idManagement = ip.idManagement " //
-            + "AND rasd.idVM != :idVM " //
-            + "AND ip.vlan_network_id = :idVlanNetwork " //
-            + "AND vm.state != 'NOT_DEPLOYED'"; //
-
-    private final static String GET_NETWORK_POOL_PURCHASED_BY_ENTERPRISE =
-        "SELECT ip "//
-            + "FROM com.abiquo.server.core.infrastructure.Datacenter dc "//
-            + "INNER JOIN dc.network net, "//
-            + "com.abiquo.server.core.infrastructure.network.VLANNetwork vlan, "//
-            // + "INNER JOIN vlan.configuration.dhcp dhcp, "//
-            + "com.abiquo.server.core.infrastructure.network.IpPoolManagement ip "//
-            // + "LEFT JOIN join ip.virtualMachine vm "//
-            + "LEFT JOIN ip.virtualAppliance vapp, "//
-            + "com.abiquo.server.core.cloud.VirtualDatacenter vdc "//
-            + "where net.id = vlan.network.id "//
-            // + "and dhcp.id = ip.dhcp.id "//
-            + "and ip.vlanNetwork.id = vlan.id "
-            + "and dc.id = vdc.datacenter.id "//
-            + "and vdc.enterprise.id = :enterpriseId "
-            + "and ip.virtualDatacenter.id = vdc.id "
-            + "and vlan.type = 'PUBLIC'";
-
-    public static final String GET_IP_INTO_VIRTUALMACHINE =
-        " SELECT ip FROM IpPoolManagement ip" + " WHERE ip.virtualMachine.id = :idVm "
-            + " AND ip.id = :idIp ";
-
-    private static Criterion equalMac(final String mac)
-    {
-        assert !StringUtils.isEmpty(mac);
-
-        return Restrictions.eq(IpPoolManagement.MAC_PROPERTY, mac);
-    }
-
-    public IpPoolManagementDAO()
-    {
-        super(IpPoolManagement.class);
-    }
-
-    public IpPoolManagementDAO(final EntityManager entityManager)
-    {
-        super(IpPoolManagement.class, entityManager);
-    }
-
-    public boolean existsAnyWithMac(final String mac)
-    {
-        assert !StringUtils.isEmpty(mac);
-
-        return this.existsAnyByCriterions(equalMac(mac));
-    }
-
-    public List<IpPoolManagement> findExternalIpsByVlan(final Integer entId,
-        final Integer datacenterLimitId, final Integer vlanId, Integer startwith,
-        final Integer limit, final String filter, final OrderByEnum orderByEnum,
-        final Boolean descOrAsc, final Boolean onlyAvailable)
-    {
-        // TODO Auto-generated method stub
-        Query finalQuery =
-            getSession().createQuery(
-                BY_EXTERNAL_VLAN + " " + defineOnlyAvailableFilter(onlyAvailable)
-                    + defineOrderBy(orderByEnum, descOrAsc));
-        finalQuery.setParameter("ent_id", entId);
-        finalQuery.setParameter("dc_limit_id", datacenterLimitId);
-        finalQuery.setParameter("vlan_id", vlanId);
-        finalQuery.setParameter("filterLike", filter == null || filter.isEmpty() ? "%" : "%"
-            + filter + "%");
-
-        // Check if the page requested is bigger than the last one
-        Integer totalResults = finalQuery.list().size();
-
-        if (limit != null)
-        {
-            finalQuery.setMaxResults(limit);
-        }
-
-        if (startwith >= totalResults)
-        {
-            startwith = totalResults - limit;
-        }
-        finalQuery.setFirstResult(startwith);
-        finalQuery.setMaxResults(limit);
-
-        PagedList<IpPoolManagement> ipList = new PagedList<IpPoolManagement>(finalQuery.list());
-        ipList.setTotalResults(totalResults);
-        ipList.setPageSize(limit);
-        ipList.setCurrentElement(startwith);
-
-        return ipList;
-    }
-
-    public List<IpPoolManagement> findFreeIpsByVlan(final VLANNetwork vlan)
-    {
-        Criterion freeIps = Restrictions.eq(IpPoolManagement.VLAN_NETWORK_PROPERTY, vlan);
-        Criteria criteria = getSession().createCriteria(IpPoolManagement.class).add(freeIps);
-        criteria.add(Restrictions.isNull(IpPoolManagement.MAC_PROPERTY));
-        return criteria.list();
-    }
-
-    /**
-     * Return a single {@link IpPoolManagement}
-     * 
-     * @param vlan {@link VLANNetwork} oject which the Ip should belong to.
-     * @param ipId identifier of the Ip.
-     * @return the found object.
-     */
-    public IpPoolManagement findIp(final VLANNetwork vlan, final Integer ipId)
-    {
-        Criteria criteria = getSession().createCriteria(IpPoolManagement.class);
-        Criterion vlanEqual = Restrictions.eq(IpPoolManagement.VLAN_NETWORK_PROPERTY, vlan);
-        Criterion ipEqual = Restrictions.eq(PersistentEntity.ID_PROPERTY, ipId);
-
-        criteria.add(vlanEqual).add(ipEqual);
-
-        return (IpPoolManagement) criteria.uniqueResult();
-    }
-
-    public List<IpPoolManagement> findIpsByEnterprise(final Integer entId, Integer firstElem,
-        final Integer numElem, final String has, final IpPoolManagement.OrderByEnum orderby,
-        final Boolean asc)
-    {
-        // Get the query that counts the total results.
-        Query finalQuery = getSession().createQuery(BY_ENT + " " + defineOrderBy(orderby, asc));
-        finalQuery.setParameter("ent_id", entId);
-        finalQuery.setParameter("filterLike", has.isEmpty() ? "%" : "%" + has + "%");
-
-        // Check if the page requested is bigger than the last one
-        Integer totalResults = finalQuery.list().size();
-        if (firstElem >= totalResults)
-        {
-            firstElem = totalResults - numElem;
-        }
-
-        // Get the list of elements
-        finalQuery.setFirstResult(firstElem);
-        finalQuery.setMaxResults(numElem);
-
-        PagedList<IpPoolManagement> ipList = new PagedList<IpPoolManagement>(finalQuery.list());
-        ipList.setTotalResults(totalResults);
-        ipList.setPageSize(numElem);
-        ipList.setCurrentElement(firstElem);
-
-        return ipList;
-    }
-
-    /**
-     * Return all the IPs from a VLAN.
-     * 
-     * @param network {@link Network} network entity that stores all the VLANs
-     * @param vlanId identifier of the VLAN to search into.
-     * @return all the {@link IpPoolManagement} ips.
-     */
-    public List<IpPoolManagement> findIpsByNetwork(final Network network, final Integer vlanId)
-    {
-        return findIpsByNetwork(network, vlanId, null);
-    }
-
-    /**
-     * Return all the IPs from a VLAN filtered by a string
-     * 
-     * @param network {@link Network} network entity that stores all the VLANs
-     * @param vlanId identifier of the VLAN to search into.
-     * @param has to filter the search
-     * @return all the {@link IpPoolManagement} ips.
-     */
-    public List<IpPoolManagement> findIpsByNetwork(final Network network, final Integer vlanId,
-        final String has)
-    {
-        return findIpsByNetwork(network, vlanId, has, 0, null);
-    }
-
-    /**
-     * Return all the IPs from a VLAN filtered by a string and saying how many elements do you want
-     * and the first element to retrieve
-     * 
-     * @param network {@link Network} network entity that stores all the VLANs
-     * @param vlanId identifier of the VLAN to search into.
-     * @param has to filter the search
-     * @param firstElem firstelement to retrieve.
-     * @param numeElem to retrieve.
-     * @return all the {@link IpPoolManagement} ips.
-     */
-    public List<IpPoolManagement> findIpsByNetwork(final Network network, final Integer vlanId,
-        final String has, Integer firstElem, final Integer numElem)
-    {
-        Query finalQuery = getSession().createQuery(BY_NETWORK);
-        finalQuery.setParameter("net_id", network.getId());
-        finalQuery.setParameter("vlan_id", vlanId);
-        finalQuery.setParameter("filterLike", has == null || has.isEmpty() ? "%" : "%" + has + "%");
-
-        // Check if the page requested is bigger than the last one
-        Integer totalResults = finalQuery.list().size();
-
-        if (numElem != null)
-        {
-            finalQuery.setMaxResults(numElem);
-        }
-
-        if (firstElem >= totalResults)
-        {
-            firstElem = totalResults - 1;
-            finalQuery.setMaxResults(1);
-        }
-        finalQuery.setFirstResult(firstElem);
-
-        PagedList<IpPoolManagement> ipList = new PagedList<IpPoolManagement>(finalQuery.list());
-        ipList.setTotalResults(totalResults);
-        ipList.setPageSize(numElem);
-        ipList.setCurrentElement(firstElem);
-
-        return ipList;
-    }
-
-    /**
-     * Return the {@link PagedList} entity with the Ips by VLAN.
-     * 
-     * @param vdcId virtual datacenter id
-     * @param vlanId vlan id
-     * @return list of used IpPoolManagement.
-     */
-    public List<IpPoolManagement> findIpsByPrivateVLAN(final Integer vdcId, final Integer vlanId)
-    {
-
-        Query finalQuery = getSession().createQuery(BY_VLAN);
-        finalQuery.setParameter("vdc_id", vdcId);
-        finalQuery.setParameter("vlan_id", vlanId);
-        finalQuery.setParameter("filterLike", "%");
-
-        Integer totalResults = finalQuery.list().size();
-
-        PagedList<IpPoolManagement> ipList = new PagedList<IpPoolManagement>(finalQuery.list());
-        ipList.setTotalResults(totalResults);
-
-        return ipList;
-
-    }
-
-    /**
-     * Find all the IpPoolManagement created and available by a vLAN with filter options
-     * 
-     * @param vdcId identifier of the virtual datacenter.
-     * @param vlanId identifier of the vlan.
-     * @param firstElem first element to retrieve.
-     * @param numElem number of elements to retrieve.
-     * @param has filter %like%
-     * @param orderby ordering filter. {@see IpPoolManagement.OrderByEnum}
-     * @param asc ordering filter, ascending = true, descending = false.
-     * @return List of IP addresses that pass the filter.
-     */
-    public List<IpPoolManagement> findIpsByPrivateVLANAvailableFiltered(final Integer vdcId,
-        final Integer vlanId, Integer firstElem, final Integer numElem, final String has,
-        final IpPoolManagement.OrderByEnum orderby, final Boolean asc)
-    {
-        // Get the query that counts the total results.
-        Query finalQuery =
-            getSession().createQuery(
-                BY_VLAN + " " + defineFilterAvailable() + defineOrderBy(orderby, asc));
-        finalQuery.setParameter("vdc_id", vdcId);
-        finalQuery.setParameter("vlan_id", vlanId);
-        finalQuery.setParameter("filterLike", has.isEmpty() ? "%" : "%" + has + "%");
-
-        // Check if the page requested is bigger than the last one
-        Integer totalResults = finalQuery.list().size();
-
-        if (firstElem >= totalResults)
-        {
-            firstElem = totalResults - numElem;
-        }
-        finalQuery.setFirstResult(firstElem);
-        finalQuery.setMaxResults(numElem);
-
-        PagedList<IpPoolManagement> ipList = new PagedList<IpPoolManagement>(finalQuery.list());
-        ipList.setTotalResults(totalResults);
-        ipList.setPageSize(numElem);
-        ipList.setCurrentElement(firstElem);
-
-        return ipList;
-    }
-
-    /**
-     * Find all the IpPoolManagement created by a vLAN with filter options
-     * 
-     * @param vdcId identifier of the virtual datacenter.
-     * @param vlanId identifier of the vlan.
-     * @param firstElem first element to retrieve.
-     * @param numElem number of elements to retrieve.
-     * @param has filter %like%
-     * @param orderby ordering filter. {@see IpPoolManagement.OrderByEnum}
-     * @param asc ordering filter, ascending = true, descending = false.
-     * @return List of IP addresses that pass the filter.
-     */
-    public List<IpPoolManagement> findIpsByPrivateVLANFiltered(final Integer vdcId,
-        final Integer vlanId, Integer firstElem, final Integer numElem, final String has,
-        final IpPoolManagement.OrderByEnum orderby, final Boolean asc, final Boolean freeIps)
-    {
-        // Get the query that counts the total results.
-        Query finalQuery;
-        if (!freeIps)
-        {
-            finalQuery = getSession().createQuery(BY_VLAN + " " + defineOrderBy(orderby, asc));
-        }
-        else
-        {
-            finalQuery =
-                getSession().createQuery(
-                    BY_VLAN_WITHOUT_USED_IPS + " " + defineFilterAvailable()
-                        + defineOrderBy(orderby, asc));
-        }
-        finalQuery.setParameter("vdc_id", vdcId);
-        finalQuery.setParameter("vlan_id", vlanId);
-        finalQuery.setParameter("filterLike", has.isEmpty() ? "%" : "%" + has + "%");
-
-        // Check if the page requested is bigger than the last one
-        Integer totalResults = finalQuery.list().size();
-
-        if (firstElem >= totalResults)
-        {
-            firstElem = totalResults - numElem;
-        }
-        finalQuery.setFirstResult(firstElem);
-        finalQuery.setMaxResults(numElem);
-
-        PagedList<IpPoolManagement> ipList = new PagedList<IpPoolManagement>(finalQuery.list());
-        ipList.setTotalResults(totalResults);
-        ipList.setPageSize(numElem);
-        ipList.setCurrentElement(firstElem);
-
-        return ipList;
-    }
-
-    public List<IpPoolManagement> findIpsByVdc(final Integer vdcId, Integer firstElem,
-        final Integer numElem, final String has, final IpPoolManagement.OrderByEnum orderby,
-        final Boolean asc)
-    {
-        // Get the query that counts the total results.
-        Query finalQuery = getSession().createQuery(BY_VDC + " " + defineOrderBy(orderby, asc));
-        finalQuery.setParameter("vdc_id", vdcId);
-        finalQuery.setParameter("filterLike", has.isEmpty() ? "%" : "%" + has + "%");
-
-        // Check if the page requested is bigger than the last one
-        Integer totalResults = finalQuery.list().size();
-
-        if (firstElem == null)
-        {
-            firstElem = 0;
-        }
-
-        if (firstElem >= totalResults)
-        {
-            firstElem = totalResults - numElem;
-        }
-        finalQuery.setFirstResult(firstElem);
-        finalQuery.setMaxResults(numElem);
-
-        PagedList<IpPoolManagement> ipList = new PagedList<IpPoolManagement>(finalQuery.list());
-        ipList.setTotalResults(totalResults);
-        ipList.setPageSize(numElem);
-        ipList.setCurrentElement(firstElem);
-
-        return ipList;
-    }
-
-    public List<IpPoolManagement> findIpsByVirtualAppliance(final VirtualAppliance vapp)
-    {
-        Criterion onVapp = Restrictions.eq(RasdManagement.VIRTUAL_APPLIANCE_PROPERTY, vapp);
-        Criteria criteria = getSession().createCriteria(IpPoolManagement.class).add(onVapp);
-        List<IpPoolManagement> result = getResultList(criteria);
-
-        return result;
-    }
-
-    public List<IpPoolManagement> findIpsByVirtualMachine(final VirtualMachine virtualMachine)
-    {
-        Query query = getSession().createQuery(BY_VIRTUAL_MACHINE);
-        query.setParameter("vm_id", virtualMachine.getId());
-
-        List<IpPoolManagement> ips = query.list();
-        return ips;
-
-    }
-
-    public IpPoolManagement findIpByVirtualMachine(final VirtualMachine vm, final Integer nicId)
-    {
-        Query finalQuery = getSession().createQuery(GET_IP_INTO_VIRTUALMACHINE);
-        finalQuery.setParameter("idVm", vm.getId());
-        finalQuery.setParameter("idIp", nicId);
-
-        return (IpPoolManagement) finalQuery.uniqueResult();
-    }
-
-    public List<IpPoolManagement> findIpsByVirtualMachineWithConfigurationId(final VirtualMachine vm)
-    {
-        List<IpPoolManagement> ips = findIpsByVirtualMachine(vm);
-        List<IpPoolManagement> resultIps = new ArrayList<IpPoolManagement>();
-        for (IpPoolManagement ip : ips)
-        {
-            if (ip.getVlanNetwork().getConfiguration().getId().equals(
-                vm.getNetworkConfiguration().getId()))
+	/**
+	 * Abiquo community edition
+	 * cloud management application for hybrid clouds
+	 * Copyright (C) 2008-2010 - Abiquo Holdings S.L.
+	 *
+	 * This application is free software; you can redistribute it and/or
+	 * modify it under the terms of the GNU LESSER GENERAL PUBLIC
+	 * LICENSE as published by the Free Software Foundation under
+	 * version 3 of the License
+	 *
+	 * This software is distributed in the hope that it will be useful,
+	 * but WITHOUT ANY WARRANTY; without even the implied warranty of
+	 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+	 * LESSER GENERAL PUBLIC LICENSE v.3 for more details.
+	 *
+	 * You should have received a copy of the GNU Lesser General Public
+	 * License along with this library; if not, write to the
+	 * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+	 * Boston, MA 02111-1307, USA.
+	 */
+
+	package com.abiquo.server.core.infrastructure.network;
+
+	import java.util.ArrayList;
+	import java.util.Arrays;
+	import java.util.Collection;
+	import java.util.List;
+
+	import javax.persistence.EntityManager;
+
+	import org.apache.commons.lang.StringUtils;
+	import org.hibernate.Criteria;
+	import org.hibernate.LockMode;
+	import org.hibernate.Query;
+	import org.hibernate.criterion.Criterion;
+	import org.hibernate.criterion.ProjectionList;
+	import org.hibernate.criterion.Projections;
+	import org.hibernate.criterion.Restrictions;
+	import org.springframework.stereotype.Repository;
+
+	import com.abiquo.model.enumerator.NetworkType;
+	import com.abiquo.server.core.cloud.VirtualAppliance;
+	import com.abiquo.server.core.cloud.VirtualMachine;
+	import com.abiquo.server.core.common.persistence.DefaultDAOBase;
+	import com.abiquo.server.core.infrastructure.management.RasdManagement;
+	import com.abiquo.server.core.infrastructure.network.IpPoolManagement.OrderByEnum;
+	import com.abiquo.server.core.util.PagedList;
+	import com.softwarementors.bzngine.entities.PersistentEntity;
+
+	@Repository("jpaIpPoolManagementDAO")
+	@SuppressWarnings("unchecked")
+	public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagement>
+	{
+
+	    // public static final String BY_DATACENTER = " SELECT ip FROM "
+	    // + "Datacenter dc INNER JOIN dc.network net, VLANNetwork vlan "
+	    // + "INNER JOIN vlan.configuration conf INNER JOIN conf.dhcp dhcp, "
+	    // + "IpPoolManagement ip LEFT JOIN ip.virtualMachine vm LEFT JOIN ip.virtualAppliance vapp "
+	    // + "LEFT JOIN ip.virtualDatacenter vdc JOIN vdc.enterprise ent "
+	    // + "WHERE net.id = vlan.network.id AND dhcp.id = ip.dhcp.id AND dc.id = :datacenter_id";
+
+	    public static final String BY_DATACENTER =
+		" SELECT ip FROM "
+		    + "Datacenter dc INNER JOIN dc.network net, VLANNetwork vlan "
+		    + "INNER JOIN vlan.configuration conf, "
+		    // "INNER JOIN conf.dhcp dhcp, "
+		    + "IpPoolManagement ip LEFT JOIN ip.virtualMachine vm LEFT JOIN ip.virtualAppliance vapp "
+		    + "LEFT JOIN ip.virtualDatacenter vdc LEFT JOIN vlan.enterprise ent "
+		    + "WHERE net.id = vlan.network.id "
+		    // +"AND dhcp.id = ip.dhcp.id"
+		    + "AND ip.vlanNetwork.id = vlan.id "
+		    + " AND dc.id = :datacenter_id AND "
+		    + "( ip.ip LIKE :filterLike OR ip.mac LIKE :filterLike OR ip.networkName LIKE :filterLike OR "
+		    + " vm.name like :filterLike OR vapp.name LIKE :filterLike OR ent.name LIKE :filterLike )";//
+
+	    public static final String BY_DATACENTER_AND_ENTERPRISE =
+		" SELECT ip FROM "
+		    + "Datacenter dc INNER JOIN dc.network net, VLANNetwork vlan "
+		    + "INNER JOIN vlan.configuration conf, "
+		    // "INNER JOIN conf.dhcp dhcp, "
+		    + "IpPoolManagement ip LEFT JOIN ip.virtualMachine vm LEFT JOIN ip.virtualAppliance vapp "
+		    + "LEFT JOIN ip.virtualDatacenter vdc LEFT JOIN vlan.enterprise ent "
+		    + "WHERE net.id = vlan.network.id "
+		    // +"AND dhcp.id = ip.dhcp.id"
+		    + "AND ip.vlanNetwork.id = vlan.id "
+		    + " AND dc.id = :datacenter_id AND "
+		    + "( ip.ip LIKE :filterLike OR ip.mac LIKE :filterLike OR ip.networkName LIKE :filterLike OR "
+		    + " vm.name like :filterLike OR vapp.name LIKE :filterLike OR ent.name LIKE :filterLike )";//
+
+	    public static final String BY_DEFAULT_VLAN_USED_BY_ANY_VDC =
+		" SELECT ip FROM  virtualdatacenter vdc, ip_pool_management ip where "
+		    + "vdc.default_vlan_network_id=ip.vlan_network_id and vdc.default_vlan_network_id=:vlan_id";
+
+	    public static final String BY_ENT =
+		" SELECT ip FROM IpPoolManagement ip " + " left join ip.virtualMachine vm "
+		    + " left join ip.virtualAppliance vapp, "
+		    + " NetworkConfiguration nc, "
+		    + " VirtualDatacenter vdc, "
+		    + " VLANNetwork vn, "
+		    + " Enterprise ent "
+		    // + " WHERE ip.dhcp.id = nc.dhcp.id "
+		    + "WHERE ip.vlanNetwork.id = vn.id " + " AND nc.id = vn.configuration.id "
+		    + " AND vn.network.id = vdc.network.id" + " AND vdc.enterprise.id = ent.id"
+		    + " AND ent.id = :ent_id " + " AND " + "( ip.ip like :filterLike "
+		    + " OR ip.mac like :filterLike " + " OR ip.vlanNetwork.name like :filterLike "
+		    + " OR vapp.name like :filterLike " + " OR vm.name like :filterLike " + ")";
+
+	    public static final String BY_EXTERNAL_VLAN =
+		"SELECT ip FROM IpPoolManagement ip "
+		    + " left join ip.virtualMachine vm "
+		    + " left join ip.virtualAppliance vapp "
+		    + " left join ip.virtualDatacenter vdc, "
+		    + " NetworkConfiguration nc, "
+		    + " VLANNetwork vn "
+		    + " join vn.enterprise ent, "
+		    + " DatacenterLimits dcl"
+		    // + " WHERE ip.dhcp.id = nc.dhcp.id "
+		    + " WHERE ip.vlanNetwork.id = vn.id " + " AND nc.id = vn.configuration.id "
+		    + " AND vn.id = :vlan_id " + " AND ent.id = :ent_id AND "
+		    + " dcl.enterprise.id = ent.id AND " + " ip.available = 1 AND "
+		    + " dcl.id = :dc_limit_id AND " + "( ip.ip like :filterLike "
+		    + " OR ip.mac like :filterLike " + " OR ip.vlanNetwork.name like :filterLike "
+		    + " OR vapp.name like :filterLike " + " OR vm.name like :filterLike " + ")";
+
+	    public static final String BY_IP_PURCHASED =
+		" SELECT ip FROM "
+		    + "Datacenter dc INNER JOIN dc.network net, VLANNetwork vlan "
+		    + "INNER JOIN vlan.configuration conf,"
+		    // +" INNER JOIN conf.dhcp dhcp, "
+		    + "IpPoolManagement ip LEFT JOIN ip.virtualMachine vm LEFT JOIN ip.virtualAppliance vapp, "
+		    + "VirtualDatacenter vdc LEFT JOIN vdc.enterprise ent "
+		    + "WHERE net.id = vlan.network.id "
+		    // +"AND dhcp.id = ip.dhcp.id "
+		    + "AND ip.vlanNetwork.id = vlan.id " + "AND vdc.id = :vdc_id AND "
+		    + "vdc.datacenter.id = dc.id AND ip.id = :ip_id AND "
+		    + "ip.available = 1 AND vlan.enterprise is null AND ip.virtualDatacenter.id = :vdc_id";
+
+	    public static final String BY_IP_TO_PURCHASE =
+		" SELECT ip FROM "
+		    + "Datacenter dc INNER JOIN dc.network net, VLANNetwork vlan "
+		    + "INNER JOIN vlan.configuration conf,"
+		    // +" INNER JOIN conf.dhcp dhcp, "
+		    + "IpPoolManagement ip LEFT JOIN ip.virtualMachine vm LEFT JOIN ip.virtualAppliance vapp, "
+		    + "VirtualDatacenter vdc LEFT JOIN vdc.enterprise ent "
+		    + "WHERE net.id = vlan.network.id "
+		    // +"AND dhcp.id = ip.dhcp.id "
+		    + "AND ip.vlanNetwork.id = vlan.id " + "AND vdc.id = :vdc_id AND "
+		    + "vdc.datacenter.id = dc.id AND ip.id = :ip_id AND "
+		    + "ip.available = 1 AND vlan.enterprise is null AND ip.virtualDatacenter is null";
+
+	    public static final String BY_NETWORK =
+		" SELECT ip FROM IpPoolManagement ip "
+		    + " left join ip.virtualMachine vm "
+		    + " left join ip.virtualAppliance vapp, "
+		    + " NetworkConfiguration nc, "
+		    + " VLANNetwork vn "
+		    // + " WHERE ip.dhcp.id = nc.dhcp.id "
+		    + "WHERE ip.vlanNetwork.id = vn.id " + " AND nc.id = vn.configuration.id "
+		    + " AND vn.id = :vlan_id " + " AND vn.network.id = :net_id AND "
+		    + "( ip.ip like :filterLike " + " OR ip.mac like :filterLike "
+		    + " OR ip.vlanNetwork.name like :filterLike " + " OR vapp.name like :filterLike "
+		    + " OR vm.name like :filterLike " + ")";
+
+	    public static final String BY_PUBLIC_VLAN =
+		" SELECT ip FROM "
+		    + "Datacenter dc INNER JOIN dc.network net, VLANNetwork vlan "
+		    + "INNER JOIN vlan.configuration conf,"
+		    // +" INNER JOIN conf.dhcp dhcp, "
+		    + "IpPoolManagement ip LEFT JOIN ip.virtualDatacenter vdc LEFT JOIN ip.virtualAppliance vapp "
+		    + "LEFT JOIN ip.virtualMachine vm LEFT JOIN vdc.enterprise ent "
+		    + "WHERE net.id = vlan.network.id"
+		    // +"AND dhcp.id = ip.dhcp.id "
+		    + " AND ip.vlanNetwork.id = vlan.id "
+		    + " AND dc.id = :datacenter_id AND "
+		    + "vlan.id = :vlan_id AND"
+		    + "( ip.ip LIKE :filterLike OR ip.mac LIKE :filterLike OR ip.networkName LIKE :filterLike OR "
+		    + " vm.name like :filterLike OR vapp.name LIKE :filterLike OR ent.name LIKE :filterLike )";
+
+	    public static final String BY_VDC =
+		" SELECT ip FROM IpPoolManagement ip "
+		    + " left join ip.virtualMachine vm "
+		    + " left join ip.virtualAppliance vapp, "
+		    + " NetworkConfiguration nc, "
+		    + " VirtualDatacenter vdc, "
+		    + " VLANNetwork vn "
+		    // + " WHERE ip.dhcp.id = nc.dhcp.id "
+		    + "WHERE ip.vlanNetwork.id = vn.id " + " AND nc.id = vn.configuration.id "
+		    + " AND vn.network.id = vdc.network.id" + " AND vdc.id = :vdc_id AND"
+		    + "( ip.ip like :filterLike " + " OR ip.mac like :filterLike "
+		    + " OR ip.vlanNetwork.name like :filterLike " + " OR vapp.name like :filterLike "
+		    + " OR vm.name like :filterLike " + ")";//
+
+	    public static final String BY_VDC_PURCHASED =
+		" SELECT ip FROM "
+		    + "Datacenter dc INNER JOIN dc.network net, VLANNetwork vlan "
+		    + "INNER JOIN vlan.configuration conf,"
+		    // +" INNER JOIN conf.dhcp dhcp, "
+		    + "IpPoolManagement ip LEFT JOIN ip.virtualMachine vm LEFT JOIN ip.virtualAppliance vapp, "
+		    + "VirtualDatacenter vdc LEFT JOIN vdc.enterprise ent "
+		    + "WHERE net.id = vlan.network.id "
+		    // +"AND dhcp.id = ip.dhcp.id "
+		    + "AND ip.vlanNetwork.id = vlan.id "
+		    + "AND vdc.id = :vdc_id AND "
+		    + "vdc.datacenter.id = dc.id AND "
+		    + "ip.available = 1 AND vlan.enterprise is null AND ip.virtualDatacenter.id = :vdc_id AND "
+		    + "( ip.ip LIKE :filterLike OR ip.mac LIKE :filterLike OR ip.networkName LIKE :filterLike OR "
+		    + " vm.name like :filterLike OR vapp.name LIKE :filterLike OR ent.name LIKE :filterLike )";
+
+	    public static final String BY_VDC_TO_PURCHASE =
+		" SELECT ip FROM "
+		    + "Datacenter dc INNER JOIN dc.network net, VLANNetwork vlan "
+		    + "INNER JOIN vlan.configuration conf,"
+		    // +" INNER JOIN conf.dhcp dhcp, "
+		    + "IpPoolManagement ip LEFT JOIN ip.virtualMachine vm LEFT JOIN ip.virtualAppliance vapp, "
+		    + "VirtualDatacenter vdc LEFT JOIN vdc.enterprise ent "
+		    + "WHERE net.id = vlan.network.id "
+		    // +"AND dhcp.id = ip.dhcp.id "
+		    + "AND ip.vlanNetwork.id = vlan.id "
+		    + "AND vdc.id = :vdc_id AND "
+		    + "vdc.datacenter.id = dc.id AND "
+		    + "ip.available = 1 AND ip.quarantine = 0  AND vlan.enterprise is null AND ip.virtualDatacenter is null AND "
+		    + "( ip.ip LIKE :filterLike OR ip.mac LIKE :filterLike OR ip.networkName LIKE :filterLike OR "
+		    + " vm.name like :filterLike OR vapp.name LIKE :filterLike OR ent.name LIKE :filterLike )";
+
+	    public static final String BY_VIRTUAL_MACHINE =
+		"SELECT ip " + "FROM IpPoolManagement ip INNER JOIN ip.virtualMachine vm "
+		    + "WHERE vm.id = :vm_id " + "ORDER BY ip.sequence";
+
+	    public static final String BY_VLAN =
+		" SELECT ip FROM IpPoolManagement ip "
+		    + " left join ip.virtualMachine vm "
+		    + " left join ip.virtualAppliance vapp, "
+		    + " NetworkConfiguration nc, "
+		    + " VirtualDatacenter vdc, "
+		    + " VLANNetwork vn "
+		    // + " WHERE ip.dhcp.id = nc.dhcp.id "
+		    + "WHERE ip.vlanNetwork.id = vn.id " + " AND nc.id = vn.configuration.id "
+		    + " AND vn.id = :vlan_id " + " AND vn.network.id = vdc.network.id"
+		    + " AND vdc.id = :vdc_id AND" + "( ip.ip like :filterLike "
+		    + " OR ip.mac like :filterLike " + " OR ip.vlanNetwork.name like :filterLike "
+		    + " OR vapp.name like :filterLike " + " OR vm.name like :filterLike " + ")";
+
+	    public static final String BY_VLAN_NEXT_AVAILABLE =
+		"SELECT ip FROM IpPoolManagement ip inner join ip.virtualDatacenter vdc WHERE vdc.id = :vdc_id AND ip.ip.available = 1 AND ip.ip NOT in ( :excludedIp )";
+
+	    public static final String BY_VLAN_USED_BY_ANY_VDC =
+		" SELECT ip FROM ip_pool_management ip  , rasd_management rasd, virtualdatacenter vdc "
+		    + "  WHERE ip.idManagement= rasd.idManagement and rasd.idVirtualDatacenter "
+		    + "= vdc.idVirtualDatacenter and ip.vlan_network_id =:vlan_id";
+
+	    public static final String BY_VLAN_USED_BY_ANY_VM =
+		" SELECT ip FROM IpPoolManagement ip "
+		    + " left join ip.virtualMachine vm "
+		    + " left join ip.virtualAppliance vapp, "
+		    + " NetworkConfiguration nc, "
+		    + " VLANNetwork vn "
+		    // + " WHERE ip.dhcp.id = nc.dhcp.id "
+		    + "WHERE ip.vlanNetwork.id = vn.id " + " AND nc.id = vn.configuration.id "
+		    + " AND vn.id = :vlan_id " + " AND ( ip.ip like :filterLike "
+		    + " OR ip.mac like :filterLike " + " OR ip.vlanNetwork.name like :filterLike "
+		    + " OR vapp.name like :filterLike " + " OR vm.name like :filterLike " + ")";
+
+	    public static final String BY_VLAN_WITHOUT_USED_IPS =
+		" SELECT ip FROM IpPoolManagement ip "
+		    + " left join ip.virtualMachine vm "
+		    + " left join ip.virtualAppliance vapp, "
+		    + " NetworkConfiguration nc, "
+		    + " VirtualDatacenter vdc, "
+		    + " VLANNetwork vn "
+		    // + " WHERE ip.dhcp.id = nc.dhcp.id "
+		    + "WHERE ip.vlanNetwork.id = vn.id " + " AND nc.id = vn.configuration.id "
+		    + " AND vn.id = :vlan_id " + " AND vn.network.id = vdc.network.id"
+		    + " AND vdc.id = :vdc_id " + " AND vm is null AND " + "( ip.ip like :filterLike "
+		    + " OR ip.mac like :filterLike " + " OR ip.vlanNetwork.name like :filterLike "
+		    + " OR vapp.name like :filterLike " + " OR vm.name like :filterLike " + ")";
+
+	    private final static String GET_IPPOOLMANAGEMENT_ASSIGNED_TO_DIFFERENT_VM_AND_DIFFERENT_FROM_NOT_DEPLOYED_SQL =
+		"SELECT * " //
+		    + "FROM ip_pool_management ip, " //
+		    + "rasd_management rasd " //
+		    + "JOIN virtualmachine vm " //
+		    + "ON vm.idVM = rasd.idVM " + "WHERE rasd.idManagement = ip.idManagement " //
+		    + "AND rasd.idVM != :idVM " //
+		    + "AND ip.vlan_network_id = :idVlanNetwork " //
+		    + "AND vm.state != 'NOT_DEPLOYED'"; //
+
+	    private final static String GET_NETWORK_POOL_PURCHASED_BY_ENTERPRISE =
+		"SELECT ip "//
+		    + "FROM com.abiquo.server.core.infrastructure.Datacenter dc "//
+		    + "INNER JOIN dc.network net, "//
+		    + "com.abiquo.server.core.infrastructure.network.VLANNetwork vlan, "//
+		    // + "INNER JOIN vlan.configuration.dhcp dhcp, "//
+		    + "com.abiquo.server.core.infrastructure.network.IpPoolManagement ip "//
+		    // + "LEFT JOIN join ip.virtualMachine vm "//
+		    + "LEFT JOIN ip.virtualAppliance vapp, "//
+		    + "com.abiquo.server.core.cloud.VirtualDatacenter vdc "//
+		    + "where net.id = vlan.network.id "//
+		    // + "and dhcp.id = ip.dhcp.id "//
+		    + "and ip.vlanNetwork.id = vlan.id "
+		    + "and dc.id = vdc.datacenter.id "//
+		    + "and vdc.enterprise.id = :enterpriseId "
+		    + "and ip.virtualDatacenter.id = vdc.id "
+		    + "and vlan.type = 'PUBLIC'";
+
+	    public static final String GET_IP_INTO_VIRTUALMACHINE =
+		" SELECT ip FROM IpPoolManagement ip" + " WHERE ip.virtualMachine.id = :idVm "
+		    + " AND ip.id = :idIp ";
+
+	    private static Criterion equalMac(final String mac)
+	    {
+		assert !StringUtils.isEmpty(mac);
+
+		return Restrictions.eq(IpPoolManagement.MAC_PROPERTY, mac);
+	    }
+
+	    public IpPoolManagementDAO()
+	    {
+		super(IpPoolManagement.class);
+	    }
+
+	    public IpPoolManagementDAO(final EntityManager entityManager)
+	    {
+		super(IpPoolManagement.class, entityManager);
+	    }
+
+	    public boolean existsAnyWithMac(final String mac)
+	    {
+		assert !StringUtils.isEmpty(mac);
+
+		return this.existsAnyByCriterions(equalMac(mac));
+	    }
+
+	    public List<IpPoolManagement> findExternalIpsByVlan(final Integer entId,
+		final Integer datacenterLimitId, final Integer vlanId, Integer startwith,
+		final Integer limit, final String filter, final OrderByEnum orderByEnum,
+		final Boolean descOrAsc, final Boolean onlyAvailable)
+	    {
+		// TODO Auto-generated method stub
+		Query finalQuery =
+		    getSession().createQuery(
+			BY_EXTERNAL_VLAN + " " + defineOnlyAvailableFilter(onlyAvailable)
+			    + defineOrderBy(orderByEnum, descOrAsc));
+		finalQuery.setParameter("ent_id", entId);
+		finalQuery.setParameter("dc_limit_id", datacenterLimitId);
+		finalQuery.setParameter("vlan_id", vlanId);
+		finalQuery.setParameter("filterLike", filter == null || filter.isEmpty() ? "%" : "%"
+		    + filter + "%");
+
+		// Check if the page requested is bigger than the last one
+		Integer totalResults = finalQuery.list().size();
+
+		if (limit != null)
+		{
+		    finalQuery.setMaxResults(limit);
+		}
+
+		if (startwith >= totalResults)
+		{
+		    startwith = totalResults - limit;
+		}
+		finalQuery.setFirstResult(startwith);
+		finalQuery.setMaxResults(limit);
+
+		PagedList<IpPoolManagement> ipList = new PagedList<IpPoolManagement>(finalQuery.list());
+		ipList.setTotalResults(totalResults);
+		ipList.setPageSize(limit);
+		ipList.setCurrentElement(startwith);
+
+		return ipList;
+	    }
+
+	    public List<IpPoolManagement> findFreeIpsByVlan(final VLANNetwork vlan)
+	    {
+		Criterion freeIps = Restrictions.eq(IpPoolManagement.VLAN_NETWORK_PROPERTY, vlan);
+		Criteria criteria = getSession().createCriteria(IpPoolManagement.class).add(freeIps);
+		criteria.add(Restrictions.isNull(IpPoolManagement.MAC_PROPERTY));
+		return criteria.list();
+	    }
+
+	    /**
+	     * Return a single {@link IpPoolManagement}
+	     * 
+	     * @param vlan {@link VLANNetwork} oject which the Ip should belong to.
+	     * @param ipId identifier of the Ip.
+	     * @return the found object.
+	     */
+	    public IpPoolManagement findIp(final VLANNetwork vlan, final Integer ipId)
+	    {
+		Criteria criteria = getSession().createCriteria(IpPoolManagement.class);
+		Criterion vlanEqual = Restrictions.eq(IpPoolManagement.VLAN_NETWORK_PROPERTY, vlan);
+		Criterion ipEqual = Restrictions.eq(PersistentEntity.ID_PROPERTY, ipId);
+
+		criteria.add(vlanEqual).add(ipEqual);
+
+		return (IpPoolManagement) criteria.uniqueResult();
+	    }
+
+	    public List<IpPoolManagement> findIpsByEnterprise(final Integer entId, Integer firstElem,
+		final Integer numElem, final String has, final IpPoolManagement.OrderByEnum orderby,
+		final Boolean asc)
+	    {
+		// Get the query that counts the total results.
+		Query finalQuery = getSession().createQuery(BY_ENT + " " + defineOrderBy(orderby, asc));
+		finalQuery.setParameter("ent_id", entId);
+		finalQuery.setParameter("filterLike", has.isEmpty() ? "%" : "%" + has + "%");
+
+		// Check if the page requested is bigger than the last one
+		Integer totalResults = finalQuery.list().size();
+		if (firstElem >= totalResults)
+		{
+		    firstElem = totalResults - numElem;
+		}
+
+		// Get the list of elements
+		finalQuery.setFirstResult(firstElem);
+		finalQuery.setMaxResults(numElem);
+
+		PagedList<IpPoolManagement> ipList = new PagedList<IpPoolManagement>(finalQuery.list());
+		ipList.setTotalResults(totalResults);
+		ipList.setPageSize(numElem);
+		ipList.setCurrentElement(firstElem);
+
+		return ipList;
+	    }
+
+	    /**
+	     * Return all the IPs from a VLAN.
+	     * 
+	     * @param network {@link Network} network entity that stores all the VLANs
+	     * @param vlanId identifier of the VLAN to search into.
+	     * @return all the {@link IpPoolManagement} ips.
+	     */
+	    public List<IpPoolManagement> findIpsByNetwork(final Network network, final Integer vlanId)
+	    {
+		return findIpsByNetwork(network, vlanId, null);
+	    }
+
+	    /**
+	     * Return all the IPs from a VLAN filtered by a string
+	     * 
+	     * @param network {@link Network} network entity that stores all the VLANs
+	     * @param vlanId identifier of the VLAN to search into.
+	     * @param has to filter the search
+	     * @return all the {@link IpPoolManagement} ips.
+	     */
+	    public List<IpPoolManagement> findIpsByNetwork(final Network network, final Integer vlanId,
+		final String has)
+	    {
+		return findIpsByNetwork(network, vlanId, has, 0, null);
+	    }
+
+	    /**
+	     * Return all the IPs from a VLAN filtered by a string and saying how many elements do you want
+	     * and the first element to retrieve
+	     * 
+	     * @param network {@link Network} network entity that stores all the VLANs
+	     * @param vlanId identifier of the VLAN to search into.
+	     * @param has to filter the search
+	     * @param firstElem firstelement to retrieve.
+	     * @param numeElem to retrieve.
+	     * @return all the {@link IpPoolManagement} ips.
+	     */
+	    public List<IpPoolManagement> findIpsByNetwork(final Network network, final Integer vlanId,
+		final String has, Integer firstElem, final Integer numElem)
+	    {
+		Query finalQuery = getSession().createQuery(BY_NETWORK);
+		finalQuery.setParameter("net_id", network.getId());
+		finalQuery.setParameter("vlan_id", vlanId);
+		finalQuery.setParameter("filterLike", has == null || has.isEmpty() ? "%" : "%" + has + "%");
+
+		// Check if the page requested is bigger than the last one
+		Integer totalResults = finalQuery.list().size();
+
+		if (numElem != null)
+		{
+		    finalQuery.setMaxResults(numElem);
+		}
+
+		if (firstElem >= totalResults)
+		{
+		    firstElem = totalResults - 1;
+		    finalQuery.setMaxResults(1);
+		}
+		finalQuery.setFirstResult(firstElem);
+
+		PagedList<IpPoolManagement> ipList = new PagedList<IpPoolManagement>(finalQuery.list());
+		ipList.setTotalResults(totalResults);
+		ipList.setPageSize(numElem);
+		ipList.setCurrentElement(firstElem);
+
+		return ipList;
+	    }
+
+	    /**
+	     * Return the {@link PagedList} entity with the Ips by VLAN.
+	     * 
+	     * @param vdcId virtual datacenter id
+	     * @param vlanId vlan id
+	     * @return list of used IpPoolManagement.
+	     */
+	    public List<IpPoolManagement> findIpsByPrivateVLAN(final Integer vdcId, final Integer vlanId)
+	    {
+
+		Query finalQuery = getSession().createQuery(BY_VLAN);
+		finalQuery.setParameter("vdc_id", vdcId);
+		finalQuery.setParameter("vlan_id", vlanId);
+		finalQuery.setParameter("filterLike", "%");
+
+		Integer totalResults = finalQuery.list().size();
+
+		PagedList<IpPoolManagement> ipList = new PagedList<IpPoolManagement>(finalQuery.list());
+		ipList.setTotalResults(totalResults);
+
+		return ipList;
+
+	    }
+
+	    /**
+	     * Find all the IpPoolManagement created and available by a vLAN with filter options
+	     * 
+	     * @param vdcId identifier of the virtual datacenter.
+	     * @param vlanId identifier of the vlan.
+	     * @param firstElem first element to retrieve.
+	     * @param numElem number of elements to retrieve.
+	     * @param has filter %like%
+	     * @param orderby ordering filter. {@see IpPoolManagement.OrderByEnum}
+	     * @param asc ordering filter, ascending = true, descending = false.
+	     * @return List of IP addresses that pass the filter.
+	     */
+	    public List<IpPoolManagement> findIpsByPrivateVLANAvailableFiltered(final Integer vdcId,
+		final Integer vlanId, Integer firstElem, final Integer numElem, final String has,
+		final IpPoolManagement.OrderByEnum orderby, final Boolean asc)
+	    {
+		// Get the query that counts the total results.
+		Query finalQuery =
+		    getSession().createQuery(
+			BY_VLAN + " " + defineFilterAvailable() + defineOrderBy(orderby, asc));
+		finalQuery.setParameter("vdc_id", vdcId);
+		finalQuery.setParameter("vlan_id", vlanId);
+		finalQuery.setParameter("filterLike", has.isEmpty() ? "%" : "%" + has + "%");
+
+		// Check if the page requested is bigger than the last one
+		Integer totalResults = finalQuery.list().size();
+
+		if (firstElem >= totalResults)
+		{
+		    firstElem = totalResults - numElem;
+		}
+		finalQuery.setFirstResult(firstElem);
+		finalQuery.setMaxResults(numElem);
+
+		PagedList<IpPoolManagement> ipList = new PagedList<IpPoolManagement>(finalQuery.list());
+		ipList.setTotalResults(totalResults);
+		ipList.setPageSize(numElem);
+		ipList.setCurrentElement(firstElem);
+
+		return ipList;
+	    }
+
+	    /**
+	     * Find next IpPoolManagement created and available by a vLAN with filter options
+	     * 
+	     * @param vdcId identifier of the virtual datacenter.
+	     * @param vlanId identifier of the vlan.
+	     * @param excludedIps ips excluded from result if exists
+	     * @return next available IP address.
+	     */
+	    public IpPoolManagement findNextIpByPrivateVLANAvailable(final Integer vdcId,
+		final Integer vlanId, final String... excludedIps)
+	    {
+		// Get the query that counts the total results.
+		Query query =
+		    getSession().createQuery(
+			BY_VLAN_NEXT_AVAILABLE
+			    + defineOrderBy(IpPoolManagement.OrderByEnum.IP, Boolean.TRUE));
+		query.setInteger("vdc_id", vdcId);
+		query.setMaxResults(1);
+		query.setLockMode("next_ip", LockMode.PESSIMISTIC_WRITE);
+		if (excludedIps != null && excludedIps.length != 0)
+		{
+		    query.setParameterList("excludedIp", Arrays.asList(excludedIps));
+		}
+		else
+		{
+		    query.setString("excludedIp", null);
+		}
+		List<IpPoolManagement> result = query.list();
+
+		return result.isEmpty() ? null : result.get(0);
+	    }
+
+	    /**
+	     * Find all the IpPoolManagement created by a vLAN with filter options
+	     * 
+	     * @param vdcId identifier of the virtual datacenter.
+	     * @param vlanId identifier of the vlan.
+	     * @param firstElem first element to retrieve.
+	     * @param numElem number of elements to retrieve.
+	     * @param has filter %like%
+	     * @param orderby ordering filter. {@see IpPoolManagement.OrderByEnum}
+	     * @param asc ordering filter, ascending = true, descending = false.
+	     * @return List of IP addresses that pass the filter.
+	     */
+	    public List<IpPoolManagement> findIpsByPrivateVLANFiltered(final Integer vdcId,
+		final Integer vlanId, Integer firstElem, final Integer numElem, final String has,
+		final IpPoolManagement.OrderByEnum orderby, final Boolean asc, final Boolean freeIps)
+	    {
+		// Get the query that counts the total results.
+		Query finalQuery;
+		if (!freeIps)
+		{
+		    finalQuery = getSession().createQuery(BY_VLAN + " " + defineOrderBy(orderby, asc));
+		}
+		else
+		{
+		    finalQuery =
+			getSession().createQuery(
+			    BY_VLAN_WITHOUT_USED_IPS + " " + defineFilterAvailable()
+				+ defineOrderBy(orderby, asc));
+		}
+		finalQuery.setParameter("vdc_id", vdcId);
+		finalQuery.setParameter("vlan_id", vlanId);
+		finalQuery.setParameter("filterLike", has.isEmpty() ? "%" : "%" + has + "%");
+
+		// Check if the page requested is bigger than the last one
+		Integer totalResults = finalQuery.list().size();
+
+		if (firstElem >= totalResults)
+		{
+		    firstElem = totalResults - numElem;
+		}
+		finalQuery.setFirstResult(firstElem);
+		finalQuery.setMaxResults(numElem);
+
+		PagedList<IpPoolManagement> ipList = new PagedList<IpPoolManagement>(finalQuery.list());
+		ipList.setTotalResults(totalResults);
+		ipList.setPageSize(numElem);
+		ipList.setCurrentElement(firstElem);
+
+		return ipList;
+	    }
+
+	    public List<IpPoolManagement> findIpsByVdc(final Integer vdcId, Integer firstElem,
+		final Integer numElem, final String has, final IpPoolManagement.OrderByEnum orderby,
+		final Boolean asc)
+	    {
+		// Get the query that counts the total results.
+		Query finalQuery = getSession().createQuery(BY_VDC + " " + defineOrderBy(orderby, asc));
+		finalQuery.setParameter("vdc_id", vdcId);
+		finalQuery.setParameter("filterLike", has.isEmpty() ? "%" : "%" + has + "%");
+
+		// Check if the page requested is bigger than the last one
+		Integer totalResults = finalQuery.list().size();
+
+		if (firstElem == null)
+		{
+		    firstElem = 0;
+		}
+
+		if (firstElem >= totalResults)
+		{
+		    firstElem = totalResults - numElem;
+		}
+		finalQuery.setFirstResult(firstElem);
+		finalQuery.setMaxResults(numElem);
+
+		PagedList<IpPoolManagement> ipList = new PagedList<IpPoolManagement>(finalQuery.list());
+		ipList.setTotalResults(totalResults);
+		ipList.setPageSize(numElem);
+		ipList.setCurrentElement(firstElem);
+
+		return ipList;
+	    }
+
+	    public List<IpPoolManagement> findIpsByVirtualAppliance(final VirtualAppliance vapp)
+	    {
+		Criterion onVapp = Restrictions.eq(RasdManagement.VIRTUAL_APPLIANCE_PROPERTY, vapp);
+		Criteria criteria = getSession().createCriteria(IpPoolManagement.class).add(onVapp);
+		List<IpPoolManagement> result = getResultList(criteria);
+
+		return result;
+	    }
+
+	    public List<IpPoolManagement> findIpsByVirtualMachine(final VirtualMachine virtualMachine)
+	    {
+		Query query = getSession().createQuery(BY_VIRTUAL_MACHINE);
+		query.setParameter("vm_id", virtualMachine.getId());
+
+		List<IpPoolManagement> ips = query.list();
+		return ips;
+
+	    }
+
+	    public IpPoolManagement findIpByVirtualMachine(final VirtualMachine vm, final Integer nicId)
+	    {
+		Query finalQuery = getSession().createQuery(GET_IP_INTO_VIRTUALMACHINE);
+		finalQuery.setParameter("idVm", vm.getId());
+		finalQuery.setParameter("idIp", nicId);
+
+		return (IpPoolManagement) finalQuery.uniqueResult();
+	    }
+
+	    public List<IpPoolManagement> findIpsByVirtualMachineWithConfigurationId(final VirtualMachine vm)
+	    {
+		List<IpPoolManagement> ips = findIpsByVirtualMachine(vm);
+		List<IpPoolManagement> resultIps = new ArrayList<IpPoolManagement>();
+		for (IpPoolManagement ip : ips)
+		{
+		    if (ip.getVlanNetwork().getConfiguration().getId().equals(
+			vm.getNetworkConfiguration().getId()))
             {
                 resultIps.add(ip);
             }
