@@ -65,13 +65,14 @@ public class VirtualMachineResourceStubImpl extends AbstractAPIStub implements
             org.jclouds.abiquo.domain.cloud.VirtualMachine vm =
                 vapp.getVirtualMachine(virtualMachine.getId());
 
-            if (vm.getCpu() != virtualMachine.getCpu() || vm.getRam() != virtualMachine.getRam()
+            if (!vm.getDescription().equals(virtualMachine.getDescription())
+                || vm.getCpu() != virtualMachine.getCpu() || vm.getRam() != virtualMachine.getRam()
                 || virtualMachine.getPassword() != null
                 && !virtualMachine.getPassword().equals(vm.getPassword()))
             {
                 vm.setCpu(virtualMachine.getCpu());
                 vm.setRam(virtualMachine.getRam());
-
+                vm.setDescription(virtualMachine.getDescription());
                 vm.setPassword(virtualMachine.getPassword());
 
                 // Here we actually perform the request to create the virtual machine
@@ -131,8 +132,8 @@ public class VirtualMachineResourceStubImpl extends AbstractAPIStub implements
     {
         BasicResult result = new BasicResult();
         String vmachineUrl =
-            resolveVirtualMachineUrl(virtualDatacenterId, virtualApplianceId,
-                virtualMachine.getId());
+            resolveVirtualMachineUrl(virtualDatacenterId, virtualApplianceId, virtualMachine
+                .getId());
 
         ClientResponse response = delete(vmachineUrl);
 
@@ -188,8 +189,8 @@ public class VirtualMachineResourceStubImpl extends AbstractAPIStub implements
     {
         DataResult result = new DataResult();
         String url =
-            createVirtualMachineResetUrl(virtualDatacenterId, virtualApplianceId,
-                virtualMachine.getId());
+            createVirtualMachineResetUrl(virtualDatacenterId, virtualApplianceId, virtualMachine
+                .getId());
 
         ClientResponse response = post(url, null);
 

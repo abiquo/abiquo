@@ -93,10 +93,10 @@ public enum APIError
         "Invalid VLAN hard limit; this cannot be greater than the number of VLANS per virtual datacenter: {0}"), LIMITS_DUPLICATED(
         "LIMIT-7", "Duplicate limits by enterprise and datacenter"), LIMITS_NOT_EXIST("LIMIT-8",
         "Limits by enterprise and datacenter do not exist"), //
-    ENTERPRISE_LIMIT_EDIT_ARE_SURPRASED("LIMIT-9",
+    ENTERPRISE_LIMIT_EDIT_ARE_SURPASSED("LIMIT-9",
         "Cannot edit resource limits; current enterprise allocation exceeds the new specified limits "
             + "(see SYSTEM traces in order to determine which resources are at HARD limit)"), //
-    DATACENTER_LIMIT_EDIT_ARE_SURPRASED(
+    DATACENTER_LIMIT_EDIT_ARE_SURPASSED(
         "LIMIT-10",
         "Cannot edit resource limits; current enterprise and datacenter allocation exceeds the new specified limits "
             + "(see SYSTEM traces in order to determine which resources are at HARD limit)"), DATACENTER_LIMIT_DELETE_VDCS(
@@ -351,8 +351,9 @@ public enum APIError
         "The DHCP URI is invalid"), REMOTE_SERVICE_DATACENTER_UUID_NOT_FOUND("RS-13",
         "The remote service does not have the *abiquo.datacenter.id* property set"), REMOTE_SERVICE_DATACENTER_UUID_INCONSISTENT(
         "RS-14",
-        "The remote service is configured with a different datacenter UUID, please adjust the *abiquo.datacenter.id* property in the remote service."), APPLIANCE_MANAGER_CALL(
-        "AM-1", "Failed Appliance Manager communication"),
+        "The remote service is configured with a different datacenter UUID, please adjust the *abiquo.datacenter.id* property in the remote service."), REMOTE_SERVICE_UNDEFINED_PORT(
+        "RS-15", "A port must be defined in the uri"), APPLIANCE_MANAGER_CALL("AM-1",
+        "Failed Appliance Manager communication"),
 
     // OVF PACKAGE LIST
     TEMPLATE_DEFINITION_LIST_NAME_ALREADY_EXIST("OVF-PACKAGE-LIST-0",
@@ -370,7 +371,7 @@ public enum APIError
         "Virtual machine template cannot be added due to invalid allocation units"), VMTEMPLATE_SYNCH_DC_REPO(
         "VIMAGE-SYNCH-DATACENTER-REPOSITORY", "Cannot obtain downloaded OVF in the datacenter"), VIMAGE_DATACENTER_REPOSITORY_NOT_FOUND(
         "DATACENTER-REPOSITORY-NOT-CREATED",
-        "Datacenter does not have the ApplianceManager properly configured. Repository not created"), VMTEMPLATE_REPOSITORY_CHANGED(
+        "Datacenter Repository not configured; check Datacenter's Appliance Manager. Contact Infrastructure Administrator"), VMTEMPLATE_REPOSITORY_CHANGED(
         "VIMAGE-REPOSITORY-CHANGED", "Datacenter repository location has changed"), VIMAGE_AM_DOWN(
         "VIMAGE-AM-DOWN", "Check Appliance Manager configuration error"), NON_EXISTENT_VIRTUAL_MACHINE_TEMPLATE(
         "VIMAGE-0", "The requested virtual machine template does not exist"), VIMAGE_IS_NOT_BUNDLE(
@@ -387,7 +388,9 @@ public enum APIError
         "VIMAGE-9",
         "Cannot delete the requested shared virtual machine template, because it belongs to another enterprise"), VMTEMPLATE_TEMPLATE_USED_BY_VIRTUAL_MACHINES_CANNOT_BE_DELETED(
         "VIMAGE-10",
-        "The Virtual Machine Template is being used by Virtual Machines and cannot be deleted"),
+        "The Virtual Machine Template is being used by Virtual Machines and cannot be deleted"), VMTEMPLATE_TEMPLATE_USED_BY_VIRTUAL_MACHINES_CANNOT_BE_UNSHARED(
+        "VIMAGE-11",
+        "The Virtual Machine Template is being used by Virtual Machines and cannot be modified to not shared"),
 
     // NODE COLLECTOR
     NON_EXISTENT_IP("NC-0", "The requested IP does not exist"), MISSING_IP_PARAMETER("NC-1",
@@ -442,7 +445,8 @@ public enum APIError
         "VSM-3", "An error occurred when unsubscribing the virtual machine"), REFRESH_STATE_PROBLEM(
         "VSM-4", "An error occurred when refreshing the virtual machine state"), VSMCLIENTFROMPOOL_PROBLEM(
         "VSM-5", "A VSMClient instance cannot be returned from connection pool."), INVALIDATE_STATE_PROBLEM(
-        "VSM-6", "An error occurred when resetting the last known state of the virtual machine"),
+        "VSM-6", "An error occurred when resetting the last known state of the virtual machine"), VSM_UNAVAILABE(
+        "VSM-7", "VSM service unavailable, check the URL service."),
 
     // LICENSE
     LICENSE_UNEXISTING("LICENSE-0", "The requested license does not exist"), LICENSE_INVALID(
@@ -689,8 +693,8 @@ public enum APIError
         // Outputs all errors in wiki table format
         for (APIError error : errors)
         {
-            System.out.println(String.format("| %s | %s | %s |", error.code, error.message, error
-                .name()));
+            System.out.println(String.format("| %s | %s | %s |", error.code, error.message,
+                error.name()));
         }
 
         System.out.println("\n ************ Flex client labels ************** \n");

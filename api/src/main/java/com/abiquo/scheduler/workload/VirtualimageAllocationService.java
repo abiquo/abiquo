@@ -338,8 +338,7 @@ public class VirtualimageAllocationService
 
             final boolean passCPU =
                 pass(Long.valueOf(machine.getVirtualCpusUsed()), requirements.getCpu(),
-                    Long.valueOf(machine.getVirtualCpuCores() * machine.getVirtualCpusPerCore()),
-                    100);
+                    Long.valueOf(machine.getVirtualCpuCores()), 100);
 
             final boolean passRAM =
                 pass(Long.valueOf(machine.getVirtualRamUsedInMb()), requirements.getRam(),

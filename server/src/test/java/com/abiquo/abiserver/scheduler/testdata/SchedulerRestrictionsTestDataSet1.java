@@ -51,8 +51,8 @@ public class SchedulerRestrictionsTestDataSet1 implements ISchedulerTestCase
     {
         populate = PopulateModelTest.getInstance();
 
-        machines.add(populate.definePhysical("pm1", 2, 1024, 4294967296L, 1));
-        machines.add(populate.definePhysical("pm2", 2, 1024, 4294967296L, 1));
+        machines.add(populate.definePhysical("pm1", 2, 1024, 4294967296L));
+        machines.add(populate.definePhysical("pm2", 2, 1024, 4294967296L));
 
         // /
 
@@ -80,6 +80,7 @@ public class SchedulerRestrictionsTestDataSet1 implements ISchedulerTestCase
     /**
      * @see TestDataBaseUtil.getPhysicalMachines()
      */
+    @Override
     public List<PhysicalmachineHB> getPhysicalMachines()
     {
         return machines;
@@ -88,6 +89,7 @@ public class SchedulerRestrictionsTestDataSet1 implements ISchedulerTestCase
     /**
      * @see TestDataBaseUtil.getVirtualImages()
      */
+    @Override
     public List<VirtualimageHB> getVirtualImages()
     {
         return imgs;

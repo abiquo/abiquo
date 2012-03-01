@@ -280,6 +280,17 @@ public class InfrastructureService extends DefaultApiService
             flushErrors();
         }
 
+        // [ABICLOUDPREMIUM-2996] These values cannot be changed. Must always reflect the real ones.
+        // Even if the POST to create the machine was made with the information from NodeCollector,
+        // we need to make sure those values have not been changed.
+        Machine remoteMachine =
+            discoverRemoteHypervisor(datacenterId, IPAddress.newIPAddress(machine.getHypervisor()
+                .getIp()), machine.getHypervisor().getType(), machine.getHypervisor().getUser(),
+                machine.getHypervisor().getPassword(), machine.getHypervisor().getPort());
+        machine.setState(remoteMachine.getState());
+        machine.setVirtualRamInMb(remoteMachine.getVirtualRamInMb());
+        machine.setVirtualCpuCores(remoteMachine.getVirtualCpuCores());
+
         checkAvailableCores(machine);
 
         Boolean anyEnabled = Boolean.FALSE;
@@ -301,7 +312,6 @@ public class InfrastructureService extends DefaultApiService
         }
 
         // Insert the machine into database
-        machine.setVirtualCpusPerCore(1);
         machine.setDatacenter(datacenter);
         machine.setRack(rack);
 
@@ -748,6 +758,12 @@ public class InfrastructureService extends DefaultApiService
                 // if any datastore has free space, select the first
                 machine.getDatastores().get(0).setEnabled(true);
             }
+        }
+        else
+        {
+            // no datastores to enable
+            addConflictErrors(APIError.MACHINE_ANY_DATASTORE_DEFINED);
+            flushErrors();
         }
 
     }

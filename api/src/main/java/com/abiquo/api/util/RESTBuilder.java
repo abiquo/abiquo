@@ -509,13 +509,20 @@ public class RESTBuilder implements IRESTBuilder
 
         Map<String, String> params = new HashMap<String, String>();
         params.put(EnterpriseResource.ENTERPRISE, String.valueOf(enterpriseId));
-        params.put(CategoryResource.CATEGORY, String.valueOf(category.getId()));
+
+        if (category != null)
+        {
+            params.put(CategoryResource.CATEGORY, String.valueOf(category.getId()));
+        }
 
         AbiquoLinkBuilder builder = AbiquoLinkBuilder.createBuilder(linkProcessor);
         links.add(builder.buildRestLink(EnterpriseResource.class, EnterpriseResource.ENTERPRISE,
             params));
-        links.add(builder.buildRestLink(CategoryResource.class, null, CategoryResource.CATEGORY,
-            category.getName(), params));
+        if (category != null)
+        {
+            links.add(builder.buildRestLink(CategoryResource.class, null,
+                CategoryResource.CATEGORY, category.getName(), params));
+        }
 
         params.put(TemplateDefinitionResource.TEMPLATE_DEFINITION, templateDefinition.getId()
             .toString());
@@ -524,8 +531,8 @@ public class RESTBuilder implements IRESTBuilder
         if (icon != null)
         {
             params.put(IconResource.ICON, String.valueOf(icon.getId()));
-            links.add(builder.buildRestLink(IconResource.class, null, IconResource.ICON,
-                icon.getPath(), params));
+            links.add(builder.buildRestLink(IconResource.class, null, IconResource.ICON, icon
+                .getPath(), params));
 
         }
 
@@ -1068,14 +1075,19 @@ public class RESTBuilder implements IRESTBuilder
         params.put(VirtualDatacenterResource.VIRTUAL_DATACENTER, ip.getVirtualDatacenter().getId()
             .toString());
         params.put(PrivateNetworkResource.PRIVATE_NETWORK, ip.getVlanNetwork().getId().toString());
+        params.put(IpAddressesResource.IP_ADDRESS, ip.getId().toString());
 
         List<RESTLink> links = new ArrayList<RESTLink>();
         RESTLink link =
             builder.buildRestLink(PrivateNetworkResource.class,
                 PrivateNetworkResource.PRIVATE_NETWORK, params);
         link.setTitle(ip.getVlanNetwork().getName());
+        
+        RESTLink ipLink = builder.buildRestLink(IpAddressesResource.class, IpAddressesResource.IP_ADDRESS_PARAM, REL_SELF, params);
+        ipLink.setTitle(VirtualMachineNetworkConfigurationResource.PRIVATE_IP);
 
         links.add(link);
+        links.add(ipLink);
 
         return links;
     }
