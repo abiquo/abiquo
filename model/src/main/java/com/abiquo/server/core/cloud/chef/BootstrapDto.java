@@ -29,11 +29,15 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
+import com.abiquo.model.transport.SingleResourceTransportDto;
+
 @XmlRootElement(name = "bootstrap")
 @XmlType(propOrder = {"nodeName", "chefConfig"})
-public class BootstrapDto implements Serializable
+public class BootstrapDto extends SingleResourceTransportDto implements Serializable
 {
     private static final long serialVersionUID = 1L;
+    public static final String BASE_MEDIA_TYPE = "application/vnd.abiquo.bootstrap+xml";
+    public static final String MEDIA_TYPE = BASE_MEDIA_TYPE + "; version=" + API_VERSION;
 
     private String nodeName;
 
@@ -146,6 +150,18 @@ public class BootstrapDto implements Serializable
                 this.elements = elements;
             }
         }
+    }
+
+    @Override
+    public String getMediaType()
+    {
+        return MEDIA_TYPE;
+    }
+
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
     }
 
 }

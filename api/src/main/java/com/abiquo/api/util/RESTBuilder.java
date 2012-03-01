@@ -81,6 +81,7 @@ import com.abiquo.model.transport.LinksDto;
 import com.abiquo.server.core.appslibrary.Category;
 import com.abiquo.server.core.appslibrary.CategoryDto;
 import com.abiquo.server.core.appslibrary.DatacenterRepositoriesDto;
+import com.abiquo.server.core.appslibrary.DatacenterRepositoryDto;
 import com.abiquo.server.core.appslibrary.Icon;
 import com.abiquo.server.core.appslibrary.IconDto;
 import com.abiquo.server.core.appslibrary.TemplateDefinitionDto;
@@ -88,6 +89,8 @@ import com.abiquo.server.core.appslibrary.TemplateDefinitionListDto;
 import com.abiquo.server.core.appslibrary.TemplateDefinitionListsDto;
 import com.abiquo.server.core.appslibrary.TemplateDefinitionsDto;
 import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
+import com.abiquo.server.core.appslibrary.VirtualMachineTemplateDto;
+import com.abiquo.server.core.appslibrary.VirtualMachineTemplatesDto;
 import com.abiquo.server.core.cloud.HypervisorTypesDto;
 import com.abiquo.server.core.cloud.VirtualApplianceDto;
 import com.abiquo.server.core.cloud.VirtualApplianceStateDto;
@@ -132,6 +135,7 @@ import com.abiquo.server.core.infrastructure.management.RasdManagement;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagementDto;
 import com.abiquo.server.core.infrastructure.network.IpsPoolManagementDto;
+import com.abiquo.server.core.infrastructure.network.NicDto;
 import com.abiquo.server.core.infrastructure.network.NicsDto;
 import com.abiquo.server.core.infrastructure.network.VLANNetwork;
 import com.abiquo.server.core.infrastructure.network.VLANNetworkDto;
@@ -140,6 +144,7 @@ import com.abiquo.server.core.infrastructure.network.VMNetworkConfiguration;
 import com.abiquo.server.core.infrastructure.network.VMNetworkConfigurationDto;
 import com.abiquo.server.core.infrastructure.network.VMNetworkConfigurationsDto;
 import com.abiquo.server.core.infrastructure.storage.DiskManagement;
+import com.abiquo.server.core.infrastructure.storage.DiskManagementDto;
 import com.abiquo.server.core.infrastructure.storage.DisksManagementDto;
 import com.abiquo.server.core.infrastructure.storage.Tier;
 import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
@@ -950,9 +955,11 @@ public class RESTBuilder implements IRESTBuilder
             params, EnterpriseDto.BASE_MEDIA_TYPE));
 
         params.put(DatacenterRepositoryResource.DATACENTER_REPOSITORY, repoId.toString());
-        links.add(builder.buildRestLink(DatacenterRepositoryResource.class, REL_EDIT, params));
+        links.add(builder.buildRestLink(DatacenterRepositoryResource.class, REL_EDIT, params,
+            DatacenterRepositoryDto.BASE_MEDIA_TYPE));
         links.add(builder.buildRestLink(VirtualMachineTemplatesResource.class,
-            VirtualMachineTemplatesResource.VIRTUAL_MACHINE_TEMPLATES_PATH, params));
+            VirtualMachineTemplatesResource.VIRTUAL_MACHINE_TEMPLATES_PATH, params,
+            VirtualMachineTemplatesDto.BASE_MEDIA_TYPE));
         links.add(builder.buildRestLink(DatacenterRepositoryResource.class,
             DatacenterRepositoryResource.DATACENTER_REPOSITORY_REFRESH_PATH, "refresh", params));
 
@@ -969,27 +976,30 @@ public class RESTBuilder implements IRESTBuilder
         paramsDc.put(DatacenterResource.DATACENTER, dcId.toString());
 
         links.add(builder.buildRestLink(DatacenterResource.class, DatacenterResource.DATACENTER,
-            paramsDc));
+            paramsDc, DatacenterDto.BASE_MEDIA_TYPE));
 
         Map<String, String> params = new HashMap<String, String>();
         params.put(EnterpriseResource.ENTERPRISE, enterpriseId.toString());
         links.add(builder.buildRestLink(EnterpriseResource.class, EnterpriseResource.ENTERPRISE,
-            params));
+            params, EnterpriseDto.BASE_MEDIA_TYPE));
 
         params.put(DatacenterRepositoryResource.DATACENTER_REPOSITORY, dcId.toString());
         links.add(builder.buildRestLink(DatacenterRepositoryResource.class,
-            DatacenterRepositoryResource.DATACENTER_REPOSITORY, params));
+            DatacenterRepositoryResource.DATACENTER_REPOSITORY, params,
+            DatacenterRepositoryDto.BASE_MEDIA_TYPE));
 
         params.put(CategoryResource.CATEGORY, vmtemplate.getCategory().getId().toString());
         RESTLink categoryLink =
-            builder.buildRestLink(CategoryResource.class, CategoryResource.CATEGORY, params);
+            builder.buildRestLink(CategoryResource.class, CategoryResource.CATEGORY, params,
+                CategoryDto.BASE_MEDIA_TYPE);
         categoryLink.setTitle(vmtemplate.getCategory().getName());
         links.add(categoryLink);
 
         params.put(VirtualMachineTemplateResource.VIRTUAL_MACHINE_TEMPLATE, vmtemplate.getId()
             .toString());
         RESTLink vmtemplateLink =
-            builder.buildRestLink(VirtualMachineTemplateResource.class, REL_EDIT, params);
+            builder.buildRestLink(VirtualMachineTemplateResource.class, REL_EDIT, params,
+                VirtualMachineTemplateDto.BASE_MEDIA_TYPE);
         vmtemplateLink.setTitle(vmtemplate.getName());
         links.add(vmtemplateLink);
 
@@ -997,7 +1007,8 @@ public class RESTBuilder implements IRESTBuilder
         {
             params.put(IconResource.ICON, vmtemplate.getIcon().getId().toString());
             RESTLink iconLink =
-                builder.buildRestLink(IconResource.class, IconResource.ICON, params);
+                builder.buildRestLink(IconResource.class, IconResource.ICON, params,
+                    IconDto.BASE_MEDIA_TYPE);
             iconLink.setTitle(vmtemplate.getIcon().getPath()); // TODO do not use title (altRef)
             links.add(iconLink);
         }
@@ -1042,7 +1053,8 @@ public class RESTBuilder implements IRESTBuilder
             virtualMachineTemplateId.toString());
 
         return builder.buildRestLink(VirtualMachineTemplateResource.class,
-            VirtualMachineTemplateResource.VIRTUAL_MACHINE_TEMPLATE, params);
+            VirtualMachineTemplateResource.VIRTUAL_MACHINE_TEMPLATE, params,
+            VirtualMachineTemplateDto.BASE_MEDIA_TYPE);
     }
 
     @Override
@@ -1100,7 +1112,8 @@ public class RESTBuilder implements IRESTBuilder
                 .getVirtualDatacenter().getId().toString());
             RESTLink vdcLink =
                 builder.buildRestLink(VirtualDatacenterResource.class,
-                    VirtualDatacenterResource.VIRTUAL_DATACENTER, params);
+                    VirtualDatacenterResource.VIRTUAL_DATACENTER, params,
+                    VirtualDatacenterDto.BASE_MEDIA_TYPE);
             vdcLink.setTitle(resource.getVirtualDatacenter().getName());
             links.add(vdcLink);
             if (resource.getVirtualAppliance() != null)
@@ -1109,7 +1122,8 @@ public class RESTBuilder implements IRESTBuilder
                     .getVirtualAppliance().getId().toString());
                 RESTLink vappLink =
                     builder.buildRestLink(VirtualApplianceResource.class,
-                        VirtualApplianceResource.VIRTUAL_APPLIANCE, params);
+                        VirtualApplianceResource.VIRTUAL_APPLIANCE, params,
+                        VirtualApplianceDto.BASE_MEDIA_TYPE);
                 vappLink.setTitle(resource.getVirtualAppliance().getName());
                 links.add(vappLink);
 
@@ -1119,7 +1133,8 @@ public class RESTBuilder implements IRESTBuilder
                         .getId().toString());
                     RESTLink vmLink =
                         builder.buildRestLink(VirtualMachineResource.class,
-                            VirtualMachineResource.VIRTUAL_MACHINE, params);
+                            VirtualMachineResource.VIRTUAL_MACHINE, params,
+                            VirtualMachineDto.BASE_MEDIA_TYPE);
                     vmLink.setTitle(resource.getVirtualMachine().getName());
                     links.add(vmLink);
                 }
@@ -1142,7 +1157,7 @@ public class RESTBuilder implements IRESTBuilder
         Map<String, String> params =
             Collections.singletonMap(EnterpriseResource.ENTERPRISE, enterpriseId.toString());
         return builder.buildRestLink(EnterpriseResource.class, EnterpriseResource.ENTERPRISE,
-            params);
+            params, EnterpriseDto.BASE_MEDIA_TYPE);
     }
 
     @Override
@@ -1245,10 +1260,12 @@ public class RESTBuilder implements IRESTBuilder
         params.put(VirtualApplianceResource.VIRTUAL_APPLIANCE, id.toString());
 
         AbiquoLinkBuilder builder = AbiquoLinkBuilder.createBuilder(linkProcessor);
-        links.add(builder.buildRestLink(VirtualDatacenterResource.class, "parent", params));
+        links.add(builder.buildRestLink(VirtualDatacenterResource.class, "parent", params,
+            VirtualDatacenterDto.BASE_MEDIA_TYPE));
 
-        links.add(builder.buildActionLink(VirtualApplianceResource.class,
-            VirtualApplianceResource.VIRTUAL_APPLIANCE_STATE_REL, REL_EDIT, params));
+        links.add(builder.buildRestLink(VirtualApplianceResource.class,
+            VirtualApplianceResource.VIRTUAL_APPLIANCE_STATE_REL, REL_EDIT, params,
+            VirtualApplianceDto.BASE_MEDIA_TYPE));
         return links;
     }
 
@@ -1331,11 +1348,10 @@ public class RESTBuilder implements IRESTBuilder
             .toString());
 
         AbiquoLinkBuilder builder = AbiquoLinkBuilder.createBuilder(linkProcessor);
-        links
-            .add(builder.buildRestLink(VirtualMachineNetworkConfigurationResource.class,
-                VirtualMachineNetworkConfigurationResource.CONFIGURATION_PATH + "/"
-                    + VirtualMachineNetworkConfigurationResource.CONFIGURATION_PARAM, REL_EDIT,
-                params));
+        links.add(builder.buildRestLink(VirtualMachineNetworkConfigurationResource.class,
+            VirtualMachineNetworkConfigurationResource.CONFIGURATION_PATH + "/"
+                + VirtualMachineNetworkConfigurationResource.CONFIGURATION_PARAM, REL_EDIT, params,
+            VMNetworkConfigurationDto.BASE_MEDIA_TYPE));
 
         return links;
     }
@@ -1352,10 +1368,12 @@ public class RESTBuilder implements IRESTBuilder
 
         AbiquoLinkBuilder builder = AbiquoLinkBuilder.createBuilder(linkProcessor);
 
-        links.add(builder.buildRestLink(VirtualMachineResource.class, "parent", params));
+        links.add(builder.buildRestLink(VirtualMachineResource.class, "parent", params,
+            VirtualMachineDto.BASE_MEDIA_TYPE));
 
         links.add(builder.buildRestLink(VirtualMachineResource.class,
-            VirtualMachineResource.VIRTUAL_MACHINE_STATE_PATH, REL_EDIT, params));
+            VirtualMachineResource.VIRTUAL_MACHINE_STATE_PATH, REL_EDIT, params,
+            VirtualMachineStateDto.BASE_MEDIA_TYPE));
         return links;
     }
 
@@ -1376,9 +1394,11 @@ public class RESTBuilder implements IRESTBuilder
         AbiquoLinkBuilder builder = AbiquoLinkBuilder.createBuilder(linkProcessor);
         links.add(builder.buildRestLink(VirtualMachineNetworkConfigurationResource.class,
             VirtualMachineNetworkConfigurationResource.NICS_PATH + "/"
-                + VirtualMachineNetworkConfigurationResource.NIC_PARAM, REL_EDIT, params));
+                + VirtualMachineNetworkConfigurationResource.NIC_PARAM, REL_EDIT, params,
+            NicDto.BASE_MEDIA_TYPE));
         links.add(builder.buildRestLink(IpAddressesResource.class,
-            IpAddressesResource.IP_ADDRESS_PARAM, IpAddressesResource.IP_ADDRESS_PARAM, params));
+            IpAddressesResource.IP_ADDRESS_PARAM, IpAddressesResource.IP_ADDRESS_PARAM, params,
+            IpPoolManagementDto.BASE_MEDIA_TYPE));
 
         return links;
     }
@@ -1426,7 +1446,8 @@ public class RESTBuilder implements IRESTBuilder
         AbiquoLinkBuilder builder = AbiquoLinkBuilder.createBuilder(linkProcessor);
         links.add(builder.buildRestLink(VirtualMachineStorageConfigurationResource.class,
             VirtualMachineStorageConfigurationResource.DISKS_PATH + "/"
-                + VirtualMachineStorageConfigurationResource.DISK_PARAM, REL_EDIT, params));
+                + VirtualMachineStorageConfigurationResource.DISK_PARAM, REL_EDIT, params,
+            DiskManagementDto.BASE_MEDIA_TYPE));
 
         return links;
     }
@@ -1439,7 +1460,9 @@ public class RESTBuilder implements IRESTBuilder
         params.put(CategoryResource.CATEGORY, categorydto.getId().toString());
 
         AbiquoLinkBuilder builder = AbiquoLinkBuilder.createBuilder(linkProcessor);
-        RESTLink editLink = builder.buildRestLink(CategoryResource.class, REL_EDIT, params);
+        RESTLink editLink =
+            builder.buildRestLink(CategoryResource.class, REL_EDIT, params,
+                CategoryDto.BASE_MEDIA_TYPE);
         links.add(editLink);
 
         return links;
@@ -1456,8 +1479,10 @@ public class RESTBuilder implements IRESTBuilder
 
         AbiquoLinkBuilder builder = AbiquoLinkBuilder.createBuilder(linkProcessor);
         links.add(builder.buildRestLink(VirtualDatacenterResource.class,
-            VirtualDatacenterResource.VIRTUAL_DATACENTER, params));
-        links.add(builder.buildRestLink(DiskResource.class, REL_EDIT, params));
+            VirtualDatacenterResource.VIRTUAL_DATACENTER, params,
+            VirtualDatacenterDto.BASE_MEDIA_TYPE));
+        links.add(builder.buildRestLink(DiskResource.class, REL_EDIT, params,
+            DiskManagementDto.BASE_MEDIA_TYPE));
 
         return links;
     }
@@ -1475,7 +1500,8 @@ public class RESTBuilder implements IRESTBuilder
         Map<String, String> params = new HashMap<String, String>();
         params.put(EnterpriseResource.ENTERPRISE, enterpriseId.toString());
         params.put(UserResource.USER, userId.toString());
-        return builder.buildRestLink(UserResource.class, UserResource.USER, params);
+        return builder.buildRestLink(UserResource.class, UserResource.USER, params,
+            UserDto.BASE_MEDIA_TYPE);
     }
 
     @Override
@@ -1496,10 +1522,10 @@ public class RESTBuilder implements IRESTBuilder
     {
 
         AbiquoLinkBuilder builder = AbiquoLinkBuilder.createBuilder(linkProcessor);
-        Map params = new HashMap();
-        params.put(VirtualDatacenterResource.VIRTUAL_DATACENTER, vdc);
-        params.put(VirtualApplianceResource.VIRTUAL_APPLIANCE, vapp);
-        params.put(VirtualMachineResource.VIRTUAL_MACHINE, vm);
+        Map<String, String> params = new HashMap<String, String>();
+        params.put(VirtualDatacenterResource.VIRTUAL_DATACENTER, vdc.toString());
+        params.put(VirtualApplianceResource.VIRTUAL_APPLIANCE, vapp.toString());
+        params.put(VirtualMachineResource.VIRTUAL_MACHINE, vm.toString());
 
         return builder.buildRestLink(VirtualMachineResource.class, "", params);
 
@@ -1540,7 +1566,8 @@ public class RESTBuilder implements IRESTBuilder
         params.put(VirtualApplianceResource.VIRTUAL_APPLIANCE, String.valueOf(vapp));
         params.put(VirtualMachineResource.VIRTUAL_MACHINE, String.valueOf(vm));
 
-        return builder.buildRestLink(VirtualMachineResource.class, "tasks", params);
+        return builder.buildRestLink(VirtualMachineResource.class, "tasks", params,
+            VirtualMachineDto.BASE_MEDIA_TYPE);
 
     }
 }

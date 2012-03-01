@@ -107,20 +107,6 @@ public class AbiquoLinkBuilder extends SingleLinkBuilderImpl
         return link;
     }
 
-    // TODO this method should desapear since action links are not defined this way anymore. Check:
-    // http://wiki.abiquo.com/display/Abiquo/API+links+and+MIME+types
-    public RESTLink buildActionLink(final Class< ? > resource, final String subResource,
-        final String title, final Map<String, String> params)
-    {
-        List<SyndLink> links =
-            setResource(resource).rel("action").pathParams(params).subResource(subResource)
-                .build(null);
-        SyndLink first = links.get(0);
-        RESTLink link = new RESTLink(first);
-        link.setTitle(title);
-        return link;
-    }
-
     public AbiquoLinkBuilder pathParams(final Map<String, String> params)
     {
         if (params != null && !params.isEmpty())
