@@ -93,7 +93,10 @@
             {
                 super.data = value;
                 
-                BindingUtils.bindProperty(VirtualMachineList(parentDocument),"hypervisor",this,"hypervisor");
+                if(parentDocument && VirtualMachineList(parentDocument).hypervisor)
+                {
+	                BindingUtils.bindProperty(VirtualMachineList(parentDocument),"hypervisor",this,"hypervisor");
+                }
 
                 if (value && value is VirtualMachine){
                     virtualMachine = data as VirtualMachine;
@@ -508,13 +511,18 @@
 
             <mx:Button id="pauseButton"
                 styleName="PauseButtonSmall"
-                enabled="{this._virtualMachine.idType == VirtualMachine.VIRTUAL_MACHINE_MANAGED &amp;&amp; (_virtualMachine.state.description == State.PAUSED.description || _virtualMachine.state.description == State.ON.description)}"
+                enabled="{this._virtualMachine.idType == VirtualMachine.VIRTUAL_MACHINE_MANAGED 
+                &amp;&amp; (_virtualMachine.state.description == State.PAUSED.description || _virtualMachine.state.description == State.ON.description)
+                &amp;&amp; HyperVisor(this._virtualMachine.assignedTo).type.id != HyperVisorType.XEN}"
                 selected="{_virtualMachine.state.description == State.PAUSED.description}"
                 click="onClickPauseButton(event)"/>
 
             <mx:Button id="rebootButton"
                 styleName="RebootButtonSmall"
-                enabled="{this._virtualMachine.idType == VirtualMachine.VIRTUAL_MACHINE_MANAGED &amp;&amp; _virtualMachine.state.description == State.ON.description}"
+                enabled="{this._virtualMachine.idType == VirtualMachine.VIRTUAL_MACHINE_MANAGED 
+                &amp;&amp; _virtualMachine.state.description == State.ON.description
+                &amp;&amp; (HyperVisor(this._virtualMachine.assignedTo).type.id != HyperVisorType.KVM 
+                &amp;&amp; HyperVisor(this._virtualMachine.assignedTo).type.id != HyperVisorType.XEN)}"
                 click="onClickRebootButton(event)"/>
 
             <mx:Spacer width="100%"/>
