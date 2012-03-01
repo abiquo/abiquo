@@ -280,7 +280,7 @@ public class PopulateModelTest
 
     /** PhysicalMachine Factory construction XXX is not stored on DB. */
     public PhysicalmachineHB definePhysical(final String name, final int cpu, final int ram,
-        final long hd, final int cpuRatio)
+        final long hd)
     {
         PhysicalmachineHB mach = new PhysicalmachineHB();
 
@@ -289,8 +289,6 @@ public class PopulateModelTest
 
         mach.setCpu(cpu);
         mach.setRam(ram);
-
-        mach.setCpuRatio(cpuRatio);
 
         mach.setCpuUsed(0);
         mach.setRamUsed(0);

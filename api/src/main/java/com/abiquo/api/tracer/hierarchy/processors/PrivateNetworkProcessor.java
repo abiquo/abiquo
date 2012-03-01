@@ -53,7 +53,7 @@ public class PrivateNetworkProcessor extends AbstractHierarchyProcessor<VLANNetw
     protected String getResourceName(final String resourceId)
     {
         VLANNetwork vlan = dao.findVlanById(Integer.valueOf(resourceId));
-        return vlan.getName();
+        return vlan != null ? vlan.getName() : null;
     }
 
 }

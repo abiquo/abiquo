@@ -21,7 +21,6 @@
 
 package com.abiquo.api.services.appslibrary;
 
-import java.util.Collection;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -76,7 +75,7 @@ public class DatacenterRepositoryService extends DefaultApiService
             toVmtemplate.insertVirtualMachineTemplates(disks, repo);
 
         // Process existing vmtemplates
-        processExistingVirtualMachineTemplates(insertedVmtemplates);
+        processExistingVirtualMachineTemplates(insertedVmtemplates, datacenter);
     }
 
     /**
@@ -111,17 +110,29 @@ public class DatacenterRepositoryService extends DefaultApiService
     }
 
     /**
-     * Post process AM existing vmtemplates.
+     * Post process AM existing images.
      * <p>
-     * This method may be overriden in enterprise version to manage virtual machine template
-     * conversions.
+     * This method may be overriden in enterprise version to manage virtual image conversions.
      * 
-     * @param vmtemplates The existing vmtemplates.
+     * @param images The existing images.
      */
     protected void processExistingVirtualMachineTemplates(
-        final Collection<VirtualMachineTemplate> vmtemplates)
+        final List<VirtualMachineTemplate> vmtemplates, final Datacenter datacenter)
     {
-        // Do nothing
+        if (vmtemplates.isEmpty())
+        {
+            return;
+        }
+
+        if (Boolean.valueOf(System.getProperty("am.conversions.skip", "false")) == Boolean.FALSE)
+        {
+            toVmtemplate.generateConversions(vmtemplates, datacenter);
+        }
+        else
+        {
+            logger.warn("VirtualMachine template conversion avoid after refresh "
+                + "(see ''am.conversions.skip'' property)");
+        }
     }
 
 }

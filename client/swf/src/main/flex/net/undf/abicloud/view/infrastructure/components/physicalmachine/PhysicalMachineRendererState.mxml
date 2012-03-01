@@ -87,7 +87,7 @@
 	                hdObject = returnDataStoresSizes();
 	
 	                ramFree = (_physicalMachine.ram - _physicalMachine.ramUsed) > 0 ? (_physicalMachine.ram - _physicalMachine.ramUsed) : 0;
-	                cpuFree = ((_physicalMachine.cpu * _physicalMachine.cpuRatio) - _physicalMachine.cpuUsed) > 0 ? ((_physicalMachine.cpu * _physicalMachine.cpuRatio) - _physicalMachine.cpuUsed) : 0;
+	                cpuFree = (_physicalMachine.cpu - _physicalMachine.cpuUsed) > 0 ? (_physicalMachine.cpu - _physicalMachine.cpuUsed) : 0;
 	                hdFree = (hdObject.free) > 0 ? Number((hdObject.free) / AbiCloudModel.GB_TO_BYTES).toFixed(1) : "0";
 	                
 	                if(ramFree == 0){
@@ -157,16 +157,16 @@
                 		total = _physicalMachine.ram;
                 		break;
                 	case "cpuOver":
-                		total = _physicalMachine.cpu * _physicalMachine.cpuRatio;
+                		total = _physicalMachine.cpu;
                 		if(itemChart.item.data != 0){
-	                		percentage = Math.ceil((itemChart.item.data / (_physicalMachine.cpu * _physicalMachine.cpuRatio))*100);
+	                		percentage = Math.ceil((itemChart.item.data / _physicalMachine.cpu)*100);
 	                	}
                 		break;
                 	case "cpuUsed":
-                		total = _physicalMachine.cpu * _physicalMachine.cpuRatio;
+                		total = _physicalMachine.cpu;
                 		break;
                 	case "cpuFree":
-                		total = _physicalMachine.cpu * _physicalMachine.cpuRatio;
+                		total = _physicalMachine.cpu;
                 		break;
                 	default:
                 		total = int(Number(hdObject.total / AbiCloudModel.GB_TO_BYTES).toFixed(1)); 

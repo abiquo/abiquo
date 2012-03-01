@@ -58,7 +58,7 @@ public class AMEventProcessor implements AMCallback
     protected InfrastructureService infService;
 
     @Autowired
-    private TemplateFactory templateFactory;
+    protected TemplateFactory templateFactory;
 
     @Autowired
     private AMServiceStub amService;

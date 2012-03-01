@@ -158,11 +158,24 @@ public class StorageResourceStubImpl extends AbstractAPIStub implements StorageR
         BasicResult result = new BasicResult();
 
         String uri = createVirtualMachineDiskLink(vdcId, vappId, vmId, diskId);
+
         ClientResponse response = delete(uri);
 
         if (response.getStatusCode() == 202 || response.getStatusCode() == 204)
         {
-            result.setSuccess(Boolean.TRUE);
+
+            uri = createVirtualDatacenterDiskLink(vdcId, diskId);
+            response = delete(uri);
+
+            if (response.getStatusCode() == 202 || response.getStatusCode() == 204)
+            {
+                result.setSuccess(Boolean.TRUE);
+
+            }
+            else
+            {
+                populateErrors(response, result, "deleteDisk");
+            }
         }
         else
         {
