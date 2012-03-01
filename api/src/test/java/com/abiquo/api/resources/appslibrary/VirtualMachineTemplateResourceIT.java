@@ -593,8 +593,8 @@ public class VirtualMachineTemplateResourceIT extends AbstractJpaGeneratorIT
 
         String uri =
             resolveVirtualMachineTemplateURI(ent.getId(), datacenter.getId(), vmtemplate.getId());
-        ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
-        assertEquals(response.getStatusCode(), 200);
+        ClientResponse response = get(uri, SYSADMIN, SYSADMIN, VirtualMachineTemplateDto.BASE_MEDIA_TYPE);
+        assertEquals(response.getStatusCode(), Status.OK.getStatusCode());
 
         VirtualMachineTemplateDto dto = response.getEntity(VirtualMachineTemplateDto.class);
         dto.setShared(Boolean.FALSE);
@@ -627,15 +627,15 @@ public class VirtualMachineTemplateResourceIT extends AbstractJpaGeneratorIT
         String uri =
             resolveVirtualMachineTemplateURI(enterprise.getId(), datacenter.getId(),
                 vmtemplate.getId());
-        ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
-        assertEquals(response.getStatusCode(), 200);
+        ClientResponse response = get(uri, SYSADMIN, SYSADMIN, VirtualMachineTemplateDto.BASE_MEDIA_TYPE);
+        assertEquals(response.getStatusCode(), Status.OK.getStatusCode());
 
         VirtualMachineTemplateDto dto = response.getEntity(VirtualMachineTemplateDto.class);
         dto.setShared(Boolean.FALSE);
 
         response = put(uri, dto, SYSADMIN, SYSADMIN);
 
-        assertError(response, 409,
+        assertError(response, Status.CONFLICT.getStatusCode(),
             APIError.VMTEMPLATE_TEMPLATE_USED_BY_VIRTUAL_MACHINES_CANNOT_BE_UNSHARED);
     }
 }
