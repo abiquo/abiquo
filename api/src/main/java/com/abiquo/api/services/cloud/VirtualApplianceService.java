@@ -25,6 +25,7 @@
 package com.abiquo.api.services.cloud;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -43,6 +44,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.exceptions.APIException;
 import com.abiquo.api.services.DefaultApiService;
+import com.abiquo.api.services.TaskService;
 import com.abiquo.api.services.UserService;
 import com.abiquo.api.services.VirtualMachineAllocatorService;
 import com.abiquo.api.services.stub.TarantinoService;
@@ -71,6 +73,8 @@ import com.abiquo.server.core.pricing.PricingRep;
 import com.abiquo.server.core.pricing.PricingTemplate;
 import com.abiquo.server.core.pricing.PricingTier;
 import com.abiquo.server.core.scheduler.VirtualMachineRequirements;
+import com.abiquo.server.core.task.Task;
+import com.abiquo.server.core.task.enums.TaskOwnerType;
 import com.abiquo.tracer.ComponentType;
 import com.abiquo.tracer.EventType;
 import com.abiquo.tracer.SeverityType;
@@ -115,6 +119,9 @@ public class VirtualApplianceService extends DefaultApiService
 
     @Autowired
     private VirtualMachineAllocatorService vmallocator;
+
+    @Autowired
+    private TaskService taskService;
 
     public VirtualApplianceService()
     {
@@ -671,4 +678,34 @@ public class VirtualApplianceService extends DefaultApiService
             "virtualAppliance.deleted", virtualAppliance.getName());
     }
 
+    /**
+     * Retrieve the last {@link Task} of every {@link VirtualMachine} in the
+     * {@link VirtualAppliance}
+     * 
+     * @param vdcId datacenter id.
+     * @param vappId virtualappliance id
+     * @return List<Task>
+     */
+    public List<Task> getAllNodesLastTask(final Integer vdcId, final Integer vappId)
+    {
+
+        VirtualAppliance virtualAppliance = getVirtualAppliance(vdcId, vappId);
+        logger.debug("Retrieving all of the nodes last task virtual appliance name {} ",
+            virtualAppliance.getName());
+        List<Task> tasks = new ArrayList<Task>();
+        for (NodeVirtualImage m : virtualAppliance.getNodes())
+        {
+            List<Task> t =
+                taskService.findTasks(TaskOwnerType.VIRTUAL_MACHINE, m.getVirtualMachine().getId()
+                    .toString());
+            if (t != null && !t.isEmpty())
+            {
+                tasks.add(t.get(0));
+            }
+        }
+        logger.debug(
+            "Retrieving all of the nodes last task virtual appliance name {}, added {} tasks ",
+            new Object[] {virtualAppliance.getName(), tasks.size()});
+        return tasks;
+    }
 }

@@ -24,6 +24,7 @@ package com.abiquo.server.core.cloud;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.abiquo.model.transport.SingleResourceTransportDto;
+import com.abiquo.server.core.task.TasksDto;
 
 @XmlRootElement(name = "virtualAppliance")
 public class VirtualApplianceDto extends SingleResourceTransportDto
@@ -133,6 +134,21 @@ public class VirtualApplianceDto extends SingleResourceTransportDto
     public void setState(final VirtualApplianceState state)
     {
         this.state = state;
+    }
+
+    /**
+     * TODO This should be abstracted
+     */
+    private TasksDto lastTasks;
+
+    public TasksDto getLastTasks()
+    {
+        return lastTasks;
+    }
+
+    public void setLastTasks(final TasksDto lastTasks)
+    {
+        this.lastTasks = lastTasks;
     }
 
 }
