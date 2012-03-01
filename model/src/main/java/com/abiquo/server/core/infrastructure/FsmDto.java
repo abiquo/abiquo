@@ -40,6 +40,8 @@ public class FsmDto extends SingleResourceTransportDto
     public static final String BASE_MEDIA_TYPE = "application/vnd.abiquo.fsm+xml";
     public static final String MEDIA_TYPE = BASE_MEDIA_TYPE + "; version=" + API_VERSION;
     
+    private static final long serialVersionUID = 1149618910307871880L;
+
     protected String dn;
 
     protected String status;

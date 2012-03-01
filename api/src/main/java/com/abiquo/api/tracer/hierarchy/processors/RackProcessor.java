@@ -52,7 +52,7 @@ public class RackProcessor extends AbstractHierarchyProcessor<Rack>
     protected String getResourceName(final String resourceId)
     {
         Rack rack = dao.findRackById(Integer.valueOf(resourceId));
-        return rack.getName();
+        return rack != null ? rack.getName() : null;
     }
 
 }

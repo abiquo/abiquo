@@ -260,7 +260,9 @@ public class EnterpriseResource extends AbstractResource
 
         Enterprise enterprise = service.getEnterprise(enterpriseId);
 
-        Collection<VirtualDatacenter> all = vdcService.getVirtualDatacenters(enterprise, null);
+        Collection<VirtualDatacenter> all =
+            vdcService.getVirtualDatacenters(enterprise, null, 0, 0, "",
+                VirtualDatacenter.OrderByEnum.NAME.name(), true);
         VirtualDatacentersDto vdcs = new VirtualDatacentersDto();
 
         for (VirtualDatacenter d : all)

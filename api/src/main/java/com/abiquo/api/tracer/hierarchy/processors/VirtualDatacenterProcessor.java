@@ -52,7 +52,7 @@ public class VirtualDatacenterProcessor extends AbstractHierarchyProcessor<Virtu
     protected String getResourceName(final String resourceId)
     {
         VirtualDatacenter vdc = dao.findById(Integer.valueOf(resourceId));
-        return vdc.getName();
+        return vdc != null ? vdc.getName() : null;
     }
 
 }

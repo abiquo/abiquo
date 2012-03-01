@@ -67,13 +67,13 @@ import com.softwarementors.validation.constraints.LeadingOrTrailingWhitespace;
 import com.softwarementors.validation.constraints.Required;
 
 @Entity
-@FilterDefs({@FilterDef(name = VirtualMachine.NOT_TEMP),
+@FilterDefs( {@FilterDef(name = VirtualMachine.NOT_TEMP),
 @FilterDef(name = VirtualMachine.ONLY_TEMP)})
-@Filters({@Filter(name = VirtualMachine.NOT_TEMP, condition = "temporal is null"),
+@Filters( {@Filter(name = VirtualMachine.NOT_TEMP, condition = "temporal is null"),
 @Filter(name = VirtualMachine.ONLY_TEMP, condition = "temporal is not null")})
 @Table(name = VirtualMachine.TABLE_NAME)
 @org.hibernate.annotations.Table(appliesTo = VirtualMachine.TABLE_NAME)
-@NamedQueries({@NamedQuery(name = "VIRTUAL_MACHINE.BY_VAPP", query = VirtualMachine.BY_VAPP),
+@NamedQueries( {@NamedQuery(name = "VIRTUAL_MACHINE.BY_VAPP", query = VirtualMachine.BY_VAPP),
 @NamedQuery(name = "VIRTUAL_MACHINE.BY_DC", query = VirtualMachine.BY_DC),
 @NamedQuery(name = "VIRTUAL_MACHINE.BY_VMT", query = VirtualMachine.BY_VMT),
 @NamedQuery(name = "VIRTUAL_MACHINE.HAS_VMT", query = VirtualMachine.HAS_VMT)})
@@ -81,19 +81,23 @@ public class VirtualMachine extends DefaultEntityBase
 {
     public static final String TABLE_NAME = "virtualmachine";
 
-    public static final String BY_VAPP = "SELECT nvi.virtualMachine "
-        + "FROM NodeVirtualImage nvi " + "WHERE nvi.virtualAppliance.id = :vapp_id";
+    public static final String BY_VAPP =
+        "SELECT nvi.virtualMachine " + "FROM NodeVirtualImage nvi "
+            + "WHERE nvi.virtualAppliance.id = :vapp_id "
+            + "AND ( nvi.virtualMachine.name like :filterLike )";
 
-    public static final String BY_DC = "SELECT vm "
-        + "FROM VirtualMachine vm, Hypervisor hy, Machine pm "
-        + " WHERE vm.hypervisor.id = hy.id and hy.machine = pm.id "
-        + " AND pm.datacenter.id = :datacenterId";
+    public static final String BY_DC =
+        "SELECT vm " + "FROM VirtualMachine vm, Hypervisor hy, Machine pm "
+            + " WHERE vm.hypervisor.id = hy.id and hy.machine = pm.id "
+            + " AND pm.datacenter.id = :datacenterId";
 
-    public static final String BY_VMT = "SELECT vm " + "FROM VirtualMachine vm "
-        + "WHERE vm.virtualMachineTemplate.id = :virtualMachineTplId";
+    public static final String BY_VMT =
+        "SELECT vm " + "FROM VirtualMachine vm "
+            + "WHERE vm.virtualMachineTemplate.id = :virtualMachineTplId";
 
-    public static final String HAS_VMT = "SELECT COUNT(*) " + "FROM VirtualMachine vm "
-        + "WHERE vm.virtualMachineTemplate.id = :virtualMachineTplId";
+    public static final String HAS_VMT =
+        "SELECT COUNT(*) " + "FROM VirtualMachine vm "
+            + "WHERE vm.virtualMachineTemplate.id = :virtualMachineTplId";
 
     public static final int MANAGED = 1;
 
@@ -731,7 +735,7 @@ public class VirtualMachine extends DefaultEntityBase
         this.runlist.remove(element);
     }
 
-    /* ******************* Helper methods ******************* */
+    /*          ******************* Helper methods ******************* */
 
     public boolean isChefEnabled()
     {
@@ -815,5 +819,47 @@ public class VirtualMachine extends DefaultEntityBase
         // Not editable
         virtualMachine.setVirtualMachineTemplate(virtualMachineTemplate);
         return virtualMachine;
+    }
+
+    /**
+     * Ways to order this element in the queries.
+     */
+    public static enum OrderByEnum
+    {
+        NAME("name", "nvi.virtualMachine.name"), STATE("state", "nvi.virtualMachine.state");
+
+        public static OrderByEnum fromValue(final String orderBy)
+        {
+            for (OrderByEnum currentOrder : OrderByEnum.values())
+            {
+                if (currentOrder.name().equalsIgnoreCase(orderBy))
+                {
+                    return currentOrder;
+                }
+            }
+
+            return null;
+        }
+
+        private String columnSQL;
+
+        private String columnHQL;
+
+        private OrderByEnum(final String columnSQL, final String columnHQL)
+        {
+            this.columnSQL = columnSQL;
+            this.columnHQL = columnHQL;
+        }
+
+        public String getColumnSQL()
+        {
+            return columnSQL;
+        }
+
+        public String getColumnHQL()
+        {
+            return columnHQL;
+        }
+
     }
 }

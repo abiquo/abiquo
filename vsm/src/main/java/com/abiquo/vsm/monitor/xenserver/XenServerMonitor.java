@@ -21,6 +21,7 @@
 package com.abiquo.vsm.monitor.xenserver;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
@@ -180,12 +181,12 @@ public class XenServerMonitor extends AbstractMonitor
                         LOGGER.trace("Getting information from the current VMS...");
 
                         // Get states
-                        Iterable<VM> vms = connector.getAllVMs();
+                        List<VM.Record> vms = connector.getAllVMs();
 
-                        for (VM vm : vms)
+                        for (VM.Record vm : vms)
                         {
                             // Save the VM in the list of current VMs
-                            String vmName = vm.getNameLabel(connector.getConnection());
+                            String vmName = vm.nameLabel;
                             currentVMs.add(vmName);
 
                             if (connector.isBeingRebooted(vm))
@@ -201,9 +202,7 @@ public class XenServerMonitor extends AbstractMonitor
                             else
                             {
                                 // Get the new state of the VM
-                                VMEventType state =
-                                    XenServerUtils.translateEvent(vm.getPowerState(connector
-                                        .getConnection()));
+                                VMEventType state = XenServerUtils.translateEvent(vm.powerState);
                                 LOGGER.trace("Found VM {} in state {}", vmName, state.name());
 
                                 VMEvent event = new VMEvent(state, physicalMachineAddress, vmName);

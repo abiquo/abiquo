@@ -84,11 +84,11 @@ public class VirtualAppliance extends DefaultEntityBase
 
     public final static String NAME_PROPERTY = "name";
 
-    private final static boolean NAME_REQUIRED = false;
+    private final static boolean NAME_REQUIRED = true;
 
-    private final static int NAME_LENGTH_MIN = 0;
+    private final static int NAME_LENGTH_MIN = 1;
 
-    private final static int NAME_LENGTH_MAX = 255;
+    private final static int NAME_LENGTH_MAX = 30;
 
     private final static boolean NAME_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
 
@@ -256,7 +256,8 @@ public class VirtualAppliance extends DefaultEntityBase
     // @Type(type = "com.abiquo.server.core.cloud.VirtualApplianceState")
     @Formula(value = STATE_FORMULA)
     private String state; // This should be VirtualApplianceState but enums does not work with
-                          // formula this bug https://hibernate.onjira.com/browse/HHH-6347
+
+    // formula this bug https://hibernate.onjira.com/browse/HHH-6347
 
     /**
      * @see VirtualApplianceState
@@ -322,6 +323,48 @@ public class VirtualAppliance extends DefaultEntityBase
 
         this.nodesVirtualImage.remove(value);
         // value.removeFromDatastores(this);
+    }
+
+    // ********************************** Others ********************************
+    /**
+     * Ways to order this element in the queries.
+     */
+    public static enum OrderByEnum
+    {
+        NAME("name", "vapp.name"), ID("id", "vapp.id");
+
+        public static OrderByEnum fromValue(final String orderBy)
+        {
+            for (OrderByEnum currentOrder : OrderByEnum.values())
+            {
+                if (currentOrder.name().equalsIgnoreCase(orderBy))
+                {
+                    return currentOrder;
+                }
+            }
+
+            return null;
+        }
+
+        private String columnSQL;
+
+        private String columnHQL;
+
+        private OrderByEnum(final String columnSQL, final String columnHQL)
+        {
+            this.columnSQL = columnSQL;
+            this.columnHQL = columnHQL;
+        }
+
+        public String getColumnSQL()
+        {
+            return columnSQL;
+        }
+
+        public String getColumnHQL()
+        {
+            return columnHQL;
+        }
     }
 
 }

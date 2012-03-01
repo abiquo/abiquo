@@ -120,7 +120,7 @@ public class IconService extends DefaultApiService
             flushErrors();
         }
 
-        Icon newIcon = new Icon(iconDto.getName(), iconDto.getPath());
+        Icon newIcon = new Icon(iconDto.getName(), iconDto.getPath().replaceAll("\r", ""));
         appslibraryRep.insertIcon(newIcon);
 
         return newIcon;

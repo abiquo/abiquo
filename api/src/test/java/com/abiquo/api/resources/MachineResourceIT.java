@@ -50,6 +50,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.abiquo.api.common.SysadminAuthentication;
+import com.abiquo.api.services.stub.NodecollectorServiceStubMock;
 import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.model.transport.error.ErrorsDto;
 import com.abiquo.server.core.cloud.Hypervisor;
@@ -72,11 +73,11 @@ public class MachineResourceIT extends AbstractJpaGeneratorIT
     private String validMachineUri;
 
     private Machine validMachine;
-    
+
     private Hypervisor validHypervisor;
-    
+
     private Enterprise e;
-    
+
     private User u;
 
     @Override
@@ -84,6 +85,8 @@ public class MachineResourceIT extends AbstractJpaGeneratorIT
     public void setup()
     {
         Hypervisor hypervisor = hypervisorGenerator.createUniqueInstance();
+        hypervisor.setIpService(NodecollectorServiceStubMock.IP_DISCOVER_FIRST);
+
         Machine machine = hypervisor.getMachine();
 
         RemoteService rs =
@@ -361,7 +364,7 @@ public class MachineResourceIT extends AbstractJpaGeneratorIT
             .setDatacenter(vm.getHypervisor().getMachine().getDatacenter());
         vm2.getVirtualMachineTemplate().getRepository()
             .setDatacenter(vm2.getHypervisor().getMachine().getDatacenter());
-        
+
         VirtualDatacenter vdc =
             vdcGenerator.createInstance(vm.getHypervisor().getMachine().getDatacenter(),
                 vm.getEnterprise());

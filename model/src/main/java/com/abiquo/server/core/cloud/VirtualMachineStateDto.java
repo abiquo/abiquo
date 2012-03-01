@@ -33,7 +33,7 @@ import com.abiquo.server.core.infrastructure.DatacenterDto;
  * 
  * @author ssedano
  */
-@XmlRootElement(name = "virtualMachineState")
+@XmlRootElement(name = "virtualmachinestate")
 public class VirtualMachineStateDto extends SingleResourceTransportDto implements Serializable
 {
 

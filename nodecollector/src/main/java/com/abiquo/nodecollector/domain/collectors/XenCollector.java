@@ -21,7 +21,6 @@
 
 package com.abiquo.nodecollector.domain.collectors;
 
-import org.libvirt.Connect;
 import org.libvirt.LibvirtException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,6 +29,7 @@ import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.nodecollector.aim.impl.AimCollectorImpl;
 import com.abiquo.nodecollector.constants.MessageValues;
 import com.abiquo.nodecollector.domain.Collector;
+import com.abiquo.nodecollector.domain.collectors.libvirt.LeaksFreeConnect;
 import com.abiquo.nodecollector.exception.CollectorException;
 import com.abiquo.nodecollector.exception.ConnectionException;
 import com.abiquo.nodecollector.exception.libvirt.AimException;
@@ -49,7 +49,8 @@ public class XenCollector extends AbstractLibvirtCollector
     {
         try
         {
-            setConn(new Connect("xen+tcp://" + getIpAddress() + "/?no_tty=1"));
+            setConnection(new LeaksFreeConnect("xen+tcp://" + getIpAddress() + "/?no_tty=1"));
+
             try
             {
                 aimcollector = new AimCollectorImpl(getIpAddress(), getAimPort());
@@ -69,7 +70,6 @@ public class XenCollector extends AbstractLibvirtCollector
                 }
                 throw new ConnectionException(MessageValues.CONN_EXCP_IV, e);
             }
-
         }
         catch (LibvirtException e)
         {
@@ -80,13 +80,11 @@ public class XenCollector extends AbstractLibvirtCollector
             catch (CollectorException e1)
             {
                 LOGGER.error("Error freeing libvirt connection to address " + getIpAddress(), e1);
-                // return;
             }
 
             LOGGER.warn("Could not connect at hypervisor {} at cloud node {}", this
                 .getHypervisorType().name(), getIpAddress());
             throw new ConnectionException(MessageValues.CONN_EXCP_IV, e);
         }
-
     }
 }

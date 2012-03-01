@@ -29,6 +29,7 @@ import javax.persistence.EntityManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import com.abiquo.server.core.cloud.VirtualMachine.OrderByEnum;
 import com.abiquo.server.core.cloud.chef.RunlistElement;
 import com.abiquo.server.core.cloud.chef.RunlistElementDAO;
 import com.abiquo.server.core.common.DefaultRepBase;
@@ -105,9 +106,12 @@ public class VirtualMachineRep extends DefaultRepBase
         return dao.findVirtualMachinesByUser(enterprise, user);
     }
 
-    public List<VirtualMachine> findVirtualMachinesByVirtualAppliance(final Integer vappId)
+    public List<VirtualMachine> findVirtualMachinesByVirtualAppliance(final Integer vappId,
+        final Integer startwith, final Integer limit, final String filter,
+        final OrderByEnum orderByEnum, final Boolean descOrAsc)
     {
-        return dao.findVirtualMachinesByVirtualAppliance(vappId);
+        return dao.findVirtualMachinesByVirtualAppliance(vappId, startwith, limit, filter,
+            orderByEnum, descOrAsc);
     }
 
     public List<VirtualMachine> findByVirtualMachineTemplate(final Integer virtualMachineTemplateId)
@@ -133,6 +137,17 @@ public class VirtualMachineRep extends DefaultRepBase
     public VirtualMachine findVirtualMachineById(final Integer vmId)
     {
         return dao.findById(vmId);
+    }
+
+    /**
+     * * Sets the {@link VirtualMachine#setState(VirtualMachineState)} to
+     * {@link VirtualMachineState#UNKNOWN}.
+     * 
+     * @param vmId id void
+     */
+    public void setVirtualMachineToUnknown(final Integer vmId)
+    {
+        dao.unknownState(vmId);
     }
 
     public VirtualMachine findVirtualMachineByHypervisor(final Hypervisor hypervisor,
@@ -272,5 +287,10 @@ public class VirtualMachineRep extends DefaultRepBase
     public void setDefaultFilters()
     {
         JPAConfiguration.enableDefaultFilters(this.entityManager);
+    }
+
+    public boolean existsVirtualMachineFromTemplate(final Integer virtualMachineTemplateId)
+    {
+        return dao.hasVirtualMachineTemplate(virtualMachineTemplateId);
     }
 }
