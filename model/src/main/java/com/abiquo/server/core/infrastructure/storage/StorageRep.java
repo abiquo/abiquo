@@ -158,6 +158,11 @@ public class StorageRep extends DefaultRepBase
         return poolDAO.findPoolsByTier(tier);
     }
 
+    public List<StoragePool> findAllPools()
+    {
+        return poolDAO.findAll();
+    }
+
     public Tier findTierById(final Integer tierId)
     {
         return tierDAO.findById(tierId);
@@ -236,7 +241,7 @@ public class StorageRep extends DefaultRepBase
     {
         return tierDAO.findAll();
     }
-    
+
     public List<Tier> getTiersByDatacenter(final Integer datacenterId)
     {
         return tierDAO.getTiersByDatacenter(datacenterId);
