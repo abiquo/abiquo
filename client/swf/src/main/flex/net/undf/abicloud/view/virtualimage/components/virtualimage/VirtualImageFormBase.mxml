@@ -111,6 +111,12 @@
 
             [Bindable]
             protected var _isEditable:Boolean;
+            
+            //Override this function due to the Javascript component
+            //To avoid a ugly displayed bug
+            override protected function headerMouseDown_handler(mouseEvent:MouseEvent):void
+            {
+            }
 
 			
             private function onCreationComplete():void

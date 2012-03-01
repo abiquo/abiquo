@@ -134,7 +134,7 @@ public class TarantinoJobCreator extends DefaultApiService
      */
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public VirtualMachineDescriptionBuilder toTarantinoDto(final VirtualMachine virtualMachine,
-        final VirtualAppliance virtualAppliance)
+        final VirtualAppliance virtualAppliance, final boolean isHA)
     {
         final VirtualDatacenter virtualDatacenter = virtualAppliance.getVirtualDatacenter();
         final Integer dcId = virtualDatacenter.getDatacenter().getId();
@@ -144,7 +144,7 @@ public class TarantinoJobCreator extends DefaultApiService
         vmDesc.setBasics(virtualMachine.getUuid(), virtualMachine.getName());
 
         logger.debug("Creating disk information");
-        primaryDiskDefinitionConfiguration(virtualMachine, vmDesc, dcId);
+        primaryDiskDefinitionConfiguration(virtualMachine, vmDesc, dcId, isHA);
         logger.debug("Disk information created!");
 
         vmDesc.hardware(virtualMachine.getCpu(), virtualMachine.getRam());
@@ -171,6 +171,11 @@ public class TarantinoJobCreator extends DefaultApiService
         return vmDesc;
     }
 
+    public VirtualMachineDescriptionBuilder toTarantinoDto(final VirtualMachine virtualMachine,
+        final VirtualAppliance virtualAppliance){
+        return toTarantinoDto(virtualMachine, virtualAppliance, false);
+    }
+
     /**
      * Gets the configured DCHP in the datacenter to set its URL in the
      * {@link com.abiquo.commons.amqp.impl.tarantino.domain.VirtualMachineDefinition.NetworkConfiguration}
@@ -182,6 +187,12 @@ public class TarantinoJobCreator extends DefaultApiService
         final RemoteService dhcp =
             remoteServiceService.getRemoteService(datacenterId, RemoteServiceType.DHCP_SERVICE);
 
+        if (dhcp == null)
+        {
+            logger.debug("Tarantino Job Creator the datacenter id {} hasn't DHCP service");
+            // The datacenter hasn't dhcp
+            return;
+        }
         try
         {
             final URI dhcpUri = new URI(dhcp.getUri());
@@ -317,7 +328,8 @@ public class TarantinoJobCreator extends DefaultApiService
      */
     @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
     protected void primaryDiskDefinitionConfiguration(final VirtualMachine virtualMachine,
-        final VirtualMachineDescriptionBuilder vmDesc, final Integer idDatacenter)
+        final VirtualMachineDescriptionBuilder vmDesc, final Integer idDatacenter,
+        final boolean isHA)
     {
         String datastore = "";
         if (virtualMachine.getDatastore() != null)
@@ -376,7 +388,7 @@ public class TarantinoJobCreator extends DefaultApiService
             url = virtualMachine.getVirtualMachineTemplate().getRepository().getUrl();
         }
         vmDesc.primaryDisk(DiskDescription.DiskFormatType.valueOf(format.name()), size, url, path,
-            datastore, repositoryManager.getUri(), cntrlType);
+            datastore, repositoryManager.getUri(), cntrlType, isHA);
     }
 
     /**
@@ -437,7 +449,7 @@ public class TarantinoJobCreator extends DefaultApiService
         {
             List<DhcpOption> dhcplist = i.getVlanNetwork().getDhcpOption();
             NetworkConfiguration configuration = i.getVlanNetwork().getConfiguration();
-            
+
             if (i.itHasTheDefaultConfiguration(virtualMachine) && !defaultConfigurationFound)
             {
                 // This interface is the one that configures the Network parameters.
@@ -461,9 +473,9 @@ public class TarantinoJobCreator extends DefaultApiService
             // configureNetwork parameter
             Integer tag = i.getVlanNetwork().getTag();
             vmDesc.addNetwork(i.getMac(), i.getIp(), virtualMachine.getHypervisor().getMachine()
-                .getVirtualSwitch(), i.getNetworkName(), tag, i.getName(), null, null, null, configuration.getNetMask(),
-                null, null, null, i.getSequence(), toDchpOptionCom(dhcplist), Boolean.FALSE,
-                i.isUnmanagedIp());
+                .getVirtualSwitch(), i.getNetworkName(), tag, i.getName(), null, null, null,
+                configuration.getNetMask(), null, null, null, i.getSequence(),
+                toDchpOptionCom(dhcplist), Boolean.FALSE, i.isUnmanagedIp());
 
         }
     }

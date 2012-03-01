@@ -31,7 +31,7 @@ public enum RemoteServiceType
     // @Deprecated
     // use TARANTINO
     // VIRTUAL_FACTORY("Virtualization Manager", "tarantino", "http://", 80), //
-    TARANTINO("Virtualization Manager", "tarantino", "http://", 80), //
+    TARANTINO("Virtualization Manager", "virtualfactory", "http://", 80), //
     STORAGE_SYSTEM_MONITOR("Storage Manager", "ssm", "http://", 80), //
     VIRTUAL_SYSTEM_MONITOR("Monitor Manager", "vsm", "http://", 80), //
     NODE_COLLECTOR("Discovery Manager", "nodecollector", "http://", 80), //

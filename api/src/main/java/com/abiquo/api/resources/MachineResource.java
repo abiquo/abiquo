@@ -81,9 +81,9 @@ public class MachineResource extends AbstractResource
 
     public static final String MACHINE_ACTION_POWER_ON_REL = "poweron";
 
-    public static final String MACHINE_ACTION_CHECK = "action/checkState";
+    public static final String MACHINE_ACTION_CHECK = "action/checkstate";
 
-    public static final String MACHINE_CHECK = "checkState";
+    public static final String MACHINE_CHECK = "checkstate";
 
     public static final String SHOW_CREDENTIALS_QUERY_PARAM = "credentials";
 
@@ -152,6 +152,20 @@ public class MachineResource extends AbstractResource
         @Context final IRESTBuilder restBuilder) throws Exception
     {
         validatePathParameters(datacenterId, rackId, machineId);
+
+        Machine old = service.getMachine(machineId);
+
+        // if we enable the machine then we force a check
+        if (old.getState().equals(MachineState.HALTED)
+            && !machine.getState().equals(MachineState.HALTED))
+        {
+            MachineState newState =
+                infraService.checkMachineState(datacenterId, machine.getIp(), machine.getType(),
+                    old.getHypervisor().getUser(), old.getHypervisor().getPassword(),
+                    machine.getPort());
+            // machine will be updated with the given state
+            machine.setState(newState);
+        }
 
         Machine m = service.modifyMachine(machineId, machine);
 
@@ -251,7 +265,6 @@ public class MachineResource extends AbstractResource
         dto.setName(machine.getName());
         dto.setState(machine.getState());
         dto.setVirtualCpuCores(machine.getVirtualCpuCores());
-        dto.setVirtualCpusPerCore(machine.getVirtualCpusPerCore());
         dto.setVirtualCpusUsed(machine.getVirtualCpusUsed());
         dto.setVirtualRamInMb(machine.getVirtualRamInMb());
         dto.setVirtualRamUsedInMb(machine.getVirtualRamUsedInMb());

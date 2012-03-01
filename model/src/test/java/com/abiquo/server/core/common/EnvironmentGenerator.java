@@ -331,7 +331,7 @@ public class EnvironmentGenerator
 
         // Storage
         StorageDevice device = deviceGenerator.createInstance(dc);
-        device.setStorageTechnology(StorageTechnologyType.OPENSOLARIS);
+        device.setStorageTechnology(StorageTechnologyType.NEXENTA);
         StoragePool pool = poolGenerator.createInstance(device);
 
         Machine machine = hypervisor.getMachine();

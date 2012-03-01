@@ -218,7 +218,7 @@
             required="true">
             <mx:TextInput id="nameInput"
                 width="100%" height="20"
-                maxChars="128"
+                maxChars="256"
                 change="validateForm()"/>
         </mx:FormItem>
 
@@ -246,7 +246,7 @@
         <mx:FormItem label="@Resource(bundle='Infrastructure', key='TEXTINPUT_LABEL_CPU')">
             <mx:NumericStepper id="cpuInput"
                 width="100" height="20"
-
+                enabled="false"
                 maximum="{AbiCloudModel.MAX_NUMBER_OF_CPU}"
                 minimum="1" stepSize="1"/>
         </mx:FormItem>
@@ -257,6 +257,7 @@
 
             <mx:NumericStepper id="ramInput"
                 width="100" height="20"
+                enabled="false"
                 minimum="{ramUnitsSelector.selectedItem.minimum}"
                 maximum="{ramUnitsSelector.selectedItem.maximum}"
                 stepSize="{ramUnitsSelector.selectedItem.stepSize}"/>

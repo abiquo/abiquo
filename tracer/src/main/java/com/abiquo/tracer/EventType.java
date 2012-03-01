@@ -82,7 +82,8 @@ public enum EventType implements Serializable
         "REMOTE_SERVICE_UPDATE", "Remote Service updated"), REMOTE_SERVICES_CHECK(316,
         "REMOTE_SERVICES_CHECK", "Remote service checked"), REMOTE_SERVICES_DELETE(317,
         "REMOTE_SERVICES_DELETE", "Remote Service deleted"), RACK_RETRIEVAL(318, "RACK_RETRIEVAL",
-        "Retrieve Rack"),
+        "Retrieve Rack"), APPLIANCE_MANAGER_CONFIGURATION(319, "APPLIANCE_MANAGER_CONFIGURATION_",
+        "The appliance manager is not well configured"),
 
     // Storage system-related events
     SSM_CREATE(400, "SSM_CREATE", "Storage System Manager created"), SSM_MODIFY(401, "SSM_MODIFY",
@@ -149,7 +150,7 @@ public enum EventType implements Serializable
 
     // API events
     API_REQUEST(900, "API_REQUEST", "Functionallity executed by API request"), API_RESPONSE(901,
-        "API_RESPONSE", "API response"), 
+        "API_RESPONSE", "API response"),
 
     // Workload Engine Events
     WORKLOAD_LOAD_RULES(1000, "WORKLOAD_LOAD_RULES", "Workload load rules"), WORKLOAD_APPLY_RULES(
@@ -174,7 +175,7 @@ public enum EventType implements Serializable
     // HA Engine Events
     MACHINE_DISABLED_BY_HA(1400, "MACHINE_DISABLED_BY_HA", "Machine disabled by HA engine."), VAPP_BLOCKED_BY_HA(
         1401, "VAPP_BLOCKED_BY_HA", "Virtual appliance block by HA engine"), VM_MOVING_BY_HA(1402,
-        "VAPP_MOVING_BY_HA", "Virtual machine being moved by HA engine"),
+        "VM_MOVING_BY_HA", "Virtual machine being moved by HA engine"),
 
     // ALLOCATION RULES
     ALLOCATION_RULES_APPLIED(1500, "ALLOCATION_RULES_APPLIED", "Allocation rules applied"), ALLOCATION_RULES_REMOVED(
@@ -227,7 +228,7 @@ public enum EventType implements Serializable
         "A Intance conversion process has started"), INSTANCE_PROCESS_FINISHED(1804,
         "INSTANCE_PROCESS_FINISHED", "A Instance conversion process has finished succesfuly"), INSTANCE_PROCESS_FAILED(
         1805, "INSTANCE_PROCESS_FAILED", "A Instance conversion process has failed"),
-    
+
     // Asynch handlers
     ASYNC_HANDLER_RESPONSE(1900, "ASYNC_HANDLER_RESPONSE", "Asynchronous hander response"),
 
@@ -293,8 +294,8 @@ public enum EventType implements Serializable
         System.out.println("|| Action performed || Description || ");
         for (EventType error : events)
         {
-            System.out.println(String.format("| %s | %s |", error.name(),
-                error.getLongDescription()));
+            System.out.println(String.format("| %s | %s |", error.name(), error
+                .getLongDescription()));
         }
     }
 }

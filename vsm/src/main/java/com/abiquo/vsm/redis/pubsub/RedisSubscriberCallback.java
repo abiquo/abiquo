@@ -221,10 +221,10 @@ public class RedisSubscriberCallback extends JedisPubSub
             {
                 broker.publish(n);
 
-                logger.info("Published a {} event.", n.getEventType());
-                logger.info("\tVirtual machine name: {}", n.getVirtualSystemId());
-                logger.info("\tPhysical machine address: {}", n.getVirtualSystemAddress());
-                logger.info("\tPhysical machine type: {}", n.getVirtualSystemType());
+                logger.info(String.format(
+                    "Published a %s event from virtual machine %s in hypervisor %s (%s).",
+                    n.getEventType(), n.getVirtualSystemId(), n.getVirtualSystemAddress(),
+                    n.getVirtualSystemType()));
             }
 
             broker.closeChannel();

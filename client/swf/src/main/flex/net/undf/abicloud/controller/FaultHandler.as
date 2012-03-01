@@ -22,7 +22,11 @@
 package net.undf.abicloud.controller
 {
 
+    import flash.net.URLRequest;
+    import flash.net.navigateToURL;
+    
     import mx.controls.Alert;
+    import mx.events.CloseEvent;
     import mx.resources.ResourceBundle;
     import mx.resources.ResourceManager;
     import mx.rpc.Fault;
@@ -107,11 +111,36 @@ package net.undf.abicloud.controller
                 //was due network problems or server unreachable
                 AbiCloudModel.getInstance().notificationManager.isServerUnreachable = true;
             }
+            
+            if(fault.rootCause && fault.rootCause.result 
+            && (fault.rootCause.result.resultCode == BasicResult.SESSION_INVALID || fault.rootCause.result.resultCode == BasicResult.SESSION_TIMEOUT))
+            {
+                //Invalid Session
+                if (AbiCloudModel.getInstance().loginManager.sessionValid)
+                {
+                    AbiCloudModel.getInstance().loginManager.sessionValid = false;
+
+                    AbiCloudAlert.showError(ResourceManager.getInstance().getString("Common",
+                                                                                    "ALERT_ERROR_TITLE_LABEL"),
+                                            ResourceManager.getInstance().getString("Common",
+                                                                                    "ALERT_ERROR_SERVER_RESPONSE_HEADER"),
+                                            ResourceManager.getInstance().getString("Common",
+                                                                                    "ALERT_MESSAGE_SESSIONINVALID"),
+                                            Alert.OK,
+                                            onSessionInvalid);
+                }
+            }
 
         /* We were asked to no generate  Notification...
            var notification:Notification = new Notification(ResourceManager.getInstance().getString("Common", "ALERT_ERROR_SERVER_RESPONSE_HEADER"),
            fault.toString());
          AbiCloudModel.getInstance().notificationManager.addNotification(notification); */
+        }
+        
+        private function onSessionInvalid(closeEvent:CloseEvent):void
+        {
+            //Provisional logout
+            navigateToURL(new URLRequest("javascript:location.reload(true)"), "_self");
         }
     }
 }

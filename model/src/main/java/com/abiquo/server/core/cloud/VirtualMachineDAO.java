@@ -37,19 +37,21 @@ import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 
 import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
+import com.abiquo.server.core.cloud.VirtualMachine.OrderByEnum;
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
 import com.abiquo.server.core.common.persistence.JPAConfiguration;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.infrastructure.Datacenter;
+import com.abiquo.server.core.util.PagedList;
 import com.softwarementors.bzngine.entities.PersistentEntity;
 
 @Repository("jpaVirtualMachineDAO")
 public class VirtualMachineDAO extends DefaultDAOBase<Integer, VirtualMachine>
 {
-    public static final String BY_VAPP_AND_ID = "SELECT nvi.virtualMachine "
-        + "FROM NodeVirtualImage nvi "
-        + "WHERE nvi.virtualAppliance.id = :vapp_id AND nvi.virtualMachine.id = :vm_id";
+    public static final String BY_VAPP_AND_ID =
+        "SELECT nvi.virtualMachine " + "FROM NodeVirtualImage nvi "
+            + "WHERE nvi.virtualAppliance.id = :vapp_id AND nvi.virtualMachine.id = :vm_id";
 
     private static Criterion equalName(final String name)
     {
@@ -134,8 +136,8 @@ public class VirtualMachineDAO extends DefaultDAOBase<Integer, VirtualMachine>
         final Integer virtualMachineId)
     {
         Criteria criteria =
-            createCriteria(sameHypervisor(hypervisor),
-                Restrictions.eq(PersistentEntity.ID_PROPERTY, virtualMachineId));
+            createCriteria(sameHypervisor(hypervisor), Restrictions.eq(
+                PersistentEntity.ID_PROPERTY, virtualMachineId));
         return (VirtualMachine) criteria.uniqueResult();
     }
 
@@ -156,10 +158,9 @@ public class VirtualMachineDAO extends DefaultDAOBase<Integer, VirtualMachine>
     {
         Criteria criteria = createCriteria();
         criteria.createAlias(VirtualMachine.VIRTUAL_MACHINE_TEMPLATE_PROPERTY, "template");
-        Restrictions.and(
-            Restrictions.eq(VirtualMachine.HYPERVISOR_PROPERTY, null),
-            Restrictions.in("template." + VirtualMachineTemplate.DISKFORMAT_TYPE_PROPERTY,
-                Arrays.asList(hypervisor.getType().compatibilityTable)));
+        Restrictions.and(Restrictions.eq(VirtualMachine.HYPERVISOR_PROPERTY, null), Restrictions
+            .in("template." + VirtualMachineTemplate.DISKFORMAT_TYPE_PROPERTY, Arrays
+                .asList(hypervisor.getType().compatibilityTable)));
         criteria.addOrder(Order.asc(VirtualMachine.NAME_PROPERTY));
         List<VirtualMachine> result = getResultList(criteria);
         return result;
@@ -196,13 +197,41 @@ public class VirtualMachineDAO extends DefaultDAOBase<Integer, VirtualMachine>
         return result;
     }
 
-    public List<VirtualMachine> findVirtualMachinesByVirtualAppliance(final Integer vappId)
+    public List<VirtualMachine> findVirtualMachinesByVirtualAppliance(final Integer vappId,
+        Integer startwith, Integer limit, final String filter, final OrderByEnum orderby,
+        final boolean asc)
     {
-        List<VirtualMachine> vmList = null;
-        TypedQuery<VirtualMachine> query =
-            getEntityManager().createNamedQuery("VIRTUAL_MACHINE.BY_VAPP", VirtualMachine.class);
-        query.setParameter("vapp_id", vappId);
-        vmList = query.getResultList();
+        // List<VirtualMachine> vmList = null;
+
+        // TypedQuery<VirtualMachine> query =
+        // getEntityManager().createNamedQuery("VIRTUAL_MACHINE.BY_VAPP", VirtualMachine.class);
+        // query.setParameter("vapp_id", vappId);
+        // vmList = query.getResultList();
+        String orderBy = defineOrderBy(orderby.getColumnHQL(), asc);
+        Query query = getSession().getNamedQuery("VIRTUAL_MACHINE.BY_VAPP");
+
+        String req = query.getQueryString() + orderBy;
+        // Add order filter to the query
+        Query queryWithOrder = getSession().createQuery(req);
+        queryWithOrder.setInteger("vapp_id", vappId);
+        queryWithOrder.setString("filterLike", filter.isEmpty() ? "%" : "%" + filter + "%");
+
+        Integer size = queryWithOrder.list().size();
+
+        // Limit 0 means no size filter
+        if (limit == 0)
+        {
+            limit = size;
+            startwith = 0;
+        }
+
+        queryWithOrder.setFirstResult(startwith);
+        queryWithOrder.setMaxResults(limit);
+
+        PagedList<VirtualMachine> vmList = new PagedList<VirtualMachine>(queryWithOrder.list());
+        vmList.setTotalResults(size);
+        vmList.setPageSize(limit > size ? size : limit);
+        vmList.setCurrentElement(startwith);
 
         return vmList;
     }
@@ -234,6 +263,19 @@ public class VirtualMachineDAO extends DefaultDAOBase<Integer, VirtualMachine>
         vmachine.setState(state);
 
         flush();
+    }
+
+    /**
+     * Sets the {@link VirtualMachine#setState(VirtualMachineState)} to
+     * {@link VirtualMachineState#UNKNOWN}.
+     * 
+     * @param vmachineId id void
+     */
+    public void unknownState(final Integer vmachineId)
+    {
+        VirtualMachine vmachine = findById(vmachineId);
+
+        vmachine.setState(VirtualMachineState.UNKNOWN);
     }
 
     private Criterion managed()
@@ -286,5 +328,25 @@ public class VirtualMachineDAO extends DefaultDAOBase<Integer, VirtualMachine>
     public void detachVirtualMachine(final VirtualMachine vm)
     {
         getEntityManager().detach(vm);
+    }
+
+    private String defineOrderBy(final String orderBy, final Boolean asc)
+    {
+        StringBuilder queryString = new StringBuilder();
+
+        queryString.append(" order by ");
+        queryString.append(orderBy);
+        queryString.append(" ");
+
+        if (asc)
+        {
+            queryString.append("asc");
+        }
+        else
+        {
+            queryString.append("desc");
+        }
+
+        return queryString.toString();
     }
 }

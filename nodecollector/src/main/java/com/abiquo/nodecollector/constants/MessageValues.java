@@ -72,6 +72,11 @@ public final class MessageValues
     public static final String COLL_EXCP_VM = "Could not get Virtual Machine information.";
 
     /**
+     * Message thrown by the <code>CollectorException</code> causes.
+     */
+    public static final String COLL_EXCP_DECODE = "Could not decode string from URL raw enconding";
+
+    /**
      * This message will be retrieved in disconnect exceptions (strange cases).
      */
     public static final String COLL_EXCP_DC = "Unknown connecting problems collecting information.";

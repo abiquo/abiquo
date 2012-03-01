@@ -32,19 +32,23 @@ import javax.persistence.EntityManager;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Transformer;
+import org.apache.commons.lang.StringUtils;
 import org.hibernate.Criteria;
 import org.hibernate.Query;
 import org.hibernate.criterion.Criterion;
+import org.hibernate.criterion.Disjunction;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 
+import com.abiquo.server.core.cloud.VirtualDatacenter.OrderByEnum;
 import com.abiquo.server.core.common.DefaultEntityCurrentUsed;
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.network.VLANNetwork;
+import com.abiquo.server.core.util.PagedList;
 import com.softwarementors.bzngine.entities.PersistentEntity;
 
 @Repository("jpaVirtualDatacenterDAO")
@@ -89,7 +93,8 @@ public class VirtualDatacenterDAO extends DefaultDAOBase<Integer, VirtualDatacen
     }
 
     public Collection<VirtualDatacenter> findByEnterpriseAndDatacenter(final Enterprise enterprise,
-        final Datacenter datacenter, final User user)
+        final Datacenter datacenter, final User user, final Integer startwith, final Integer limit,
+        final String filter, final OrderByEnum orderByEnum, final Boolean asc)
     {
         Collection<Criterion> restrictions = new ArrayList<Criterion>();
         if (enterprise != null)
@@ -105,10 +110,13 @@ public class VirtualDatacenterDAO extends DefaultDAOBase<Integer, VirtualDatacen
             restrictions.add(availableToUser(user));
         }
 
-        return findVirtualDatacentersByCriterions(restrictions);
+        return findVirtualDatacentersByCriterions(restrictions, startwith, limit, filter,
+            orderByEnum, asc);
     }
 
-    public Collection<VirtualDatacenter> findByDatacenter(final Datacenter datacenter)
+    public Collection<VirtualDatacenter> findByDatacenter(final Datacenter datacenter,
+        final Integer startwith, final Integer limit, final String filter,
+        final OrderByEnum orderByEnum, final Boolean asc)
     {
         Collection<Criterion> restrictions = new ArrayList<Criterion>();
         if (datacenter != null)
@@ -116,17 +124,57 @@ public class VirtualDatacenterDAO extends DefaultDAOBase<Integer, VirtualDatacen
             restrictions.add(sameDatacenter(datacenter));
         }
 
-        return findVirtualDatacentersByCriterions(restrictions);
+        return findVirtualDatacentersByCriterions(restrictions, startwith, limit, filter,
+            orderByEnum, asc);
     }
 
     public Collection<VirtualDatacenter> findByEnterpriseAndDatacenter(final Enterprise enterprise,
-        final Datacenter datacenter)
+        final Datacenter datacenter, final Integer startwith, final Integer limit,
+        final String filter, final OrderByEnum orderByEnum, final Boolean asc)
     {
-        return findByEnterpriseAndDatacenter(enterprise, datacenter, null);
+        return findByEnterpriseAndDatacenter(enterprise, datacenter, null, startwith, limit,
+            filter, orderByEnum, asc);
     }
 
     private Collection<VirtualDatacenter> findVirtualDatacentersByCriterions(
-        final Collection<Criterion> criterions)
+        final Collection<Criterion> criterions, Integer startwith, Integer limit,
+        final String filter, final OrderByEnum orderByEnum, final Boolean asc)
+    {
+        Criteria criteria = createCriteria(criterions, filter, orderByEnum, asc);
+
+        // Check if the page requested is bigger than the last one
+        Long total = count(criteria);
+        criteria = createCriteria(criterions, filter, orderByEnum, asc);
+        Integer totalResults = total.intValue();
+        limit = limit != 0 ? limit : totalResults;
+        if (limit != null)
+        {
+            criteria.setMaxResults(limit);
+        }
+
+        if (startwith >= totalResults)
+        {
+            startwith = totalResults - limit;
+        }
+        criteria.setFirstResult(startwith);
+        criteria.setMaxResults(limit);
+
+        List<VirtualDatacenter> result = getResultList(criteria);
+
+        PagedList<VirtualDatacenter> page = new PagedList<VirtualDatacenter>();
+        page.addAll(result);
+        page.setCurrentElement(startwith);
+        page.setPageSize(limit);
+        page.setTotalResults(totalResults);
+
+        return page;
+
+        // criteria.addOrder(Order.asc(VirtualDatacenter.NAME_PROPERTY));
+
+    }
+
+    private Criteria createCriteria(final Collection<Criterion> criterions, final String filter,
+        final OrderByEnum orderByEnum, final boolean asc)
     {
         Criteria criteria = getSession().createCriteria(VirtualDatacenter.class);
 
@@ -134,10 +182,31 @@ public class VirtualDatacenterDAO extends DefaultDAOBase<Integer, VirtualDatacen
         {
             criteria.add(criterion);
         }
+        if (!StringUtils.isEmpty(filter))
+        {
+            criteria.add(filterBy(filter));
+        }
 
-        criteria.addOrder(Order.asc(VirtualDatacenter.NAME_PROPERTY));
-        List<VirtualDatacenter> result = getResultList(criteria);
-        return result;
+        if (!StringUtils.isEmpty(orderByEnum.getColumnSQL()))
+        {
+            Order order = Order.desc(orderByEnum.getColumnSQL());
+            if (asc)
+            {
+                order = Order.asc(orderByEnum.getColumnSQL());
+            }
+            criteria.addOrder(order);
+        }
+        return criteria;
+    }
+
+    private Criterion filterBy(final String filter)
+    {
+        Disjunction filterDisjunction = Restrictions.disjunction();
+
+        filterDisjunction.add(Restrictions
+            .like(VirtualDatacenter.NAME_PROPERTY, '%' + filter + '%'));
+
+        return filterDisjunction;
     }
 
     public Collection<VirtualDatacenter> findByEnterprise(final Enterprise enterprise)
@@ -154,7 +223,7 @@ public class VirtualDatacenterDAO extends DefaultDAOBase<Integer, VirtualDatacen
     private static final String SUM_VM_RESOURCES =
         "select sum(vm.cpu), sum(vm.ram), sum(vm.hd) from virtualmachine vm, nodevirtualimage vi, node n, virtualapp a "
             + "where vi.idVM = vm.idVM and vi.idNode = n.idNode and n.idVirtualApp = a.idVirtualApp "
-            + "and a.idVirtualDataCenter = :virtualDatacenterId and STRCMP(vm.state, :not_deployed) != 0";
+            + "and a.idVirtualDataCenter = :virtualDatacenterId and vm.state != 'NOT_ALLOCATED' and vm.idHypervisor is not null";
 
     // +
     // "and hy.id = vm.idHypervisor and pm.idPhysicalMachine = hy.idPhysicalMachine and pm.idState != 7";
@@ -163,6 +232,10 @@ public class VirtualDatacenterDAO extends DefaultDAOBase<Integer, VirtualDatacen
     private static final String SUM_VOLUMES_RESOURCES =
         "select sum(r.limitResource) from rasd r, rasd_management rm where r.instanceID = rm.idResource "
             + "and rm.idResourceType = '8' and rm.idVirtualDatacenter = :virtualDatacenterId";
+
+    private static final String SUM_EXTRA_HD_RESOURCES =
+        "select sum(r.limitResource) from rasd r, rasd_management rm where r.instanceID = rm.idResource "
+            + "and rm.idResourceType = '17' and rm.idVirtualDatacenter = :virtualDatacenterId";
 
     private static final String COUNT_PUBLIC_IP_RESOURCES =
         "select count(*) from ip_pool_management ipm, rasd_management rm, vlan_network vn, virtualdatacenter vdc "
@@ -186,24 +259,27 @@ public class VirtualDatacenterDAO extends DefaultDAOBase<Integer, VirtualDatacen
     public DefaultEntityCurrentUsed getCurrentResourcesAllocated(final int virtualDatacenterId)
     {
         Object[] vmResources =
-            (Object[]) getSession().createSQLQuery(SUM_VM_RESOURCES)
-                .setParameter("virtualDatacenterId", virtualDatacenterId)
-                .setParameter("not_deployed", VirtualMachineState.NOT_ALLOCATED.name())
-                .uniqueResult();
+            (Object[]) getSession().createSQLQuery(SUM_VM_RESOURCES).setParameter(
+                "virtualDatacenterId", virtualDatacenterId).uniqueResult();
 
         Long cpu = vmResources[0] == null ? 0 : ((BigDecimal) vmResources[0]).longValue();
         Long ram = vmResources[1] == null ? 0 : ((BigDecimal) vmResources[1]).longValue();
         Long hd = vmResources[2] == null ? 0 : ((BigDecimal) vmResources[2]).longValue();
 
+        BigDecimal extraHd =
+            (BigDecimal) getSession().createSQLQuery(SUM_EXTRA_HD_RESOURCES).setParameter(
+                "virtualDatacenterId", virtualDatacenterId).uniqueResult();
+        Long hdTot = extraHd == null ? hd : hd + extraHd.longValue() * 1024 * 1024;
+
         BigDecimal storage =
-            (BigDecimal) getSession().createSQLQuery(SUM_VOLUMES_RESOURCES)
-                .setParameter("virtualDatacenterId", virtualDatacenterId).uniqueResult();
+            (BigDecimal) getSession().createSQLQuery(SUM_VOLUMES_RESOURCES).setParameter(
+                "virtualDatacenterId", virtualDatacenterId).uniqueResult();
 
         BigInteger publicIps =
-            (BigInteger) getSession().createSQLQuery(COUNT_PUBLIC_IP_RESOURCES)
-                .setParameter("virtualDatacenterId", virtualDatacenterId).uniqueResult();
+            (BigInteger) getSession().createSQLQuery(COUNT_PUBLIC_IP_RESOURCES).setParameter(
+                "virtualDatacenterId", virtualDatacenterId).uniqueResult();
 
-        DefaultEntityCurrentUsed used = new DefaultEntityCurrentUsed(cpu.intValue(), ram, hd);
+        DefaultEntityCurrentUsed used = new DefaultEntityCurrentUsed(cpu.intValue(), ram, hdTot);
 
         // Storage usage is stored in MB
         used.setStorage(storage == null ? 0 : storage.longValue() * 1024 * 1024);

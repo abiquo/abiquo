@@ -122,17 +122,17 @@ public class StorageResourceStubImpl extends AbstractAPIStub implements StorageR
         if (response.getStatusCode() == 201)
         {
             DiskManagementDto diskDto = response.getEntity(DiskManagementDto.class);
-            
+
             // If it has been created, assign the disk to the virtualmachine
             LinksDto links = new LinksDto();
             RESTLink link = new RESTLink();
             link.setRel("disk");
             link.setHref(diskDto.getEditLink().getHref());
             links.addLink(link);
-            
+
             String vmUri = createVirtualMachineDisksLink(vdcId, vappId, vmId);
             response = post(vmUri, links);
-            
+
             if (response.getStatusCode() == 202 || response.getStatusCode() == 204)
             {
                 result.setData(createFlexObject(diskDto));
@@ -158,15 +158,58 @@ public class StorageResourceStubImpl extends AbstractAPIStub implements StorageR
         BasicResult result = new BasicResult();
 
         String uri = createVirtualMachineDiskLink(vdcId, vappId, vmId, diskId);
+
         ClientResponse response = delete(uri);
 
         if (response.getStatusCode() == 202 || response.getStatusCode() == 204)
         {
-            result.setSuccess(Boolean.TRUE);
+
+            uri = createVirtualDatacenterDiskLink(vdcId, diskId);
+            response = delete(uri);
+
+            if (response.getStatusCode() == 202 || response.getStatusCode() == 204)
+            {
+                result.setSuccess(Boolean.TRUE);
+
+            }
+            else
+            {
+                populateErrors(response, result, "deleteDisk");
+            }
         }
         else
         {
             populateErrors(response, result, "deleteDiskFromVirtualMachine");
+        }
+
+        return result;
+    }
+
+    @Override
+    public BasicResult getHardDisksByVirtualMachine(final Integer datacenterId,
+        final Integer rackId, final Integer pmId, final Integer vmId)
+    {
+        DataResult<List<Disk>> result = new DataResult<List<Disk>>();
+
+        String uri = createVirtualMachineHardDiskLink(datacenterId, rackId, pmId, vmId);
+        ClientResponse response = get(uri);
+
+        if (response.getStatusCode() == 200)
+        {
+            DisksManagementDto dtos = response.getEntity(DisksManagementDto.class);
+            List<Disk> returnDisks = new ArrayList<Disk>();
+
+            for (DiskManagementDto dto : dtos.getCollection())
+            {
+                returnDisks.add(createFlexObject(dto));
+            }
+
+            result.setData(returnDisks);
+            result.setSuccess(Boolean.TRUE);
+        }
+        else
+        {
+            populateErrors(response, result, "getHardDisksByVirtualMachine");
         }
 
         return result;

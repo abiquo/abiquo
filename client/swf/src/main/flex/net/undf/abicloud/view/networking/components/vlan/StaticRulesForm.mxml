@@ -27,12 +27,14 @@
 	creationComplete="onCreationComplete()"
     xmlns:mx="http://www.adobe.com/2006/mxml"
     xmlns:general="net.undf.abicloud.view.general.*"
+    wikiUrl="{AbiCloudModel.getInstance().configurationManager.config.client_wiki_network_staticRoutes.value}"
     titleText="@Resource(bundle='Infrastructure', key='POPUP_TITLE_STATIC_RULES')"
     xmlns:utils="net.undf.abicloud.utils.*">
 
 
     <mx:Script>
         <![CDATA[
+        	import net.undf.abicloud.model.AbiCloudModel;
         	import mx.controls.dataGridClasses.DataGridColumn;
         	import net.undf.abicloud.vo.networking.DhcpOption;
         	import mx.utils.StringUtil;
@@ -265,24 +267,24 @@
 
             <mx:FormItem 
                 horizontalGap="0"
-                label="@Resource(bundle='Networking', key='LABEL_NETMASK')"
-                direction="horizontal"
-                required="true">
-
-                <mx:TextInput id="netmaskInput"
-                    height="20"
-                    maxChars="39"
-                    change="validateForm()"
-                    restrict="0-9.:A-F"/>
-            </mx:FormItem>
-
-            <mx:FormItem 
-                horizontalGap="0"
                 label="@Resource(bundle='Networking', key='LABEL_ADDRESS')"
                 direction="horizontal"
                 required="true">
 
                 <mx:TextInput id="addressInput"
+                    height="20"
+                    maxChars="39"
+                    change="validateForm()"
+                    restrict="0-9.:A-F"/>
+            </mx:FormItem>
+            
+            <mx:FormItem 
+                horizontalGap="0"
+                label="@Resource(bundle='Networking', key='LABEL_NETMASK')"
+                direction="horizontal"
+                required="true">
+
+                <mx:TextInput id="netmaskInput"
                     height="20"
                     maxChars="39"
                     change="validateForm()"
@@ -345,16 +347,16 @@
 		                    </mx:Component>
 		                </mx:itemRenderer>
 		            </mx:DataGridColumn>
+	                <mx:DataGridColumn 
+	                    sortable="false"
+	                    dataField="networkAddress"
+	                    headerText="@Resource(bundle='Networking',key='LABEL_ADDRESS')"/>
+	                    
 	                 <mx:DataGridColumn
 	                 	width="100"
 	                    sortable="false"
 	                    labelFunction="netmaskComboBoxDataGridLabelFunction"
 	                    headerText="@Resource(bundle='Networking',key='LABEL_NETMASK')"/>
-	                
-	                <mx:DataGridColumn 
-	                    sortable="false"
-	                    dataField="networkAddress"
-	                    headerText="@Resource(bundle='Networking',key='LABEL_ADDRESS')"/>
 	                
 	                <mx:DataGridColumn 
 	                    sortable="false"

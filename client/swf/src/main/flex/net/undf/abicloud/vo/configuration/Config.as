@@ -101,6 +101,7 @@ package net.undf.abicloud.vo.configuration
 		public var client_wiki_infra_discoverBlades:SystemProperty;
 		
 		public var client_wiki_network_publicVlan:SystemProperty;
+		public var client_wiki_network_staticRoutes:SystemProperty;
 		
 		public var client_wiki_storage_storageDevice:SystemProperty;
 		public var client_wiki_storage_storagePool:SystemProperty;

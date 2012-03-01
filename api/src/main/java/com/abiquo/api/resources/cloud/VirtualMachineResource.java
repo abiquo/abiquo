@@ -679,11 +679,20 @@ public class VirtualMachineResource extends AbstractResource
         User userVm = v.getVirtualMachine().getUser();
         VirtualMachineWithNodeDto dto =
             createNodeTransferObject(v, vdcId, vappId, restBuilder, volumeIds, diskIds, ips);
-        VirtualMachineWithNodeExtendedDto extendedDto =
-            new VirtualMachineWithNodeExtendedDto(dto,
-                userVm.getName(),
-                userVm.getSurname(),
-                userVm.getEnterprise().getName());
+        VirtualMachineWithNodeExtendedDto extendedDto = null;
+        if (userVm == null)
+        {
+            // DELETED USER
+            extendedDto = new VirtualMachineWithNodeExtendedDto(dto, "", "", "");
+        }
+        else
+        {
+            extendedDto =
+                new VirtualMachineWithNodeExtendedDto(dto,
+                    userVm.getName(),
+                    userVm.getSurname(),
+                    userVm.getEnterprise().getName());
+        }
         return extendedDto;
     }
 
