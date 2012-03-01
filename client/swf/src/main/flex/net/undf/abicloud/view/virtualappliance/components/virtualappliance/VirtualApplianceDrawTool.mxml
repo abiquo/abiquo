@@ -104,6 +104,7 @@
             {
                 //Check privilege
                 SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.VAPP_DEPLOY_UNDEPLOY, "removeChild",powerOnOffButton,drawingToolBar);
+                SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.VAPP_DEPLOY_UNDEPLOY, "removeChild",applyChangesButton,drawingToolBar);
                 SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.VAPP_CREATE_INSTANCE, "removeChild",createBundleButton,drawingToolBar);
                                 
                 

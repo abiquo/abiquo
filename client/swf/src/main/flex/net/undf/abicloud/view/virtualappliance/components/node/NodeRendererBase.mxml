@@ -114,7 +114,8 @@
             private function onCreationComplete():void{
             	//Checking privilege
                 if(!SecuredPrivilegeAccess.userHasPrivilege(PrivilegeType.VAPP_ASSIGN_NETWORK)
-                && !SecuredPrivilegeAccess.userHasPrivilege(PrivilegeType.VAPP_ASSIGN_VOLUME)){
+                && !SecuredPrivilegeAccess.userHasPrivilege(PrivilegeType.VAPP_ASSIGN_VOLUME)
+                && !SecuredPrivilegeAccess.userHasPrivilege(PrivilegeType.VAPP_CUSTOMISE_SETTINGS)){
                 	SecuredPrivilegeAccess.checkElementAccess("removeEditButton","condition",showConfigurationButton,buttonsContainer);
                 }
                 
