@@ -21,9 +21,11 @@
 
 package net.undf.abicloud.utils
 {
+	import mx.collections.ArrayCollection;
 	import mx.core.UIComponent;
 	
 	import net.undf.abicloud.model.AbiCloudModel;
+	import net.undf.abicloud.vo.user.Privilege;
 	
 	public class SecuredPrivilegeAccess
 	{	
@@ -47,5 +49,18 @@ package net.undf.abicloud.utils
 		public static function userHasPrivilege(privilege:String):Boolean{
 			return AbiCloudModel.getInstance().userManager.userHasPrivilege(privilege);
 		}
+		
+		public static function userHasAtLeastOnPrivilege(privileges:ArrayCollection):Boolean{
+            
+            var access:Boolean;
+            for(var i:int ; i < privileges.length ; i++)
+            {
+            	if(SecuredPrivilegeAccess.userHasPrivilege(privileges.getItemAt(i).toString()))
+            	{
+            		access = true;
+            	}
+            }
+            return access;
+        }
 	}
 }

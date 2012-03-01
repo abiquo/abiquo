@@ -34,6 +34,8 @@
 
     <mx:Script>
         <![CDATA[
+        	import net.undf.abicloud.vo.user.PrivilegeType;
+        	import net.undf.abicloud.utils.SecuredPrivilegeAccess;
         	import mx.events.FlexEvent;
         	import mx.collections.ArrayCollection;
         	import net.undf.abicloud.vo.virtualimage.Repository;
@@ -153,6 +155,9 @@
 
             private function onInitialize():void
             {
+                //Check for privileges
+                SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.VDC_MANAGE_VAPP,"removeChild",virtualResourcesPanel,virtualImageContainer);
+                
                 //We register events to know when a VirtualAppliance has been successfully edited, deleted or checked
                 AbiCloudModel.getInstance().virtualApplianceManager.addEventListener(VirtualApplianceEvent.VIRTUAL_APPLIANCE_EDITED,
                                                                                      onVirtualApplianceEdited);
@@ -254,10 +259,13 @@
 
             private function requestCategories():void
             {
-                //Requesting the list of virtual image categories for the current User Enterprise
-                var virtualImageEvent:VirtualImageEvent = new VirtualImageEvent(VirtualImageEvent.GET_CATEGORIES);
-                virtualImageEvent.enterprise = AbiCloudModel.getInstance().loginManager.user.enterprise;
-                dispatchEvent(virtualImageEvent);
+                if(SecuredPrivilegeAccess.userHasPrivilege(PrivilegeType.VDC_MANAGE_VAPP))
+                {
+	                //Requesting the list of virtual image categories for the current User Enterprise
+	                var virtualImageEvent:VirtualImageEvent = new VirtualImageEvent(VirtualImageEvent.GET_CATEGORIES);
+	                virtualImageEvent.enterprise = AbiCloudModel.getInstance().loginManager.user.enterprise;
+	                dispatchEvent(virtualImageEvent);
+                }
             }
 
             private function onCategoriesChange(event:Event):void
@@ -1028,6 +1036,7 @@
         text="{this._virtualAppliance.name}"/>
 
     <mx:HDividedBox 
+    	id="virtualImageContainer"
         left="0" right="0" top="25" bottom="0"
         horizontalGap="10"
         paddingBottom="0"
