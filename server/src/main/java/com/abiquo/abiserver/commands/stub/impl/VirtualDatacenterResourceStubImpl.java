@@ -27,6 +27,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 
+import org.apache.commons.httpclient.URIException;
+import org.apache.commons.httpclient.util.URIUtil;
 import org.apache.wink.client.ClientResponse;
 
 import com.abiquo.abiserver.business.hibernate.pojohb.networking.NetworkConfigurationHB;
@@ -35,11 +37,12 @@ import com.abiquo.abiserver.commands.stub.AbstractAPIStub;
 import com.abiquo.abiserver.commands.stub.VirtualDatacenterResourceStub;
 import com.abiquo.abiserver.persistence.DAOFactory;
 import com.abiquo.abiserver.persistence.hibernate.HibernateDAOFactory;
-import com.abiquo.abiserver.pojo.infrastructure.DataCenter;
 import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.result.DataResult;
+import com.abiquo.abiserver.pojo.result.ListRequest;
 import com.abiquo.abiserver.pojo.user.Enterprise;
 import com.abiquo.abiserver.pojo.virtualappliance.VirtualDataCenter;
+import com.abiquo.abiserver.pojo.virtualappliance.VirtualDatacentersListResult;
 import com.abiquo.abiserver.pojo.virtualhardware.Limit;
 import com.abiquo.abiserver.pojo.virtualhardware.ResourceAllocationLimit;
 import com.abiquo.model.enumerator.HypervisorType;
@@ -232,61 +235,6 @@ public class VirtualDatacenterResourceStubImpl extends AbstractAPIStub implement
     }
 
     @Override
-    public DataResult<Collection<VirtualDataCenter>> getVirtualDatacenters(
-        final Enterprise enterprise, final DataCenter datacenter)
-    {
-        DataResult<Collection<VirtualDataCenter>> result =
-            new DataResult<Collection<VirtualDataCenter>>();
-
-        String uri = createVirtualDatacentersLink(enterprise, datacenter);
-
-        ClientResponse response = get(uri);
-        if (response.getStatusCode() == 200)
-        {
-            result.setSuccess(true);
-            DAOFactory factory = HibernateDAOFactory.instance();
-
-            VirtualDatacentersDto dto = response.getEntity(VirtualDatacentersDto.class);
-            Collection<VirtualDataCenter> datacenters = new LinkedHashSet<VirtualDataCenter>();
-
-            for (VirtualDatacenterDto vdc : dto.getCollection())
-            {
-                int datacenterId =
-                    URIResolver.getLinkId(vdc.searchLink("datacenter"), "admin/datacenters",
-                        "{datacenter}", "datacenter");
-
-                // factory.beginConnection();
-                // NetworkHB network = factory.getNetworkDAO().findByVirtualDatacenter(vdc.getId());
-                // factory.endConnection();
-
-                VirtualDataCenter vdctoadd =
-                    VirtualDataCenter.create(vdc, datacenterId, enterprise);
-
-                // Get the default network of the vdc.
-                RESTLink link = vdc.searchLink("defaultnetwork");
-
-                response = get(link.getHref());
-                if (response.getStatusCode() == 200)
-                {
-                    VLANNetworkDto vlanDto = response.getEntity(VLANNetworkDto.class);
-
-                    vdctoadd.setDefaultVlan(NetworkResourceStubImpl.createFlexObject(vlanDto));
-                }
-
-                datacenters.add(vdctoadd);
-            }
-            result.setData(datacenters);
-            /* factory.endConnection(); */
-        }
-        else
-        {
-            populateErrors(response, result, "getVirtualDatacenters");
-        }
-
-        return result;
-    }
-
-    @Override
     public DataResult<Collection<VirtualDataCenter>> getVirtualDatacentersByEnterprise(
         final Enterprise enterprise)
     {
@@ -334,4 +282,91 @@ public class VirtualDatacenterResourceStubImpl extends AbstractAPIStub implement
 
         return result;
     }
+
+    @Override
+    public DataResult<VirtualDatacentersListResult> getVirtualDatacentersByEnterprise(
+        final Enterprise enterprise, final ListRequest listRequest)
+    {
+        DataResult<VirtualDatacentersListResult> result =
+            new DataResult<VirtualDatacentersListResult>();
+
+        StringBuilder buildRequest =
+            new StringBuilder(createVirtualDatacentersFromEnterpriseLink(enterprise.getId()));
+        VirtualDatacentersListResult listResult = new VirtualDatacentersListResult();
+
+        if (listRequest != null)
+        {
+            buildRequest.append("?startwith=" + listRequest.getOffset());
+            buildRequest.append("&limit=" + listRequest.getNumberOfNodes());
+            if (listRequest.getOrderBy() != null && !listRequest.getOrderBy().isEmpty())
+            {
+                buildRequest.append("&by=" + listRequest.getOrderBy());
+            }
+            buildRequest.append("&asc=" + (listRequest.getAsc() == true ? "true" : "false"));
+            if (listRequest.getFilterLike() != null && !listRequest.getFilterLike().isEmpty())
+            {
+                try
+                {
+                    buildRequest.append("&has=" + URIUtil.encodeQuery(listRequest.getFilterLike()));
+                }
+                catch (URIException e)
+                {
+                }
+            }
+        }
+
+        ClientResponse response = get(buildRequest.toString());
+
+        if (response.getStatusCode() == 200)
+        {
+            VirtualDatacentersDto dto = response.getEntity(VirtualDatacentersDto.class);
+            Collection<VirtualDataCenter> collection = new LinkedHashSet<VirtualDataCenter>();
+
+            for (VirtualDatacenterDto vdc : dto.getCollection())
+            {
+
+                int datacenterId =
+                    URIResolver.getLinkId(vdc.searchLink("datacenter"), "admin/datacenters",
+                        "{datacenter}", "datacenter");
+
+                VirtualDataCenter vdctoadd =
+                    VirtualDataCenter.create(vdc, datacenterId, enterprise);
+
+                // TODO set all limits
+                ResourceAllocationLimit limits = new ResourceAllocationLimit();
+
+                Limit publicIpLimit = new Limit();
+                publicIpLimit.setHard(vdc.getPublicIpsHard());
+                publicIpLimit.setSoft(vdc.getPublicIpsSoft());
+                limits.setPublicIP(publicIpLimit);
+
+                vdctoadd.setLimits(limits);
+
+                // Get the default network of the vdc.
+                RESTLink link = vdc.searchLink("defaultnetwork");
+                response = get(link.getHref());
+                VLANNetworkDto vlanDto = response.getEntity(VLANNetworkDto.class);
+
+                vdctoadd.setDefaultVlan(NetworkResourceStubImpl.createFlexObject(vlanDto));
+
+                collection.add(vdctoadd);
+            }
+
+            Integer total =
+                dto.getTotalSize() != null ? dto.getTotalSize() : dto.getCollection().size();
+
+            listResult.setTotalVirtualDatacenters(total);
+            listResult.setVirtualDatacentersList(collection);
+
+            result.setSuccess(true);
+            result.setData(listResult);
+        }
+        else
+        {
+            populateErrors(response, result, "getVirtualDatacenters");
+        }
+
+        return result;
+    }
+
 }
