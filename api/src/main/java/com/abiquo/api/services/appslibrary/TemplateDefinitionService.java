@@ -23,7 +23,6 @@ package com.abiquo.api.services.appslibrary;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -38,14 +37,15 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.abiquo.api.exceptions.APIError;
+import com.abiquo.api.services.DefaultApiService;
 import com.abiquo.api.services.EnterpriseService;
-import com.abiquo.appliancemanager.client.ApplianceManagerResourceStubImpl;
-import com.abiquo.appliancemanager.client.ApplianceManagerResourceStubImpl.ApplianceManagerStubException;
+import com.abiquo.api.services.stub.AMServiceStub;
+import com.abiquo.appliancemanager.client.ExternalHttpConnection;
 import com.abiquo.appliancemanager.repositoryspace.OVFDescription;
 import com.abiquo.appliancemanager.transport.TemplateStateDto;
 import com.abiquo.model.enumerator.DiskFormatType;
-import com.abiquo.model.transport.error.CommonError;
 import com.abiquo.ovfmanager.ovf.xml.OVFSerializer;
+import com.abiquo.server.core.appslibrary.AppsLibraryDAO;
 import com.abiquo.server.core.appslibrary.AppsLibraryRep;
 import com.abiquo.server.core.appslibrary.Category;
 import com.abiquo.server.core.appslibrary.Icon;
@@ -54,7 +54,7 @@ import com.abiquo.server.core.appslibrary.TemplateDefinitionRep;
 import com.abiquo.server.core.enterprise.Enterprise;
 
 @Service
-public class TemplateDefinitionService extends DefaultApiServiceWithApplianceManagerClient
+public class TemplateDefinitionService extends DefaultApiService
 {
     private final static Logger LOGGER = LoggerFactory.getLogger(TemplateDefinitionService.class);
 
@@ -64,6 +64,16 @@ public class TemplateDefinitionService extends DefaultApiServiceWithApplianceMan
     @Autowired
     private AppsLibraryRep appslibraryRep;
 
+    @Autowired
+    private EnterpriseService enterpriseService;
+
+    @Autowired
+    private AMServiceStub amService;
+    
+    @Autowired
+    protected AppsLibraryDAO appsLibraryDao;
+
+
     public TemplateDefinitionService()
     {
 
@@ -72,19 +82,23 @@ public class TemplateDefinitionService extends DefaultApiServiceWithApplianceMan
     public TemplateDefinitionService(final EntityManager em)
     {
         repo = new TemplateDefinitionRep(em);
-        entService = new EnterpriseService(em);
         appslibraryRep = new AppsLibraryRep(em);
+        enterpriseService = new EnterpriseService(em);
+        appsLibraryDao = new AppsLibraryDAO(em);
+        amService = new AMServiceStub();
     }
 
     @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
     public List<TemplateDefinition> getTemplateDefinitionsByEnterprise(final Integer idEnterprise)
     {
+        enterpriseService.getEnterprise(idEnterprise); // check can view
         return repo.getTemplateDefinitionsByEnterprise(idEnterprise);
     }
 
     @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
-    public TemplateDefinition getTemplateDefinition(final Integer id)
+    public TemplateDefinition getTemplateDefinition(final Integer id, final Integer idEnterprise)
     {
+        enterpriseService.getEnterprise(idEnterprise); // check can view
         TemplateDefinition ovfpackage = repo.getTemplateDefinition(id);
         if (ovfpackage == null)
         {
@@ -98,7 +112,14 @@ public class TemplateDefinitionService extends DefaultApiServiceWithApplianceMan
     public TemplateDefinition addTemplateDefinition(final TemplateDefinition templateDef,
         final Integer idEnterprise)
     {
-        Enterprise ent = entService.getEnterprise(idEnterprise);
+        Enterprise ent = enterpriseService.getEnterprise(idEnterprise); // check can view
+        templateDef.setAppsLibrary(appsLibraryDao.findByEnterpriseOrInitialize(ent));
+        
+        if (!templateDef.isValid())
+        {
+            addValidationErrors(templateDef.getValidationErrors());
+            flushErrors();
+        }
         return repo.addTemplateDefinition(templateDef, ent);
     }
 
@@ -106,13 +127,22 @@ public class TemplateDefinitionService extends DefaultApiServiceWithApplianceMan
     public TemplateDefinition updateTemplateDefinition(final Integer templateDefId,
         final TemplateDefinition templateDef, final Integer idEnterprise)
     {
-        Enterprise enterprise = entService.getEnterprise(idEnterprise);
+        Enterprise enterprise = enterpriseService.getEnterprise(idEnterprise); // check can view
+        templateDef.setAppsLibrary(appsLibraryDao.findByEnterpriseOrInitialize(enterprise));
+
+        if (!templateDef.isValid())
+        {
+            addValidationErrors(templateDef.getValidationErrors());
+            flushErrors();
+        }
+
         return repo.updateTemplateDefinition(templateDefId, templateDef, enterprise);
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public void removeTemplateDefinition(final Integer id)
+    public void removeTemplateDefinition(final Integer id, final Integer idEnterprise)
     {
+        enterpriseService.getEnterprise(idEnterprise); // check can view
         TemplateDefinition templateDef = repo.getTemplateDefinition(id);
         if (templateDef == null)
         {
@@ -129,67 +159,24 @@ public class TemplateDefinitionService extends DefaultApiServiceWithApplianceMan
     public TemplateStateDto getTemplateState(final Integer id, final Integer datacenterId,
         final Integer enterpriseId)
     {
-        checkEnterpriseAndDatacenter(enterpriseId, datacenterId);
-
-        final String ovfUrl = getTemplateDefinition(id).getUrl();
-        final ApplianceManagerResourceStubImpl amClient = getApplianceManagerClient(datacenterId);
-
-        try
-        {
-            return amClient.getTemplateStatus(String.valueOf(enterpriseId), ovfUrl);
-        }
-        catch (ApplianceManagerStubException e)
-        {
-            addConflictErrors(new CommonError(APIError.APPLIANCE_MANAGER_CALL.getCode(),
-                e.getMessage()));
-            flushErrors();
-            return null;
-        }
+        final String ovfUrl = getTemplateDefinition(id, enterpriseId).getUrl();
+        return amService.getTemplateState(datacenterId, enterpriseId, ovfUrl);
     }
 
     @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
     public void installTemplateDefinition(final Integer id, final Integer datacenterId,
         final Integer enterpriseId)
     {
-        checkEnterpriseAndDatacenter(enterpriseId, datacenterId);
-
-        final String ovfUrl = getTemplateDefinition(id).getUrl();
-        final ApplianceManagerResourceStubImpl amClient = getApplianceManagerClient(datacenterId);
-
-        try
-        {
-            // checks the repository is writable
-            amClient.getRepository(String.valueOf(enterpriseId), true);
-
-            amClient.installTemplateDefinition(String.valueOf(enterpriseId), ovfUrl);
-        }
-        catch (ApplianceManagerStubException e)
-        {
-            addConflictErrors(new CommonError(APIError.APPLIANCE_MANAGER_CALL.getCode(),
-                e.getMessage()));
-            flushErrors();
-        }
+        final String ovfUrl = getTemplateDefinition(id, enterpriseId).getUrl();
+        amService.install(datacenterId, enterpriseId, ovfUrl);
     }
 
     @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
     public void uninstallTemplateDefinition(final Integer id, final Integer datacenterId,
         final Integer enterpriseId)
     {
-        checkEnterpriseAndDatacenter(enterpriseId, datacenterId);
-
-        final String ovfUrl = getTemplateDefinition(id).getUrl();
-        final ApplianceManagerResourceStubImpl amClient = getApplianceManagerClient(datacenterId);
-
-        try
-        {
-            amClient.delete(String.valueOf(enterpriseId), ovfUrl);
-        }
-        catch (ApplianceManagerStubException e)
-        {
-            addConflictErrors(new CommonError(APIError.APPLIANCE_MANAGER_CALL.getCode(),
-                e.getMessage()));
-            flushErrors();
-        }
+        final String ovfUrl = getTemplateDefinition(id, enterpriseId).getUrl();
+        amService.delete(datacenterId, enterpriseId, ovfUrl);
     }
 
     /** #################### ovfindex.xml #################### */
@@ -258,10 +245,11 @@ public class TemplateDefinitionService extends DefaultApiServiceWithApplianceMan
     private Long getDiskFileSizeMbFromOvfId(final String ovfid)
     {
         InputStream isovf = null;
+        ExternalHttpConnection connection = new ExternalHttpConnection();
         try
         {
-            URL ovfurl = new URL(ovfid);
-            isovf = ovfurl.openStream();
+            isovf = connection.openConnection(ovfid);
+
             EnvelopeType envelope = OVFSerializer.getInstance().readXMLEnvelope(isovf);
 
             Long accSize = 0l;
@@ -284,6 +272,8 @@ public class TemplateDefinitionService extends DefaultApiServiceWithApplianceMan
         }
         finally
         {
+            connection.releaseConnection();
+
             if (isovf != null)
             {
                 try

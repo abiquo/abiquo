@@ -22,16 +22,21 @@
 package com.abiquo.am.resources;
 
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 
 import org.apache.wink.common.annotations.Workspace;
+import org.dmtf.schemas.ovf.envelope._1.EnvelopeType;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
+import com.abiquo.am.services.download.OVFDocumentFetch;
 import com.abiquo.am.services.filesystem.EnterpriseRepositoryFileSystem;
+import com.abiquo.am.services.ovfformat.TemplateFromOVFEnvelope;
 import com.abiquo.api.resource.AbstractResource;
 import com.abiquo.appliancemanager.config.AMConfiguration;
-import com.abiquo.appliancemanager.config.AMConfigurationManager;
 import com.abiquo.appliancemanager.transport.RepositoryConfigurationDto;
+import com.abiquo.appliancemanager.transport.TemplateDto;
 
 @Path(EnterpriseRepositoriesResource.ENTERPRISE_REPOSITORY_PATH)
 @Controller
@@ -41,21 +46,26 @@ public class EnterpriseRepositoriesResource extends AbstractResource
     public static final String ENTERPRISE_REPOSITORY_PATH =
         ApplianceManagerPaths.ENTERPRISE_REPOSITORY_PATH;
 
+    @Autowired
+    OVFDocumentFetch validate;
+
     @GET
     public RepositoryConfigurationDto getConfig()
     {
-        CheckResource.validate();
-
-        AMConfiguration config = AMConfigurationManager.getInstance().getAMConfiguration();
-
         RepositoryConfigurationDto configDto = new RepositoryConfigurationDto();
-        //configDto.setBrokerUrl(config.getBrokerUrl());
-        configDto.setLocation(config.getRepositoryLocation());
+        // configDto.setBrokerUrl(config.getBrokerUrl());
+        configDto.setLocation(AMConfiguration.getRepositoryLocation());
         configDto.setCapacityMb(EnterpriseRepositoryFileSystem.getCapacityMb());
         configDto.setRemainingMb(EnterpriseRepositoryFileSystem.getFreeMb());
 
-        
         return configDto;
     }
 
+    @POST
+    @Path("/actions/validate")
+    public TemplateDto validate(final EnvelopeType envelope)
+    {
+        return TemplateFromOVFEnvelope.createTemplateDto("http://am/validation/OK.ovf",
+            validate.checkEnvelopeIsValid(envelope));
+    }
 }

@@ -52,8 +52,6 @@ public class AppsLibraryGenerator extends DefaultEntityGenerator<AppsLibrary>
     @Override
     public AppsLibrary createUniqueInstance()
     {
-        // FIXME: Write here how to create the pojo
-
         AppsLibrary appsLibrary = new AppsLibrary();
 
         Enterprise n1 = enterpriseGenerator.createUniqueInstance();
@@ -62,6 +60,13 @@ public class AppsLibraryGenerator extends DefaultEntityGenerator<AppsLibrary>
         return appsLibrary;
     }
 
+    public AppsLibrary createUniqueInstance(final Enterprise n1)
+    {
+        AppsLibrary appsLibrary = new AppsLibrary();
+        appsLibrary.setEnterprise(n1);
+        return appsLibrary;
+    }
+    
     @Override
     public void addAuxiliaryEntitiesToPersist(final AppsLibrary entity,
         final List<Object> entitiesToPersist)

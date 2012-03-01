@@ -38,16 +38,14 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.abiquo.am.resources.handler.CheckRepositoryHandler;
 import com.abiquo.am.services.TemplateConventions;
-import com.abiquo.appliancemanager.config.AMConfigurationManager;
+import com.abiquo.appliancemanager.config.AMConfiguration;
 
 // TODO add authentication support
-public class StaticRepositoryServlet
-
-extends HttpServlet
+public class StaticRepositoryServlet extends HttpServlet
 {
+    private static final long serialVersionUID = 2983718598265271809L;
 
-    protected String pathPrefix = AMConfigurationManager.getInstance().getAMConfiguration()
-        .getRepositoryPath();
+    protected String pathPrefix = AMConfiguration.getRepositoryPath();
 
     public static interface LookupResult
     {
@@ -127,7 +125,9 @@ extends HttpServlet
             resp.setStatus(HttpServletResponse.SC_OK);
             resp.setContentType(mimeType);
             if (contentLength >= 0 && !willDeflate())
+            {
                 resp.setContentLength(contentLength);
+            }
         }
 
         @Override
@@ -141,7 +141,9 @@ extends HttpServlet
                 os = new GZIPOutputStream(resp.getOutputStream(), bufferSize);
             }
             else
+            {
                 os = resp.getOutputStream();
+            }
             transferStreams(url.openStream(), os);
         }
 
@@ -149,7 +151,9 @@ extends HttpServlet
         public void respondHead(final HttpServletResponse resp)
         {
             if (willDeflate())
+            {
                 throw new UnsupportedOperationException();
+            }
             setHeaders(resp);
         }
     }
@@ -192,7 +196,7 @@ extends HttpServlet
     {
         new CheckRepositoryHandler().canUseRepository();
 
-            LookupResult r = (LookupResult) req.getAttribute("lookupResult");
+        LookupResult r = (LookupResult) req.getAttribute("lookupResult");
         if (r == null)
         {
             r = lookupNoCache(req);
@@ -223,7 +227,9 @@ extends HttpServlet
             return new Error(HttpServletResponse.SC_BAD_REQUEST, "Malformed path");
         }
         if (url == null)
+        {
             return new Error(HttpServletResponse.SC_NOT_FOUND, "Not found");
+        }
 
         final String mimeType = getMimeType(path);
 
@@ -234,13 +240,17 @@ extends HttpServlet
             // Try as an ordinary file
             File f = new File(realpath);
             if (!f.isFile())
+            {
                 return new Error(HttpServletResponse.SC_FORBIDDEN, "Forbidden");
+            }
             else
+            {
                 return new StaticFile(f.lastModified(),
                     mimeType,
                     (int) f.length(),
                     acceptsDeflate(req),
                     url);
+            }
         }
         else
         {
@@ -251,17 +261,23 @@ extends HttpServlet
                 if (ze != null)
                 {
                     if (ze.isDirectory())
+                    {
                         return new Error(HttpServletResponse.SC_FORBIDDEN, "Forbidden");
+                    }
                     else
+                    {
                         return new StaticFile(ze.getTime(),
                             mimeType,
                             (int) ze.getSize(),
                             acceptsDeflate(req),
                             url);
+                    }
                 }
                 else
+                {
                     // Unexpected?
                     return new StaticFile(-1, mimeType, -1, acceptsDeflate(req), url);
+                }
             }
             catch (ClassCastException e)
             {
@@ -320,7 +336,9 @@ extends HttpServlet
             byte[] buf = new byte[bufferSize];
             int bytesRead;
             while ((bytesRead = is.read(buf)) != -1)
+            {
                 os.write(buf, 0, bytesRead);
+            }
         }
         finally
         {
@@ -332,8 +350,12 @@ extends HttpServlet
     public static <T> T coalesce(final T... ts)
     {
         for (T t : ts)
+        {
             if (t != null)
+            {
                 return t;
+            }
+        }
         return null;
     }
 

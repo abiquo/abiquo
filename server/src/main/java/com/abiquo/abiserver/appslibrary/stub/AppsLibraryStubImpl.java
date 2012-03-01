@@ -47,7 +47,8 @@ import com.abiquo.abiserver.pojo.virtualimage.Icon;
 import com.abiquo.abiserver.pojo.virtualimage.OVFPackage;
 import com.abiquo.abiserver.pojo.virtualimage.OVFPackageInstanceStatus;
 import com.abiquo.abiserver.pojo.virtualimage.OVFPackageList;
-import com.abiquo.appliancemanager.client.ApplianceManagerResourceStubImpl;
+import com.abiquo.appliancemanager.client.AMClient;
+import com.abiquo.appliancemanager.client.AMClientException;
 import com.abiquo.appliancemanager.transport.TemplateStateDto;
 import com.abiquo.appliancemanager.transport.TemplatesStateDto;
 import com.abiquo.model.enumerator.DiskFormatType;
@@ -233,15 +234,23 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
                 factory.endConnection();
             }
 
-            final ApplianceManagerResourceStubImpl amClient =
-                new ApplianceManagerResourceStubImpl(amUrl);
+            // XXX direct server->am communication
+            final AMClient amClient = new AMClient().initialize(amUrl, false);
 
-            TemplateStateDto uploadState =
-                amClient.getTemplateStatus(String.valueOf(idEnterprise), templateDefinitionUrl);
-
-            result.setSuccess(Boolean.TRUE);
-            result.setData(createFlexOVFPackageListObject(uploadState));
-            return result;
+            TemplateStateDto uploadState;
+            try
+            {
+                uploadState = amClient.getTemplateStatus(idEnterprise, templateDefinitionUrl);
+                result.setSuccess(Boolean.TRUE);
+                result.setData(createFlexOVFPackageListObject(uploadState));
+                return result;
+            }
+            catch (AMClientException e)
+            {
+                result.setSuccess(Boolean.FALSE);
+                result.setMessage(e.getMessage());
+                return result;
+            }
         }
 
         final String uri =

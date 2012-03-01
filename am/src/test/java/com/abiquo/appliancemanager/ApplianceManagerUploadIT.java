@@ -41,7 +41,8 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.abiquo.appliancemanager.client.ApplianceManagerResourceStubImpl;
+import com.abiquo.appliancemanager.client.AMClient;
+import com.abiquo.appliancemanager.client.AMClientException;
 import com.abiquo.appliancemanager.transport.TemplateDto;
 import com.abiquo.testng.TestServerListener;
 import com.ning.http.client.AsyncHttpClient;
@@ -56,28 +57,28 @@ public class ApplianceManagerUploadIT
 {
     final static String ovfId = "http://127.0.0.1/upload/testUpload/envelope.ovf";
 
-    final static String idEnterprise = "1";
+    final static Integer idEnterprise = 1;
 
-    protected ApplianceManagerResourceStubImpl client;
+    protected AMClient client;
 
     protected ApplianceManagerAsserts asserts;
 
     @BeforeClass
     public void setUp() throws IOException
     {
-        client = new ApplianceManagerResourceStubImpl(BASE_URI);
+        client = new AMClient().initialize(BASE_URI, false);
         asserts = new ApplianceManagerAsserts(client);
     }
 
     @BeforeMethod
-    public void assertCleanPre()
+    public void assertCleanPre() throws AMClientException
     {
         asserts.ovfInstanceNoExist(ovfId);
         assertEventsEmpty();
     }
 
     @AfterMethod
-    public void assertCleanPost()
+    public void assertCleanPost() throws AMClientException
     {
         asserts.ovfInstanceNoExist(ovfId);
         assertEventsEmpty();
@@ -93,7 +94,7 @@ public class ApplianceManagerUploadIT
 
         asserts.ovfInstanceExist(ovfId);
 
-        client.delete(idEnterprise, ovfId);
+        client.deleteTemplate(idEnterprise, ovfId);
 
         expectedEvents(DOWNLOAD, NOT_DOWNLOAD);
 
@@ -119,6 +120,8 @@ public class ApplianceManagerUploadIT
             {
                 throw new RuntimeException("Can't upload " + res.getStatusText());
             }
+
+            httpClient.close();
         }
         // TODO add callbacks
     }

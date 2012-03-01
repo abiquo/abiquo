@@ -21,6 +21,9 @@
 
 package com.abiquo.appliancemanager.config;
 
+import com.abiquo.am.exceptions.AMError;
+import com.abiquo.appliancemanager.exceptions.AMException;
+
 /**
  * Main configuration for the Appliance Manager artifact.
  * 
@@ -28,69 +31,103 @@ package com.abiquo.appliancemanager.config;
  */
 public class AMConfiguration
 {
-    public final static Integer REPOSITORY_FILE_MARK_CHECK_TIMEOUT_SECONDS = Integer.valueOf(System
-        .getProperty("abiquo.repository.timeoutSeconds", "10"));
 
-    public final static int HTTP_CONNECTION_TIMEOUT = 60 * 1000; // a minute
-
-    public final static int HTTP_IDLE_TIMEOUT = 10 * 60 * 1000; // ten minutes
-
-    public final static int HTTP_REQUEST_TIMEOUT = 24 * 60 * 60 * 1000; // a day
-
-    public final static int HTTP_MAX_CONNECTIONS = Integer.valueOf(System.getProperty(
-        "abiquo.appliancemanager.downloads", "10"));
-
-    /** milliseconds */
-    public final static int DOWNLOADING_PUBLISH_INTERVAL = Integer.valueOf(System.getProperty(
-        "abiquo.appliancemanager.downloadingPublishInterval", "5000"));
+    /** **** ***** REPOSITORY FILESYSTEM **** ******/
 
     /**
-     * Where the ''repositoryLocation'' file system is mounted. Base path on the machine local file
-     * system where the OVF packages files are stored.
+     * Where the ''repositoryPath'' is exported. <br>
+     * Usually a NFS location such 'nsf-devel:/opt/vm_repository' .
      */
-    private String repositoryPath;
+    private static String repositoryLocation = //
+        System.getProperty("abiquo.appliancemanager.repositoryLocation", "nfs-test:/test/path");
 
-    /**
-     * Where the ''repositoryPath'' is exported. Usually a NFS location such
-     * 'nsf-devel:/opt/vm_repository' .
-     */
-    private String repositoryLocation;
+    /** Where the ''repositoryLocation'' file system is mounted. */
+    private static String repositoryPath = //
+        System.getProperty("abiquo.appliancemanager.localRepositoryPath", "/tmp/testrepo");
 
-    /** proxy host server. if any. */
-    private String proxyHost;
+    /** **** ***** TIMEOUT REPOSITORYN **** ******/
 
-    /** proxy port server. if any. */
-    private Integer proxyPort;
+    /** Max time to check the .abiquo_repository file mark in the filesystem */
+    public final static Integer REPOSITORY_FILE_MARK_CHECK_TIMEOUT_SECONDS = // 5 seconds
+        Integer.parseInt(System.getProperty("abiquo.repository.timeoutSeconds", "5"));
 
-    /** Milliseconds to wait before refresh the download progress. */
-    private Integer updateProgressInterval;
+    /** Max time to scan the enterprise repository filesystem folder finding new templates */
+    public final static Integer ENTERPRISE_REPOSITORY_REFRESH_TIMEOUT = // repo check x10
+        Integer.parseInt(System.getProperty("abiquo.appliancemanager.fstimeoutms",
+            String.valueOf(REPOSITORY_FILE_MARK_CHECK_TIMEOUT_SECONDS * 10)));
 
-    /** Bytes to be downloaded from the RepositorySpace before flushing to the . */
-    private Integer deployBuffer;
+    /** **** ***** TIMEOUT CONNECTIONS **** ******/
 
-    /** Timeout for remote connection (during deploy). */
-    private Integer timeout;
+    public final static Integer DOWNLOADING_PUBLISH_INTERVAL = Integer.valueOf(System.getProperty(
+        "abiquo.appliancemanager.upload.progressIntervall", "5000"));
 
-    /**
-     * Timeout of of available ovf packages refresh on the filesystem (when timeout use cached
-     * result)
-     */
-    private Integer fstimeoutMs;
+    public final static Integer HTTP_CONNECTION_TIMEOUT = // a minute
+        Integer.parseInt(System.getProperty("abiquo.appliancemanager.deploy.connection", "60000"));
 
-    public AMConfiguration(final String repositoryPath, final String repositoryLocation)
+    public final static Integer HTTP_IDLE_TIMEOUT = // ten minutes
+        Integer.parseInt(System.getProperty("abiquo.appliancemanager.deploy.idle", "600000"));
+
+    public final static Integer HTTP_REQUEST_TIMEOUT = // a day
+        Integer.parseInt(System.getProperty("abiquo.appliancemanager.deploy.timeout", "86400000"));
+
+    public final static Integer HTTP_MAX_CONNECTIONS = //
+        Integer.parseInt(System.getProperty("abiquo.appliancemanager.downloads", "-1"));
+
+    /** **** ***** PROXY **** ******/
+    public final static String HTTP_PROXY_USER = //
+        System.getProperty("abiquo.httpProxy.user");
+
+    public final static String HTTP_PROXY_PASS = //
+        System.getProperty("abiquo.httpProxy.password");
+
+    public final static String HTTP_PROXY_HOST = //
+        System.getProperty("abiquo.httpProxy.host");
+
+    public final static Integer HTTP_PROXY_PORT = //
+        Integer.parseInt(System.getProperty("abiquo.httpProxy.port", "80"));
+
+    public static String getRepositoryPath()
     {
-        assert isValidRepositoryLocation(repositoryLocation);
-        assert isValidRepositoryPath(repositoryPath);
+        if (!repositoryPath.endsWith("/"))
+        {
+            repositoryPath += '/';
+        }
 
-        this.repositoryPath = repositoryPath;
-        this.repositoryLocation = repositoryLocation;
+        if (!isValidRepositoryPath(repositoryPath))
+        {
+            throw new AMException(AMError.CONFIG_REPOSITORY_PATH, repositoryPath);
+        }
+
+        return repositoryPath;
+    }
+
+    public static String getRepositoryLocation()
+    {
+        if (!isValidRepositoryLocation(repositoryLocation))
+        {
+            throw new AMException(AMError.CONFIG_REPOSITORY_LOCATION, repositoryLocation);
+        }
+
+        return repositoryLocation;
+    }
+
+    public static boolean isProxy()
+    {
+        return HTTP_PROXY_HOST != null;
+    }
+
+    /** Only serialize elements related to the repository (path and location) */
+    public static String printConfig()
+    {
+        return String.format("Repository:\nexportLocation '%s'\nmountPoint '%s'",
+            repositoryLocation, repositoryPath);
     }
 
     public static boolean isValidRepositoryPath(final String repositoryPath)
     {
         return !(repositoryPath == null || repositoryPath.isEmpty() || !repositoryPath
             .endsWith("/"));
-        // TODO should the ''exist and can write'' check be there ?
+
     }
 
     public static boolean isValidRepositoryLocation(final String repositoryLocation)
@@ -98,125 +135,4 @@ public class AMConfiguration
         return !(repositoryLocation == null || repositoryLocation.isEmpty() || !repositoryLocation
             .contains(":"));
     }
-
-    public Integer getFsTimeoutMs()
-    {
-        return fstimeoutMs;
-    }
-
-    public void setFsTimeoutMs(final Integer fstimeoutMs)
-    {
-        this.fstimeoutMs = fstimeoutMs;
-    }
-
-    public String getRepositoryPath()
-    {
-        return repositoryPath;
-    }
-
-    public String getRepositoryLocation()
-    {
-        return repositoryLocation;
-    }
-
-    public Integer getUpdateProgressInterval()
-    {
-        return updateProgressInterval;
-    }
-
-    public Integer getTimeout()
-    {
-        return timeout;
-    }
-
-    public Integer getDeployBuffer()
-    {
-        return deployBuffer;
-    }
-
-    protected void setRepositoryPath(final String repositoryPath)
-    {
-        assert isValidRepositoryPath(repositoryPath);
-
-        this.repositoryPath = repositoryPath;
-    }
-
-    protected void setRepositoryLocation(final String repositoryLocation)
-    {
-        assert isValidRepositoryLocation(repositoryLocation);
-
-        this.repositoryLocation = repositoryLocation;
-    }
-
-    protected void setUpdateProgressInterval(final Integer updateProgressInterval)
-    {
-        assert updateProgressInterval > 0; // XXX
-
-        this.updateProgressInterval = updateProgressInterval;
-    }
-
-    protected void setDeployBuffer(final Integer deployBuffer)
-    {
-        assert deployBuffer > 32; // XXX
-
-        this.deployBuffer = deployBuffer;
-    }
-
-    protected void setTimeout(final Integer timeout)
-    {
-        assert timeout >= 0; // XXX
-
-        this.timeout = timeout;
-    }
-
-    public void setProxyHost(final String proxyHost)
-    {
-        if (proxyHost != null && proxyHost.isEmpty())
-        {
-            this.proxyHost = null;
-        }
-        else
-        {
-            this.proxyHost = proxyHost;
-        }
-    }
-
-    public String getProxyHost()
-    {
-        return proxyHost;
-    }
-
-    public void setProxyPort(final Integer proxyPort)
-    {
-
-        if (proxyPort != null && proxyPort == 0)
-        {
-            this.proxyPort = null;
-        }
-        else
-        {
-            this.proxyPort = proxyPort;
-        }
-    }
-
-    public Integer getProxyPort()
-    {
-        return proxyPort;
-    }
-
-    public boolean isProxy()
-    {
-        return proxyHost != null && proxyPort != null;
-    }
-
-    /**
-     * Only serializa elements related to the repository (path and location)
-     */
-    @Override
-    public String toString()
-    {
-        return String.format("RepositoryConfiguation : [path:%s, loation:%s]", repositoryPath,
-            repositoryLocation);
-    }
-
 }

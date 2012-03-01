@@ -29,7 +29,6 @@ import static com.abiquo.api.common.UriTestResolver.resolveEnterpriseURI;
 import static com.abiquo.api.common.UriTestResolver.resolveIconURI;
 import static com.abiquo.api.common.UriTestResolver.resolveVirtualMachineTemplateURI;
 import static com.abiquo.api.util.URIResolver.buildPath;
-import static com.abiquo.testng.TestConfig.APPS_INTEGRATION_TESTS;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
@@ -481,23 +480,19 @@ public class VirtualMachineTemplateResourceIT extends AbstractJpaGeneratorIT
         assertError(response, 409, APIError.VMTEMPLATE_STATEFUL_TEMPLATE_CANNOT_BE_DELETED);
     }
 
-    @Test(groups = {APPS_INTEGRATION_TESTS})
+    @Test//(groups = {APPS_INTEGRATION_TESTS})
     public void deleteSharedMachineTemplateFromOtherEnterpriseByEntAdminRises409()
     {
-
         Enterprise ent1 = enterpriseGenerator.createUniqueInstance();
         Datacenter datacenter1 = datacenterGenerator.createUniqueInstance();
-
         Repository rep = repositoryGenerator.createInstance(datacenter1);
 
         DatacenterLimits limits = datacenterLimitsGenerator.createInstance(ent1, datacenter1);
-
         VirtualMachineTemplate vmtemplate =
             virtualMachineTemplateGenerator.createInstance(ent, repository);
 
         vmtemplate.setShared(Boolean.TRUE);
         vmtemplate.setEnterprise(ent1);
-
         vmtemplate.setOvfid(null);
         setup(ent1, datacenter1, rep, limits, vmtemplate.getCategory(), vmtemplate);
 

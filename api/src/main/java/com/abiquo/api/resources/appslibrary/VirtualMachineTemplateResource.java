@@ -30,7 +30,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Context;
 
-import org.apache.wink.client.Resource;
 import org.apache.wink.common.annotations.Parent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -40,7 +39,7 @@ import com.abiquo.api.resources.EnterpriseResource;
 import com.abiquo.api.services.InfrastructureService;
 import com.abiquo.api.services.appslibrary.VirtualMachineTemplateService;
 import com.abiquo.api.util.IRESTBuilder;
-import com.abiquo.appliancemanager.client.ApplianceManagerResourceStub;
+import com.abiquo.appliancemanager.client.AMClientResources;
 import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.model.rest.RESTLink;
 import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
@@ -153,10 +152,8 @@ public class VirtualMachineTemplateResource extends AbstractResource
     {
         if (ovfid != null)
         {
-            ApplianceManagerResourceStub am = new ApplianceManagerResourceStub(amUri);
-            Resource resource = am.template(enterpriseId.toString(), ovfid);
-            String href = resource.getUriBuilder().build(new Object[] {}).toString();
-
+            String href = AMClientResources.resolveTemplateUrl(amUri, enterpriseId, ovfid);
+            
             dto.addLink(new RESTLink("templatedefinition", ovfid));
             dto.addLink(new RESTLink("template", href));
             dto.addLink(new RESTLink("templatestatus", href + "?format=status"));

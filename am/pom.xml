@@ -15,11 +15,6 @@
 	</parent>
 	<!-- Dependences -->
 	<dependencies>
-		<!-- JETTY html tests -->
-		<!-- <dependency> <groupId>javax.activation</groupId> <artifactId>activation</artifactId> 
-			<version>1.1</version> </dependency> <dependency> <groupId>javax.mail</groupId> 
-			<artifactId>mail</artifactId> <version>1.4</version> </dependency> -->
-
 		<!-- ABIQUO DEPENDENCIES -->
 		<!-- TODO remove depends on SingleResourceTransportDto -->
 		<dependency>
@@ -38,6 +33,12 @@
 			<artifactId>commons-amqp</artifactId>
 			<version>${commonsamqp.version}</version>
 		</dependency>
+		<!-- Script execution 
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-exec</artifactId>
+			<version>1.1</version>
+		</dependency>-->
 		<!-- REST -->
 		<dependency>
 			<groupId>org.apache.wink</groupId>
@@ -102,7 +103,7 @@
 		<dependency>
 			<groupId>com.ning</groupId>
 			<artifactId>async-http-client</artifactId>
-			<version>1.7.0</version>			
+			<version>1.7.1</version>			
 		</dependency>
 		<!-- jedis -->
 		<dependency>
@@ -230,6 +231,10 @@
 			<classifier>tests</classifier>
 			<scope>test</scope>
 		</dependency>
+		<!-- JETTY html tests -->
+		<!-- <dependency> <groupId>javax.activation</groupId> <artifactId>activation</artifactId> 
+			<version>1.1</version> </dependency> <dependency> <groupId>javax.mail</groupId> 
+			<artifactId>mail</artifactId> <version>1.4</version> </dependency> -->
 	</dependencies>
 	<!-- -->
 	<!-- PROJECT INFORMATION -->
@@ -300,7 +305,7 @@
 				<configuration>
 					<systemPropertyVariables>
 						<webapp.context>/am</webapp.context>
-						<webapp.dir>${basedir}/src/main/webapp</webapp.dir>
+						<webapp.dir>${basedir}/src/test/webapp</webapp.dir>
 						<rs.basedir>${basedir}</rs.basedir>
 					</systemPropertyVariables>
 				</configuration>

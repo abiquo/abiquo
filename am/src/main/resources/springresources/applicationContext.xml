@@ -19,8 +19,7 @@
 		</property>
 		<property name="instances">
 			<set>
-				<!-- NOTE: parent resources first -->
-				<ref bean="checkResource" />
+				<!-- NOTE: parent resources first -->				
 				<ref bean="diskFileResource" />
 				<ref bean="enterpriseRepositoriesResource" />
 				<ref bean="enterpriseRepositoryResource" />

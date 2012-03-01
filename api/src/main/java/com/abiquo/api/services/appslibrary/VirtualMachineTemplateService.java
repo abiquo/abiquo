@@ -48,19 +48,18 @@ import com.abiquo.api.resources.appslibrary.IconResource;
 import com.abiquo.api.resources.appslibrary.IconsResource;
 import com.abiquo.api.resources.appslibrary.VirtualMachineTemplateResource;
 import com.abiquo.api.resources.appslibrary.VirtualMachineTemplatesResource;
+import com.abiquo.api.services.DefaultApiService;
 import com.abiquo.api.services.EnterpriseService;
 import com.abiquo.api.services.InfrastructureService;
 import com.abiquo.api.services.UserService;
+import com.abiquo.api.services.stub.AMServiceStub;
 import com.abiquo.api.spring.security.SecurityService;
 import com.abiquo.api.util.URIResolver;
-import com.abiquo.appliancemanager.client.ApplianceManagerResourceStubImpl;
-import com.abiquo.appliancemanager.client.ApplianceManagerResourceStubImpl.ApplianceManagerStubException;
 import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.model.enumerator.Privileges;
 import com.abiquo.model.enumerator.StatefulInclusion;
 import com.abiquo.model.rest.RESTLink;
-import com.abiquo.model.transport.error.CommonError;
 import com.abiquo.server.core.appslibrary.AppsLibraryRep;
 import com.abiquo.server.core.appslibrary.Category;
 import com.abiquo.server.core.appslibrary.Icon;
@@ -72,8 +71,6 @@ import com.abiquo.server.core.cloud.VirtualDatacenterRep;
 import com.abiquo.server.core.cloud.VirtualMachineRep;
 import com.abiquo.server.core.enterprise.DatacenterLimits;
 import com.abiquo.server.core.enterprise.Enterprise;
-import com.abiquo.server.core.enterprise.Privilege;
-import com.abiquo.server.core.enterprise.Role;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.Repository;
 import com.abiquo.server.core.infrastructure.RepositoryDAO;
@@ -82,11 +79,11 @@ import com.abiquo.tracer.EventType;
 import com.abiquo.tracer.SeverityType;
 
 @Service
-public class VirtualMachineTemplateService extends DefaultApiServiceWithApplianceManagerClient
+public class VirtualMachineTemplateService extends DefaultApiService
 {
 
-    final private static Logger logger =
-        LoggerFactory.getLogger(VirtualMachineTemplateService.class);
+    final private static Logger logger = LoggerFactory
+        .getLogger(VirtualMachineTemplateService.class);
 
     @Autowired
     private RepositoryDAO repositoryDao;
@@ -114,6 +111,9 @@ public class VirtualMachineTemplateService extends DefaultApiServiceWithApplianc
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private AMServiceStub am;
 
     public VirtualMachineTemplateService()
     {
@@ -486,8 +486,8 @@ public class VirtualMachineTemplateService extends DefaultApiServiceWithApplianc
             // moreover check if the current user doesn't have the privelige to impersonate between
             // enterprises
             if (!vmtemplateToDelete.getEnterprise().getId().equals(ent.getId())
-                && !securityService.hasPrivilege(Privileges.ENTERPRISE_ADMINISTER_ALL, userService
-                    .getCurrentUser()))
+                && !securityService.hasPrivilege(Privileges.ENTERPRISE_ADMINISTER_ALL,
+                    userService.getCurrentUser()))
             {
                 addConflictErrors(APIError.VMTEMPLATE_SHARED_TEMPLATE_FROM_OTHER_ENTERPRISE);
                 flushErrors();
@@ -504,25 +504,8 @@ public class VirtualMachineTemplateService extends DefaultApiServiceWithApplianc
             viOvf = codifyBundleImportedOVFid(vmtemplateToDelete.getPath());
         }
 
-        final ApplianceManagerResourceStubImpl amClient = getApplianceManagerClient(datacenterId);
-        try
-        {
-            amClient.delete(vmtemplateToDelete.getEnterprise().getId().toString(), viOvf);
-        }
-        catch (ApplianceManagerStubException e)
-        {
-            CommonError error;
-            try
-            {
-                error = new CommonError("409", e.getCause().toString());
-            }
-            catch (Exception ex)
-            {
-                error = new CommonError("409", e.getMessage());
-            }
-            addConflictErrors(error);
-            flushErrors();
-        }
+        am.delete(datacenterId, enterpriseId, viOvf);
+
         // delete
         appsLibraryRep.deleteVirtualMachineTemplate(vmtemplateToDelete);
 

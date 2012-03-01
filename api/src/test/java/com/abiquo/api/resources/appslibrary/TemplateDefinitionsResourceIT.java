@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.wink.client.ClientResponse;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -53,16 +54,22 @@ public class TemplateDefinitionsResourceIT extends AbstractJpaGeneratorIT
 
     private static final String SYSADMIN = "sysadmin";
 
+    Enterprise enterprise;
+
+    AppsLibrary appslib;
+
     @BeforeMethod(groups = {APPS_INTEGRATION_TESTS})
     public void setUpUser()
     {
-        Enterprise enterprise = enterpriseGenerator.createUniqueInstance();
+        enterprise = enterpriseGenerator.createUniqueInstance();
+        appslib = appsLibraryGenerator.createUniqueInstance(enterprise);
 
         Role role = roleGenerator.createInstanceSysAdmin();
         User user = userGenerator.createInstance(enterprise, role, SYSADMIN, SYSADMIN);
 
         List<Object> entitiesToSetup = new ArrayList<Object>();
         entitiesToSetup.add(enterprise);
+        entitiesToSetup.add(appslib);
 
         for (Privilege p : role.getPrivileges())
         {
@@ -74,6 +81,13 @@ public class TemplateDefinitionsResourceIT extends AbstractJpaGeneratorIT
         setup(entitiesToSetup.toArray());
     }
 
+    @AfterMethod
+    @Override
+    public void tearDown()
+    {
+        super.tearDown();
+    }
+
     @Test(groups = {APPS_INTEGRATION_TESTS})
     public void getTemplateDefinitionsLists() throws Exception
     {
@@ -82,20 +96,16 @@ public class TemplateDefinitionsResourceIT extends AbstractJpaGeneratorIT
         Category category = categoryGenerator.createUniqueInstance();
         Icon icon = iconGenerator.createUniqueInstance();
 
-        AppsLibrary appsLibrary = appsLibraryGenerator.createUniqueInstance();
-
         TemplateDefinition ovfPackage0 =
-            templateDefGenerator.createInstance(appsLibrary, category, icon);
+            templateDefGenerator.createInstance(appslib, category, icon);
         TemplateDefinition ovfPackage1 =
-            templateDefGenerator.createInstance(appsLibrary, category, icon);
+            templateDefGenerator.createInstance(appslib, category, icon);
         TemplateDefinition ovfPackage2 =
-            templateDefGenerator.createInstance(appsLibrary, category, icon);
+            templateDefGenerator.createInstance(appslib, category, icon);
         List<Object> entitiesToSetup = new ArrayList<Object>();
 
         entitiesToSetup.add(category);
         entitiesToSetup.add(icon);
-        entitiesToSetup.add(appsLibrary.getEnterprise());
-        entitiesToSetup.add(appsLibrary);
         entitiesToSetup.add(ovfPackage0);
         entitiesToSetup.add(ovfPackage1);
         entitiesToSetup.add(ovfPackage2);
@@ -103,8 +113,7 @@ public class TemplateDefinitionsResourceIT extends AbstractJpaGeneratorIT
         setup(entitiesToSetup.toArray());
 
         ClientResponse response =
-            get(resolveTemplateDefinitionsURI(appsLibrary.getEnterprise().getId()), SYSADMIN,
-                SYSADMIN);
+            get(resolveTemplateDefinitionsURI(enterprise.getId()), SYSADMIN, SYSADMIN);
 
         assertEquals(response.getStatusCode(), 200);
 
@@ -117,14 +126,6 @@ public class TemplateDefinitionsResourceIT extends AbstractJpaGeneratorIT
     @Test(groups = {APPS_INTEGRATION_TESTS})
     public void createTemplateDefinition()
     {
-
-        AppsLibrary appsLibrary = appsLibraryGenerator.createUniqueInstance();
-
-        List<Object> entitiesToSetup = new ArrayList<Object>();
-        entitiesToSetup.add(appsLibrary.getEnterprise());
-        entitiesToSetup.add(appsLibrary);
-        setup(entitiesToSetup.toArray());
-
         TemplateDefinitionDto p = new TemplateDefinitionDto();
         p.setDescription("test_created_desc");
         p.setUrl("http://www.abiquo.com");
@@ -140,8 +141,7 @@ public class TemplateDefinitionsResourceIT extends AbstractJpaGeneratorIT
         p.addLink(iconLink);
 
         ClientResponse response =
-            post(resolveTemplateDefinitionsURI(appsLibrary.getEnterprise().getId()), p, SYSADMIN,
-                SYSADMIN);
+            post(resolveTemplateDefinitionsURI(enterprise.getId()), p, SYSADMIN, SYSADMIN);
 
         assertEquals(response.getStatusCode(), 201);
 
