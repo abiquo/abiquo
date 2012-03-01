@@ -952,7 +952,8 @@
         <mx:Button id="pauseButton"
             width="57" height="47"
             styleName="StandardPauseButton"
-            enabled="{_virtualMachine.state.description == State.PAUSED.description || _virtualMachine.state.description == State.ON.description}"
+            enabled="{(_virtualMachine.state.description == State.PAUSED.description || _virtualMachine.state.description == State.ON.description)
+            &amp;&amp; HyperVisor(this._virtualMachine.assignedTo).type.id != HyperVisorType.XEN}"
             selected="{_virtualMachine.state.description == State.PAUSED.description}"
             click="onClickPauseButton()"
             useHandCursor="true"

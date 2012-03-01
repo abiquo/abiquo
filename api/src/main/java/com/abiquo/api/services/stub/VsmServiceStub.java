@@ -292,4 +292,45 @@ public class VsmServiceStub extends DefaultApiService
             clientPool.releaseClientFor(service, client);
         }
     }
+
+    /**
+     * Returns true if the subscription exists.
+     * 
+     * @param service The VSM {@link RemoteService}
+     * @param name The {@link VirtualMachine#NAME_PROPERTY}
+     * @return True if the virtual machine is subscribed. False otherwise.
+     */
+    public boolean isVirtualMachineSubscribed(final RemoteService service, final String name)
+    {
+        VSMClient client = getClientFromPool(service);
+
+        try
+        {
+            return client.isSubscribed(name);
+        }
+        finally
+        {
+            returnClientToPool(client);
+        }
+    }
+
+    /**
+     * Returns true if the hypervisor is monitored.
+     * 
+     * @param service The VSM uri.
+     * @param hypervisor The hypervisor to query.
+     */
+    public boolean isHypervisorMonitored(final RemoteService service, final Hypervisor hypervisor)
+    {
+        VSMClient client = getClientFromPool(service);
+
+        try
+        {
+            return client.isMonitored(buildHypervisorURI(hypervisor));
+        }
+        finally
+        {
+            returnClientToPool(client);
+        }
+    }
 }
