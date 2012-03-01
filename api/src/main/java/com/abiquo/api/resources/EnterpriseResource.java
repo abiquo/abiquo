@@ -22,6 +22,7 @@
 package com.abiquo.api.resources;
 
 import java.net.URLDecoder;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -51,6 +52,7 @@ import com.abiquo.api.services.DatacenterService;
 import com.abiquo.api.services.EnterpriseService;
 import com.abiquo.api.services.NetworkService;
 import com.abiquo.api.services.UserService;
+import com.abiquo.api.services.appslibrary.VirtualMachineTemplateService;
 import com.abiquo.api.services.cloud.VirtualApplianceService;
 import com.abiquo.api.services.cloud.VirtualDatacenterService;
 import com.abiquo.api.services.cloud.VirtualMachineService;
@@ -85,6 +87,8 @@ public class EnterpriseResource extends AbstractResource
 
     public static final String ENTERPRISE_ACTION_GET_IPS_PATH = "action/ips";
 
+    public static final String ENTERPRISE_ACTION_GET_ICONS_PATH = "action/icons";
+
     public static final String ENTERPRISE_ACTION_GET_VIRTUALMACHINES_PATH =
         "action/virtualmachines";
 
@@ -110,6 +114,9 @@ public class EnterpriseResource extends AbstractResource
 
     @Autowired
     VirtualApplianceService vappService;
+
+    @Autowired
+    private VirtualMachineTemplateService vmtService;
 
     @Context
     UriInfo uriInfo;
@@ -234,6 +241,28 @@ public class EnterpriseResource extends AbstractResource
                 vapp.getId(), restBuilder, null, null, null));
         }
         return vmDto;
+
+    }
+
+    /**
+     * Retrieves the list Of icons urls used in virtual images of an enterprise
+     * 
+     * @param enterpriseId identifier of the enterprise
+     * @param restBuilder {@link IRESTBuilder} object injected by context
+     * @return the list of String
+     * @throws Exception
+     */
+    @GET
+    @Path(EnterpriseResource.ENTERPRISE_ACTION_GET_ICONS_PATH)
+    public List<String> getIconsByEnterprise(
+        @PathParam(EnterpriseResource.ENTERPRISE) final Integer enterpriseId,
+        @Context final IRESTBuilder restBuilder) throws Exception
+    {
+
+        // check if the enterprise exists
+        Enterprise enterprise = service.getEnterprise(enterpriseId);
+
+        return vmtService.findIconsByEnterprise(enterprise.getId());
 
     }
 

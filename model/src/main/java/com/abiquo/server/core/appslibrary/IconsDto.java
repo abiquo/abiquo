@@ -23,19 +23,17 @@ package com.abiquo.server.core.appslibrary;
 
 import java.util.List;
 
-import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.abiquo.model.transport.WrapperDto;
 
 @XmlRootElement(name = "icons")
-public class IconsDto extends WrapperDto<IconDto>
+public class IconsDto extends WrapperDto<String>
 {
     private static final long serialVersionUID = 1L;
 
     @Override
-    @XmlElement(name = "icon")
-    public List<IconDto> getCollection()
+    public List<String> getCollection()
     {
         return collection;
     }

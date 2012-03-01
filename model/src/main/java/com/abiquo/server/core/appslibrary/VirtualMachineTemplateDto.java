@@ -31,7 +31,7 @@ import com.abiquo.model.transport.SingleResourceTransportDto;
 @XmlRootElement(name = "virtualMachineTemplate")
 @XmlType(propOrder = {"id", "name", "description", "path", "diskFormatType", "diskFileSize",
 "cpuRequired", "ramRequired", "hdRequired", "shared", "costCode", "creationDate", "creationUser",
-"chefEnabled"})
+"chefEnabled", "iconUrl"})
 public class VirtualMachineTemplateDto extends SingleResourceTransportDto
 {
     private static final long serialVersionUID = 1L;
@@ -63,6 +63,8 @@ public class VirtualMachineTemplateDto extends SingleResourceTransportDto
     private String creationUser;
 
     private boolean chefEnabled;
+
+    private String iconUrl;
 
     public boolean isChefEnabled()
     {
@@ -202,6 +204,16 @@ public class VirtualMachineTemplateDto extends SingleResourceTransportDto
     public void setCreationUser(final String creationUser)
     {
         this.creationUser = creationUser;
+    }
+
+    public void setIconUrl(final String iconUrl)
+    {
+        this.iconUrl = iconUrl;
+    }
+
+    public String getIconUrl()
+    {
+        return iconUrl;
     }
 
 }

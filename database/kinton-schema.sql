@@ -1086,9 +1086,9 @@ CREATE TABLE  `kinton`.`virtualimage` (
   `hd_required` bigint(20) default NULL,
   `ram_required` int(7) unsigned default NULL,
   `cpu_required` int(11) default NULL,
+  `iconUrl` varchar(255) default NULL,
   `idCategory` int(3) unsigned NOT NULL,
   `idRepository` int(3) unsigned default NULL,
-  `idIcon` int(4) unsigned default NULL,
   `type` varchar(50) NOT NULL,
   `idMaster` int(4) unsigned default NULL,
   `idEnterprise` int(10) unsigned default null,
@@ -1104,10 +1104,8 @@ CREATE TABLE  `kinton`.`virtualimage` (
   PRIMARY KEY  (`idImage`),
   KEY `fk_virtualimage_category` (`idCategory`),
   KEY `virtualImage_FK3` (`idRepository`),
-  KEY `virtualImage_FK4` (`idIcon`),
   CONSTRAINT `fk_virtualimage_category` FOREIGN KEY (`idCategory`) REFERENCES `category` (`idCategory`),
   CONSTRAINT `virtualImage_FK3` FOREIGN KEY (`idRepository`) REFERENCES `repository` (`idRepository`) ON DELETE SET NULL,
-  CONSTRAINT `virtualImage_FK4` FOREIGN KEY (`idIcon`) REFERENCES `icon` (`idIcon`) ON DELETE SET NULL,
   CONSTRAINT `virtualImage_FK8` FOREIGN KEY (`idMaster`) REFERENCES `virtualimage` (`idImage`) ON DELETE SET NULL,
   CONSTRAINT `virtualImage_FK9` FOREIGN KEY (`idEnterprise`) REFERENCES `enterprise` (`idEnterprise`) ON DELETE SET NULL
 ) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8;
@@ -1518,13 +1516,12 @@ CREATE  TABLE IF NOT EXISTS `kinton`.`ovf_package` (
   `url` VARCHAR(255) NULL NOT NULL,
   `name` VARCHAR(255) NULL ,
   `description` VARCHAR(255) NULL ,
+  `iconUrl` varchar(255) default NULL,
   `productName` VARCHAR(45) NULL ,
   `productUrl` VARCHAR(45) NULL ,
   `productVersion` VARCHAR(45) NULL ,
   `productVendor` VARCHAR(45) NULL ,
-
    `idCategory` int(3) unsigned NULL,  -- NOT NULL default 1,
-   `idIcon` int(4) unsigned default NULL,
    `diskSizeMb` bigint(20) NULL,
   `version_c` int(11) default 0,
   `type` varchar(50) not null,
@@ -1535,8 +1532,7 @@ CREATE  TABLE IF NOT EXISTS `kinton`.`ovf_package` (
     REFERENCES `kinton`.`apps_library` (`id_apps_library`)
     ON DELETE CASCADE,
     -- ON UPDATE NO ACTION
-  CONSTRAINT `fk_ovf_package_category` FOREIGN KEY (`idCategory`) REFERENCES `category` (`idCategory`) ON DELETE SET NULL,
-    CONSTRAINT `fk_ovf_package_icon`    FOREIGN KEY (`idIcon`)   REFERENCES `icon` (`idIcon`) ON DELETE SET NULL
+  CONSTRAINT `fk_ovf_package_category` FOREIGN KEY (`idCategory`) REFERENCES `category` (`idCategory`) ON DELETE SET NULL
   )
 ENGINE = InnoDB DEFAULT CHARSET=utf8;
 -- -----------------------------------------------------
