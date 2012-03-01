@@ -302,7 +302,7 @@ public class VsmServiceStub extends DefaultApiService
      */
     public boolean isVirtualMachineSubscribed(final RemoteService service, final String name)
     {
-        VSMClient client = getClientFromPool(service);
+        VSMClient client = (VSMClient) clientPool.getClientFor(service);
 
         try
         {
@@ -310,7 +310,7 @@ public class VsmServiceStub extends DefaultApiService
         }
         finally
         {
-            returnClientToPool(client);
+            clientPool.releaseClientFor(service, client);
         }
     }
 
@@ -322,7 +322,7 @@ public class VsmServiceStub extends DefaultApiService
      */
     public boolean isHypervisorMonitored(final RemoteService service, final Hypervisor hypervisor)
     {
-        VSMClient client = getClientFromPool(service);
+        VSMClient client = (VSMClient) clientPool.getClientFor(service);
 
         try
         {
@@ -330,7 +330,7 @@ public class VsmServiceStub extends DefaultApiService
         }
         finally
         {
-            returnClientToPool(client);
+            clientPool.releaseClientFor(service, client);
         }
     }
 }
