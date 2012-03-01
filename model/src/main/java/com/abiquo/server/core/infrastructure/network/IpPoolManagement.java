@@ -390,7 +390,7 @@ public class IpPoolManagement extends RasdManagement
         return getVirtualMachine() != null;
     }
 
-    public boolean itHasTheDefaultConfiguration(VirtualMachine vm)
+    public boolean itHasTheDefaultConfiguration(final VirtualMachine vm)
     {
         return vm.getNetworkConfiguration() != null
             && getVlanNetwork().getConfiguration().getId()
