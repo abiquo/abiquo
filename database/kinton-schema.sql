@@ -2553,6 +2553,40 @@ CREATE TRIGGER `kinton`.`update_datastore_update_stats` AFTER UPDATE ON `kinton`
 		        END IF;
 		    END IF;
 	        END IF;
+            ELSEIF NEW.usedSize NOT IN (SELECT d.usedSize FROM datastore d LEFT OUTER JOIN datastore_assignment da ON d.idDatastore = da.idDatastore
+                LEFT OUTER JOIN physicalmachine pm ON da.idPhysicalMachine = pm.idPhysicalMachine
+                WHERE pm.idDatacenter = idDatacenter AND d.datastoreUUID = NEW.datastoreUUID AND d.idDatastore != NEW.idDatastore 
+                AND d.enabled = 1) THEN
+                -- repeated code to update only the first shared datastore
+	        IF OLD.enabled = 1 THEN
+		    IF NEW.enabled = 1 THEN
+		        IF machineState IN (2, 6, 7) THEN
+		            UPDATE IGNORE cloud_usage_stats cus SET cus.vStorageTotal = cus.vStorageTotal - OLD.size + NEW.size
+		            WHERE cus.idDatacenter = idDatacenter;
+		        ELSE
+		            UPDATE IGNORE cloud_usage_stats cus SET cus.vStorageTotal = cus.vStorageTotal - OLD.size + NEW.size,
+		            cus.vStorageUsed = cus.vStorageUsed - OLD.usedSize + NEW.usedSize WHERE cus.idDatacenter = idDatacenter;
+		        END IF;
+	            ELSEIF NEW.enabled = 0 THEN
+		        IF machineState IN (2, 6, 7) THEN
+		            UPDATE IGNORE cloud_usage_stats cus SET cus.vStorageTotal = cus.vStorageTotal - OLD.size
+		            WHERE cus.idDatacenter = idDatacenter;
+		        ELSE
+		            UPDATE IGNORE cloud_usage_stats cus SET cus.vStorageTotal = cus.vStorageTotal - OLD.size,
+		            cus.vStorageUsed = cus.vStorageUsed - OLD.usedSize WHERE cus.idDatacenter = idDatacenter;
+		        END IF;
+		    END IF;
+	        ELSE
+		    IF NEW.enabled = 1 THEN
+		        IF machineState IN (2, 6, 7) THEN
+		            UPDATE IGNORE cloud_usage_stats cus SET cus.vStorageTotal = cus.vStorageTotal + NEW.size
+		            WHERE cus.idDatacenter = idDatacenter;
+		        ELSE
+		            UPDATE IGNORE cloud_usage_stats cus SET cus.vStorageTotal = cus.vStorageTotal + NEW.size,
+		            cus.vStorageUsed = cus.vStorageUsed + NEW.usedSize WHERE cus.idDatacenter = idDatacenter;
+		        END IF;
+		    END IF;
+	        END IF;
 	    END IF;
         END IF;
     END;
