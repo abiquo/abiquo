@@ -45,7 +45,7 @@ public @interface VlanIdRange
 {
     boolean required() default true;
 
-    String message() default "is invalid. Max VLAN id must be greater than min VLAN id";
+    String message() default "is invalid. Max VLAN id must be greater or equal than min VLAN id";
 
     Class< ? >[] groups() default {};
 
