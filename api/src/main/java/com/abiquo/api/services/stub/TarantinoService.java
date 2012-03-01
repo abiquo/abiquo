@@ -428,7 +428,8 @@ public class TarantinoService extends DefaultApiService
             }
 
             enqueueTask(datacenter, builder.buildAsyncTask(String.valueOf(virtualMachine.getId()),
-                TaskType.HIGH_AVAILABILITY), deployTask, EventType.VM_MOVING_BY_HA);
+ TaskType.HA_DEPLOY),
+                deployTask, EventType.VM_MOVING_BY_HA);
 
             return deployTask.getId();
         }
@@ -505,7 +506,8 @@ public class TarantinoService extends DefaultApiService
                     .buildTarantinoTask();
 
             Task redisTask =
-                builder.buildAsyncTask(String.valueOf(virtualMachine.getId()), TaskType.UNDEPLOY);
+                builder
+                    .buildAsyncTask(String.valueOf(virtualMachine.getId()), TaskType.HA_UNDEPLOY);
 
             Datacenter datacenter = virtualMachine.getHypervisor().getMachine().getDatacenter();
 
