@@ -46,6 +46,7 @@ import com.abiquo.server.core.cloud.NodeVirtualImage;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualDatacenterDto;
 import com.abiquo.server.core.cloud.VirtualDatacenterRep;
+import com.abiquo.server.core.cloud.VirtualDatacenter.OrderByEnum;
 import com.abiquo.server.core.common.Limit;
 import com.abiquo.server.core.enterprise.DatacenterLimits;
 import com.abiquo.server.core.enterprise.DatacenterLimitsDAO;
@@ -111,13 +112,9 @@ public class VirtualDatacenterService extends DefaultApiService
         return getVirtualDatacenters(enterprise, datacenter, user, filterOptions);
     }
 
-    Collection<VirtualDatacenter> getVirtualDatacenters(Enterprise enterprise,
+    public Collection<VirtualDatacenter> getVirtualDatacenters(Enterprise enterprise,
         final Datacenter datacenter, final User user, final FilterOptions filterOptions)
     {
-        // boolean findByUser =
-        // user != null
-        // && (user.getRole().getType() == Role.Type.USER && !StringUtils.isEmpty(user
-        // .getAvailableVirtualDatacenters()));
         boolean findByUser =
             user != null && !securityService.canManageOtherEnterprises()
                 && !securityService.canManageOtherUsers()
@@ -140,9 +137,10 @@ public class VirtualDatacenterService extends DefaultApiService
     }
 
     public Collection<VirtualDatacenter> getVirtualDatacentersByDatacenter(
-        final Datacenter datacenter)
+        final Datacenter datacenter, final Integer startwith, final Integer limit,
+        final String filter, final OrderByEnum orderByEnum, final Boolean asc)
     {
-        return repo.findByDatacenter(datacenter);
+        return repo.findByDatacenter(datacenter, startwith, limit, filter, orderByEnum, asc);
     }
 
     @Transactional(readOnly = true, propagation = Propagation.REQUIRED)

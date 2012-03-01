@@ -371,6 +371,10 @@ BEGIN
 	IF EXISTS (SELECT * FROM information_schema.columns WHERE table_schema= 'kinton' AND table_name='physicalmachine' AND column_name='hdUsed') THEN
 		ALTER TABLE kinton.physicalmachine DROP COLUMN hdUsed;
 	END IF;
+	--
+	IF EXISTS (SELECT * FROM information_schema.columns WHERE table_schema= 'kinton' AND table_name='physicalmachine' AND column_name='cpuRatio') THEN
+		ALTER TABLE kinton.physicalmachine DROP COLUMN cpuRatio;
+	END IF;
 	-- Columns dropped from virtualapp
 	IF EXISTS (SELECT * FROM information_schema.columns WHERE table_schema= 'kinton' AND table_name='virtualapp' AND column_name='state') THEN
 		ALTER TABLE kinton.virtualapp DROP COLUMN state;
@@ -790,7 +794,7 @@ IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN
     END IF;
     IF NEW.idState != 2 THEN
         UPDATE IGNORE cloud_usage_stats SET serversTotal = serversTotal+1, 
-               vCpuTotal=vCpuTotal+(NEW.cpu*NEW.cpuRatio), vMemoryTotal=vMemoryTotal+NEW.ram
+               vCpuTotal=vCpuTotal+NEW.cpu, vMemoryTotal=vMemoryTotal+NEW.ram
         WHERE idDataCenter = NEW.idDataCenter;
     END IF;
 END IF;
@@ -835,7 +839,7 @@ IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN
     END IF;
     IF OLD.idState NOT IN (2, 6, 7) THEN
         UPDATE IGNORE cloud_usage_stats SET serversTotal=serversTotal-1,
-               vCpuTotal=vCpuTotal-(OLD.cpu*OLD.cpuRatio), vMemoryTotal=vMemoryTotal-OLD.ram
+               vCpuTotal=vCpuTotal-OLD.cpu, vMemoryTotal=vMemoryTotal-OLD.ram
         WHERE idDataCenter = OLD.idDataCenter;
     END IF;
 END IF;
@@ -914,14 +918,14 @@ IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN
         IF OLD.idState IN (2, 7) THEN
             -- Machine not managed changes into managed; or disabled_by_ha to Managed
             UPDATE IGNORE cloud_usage_stats SET serversTotal=serversTotal+1,
-                   vCpuTotal=vCpuTotal + (NEW.cpu*NEW.cpuRatio),
+                   vCpuTotal=vCpuTotal + NEW.cpu,
                    vMemoryTotal=vMemoryTotal + NEW.ram
             WHERE idDataCenter = NEW.idDataCenter;
         END IF;
         IF NEW.idState IN (2,7) THEN
             -- Machine managed changes into not managed or DisabledByHA
             UPDATE IGNORE cloud_usage_stats SET serversTotal=serversTotal-1,
-                   vCpuTotal=vCpuTotal-(OLD.cpu*OLD.cpuRatio),
+                   vCpuTotal=vCpuTotal-OLD.cpu,
                    vMemoryTotal=vMemoryTotal-OLD.ram
             WHERE idDataCenter = OLD.idDataCenter;
         END IF;
@@ -942,7 +946,7 @@ IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN
         -- No State Changes
         IF NEW.idState NOT IN (2, 6, 7) THEN
             -- If Machine is in a not managed state, changes into resources are ignored, Should we add 'Disabled' state to this condition?
-            UPDATE IGNORE cloud_usage_stats SET vCpuTotal=vCpuTotal+((NEW.cpu-OLD.cpu)*NEW.cpuRatio),
+            UPDATE IGNORE cloud_usage_stats SET vCpuTotal=vCpuTotal+(NEW.cpu-OLD.cpu),
                    vMemoryTotal=vMemoryTotal + (NEW.ram-OLD.ram)
             WHERE idDataCenter = OLD.idDataCenter;
         END IF;
@@ -1733,7 +1737,7 @@ CREATE PROCEDURE kinton.CalculateCloudUsageStats()
     AND v.state = 'ON'
     and v.idType = 1;
     --
-    SELECT IF (SUM(cpu*cpuRatio) IS NULL,0,SUM(cpu*cpuRatio)), IF (SUM(ram) IS NULL,0,SUM(ram)), IF (SUM(hd) IS NULL,0,SUM(hd)) , IF (SUM(cpuUsed) IS NULL,0,SUM(cpuUsed)), IF (SUM(ramUsed) IS NULL,0,SUM(ramUsed)), IF (SUM(hdUsed) IS NULL,0,SUM(hdUsed)) INTO vCpuTotal, vMemoryTotal, vStorageTotal, vCpuUsed, vMemoryUsed, vStorageUsed
+    SELECT IF (SUM(cpu) IS NULL,0,SUM(cpu)), IF (SUM(ram) IS NULL,0,SUM(ram)), IF (SUM(hd) IS NULL,0,SUM(hd)) , IF (SUM(cpuUsed) IS NULL,0,SUM(cpuUsed)), IF (SUM(ramUsed) IS NULL,0,SUM(ramUsed)), IF (SUM(hdUsed) IS NULL,0,SUM(hdUsed)) INTO vCpuTotal, vMemoryTotal, vStorageTotal, vCpuUsed, vMemoryUsed, vStorageUsed
     FROM physicalmachine
     WHERE idDataCenter = idDataCenterObj
     AND idState = 3; 

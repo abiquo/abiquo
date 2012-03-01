@@ -211,8 +211,8 @@ public class Datacenter extends DefaultEntityBase // DefaultEntityWithLimits
     }
 
     public Machine createMachine(final String name, final String description, final int ramInMb,
-        final int currentRamInUseInMb, final int realCpuThreads, final int virtualCpusPerThread,
-        final int currentCpusInUse, final MachineState state, final String virtualSwitch)
+        final int currentRamInUseInMb, final int realCpuThreads, final int currentCpusInUse,
+        final MachineState state, final String virtualSwitch)
     {
         return new Machine(this,
             name,
@@ -220,7 +220,6 @@ public class Datacenter extends DefaultEntityBase // DefaultEntityWithLimits
             ramInMb,
             currentRamInUseInMb,
             realCpuThreads,
-            virtualCpusPerThread,
             currentCpusInUse,
             state,
             virtualSwitch);

@@ -261,19 +261,27 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
         }
         String linkApp = createVirtualApplianceUrl(virtualDatacenterId, virtualAppliance.getId());
 
-        VirtualApplianceDto appDto = virtualApplianceToDto(virtualAppliance);
-        ClientResponse put = put(linkApp, appDto);
-        if (put.getStatusCode() != Status.OK.getStatusCode())
-        {
-            addErrors(result, errors, put, "updateVirtualApplianceNodes");
-        }
-
         ClientResponse response = get(linkApp);
         if (response.getStatusCode() == Status.OK.getStatusCode())
         {
             VirtualApplianceDto entity = response.getEntity(VirtualApplianceDto.class);
             try
             {
+                VirtualApplianceDto appDto = virtualApplianceToDto(virtualAppliance);
+                if (!appDto.getName().equals(entity.getName())
+                    || appDto.getNodeconnections() != null
+                    && !appDto.getNodeconnections().equals(entity.getNodeconnections()))
+                {
+                    ClientResponse put = put(linkApp, appDto);
+                    if (put.getStatusCode() != Status.OK.getStatusCode())
+                    {
+                        addErrors(result, errors, put, "updateVirtualApplianceNodes");
+                    }
+                    else
+                    {
+                        entity = response.getEntity(VirtualApplianceDto.class);
+                    }
+                }
                 VirtualAppliance app = dtoToVirtualAppliance(entity, virtualDatacenterId, result);
                 result.setData(app);
             }
@@ -375,6 +383,41 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
         return app;
     }
 
+    private VirtualAppliance dtoToVirtualApplianceFaster(
+        final VirtualApplianceDto virtualApplianceDto, final int virtualDatacenterId,
+        final DataResult result)
+    {
+        VirtualAppliance app = new VirtualAppliance();
+
+        app.setError(virtualApplianceDto.getError() == 1 ? Boolean.TRUE : Boolean.FALSE);
+        app.setHighDisponibility(virtualApplianceDto.getHighDisponibility() == 1 ? Boolean.TRUE
+            : Boolean.FALSE);
+        app.setId(virtualApplianceDto.getId());
+        app.setIsPublic(virtualApplianceDto.getPublicApp() == 1 ? Boolean.TRUE : Boolean.FALSE);
+        app.setName(virtualApplianceDto.getName());
+
+        StringBuilder nodeconnections = new StringBuilder();
+        nodeconnections.append(StringUtils.isBlank(virtualApplianceDto.getNodeconnections())
+            ? "<connections></connections>" : virtualApplianceDto.getNodeconnections());
+        app.setNodeConnections(nodeconnections.toString());
+        app.setState(new State(StateEnum.valueOf(virtualApplianceDto.getState().name())));
+        Integer vdcId = virtualApplianceDto.getIdFromLink("virtualdatacenter");
+        String link = createVirtualDatacenterLink(vdcId);
+        ClientResponse vdcResponse = get(link);
+        if (vdcResponse.getStatusCode() == Status.OK.getStatusCode())
+        {
+            VirtualDatacenterDto dto = vdcResponse.getEntity(VirtualDatacenterDto.class);
+            VirtualDataCenter virtualDataCenter =
+                dtoToVirtualDatacenterFaster(dto, app.getEnterprise());
+            app.setVirtualDataCenter(virtualDataCenter);
+        }
+        else
+        {
+            populateErrors(vdcResponse, result, "getVirtualDatacenter");
+        }
+        return app;
+    }
+
     private VirtualAppliance dtoToVirtualAppliance(final VirtualApplianceDto virtualApplianceDto,
         final VirtualDataCenter virtualDatacenter, final DataResult result)
     {
@@ -437,6 +480,21 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
         ResourceAllocationLimit limits = new ResourceAllocationLimit();
 
         vdc.setLimits(limits);
+        return vdc;
+    }
+
+    private VirtualDataCenter dtoToVirtualDatacenterFaster(final VirtualDatacenterDto dto,
+        final Enterprise enterprise)
+    {
+        VirtualDataCenter vdc = new VirtualDataCenter();
+        vdc.setId(dto.getId());
+        vdc.setIdDataCenter(dto.getIdFromLink("datacenter"));
+        vdc.setName(dto.getName());
+        vdc
+            .setHyperType(HyperVisorType
+                .create(dto.getHypervisorType(),
+                    new com.abiquo.abiserver.pojo.virtualimage.DiskFormatType(dto
+                        .getHypervisorType().baseFormat)));
         return vdc;
     }
 
@@ -579,7 +637,8 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
         }
         else
         {
-            populateErrors(response, result, methodName);
+            populateErrors(response, result, methodName,
+                "You do not have sufficient privileges to view the contents of the virtual appliance");
         }
 
         return result;
@@ -603,7 +662,8 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
             }
             catch (Exception ex)
             {
-                populateErrors(ex, result, "getVirtualApplianceNodes");
+                populateErrors(ex, result, "getVirtualApplianceNodes",
+                    "You do not have sufficient privileges to view the contents of the appliance library");
             }
             finally
             {
@@ -1111,11 +1171,20 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
                 response = get(limitDto.searchLink("action", "virtualappliances").getHref());
                 if (response.getStatusCode() == 200)
                 {
-                    VirtualAppliancesDto dto = response.getEntity(VirtualAppliancesDto.class);
-                    List<VirtualAppliance> collection = dtosToVirtualAppliance(dto, result);
+                    VirtualAppliancesDto dtos = response.getEntity(VirtualAppliancesDto.class);
+                    // List<VirtualAppliance> collection = dtosToVirtualAppliance(dtos, result);
+
+                    List<VirtualAppliance> collection = new ArrayList<VirtualAppliance>();
+                    for (VirtualApplianceDto dto : dtos.getCollection())
+                    {
+                        Integer virtualDatacenterId = dto.getIdFromLink("virtualdatacenter");
+                        VirtualAppliance virtualAppliance =
+                            dtoToVirtualApplianceFaster(dto, virtualDatacenterId, result);
+                        collection.add(virtualAppliance);
+                    }
 
                     Integer total =
-                        dto.getTotalSize() != null ? dto.getTotalSize() : dto.getCollection()
+                        dtos.getTotalSize() != null ? dtos.getTotalSize() : dtos.getCollection()
                             .size();
 
                     listResult.setTotalVirtualAppliances(total);
@@ -1446,7 +1515,7 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
         result.setSuccess(false);
         if (ex instanceof AuthorizationException)
         {
-            populateErrors((AuthorizationException) ex, result, methodName);
+            populateErrors(ex, result, methodName);
         }
         else if (ex instanceof AbiquoException)
         {

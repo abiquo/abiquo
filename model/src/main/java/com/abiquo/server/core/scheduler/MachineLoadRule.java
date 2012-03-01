@@ -176,7 +176,7 @@ public class MachineLoadRule extends DefaultEntityBase implements
 
     private final static String CPU_LOAD_PERCENTAGE_COLUMN = "cpuLoadPercentage";
 
-    private final static int CPU_LOAD_PERCENTAGE_MIN = Integer.MIN_VALUE;
+    private final static int CPU_LOAD_PERCENTAGE_MIN = 0;
 
     private final static int CPU_LOAD_PERCENTAGE_MAX = Integer.MAX_VALUE;
 
@@ -198,7 +198,7 @@ public class MachineLoadRule extends DefaultEntityBase implements
 
     private final static String RAM_LOAD_PERCENTAGE_COLUMN = "ramLoadPercentage";
 
-    private final static int RAM_LOAD_PERCENTAGE_MIN = Integer.MIN_VALUE;
+    private final static int RAM_LOAD_PERCENTAGE_MIN = 0;
 
     private final static int RAM_LOAD_PERCENTAGE_MAX = Integer.MAX_VALUE;
 
@@ -238,8 +238,7 @@ public class MachineLoadRule extends DefaultEntityBase implements
 
         final boolean passCPU =
             pass(Long.valueOf(machine.getVirtualCpusUsed()), requirements.getCpu(),
-                Long.valueOf(machine.getVirtualCpuCores() * machine.getVirtualCpusPerCore()),
-                cpuLoadPercentage);
+                Long.valueOf(machine.getVirtualCpuCores()), cpuLoadPercentage);
 
         // if (!passCPU)
         // {
@@ -259,6 +258,6 @@ public class MachineLoadRule extends DefaultEntityBase implements
     public static boolean pass(final Long used, final Long required, final Long allowed,
         final Integer oversubscription)
     {
-        return (used + required) <= (oversubscription * allowed / 100);
+        return used + required <= oversubscription * allowed / 100;
     }
 }

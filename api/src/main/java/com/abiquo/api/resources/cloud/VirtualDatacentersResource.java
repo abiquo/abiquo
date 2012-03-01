@@ -28,6 +28,8 @@ import static com.abiquo.api.resources.cloud.VirtualDatacenterResource.createTra
 import java.util.Collection;
 
 import javax.annotation.Resource;
+import javax.validation.constraints.Min;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -85,8 +87,13 @@ public class VirtualDatacentersResource extends AbstractResource
     @GET
     public VirtualDatacentersDto getVirtualDatacenters(
         @QueryParam(ENTERPRISE) final Integer enterpriseId,
-        @QueryParam(DATACENTER) final Integer datacenterId, @Context final IRESTBuilder restBuilder)
-        throws Exception
+        @QueryParam(DATACENTER) final Integer datacenterId,
+        @QueryParam(START_WITH) @DefaultValue("0") @Min(0) final Integer startwith,
+        @QueryParam(BY) @DefaultValue("name") final String orderBy,
+        @QueryParam(FILTER) @DefaultValue("") final String filter,
+        @QueryParam(LIMIT) @Min(1) @DefaultValue(DEFAULT_PAGE_LENGTH_STRING) final Integer limit,
+        @QueryParam(ASC) @DefaultValue("true") final Boolean descOrAsc,
+        @Context final IRESTBuilder restBuilder) throws Exception
     {
 
         if (!securityService.hasPrivilege(Privileges.VDC_ENUMERATE)
