@@ -478,17 +478,41 @@
                                     width="12" height="13">
                                     <mx:Script>
                                         <![CDATA[
+                                        	import mx.core.Application;
+                                        	import mx.managers.PopUpManager;
+                                        	import mx.controls.Alert;
                                             import net.undf.abicloud.vo.virtualappliance.VirtualAppliance;
                                             import net.undf.abicloud.vo.infrastructure.State;
 
                                             [Bindable]
                                             private var _virtualAppliance:VirtualAppliance;
+                                            
+                                            //Pop Up used to display Virtual Appliance error
+                                            private var _virtualApplianceError:VirtualApplianceError;
 
                                             override public function set data(value:Object):void
                                             {
                                                 super.data = value;
                                                 this._virtualAppliance = value as VirtualAppliance;
                                             }
+                                            
+                                            private function openVirtualApplianceError():void
+                                            {
+                                            	_virtualApplianceError = new VirtualApplianceError();
+                                            	_virtualApplianceError.addEventListener("virtualApplianceErrorClose",
+                                                           closeVirtualApplianceError);
+                                               
+                                                PopUpManager.addPopUp(this._virtualApplianceError,Application.application as DisplayObject, true);
+                                                PopUpManager.centerPopUp(this._virtualApplianceError);
+                                                
+                                                _virtualApplianceError.init(this._virtualAppliance);
+                                            }
+                                            
+                                            private function closeVirtualApplianceError(event:Event = null):void
+								            {
+								                //Closing the Pop Up
+								                PopUpManager.removePopUp(_virtualApplianceError);
+								            }
                                         ]]>
                                     </mx:Script>
                                     <utils:SmoothImage 
@@ -496,11 +520,13 @@
                                         horizontalCenter="0"
                                         verticalCenter="0"
                                         id="virtualApplianceListBaseAlertIcon"
+                                        click="openVirtualApplianceError()"
+                                        buttonMode="true"
+                                        useHandCursor="true"
                                         creationComplete="net.undf.abicloud.utils.AbicloudUtils.getImageFromStyle('VirtualApplianceMiniatureAlertIcon', virtualApplianceListBaseAlertIcon)"
                                         visible="{this._virtualAppliance.error || 
-													   			 this._virtualAppliance.state.description == State.UNKNOWN.description}"/>
-									    <!--visible="{this._virtualAppliance.error || 
-                                                                 this._virtualAppliance.state.description == State.FAILED.description}"/>-->
+                                                                 this._virtualAppliance.state.description == State.UNKNOWN.description}"/>
+                                
                                 </mx:Canvas>
                             </mx:Component>
                         </mx:itemRenderer>
