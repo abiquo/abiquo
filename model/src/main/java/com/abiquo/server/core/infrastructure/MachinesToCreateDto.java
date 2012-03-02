@@ -31,7 +31,9 @@ import com.abiquo.model.transport.SingleResourceTransportDto;
 public class MachinesToCreateDto extends SingleResourceTransportDto implements Serializable
 {
     private static final long serialVersionUID = 1682439124759672513L;
-    public static final String MEDIA_TYPE = "application/vnd.abiquo.multiplemachines+xml";
+    
+    public static final String BASE_MEDIA_TYPE = "application/vnd.abiquo.multiplemachines+xml";
+    public static final String MEDIA_TYPE = BASE_MEDIA_TYPE + "; version=" + API_VERSION;
 
     private String ipFrom;
 
@@ -135,6 +137,12 @@ public class MachinesToCreateDto extends SingleResourceTransportDto implements S
     public String getMediaType()
     {
         return MachinesToCreateDto.MEDIA_TYPE;
+    }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
     }
 
 }

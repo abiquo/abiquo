@@ -35,7 +35,8 @@ public class DiskFormatTypesDto extends WrapperDto<DiskFormatTypeDto>
      * 
      */
     private static final long serialVersionUID = 717145703461179229L;
-    public static final String MEDIA_TYPE = "application/vnd.abiquo.diskformattypes+xml";
+    public static final String BASE_MEDIA_TYPE = "application/vnd.abiquo.diskformattypes+xml";
+    public static final String MEDIA_TYPE = BASE_MEDIA_TYPE + "; version=" + API_VERSION;
     
     @Override
     @XmlElement(name = "diskformattype")
@@ -48,6 +49,12 @@ public class DiskFormatTypesDto extends WrapperDto<DiskFormatTypeDto>
     public String getMediaType()
     {
         return DiskFormatTypesDto.MEDIA_TYPE;
+    }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
     }
 
 }

@@ -38,7 +38,8 @@ public class CostCodeCurrenciesDto extends WrapperDto<CostCodeCurrencyDto>
      */
     private static final long serialVersionUID = 1L;
 
-    public static final String MEDIA_TYPE = "application/costcodecurrenciesdto+xml";
+    public static final String BASE_MEDIA_TYPE = "application/costcodecurrenciesdto+xml";
+    public static final String MEDIA_TYPE = BASE_MEDIA_TYPE + "; version=" + API_VERSION;
 
     @Override
     @XmlElement(name = "costCodeCurrency")
@@ -55,6 +56,12 @@ public class CostCodeCurrenciesDto extends WrapperDto<CostCodeCurrencyDto>
     public String getMediaType()
     {
         return CostCodeCurrenciesDto.MEDIA_TYPE;
+    }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
     }
 
 }

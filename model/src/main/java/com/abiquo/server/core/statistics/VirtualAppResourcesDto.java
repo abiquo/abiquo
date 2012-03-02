@@ -29,7 +29,8 @@ import com.abiquo.server.core.infrastructure.DatacenterDto;
 @XmlRootElement(name = "vappResources")
 public class VirtualAppResourcesDto extends SingleResourceTransportDto
 {
-    public static final String MEDIA_TYPE = "application/vnd.abiquo.virtualappresources+xml";
+    public static final String BASE_MEDIA_TYPE = "application/vnd.abiquo.virtualappresources+xml";
+    public static final String MEDIA_TYPE = BASE_MEDIA_TYPE + "; version=" + API_VERSION;
     
     private Integer id;
 
@@ -131,6 +132,12 @@ public class VirtualAppResourcesDto extends SingleResourceTransportDto
     public String getMediaType()
     {
         return VirtualAppResourcesDto.MEDIA_TYPE;
+    }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
     }
 
 }

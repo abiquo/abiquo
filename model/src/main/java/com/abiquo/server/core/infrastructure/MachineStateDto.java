@@ -30,7 +30,9 @@ import com.abiquo.model.transport.SingleResourceTransportDto;
 @XmlRootElement(name = "MachineState")
 public class MachineStateDto extends SingleResourceTransportDto
 {
-    public static final String MEDIA_TYPE = "application/vnd.abiquo.machinestate+xml";
+    public static final String BASE_MEDIA_TYPE = "application/vnd.abiquo.machinestate+xml";
+    public static final String MEDIA_TYPE = BASE_MEDIA_TYPE + "; version=" + API_VERSION;
+    
     private static final long serialVersionUID = -1283420076908929678L;
 
     private MachineState state;
@@ -50,5 +52,11 @@ public class MachineStateDto extends SingleResourceTransportDto
     public String getMediaType()
     {
         return MachineStateDto.MEDIA_TYPE;
+    }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
     }
 }

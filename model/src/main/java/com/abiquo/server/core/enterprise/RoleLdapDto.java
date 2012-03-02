@@ -29,7 +29,8 @@ import com.abiquo.server.core.infrastructure.DatacenterDto;
 @XmlRootElement(name = "roleLdap")
 public class RoleLdapDto extends SingleResourceTransportDto
 {
-    public static final String MEDIA_TYPE = "application/vnd.abiquo.roleldap+xml";
+    public static final String BASE_MEDIA_TYPE = "application/vnd.abiquo.roleldap+xml";
+    public static final String MEDIA_TYPE = BASE_MEDIA_TYPE + "; version=" + API_VERSION;
     
     public RoleLdapDto()
     {
@@ -71,5 +72,11 @@ public class RoleLdapDto extends SingleResourceTransportDto
     public String getMediaType()
     {
         return RoleLdapDto.MEDIA_TYPE;
+    }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
     }
 }

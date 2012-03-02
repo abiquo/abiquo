@@ -33,7 +33,8 @@ public class CostCodeDto extends SingleResourceTransportDto
      * 
      */
     private static final long serialVersionUID = 1L;
-    public static final String MEDIA_TYPE = "application/vnd.abiquo.costcode+xml";
+    public static final String BASE_MEDIA_TYPE = "application/vnd.abiquo.costcode+xml";
+    public static final String MEDIA_TYPE = BASE_MEDIA_TYPE + "; version=" + API_VERSION;
 
     public CostCodeDto()
     {
@@ -88,6 +89,12 @@ public class CostCodeDto extends SingleResourceTransportDto
     public String getMediaType()
     {
         return CostCodeDto.MEDIA_TYPE;
+    }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
     }
 
 }

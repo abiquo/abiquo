@@ -39,7 +39,8 @@ import com.abiquo.model.transport.WrapperDto;
 @XmlRootElement(name = "ips")
 public class IpsPoolManagementDto extends WrapperDto<IpPoolManagementDto>
 {
-    public static final String MEDIA_TYPE = "application/vnd.abiquo.ips+xml";
+    public static final String BASE_MEDIA_TYPE = "application/vnd.abiquo.ips+xml";
+    public static final String MEDIA_TYPE = BASE_MEDIA_TYPE + "; version=" + API_VERSION;
     
     @XmlElement(name = "ip")
     public List<IpPoolManagementDto> getCollection()
@@ -51,5 +52,11 @@ public class IpsPoolManagementDto extends WrapperDto<IpPoolManagementDto>
     public String getMediaType()
     {
         return IpsPoolManagementDto.MEDIA_TYPE;
+    }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
     }
 }

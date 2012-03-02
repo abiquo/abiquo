@@ -27,7 +27,8 @@ import javax.xml.bind.annotation.XmlRootElement;
 public class VirtualMachineWithNodeExtendedDto extends VirtualMachineWithNodeDto
 {
     private static final long serialVersionUID = -4124890793051402691L;
-    public static final String MEDIA_TYPE = "application/vnd.abiquo.virtualmachinewithnodeextended+xml";
+    public static final String BASE_MEDIA_TYPE = "application/vnd.abiquo.virtualmachinewithnodeextended+xml";
+    public static final String MEDIA_TYPE = BASE_MEDIA_TYPE + "; version=" + API_VERSION;
 
     private String userName;
 

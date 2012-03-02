@@ -35,7 +35,8 @@ import com.abiquo.model.transport.WrapperDto;
 public class SystemPropertiesDto extends WrapperDto<SystemPropertyDto>
 {
     private static final long serialVersionUID = 1L;
-    public static final String MEDIA_TYPE = "application/vnd.abiquo.systemproperties+xml";
+    public static final String BASE_MEDIA_TYPE = "application/vnd.abiquo.systemproperties+xml";
+    public static final String MEDIA_TYPE = BASE_MEDIA_TYPE + "; version=" + API_VERSION;
 
     @Override
     @XmlElement(name = "property")
@@ -48,5 +49,11 @@ public class SystemPropertiesDto extends WrapperDto<SystemPropertyDto>
     public String getMediaType()
     {
         return SystemPropertiesDto.MEDIA_TYPE;
+    }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
     }
 }

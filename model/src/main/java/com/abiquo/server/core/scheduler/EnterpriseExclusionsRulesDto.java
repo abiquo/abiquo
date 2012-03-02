@@ -35,7 +35,8 @@ import com.abiquo.server.core.infrastructure.DatacenterDto;
 @XmlRootElement(name = "enterpriseExclusionRules")
 public class EnterpriseExclusionsRulesDto extends WrapperDto<EnterpriseExclusionRuleDto>
 {
-    public static final String MEDIA_TYPE = "application/vnd.abiquo.enterpriseexclusionrules+xml";
+    public static final String BASE_MEDIA_TYPE = "application/vnd.abiquo.enterpriseexclusionrules+xml";
+    public static final String MEDIA_TYPE = BASE_MEDIA_TYPE + "; version=" + API_VERSION;
     
     @Override
     @XmlElement(name = "enterpriseExclusionRule")
@@ -48,5 +49,11 @@ public class EnterpriseExclusionsRulesDto extends WrapperDto<EnterpriseExclusion
     public String getMediaType()
     {
         return EnterpriseExclusionsRulesDto.MEDIA_TYPE;
+    }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
     }
 }

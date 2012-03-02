@@ -32,7 +32,8 @@ import com.abiquo.model.transport.WrapperDto;
 @XmlRootElement(name = "virtualMachines")
 public class VirtualMachinesDto extends WrapperDto<VirtualMachineDto>
 {
-    public static final String MEDIA_TYPE = "application/vnd.abiquo.virtualmachines+xml";
+    public static final String BASE_MEDIA_TYPE = "application/vnd.abiquo.virtualmachines+xml";
+    public static final String MEDIA_TYPE = BASE_MEDIA_TYPE + "; version=" + API_VERSION;
     
     @Override
     @XmlElement(name = "virtualMachine")
@@ -49,5 +50,11 @@ public class VirtualMachinesDto extends WrapperDto<VirtualMachineDto>
     public String getMediaType()
     {
         return VirtualMachinesDto.MEDIA_TYPE;
+    }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
     }
 }

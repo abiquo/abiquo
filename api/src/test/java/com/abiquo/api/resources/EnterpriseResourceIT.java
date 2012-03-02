@@ -143,7 +143,6 @@ public class EnterpriseResourceIT extends AbstractJpaGeneratorIT
         assertLinkExist(dto, resolveEnterpriseActionGetIPsURI(enterprise.getId()),
             IpAddressesResource.IP_ADDRESSES, IpAddressesResource.IP_ADDRESSES);
         assertLinkExist(dto, resolveEnterpriseActionGetVirtualMachinesURI(enterprise.getId()),
-            VirtualMachinesResource.VIRTUAL_MACHINES_PATH,
             VirtualMachinesResource.VIRTUAL_MACHINES_PATH);
     }
 

@@ -29,7 +29,8 @@ public class StoragePoolWithDeviceDto extends StoragePoolDto
 
     private static final long serialVersionUID = 1L;
 
-    public static final String MEDIA_TYPE = "application/storagepoolwithdevicedto+xml";
+    public static final String BASE_MEDIA_TYPE = "application/storagepoolwithdevicedto+xml";
+    public static final String MEDIA_TYPE = BASE_MEDIA_TYPE + "; version=" + API_VERSION;
 
     private StorageDeviceDto device;
 
@@ -47,6 +48,12 @@ public class StoragePoolWithDeviceDto extends StoragePoolDto
     public String getMediaType()
     {
         return StoragePoolWithDeviceDto.MEDIA_TYPE;
+    }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
     }
 
 }

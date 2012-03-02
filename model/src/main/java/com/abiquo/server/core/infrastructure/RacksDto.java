@@ -34,7 +34,8 @@ import com.abiquo.model.transport.WrapperDto;
 @XmlRootElement(name = "racks")
 public class RacksDto extends WrapperDto<RackDto>
 {
-    public static final String MEDIA_TYPE = "application/vnd.abiquo.racks+xml";
+    public static final String BASE_MEDIA_TYPE = "application/vnd.abiquo.racks+xml";
+    public static final String MEDIA_TYPE = BASE_MEDIA_TYPE + "; version=" + API_VERSION;
     
     @XmlElement(name = "rack")
     public List<RackDto> getCollection()
@@ -46,5 +47,11 @@ public class RacksDto extends WrapperDto<RackDto>
     public String getMediaType()
     {
         return RacksDto.MEDIA_TYPE;
+    }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
     }
 }

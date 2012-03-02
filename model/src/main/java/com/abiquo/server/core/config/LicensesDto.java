@@ -36,7 +36,9 @@ import com.abiquo.server.core.infrastructure.DatacenterDto;
 public class LicensesDto extends WrapperDto<LicenseDto>
 {
     private static final long serialVersionUID = 1L;
-    public static final String MEDIA_TYPE = "application/vnd.abiquo.licenses+xml";
+    
+    public static final String BASE_MEDIA_TYPE = "application/vnd.abiquo.licenses+xml";
+    public static final String MEDIA_TYPE = BASE_MEDIA_TYPE + "; version=" + API_VERSION;
 
     private Integer availablecores = 0;
 
@@ -72,6 +74,12 @@ public class LicensesDto extends WrapperDto<LicenseDto>
     public String getMediaType()
     {
         return LicensesDto.MEDIA_TYPE;
+    }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
     }
 
 }

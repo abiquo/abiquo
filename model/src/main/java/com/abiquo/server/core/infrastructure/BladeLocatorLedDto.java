@@ -63,7 +63,8 @@ public class BladeLocatorLedDto extends SingleResourceTransportDto
 
     protected String bladeDn;
     
-    public static final String MEDIA_TYPE = "application/vnd.abiquo.bladelocatorled+xml";
+    public static final String BASE_MEDIA_TYPE = "application/vnd.abiquo.bladelocatorled+xml";
+    public static final String MEDIA_TYPE = BASE_MEDIA_TYPE + "; version=" + API_VERSION;
 
     /**
      * Gets the value of the status property.
@@ -150,6 +151,12 @@ public class BladeLocatorLedDto extends SingleResourceTransportDto
     public String getMediaType()
     {
         return MEDIA_TYPE;
+    }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
     }
 
 }

@@ -37,11 +37,20 @@ import com.abiquo.server.core.infrastructure.DatacenterDto;
 public class LinksDto extends SingleResourceTransportDto
 {
     private static final long serialVersionUID = -8659042159324422045L;
-    public static final String MEDIA_TYPE = "application/vnd.abiquo.links+xml";
+    
+    public static final String BASE_MEDIA_TYPE = "application/vnd.abiquo.links+xml";
+    public static final String MEDIA_TYPE = BASE_MEDIA_TYPE + "; version=" + API_VERSION;
+    
     @Override
     public String getMediaType()
     {
         return LinksDto.MEDIA_TYPE;
+    }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
     }
 
 }
