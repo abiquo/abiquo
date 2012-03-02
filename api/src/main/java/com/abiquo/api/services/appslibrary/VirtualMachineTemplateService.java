@@ -280,6 +280,7 @@ public class VirtualMachineTemplateService extends DefaultApiServiceWithApplianc
             && !validURI(virtualMachineTemplate.getIconUrl()))
         {
             addConflictErrors(APIError.VIMAGE_MALFORMED_ICON_URI);
+            flushErrors();
 
         }
 
@@ -297,6 +298,7 @@ public class VirtualMachineTemplateService extends DefaultApiServiceWithApplianc
         old.setRamRequired(virtualMachineTemplate.getRamRequired());
         old.setShared(virtualMachineTemplate.isShared());
         old.setChefEnabled(virtualMachineTemplate.isChefEnabled());
+        old.setIconUrl(virtualMachineTemplate.getIconUrl());
 
         // retrieve the links
         RESTLink categoryLink = virtualMachineTemplate.searchLink(CategoryResource.CATEGORY);

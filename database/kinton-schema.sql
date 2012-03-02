@@ -356,28 +356,6 @@ CREATE TABLE  `kinton`.`hypervisor` (
   CONSTRAINT `Hypervisor_FK1` FOREIGN KEY (`idPhysicalMachine`) REFERENCES `physicalmachine` (`idPhysicalMachine`) ON DELETE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
 
---
--- Definition of table `kinton`.`icon`
---
-
-DROP TABLE IF EXISTS `kinton`.`icon`;
-CREATE TABLE  `kinton`.`icon` (
-  `idIcon` int(10) unsigned NOT NULL auto_increment,
-  `path` varchar(200) NOT NULL,
-  `name` varchar(20) NOT NULL DEFAULT 'icon',
-  PRIMARY KEY  (`idIcon`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8;
-
---
--- Dumping data for table `kinton`.`icon`
---
-
-/*!40000 ALTER TABLE `icon` DISABLE KEYS */;
-LOCK TABLES `icon` WRITE;
-INSERT INTO `kinton`.`icon` VALUES  (1,'http://bestwindowssoftware.org/icon/ubuntu_icon.png','ubuntu'),
- (2,'http://www.pixeljoint.com/files/icons/mipreview1.gif','Guybrush');
-UNLOCK TABLES;
-/*!40000 ALTER TABLE `icon` ENABLE KEYS */;
 
 --
 -- Definition of table `kinton`.`log`
