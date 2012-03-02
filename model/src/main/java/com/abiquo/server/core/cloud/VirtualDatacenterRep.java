@@ -353,6 +353,20 @@ public class VirtualDatacenterRep extends DefaultRepBase
     }
 
     /**
+     * Return next available private IP by VLAN with filter options.
+     * 
+     * @param vdcId identifier of the virtual datacenter.
+     * @param vlanId identifier of the vlan
+     * @param excludedIp ip excluded from result if exists
+     * @return list of IpPoolManagement.
+     */
+    public IpPoolManagement findNextIpByPrivateVLANAvailable(final Integer vdcId,
+        final Integer vlanId, final String... excludedIp)
+    {
+        return ipManagementDAO.findNextIpByPrivateVLANAvailable(vdcId, vlanId, excludedIp);
+    }
+
+    /**
      * Return all the private IPs by VLAN with filter options.
      * 
      * @param vlanId identifier of the vlan
@@ -698,6 +712,11 @@ public class VirtualDatacenterRep extends DefaultRepBase
     public void updateVlan(final VLANNetwork vlan)
     {
         vlanDAO.flush();
+    }
+
+    public void detach(final VirtualDatacenter virtualDatacenter)
+    {
+        virtualDatacenterDAO.detach(virtualDatacenter);
     }
 
 }
