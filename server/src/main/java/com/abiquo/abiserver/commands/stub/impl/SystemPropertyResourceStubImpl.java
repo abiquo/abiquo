@@ -44,7 +44,7 @@ public class SystemPropertyResourceStubImpl extends AbstractAPIStub implements
     SystemPropertyResourceStub
 {
     @Override
-    public DataResult<Collection<SystemProperty>> getSystemProperties(String component)
+    public DataResult<Collection<SystemProperty>> getSystemProperties(final String component)
     {
         // Build API request URI
         Map<String, String[]> queryparams = new HashMap<String, String[]>();
@@ -55,7 +55,7 @@ public class SystemPropertyResourceStubImpl extends AbstractAPIStub implements
                 queryparams);
 
         // Perform API call
-        ClientResponse response = get(uri);
+        ClientResponse response = get(uri, SystemPropertiesDto.MEDIA_TYPE);
 
         // Process result
         DataResult<Collection<SystemProperty>> dataResult =
@@ -84,8 +84,8 @@ public class SystemPropertyResourceStubImpl extends AbstractAPIStub implements
     }
 
     @Override
-    public DataResult<Collection<SystemProperty>> modifySystemProperties(String component,
-        Collection<SystemProperty> properties)
+    public DataResult<Collection<SystemProperty>> modifySystemProperties(final String component,
+        final Collection<SystemProperty> properties)
     {
         // Build the DTO
         SystemPropertiesDto dto = new SystemPropertiesDto();
@@ -130,7 +130,7 @@ public class SystemPropertyResourceStubImpl extends AbstractAPIStub implements
         return dataResult;
     }
 
-    private static SystemProperty fromDto(SystemPropertyDto dto)
+    private static SystemProperty fromDto(final SystemPropertyDto dto)
     {
         SystemProperty systemProperty = new SystemProperty();
 
@@ -142,7 +142,7 @@ public class SystemPropertyResourceStubImpl extends AbstractAPIStub implements
         return systemProperty;
     }
 
-    private static SystemPropertyDto toDto(SystemProperty systemProperty)
+    private static SystemPropertyDto toDto(final SystemProperty systemProperty)
     {
         SystemPropertyDto dto = new SystemPropertyDto();
 

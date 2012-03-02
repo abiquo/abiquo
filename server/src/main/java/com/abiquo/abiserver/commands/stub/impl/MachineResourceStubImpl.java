@@ -42,6 +42,8 @@ import com.abiquo.abiserver.pojo.infrastructure.State;
 import com.abiquo.abiserver.pojo.infrastructure.VirtualMachine;
 import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.result.DataResult;
+import com.abiquo.abiserver.pojo.ucs.BladeLocatorLed;
+import com.abiquo.abiserver.pojo.ucs.LogicServer;
 import com.abiquo.abiserver.pojo.user.Enterprise;
 import com.abiquo.abiserver.pojo.user.User;
 import com.abiquo.abiserver.pojo.virtualimage.Category;
@@ -54,10 +56,8 @@ import com.abiquo.server.core.appslibrary.VirtualMachineTemplateDto;
 import com.abiquo.server.core.cloud.VirtualMachineDto;
 import com.abiquo.server.core.cloud.VirtualMachinesDto;
 import com.abiquo.server.core.enterprise.EnterpriseDto;
-import com.abiquo.server.core.enterprise.UserDto;
 import com.abiquo.server.core.enterprise.User.AuthType;
-import com.abiquo.abiserver.pojo.ucs.BladeLocatorLed;
-import com.abiquo.abiserver.pojo.ucs.LogicServer;
+import com.abiquo.server.core.enterprise.UserDto;
 import com.abiquo.server.core.infrastructure.MachineDto;
 
 public class MachineResourceStubImpl extends AbstractAPIStub implements MachineResourceStub
@@ -72,7 +72,7 @@ public class MachineResourceStubImpl extends AbstractAPIStub implements MachineR
         DataResult<HypervisorRemoteAccessInfo> result =
             new DataResult<HypervisorRemoteAccessInfo>();
 
-        ClientResponse response = get(uri);
+        ClientResponse response = get(uri, MachineDto.MEDIA_TYPE);
         if (response.getStatusCode() == 200)
         {
             MachineDto dto = response.getEntity(MachineDto.class);
@@ -158,6 +158,7 @@ public class MachineResourceStubImpl extends AbstractAPIStub implements MachineR
         // PREMIUM
         return null;
     }
+
     /**
      * @see com.abiquo.abiserver.commands.stub.MachineResourceStub#bladeLocatorLED(PhysicalMachine)
      */
@@ -176,7 +177,7 @@ public class MachineResourceStubImpl extends AbstractAPIStub implements MachineR
 
         DataResult<List<VirtualMachine>> result = new DataResult<List<VirtualMachine>>();
 
-        ClientResponse response = get(uri);
+        ClientResponse response = get(uri, VirtualMachinesDto.MEDIA_TYPE);
         if (response.getStatusCode() == 200)
         {
             VirtualMachinesDto dtos = response.getEntity(VirtualMachinesDto.class);
@@ -223,7 +224,7 @@ public class MachineResourceStubImpl extends AbstractAPIStub implements MachineR
         RESTLink userLink = virtualMachineDto.searchLink("user");
         if (userLink != null)
         {
-            ClientResponse userResponse = get(userLink.getHref());
+            ClientResponse userResponse = get(userLink.getHref(), UserDto.MEDIA_TYPE);
             if (userResponse.getStatusCode() == Status.OK.getStatusCode())
             {
 
@@ -240,7 +241,7 @@ public class MachineResourceStubImpl extends AbstractAPIStub implements MachineR
         RESTLink entLink = virtualMachineDto.searchLink("enterprise");
         if (userLink != null)
         {
-            ClientResponse entResponse = get(entLink.getHref());
+            ClientResponse entResponse = get(entLink.getHref(), EnterpriseDto.MEDIA_TYPE);
             if (entResponse.getStatusCode() == Status.OK.getStatusCode())
             {
 
@@ -257,7 +258,8 @@ public class MachineResourceStubImpl extends AbstractAPIStub implements MachineR
         RESTLink virtualImage = virtualMachineDto.searchLink("virtualmachinetemplate");
         if (virtualImage != null)
         {
-            ClientResponse imageResponse = get(virtualImage.getHref());
+            ClientResponse imageResponse =
+                get(virtualImage.getHref(), VirtualMachineTemplateDto.MEDIA_TYPE);
             if (imageResponse.getStatusCode() == Status.OK.getStatusCode())
             {
 

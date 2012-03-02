@@ -138,7 +138,7 @@ public class RacksResourceStubImpl extends AbstractAPIStub implements RacksResou
             uri += filter;
         }
 
-        ClientResponse response = get(uri);
+        ClientResponse response = get(uri, RacksDto.MEDIA_TYPE);
 
         if (response.getStatusCode() == 200)
         {

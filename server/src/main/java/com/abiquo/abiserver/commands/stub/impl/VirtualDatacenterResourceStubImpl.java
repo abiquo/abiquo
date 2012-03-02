@@ -240,7 +240,7 @@ public class VirtualDatacenterResourceStubImpl extends AbstractAPIStub implement
 
         String uri = createVirtualDatacentersLink(enterprise, datacenter);
 
-        ClientResponse response = get(uri);
+        ClientResponse response = get(uri, VirtualDatacentersDto.MEDIA_TYPE);
         if (response.getStatusCode() == 200)
         {
             result.setSuccess(true);
@@ -264,7 +264,7 @@ public class VirtualDatacenterResourceStubImpl extends AbstractAPIStub implement
 
                 // Get the default network of the vdc.
                 RESTLink link = vdc.searchLink("defaultnetwork");
-                response = get(link.getHref());
+                response = get(link.getHref(), VLANNetworkDto.MEDIA_TYPE);
                 VLANNetworkDto vlanDto = response.getEntity(VLANNetworkDto.class);
 
                 vdctoadd.setDefaultVlan(NetworkResourceStubImpl.createFlexObject(vlanDto));
@@ -296,7 +296,7 @@ public class VirtualDatacenterResourceStubImpl extends AbstractAPIStub implement
                 Collections.singletonMap("enterprise", new String[] {valueOf(enterprise.getId())}));
 
         // Request virtual datacenters
-        ClientResponse response = get(uri);
+        ClientResponse response = get(uri, VirtualDatacentersDto.MEDIA_TYPE);
 
         if (response.getStatusCode() == 200)
         {

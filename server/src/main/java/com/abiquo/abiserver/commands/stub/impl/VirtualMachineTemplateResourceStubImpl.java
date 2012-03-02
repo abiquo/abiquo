@@ -203,7 +203,8 @@ public class VirtualMachineTemplateResourceStubImpl extends AbstractAPIStub impl
         RESTLink masterLink = getLink("master", vi.getLinks());
         if (masterLink != null)
         {
-            ClientResponse masterResponse = get(masterLink.getHref());
+            ClientResponse masterResponse =
+                get(masterLink.getHref(), VirtualMachineTemplateDto.MEDIA_TYPE);
             if (masterResponse.getStatusCode() == Status.OK.getStatusCode())
             {
                 VirtualMachineTemplateDto vmtDto =
