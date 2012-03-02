@@ -31,9 +31,11 @@ import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.UriInfo;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.wink.common.annotations.Parent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -56,6 +58,8 @@ import com.abiquo.server.core.cloud.VirtualMachineState;
 import com.abiquo.server.core.cloud.VirtualMachineTaskDto;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
 import com.abiquo.server.core.infrastructure.network.IpsPoolManagementDto;
+import com.abiquo.server.core.task.Task;
+import com.abiquo.server.core.task.TasksDto;
 
 @Parent(VirtualAppliancesResource.class)
 @Path(VirtualApplianceResource.VIRTUAL_APPLIANCE_PARAM)
@@ -96,7 +100,10 @@ public class VirtualApplianceResource
     private VirtualMachineLock vmLock;
 
     /**
-     * Return the virtual appliance if exists.
+     * Return the virtual appliance if exists. And also the expanded nodes. <br>
+     * <ul>
+     * <li>Last Task: returns the last {@link Task} of every node
+     * </ul>
      * 
      * @param vdcId identifier of the virtual datacenter.
      * @param vappId identifier of the virtual appliance.
@@ -108,11 +115,36 @@ public class VirtualApplianceResource
     public VirtualApplianceDto getVirtualAppliance(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
-        @Context final IRESTBuilder restBuilder) throws Exception
+        @QueryParam(value = "expand") final String expand, @Context final IRESTBuilder restBuilder,
+        @Context final UriInfo uriInfo) throws Exception
     {
         VirtualAppliance vapp = service.getVirtualAppliance(vdcId, vappId);
+        VirtualApplianceDto dto = createTransferObject(vapp, restBuilder);
 
-        return createTransferObject(vapp, restBuilder);
+        expandNodes(vdcId, vappId, expand, uriInfo, dto);
+
+        return dto;
+    }
+
+    private void expandNodes(final Integer vdcId, final Integer vappId, final String expand,
+        final UriInfo uriInfo, final VirtualApplianceDto dto)
+    {
+        String[] expands = StringUtils.split(expand, ",");
+        if (expands != null)
+        {
+            for (String e : expands)
+            {
+                if ("last_task".equalsIgnoreCase(e))
+                {
+                    List<Task> lastTasks = service.getAllNodesLastTask(vdcId, vappId);
+                    if (lastTasks != null && !lastTasks.isEmpty())
+                    {
+                        TasksDto t = TaskResourceUtils.transform(lastTasks, uriInfo);
+                        dto.setLastTasks(t);
+                    }
+                }
+            }
+        }
     }
 
     @PUT
