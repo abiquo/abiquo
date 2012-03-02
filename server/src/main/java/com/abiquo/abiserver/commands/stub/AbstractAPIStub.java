@@ -21,6 +21,9 @@
 
 package com.abiquo.abiserver.commands.stub;
 
+import static com.abiquo.util.URIResolver.resolveURI;
+import static java.lang.String.valueOf;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -165,36 +168,6 @@ public class AbstractAPIStub
         return user;
     }
 
-    protected ClientResponse post(final String uri, final SingleResourceTransportDto dto,
-        final String user, final String password)
-    {
-        Resource resource = resource(uri, user, password);
-        if (dto != null)
-        {
-            resource.contentType(dto.getMediaType());
-            resource.accept(dto.getMediaType());
-        }
-        return resource.post(dto);
-    }
-
-    protected ClientResponse put(final String uri, final SingleResourceTransportDto dto,
-        final String user, final String password)
-    {
-        Resource resource = resource(uri, user, password);
-        if (dto != null)
-        {
-            resource.contentType(dto.getMediaType());
-            resource.accept(dto.getMediaType());
-        }
-        return resource.put(dto);
-    }
-
-    protected ClientResponse put(final String uri, final SingleResourceTransportDto dto,
-        final String user, final String password, final String mediaType)
-    {
-        return resource(uri, user, password, mediaType).contentType(mediaType).put(dto);
-    }
-
     protected ClientResponse delete(final String uri, final String user, final String password)
     {
         return resource(uri, user, password).delete();
@@ -210,6 +183,12 @@ public class AbstractAPIStub
     {
         UserHB user = getCurrentUserCredentials();
         return resource(uri, user.getUser(), user.getPassword(), mediaType).get();
+    }
+
+    protected ClientResponse get(final String uri, final String user, final String password,
+        final ClientHandler... handlers)
+    {
+        return resource(uri, user, password, handlers).get();
     }
 
     protected ClientResponse post(final String uri, final SingleResourceTransportDto dto)
@@ -232,6 +211,18 @@ public class AbstractAPIStub
             .accept(mediaType).post(dto);
     }
 
+    protected ClientResponse post(final String uri, final SingleResourceTransportDto dto,
+        final String user, final String password)
+    {
+        Resource resource = resource(uri, user, password);
+        if (dto != null)
+        {
+            resource.contentType(dto.getMediaType());
+            resource.accept(dto.getMediaType());
+        }
+        return resource.post(dto);
+    }
+
     protected Resource resource(final String uri)
     {
         UserHB user = getCurrentUserCredentials();
@@ -252,11 +243,17 @@ public class AbstractAPIStub
     }
 
     protected ClientResponse put(final String uri, final SingleResourceTransportDto dto,
-        final String mediaType)
+        final String accept, final String content)
     {
         UserHB user = getCurrentUserCredentials();
-        return resource(uri, user.getUser(), user.getPassword(), mediaType).contentType(mediaType)
-            .put(dto);
+        return resource(uri, user.getUser(), user.getPassword(), accept).contentType(content).put(
+            dto);
+    }
+
+    protected ClientResponse put(final String uri, final SingleResourceTransportDto dto,
+        final String user, final String password, final String accept, final String content)
+    {
+        return resource(uri, user, password, accept).contentType(content).put(dto);
     }
 
     protected ClientResponse delete(final String uri)
@@ -1460,12 +1457,6 @@ public class AbstractAPIStub
         cookieValue = new String(Base64.encodeBase64(cookieValue.getBytes()));
 
         return resource.cookie(new Cookie("auth", cookieValue));
-    }
-
-    protected ClientResponse get(final String uri, final String user, final String password,
-        final ClientHandler... handlers)
-    {
-        return resource(uri, user, password, handlers).get();
     }
 
     protected String createRacksLink(final Integer datacenterId)

@@ -116,8 +116,8 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
         // resource.queryParam("ovfindexURL", ovfpackageListURL);
 
         ClientResponse response =
-            resource(uri).accept(MediaType.APPLICATION_XML).contentType(MediaType.TEXT_PLAIN).post(
-                ovfindexURL);
+            resource(uri).accept(MediaType.APPLICATION_XML).contentType(MediaType.TEXT_PLAIN)
+                .post(ovfindexURL);
 
         if (response.getStatusType().getFamily() != Family.SUCCESSFUL)
         {
@@ -143,8 +143,8 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
             getTemplateDefinitionListIdFromName(idEnterprise, templateDefinitionListName);
 
         String uri =
-            createTemplateDefinitionListLink(idEnterprise.toString(), templateDefinitionListId
-                .toString());
+            createTemplateDefinitionListLink(idEnterprise.toString(),
+                templateDefinitionListId.toString());
         ClientResponse response = delete(uri);
 
         if (response.getStatusType().getFamily() != Family.SUCCESSFUL)
@@ -245,8 +245,8 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
         }
 
         final String uri =
-            createTemplateStateLink(String.valueOf(idEnterprise), String
-                .valueOf(templateDefinitionId));
+            createTemplateStateLink(String.valueOf(idEnterprise),
+                String.valueOf(templateDefinitionId));
 
         ClientResponse response = resource(uri).queryParam("datacenterId", datacenterId).get();
 
@@ -302,8 +302,8 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
             getTemplateDefinitionIdByUrl(templateDefinitionUrl, idEnterprise);
 
         final String uri =
-            createTemplateDefinitionInstallLink(String.valueOf(idEnterprise), String
-                .valueOf(templateDefinitionId));
+            createTemplateDefinitionInstallLink(String.valueOf(idEnterprise),
+                String.valueOf(templateDefinitionId));
 
         Resource resource = resource(uri).contentType(MediaType.TEXT_PLAIN);
         ClientResponse response = resource.post(String.valueOf(datacenterId));
@@ -339,8 +339,8 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
             getTemplateDefinitionIdByUrl(templateDefinitionUrl, idEnterprise);
 
         final String uri =
-            createTemplateDefinitionUninstallLink(String.valueOf(idEnterprise), String
-                .valueOf(templateDefinitionId));
+            createTemplateDefinitionUninstallLink(String.valueOf(idEnterprise),
+                String.valueOf(templateDefinitionId));
 
         Resource resource = resource(uri).contentType(MediaType.TEXT_PLAIN);
         ClientResponse response = resource.post(String.valueOf(datacenterId));
@@ -375,7 +375,7 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
         String uri =
             createTemplateDefinitionListLink(idEnterprise.toString(), templateDefListId.toString());
 
-        ClientResponse response = get(uri);
+        ClientResponse response = get(uri, TemplateDefinitionListDto.MEDIA_TYPE);
 
         if (response.getStatusType().getFamily() == Family.SUCCESSFUL)
         {
@@ -481,7 +481,7 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
     {
 
         String uri = createTemplateDefinitionListsLink(idEnterprise.toString());
-        ClientResponse response = get(uri);
+        ClientResponse response = get(uri, TemplateDefinitionListsDto.MEDIA_TYPE);
 
         if (response.getStatusType().getFamily() != Family.SUCCESSFUL)
         {
@@ -522,8 +522,8 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
 
         String uri = createTemplateDefinitionListLink(idEnterprise.toString(), idList.toString());
         ClientResponse response =
-            resource(uri).accept(MediaType.APPLICATION_XML).contentType(MediaType.TEXT_PLAIN).put(
-                null);
+            resource(uri).accept(MediaType.APPLICATION_XML).contentType(MediaType.TEXT_PLAIN)
+                .put(null);
 
         if (response.getStatusType().getFamily() != Family.SUCCESSFUL)
         {
@@ -562,9 +562,9 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
             getTemplateDefinitionListIdFromName(idEnterprise, templateDefinitionListName);
 
         String uri =
-            createTemplateDefinitionLink(idEnterprise.toString(), templateDefinitionListId
-                .toString());
-        ClientResponse response = get(uri);
+            createTemplateDefinitionLink(idEnterprise.toString(),
+                templateDefinitionListId.toString());
+        ClientResponse response = get(uri, TemplateDefinitionsDto.MEDIA_TYPE);
 
         if (response.getStatusType().getFamily() != Family.SUCCESSFUL)
         {
@@ -630,7 +630,7 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
 
         final String uri = createIconsLink();
 
-        ClientResponse response = get(uri);
+        ClientResponse response = get(uri, IconsDto.MEDIA_TYPE);
 
         if (response.getStatusType().getFamily() == Family.SUCCESSFUL)
         {
@@ -670,7 +670,7 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
 
         final String uri = createDiskFormatTypesLink();
 
-        ClientResponse response = get(uri);
+        ClientResponse response = get(uri, DiskFormatTypesDto.MEDIA_TYPE);
 
         if (response.getStatusType().getFamily() == Family.SUCCESSFUL)
         {
@@ -697,8 +697,8 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
     public static com.abiquo.abiserver.pojo.virtualimage.DiskFormatType createFlexDiskFormatTypeObject(
         final DiskFormatTypeDto diskFormatTypeDto)
     {
-        return new com.abiquo.abiserver.pojo.virtualimage.DiskFormatType(DiskFormatType
-            .fromId(diskFormatTypeDto.getId()));
+        return new com.abiquo.abiserver.pojo.virtualimage.DiskFormatType(DiskFormatType.fromId(diskFormatTypeDto
+            .getId()));
     }
 
     protected OVFPackageList createFlexOVFPackageListObject(final TemplateDefinitionListDto listDto)
@@ -727,7 +727,7 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
         RESTLink categoryLink = getLink("category", packDto.getLinks());
         if (categoryLink != null)
         {
-            ClientResponse categoryResponse = get(categoryLink.getHref());
+            ClientResponse categoryResponse = get(categoryLink.getHref(), CategoryDto.MEDIA_TYPE);
             if (categoryResponse.getStatusCode() == Status.OK.getStatusCode())
             {
                 CategoryDto categoryDto = categoryResponse.getEntity(CategoryDto.class);
@@ -808,7 +808,7 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
     private TemplateDefinitionsDto getTemplateDefinitions(final Integer idEnterprise)
     {
         String uri = createTemplateDefinitionsLink(idEnterprise.toString());
-        ClientResponse response = get(uri);
+        ClientResponse response = get(uri, TemplateDefinitionsDto.MEDIA_TYPE);
 
         if (response.getStatusType().getFamily() != Family.SUCCESSFUL)
         {
@@ -830,7 +830,7 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
 
         final String uri = createCategoriesLink();
 
-        ClientResponse response = get(uri);
+        ClientResponse response = get(uri, CategoriesDto.MEDIA_TYPE);
 
         if (response.getStatusType().getFamily() == Family.SUCCESSFUL)
         {
