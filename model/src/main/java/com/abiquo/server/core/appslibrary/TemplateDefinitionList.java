@@ -97,7 +97,7 @@ public class TemplateDefinitionList extends DefaultEntityBase
 
     public final static String NAME_PROPERTY = "name";
 
-    private final static boolean NAME_REQUIRED = false;
+    private final static boolean NAME_REQUIRED = true;
 
     private final static int NAME_LENGTH_MIN = 0;
 

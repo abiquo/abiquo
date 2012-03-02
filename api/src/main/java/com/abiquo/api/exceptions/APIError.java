@@ -222,7 +222,9 @@ public enum APIError
         "MACHINE-8", "Invalid IPMI configuration"), MACHINE_INVALID_IP_RANGE("MACHINE-9",
         "Invalid IP range"), MACHINE_IQN_MISSING("MACHINE-10",
         "The IQN of the target Physical Machine is not set"), MANAGED_MACHINE_CANNOT_CHANGE_NAME(
-        "MACHINE-11", "The Machine is in a managed Rack and its name cannot be changed."),
+        "MACHINE-11", "The Machine is in a managed Rack and its name cannot be changed."), MACHINE_CANNOT_BE_RESERVED(
+        "MACHINE-12",
+        "The machine cannot be reserved because another enterprise has deployed virtual machines on it."),
 
     HYPERVISOR_EXIST_IP("HYPERVISOR-1",
         "Invalid hypervisor IP. A hypervisor with that IP already exists"), HYPERVISOR_EXIST_SERVICE_IP(
@@ -357,7 +359,8 @@ public enum APIError
 
     // OVF PACKAGE LIST
     TEMPLATE_DEFINITION_LIST_NAME_ALREADY_EXIST("OVF-PACKAGE-LIST-0",
-        "OVF Package list name already exists"),
+        "OVF Package list name already exists"), TEMPLATE_DEFINITION_LIST_NAME_NOT_FOUND(
+        "OVF-PACKAGE-LIST-1", "OVF Package list name is required"),
 
     // OVF PACKAGE
     NON_EXISTENT_OVF_PACKAGE("OVF-PACKAGE-0", "The requested OVF package does not exist"), NON_EXISTENT_TEMPLATE_DEFINITION_LIST(
@@ -576,7 +579,7 @@ public enum APIError
 
     // TASKS
     NON_EXISTENT_TASK("TASK-1", "The requested task does not exist"), TASK_OWNER_NOT_FOUND(
-        "TASK-2", ""),
+        "TASK-2", "The owner of the requested task could not be found"),
 
     // PRICING TEMPLATE
     CURRENCY_PARAM_NOT_FOUND("PRICINGTEMPLATE-0", "Missing currency parameter"), ENT_PARAM_NOT_FOUND(
