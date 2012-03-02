@@ -1359,7 +1359,7 @@ public class VirtualMachineService extends DefaultApiService
 
             // Tasks needs the definition of the virtual machine
             VirtualMachineDescriptionBuilder vmDesc =
-                jobCreator.toTarantinoDto(virtualMachine, virtualAppliance);
+                jobCreator.toTarantinoDto(virtualMachine, virtualAppliance, true);
 
             String idAsyncTask =
                 tarantino.undeployVirtualMachineHA(virtualMachine, vmDesc, originalState,
