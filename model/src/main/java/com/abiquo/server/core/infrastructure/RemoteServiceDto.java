@@ -31,7 +31,8 @@ import com.abiquo.model.transport.error.ErrorsDto;
 @XmlRootElement(name = "remoteService")
 public class RemoteServiceDto extends SingleResourceTransportDto
 {
-    public static final String MEDIA_TYPE = "application/vnd.abiquo.remoteservice+xml";
+    public static final String BASE_MEDIA_TYPE = "application/vnd.abiquo.remoteservice+xml";
+    public static final String MEDIA_TYPE = BASE_MEDIA_TYPE + "; version=" + API_VERSION;
     
     private Integer id;
 
@@ -98,6 +99,12 @@ public class RemoteServiceDto extends SingleResourceTransportDto
     public String getMediaType()
     {
         return RemoteServiceDto.MEDIA_TYPE;
+    }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
     }
 
 }

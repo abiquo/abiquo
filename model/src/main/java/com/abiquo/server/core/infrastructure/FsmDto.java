@@ -37,7 +37,8 @@ import com.abiquo.model.transport.SingleResourceTransportDto;
 @XmlRootElement(name = "logicServer")
 public class FsmDto extends SingleResourceTransportDto
 {
-    public static final String MEDIA_TYPE = "application/vnd.abiquo.fsm+xml";
+    public static final String BASE_MEDIA_TYPE = "application/vnd.abiquo.fsm+xml";
+    public static final String MEDIA_TYPE = BASE_MEDIA_TYPE + "; version=" + API_VERSION;
     
     protected String dn;
 
@@ -154,5 +155,11 @@ public class FsmDto extends SingleResourceTransportDto
     public String getMediaType()
     {
         return FsmDto.MEDIA_TYPE;
+    }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
     }
 }

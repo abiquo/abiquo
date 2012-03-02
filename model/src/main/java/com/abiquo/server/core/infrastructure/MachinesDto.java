@@ -36,7 +36,8 @@ import com.abiquo.model.transport.error.ErrorsDto;
 @XmlRootElement(name = "machines")
 public class MachinesDto extends WrapperDto<MachineDto>
 {
-    public static final String MEDIA_TYPE = "application/vnd.abiquo.machines+xml";
+    public static final String BASE_MEDIA_TYPE = "application/vnd.abiquo.machines+xml";
+    public static final String MEDIA_TYPE = BASE_MEDIA_TYPE + "; version=" + API_VERSION;
     
     private ErrorsDto errors;
 
@@ -65,5 +66,11 @@ public class MachinesDto extends WrapperDto<MachineDto>
     public String getMediaType()
     {
         return MachinesDto.MEDIA_TYPE;
+    }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
     }
 }

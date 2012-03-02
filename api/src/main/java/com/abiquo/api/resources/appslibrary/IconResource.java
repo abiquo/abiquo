@@ -21,11 +21,13 @@
 
 package com.abiquo.api.resources.appslibrary;
 
+import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 
 import org.apache.wink.common.annotations.Parent;
@@ -51,6 +53,7 @@ public class IconResource extends AbstractResource
     private IconService service;
 
     @GET
+    @Produces(IconDto.MEDIA_TYPE)
     public IconDto getIcon(@PathParam(ICON) final Integer iconId,
         @Context final IRESTBuilder restBuilder)
     {
@@ -59,6 +62,8 @@ public class IconResource extends AbstractResource
     }
 
     @PUT
+    @Consumes(IconDto.MEDIA_TYPE)
+    @Produces(IconDto.MEDIA_TYPE)
     public IconDto modifyIcon(final IconDto iconDto, @PathParam(ICON) final Integer iconId,
         @Context final IRESTBuilder restBuilder)
     {

@@ -35,7 +35,8 @@ public class DhcpOptionsDto extends WrapperDto<DhcpOptionDto>
      * 
      */
     private static final long serialVersionUID = 1L;
-    public static final String MEDIA_TYPE = "application/vnd.abiquo.dhcpoptions+xml";
+    public static final String BASE_MEDIA_TYPE = "application/vnd.abiquo.dhcpoptions+xml";
+    public static final String MEDIA_TYPE = BASE_MEDIA_TYPE + "; version=" + API_VERSION;
 
     @Override
     @XmlElement(name = "dhcpoption")
@@ -50,4 +51,9 @@ public class DhcpOptionsDto extends WrapperDto<DhcpOptionDto>
         return DhcpOptionsDto.MEDIA_TYPE;
     }
 
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
+    }
 }

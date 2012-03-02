@@ -37,7 +37,8 @@ public class PricingTiersDto extends WrapperDto<PricingTierDto>
      */
     private static final long serialVersionUID = 1L;
 
-    public static final String MEDIA_TYPE = "application/vnd.abiquo.pricingtiers+xml";
+    public static final String BASE_MEDIA_TYPE = "application/vnd.abiquo.pricingtiers+xml";
+    public static final String MEDIA_TYPE = BASE_MEDIA_TYPE + "; version=" + API_VERSION;
 
     @Override
     @XmlElement(name = "pricingTier")
@@ -52,4 +53,9 @@ public class PricingTiersDto extends WrapperDto<PricingTierDto>
         return PricingTiersDto.MEDIA_TYPE;
     }
 
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
+    }
 }

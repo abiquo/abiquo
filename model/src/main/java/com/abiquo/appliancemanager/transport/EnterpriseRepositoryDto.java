@@ -70,4 +70,10 @@ public class EnterpriseRepositoryDto extends RepositoryConfigurationDto
     {
         return MediaType.APPLICATION_XML;
     }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return MediaType.APPLICATION_XML;
+    }
 }

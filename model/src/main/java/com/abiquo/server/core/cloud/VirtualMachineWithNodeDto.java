@@ -30,7 +30,8 @@ public class VirtualMachineWithNodeDto extends VirtualMachineDto
      * 
      */
     private static final long serialVersionUID = -8877350185009627544L;
-    public static final String MEDIA_TYPE = "application/vnd.abiquo.virtualmachinewithnode+xml";
+    public static final String BASE_MEDIA_TYPE = "application/vnd.abiquo.virtualmachinewithnode+xml";
+    public static final String MEDIA_TYPE = BASE_MEDIA_TYPE + "; version=" + API_VERSION;
 
     private Integer nodeId;
 
@@ -84,6 +85,12 @@ public class VirtualMachineWithNodeDto extends VirtualMachineDto
     public String getMediaType()
     {
         return VirtualMachineWithNodeDto.MEDIA_TYPE;
+    }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
     }
 
 }

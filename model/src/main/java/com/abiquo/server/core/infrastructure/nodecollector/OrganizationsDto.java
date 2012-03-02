@@ -99,4 +99,10 @@ public class OrganizationsDto extends WrapperDto<OrganizationDto>
     {
         return MediaType.APPLICATION_XML;
     }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return MediaType.APPLICATION_XML;
+    }
 }

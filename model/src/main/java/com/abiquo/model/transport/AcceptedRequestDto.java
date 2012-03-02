@@ -42,7 +42,8 @@ import com.abiquo.server.core.infrastructure.DatacenterDto;
 public class AcceptedRequestDto<T> extends SingleResourceTransportDto
 {
     private static final long serialVersionUID = -7743440222172054557L;
-    public static final String MEDIA_TYPE = "application/vnd.abiquo.acceptedrequest+xml";
+    public static final String BASE_MEDIA_TYPE = "application/vnd.abiquo.acceptedrequest+xml";
+    public static final String MEDIA_TYPE = BASE_MEDIA_TYPE + "; version=" + API_VERSION;
 
     private static final String STATUS_REL = "status";
 
@@ -76,6 +77,12 @@ public class AcceptedRequestDto<T> extends SingleResourceTransportDto
     public String getMediaType()
     {
         return AcceptedRequestDto.MEDIA_TYPE;
+    }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
     }
 
 }

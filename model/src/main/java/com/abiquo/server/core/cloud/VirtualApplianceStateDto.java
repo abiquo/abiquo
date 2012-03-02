@@ -41,7 +41,8 @@ public class VirtualApplianceStateDto extends SingleResourceTransportDto impleme
      * 
      */
     private static final long serialVersionUID = 7891496375111061310L;
-    public static final String MEDIA_TYPE = "application/vnd.abiquo.virtualappliancestate+xml";
+    public static final String BASE_MEDIA_TYPE = "application/vnd.abiquo.virtualappliancestate+xml";
+    public static final String MEDIA_TYPE = BASE_MEDIA_TYPE + "; version=" + API_VERSION;
     
     /**
      * Machine power state. <br>
@@ -93,5 +94,11 @@ public class VirtualApplianceStateDto extends SingleResourceTransportDto impleme
     public String getMediaType()
     {
         return VirtualApplianceStateDto.MEDIA_TYPE;
+    }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
     }
 }

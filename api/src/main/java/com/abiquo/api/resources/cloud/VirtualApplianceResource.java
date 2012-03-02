@@ -70,10 +70,6 @@ public class VirtualApplianceResource
 
     public static final String VIRTUAL_APPLIANCE_GET_IPS_PATH = "action/ips";
 
-    public static final String VIRTUAL_APPLIANCE_ACTION_ADD_IMAGE = "action/addImage";
-
-    public static final String VIRTUAL_APPLIANCE_ACTION_ADD_IMAGE_REL = "addimage";
-
     public static final String VIRTUAL_APPLIANCE_DEPLOY_PATH = "action/deploy";
 
     public static final String VIRTUAL_APPLIANCE_DEPLOY_REL = "deploy";

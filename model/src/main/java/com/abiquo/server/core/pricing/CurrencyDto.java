@@ -33,7 +33,8 @@ public class CurrencyDto extends SingleResourceTransportDto
      * 
      */
     private static final long serialVersionUID = 1L;
-    public static final String MEDIA_TYPE = "application/vnd.abiquo.currency+xml";
+    public static final String BASE_MEDIA_TYPE = "application/vnd.abiquo.currency+xml";
+    public static final String MEDIA_TYPE = BASE_MEDIA_TYPE + "; version=" + API_VERSION;
 
     public CurrencyDto()
     {
@@ -101,6 +102,12 @@ public class CurrencyDto extends SingleResourceTransportDto
     public String getMediaType()
     {
         return CurrencyDto.MEDIA_TYPE;
+    }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
     }
 
 }

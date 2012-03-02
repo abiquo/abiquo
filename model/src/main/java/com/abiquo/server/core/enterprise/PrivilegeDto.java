@@ -29,7 +29,8 @@ import com.abiquo.server.core.infrastructure.DatacenterDto;
 @XmlRootElement(name = "privilege")
 public class PrivilegeDto extends SingleResourceTransportDto
 {
-    public static final String MEDIA_TYPE = "application/vnd.abiquo.privilege+xml";
+    public static final String BASE_MEDIA_TYPE = "application/vnd.abiquo.privilege+xml";
+    public static final String MEDIA_TYPE = BASE_MEDIA_TYPE + "; version=" + API_VERSION;
     
     public PrivilegeDto()
     {
@@ -71,6 +72,12 @@ public class PrivilegeDto extends SingleResourceTransportDto
     public String getMediaType()
     {
         return PrivilegeDto.MEDIA_TYPE;
+    }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
     }
 
 }

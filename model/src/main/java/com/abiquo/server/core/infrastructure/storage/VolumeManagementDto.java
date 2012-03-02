@@ -32,8 +32,10 @@ import com.abiquo.server.core.infrastructure.DatacenterDto;
 /* "availableSizeInMB", "usedSizeInMB", */"idScsi", "idImage"})
 public class VolumeManagementDto extends SingleResourceTransportDto
 {
-    public static final String MEDIA_TYPE = "application/vnd.abiquo.volume+xml";
-    public static final String ISCSI_MEDIA_TYPE = "application/vnd.abiquo.iscsivolume+xml";
+    public static final String BASE_MEDIA_TYPE = "application/vnd.abiquo.volume+xml";
+    public static final String BASE_ISCSI_MEDIA_TYPE = "application/vnd.abiquo.iscsivolume+xml";
+    public static final String MEDIA_TYPE = BASE_MEDIA_TYPE + "; version=" + API_VERSION;
+    public static final String ISCSI_MEDIA_TYPE = BASE_ISCSI_MEDIA_TYPE + "; version=" + API_VERSION;
 
     private static final long serialVersionUID = 1L;
 
@@ -163,5 +165,11 @@ public class VolumeManagementDto extends SingleResourceTransportDto
     public String getMediaType()
     {
         return VolumeManagementDto.MEDIA_TYPE;
+    }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
     }
 }
