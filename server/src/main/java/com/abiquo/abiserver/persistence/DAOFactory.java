@@ -50,7 +50,6 @@ import com.abiquo.abiserver.persistence.dao.virtualappliance.VirtualMachineDAO;
 import com.abiquo.abiserver.persistence.dao.virtualhardware.ResourceAllocationSettingDataDAO;
 import com.abiquo.abiserver.persistence.dao.virtualhardware.ResourceManagementDAO;
 import com.abiquo.abiserver.persistence.dao.virtualimage.CategoryDAO;
-import com.abiquo.abiserver.persistence.dao.virtualimage.IconDAO;
 import com.abiquo.abiserver.persistence.dao.virtualimage.RepositoryDAO;
 import com.abiquo.abiserver.persistence.dao.virtualimage.VirtualImageConversionsDAO;
 import com.abiquo.abiserver.persistence.dao.virtualimage.VirtualImageDAO;
@@ -138,8 +137,6 @@ public interface DAOFactory
     public abstract VirtualImageDAO getVirtualImageDAO();
 
     public abstract CategoryDAO getCategoryDAO();
-
-    public abstract IconDAO getIconDAO();
 
     public abstract RepositoryDAO getRepositoryDAO();
 

@@ -48,7 +48,6 @@ import com.abiquo.ovfmanager.ovf.xml.OVFSerializer;
 import com.abiquo.server.core.appslibrary.AppsLibraryDAO;
 import com.abiquo.server.core.appslibrary.AppsLibraryRep;
 import com.abiquo.server.core.appslibrary.Category;
-import com.abiquo.server.core.appslibrary.Icon;
 import com.abiquo.server.core.appslibrary.TemplateDefinition;
 import com.abiquo.server.core.appslibrary.TemplateDefinitionRep;
 import com.abiquo.server.core.enterprise.Enterprise;
@@ -69,10 +68,9 @@ public class TemplateDefinitionService extends DefaultApiService
 
     @Autowired
     private AMServiceStub amService;
-    
+
     @Autowired
     protected AppsLibraryDAO appsLibraryDao;
-
 
     public TemplateDefinitionService()
     {
@@ -114,7 +112,7 @@ public class TemplateDefinitionService extends DefaultApiService
     {
         Enterprise ent = enterpriseService.getEnterprise(idEnterprise); // check can view
         templateDef.setAppsLibrary(appsLibraryDao.findByEnterpriseOrInitialize(ent));
-        
+
         if (!templateDef.isValid())
         {
             addValidationErrors(templateDef.getValidationErrors());
@@ -215,9 +213,7 @@ public class TemplateDefinitionService extends DefaultApiService
         {
             String iconPath = descr.getIcon().get(0).getFileRef();
             // TODO start with http://
-
-            Icon icon = appslibraryRep.findByIconPathOrCreateNew(iconPath);
-            pack.setIcon(icon);
+            pack.setIconUrl(iconPath);
         }
 
         DiskFormatType format = findByDiskFormatNameOrUnknow(descr.getDiskFormat());

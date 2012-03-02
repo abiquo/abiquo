@@ -56,7 +56,6 @@ import com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.Virtualma
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.ResourceAllocationSettingData;
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.ResourceManagementHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualimage.CategoryHB;
-import com.abiquo.abiserver.business.hibernate.pojohb.virtualimage.IconHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualimage.RepositoryHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualimage.VirtualImageConversionsHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualimage.VirtualimageHB;
@@ -114,12 +113,10 @@ import com.abiquo.abiserver.persistence.dao.virtualhardware.ResourceManagementDA
 import com.abiquo.abiserver.persistence.dao.virtualhardware.hibernate.ResourceAllocationSettingDataDAOHibernate;
 import com.abiquo.abiserver.persistence.dao.virtualhardware.hibernate.ResourceManagementDAOHibernate;
 import com.abiquo.abiserver.persistence.dao.virtualimage.CategoryDAO;
-import com.abiquo.abiserver.persistence.dao.virtualimage.IconDAO;
 import com.abiquo.abiserver.persistence.dao.virtualimage.RepositoryDAO;
 import com.abiquo.abiserver.persistence.dao.virtualimage.VirtualImageConversionsDAO;
 import com.abiquo.abiserver.persistence.dao.virtualimage.VirtualImageDAO;
 import com.abiquo.abiserver.persistence.dao.virtualimage.hibernate.CategoryDAOHibernate;
-import com.abiquo.abiserver.persistence.dao.virtualimage.hibernate.IconDAOHibernate;
 import com.abiquo.abiserver.persistence.dao.virtualimage.hibernate.RepositoryDAOHibernate;
 import com.abiquo.abiserver.persistence.dao.virtualimage.hibernate.VirtualImageConversionsDAOHibernate;
 import com.abiquo.abiserver.persistence.dao.virtualimage.hibernate.VirtualImageDAOHibernate;
@@ -417,16 +414,6 @@ public class HibernateDAOFactory implements DAOFactory
     public CategoryDAO getCategoryDAO()
     {
         return (CategoryDAO) instantiateDAO(CategoryDAOHibernate.class, CategoryHB.class);
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see com.abiquo.abiserver.persistence.DAOFactory#getIconDAO()
-     */
-    @Override
-    public IconDAO getIconDAO()
-    {
-        return (IconDAO) instantiateDAO(IconDAOHibernate.class, IconHB.class);
     }
 
     /*

@@ -39,7 +39,6 @@ import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.resources.AbstractJpaGeneratorIT;
 import com.abiquo.server.core.appslibrary.AppsLibrary;
 import com.abiquo.server.core.appslibrary.Category;
-import com.abiquo.server.core.appslibrary.Icon;
 import com.abiquo.server.core.appslibrary.TemplateDefinition;
 import com.abiquo.server.core.appslibrary.TemplateDefinitionList;
 import com.abiquo.server.core.appslibrary.TemplateDefinitionListDto;
@@ -93,14 +92,13 @@ public class TemplateDefinitionListsResourceIT extends AbstractJpaGeneratorIT
     private void setupList()
     {
         Category category = categoryGenerator.createUniqueInstance();
-        Icon icon = iconGenerator.createUniqueInstance();
 
         TemplateDefinition templateDef0 =
-            templateDefGenerator.createInstance(appsLibrary, category, icon);
+            templateDefGenerator.createInstance(appsLibrary, category);
         TemplateDefinition templateDef1 =
-            templateDefGenerator.createInstance(appsLibrary, category, icon);
+            templateDefGenerator.createInstance(appsLibrary, category);
         TemplateDefinition templateDef2 =
-            templateDefGenerator.createInstance(appsLibrary, category, icon);
+            templateDefGenerator.createInstance(appsLibrary, category);
 
         TemplateDefinitionList list =
             new TemplateDefinitionList("templateDefinitionList_1", "http://www.abiquo.com");
@@ -118,7 +116,6 @@ public class TemplateDefinitionListsResourceIT extends AbstractJpaGeneratorIT
         // List<TemplateDefinition> listofpackages = new ArrayList<TemplateDefinition>();
         // list.setTemplateDefinitions(listofpackages);
         List<Object> entitiesToSetup2 = new ArrayList<Object>();
-        entitiesToSetup2.add(icon);
         entitiesToSetup2.add(category);
 
         entitiesToSetup2.add(templateDef0);

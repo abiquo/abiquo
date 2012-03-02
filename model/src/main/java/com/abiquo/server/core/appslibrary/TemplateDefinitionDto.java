@@ -52,6 +52,8 @@ public class TemplateDefinitionDto extends SingleResourceTransportDto
 
     private long diskFileSize;
 
+    private String iconUrl;
+
     public Integer getId()
     {
         return id;
@@ -150,5 +152,15 @@ public class TemplateDefinitionDto extends SingleResourceTransportDto
     public void setDescription(final String description)
     {
         this.description = StringUtils.strip(description);
+    }
+
+    public void setIconUrl(String iconUrl)
+    {
+        this.iconUrl = iconUrl;
+    }
+
+    public String getIconUrl()
+    {
+        return iconUrl;
     }
 }

@@ -39,7 +39,6 @@ import com.abiquo.api.resources.AbstractJpaGeneratorIT;
 import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.server.core.appslibrary.AppsLibrary;
 import com.abiquo.server.core.appslibrary.Category;
-import com.abiquo.server.core.appslibrary.Icon;
 import com.abiquo.server.core.appslibrary.TemplateDefinition;
 import com.abiquo.server.core.appslibrary.TemplateDefinitionDto;
 import com.abiquo.server.core.enterprise.Enterprise;
@@ -61,8 +60,6 @@ public class TemplateDefinitionResourceIT extends AbstractJpaGeneratorIT
 
     protected TemplateDefinition templateDef;
 
-    protected Icon icon;
-
     private static final String SYSADMIN = "sysadmin";
 
     @BeforeMethod(groups = {APPS_INTEGRATION_TESTS})
@@ -74,8 +71,6 @@ public class TemplateDefinitionResourceIT extends AbstractJpaGeneratorIT
         datacenter = datacenterGenerator.createUniqueInstance();
         category = categoryGenerator.createUniqueInstance();
         category.setName("category_1");
-        
-        icon = iconGenerator.createUniqueInstance();
 
         Role role = roleGenerator.createInstanceSysAdmin();
         User user = userGenerator.createInstance(enterprise, role, SYSADMIN, SYSADMIN);
@@ -92,7 +87,6 @@ public class TemplateDefinitionResourceIT extends AbstractJpaGeneratorIT
         entitiesToSetup.add(role);
         entitiesToSetup.add(user);
 
-        entitiesToSetup.add(icon);
         entitiesToSetup.add(category);
 
         setup(entitiesToSetup.toArray());
@@ -107,7 +101,7 @@ public class TemplateDefinitionResourceIT extends AbstractJpaGeneratorIT
     @Test(groups = {APPS_INTEGRATION_TESTS})
     public void getTemplateDefinition() throws ClientWebException
     {
-        templateDef = templateDefGenerator.createInstance(appsLibrary, category, icon);
+        templateDef = templateDefGenerator.createInstance(appsLibrary, category);
         templateDef.setDescription("templateDef_1");
         templateDef.setType(DiskFormatType.UNKNOWN);
         setup(templateDef);
@@ -127,7 +121,7 @@ public class TemplateDefinitionResourceIT extends AbstractJpaGeneratorIT
     @Test(groups = {APPS_INTEGRATION_TESTS})
     public void modifyTemplateDefinition() throws ClientWebException
     {
-        templateDef = templateDefGenerator.createInstance(appsLibrary, category, icon);
+        templateDef = templateDefGenerator.createInstance(appsLibrary, category);
         setup(templateDef);
 
         ClientResponse response =
@@ -157,7 +151,7 @@ public class TemplateDefinitionResourceIT extends AbstractJpaGeneratorIT
     @Test(groups = {APPS_INTEGRATION_TESTS})
     public void deleteTemplateDefinition() throws ClientWebException
     {
-        templateDef = templateDefGenerator.createInstance(appsLibrary, category, icon);
+        templateDef = templateDefGenerator.createInstance(appsLibrary, category);
         templateDef.setDescription("templateDef_1");
         templateDef.setType(DiskFormatType.UNKNOWN);
         setup(templateDef);

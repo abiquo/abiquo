@@ -41,7 +41,6 @@ import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.resources.AbstractJpaGeneratorIT;
 import com.abiquo.server.core.appslibrary.AppsLibrary;
 import com.abiquo.server.core.appslibrary.Category;
-import com.abiquo.server.core.appslibrary.Icon;
 import com.abiquo.server.core.appslibrary.TemplateDefinition;
 import com.abiquo.server.core.appslibrary.TemplateDefinitionList;
 import com.abiquo.server.core.appslibrary.TemplateDefinitionListDto;
@@ -59,15 +58,12 @@ public class TemplateDefinitionListResourceIT extends AbstractJpaGeneratorIT
 
     protected AppsLibrary appsLibrary;
 
-    protected Icon icon;
-
     protected Category category;
 
     protected TemplateDefinitionList list;
 
     protected TemplateDefinition templateDef0;
 
-    
     @BeforeMethod(groups = {APPS_INTEGRATION_TESTS})
     public void setUpUser()
     {
@@ -75,14 +71,12 @@ public class TemplateDefinitionListResourceIT extends AbstractJpaGeneratorIT
         appsLibrary = appsLibraryGenerator.createUniqueInstance(enterprise);
 
         category = categoryGenerator.createUniqueInstance();
-        icon = iconGenerator.createUniqueInstance();
 
         Role role = roleGenerator.createInstanceSysAdmin();
         User user = userGenerator.createInstance(enterprise, role, SYSADMIN, SYSADMIN);
         List<Object> entitiesToSetup = new ArrayList<Object>();
         entitiesToSetup.add(enterprise);
         entitiesToSetup.add(appsLibrary);
-        entitiesToSetup.add(icon);
         entitiesToSetup.add(category);
 
         for (Privilege p : role.getPrivileges())
@@ -94,13 +88,11 @@ public class TemplateDefinitionListResourceIT extends AbstractJpaGeneratorIT
 
         setup(entitiesToSetup.toArray());
 
-        //
-
-        templateDef0 = templateDefGenerator.createInstance(appsLibrary, category, icon);
+        templateDef0 = templateDefGenerator.createInstance(appsLibrary, category);
         TemplateDefinition templateDef1 =
-            templateDefGenerator.createInstance(appsLibrary, category, icon);
+            templateDefGenerator.createInstance(appsLibrary, category);
         TemplateDefinition templateDef2 =
-            templateDefGenerator.createInstance(appsLibrary, category, icon);
+            templateDefGenerator.createInstance(appsLibrary, category);
 
         list = new TemplateDefinitionList("templateDefinitionList_1", "http://www.abiquo.com");
         list.setAppsLibrary(appsLibrary);
@@ -123,14 +115,13 @@ public class TemplateDefinitionListResourceIT extends AbstractJpaGeneratorIT
 
         setup(entitiesToSetup2.toArray());
     }
-    
+
     @AfterMethod(groups = {APPS_INTEGRATION_TESTS})
     public void tearDownTest()
     {
         super.tearDown();
     }
 
-    
     @Test(groups = {APPS_INTEGRATION_TESTS})
     public void getTemplateDefinitionList()
     {
@@ -139,8 +130,9 @@ public class TemplateDefinitionListResourceIT extends AbstractJpaGeneratorIT
         for (TemplateDefinitionListDto o : lists.getCollection())
         {
             ClientResponse response =
-                get(UriTestResolver.resolveTemplateDefinitionListURI(enterprise.getId(), o.getId()), SYSADMIN, SYSADMIN);
-            
+                get(UriTestResolver.resolveTemplateDefinitionListURI(enterprise.getId(), o.getId()),
+                    SYSADMIN, SYSADMIN);
+
             TemplateDefinitionListDto result = response.getEntity(TemplateDefinitionListDto.class);
             assertNotNull(result);
             assertEquals(result.getName(), "templateDefinitionList_1");
@@ -149,6 +141,7 @@ public class TemplateDefinitionListResourceIT extends AbstractJpaGeneratorIT
 
     TemplateDefinitionListsDto getLists()
     {
+
         ClientResponse response =
             get(UriTestResolver.resolveTemplateDefinitionListsURI(enterprise.getId()), SYSADMIN,
                 SYSADMIN);
@@ -182,6 +175,7 @@ public class TemplateDefinitionListResourceIT extends AbstractJpaGeneratorIT
                 delete(
                     UriTestResolver.resolveTemplateDefinitionListURI(enterprise.getId(), o.getId()),
                     SYSADMIN, SYSADMIN);
+
             assertEquals(response.getStatusCode(), 204);
         }
     }
@@ -209,5 +203,4 @@ public class TemplateDefinitionListResourceIT extends AbstractJpaGeneratorIT
             assertEquals(result.getTemplateDefinitions().getCollection().size(), 2);
         }
     }
-
 }

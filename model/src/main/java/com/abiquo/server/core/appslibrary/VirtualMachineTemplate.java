@@ -460,26 +460,32 @@ public class VirtualMachineTemplate extends DefaultEntityBase
         this.description = description;
     }
 
-    public final static String ICON_PROPERTY = "icon";
+    public final static String ICON_URL_PROPERTY = "iconUrl";
 
-    private final static boolean ICON_REQUIRED = false;
+    private final static boolean ICON_URL_REQUIRED = false;
 
-    private final static String ICON_ID_COLUMN = "idIcon";
+    private final static int ICON_URL_LENGTH_MIN = 0;
 
-    @JoinColumn(name = ICON_ID_COLUMN)
-    @ManyToOne(fetch = FetchType.LAZY)
-    @ForeignKey(name = "FK_" + TABLE_NAME + "_icon")
-    private Icon icon;
+    private final static int ICON_URL_LENGTH_MAX = 255;
 
-    @Required(value = ICON_REQUIRED)
-    public Icon getIcon()
+    private final static boolean ICON_URL_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
+
+    private final static String ICON_URL_COLUMN = "iconUrl";
+
+    @Column(name = ICON_URL_COLUMN, nullable = !ICON_URL_REQUIRED, length = ICON_URL_LENGTH_MAX)
+    private String iconUrl;
+
+    @Required(value = ICON_URL_REQUIRED)
+    @Length(min = ICON_URL_LENGTH_MIN, max = ICON_URL_LENGTH_MAX)
+    @LeadingOrTrailingWhitespace(allowed = ICON_URL_LEADING_OR_TRAILING_WHITESPACES_ALLOWED)
+    public String getIconUrl()
     {
-        return icon;
+        return this.iconUrl;
     }
 
-    public void setIcon(final Icon icon)
+    public void setIconUrl(final String iconUrl)
     {
-        this.icon = icon;
+        this.iconUrl = iconUrl;
     }
 
     public final static String COST_CODE_PROPERTY = "costCode";
@@ -593,7 +599,7 @@ public class VirtualMachineTemplate extends DefaultEntityBase
 
     // Creation date does not have a setter, since it will be auto generated.
 
-    /* *********************** Helper methods ************************* */
+    /*          *********************** Helper methods ************************* */
 
     public void setRequirements(final int cpu, final int ram, final long hd)
     {

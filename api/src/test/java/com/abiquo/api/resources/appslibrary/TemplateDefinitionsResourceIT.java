@@ -39,7 +39,6 @@ import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.model.rest.RESTLink;
 import com.abiquo.server.core.appslibrary.AppsLibrary;
 import com.abiquo.server.core.appslibrary.Category;
-import com.abiquo.server.core.appslibrary.Icon;
 import com.abiquo.server.core.appslibrary.TemplateDefinition;
 import com.abiquo.server.core.appslibrary.TemplateDefinitionDto;
 import com.abiquo.server.core.appslibrary.TemplateDefinitionsDto;
@@ -94,18 +93,13 @@ public class TemplateDefinitionsResourceIT extends AbstractJpaGeneratorIT
         // Resource resource = client.resource(ovfPackagesURI).accept(MediaType.APPLICATION_XML);
 
         Category category = categoryGenerator.createUniqueInstance();
-        Icon icon = iconGenerator.createUniqueInstance();
 
-        TemplateDefinition ovfPackage0 =
-            templateDefGenerator.createInstance(appslib, category, icon);
-        TemplateDefinition ovfPackage1 =
-            templateDefGenerator.createInstance(appslib, category, icon);
-        TemplateDefinition ovfPackage2 =
-            templateDefGenerator.createInstance(appslib, category, icon);
+        TemplateDefinition ovfPackage0 = templateDefGenerator.createInstance(appslib, category);
+        TemplateDefinition ovfPackage1 = templateDefGenerator.createInstance(appslib, category);
+        TemplateDefinition ovfPackage2 = templateDefGenerator.createInstance(appslib, category);
         List<Object> entitiesToSetup = new ArrayList<Object>();
 
         entitiesToSetup.add(category);
-        entitiesToSetup.add(icon);
         entitiesToSetup.add(ovfPackage0);
         entitiesToSetup.add(ovfPackage1);
         entitiesToSetup.add(ovfPackage2);
@@ -136,9 +130,7 @@ public class TemplateDefinitionsResourceIT extends AbstractJpaGeneratorIT
         categoryLink.setTitle("category_1");
         p.addLink(categoryLink);
 
-        RESTLink iconLink = new RESTLink(IconResource.ICON, "");
-        iconLink.setTitle("http://www.google.com/logos/2011/Albert_Szent_Gyorgyi-2011-hp.jpg");
-        p.addLink(iconLink);
+        p.setIconUrl("http://www.google.com/logos/2011/Albert_Szent_Gyorgyi-2011-hp.jpg");
 
         ClientResponse response =
             post(resolveTemplateDefinitionsURI(enterprise.getId()), p, SYSADMIN, SYSADMIN);
