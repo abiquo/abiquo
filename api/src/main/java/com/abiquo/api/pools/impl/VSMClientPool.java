@@ -21,10 +21,11 @@
 
 package com.abiquo.api.pools.impl;
 
-import org.apache.commons.pool.BasePoolableObjectFactory;
 import org.apache.commons.pool.impl.GenericObjectPool;
-import org.springframework.stereotype.Component;
 
+import com.abiquo.api.pools.PoolableRemoteServiceClientFactory;
+import com.abiquo.api.pools.RemoteServiceClientPool.Pool;
+import com.abiquo.server.core.infrastructure.RemoteService;
 import com.abiquo.vsm.client.VSMClient;
 
 /**
@@ -32,26 +33,26 @@ import com.abiquo.vsm.client.VSMClient;
  * 
  * @author enric.ruiz@abiquo.com
  */
-@Component(value = "vSMClientPool")
-public class VSMClientPool extends GenericObjectPool
+public class VSMClientPool extends Pool<VSMClient>
 {
-    public VSMClientPool()
+    public VSMClientPool(final RemoteService remoteService)
     {
-        super(new PoolableVSMClientFactory());
+        super(new PoolableVSMClientFactory(remoteService));
     }
 
-    public VSMClient borrowObject(String uri) throws Exception
+    private static class PoolableVSMClientFactory extends PoolableRemoteServiceClientFactory
     {
-        VSMClient client = (VSMClient) super.borrowObject();
-        return client.initialize(uri);
-    }
+        public PoolableVSMClientFactory(final RemoteService remoteService)
+        {
+            super(remoteService);
+        }
 
-    private static class PoolableVSMClientFactory extends BasePoolableObjectFactory
-    {
         @Override
         public Object makeObject() throws Exception
         {
-            return new VSMClient();
+            VSMClient client = new VSMClient();
+            client.initialize(remoteService.getUri());
+            return client;
         }
     }
 }
