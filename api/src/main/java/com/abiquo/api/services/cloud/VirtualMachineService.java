@@ -853,7 +853,7 @@ public class VirtualMachineService extends DefaultApiService
      * 
      * @param virtualMachine void
      */
-    private void detachVirtualMachineIPs(final VirtualMachine virtualMachine)
+    public void detachVirtualMachineIPs(final VirtualMachine virtualMachine)
     {
         for (IpPoolManagement ip : virtualMachine.getIps())
         {
@@ -1042,7 +1042,7 @@ public class VirtualMachineService extends DefaultApiService
      *            contain the virtual machine template.
      * @param virtualAppliance void where the virtual machine exists.
      */
-    private void createNodeVirtualImage(final VirtualMachine virtualMachine,
+    protected void createNodeVirtualImage(final VirtualMachine virtualMachine,
         final VirtualAppliance virtualAppliance, final String name)
     {
         LOGGER.debug("Create node virtual image with name virtual machine: {}",
@@ -2941,4 +2941,25 @@ public class VirtualMachineService extends DefaultApiService
         repo.update(vm);
     }
 
+    /**
+     * This method writes without care for permissions.
+     * 
+     * @param vm void
+     */
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void insertNodeVirtualImage(final NodeVirtualImage node)
+    {
+        repo.insertNodeVirtualImage(node);
+    }
+
+    /**
+     * This method writes without care for permissions.
+     * 
+     * @param vm void
+     */
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void insertVirtualMachine(final VirtualMachine virtualMachine)
+    {
+        repo.insert(virtualMachine);
+    }
 }

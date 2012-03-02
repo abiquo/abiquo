@@ -183,10 +183,20 @@ public enum APIError
     // VIRTUAL APPLIANCE
     NON_EXISTENT_VIRTUALAPPLIANCE("VAPP-0", "The requested virtual appliance does not exist"), VIRTUALAPPLIANCE_NOT_DEPLOYED(
         "VAPP-1", "The virtual appliance is not deployed"), VIRTUALAPPLIANCE_NOT_RUNNING("VAPP-2",
-        "The virtual appliance is not running"), VIRTUALAPPLIANCE_DEPLOYED("VAPP-1",
+        "The virtual appliance is not running"), VIRTUALAPPLIANCE_DEPLOYED("VAPP-3",
         "The virtual appliance is deployed"), VIRTUALAPPLIANCE_NON_MANAGED_IMAGES("VAPP-4",
         "The virtual appliance has non-managed VM templates"), VIRTUALAPPLIANCE_INVALID_STATE_DELETE(
-        "VAPP-4", "The virtual appliance has non-managed VM templates"),
+        "VAPP-5", "The virtual appliance has non-managed VM templates"), VIRTUALAPPLIANCE_MOVE_MISSING_VDC(
+        "VAPP-6", "The virtual appliance has not the virtual datacenter link"), VIRTUALAPPLIANCE_INVALID_STATE_MOVE_COPY(
+        "VAPP-8", "The virtual appliance cannot be moved since the state is not NOT_DEPLOYED"), VIRTUALAPPLIANCE_INVALID_DC_MOVE_COPY(
+        "VAPP-7",
+        "The virtual appliance cannot be moved or copied since target virtual datacenter is not in the same datacenter"), VIRTUALAPPLIANCE_MOVE_COPY_CAPTURED_VM(
+        "VAPP-9",
+        "The virtual appliance cannot be moved nor copied since it contains captured virtual machines"), VIRTUALAPPLIANCE_MOVE_COPY_INCOMPATIBLE_VM(
+        "VAPP-10",
+        "The virtual appliance cannot be moved nor copied since it contains incompatible virtual machines templates with the hypervisor to be moved"), VIRTUALAPPLIANCE_COPY_PERSISTENT_VM(
+        "VAPP-11",
+        "The virtual appliance cannot be copied since it contains persistent virtual machines templates with the hypervisor to be moved"),
 
     // VIRTUAL CONVERSION
     NON_EXISTENT_VIRTUALAPPLIANCE_STATEFULCONVERSION("VASC-0",
