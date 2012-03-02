@@ -22,6 +22,7 @@
 package com.abiquo.server.core.infrastructure.network;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -29,6 +30,7 @@ import javax.persistence.EntityManager;
 
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.Criteria;
+import org.hibernate.LockMode;
 import org.hibernate.Query;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.ProjectionList;
@@ -237,6 +239,9 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
             + " AND vdc.id = :vdc_id AND" + "( ip.ip like :filterLike "
             + " OR ip.mac like :filterLike " + " OR ip.vlanNetwork.name like :filterLike "
             + " OR vapp.name like :filterLike " + " OR vm.name like :filterLike " + ")";
+
+    public static final String BY_VLAN_NEXT_AVAILABLE =
+        "SELECT ip FROM IpPoolManagement ip inner join ip.virtualDatacenter vdc WHERE vdc.id = :vdc_id AND ip.ip.available = 1 AND ip.ip NOT in ( :excludedIp )";
 
     public static final String BY_VLAN_USED_BY_ANY_VDC =
         " SELECT ip FROM ip_pool_management ip  , rasd_management rasd, virtualdatacenter vdc "
@@ -550,6 +555,38 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
         ipList.setCurrentElement(firstElem);
 
         return ipList;
+    }
+
+    /**
+     * Find next IpPoolManagement created and available by a vLAN with filter options
+     * 
+     * @param vdcId identifier of the virtual datacenter.
+     * @param vlanId identifier of the vlan.
+     * @param excludedIps ips excluded from result if exists
+     * @return next available IP address.
+     */
+    public IpPoolManagement findNextIpByPrivateVLANAvailable(final Integer vdcId,
+        final Integer vlanId, final String... excludedIps)
+    {
+        // Get the query that counts the total results.
+        Query query =
+            getSession().createQuery(
+                BY_VLAN_NEXT_AVAILABLE
+                    + defineOrderBy(IpPoolManagement.OrderByEnum.IP, Boolean.TRUE));
+        query.setInteger("vdc_id", vdcId);
+        query.setMaxResults(1);
+        query.setLockMode("next_ip", LockMode.PESSIMISTIC_WRITE);
+        if (excludedIps != null && excludedIps.length != 0)
+        {
+            query.setParameterList("excludedIp", Arrays.asList(excludedIps));
+        }
+        else
+        {
+            query.setString("excludedIp", null);
+        }
+        List<IpPoolManagement> result = query.list();
+
+        return result.isEmpty() ? null : result.get(0);
     }
 
     /**
