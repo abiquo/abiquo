@@ -34,8 +34,10 @@ import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.UriInfo;
 
@@ -103,6 +105,7 @@ public class VirtualDatacenterResource extends AbstractResource
     UriInfo uriInfo;
 
     @GET
+    @Produces(VirtualDatacenterDto.MEDIA_TYPE)
     public VirtualDatacenterDto getVirtualDatacenter(
         @PathParam(VIRTUAL_DATACENTER) final Integer id, @Context final IRESTBuilder restBuilder)
         throws Exception
@@ -130,6 +133,7 @@ public class VirtualDatacenterResource extends AbstractResource
     @SuppressWarnings("unchecked")
     @GET
     @Path(VirtualDatacenterResource.VIRTUAL_DATACENTER_GET_IPS_PATH)
+    @Produces(IpsPoolManagementDto.MEDIA_TYPE)
     public IpsPoolManagementDto getIPsByVirtualDatacenter(
         @PathParam(VIRTUAL_DATACENTER) final Integer id,
         @QueryParam(START_WITH) @Min(0) final Integer startwith,
@@ -164,6 +168,7 @@ public class VirtualDatacenterResource extends AbstractResource
     }
 
     @GET
+    @Produces(MediaType.TEXT_PLAIN)
     @Path(VirtualDatacenterResource.VIRTUAL_DATACENTER_DHCP_INFO_PATH)
     public String getDHCPInfoByVirtualDatacenter(@PathParam(VIRTUAL_DATACENTER) final Integer id,
         @Context final IRESTBuilder restBuilder) throws Exception
@@ -209,6 +214,7 @@ public class VirtualDatacenterResource extends AbstractResource
     // should be also changed in enterprise version.
     @GET
     @Path(VirtualDatacenterResource.DEFAULT_VLAN_PATH)
+    @Produces(VLANNetworkDto.MEDIA_TYPE)
     public VLANNetworkDto getDefaultVlan(
         @PathParam(VIRTUAL_DATACENTER) @NotNull @Min(1) final Integer id,
         @Context final IRESTBuilder restBuilder) throws Exception

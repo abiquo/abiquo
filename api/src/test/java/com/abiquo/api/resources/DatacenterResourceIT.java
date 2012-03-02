@@ -88,7 +88,8 @@ public class DatacenterResourceIT extends AbstractJpaGeneratorIT
     {
         ClientResponse response = get(resolveDatacenterURI(12345), DatacenterDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), Status.NOT_FOUND.getStatusCode());
-        assertErrors(response, Status.NOT_FOUND.getStatusCode(), APIError.NON_EXISTENT_DATACENTER.getCode());
+        assertErrors(response, Status.NOT_FOUND.getStatusCode(),
+            APIError.NON_EXISTENT_DATACENTER.getCode());
     }
 
     @Test
@@ -114,7 +115,8 @@ public class DatacenterResourceIT extends AbstractJpaGeneratorIT
         DatacenterDto dc = createDatacenter();
         String uri = dc.getEditLink().getHref();
 
-        DatacenterDto datacenter = get(uri, DatacenterDto.MEDIA_TYPE).getEntity(DatacenterDto.class);
+        DatacenterDto datacenter =
+            get(uri, DatacenterDto.MEDIA_TYPE).getEntity(DatacenterDto.class);
 
         datacenter.setLocation("datacenter_situation_changed");
         ClientResponse response = put(uri, datacenter);
@@ -150,7 +152,8 @@ public class DatacenterResourceIT extends AbstractJpaGeneratorIT
 
         response = get(resolveHypervisorTypesURI(12345), HypervisorTypesDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), Status.NOT_FOUND.getStatusCode());
-        assertErrors(response, Status.NOT_FOUND.getStatusCode(), APIError.NON_EXISTENT_DATACENTER.getCode());
+        assertErrors(response, Status.NOT_FOUND.getStatusCode(),
+            APIError.NON_EXISTENT_DATACENTER.getCode());
     }
 
     @Test
@@ -469,7 +472,7 @@ public class DatacenterResourceIT extends AbstractJpaGeneratorIT
         String ip = NodecollectorServiceStubMock.IP_CORRECT_1;
 
         ClientResponse response =
-            get(resolveDatacenterURIActionDiscoverHypervidor(datacenter.getId(), ip));
+            get(resolveDatacenterURIActionDiscoverHypervidor(datacenter.getId(), ip), "text/plain");
 
         String hType = response.getEntity(String.class);
         assertNotNull(hType);

@@ -27,11 +27,13 @@ import java.util.List;
 
 import javax.validation.constraints.Min;
 import javax.ws.rs.DefaultValue;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 
 import org.apache.wink.common.annotations.Parent;
@@ -56,6 +58,7 @@ public class VirtualAppliancesResource extends AbstractResource
     VirtualApplianceService service;
 
     @GET
+    @Produces(VirtualAppliancesDto.MEDIA_TYPE)
     public VirtualAppliancesDto getVirtualAppliances(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
         @QueryParam(START_WITH) @DefaultValue("0") @Min(0) final Integer startwith,
@@ -82,6 +85,8 @@ public class VirtualAppliancesResource extends AbstractResource
     }
 
     @POST
+    @Consumes(VirtualApplianceDto.MEDIA_TYPE)
+    @Produces(VirtualApplianceDto.MEDIA_TYPE)
     public VirtualApplianceDto createVirtualAppliance(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
         final VirtualApplianceDto dto, @Context final IRESTBuilder restBuilder) throws Exception

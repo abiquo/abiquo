@@ -62,7 +62,7 @@ public class StorageResourceStubImpl extends AbstractAPIStub implements StorageR
         DataResult<List<Disk>> result = new DataResult<List<Disk>>();
 
         String uri = createVirtualMachineDisksLink(vdcId, vappId, vmId);
-        ClientResponse response = get(uri);
+        ClientResponse response = get(uri, DisksManagementDto.MEDIA_TYPE);
 
         if (response.getStatusCode() == 200)
         {
@@ -92,7 +92,7 @@ public class StorageResourceStubImpl extends AbstractAPIStub implements StorageR
         DataResult<Disk> result = new DataResult<Disk>();
 
         String uri = createVirtualMachineDiskLink(vdcId, vappId, vmId, diskOrder);
-        ClientResponse response = get(uri);
+        ClientResponse response = get(uri, DiskManagementDto.MEDIA_TYPE);
 
         if (response.getStatusCode() == 200)
         {
@@ -192,7 +192,7 @@ public class StorageResourceStubImpl extends AbstractAPIStub implements StorageR
         DataResult<List<Disk>> result = new DataResult<List<Disk>>();
 
         String uri = createVirtualMachineHardDiskLink(datacenterId, rackId, pmId, vmId);
-        ClientResponse response = get(uri);
+        ClientResponse response = get(uri, DisksManagementDto.MEDIA_TYPE);
 
         if (response.getStatusCode() == 200)
         {

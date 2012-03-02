@@ -113,7 +113,7 @@ public class UsersResourceStubImpl extends AbstractAPIStub implements UsersResou
     {
         DataResult<User> result = new DataResult<User>();
 
-        ClientResponse response = get(createUserLink("_", id));
+        ClientResponse response = get(createUserLink("_", id), UserDto.MEDIA_TYPE);
 
         if (response.getStatusCode() == 200)
         {
@@ -195,12 +195,12 @@ public class UsersResourceStubImpl extends AbstractAPIStub implements UsersResou
         }
 
         String uri =
-            createUsersLink(enterpriseWildcard, userListOptions.getOffset(), userListOptions
-                .getLength());
+            createUsersLink(enterpriseWildcard, userListOptions.getOffset(),
+                userListOptions.getLength());
 
         uri = UriHelper.appendQueryParamsToPath(uri, queryParams, false);
 
-        ClientResponse response = get(uri, LINK_MEDIA_TYPE);
+        ClientResponse response = get(uri, UsersDto.MEDIA_TYPE);
         if (response.getStatusCode() == 200)
         {
             UsersDto usersDto = response.getEntity(UsersDto.class);
@@ -284,12 +284,12 @@ public class UsersResourceStubImpl extends AbstractAPIStub implements UsersResou
         }
 
         String uri =
-            createUsersLink(enterpriseWildcard, userListOptions.getOffset(), userListOptions
-                .getLength());
+            createUsersLink(enterpriseWildcard, userListOptions.getOffset(),
+                userListOptions.getLength());
 
         uri = UriHelper.appendQueryParamsToPath(uri, queryParams, false);
 
-        ClientResponse response = getWithMediaType(uri, FLAT_MEDIA_TYPE, FLAT_MEDIA_TYPE);
+        ClientResponse response = get(uri, UsersWithRolesDto.MEDIA_TYPE);
         if (response.getStatusCode() == 200)
         {
             UsersWithRolesDto usersDto = response.getEntity(UsersWithRolesDto.class);
@@ -342,13 +342,13 @@ public class UsersResourceStubImpl extends AbstractAPIStub implements UsersResou
                 if (SecurityService.isStandardUser(currentUser.getRoleHB().toPojo())
                     && orderBy.equalsIgnoreCase("role"))
                 {
-                    normalUsers.add(User.create(dto, Enterprise.create(enterprise), Role.create(
-                        role, entRole, privileges)));
+                    normalUsers.add(User.create(dto, Enterprise.create(enterprise),
+                        Role.create(role, entRole, privileges)));
                 }
                 else
                 {
-                    users.add(User.create(dto, Enterprise.create(enterprise), Role.create(role,
-                        entRole, privileges)));
+                    users.add(User.create(dto, Enterprise.create(enterprise),
+                        Role.create(role, entRole, privileges)));
                 }
                 // }
                 // else
@@ -402,7 +402,7 @@ public class UsersResourceStubImpl extends AbstractAPIStub implements UsersResou
         if (!cache.containsKey(privilegesUri))
         {
             PrivilegesDto ps =
-                get(privilegesUri, AbstractAPIStub.FLAT_MEDIA_TYPE).getEntity(PrivilegesDto.class);
+                get(privilegesUri, PrivilegesDto.MEDIA_TYPE).getEntity(PrivilegesDto.class);
             if (ps.getCollection() != null)
             {
                 for (PrivilegeDto p : ps.getCollection())
@@ -424,7 +424,7 @@ public class UsersResourceStubImpl extends AbstractAPIStub implements UsersResou
         RoleDto dto = null;
         if (!cache.containsKey(roleUri))
         {
-            ClientResponse response = get(roleUri, LINK_MEDIA_TYPE);
+            ClientResponse response = get(roleUri, RoleDto.MEDIA_TYPE);
             if (response.getStatusCode() == 200)
             {
                 dto = response.getEntity(RoleDto.class);
@@ -444,7 +444,7 @@ public class UsersResourceStubImpl extends AbstractAPIStub implements UsersResou
         EnterpriseDto dto = null;
         if (!cache.containsKey(enterpriseUri))
         {
-            dto = get(enterpriseUri).getEntity(EnterpriseDto.class);
+            dto = get(enterpriseUri, EnterpriseDto.MEDIA_TYPE).getEntity(EnterpriseDto.class);
             cache.put(enterpriseUri, dto);
         }
         else
@@ -457,8 +457,14 @@ public class UsersResourceStubImpl extends AbstractAPIStub implements UsersResou
     private UserDto fromUserToDto(final User user)
     {
         UserDto newUser =
-            new UserDto(user.getName(), user.getSurname(), user.getEmail(), user.getUser(), user
-                .getPass(), user.getLocale(), user.getDescription(), user.getAuthType().name());
+            new UserDto(user.getName(),
+                user.getSurname(),
+                user.getEmail(),
+                user.getUser(),
+                user.getPass(),
+                user.getLocale(),
+                user.getDescription(),
+                user.getAuthType().name());
 
         newUser.setActive(user.getActive());
         newUser.addLink(new RESTLink("role", createRoleLink(user.getRole().getId())));
@@ -476,8 +482,8 @@ public class UsersResourceStubImpl extends AbstractAPIStub implements UsersResou
         }
         else
         {
-            newUser.setAvailableVirtualDatacenters(StringUtils.join(user
-                .getAvailableVirtualDatacenters(), ","));
+            newUser.setAvailableVirtualDatacenters(StringUtils.join(
+                user.getAvailableVirtualDatacenters(), ","));
         }
 
         return newUser;
@@ -490,7 +496,7 @@ public class UsersResourceStubImpl extends AbstractAPIStub implements UsersResou
 
         String uri = createRoleLink(roleId);
 
-        ClientResponse response = get(uri, LINK_MEDIA_TYPE);
+        ClientResponse response = get(uri, RoleDto.MEDIA_TYPE);
 
         if (response.getStatusCode() == 200)
         {
@@ -572,7 +578,7 @@ public class UsersResourceStubImpl extends AbstractAPIStub implements UsersResou
 
         uri = UriHelper.appendQueryParamsToPath(uri, queryParams, false);
 
-        ClientResponse response = get(uri);
+        ClientResponse response = get(uri, RolesDto.MEDIA_TYPE);
         if (response.getStatusCode() == 200)
         {
             UserHB currentUser = getCurrentUser();
@@ -618,7 +624,7 @@ public class UsersResourceStubImpl extends AbstractAPIStub implements UsersResou
 
         String uri = createRoleActionGetPrivilegesURI(roleId);
 
-        ClientResponse response = get(uri, FLAT_MEDIA_TYPE);
+        ClientResponse response = get(uri, PrivilegesDto.MEDIA_TYPE);
         if (response.getStatusCode() == 200)
         {
             PrivilegesDto dto = response.getEntity(PrivilegesDto.class);
@@ -678,7 +684,7 @@ public class UsersResourceStubImpl extends AbstractAPIStub implements UsersResou
 
         String uri = createRoleLink(idRole);
 
-        ClientResponse response = get(uri, LINK_MEDIA_TYPE);
+        ClientResponse response = get(uri, RoleDto.MEDIA_TYPE);
 
         if (response.getStatusCode() == 200)
         {

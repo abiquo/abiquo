@@ -38,6 +38,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 
 import org.apache.wink.common.annotations.Parent;
@@ -156,7 +157,7 @@ public class DatacenterResource extends AbstractResource
 
         return createTransferObject(datacenter, restBuilder);
     }
-    
+
     @PUT
     @Consumes(DatacenterDto.MEDIA_TYPE)
     @Produces(DatacenterDto.MEDIA_TYPE)
@@ -258,6 +259,7 @@ public class DatacenterResource extends AbstractResource
      */
     @GET
     @Path(ACTION_DISCOVER_HYPERVISOR_TYPE)
+    @Produces(MediaType.TEXT_PLAIN)
     public String getHypervisorType(
         @PathParam(DatacenterResource.DATACENTER) final Integer datacenterId,
         @QueryParam(IP) @NotNull final String ip)

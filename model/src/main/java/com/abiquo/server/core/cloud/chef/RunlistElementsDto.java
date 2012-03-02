@@ -50,7 +50,7 @@ public class RunlistElementsDto extends WrapperDto<RunlistElementDto>
     {
         return collection;
     }
-    
+
     @Override
     public String getMediaType()
     {

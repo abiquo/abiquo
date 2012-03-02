@@ -99,61 +99,63 @@ public class VirtualMachineStorageConfigurationResourceIT extends AbstractJpaGen
     {
         super.tearDown();
     }
-    
+
     @Test
     public void testGetListOfDisksReturns404IfUnexistingVirtualDatacenter()
     {
         String uri = resolveVirtualMachineDisksUri(vdc.getId() + 100, vapp.getId(), vm.getId());
-        ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
-        assertError(response, Status.NOT_FOUND.getStatusCode(), APIError.NON_EXISTENT_VIRTUAL_DATACENTER);
+        ClientResponse response = get(uri, SYSADMIN, SYSADMIN, DisksManagementDto.MEDIA_TYPE);
+        assertError(response, Status.NOT_FOUND.getStatusCode(),
+            APIError.NON_EXISTENT_VIRTUAL_DATACENTER);
     }
 
     @Test
     public void testGetListOfDisksReturns404IfUnexistingVirtualAppliance()
     {
         String uri = resolveVirtualMachineDisksUri(vdc.getId(), vapp.getId() + 100, vm.getId());
-        ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
-        assertError(response, Status.NOT_FOUND.getStatusCode(), APIError.NON_EXISTENT_VIRTUALAPPLIANCE);
+        ClientResponse response = get(uri, SYSADMIN, SYSADMIN, DisksManagementDto.MEDIA_TYPE);
+        assertError(response, Status.NOT_FOUND.getStatusCode(),
+            APIError.NON_EXISTENT_VIRTUALAPPLIANCE);
     }
 
     @Test
     public void testGetListOfDisksReturns404IfUnexistingVirtualMachine()
     {
         String uri = resolveVirtualMachineDisksUri(vdc.getId(), vapp.getId(), vm.getId() + 100);
-        ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
-        assertError(response, Status.NOT_FOUND.getStatusCode(), APIError.NON_EXISTENT_VIRTUALMACHINE);
+        ClientResponse response = get(uri, SYSADMIN, SYSADMIN, DisksManagementDto.MEDIA_TYPE);
+        assertError(response, Status.NOT_FOUND.getStatusCode(),
+            APIError.NON_EXISTENT_VIRTUALMACHINE);
     }
-    
+
     @Test
     public void testGetVolumeReturns404IfUnexistingDisk()
     {
         String uri =
-            resolveVirtualMachineDiskUri(vdc.getId(), vapp.getId(), vm.getId(),
-                disk.getId() + 100);
-        ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
+            resolveVirtualMachineDiskUri(vdc.getId(), vapp.getId(), vm.getId(), disk.getId() + 100);
+        ClientResponse response = get(uri, SYSADMIN, SYSADMIN, DiskManagementDto.MEDIA_TYPE);
         assertError(response, Status.NOT_FOUND.getStatusCode(), APIError.HD_NON_EXISTENT_HARD_DISK);
     }
 
-    
     @Test(groups = {EDIT_VM_INTEGRATION_TESTS})
     public void testAttachDisksReturns400IfInvalidVirtualDatacenter()
     {
         String invalidLink = resolveDiskUri(vdc.getId() + 100, disk.getId());
         LinksDto request = new LinksDto();
-        request.addLink(new RESTLink(VirtualMachineStorageConfigurationResource.DISK,
-            invalidLink));
+        request.addLink(new RESTLink(VirtualMachineStorageConfigurationResource.DISK, invalidLink));
 
         String uri = resolveVirtualMachineDisksUri(vdc.getId(), vapp.getId(), vm.getId());
-        ClientResponse response = post(uri, request, SYSADMIN, SYSADMIN);
-        assertError(response, Status.BAD_REQUEST.getStatusCode(), APIError.HD_ATTACH_INVALID_VDC_LINK);
+        ClientResponse response =
+            post(uri, request, SYSADMIN, SYSADMIN, AcceptedRequestDto.MEDIA_TYPE,
+                LinksDto.MEDIA_TYPE);
+        assertError(response, Status.BAD_REQUEST.getStatusCode(),
+            APIError.HD_ATTACH_INVALID_VDC_LINK);
     }
-    
+
     @Test(groups = {EDIT_VM_INTEGRATION_TESTS})
     public void testDetachHardDiskReturns404IfUnexistingHardDisk()
     {
         String uri =
-            resolveVirtualMachineDiskUri(vdc.getId(), vapp.getId(), vm.getId(),
-                disk.getId() + 100);
+            resolveVirtualMachineDiskUri(vdc.getId(), vapp.getId(), vm.getId(), disk.getId() + 100);
         ClientResponse response = delete(uri, SYSADMIN, SYSADMIN);
         assertError(response, Status.NOT_FOUND.getStatusCode(), APIError.HD_NON_EXISTENT_HARD_DISK);
     }
@@ -166,7 +168,7 @@ public class VirtualMachineStorageConfigurationResourceIT extends AbstractJpaGen
         ClientResponse response = delete(uri, SYSADMIN, SYSADMIN);
         assertError(response, Status.NOT_FOUND.getStatusCode(), APIError.HD_NON_EXISTENT_HARD_DISK);
     }
-    
+
     @Test
     public void testGetListOfHardDisks()
     {
@@ -174,42 +176,45 @@ public class VirtualMachineStorageConfigurationResourceIT extends AbstractJpaGen
         update(disk.getRasd(), disk);
 
         String uri = resolveVirtualMachineDisksUri(vdc.getId(), vapp.getId(), vm.getId());
-        ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
+        ClientResponse response = get(uri, SYSADMIN, SYSADMIN, DisksManagementDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), Status.OK.getStatusCode());
 
         DisksManagementDto dto = response.getEntity(DisksManagementDto.class);
         assertEquals(dto.getCollection().size(), 1);
     }
-    
+
     @Test
     public void testGetHardDisk()
     {
         disk.attach(1, vm);
         update(disk.getRasd(), disk);
 
-        String uri = resolveVirtualMachineDiskUri(vdc.getId(), vapp.getId(), vm.getId(), disk.getId());
-        ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
+        String uri =
+            resolveVirtualMachineDiskUri(vdc.getId(), vapp.getId(), vm.getId(), disk.getId());
+        ClientResponse response = get(uri, SYSADMIN, SYSADMIN, DiskManagementDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), Status.OK.getStatusCode());
 
         DiskManagementDto dto = response.getEntity(DiskManagementDto.class);
         assertNotNull(dto);
     }
-    
+
     @Test(groups = {EDIT_VM_INTEGRATION_TESTS})
     public void testAttachDisksNoLinks()
     {
         String uri = resolveVirtualMachineDisksUri(vdc.getId(), vapp.getId(), vm.getId());
-        ClientResponse response = post(uri, new LinksDto(), SYSADMIN, SYSADMIN);
+        ClientResponse response =
+            post(uri, new LinksDto(), SYSADMIN, SYSADMIN, AcceptedRequestDto.MEDIA_TYPE,
+                LinksDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), Status.ACCEPTED.getStatusCode());
 
         // Verify that no volume is attached
-        response = get(uri, SYSADMIN, SYSADMIN);
+        response = get(uri, SYSADMIN, SYSADMIN, DisksManagementDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), Status.OK.getStatusCode());
 
         DisksManagementDto dto = response.getEntity(DisksManagementDto.class);
         assertTrue(dto.isEmpty());
     }
-    
+
     @Test(groups = {EDIT_VM_INTEGRATION_TESTS})
     public void testAttachHardDisksInNotDeployedVM()
     {
@@ -221,17 +226,17 @@ public class VirtualMachineStorageConfigurationResourceIT extends AbstractJpaGen
             resolveDiskUri(vdc.getId(), disk.getId())));
 
         String uri = resolveVirtualMachineDisksUri(vdc.getId(), vapp.getId(), vm.getId());
-        ClientResponse response = post(uri, request, SYSADMIN, SYSADMIN);
+        ClientResponse response = post(uri, request, SYSADMIN, SYSADMIN, null, LinksDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), Status.NO_CONTENT.getStatusCode());
 
         // Verify that the disk is attached
-        response = get(uri, SYSADMIN, SYSADMIN);
+        response = get(uri, SYSADMIN, SYSADMIN, DisksManagementDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), Status.OK.getStatusCode());
 
         DisksManagementDto dto = response.getEntity(DisksManagementDto.class);
         assertEquals(dto.getCollection().size(), 1);
     }
-    
+
     @Test(groups = {EDIT_VM_INTEGRATION_TESTS})
     public void testAttachHardDisksInDeployedVM()
     {
@@ -240,7 +245,9 @@ public class VirtualMachineStorageConfigurationResourceIT extends AbstractJpaGen
             resolveDiskUri(vdc.getId(), disk.getId())));
 
         String uri = resolveVirtualMachineDisksUri(vdc.getId(), vapp.getId(), vm.getId());
-        ClientResponse response = post(uri, request, SYSADMIN, SYSADMIN);
+        ClientResponse response =
+            post(uri, request, SYSADMIN, SYSADMIN, AcceptedRequestDto.MEDIA_TYPE,
+                LinksDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), Status.ACCEPTED.getStatusCode());
 
         // Verify that the operation returned a task reference
@@ -248,7 +255,7 @@ public class VirtualMachineStorageConfigurationResourceIT extends AbstractJpaGen
         assertNotNull(dto);
         assertNotNull(dto.getEntity());
     }
-    
+
     @Test(groups = {EDIT_VM_INTEGRATION_TESTS})
     public void testDetachHardDisksInNotDeployedVM()
     {
@@ -261,7 +268,7 @@ public class VirtualMachineStorageConfigurationResourceIT extends AbstractJpaGen
         assertEquals(response.getStatusCode(), Status.NO_CONTENT.getStatusCode());
 
         // Verify that the volume is not attached
-        response = get(uri, SYSADMIN, SYSADMIN);
+        response = get(uri, SYSADMIN, SYSADMIN, DisksManagementDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), Status.OK.getStatusCode());
 
         DisksManagementDto dto = response.getEntity(DisksManagementDto.class);
@@ -283,7 +290,7 @@ public class VirtualMachineStorageConfigurationResourceIT extends AbstractJpaGen
         assertNotNull(dto);
         assertNotNull(dto.getEntity());
     }
-    
+
     @Test(groups = {EDIT_VM_INTEGRATION_TESTS})
     public void testChangeHardDisksInNotDeployedVM()
     {
@@ -301,11 +308,11 @@ public class VirtualMachineStorageConfigurationResourceIT extends AbstractJpaGen
             resolveDiskUri(vdc.getId(), disk.getId())));
 
         String uri = resolveVirtualMachineDisksUri(vdc.getId(), vapp.getId(), vm.getId());
-        ClientResponse response = put(uri, request, SYSADMIN, SYSADMIN);
+        ClientResponse response = put(uri, request, SYSADMIN, SYSADMIN, null, LinksDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), Status.NO_CONTENT.getStatusCode());
 
         // Verify that there is only one disk attached and it is the first one
-        response = get(uri, SYSADMIN, SYSADMIN);
+        response = get(uri, SYSADMIN, SYSADMIN, DisksManagementDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), Status.OK.getStatusCode());
 
         DisksManagementDto dto = response.getEntity(DisksManagementDto.class);
@@ -326,7 +333,9 @@ public class VirtualMachineStorageConfigurationResourceIT extends AbstractJpaGen
             resolveDiskUri(vdc.getId(), disk.getId())));
 
         String uri = resolveVirtualMachineDisksUri(vdc.getId(), vapp.getId(), vm.getId());
-        ClientResponse response = put(uri, request, SYSADMIN, SYSADMIN);
+        ClientResponse response =
+            put(uri, request, SYSADMIN, SYSADMIN, AcceptedRequestDto.MEDIA_TYPE,
+                LinksDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), Status.ACCEPTED.getStatusCode());
 
         // Verify that the operation returned a task reference
@@ -334,7 +343,7 @@ public class VirtualMachineStorageConfigurationResourceIT extends AbstractJpaGen
         assertNotNull(dto);
         assertNotNull(dto.getEntity());
     }
-    
+
     @Test(groups = {EDIT_VM_INTEGRATION_TESTS})
     public void testDetachHardDiskInNotDeployedVM()
     {
@@ -351,7 +360,7 @@ public class VirtualMachineStorageConfigurationResourceIT extends AbstractJpaGen
 
         // Verify that the disk is not attached
         uri = resolveVirtualMachineDisksUri(vdc.getId(), vapp.getId(), vm.getId());
-        response = get(uri, SYSADMIN, SYSADMIN);
+        response = get(uri, SYSADMIN, SYSADMIN, DisksManagementDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), Status.OK.getStatusCode());
 
         DisksManagementDto dto = response.getEntity(DisksManagementDto.class);

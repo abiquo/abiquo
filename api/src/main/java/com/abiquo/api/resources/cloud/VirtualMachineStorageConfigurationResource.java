@@ -49,12 +49,14 @@ import java.util.List;
 
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 
 import org.apache.wink.common.annotations.Parent;
@@ -122,6 +124,7 @@ public class VirtualMachineStorageConfigurationResource extends AbstractResource
      */
     @GET
     @Path(DISKS_PATH)
+    @Produces(DisksManagementDto.MEDIA_TYPE)
     public DisksManagementDto getListOfHardDisks(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) @NotNull @Min(1) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) @NotNull @Min(1) final Integer vappId,
@@ -153,6 +156,8 @@ public class VirtualMachineStorageConfigurationResource extends AbstractResource
      */
     @POST
     @Path(DISKS_PATH)
+    @Consumes(LinksDto.MEDIA_TYPE)
+    @Produces(AcceptedRequestDto.MEDIA_TYPE)
     public AcceptedRequestDto< ? > attachHardDisks(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) @NotNull @Min(1) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) @NotNull @Min(1) final Integer vappId,
@@ -252,6 +257,8 @@ public class VirtualMachineStorageConfigurationResource extends AbstractResource
      */
     @PUT
     @Path(DISKS_PATH)
+    @Consumes(LinksDto.MEDIA_TYPE)
+    @Produces(AcceptedRequestDto.MEDIA_TYPE)
     public AcceptedRequestDto< ? > changeHardDisks(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) @NotNull @Min(1) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) @NotNull @Min(1) final Integer vappId,
@@ -301,6 +308,7 @@ public class VirtualMachineStorageConfigurationResource extends AbstractResource
      */
     @GET
     @Path(DISKS_PATH + "/" + DISK_PARAM)
+    @Produces(DiskManagementDto.MEDIA_TYPE)
     public DiskManagementDto getHardDisk(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) @NotNull @Min(1) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) @NotNull @Min(1) final Integer vappId,

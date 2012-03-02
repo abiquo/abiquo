@@ -31,6 +31,7 @@ import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.UriInfo;
@@ -74,6 +75,7 @@ public class IpAddressesResource extends AbstractResource
     UriInfo uriInfo;
 
     @GET
+    @Produces(IpsPoolManagementDto.MEDIA_TYPE)
     public IpsPoolManagementDto getIPAddresses(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) @Min(1) final Integer vdcId,
         @PathParam(PrivateNetworkResource.PRIVATE_NETWORK) @Min(1) final Integer vlanId,

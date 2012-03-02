@@ -21,8 +21,8 @@
 
 package com.abiquo.api.resources.cloud;
 
-import static com.abiquo.api.common.UriTestResolver.resolveDisksUri;
 import static com.abiquo.api.common.UriTestResolver.resolveDiskUri;
+import static com.abiquo.api.common.UriTestResolver.resolveDisksUri;
 import static com.abiquo.testng.TestConfig.STORAGE_INTEGRATION_TESTS;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
@@ -103,8 +103,8 @@ public class DisksResourceIT extends AbstractJpaGeneratorIT
         setup(vdc.getDatacenter(), vdc, vdcKVM, dclimit, vapp, vm.getVirtualMachineTemplate()
             .getCategory(), vm.getVirtualMachineTemplate().getRepository().getDatacenter(), vm
             .getVirtualMachineTemplate().getRepository(), vm.getVirtualMachineTemplate(), vm
-            .getHypervisor().getMachine().getRack(), vm.getHypervisor().getMachine(), vm
-            .getHypervisor(), vm, nvi);
+            .getHypervisor().getMachine().getRack(), vm.getHypervisor().getMachine(),
+            vm.getHypervisor(), vm, nvi);
 
         SecurityContextHolder.getContext().setAuthentication(new BasicUserAuthentication());
     }
@@ -127,7 +127,9 @@ public class DisksResourceIT extends AbstractJpaGeneratorIT
         DiskManagementDto newDisk = new DiskManagementDto();
         newDisk.setSizeInMb(12000L);
 
-        ClientResponse response = post(uri, newDisk, "basicUser", "basicUser");
+        ClientResponse response =
+            post(uri, newDisk, "basicUser", "basicUser", DisksManagementDto.MEDIA_TYPE,
+                DisksManagementDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), Status.CREATED.getStatusCode());
     }
 
@@ -138,7 +140,9 @@ public class DisksResourceIT extends AbstractJpaGeneratorIT
         DiskManagementDto newDisk = new DiskManagementDto();
         newDisk.setSizeInMb(12000L);
 
-        ClientResponse response = post(uri, newDisk, "basicUser", "basicUser");
+        ClientResponse response =
+            post(uri, newDisk, "basicUser", "basicUser", DisksManagementDto.MEDIA_TYPE,
+                DisksManagementDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), Status.CONFLICT.getStatusCode());
     }
 
@@ -152,7 +156,9 @@ public class DisksResourceIT extends AbstractJpaGeneratorIT
         DiskManagementDto newDisk = new DiskManagementDto();
         newDisk.setSizeInMb(12000L);
 
-        ClientResponse response = post(uri, newDisk);
+        ClientResponse response =
+            post(uri, newDisk, "basicUser", "basicUser", DisksManagementDto.MEDIA_TYPE,
+                DisksManagementDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), Status.BAD_REQUEST.getStatusCode());
     }
 
@@ -168,7 +174,8 @@ public class DisksResourceIT extends AbstractJpaGeneratorIT
         setup(disk1.getRasd(), disk2.getRasd(), disk3.getRasd(), disk1, disk2, disk3);
 
         String uri = resolveDisksUri(vdc.getId());
-        ClientResponse response = get(uri, "basicUser", "basicUser");
+        ClientResponse response =
+            get(uri, "basicUser", "basicUser", DisksManagementDto.MEDIA_TYPE, null);
 
         assertEquals(response.getStatusCode(), Status.OK.getStatusCode());
         assertNotNull(response.getEntity(DisksManagementDto.class));
@@ -189,7 +196,8 @@ public class DisksResourceIT extends AbstractJpaGeneratorIT
         setup(disk1.getRasd(), disk2.getRasd(), disk3.getRasd(), disk1, disk2, disk3);
 
         String uri = resolveDisksUri(-12);
-        ClientResponse response = get(uri);
+        ClientResponse response =
+            get(uri, "basicUser", "basicUser", DisksManagementDto.MEDIA_TYPE, null);
 
         assertEquals(response.getStatusCode(), Status.BAD_REQUEST.getStatusCode());
     }
@@ -204,7 +212,8 @@ public class DisksResourceIT extends AbstractJpaGeneratorIT
         setup(disk1.getRasd(), disk1);
 
         String uri = resolveDiskUri(vdc.getId(), disk1.getId());
-        ClientResponse response = get(uri, "basicUser", "basicUser");
+        ClientResponse response =
+            get(uri, "basicUser", "basicUser", DiskManagementDto.MEDIA_TYPE, null);
 
         assertEquals(response.getStatusCode(), Status.OK.getStatusCode());
         assertNotNull(response.getEntity(DiskManagementDto.class));
@@ -221,11 +230,11 @@ public class DisksResourceIT extends AbstractJpaGeneratorIT
         setup(disk1.getRasd(), disk1);
 
         String uri = resolveDiskUri(-12, disk1.getId());
-        ClientResponse response = get(uri);
+        ClientResponse response = get(uri, DiskManagementDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), Status.BAD_REQUEST.getStatusCode());
 
         uri = resolveDiskUri(vdc.getId(), -21);
-        response = get(uri);
+        response = get(uri, DiskManagementDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), Status.BAD_REQUEST.getStatusCode());
     }
 
@@ -244,7 +253,7 @@ public class DisksResourceIT extends AbstractJpaGeneratorIT
         assertEquals(response.getStatusCode(), Status.NO_CONTENT.getStatusCode());
 
         // Not found should be raised afeter delete the disk
-        response = get(uri);
+        response = get(uri, DiskManagementDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), Status.NOT_FOUND.getStatusCode());
     }
 
@@ -259,7 +268,7 @@ public class DisksResourceIT extends AbstractJpaGeneratorIT
         setup(disk1.getRasd(), disk1);
 
         String uri = resolveDiskUri(-12, disk1.getId());
-        ClientResponse response = delete(uri);
+        ClientResponse response = delete(uri, "basicUser", "basicUser");
         assertEquals(response.getStatusCode(), Status.BAD_REQUEST.getStatusCode());
 
         uri = resolveDiskUri(vdc.getId(), -21);

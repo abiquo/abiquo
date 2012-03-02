@@ -27,10 +27,12 @@ import java.util.Collection;
 
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 
 import org.apache.wink.common.annotations.Parent;
@@ -57,6 +59,7 @@ public class PrivateNetworksResource extends AbstractResource
     private NetworkService service;
 
     @GET
+    @Produces(VLANNetworksDto.MEDIA_TYPE)
     public VLANNetworksDto getPrivateNetworks(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) @NotNull @Min(1) final Integer virtualDatacenterId,
         @Context final IRESTBuilder restBuilder) throws Exception
@@ -79,6 +82,8 @@ public class PrivateNetworksResource extends AbstractResource
     }
 
     @POST
+    @Consumes(VLANNetworkDto.MEDIA_TYPE)
+    @Produces(VLANNetworkDto.MEDIA_TYPE)
     public VLANNetworkDto createNetwork(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) @NotNull @Min(1) final Integer virtualDatacenterId,
         @NotNull final VLANNetworkDto dto, @Context final IRESTBuilder restBuilder)

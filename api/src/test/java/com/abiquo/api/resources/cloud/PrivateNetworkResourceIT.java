@@ -34,7 +34,6 @@ import static org.testng.Assert.assertNotNull;
 import java.util.ArrayList;
 import java.util.Random;
 
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response.Status;
 
 import org.apache.wink.client.ClientResponse;
@@ -108,7 +107,7 @@ public class PrivateNetworkResourceIT extends AbstractJpaGeneratorIT
     {
         Resource resource = client.resource(validURI);
 
-        ClientResponse response = resource.accept(MediaType.APPLICATION_XML).get();
+        ClientResponse response = resource.accept(VLANNetworkDto.MEDIA_TYPE).get();
         VLANNetworkDto network = response.getEntity(VLANNetworkDto.class);
 
         assertEquals(200, response.getStatusCode());
@@ -122,7 +121,7 @@ public class PrivateNetworkResourceIT extends AbstractJpaGeneratorIT
             resolvePrivateNetworkURI(vdc.getId(), new Random().nextInt(1000));
         Resource resource = client.resource(invalidNetworkURI);
 
-        ClientResponse response = resource.accept(MediaType.APPLICATION_XML).get();
+        ClientResponse response = resource.accept(VLANNetworkDto.MEDIA_TYPE).get();
         assertErrors(response, 404, APIError.VLANS_NON_EXISTENT_VIRTUAL_NETWORK);
     }
 
@@ -132,7 +131,7 @@ public class PrivateNetworkResourceIT extends AbstractJpaGeneratorIT
         String invalidVDCURI = resolvePrivateNetworkURI(new Random().nextInt(1000), vlan.getId());
         Resource resource = client.resource(invalidVDCURI);
 
-        ClientResponse response = resource.accept(MediaType.APPLICATION_XML).get();
+        ClientResponse response = resource.accept(VLANNetworkDto.MEDIA_TYPE).get();
         assertErrors(response, 404, APIError.NON_EXISTENT_VIRTUAL_DATACENTER);
     }
 
@@ -154,14 +153,14 @@ public class PrivateNetworkResourceIT extends AbstractJpaGeneratorIT
 
         // Ensure we have create it correctly.
         Resource resource = client.resource(resolvePrivateNetworkURI(vdc2.getId(), vlan2.getId()));
-        ClientResponse response = resource.accept(MediaType.APPLICATION_XML).get();
+        ClientResponse response = resource.accept(VLANNetworkDto.MEDIA_TYPE).get();
         VLANNetworkDto network = response.getEntity(VLANNetworkDto.class);
         assertEquals(200, response.getStatusCode());
         assertNotNull(network);
 
         // Try to cross parameters.
         resource = client.resource(resolvePrivateNetworkURI(vdc.getId(), vlan2.getId()));
-        response = resource.accept(MediaType.APPLICATION_XML).get();
+        response = resource.accept(VLANNetworkDto.MEDIA_TYPE).get();
 
         // The VLAN does not exist!
         assertErrors(response, 404, APIError.VLANS_NON_EXISTENT_VIRTUAL_NETWORK);
@@ -215,7 +214,7 @@ public class PrivateNetworkResourceIT extends AbstractJpaGeneratorIT
         // Ensure the IPs of the VLAN have changed its 'vlanname' attribute. Get a random IP and
         // check it
         String ipsUri = resolvePrivateNetworkIPsURI(vdc.getId(), vlan.getId());
-        response = get(ipsUri);
+        response = get(ipsUri, IpsPoolManagementDto.MEDIA_TYPE);
         IpsPoolManagementDto dtoIPs = response.getEntity(IpsPoolManagementDto.class);
         assertNotNull(dtoIPs);
         IpPoolManagementDto dtoIP = dtoIPs.getCollection().get(new Random().nextInt(24));
@@ -234,25 +233,25 @@ public class PrivateNetworkResourceIT extends AbstractJpaGeneratorIT
         VLANNetworkDto dto = createTransferObject(vlan);
         Resource resource = client.resource(resolvePrivateNetworkURI(0, vlan.getId()));
         ClientResponse response =
-            resource.accept(MediaType.APPLICATION_XML).contentType(MediaType.APPLICATION_XML)
+            resource.accept(VLANNetworkDto.MEDIA_TYPE).contentType(VLANNetworkDto.MEDIA_TYPE)
                 .put(dto);
         assertEquals(response.getStatusCode(), 400);
 
         resource = client.resource(resolvePrivateNetworkURI(-400, vlan.getId()));
         response =
-            resource.accept(MediaType.APPLICATION_XML).contentType(MediaType.APPLICATION_XML)
+            resource.accept(VLANNetworkDto.MEDIA_TYPE).contentType(VLANNetworkDto.MEDIA_TYPE)
                 .put(dto);
         assertEquals(response.getStatusCode(), 400);
 
         resource = client.resource(resolvePrivateNetworkURI(vdc.getId(), 0));
         response =
-            resource.accept(MediaType.APPLICATION_XML).contentType(MediaType.APPLICATION_XML)
+            resource.accept(VLANNetworkDto.MEDIA_TYPE).contentType(VLANNetworkDto.MEDIA_TYPE)
                 .put(dto);
         assertEquals(response.getStatusCode(), 400);
 
         resource = client.resource(resolvePrivateNetworkURI(vdc.getId(), -1000));
         response =
-            resource.accept(MediaType.APPLICATION_XML).contentType(MediaType.APPLICATION_XML)
+            resource.accept(VLANNetworkDto.MEDIA_TYPE).contentType(VLANNetworkDto.MEDIA_TYPE)
                 .put(dto);
         assertEquals(response.getStatusCode(), 400);
     }
@@ -263,25 +262,25 @@ public class PrivateNetworkResourceIT extends AbstractJpaGeneratorIT
     {
         Resource resource = client.resource(resolvePrivateNetworkURI(0, vlan.getId()));
         ClientResponse response =
-            resource.accept(MediaType.APPLICATION_XML).contentType(MediaType.APPLICATION_XML)
+            resource.accept(VLANNetworkDto.MEDIA_TYPE).contentType(VLANNetworkDto.MEDIA_TYPE)
                 .delete();
         assertEquals(response.getStatusCode(), 400);
 
         resource = client.resource(resolvePrivateNetworkURI(-400, vlan.getId()));
         response =
-            resource.accept(MediaType.APPLICATION_XML).contentType(MediaType.APPLICATION_XML)
+            resource.accept(VLANNetworkDto.MEDIA_TYPE).contentType(VLANNetworkDto.MEDIA_TYPE)
                 .delete();
         assertEquals(response.getStatusCode(), 400);
 
         resource = client.resource(resolvePrivateNetworkURI(vdc.getId(), 0));
         response =
-            resource.accept(MediaType.APPLICATION_XML).contentType(MediaType.APPLICATION_XML)
+            resource.accept(VLANNetworkDto.MEDIA_TYPE).contentType(VLANNetworkDto.MEDIA_TYPE)
                 .delete();
         assertEquals(response.getStatusCode(), 400);
 
         resource = client.resource(resolvePrivateNetworkURI(vdc.getId(), -1000));
         response =
-            resource.accept(MediaType.APPLICATION_XML).contentType(MediaType.APPLICATION_XML)
+            resource.accept(VLANNetworkDto.MEDIA_TYPE).contentType(VLANNetworkDto.MEDIA_TYPE)
                 .delete();
         assertEquals(response.getStatusCode(), 400);
     }
@@ -305,7 +304,7 @@ public class PrivateNetworkResourceIT extends AbstractJpaGeneratorIT
         assertEquals(response.getStatusCode(), Status.NO_CONTENT.getStatusCode());
 
         // Perform a GET to ensure the entity has been deleted
-        response = get(uri, "basicUser", "basicUser");
+        response = get(uri, "basicUser", "basicUser", VLANNetworkDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), Status.NOT_FOUND.getStatusCode());
 
     }
@@ -337,7 +336,7 @@ public class PrivateNetworkResourceIT extends AbstractJpaGeneratorIT
     {
         Resource resource = client.resource(validURI);
 
-        return resource.accept(MediaType.APPLICATION_XML).get(VLANNetworkDto.class);
+        return resource.accept(VLANNetworkDto.MEDIA_TYPE).get(VLANNetworkDto.class);
     }
 
     /**
