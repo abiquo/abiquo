@@ -26,7 +26,6 @@ import org.apache.commons.pool.impl.GenericObjectPool;
 import org.springframework.stereotype.Component;
 
 import com.abiquo.appliancemanager.client.AMClient;
-import com.abiquo.vsm.client.VSMClient;
 
 /**
  * {@link GenericObjectPool} for {@link AMClient}.
@@ -54,7 +53,7 @@ public class AMClientPool extends GenericObjectPool
         @Override
         public Object makeObject() throws Exception
         {
-            return new VSMClient();
+            return new AMClient();
         }
     }
 }

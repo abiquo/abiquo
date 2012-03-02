@@ -279,7 +279,7 @@
 							</includes>
 							<excludes>
 								<exclude>**/client/*</exclude>
-							</excludes>
+							</excludes>                                                       
 						</configuration>
 					</execution>
 					<execution>
@@ -293,7 +293,9 @@
 							<includes>
 								<include>**/client/*</include>
 								<include>**/appliancemanager/util/*</include>
-								<!-- <include>**/transport/*</include> <include>**/ApplianceManagerResourceConstants.class</include> -->
+                                <include>**/appliancemanager/exceptions/*</include>
+                                <include>**/appliancemanager/config/*</include>
+                                <!-- <include>**/transport/*</include> <include>**/ApplianceManagerResourceConstants.class</include> -->
 							</includes>
 						</configuration>
 					</execution>

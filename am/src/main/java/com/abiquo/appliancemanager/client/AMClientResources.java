@@ -35,7 +35,6 @@ import org.apache.wink.client.ClientConfig;
 import org.apache.wink.client.ClientResponse;
 import org.apache.wink.client.Resource;
 import org.apache.wink.client.RestClient;
-import org.apache.wink.common.internal.utils.UriHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,9 +45,8 @@ public class AMClientResources
 {
     protected final static Logger LOGGER = LoggerFactory.getLogger(AMClient.class);
 
-    public static final String  GET_IDS_ACTION = "action/getstates";
+    // public static final String GET_IDS_ACTION = "action/getstates";
 
-    
     protected String serviceUri;
 
     private RestClient client;
@@ -92,7 +90,8 @@ public class AMClientResources
         }
     }
 
-    public static String resolveTemplateUrl(final String serviceUri, final Integer idEnterprise, String ovfid)
+    public static String resolveTemplateUrl(final String serviceUri, final Integer idEnterprise,
+        String ovfid)
     {
         if (ovfid.startsWith("http://"))
         {
@@ -108,12 +107,11 @@ public class AMClientResources
         return
         // XXX calling from server encode the ''ovfid''
         // URIResolver.resolveURI(serviceUri, "erepos/{erepo}/templates/{template}", params);
-            URIResolver.resolveURI(serviceUri, "erepos/{erepo}/templates", params) // + '/'
-                + decodedUrl(ovfid);
-        
+        URIResolver.resolveURI(serviceUri, "erepos/{erepo}/templates", params) // + '/'
+            + decodedUrl(ovfid);
+
     }
-    
-    
+
     Resource template(final Integer idEnterprise, final String ovfid)
     {
         String url = resolveTemplateUrl(serviceUri, idEnterprise, ovfid);
@@ -132,16 +130,15 @@ public class AMClientResources
         return client.resource(url);
     }
 
-    Resource templates_GetIds(final Integer idEnterprise)
-    {
-        final String url =
-            URIResolver.resolveURI(serviceUri, "erepos/{erepo}/templates/",
-                Collections.singletonMap("erepo", valueOf(idEnterprise)));
+    // Resource templates_GetIds(final Integer idEnterprise)
+    // {
+    // final String url =
+    // URIResolver.resolveURI(serviceUri, "erepos/{erepo}/templates/",
+    // Collections.singletonMap("erepo", valueOf(idEnterprise)));
+    //
+    // return client.resource(UriHelper.appendPathToBaseUri(url, GET_IDS_ACTION));
+    // }
 
-        return client.resource(UriHelper.appendPathToBaseUri(url, GET_IDS_ACTION));
-    }
-
-    
     Resource repository(final Integer idEnterprise)
     {
         final String url =

@@ -28,13 +28,11 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import com.abiquo.model.transport.WrapperDto;
 
-@XmlRootElement(name = "templateIds")
+@XmlRootElement(name = "idTemplates")
 public class TemplateIdsDto extends WrapperDto<TemplateIdDto>
 {
-    private static final long serialVersionUID = -6304901525613115286L;
-
     @Override
-    @XmlElement(name = "templateId")
+    @XmlElement(name = "idTemplate")
     public List<TemplateIdDto> getCollection()
     {
         return collection;

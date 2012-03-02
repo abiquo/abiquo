@@ -70,32 +70,31 @@ public class AMClient extends AMClientResources
 
     public static final String QUERY_PRAM_STATE = "state";
 
-    
-    public TemplatesStateDto getTemplatesState(final Integer idEnterprise, final TemplateStatusEnumType state) throws AMClientException
+    public TemplatesStateDto getTemplatesState(final Integer idEnterprise,
+        final TemplateStatusEnumType state) throws AMClientException
     {
 
         ClientResponse response = templates(idEnterprise)//
             .accept(MediaType.APPLICATION_XML).//
             queryParam(QUERY_PRAM_STATE, state.name()).get();
-        
+
         checkResponseErrors(response);
 
         return response.getEntity(TemplatesStateDto.class);
     }
 
-    
-    public TemplatesStateDto getTemplatesState(final Integer idEnterprise, final TemplateIdsDto ids) throws AMClientException
+    public TemplatesStateDto getTemplatesState(final Integer idEnterprise, final TemplateIdsDto ids)
+        throws AMClientException
     {
 
-        ClientResponse response = templates_GetIds(idEnterprise)//
-            .accept(MediaType.APPLICATION_XML).
-            post(ids);
-            
+        ClientResponse response = templates(idEnterprise)// templates_GetIds(idEnterprise)//
+            .accept(MediaType.APPLICATION_XML).contentType(MediaType.APPLICATION_XML).post(ids);
+
         checkResponseErrors(response);
 
         return response.getEntity(TemplatesStateDto.class);
     }
-    
+
     public RepositoryConfigurationDto getRepositoryConfiguration() throws AMClientException
     {
         ClientResponse response = repositories()//

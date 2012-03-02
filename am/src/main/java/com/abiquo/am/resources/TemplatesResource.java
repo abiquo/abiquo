@@ -75,7 +75,7 @@ public class TemplatesResource
 
     public static final String OVFPI_PATH = ApplianceManagerPaths.TEMPLATE_PATH;
 
-    public static final String GET_IDS_ACTION = "action/getstates";
+    // public static final String GET_IDS_ACTION = "action/getstates";
 
     public static final String QUERY_PRAM_STATE = "state";
 
@@ -107,7 +107,7 @@ public class TemplatesResource
     }
 
     @POST
-    @Path(GET_IDS_ACTION)
+    @Consumes(MediaType.APPLICATION_XML)
     public TemplatesStateDto getTemplatesStatus(
         @PathParam(EnterpriseRepositoryResource.ENTERPRISE_REPOSITORY) final String idEnterprise,
         final TemplateIdsDto ids)
@@ -146,6 +146,7 @@ public class TemplatesResource
      * Never return error. Use GET_STATUS to see errors
      */
     @POST
+    @Consumes(MediaType.TEXT_PLAIN)
     public void downloadTemplate(
         @PathParam(EnterpriseRepositoryResource.ENTERPRISE_REPOSITORY) final String erId,
         final String ovfId)

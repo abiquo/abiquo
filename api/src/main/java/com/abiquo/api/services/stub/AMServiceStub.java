@@ -81,6 +81,26 @@ public class AMServiceStub extends DefaultApiService
         {
             returnClientToPool(amClient);
         }
+    }
+
+    public TemplateDto getTemplateBySystem(final Integer datacenterId, final Integer enterpriseId,
+        final String ovfId)
+    {
+        final AMClient amClient = getAMClientBySystem(datacenterId, enterpriseId, false);
+
+        try
+        {
+            return amClient.getTemplate(enterpriseId, ovfId);
+        }
+        catch (Exception e)
+        {
+            reportError(e);
+            return null;// unreachable
+        }
+        finally
+        {
+            returnClientToPool(amClient);
+        }
 
     }
 
@@ -173,8 +193,16 @@ public class AMServiceStub extends DefaultApiService
         }
         catch (Exception e)
         {
-            reportError(e);
-            return null;// unreachable
+            TemplateStateDto st = new TemplateStateDto();
+            st.setOvfId(id);
+            st.setStatus(TemplateStatusEnumType.DOWNLOADING);
+            st.setDownloadingProgress(0.0);
+
+            LOGGER.warn("Can't update the download progress of {} caused by: {}", id,
+                e.getMessage());
+            return st;
+            // reportError(e);
+            // return null;// unreachable
         }
         finally
         {
@@ -213,7 +241,7 @@ public class AMServiceStub extends DefaultApiService
         catch (AMClientException e1)
         {
             returnClientToPool(amClient);
-            
+
             addConflictErrors(APIError.VMTEMPLATE_SYNCH_DC_REPO);
             reportError(e1);
         }
@@ -300,6 +328,29 @@ public class AMServiceStub extends DefaultApiService
         }
     }
 
+    /**
+     * Do not check the UserSession as it is called by AMEventProcessor
+     */
+    private AMClient getAMClientBySystem(final Integer dcId, final Integer enterpriseId,
+        final boolean withTimeout)
+    {
+        final String amUri =
+            infService.getRemoteService(dcId, RemoteServiceType.APPLIANCE_MANAGER).getUri();
+
+        try
+        {
+            return clientPool.borrowObject(amUri, withTimeout);
+        }
+        catch (Exception e)
+        {
+            LOGGER.error(APIError.AM_CLIENT.getMessage(), e);
+
+            addUnexpectedErrors(APIError.AM_CLIENT);
+            flushErrors();
+            return null;
+        }
+    }
+
     private void returnClientToPool(final AMClient client)
     {
         try
@@ -316,18 +367,18 @@ public class AMServiceStub extends DefaultApiService
     {
         if (e instanceof AMClientException)
         {
-            LOGGER.error(APIError.AM_FAILED_REQUEST.getMessage(), e);
+            LOGGER.error(APIError.AM_FAILED_REQUEST.getMessage(), e.getMessage());
             addServiceUnavailableErrors(new CommonError(APIError.AM_FAILED_REQUEST.getCode(),
                 APIError.AM_FAILED_REQUEST.getMessage() + '\n' + e.getMessage()));
         }
         else if (isATimeout(e))
         {
-            LOGGER.warn(APIError.AM_TIMEOUT.getMessage(), e);
+            LOGGER.warn(APIError.AM_TIMEOUT.getMessage(), e.getMessage());
             addServiceUnavailableErrors(APIError.AM_TIMEOUT);
         }
         else
         {
-            LOGGER.error(APIError.AM_UNAVAILABE.getMessage(), e);
+            LOGGER.error(APIError.AM_UNAVAILABE.getMessage(), e.getMessage());
             addServiceUnavailableErrors(APIError.AM_UNAVAILABE);
         }
 
@@ -336,9 +387,11 @@ public class AMServiceStub extends DefaultApiService
 
     private boolean isATimeout(final Exception e)
     {
-        return ((e instanceof ClientRuntimeException && e.getCause() instanceof SocketTimeoutException) || //
-        (e instanceof ClientRuntimeException && e.getCause().getCause() != null && e.getCause()
-            .getCause() instanceof SocketTimeoutException));
+        return e instanceof ClientRuntimeException
+            && e.getCause() instanceof SocketTimeoutException
+            || //
+            e instanceof ClientRuntimeException && e.getCause().getCause() != null
+            && e.getCause().getCause() instanceof SocketTimeoutException;
     }
 
 }

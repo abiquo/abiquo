@@ -29,6 +29,7 @@ import java.util.Map;
 
 import javax.xml.namespace.QName;
 
+import org.apache.commons.io.FilenameUtils;
 import org.dmtf.schemas.ovf.envelope._1.ContentType;
 import org.dmtf.schemas.ovf.envelope._1.DiskSectionType;
 import org.dmtf.schemas.ovf.envelope._1.EnvelopeType;
@@ -61,8 +62,6 @@ import com.abiquo.ovfmanager.ovf.section.DiskFormat;
 public class TemplateFromOVFEnvelope
 {
 
-    
-
     public static VirtualDiskDescType getDisk(final EnvelopeType envelope)
     {
         DiskSectionType diskSection = null;
@@ -85,7 +84,7 @@ public class TemplateFromOVFEnvelope
         return disks.get(0);
 
     }
-    
+
     /**
      * TODO re-DOC <br>
      * REQUIRE THE OVFID IS PLACED ON A REMOTE LOCATION (WARINING on generation)<BR>
@@ -110,8 +109,7 @@ public class TemplateFromOVFEnvelope
             new HashMap<String, VirtualDiskDescType>();
         Map<String, FileType> fileIdToFileType = new HashMap<String, FileType>();
         Map<String, List<String>> diskIdToVSs = new HashMap<String, List<String>>();
-        Map<String, TemplateDto> requiredByVSs =
-            new HashMap<String, TemplateDto>();
+        Map<String, TemplateDto> requiredByVSs = new HashMap<String, TemplateDto>();
         DiskSectionType diskSectionType;
 
         try
@@ -214,7 +212,15 @@ public class TemplateFromOVFEnvelope
 
                     // Note that getHRef() will now return the relative path
                     // of the file at the downloaded repository space
-                    diskInfo.setDiskFilePath(filePath);
+
+                    if (filePath.startsWith("http:"))
+                    {
+                        diskInfo.setDiskFilePath(FilenameUtils.getName(filePath));
+                    }
+                    else
+                    {
+                        diskInfo.setDiskFilePath(filePath);
+                    }
 
                     diskInfo.setIconPath(iconPath);
                     diskInfo.setDescription(description);

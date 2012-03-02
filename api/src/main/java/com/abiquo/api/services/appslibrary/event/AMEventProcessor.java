@@ -111,8 +111,8 @@ public class AMEventProcessor implements AMCallback
         final Repository repository = infService.getRepositoryFromLocation(repoLocation);
 
         TemplateDto packageInstance =
-            amService.getTemplate(repository.getDatacenter().getId(), Integer.valueOf(idEnterp),
-                ovfId);
+            amService.getTemplateBySystem(repository.getDatacenter().getId(),
+                Integer.valueOf(idEnterp), ovfId);
 
         return templateFactory.insertVirtualMachineTemplates(
             Collections.singletonList(packageInstance), repository);

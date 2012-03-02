@@ -25,11 +25,9 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import com.abiquo.model.transport.SingleResourceTransportDto;
 
-@XmlRootElement(name = "templateId")
+@XmlRootElement(name = "idTemplate")
 public class TemplateIdDto extends SingleResourceTransportDto
 {
-    private static final long serialVersionUID = -6405001303048220489L;
-
     private String ovfId;
 
     public String getOvfId()

@@ -54,21 +54,22 @@ public class AMConfiguration
     /** Max time to scan the enterprise repository filesystem folder finding new templates */
     public final static Integer ENTERPRISE_REPOSITORY_REFRESH_TIMEOUT = // repo check x10
         Integer.parseInt(System.getProperty("abiquo.appliancemanager.fstimeoutms",
-            String.valueOf(REPOSITORY_FILE_MARK_CHECK_TIMEOUT_SECONDS * 10)));
+            String.valueOf(REPOSITORY_FILE_MARK_CHECK_TIMEOUT_SECONDS * 10 * 1000)));
 
     /** **** ***** TIMEOUT CONNECTIONS **** ******/
 
     public final static Integer DOWNLOADING_PUBLISH_INTERVAL = Integer.valueOf(System.getProperty(
         "abiquo.appliancemanager.upload.progressIntervall", "5000"));
 
-    public final static Integer HTTP_CONNECTION_TIMEOUT = // a minute
-        Integer.parseInt(System.getProperty("abiquo.appliancemanager.deploy.connection", "60000"));
+    public final static Integer HTTP_CONNECTION_TIMEOUT = // 2 minute
+        Integer.parseInt(System.getProperty("abiquo.appliancemanager.deploy.connection", "120000"));
 
     public final static Integer HTTP_IDLE_TIMEOUT = // ten minutes
         Integer.parseInt(System.getProperty("abiquo.appliancemanager.deploy.idle", "600000"));
 
     public final static Integer HTTP_REQUEST_TIMEOUT = // a day
-        Integer.parseInt(System.getProperty("abiquo.appliancemanager.deploy.timeout", "86400000"));
+        Integer.parseInt(System.getProperty("abiquo.appliancemanager.deploy.totalTimeout",
+            "86400000"));
 
     public final static Integer HTTP_MAX_CONNECTIONS = //
         Integer.parseInt(System.getProperty("abiquo.appliancemanager.downloads", "-1"));

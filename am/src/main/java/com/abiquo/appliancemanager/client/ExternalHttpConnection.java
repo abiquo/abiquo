@@ -31,12 +31,12 @@ import static com.abiquo.appliancemanager.config.AMConfiguration.HTTP_PROXY_USER
 import static com.abiquo.appliancemanager.config.AMConfiguration.HTTP_REQUEST_TIMEOUT;
 import static com.abiquo.appliancemanager.config.AMConfiguration.isProxy;
 
+import java.io.IOException;
 import java.io.InputStream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.abiquo.appliancemanager.exceptions.DownloadException;
 import com.ning.http.client.AsyncHttpClient;
 import com.ning.http.client.AsyncHttpClientConfig;
 import com.ning.http.client.ProxyServer;
@@ -48,7 +48,6 @@ public class ExternalHttpConnection
 {
     private final static Logger LOG = LoggerFactory.getLogger(ExternalHttpConnection.class);
 
-
     public static AsyncHttpClientConfig createHttpClientConf()
     {
 
@@ -56,10 +55,11 @@ public class ExternalHttpConnection
             setFollowRedirects(true).//
             setCompressionEnabled(true).//
             setIdleConnectionInPoolTimeoutInMs(HTTP_IDLE_TIMEOUT).//
+            setIdleConnectionTimeoutInMs(HTTP_IDLE_TIMEOUT). //
             setConnectionTimeoutInMs(HTTP_CONNECTION_TIMEOUT).//
             setRequestTimeoutInMs(HTTP_REQUEST_TIMEOUT).//
             setMaximumConnectionsTotal(HTTP_MAX_CONNECTIONS);
-        
+
         if (isProxy())
         {
             LOG.info("Configure HTTP connections to use the proxy [{}:{}]", //
@@ -88,7 +88,7 @@ public class ExternalHttpConnection
 
     private final AsyncHttpClient httpClient = new AsyncHttpClient(createHttpClientConf());
 
-    public InputStream openConnection(final String url)
+    public InputStream openConnection(final String url) throws IOException
     {
         try
         {
@@ -97,7 +97,7 @@ public class ExternalHttpConnection
         }
         catch (Exception e)
         {
-            throw new DownloadException("Can't open InputStream to " + url, e);
+            throw new IOException("Can't open InputStream to " + url, e);
         }
     }
 
@@ -107,7 +107,7 @@ public class ExternalHttpConnection
     }
 
     // it also release the connection
-    public Long headFile(final String url)
+    public Long headFile(final String url) throws IOException
     {
         try
         {
@@ -116,7 +116,7 @@ public class ExternalHttpConnection
         }
         catch (Exception e)
         {
-            throw new DownloadException("Can't open InputStream to " + url, e);
+            throw new IOException("Can't open InputStream to " + url, e);
         }
         finally
         {
