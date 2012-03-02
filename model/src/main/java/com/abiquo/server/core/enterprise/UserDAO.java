@@ -27,6 +27,7 @@ import java.util.List;
 
 import javax.persistence.EntityManager;
 
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.Criteria;
 import org.hibernate.criterion.CriteriaSpecification;
@@ -153,7 +154,7 @@ public class UserDAO extends DefaultDAOBase<Integer, User>
         {
             criteria.add(sameRole(role));
         }
-        if (!StringUtils.isEmpty(filters))
+        if (!ArrayUtils.isEmpty(filters))
         {
             for (String filter : filters)
             {

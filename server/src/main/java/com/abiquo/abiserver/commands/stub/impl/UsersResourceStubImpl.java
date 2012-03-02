@@ -289,7 +289,7 @@ public class UsersResourceStubImpl extends AbstractAPIStub implements UsersResou
 
         uri = UriHelper.appendQueryParamsToPath(uri, queryParams, true);
 
-        ClientResponse response = getWithMediaType(uri, FLAT_MEDIA_TYPE, FLAT_MEDIA_TYPE);
+        ClientResponse response = get(uri, FLAT_MEDIA_TYPE);
         if (response.getStatusCode() == 200)
         {
             UsersWithRolesDto usersDto = response.getEntity(UsersWithRolesDto.class);
