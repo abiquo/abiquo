@@ -31,7 +31,7 @@
     show="checkVirtualApplianceState()"
     minWidth="300"
     creationComplete="onCreationComplete()"
-    xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:info="net.undf.abicloud.view.general.components.info.*" xmlns:general="net.undf.abicloud.view.general.*">
+    xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:info="net.undf.abicloud.view.general.components.info.*" xmlns:general="net.undf.abicloud.view.general.*" xmlns:virtualappliance="net.undf.abicloud.view.virtualappliance.components.virtualappliance.*">
 
     <mx:Script>
         <![CDATA[
@@ -82,16 +82,16 @@
             //Force updating node task status
             private function updateNodes(event:Event):void
             {
-            	if(nodesList && this._virtualAppliance)
+            	if(nodeStatuses && nodeStatuses.nodesList && this._virtualAppliance)
             	{
-	            	nodesList.dataProvider = this._virtualAppliance.nodes;
+	            	nodeStatuses.nodesList.dataProvider = this._virtualAppliance.nodes;
             	}
             }
 
             public function set virtualAppliance(value:VirtualAppliance):void
             {
                 this._virtualAppliance = value;
-                nodesList.dataProvider = this._virtualAppliance.nodes;
+                nodeStatuses.nodesList.dataProvider = this._virtualAppliance.nodes;
 
                 if (visible)
                 {
@@ -147,86 +147,7 @@
                 dispatchEvent(virtualApplianceEvent);
             }        
             
-            private function returnName(object:NodeVirtualImage, column:DataGridColumn):String
-            {
-                return object.name;
-            }
             
-            
-            private function returnStatus(object:NodeVirtualImage, column:DataGridColumn):String
-            {
-                if(!this._virtualAppliance)
-                {
-                    return '';	
-                }
-                /***
-                * We return for each node the state and the description of the action perfomed
-                * Check order:
-                *   - if any task is retrieved -> Processing
-                *   - if a task is retrieved:
-                *       - if the Virtual Appliance have a timestamp:
-                *           -  if the Virtual Appliance timestamp > Task timestamp -> Processing
-                *           -  if the Virtual Appliance timestamp < Task timestamp -> *Check Flow* 
-                *       - if the Virtual Appliance doesn't have timestamp -> *Check Flow*
-                * 
-                * *Check Flow*
-                *   - if task FINISHED_SUCCESSFULLY -> task.type
-                *   - if task FINISHED_UNSUCCESSFULLY o ABORTED -> task.state 
-                *   - if a job as a different state that DONE and FAILED -> job.type + job.description
-                *  
-                * **/
-                
-                if(object.taskStatus.tasks.length == 0)
-                {
-                    return resourceManager.getString('VirtualAppliance','LABEL_PROCESSING');	
-                }
-                else
-                {
-                	var timestamp:Timestamp = AbiCloudModel.getInstance().virtualApplianceManager.isTimestampUsed('virtualAppliance',this._virtualAppliance.id);
-                	var task:Task = object.taskStatus.tasks.getItemAt(0) as Task;
-                	if(timestamp)
-                	{
-                	   if(timestamp.timestamp > task.timestamp)
-                	   {
-                	   	   return resourceManager.getString('VirtualAppliance','LABEL_PROCESSING');
-                	   }	
-                	}
-                	
-                	if(task.state == Task.FINISHED_SUCCESSFULLY)
-                	{
-                		return resourceManager.getString('VirtualAppliance','LABEL_TYPE_' + task.type);
-                	}
-                	else if(task.state == Task.FINISHED_UNSUCCESSFULLY || task.state == Task.ABORTED)
-                	{
-                		return resourceManager.getString('VirtualAppliance','LABEL_STATUS_' + task.state);
-                	}
-                	else
-                	{
-                		var job:Job = returnNodeState(task.jobs);
-	                    if(job)
-	                    {
-	                        return resourceManager.getString('VirtualAppliance','LABEL_STATUS_' + job.type);
-	                    }
-	                    return resourceManager.getString('VirtualAppliance','LABEL_FINISHING');
-                	}
-                	
-                }
-                return '';
-            }
-            
-            private function returnNodeState(jobs:ArrayCollection):Job
-            {
-                var job:Job;
-                for(var i:int = 0 ; i < jobs.length ; i++)
-                {
-                    job = jobs.getItemAt(i) as Job;
-                    if(job.state != Job.DONE && job.state != Job.FAILED)
-                    {
-                    	return job;
-                    }	
-                }
-                return null;
-            }
         ]]>
     </mx:Script>
     <mx:HBox width="100%" 
@@ -290,26 +211,12 @@
         </mx:VBox>
     </mx:HBox>
     
-    <general:GeneralSubPanel 
-        width="100%" height="100%"
-        verticalAlign="middle"
-        title="@Resource(bundle='VirtualAppliance', key='LABEL_STATUS')">
-
-        <mx:DataGrid id="nodesList"
-            width="100%" height="190">
-            <mx:columns>
-                <mx:DataGridColumn 
-                	headerText="Node"
-                    labelFunction="returnName"/>
-                 
-                 <mx:DataGridColumn 
-                    headerText="Status"
-                    width="150"
-                    labelFunction="returnStatus"/>
-
-            </mx:columns>
-        </mx:DataGrid>
-    </general:GeneralSubPanel>
+    <virtualappliance:NodeStatuses 
+        id="nodeStatuses" 
+        width="100%"
+        height="100%"
+        virtualAppliance="{this._virtualAppliance}"
+        title="@Resource(bundle='VirtualAppliance', key='LABEL_STATUS')"/>
 
     <!-- Custom Progress Bar -->
     <mx:Canvas 

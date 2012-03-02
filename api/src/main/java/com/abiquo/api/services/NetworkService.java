@@ -207,8 +207,9 @@ public class NetworkService extends DefaultApiService
             case INTERNAL:
                 // find next available IP to use.
                 ip =
-                    repo.findIpsByPrivateVLANAvailableFiltered(vdc.getId(), vlan.getId(), 0, 1,
-                        new String(), OrderByEnum.IP, Boolean.TRUE).get(0);
+                    repo.findNextIpByPrivateVLANAvailable(vdc.getId(), vlan.getId(), vlan
+                        .getConfiguration().getGateway());
+
                 break;
 
             case UNMANAGED:
@@ -237,15 +238,17 @@ public class NetworkService extends DefaultApiService
         Rasd rasd = createRasdEntity(vm, ip);
 
         repo.insertRasd(rasd);
-        ip.setRasd(rasd);
+        if (ip != null)
+        {
+            ip.setRasd(rasd);
 
-        ip.attach(0, vm, vapp);
+            ip.attach(0, vm, vapp);
 
-        ip.setVirtualAppliance(vapp);
-        ip.setVirtualMachine(vm);
-
-        repo.updateIpManagement(ip);
-        
+            ip.setVirtualAppliance(vapp);
+            ip.setVirtualMachine(vm);
+            ip.setAvailable(Boolean.FALSE);
+            repo.updateIpManagement(ip);
+        }
         vm.setNetworkConfiguration(vlan.getConfiguration());
         repo.updateVirtualMachine(vm);
 
@@ -287,29 +290,28 @@ public class NetworkService extends DefaultApiService
      * <p>
      * If the virtual machine is not deployed, the method simply returns <code>null</code>. If the
      * virtual machine is deployed, the attachment will run a reconfigure operation and this method
-     * will return the identifier of the task object associated to the reconfigure operation.
-     * 
-     * If the @param configurationRef is an empty list, we will set no network configuration
-     * to this machine. Stupid behavior, but we allow it.
+     * will return the identifier of the task object associated to the reconfigure operation. If the @param
+     * configurationRef is an empty list, we will set no network configuration to this machine.
+     * Stupid behavior, but we allow it.
      * 
      * @param vdcId identifier of the virtual datacenter.
      * @param vappId identifier of the virtual appliance
      * @param vmId identifier of the virtual machine
      * @param configurationRef the link to the available configuration.
-     * 
      * @return The id of the Tarantino task if the virtual machine is deployed, <code>null</code>
      *         otherwise.
      */
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public Object changeNetworkConfiguration(final Integer vdcId, final Integer vappId, final Integer vmId,
-        final LinksDto configurationRef, final VirtualMachineState originalState)
+    public Object changeNetworkConfiguration(final Integer vdcId, final Integer vappId,
+        final Integer vmId, final LinksDto configurationRef, final VirtualMachineState originalState)
     {
         VirtualDatacenter vdc = getVirtualDatacenter(vdcId);
         VirtualAppliance vapp = getVirtualAppliance(vdc, vappId);
         VirtualMachine oldvm = getVirtualMachine(vapp, vmId);
 
         VirtualMachine newvm = vmService.duplicateVirtualMachineObject(oldvm);
-        NetworkConfiguration netconf = vmService.getNetworkConfigurationFromDto(vapp, newvm, configurationRef);
+        NetworkConfiguration netconf =
+            vmService.getNetworkConfigurationFromDto(vapp, newvm, configurationRef);
 
         newvm.setNetworkConfiguration(netconf);
 
@@ -782,9 +784,10 @@ public class NetworkService extends DefaultApiService
         LOGGER.debug("Returning the list of IPs used by Virtual Machine '" + vm.getName() + "'.");
         return ips;
     }
-    
+
     public List<IpPoolManagement> getListIpPoolManagementByInfrastructureVirtualMachine(
-        Integer datacenterId, Integer rackId, Integer machineId, Integer vmId)
+        final Integer datacenterId, final Integer rackId, final Integer machineId,
+        final Integer vmId)
     {
         Machine pm = datacenterRepo.findMachineByIds(datacenterId, rackId, machineId);
         if (pm == null)
@@ -792,7 +795,7 @@ public class NetworkService extends DefaultApiService
             addNotFoundErrors(APIError.NON_EXISTENT_MACHINE);
             flushErrors();
         }
-        
+
         VirtualMachine vm = vmService.getVirtualMachineByHypervisor(pm.getHypervisor(), vmId);
         VirtualAppliance vapp = repo.findVirtualApplianceByVirtualMachine(vm);
         if (vapp == null)
@@ -915,8 +918,7 @@ public class NetworkService extends DefaultApiService
 
         // Generally there is only one IP, but we avoid problemes and
         // we return IPs
-        List<IpPoolManagement> ips =
-            repo.findIpsWithConfigurationIdInVirtualMachine(vm);
+        List<IpPoolManagement> ips = repo.findIpsWithConfigurationIdInVirtualMachine(vm);
         if (ips == null || ips.isEmpty())
         {
             addNotFoundErrors(APIError.VLANS_NON_EXISTENT_CONFIGURATION);
@@ -928,7 +930,8 @@ public class NetworkService extends DefaultApiService
         IpPoolManagement resultIp = ips.get(0);
         for (IpPoolManagement ip : ips)
         {
-            if (ip.getVlanNetwork().getConfiguration().getId().equals(vm.getNetworkConfiguration().getId()))
+            if (ip.getVlanNetwork().getConfiguration().getId()
+                .equals(vm.getNetworkConfiguration().getId()))
             {
                 resultIp = ip;
                 break;
@@ -941,7 +944,8 @@ public class NetworkService extends DefaultApiService
         vmconfig.setPrimaryDNS(vlan.getConfiguration().getPrimaryDNS());
         vmconfig.setSecondaryDNS(vlan.getConfiguration().getSecondaryDNS());
         vmconfig.setSuffixDNS(vlan.getConfiguration().getSufixDNS());
-        vmconfig.setUsed(vlan.getConfiguration().getId().equals(vm.getNetworkConfiguration().getId()));
+        vmconfig.setUsed(vlan.getConfiguration().getId()
+            .equals(vm.getNetworkConfiguration().getId()));
         vmconfig.setId(vlan.getConfiguration().getId());
 
         LOGGER

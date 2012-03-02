@@ -26,8 +26,8 @@ import static com.abiquo.api.resources.cloud.VirtualApplianceResource.createTran
 import java.util.List;
 
 import javax.validation.constraints.Min;
-import javax.ws.rs.DefaultValue;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -35,17 +35,22 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.UriInfo;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.wink.common.annotations.Parent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
 import com.abiquo.api.resources.AbstractResource;
+import com.abiquo.api.resources.TaskResourceUtils;
 import com.abiquo.api.services.cloud.VirtualApplianceService;
 import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualApplianceDto;
 import com.abiquo.server.core.cloud.VirtualAppliancesDto;
+import com.abiquo.server.core.task.Task;
+import com.abiquo.server.core.task.TasksDto;
 
 @Parent(VirtualDatacenterResource.class)
 @Path(VirtualAppliancesResource.VIRTUAL_APPLIANCES_PATH)
@@ -65,7 +70,8 @@ public class VirtualAppliancesResource extends AbstractResource
         @QueryParam(FILTER) @DefaultValue("") final String filter,
         @QueryParam(LIMIT) @Min(1) @DefaultValue(DEFAULT_PAGE_LENGTH_STRING) final Integer limit,
         @QueryParam(ASC) @DefaultValue("true") final Boolean descOrAsc,
-        @Context final IRESTBuilder restBuilder) throws Exception
+        @QueryParam("expand") final String expand, @Context final IRESTBuilder restBuilder,
+        @Context final UriInfo uriInfo) throws Exception
     {
         List<VirtualAppliance> all =
             service.getVirtualAppliancesByVirtualDatacenter(vdcId, startwith, orderBy, filter,
@@ -76,11 +82,34 @@ public class VirtualAppliancesResource extends AbstractResource
         {
             for (VirtualAppliance v : all)
             {
-                vappsDto.add(createTransferObject(v, restBuilder));
+                VirtualApplianceDto dto = createTransferObject(v, restBuilder);
+                expandNodes(vdcId, v.getId(), expand, uriInfo, dto);
+                vappsDto.add(dto);
             }
         }
 
         return vappsDto;
+    }
+
+    private void expandNodes(final Integer vdcId, final Integer vappId, final String expand,
+        final UriInfo uriInfo, final VirtualApplianceDto dto)
+    {
+        String[] expands = StringUtils.split(expand, ",");
+        if (expands != null)
+        {
+            for (String e : expands)
+            {
+                if ("last_task".equalsIgnoreCase(e))
+                {
+                    List<Task> lastTasks = service.getAllNodesLastTask(vdcId, vappId);
+                    if (lastTasks != null && !lastTasks.isEmpty())
+                    {
+                        TasksDto dtos = TaskResourceUtils.transform(lastTasks, uriInfo);
+                        dto.setLastTasks(dtos);
+                    }
+                }
+            }
+        }
     }
 
     @POST
