@@ -52,7 +52,7 @@ public class VirtualMachineProcessor extends AbstractHierarchyProcessor<VirtualM
     protected String getResourceName(final String resourceId)
     {
         VirtualMachine vm = dao.findVirtualMachineById(Integer.valueOf(resourceId));
-        return vm.getName();
+        return vm != null ? vm.getName() : null;
     }
 
 }

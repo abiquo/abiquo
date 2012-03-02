@@ -607,6 +607,31 @@ public class NetworkService extends DefaultApiService
     }
 
     /**
+     * Retrieve a private IP object.
+     * 
+     * @param vdcId identifier of the {@link VirtualDatacenter}
+     * @param vlanId identifier of the {@link VLANNetwork}
+     * @param ipId identifier of the {@link IpPoolManagement} object to retrieve.
+     * @return the found object.
+     */
+    public IpPoolManagement getIpPoolManagementByVlan(Integer vdcId, Integer vlanId, Integer ipId)
+    {
+        VirtualDatacenter vdc = getVirtualDatacenter(vdcId);
+        VLANNetwork vlan = getPrivateVlan(vdc, vlanId);
+        IpPoolManagement ip = repo.findIp(vlan, ipId);
+        
+        if (ip == null)
+        {
+            addNotFoundErrors(APIError.NON_EXISTENT_IP);
+            flushErrors();
+        }
+
+        LOGGER.debug("Returning the private Ip Address with id '" + ip.getId() + "'.");
+        
+        return ip;       
+    }
+
+    /**
      * Asks for all the Private IPs managed by an Enterprise.
      * 
      * @param entId identifier of the Enterprise.
@@ -706,7 +731,7 @@ public class NetworkService extends DefaultApiService
         }
 
     }
-
+    
     /**
      * Asks for all the Private IPs managed by a Virtual Appliance.
      * 

@@ -82,7 +82,7 @@ public class PhysicalMachineDAOHibernate extends HibernateDAO<PhysicalmachineHB,
     {
 
         // "(pm.ram - pm.ramUsed) >= " + vimage.getRamRequired() +
-        // " and ((pm.cpu * pm.cpuRatio) - pm.cpuUsed) >= " + vimage.getCpuRequired();
+        // " and (pm.cpu - pm.cpuUsed) >= " + vimage.getCpuRequired();
         Session session = HibernateDAOFactory.getSessionFactory().getCurrentSession();
         Query pmQuery = session.getNamedQuery(FIRST_PASS_QUERY);
 

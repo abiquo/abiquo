@@ -69,6 +69,7 @@ public class VirtualImageConversionsHB implements java.io.Serializable,
         this.setTargetType(targetType);
     }
 
+    @Override
     public VirtualImageConversions toPojo()
     {
         VirtualImageConversions imageConversion = new VirtualImageConversions();
@@ -218,7 +219,7 @@ public class VirtualImageConversionsHB implements java.io.Serializable,
 
     public boolean isBundleConversion()
     {
-        return sourceType != null;
+        return image.getMaster() != null;
     }
 
     public DiskFormatType getSourceType()
@@ -226,7 +227,7 @@ public class VirtualImageConversionsHB implements java.io.Serializable,
         return sourceType;
     }
 
-    public void setSourceType(DiskFormatType sourceType)
+    public void setSourceType(final DiskFormatType sourceType)
     {
         this.sourceType = sourceType;
     }
@@ -236,7 +237,7 @@ public class VirtualImageConversionsHB implements java.io.Serializable,
         return targetType;
     }
 
-    public void setTargetType(DiskFormatType targetType)
+    public void setTargetType(final DiskFormatType targetType)
     {
         this.targetType = targetType;
     }

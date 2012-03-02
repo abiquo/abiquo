@@ -82,7 +82,6 @@ public class InfrastructureDataProvider extends DataProvider
 
         pMachine.setHd(100000);
         pMachine.setCpu(2);
-        pMachine.setCpuRatio(2);
         pMachine.setRam(1024);
         
         //final NetworkModule nModule = new NetworkModule();

@@ -61,7 +61,7 @@ public class PersistenceExceptionMapper implements ExceptionMapper<PersistenceEx
         errors.getCollection().add(error);
         builder.entity(errors).type(MediaType.APPLICATION_XML_TYPE);
 
-        LOGGER.error("Unexpexted persistence exception", exception);
+        LOGGER.error("Unexpected persistence exception", exception);
 
         return builder.build();
     }
