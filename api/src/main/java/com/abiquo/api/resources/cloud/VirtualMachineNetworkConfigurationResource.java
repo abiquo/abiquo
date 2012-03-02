@@ -198,6 +198,8 @@ public class VirtualMachineNetworkConfigurationResource extends AbstractResource
      */
     @PUT
     @Path(CONFIGURATION_PATH)
+    @Consumes(LinksDto.MEDIA_TYPE)
+    @Produces(AcceptedRequestDto.MEDIA_TYPE)
     public AcceptedRequestDto< ? > changeVirtualMachineNetworkConfiguration(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) @NotNull @Min(1) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) @NotNull @Min(1) final Integer vappId,
@@ -287,7 +289,7 @@ public class VirtualMachineNetworkConfigurationResource extends AbstractResource
      */
     @POST
     @Path(NICS_PATH)
-    @Consumes(AcceptedRequestDto.MEDIA_TYPE)
+    @Consumes(LinksDto.MEDIA_TYPE)
     @Produces(AcceptedRequestDto.MEDIA_TYPE)
     public AcceptedRequestDto< ? > attachNICs(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) @NotNull @Min(1) final Integer vdcId,
@@ -342,6 +344,8 @@ public class VirtualMachineNetworkConfigurationResource extends AbstractResource
      */
     @PUT
     @Path(NICS_PATH)
+    @Consumes(LinksDto.MEDIA_TYPE)
+    @Produces(AcceptedRequestDto.MEDIA_TYPE)
     public AcceptedRequestDto< ? > changeNICs(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) @NotNull @Min(1) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) @NotNull @Min(1) final Integer vappId,
