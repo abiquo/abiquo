@@ -24,7 +24,6 @@ package com.abiquo.server.core.infrastructure.storage;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.abiquo.model.transport.SingleResourceTransportDto;
-import com.abiquo.server.core.infrastructure.network.DhcpOptionDto;
 
 @XmlRootElement(name = "storagePool")
 public class StoragePoolDto extends SingleResourceTransportDto

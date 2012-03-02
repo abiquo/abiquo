@@ -32,7 +32,7 @@ import com.abiquo.model.rest.RESTLink;
 
 public abstract class SingleResourceTransportDto implements Serializable
 {
-    public static final String API_VERSION = "1.0";
+    public static final String API_VERSION = "2.0";
 
     public static final String APPLICATION = "application";
 

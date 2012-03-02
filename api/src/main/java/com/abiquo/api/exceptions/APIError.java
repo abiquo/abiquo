@@ -41,8 +41,9 @@ public enum APIError
         "The requested resource does not exist"), STATUS_METHOD_NOT_ALLOWED(
         "405-METHOD NOT ALLOWED", "The resource does not expose this method"), STATUS_CONFLICT(
         "409-CONFLICT", "Conflict"), STATUS_HEADER_VERSION_MANDATORY("412-PRECONDITION FAILED",
-        "Header 'X-abiquo-version' is mandatory"), STATUS_HEADER_VERSION_INVALID(
-        "412-PRECONDITION_FAILED", "Invalid header 'X-abiquo-version'"), STATUS_UNSUPPORTED_MEDIA_TYPE(
+        "Header 'X-abiquo-version' is mandatory"), STATUS_NOT_ACCEPTABLE_VERSION(
+        "406-NOT ACCEPTABLE", "Invalid version parameter for 'Accept' header"), STATUS_UNSUPPORTED_MEDIA_TYPE_VERSION(
+        "415-UNSUPPORTED MEDIA TYPE", "Invalid version 'Content-type' "), STATUS_UNSUPPORTED_MEDIA_TYPE(
         "415-UNSUPPORTED MEDIA TYPE",
         "The Abiquo API currently only supports application/XML Media Type"), STATUS_INTERNAL_SERVER_ERROR(
         "500-INTERNAL SERVER ERROR", "Unexpected exception"), STATUS_UNPROVISIONED(
