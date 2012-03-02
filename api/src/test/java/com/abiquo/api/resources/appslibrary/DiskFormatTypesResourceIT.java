@@ -39,7 +39,7 @@ public class DiskFormatTypesResourceIT extends AbstractJpaGeneratorIT
     public void getDiskFormatTypes() throws Exception
     {
         String diskFormatTypesURI = resolveDiskFormatTypesURI();
-        ClientResponse response = get(diskFormatTypesURI);
+        ClientResponse response = get(diskFormatTypesURI, DiskFormatTypesDto.MEDIA_TYPE);
 
         DiskFormatTypesDto dtos = response.getEntity(DiskFormatTypesDto.class);
         assertEquals(dtos.getCollection().size(), DiskFormatType.getIdMax() + 1);

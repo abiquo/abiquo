@@ -257,6 +257,8 @@ public class VirtualMachineStorageConfigurationResource extends AbstractResource
      */
     @PUT
     @Path(DISKS_PATH)
+    @Consumes(LinksDto.MEDIA_TYPE)
+    @Produces(AcceptedRequestDto.MEDIA_TYPE)
     public AcceptedRequestDto< ? > changeHardDisks(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) @NotNull @Min(1) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) @NotNull @Min(1) final Integer vappId,

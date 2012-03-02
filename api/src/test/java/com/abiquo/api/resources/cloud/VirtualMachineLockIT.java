@@ -41,11 +41,14 @@ import org.testng.annotations.Test;
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.resources.AbstractJpaGeneratorIT;
 import com.abiquo.model.enumerator.HypervisorType;
+import com.abiquo.model.transport.AcceptedRequestDto;
 import com.abiquo.server.core.cloud.VirtualAppliance;
+import com.abiquo.server.core.cloud.VirtualApplianceDto;
 import com.abiquo.server.core.cloud.VirtualApplianceState;
 import com.abiquo.server.core.cloud.VirtualApplianceStateDto;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualMachine;
+import com.abiquo.server.core.cloud.VirtualMachineDto;
 import com.abiquo.server.core.cloud.VirtualMachineState;
 import com.abiquo.server.core.cloud.VirtualMachineStateDto;
 import com.abiquo.server.core.cloud.VirtualMachineTaskDto;
@@ -138,7 +141,8 @@ public class VirtualMachineLockIT extends AbstractJpaGeneratorIT
         String uri = resolveVirtualMachineDeployURI(vdc.getId(), vapp.getId(), vm.getId());
 
         ClientResponse response =
-            post(uri, null, EnvironmentGenerator.SYSADMIN, EnvironmentGenerator.SYSADMIN);
+            post(uri, null, EnvironmentGenerator.SYSADMIN, EnvironmentGenerator.SYSADMIN,
+                AcceptedRequestDto.MEDIA_TYPE, null);
 
         assertErrors(response, 409, APIError.VIRTUAL_MACHINE_INVALID_STATE_DEPLOY);
     }
@@ -152,7 +156,8 @@ public class VirtualMachineLockIT extends AbstractJpaGeneratorIT
         String uri = resolveVirtualMachineDeployURI(vdc.getId(), vapp.getId(), vm.getId());
 
         ClientResponse response =
-            post(uri, null, EnvironmentGenerator.SYSADMIN, EnvironmentGenerator.SYSADMIN);
+            post(uri, null, EnvironmentGenerator.SYSADMIN, EnvironmentGenerator.SYSADMIN,
+                AcceptedRequestDto.MEDIA_TYPE, null);
 
         assertEquals(response.getStatusCode(), 202);
         assertVmState(VirtualMachineState.LOCKED);
@@ -170,7 +175,8 @@ public class VirtualMachineLockIT extends AbstractJpaGeneratorIT
         dto.setForceEnterpriseSoftLimits(true);
 
         ClientResponse response =
-            post(uri, dto, EnvironmentGenerator.SYSADMIN, EnvironmentGenerator.SYSADMIN);
+            post(uri, dto, EnvironmentGenerator.SYSADMIN, EnvironmentGenerator.SYSADMIN,
+                AcceptedRequestDto.MEDIA_TYPE, VirtualMachineTaskDto.MEDIA_TYPE);
 
         assertEquals(response.getStatusCode(), 202);
         assertVmState(VirtualMachineState.LOCKED);
@@ -188,7 +194,8 @@ public class VirtualMachineLockIT extends AbstractJpaGeneratorIT
         dto.setForceUndeploy(false);
 
         ClientResponse response =
-            post(uri, dto, EnvironmentGenerator.SYSADMIN, EnvironmentGenerator.SYSADMIN);
+            post(uri, dto, EnvironmentGenerator.SYSADMIN, EnvironmentGenerator.SYSADMIN,
+                AcceptedRequestDto.MEDIA_TYPE, VirtualMachineTaskDto.MEDIA_TYPE);
 
         assertEquals(response.getStatusCode(), 202);
         assertVmState(VirtualMachineState.LOCKED);
@@ -206,7 +213,8 @@ public class VirtualMachineLockIT extends AbstractJpaGeneratorIT
         dto.setForceUndeploy(false);
 
         ClientResponse response =
-            post(uri, dto, EnvironmentGenerator.SYSADMIN, EnvironmentGenerator.SYSADMIN);
+            post(uri, dto, EnvironmentGenerator.SYSADMIN, EnvironmentGenerator.SYSADMIN,
+                AcceptedRequestDto.MEDIA_TYPE, VirtualMachineTaskDto.MEDIA_TYPE);
 
         Assert.assertEquals(response.getStatusCode(), 202);
     }
@@ -223,7 +231,8 @@ public class VirtualMachineLockIT extends AbstractJpaGeneratorIT
         dto.setState(VirtualMachineState.OFF);
 
         ClientResponse response =
-            put(uri, dto, EnvironmentGenerator.SYSADMIN, EnvironmentGenerator.SYSADMIN);
+            put(uri, dto, EnvironmentGenerator.SYSADMIN, EnvironmentGenerator.SYSADMIN,
+                AcceptedRequestDto.MEDIA_TYPE, VirtualMachineStateDto.MEDIA_TYPE);
 
         assertEquals(response.getStatusCode(), 202);
         assertVmState(VirtualMachineState.LOCKED);
@@ -241,7 +250,8 @@ public class VirtualMachineLockIT extends AbstractJpaGeneratorIT
         dto.setState(VirtualMachineState.ON);
 
         ClientResponse response =
-            put(uri, dto, EnvironmentGenerator.SYSADMIN, EnvironmentGenerator.SYSADMIN);
+            put(uri, dto, EnvironmentGenerator.SYSADMIN, EnvironmentGenerator.SYSADMIN,
+                AcceptedRequestDto.MEDIA_TYPE, VirtualMachineStateDto.MEDIA_TYPE);
 
         assertErrors(response, 409, APIError.VIRTUAL_MACHINE_STATE_CHANGE_ERROR);
     }
@@ -259,7 +269,8 @@ public class VirtualMachineLockIT extends AbstractJpaGeneratorIT
         dto.setState(VirtualMachineState.PAUSED);
 
         ClientResponse response =
-            put(uri, dto, EnvironmentGenerator.SYSADMIN, EnvironmentGenerator.SYSADMIN);
+            put(uri, dto, EnvironmentGenerator.SYSADMIN, EnvironmentGenerator.SYSADMIN,
+                AcceptedRequestDto.MEDIA_TYPE, VirtualMachineStateDto.MEDIA_TYPE);
 
         assertErrors(response, 409, APIError.VIRTUAL_MACHINE_PAUSE_UNSUPPORTED);
     }
@@ -276,7 +287,8 @@ public class VirtualMachineLockIT extends AbstractJpaGeneratorIT
         dto.setState(VirtualMachineState.PAUSED);
 
         ClientResponse response =
-            put(uri, dto, EnvironmentGenerator.SYSADMIN, EnvironmentGenerator.SYSADMIN);
+            put(uri, dto, EnvironmentGenerator.SYSADMIN, EnvironmentGenerator.SYSADMIN,
+                AcceptedRequestDto.MEDIA_TYPE, VirtualMachineStateDto.MEDIA_TYPE);
 
         assertErrors(response, 409, APIError.VIRTUAL_MACHINE_UNALLOCATED_STATE);
     }
@@ -294,7 +306,8 @@ public class VirtualMachineLockIT extends AbstractJpaGeneratorIT
         dto.setState(VirtualMachineState.PAUSED);
 
         ClientResponse response =
-            put(uri, dto, EnvironmentGenerator.SYSADMIN, EnvironmentGenerator.SYSADMIN);
+            put(uri, dto, EnvironmentGenerator.SYSADMIN, EnvironmentGenerator.SYSADMIN,
+                AcceptedRequestDto.MEDIA_TYPE, VirtualMachineStateDto.MEDIA_TYPE);
 
         assertEquals(response.getStatusCode(), 202);
         assertVmState(VirtualMachineState.LOCKED);
@@ -355,7 +368,8 @@ public class VirtualMachineLockIT extends AbstractJpaGeneratorIT
         dto.setForceEnterpriseSoftLimits(false);
 
         ClientResponse response =
-            post(uri, dto, EnvironmentGenerator.SYSADMIN, EnvironmentGenerator.SYSADMIN);
+            post(uri, dto, EnvironmentGenerator.SYSADMIN, EnvironmentGenerator.SYSADMIN,
+                AcceptedRequestDto.MEDIA_TYPE, VirtualMachineTaskDto.MEDIA_TYPE);
 
         assertEquals(response.getStatusCode(), 202);
         assertVappState(VirtualApplianceState.LOCKED);
@@ -373,7 +387,8 @@ public class VirtualMachineLockIT extends AbstractJpaGeneratorIT
         dto.setForceEnterpriseSoftLimits(false);
 
         ClientResponse response =
-            post(uri, dto, EnvironmentGenerator.SYSADMIN, EnvironmentGenerator.SYSADMIN);
+            post(uri, dto, EnvironmentGenerator.SYSADMIN, EnvironmentGenerator.SYSADMIN,
+                AcceptedRequestDto.MEDIA_TYPE, VirtualMachineTaskDto.MEDIA_TYPE);
 
         assertErrors(response, 409, APIError.VIRTUAL_MACHINE_INVALID_STATE_DEPLOY);
     }
@@ -390,7 +405,8 @@ public class VirtualMachineLockIT extends AbstractJpaGeneratorIT
         dto.setForceEnterpriseSoftLimits(false);
 
         ClientResponse response =
-            post(uri, dto, EnvironmentGenerator.SYSADMIN, EnvironmentGenerator.SYSADMIN);
+            post(uri, dto, EnvironmentGenerator.SYSADMIN, EnvironmentGenerator.SYSADMIN,
+                AcceptedRequestDto.MEDIA_TYPE, VirtualMachineTaskDto.MEDIA_TYPE);
 
         assertEquals(response.getStatusCode(), 202);
         assertVappState(VirtualApplianceState.LOCKED);
@@ -408,7 +424,8 @@ public class VirtualMachineLockIT extends AbstractJpaGeneratorIT
         dto.setForceEnterpriseSoftLimits(false);
 
         ClientResponse response =
-            post(uri, dto, EnvironmentGenerator.SYSADMIN, EnvironmentGenerator.SYSADMIN);
+            post(uri, dto, EnvironmentGenerator.SYSADMIN, EnvironmentGenerator.SYSADMIN,
+                AcceptedRequestDto.MEDIA_TYPE, VirtualMachineTaskDto.MEDIA_TYPE);
 
         Assert.assertEquals(response.getStatusCode(), 202);
     }
@@ -460,7 +477,8 @@ public class VirtualMachineLockIT extends AbstractJpaGeneratorIT
     {
         String uri = resolveVirtualMachineStateURI(vdc.getId(), vapp.getId(), vm.getId());
         ClientResponse response =
-            get(uri, EnvironmentGenerator.SYSADMIN, EnvironmentGenerator.SYSADMIN);
+            get(uri, EnvironmentGenerator.SYSADMIN, EnvironmentGenerator.SYSADMIN,
+                VirtualMachineStateDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), 200);
 
         VirtualMachineStateDto dto = response.getEntity(VirtualMachineStateDto.class);
@@ -471,7 +489,8 @@ public class VirtualMachineLockIT extends AbstractJpaGeneratorIT
     {
         String uri = resolveVirtualApplianceStateURI(vdc.getId(), vapp.getId());
         ClientResponse response =
-            get(uri, EnvironmentGenerator.SYSADMIN, EnvironmentGenerator.SYSADMIN);
+            get(uri, EnvironmentGenerator.SYSADMIN, EnvironmentGenerator.SYSADMIN,
+                VirtualApplianceStateDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), 200);
 
         VirtualApplianceStateDto dto = response.getEntity(VirtualApplianceStateDto.class);
@@ -482,7 +501,8 @@ public class VirtualMachineLockIT extends AbstractJpaGeneratorIT
     {
         String uri = resolveVirtualMachineURI(vdc.getId(), vapp.getId(), vm.getId());
         ClientResponse response =
-            get(uri, EnvironmentGenerator.SYSADMIN, EnvironmentGenerator.SYSADMIN);
+            get(uri, EnvironmentGenerator.SYSADMIN, EnvironmentGenerator.SYSADMIN,
+                VirtualMachineDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), responseCode);
     }
 
@@ -490,7 +510,8 @@ public class VirtualMachineLockIT extends AbstractJpaGeneratorIT
     {
         String uri = resolveVirtualApplianceURI(vdc.getId(), vapp.getId());
         ClientResponse response =
-            get(uri, EnvironmentGenerator.SYSADMIN, EnvironmentGenerator.SYSADMIN);
+            get(uri, EnvironmentGenerator.SYSADMIN, EnvironmentGenerator.SYSADMIN,
+                VirtualApplianceDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), responseCode);
     }
 

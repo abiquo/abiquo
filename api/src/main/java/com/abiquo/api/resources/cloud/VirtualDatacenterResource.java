@@ -37,6 +37,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.UriInfo;
 
@@ -167,6 +168,7 @@ public class VirtualDatacenterResource extends AbstractResource
     }
 
     @GET
+    @Produces(MediaType.TEXT_PLAIN)
     @Path(VirtualDatacenterResource.VIRTUAL_DATACENTER_DHCP_INFO_PATH)
     public String getDHCPInfoByVirtualDatacenter(@PathParam(VIRTUAL_DATACENTER) final Integer id,
         @Context final IRESTBuilder restBuilder) throws Exception

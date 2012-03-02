@@ -34,7 +34,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 
 import org.apache.wink.common.annotations.Parent;
@@ -146,7 +145,7 @@ public class VirtualMachineResource extends AbstractResource
      * @throws Exception
      */
     @GET
-    @Produces({MediaType.APPLICATION_XML, VirtualMachineDto.MEDIA_TYPE})
+    @Produces(VirtualMachineDto.MEDIA_TYPE)
     public VirtualMachineDto getVirtualMachine(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) @NotNull @Min(1) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) @NotNull @Min(1) final Integer vappId,
@@ -169,6 +168,8 @@ public class VirtualMachineResource extends AbstractResource
      * @throws Exception AcceptedRequestDto
      */
     @PUT
+    @Consumes(VirtualMachineDto.MEDIA_TYPE)
+    @Produces(AcceptedRequestDto.MEDIA_TYPE)
     public AcceptedRequestDto<String> updateVirtualMachine(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) @NotNull @Min(1) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) @NotNull @Min(1) final Integer vappId,
@@ -213,7 +214,8 @@ public class VirtualMachineResource extends AbstractResource
      * @throws Exception
      */
     @PUT
-    @Consumes(VM_NODE_MEDIA_TYPE)
+    @Consumes(VirtualMachineWithNodeDto.MEDIA_TYPE)
+    @Produces(AcceptedRequestDto.MEDIA_TYPE)
     public AcceptedRequestDto<String> updateVirtualMachineNode(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) @NotNull @Min(1) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) @NotNull @Min(1) final Integer vappId,
@@ -243,6 +245,8 @@ public class VirtualMachineResource extends AbstractResource
      */
     @PUT
     @Path(VIRTUAL_MACHINE_STATE_PATH)
+    @Produces(AcceptedRequestDto.MEDIA_TYPE)
+    @Consumes(VirtualMachineStateDto.MEDIA_TYPE)
     public AcceptedRequestDto<String> powerStateVirtualMachine(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
@@ -842,7 +846,7 @@ public class VirtualMachineResource extends AbstractResource
      * @throws Exception
      */
     @GET
-    @Produces({VM_NODE_MEDIA_TYPE, VirtualMachineWithNodeDto.MEDIA_TYPE})
+    @Produces(VirtualMachineWithNodeDto.MEDIA_TYPE)
     public VirtualMachineWithNodeDto getVirtualMachineWithNode(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) @NotNull @Min(1) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) @NotNull @Min(1) final Integer vappId,
@@ -857,7 +861,7 @@ public class VirtualMachineResource extends AbstractResource
     }
 
     @GET
-    @Produces({MediaType.APPLICATION_XML, TasksDto.MEDIA_TYPE})
+    @Produces(TasksDto.MEDIA_TYPE)
     @Path(TaskResourceUtils.TASKS_PATH)
     public TasksDto getTasks(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) @NotNull @Min(1) final Integer vdcId,
@@ -872,7 +876,7 @@ public class VirtualMachineResource extends AbstractResource
     }
 
     @GET
-    @Produces({MediaType.APPLICATION_XML, TaskDto.MEDIA_TYPE})
+    @Produces(TaskDto.MEDIA_TYPE)
     @Path(TaskResourceUtils.TASK_PATH)
     public TaskDto getTask(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) @NotNull @Min(1) final Integer vdcId,

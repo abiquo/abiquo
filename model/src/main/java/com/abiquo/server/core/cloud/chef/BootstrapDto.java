@@ -33,6 +33,10 @@ import javax.xml.bind.annotation.XmlType;
 @XmlType(propOrder = {"nodeName", "chefConfig"})
 public class BootstrapDto implements Serializable
 {
+    public static final String BASE_MEDIA_TYPE = "application/vnd.abiquo.extended-bootstrap+xml";
+
+    public static final String MEDIA_TYPE = BASE_MEDIA_TYPE + "; version=" + "1.0";
+
     private static final long serialVersionUID = 1L;
 
     private String nodeName;

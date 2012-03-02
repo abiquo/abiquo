@@ -341,7 +341,7 @@ public class ApplianceManagerResourceIT extends AbstractJpaGeneratorIT
         assertLinkExist(repodto, resolveDatacenterURI(datacenterId), DatacenterResource.DATACENTER);
         assertLinkExist(repodto, amRepoUrl, "applianceManagerRepositoryUri");
 
-        ClientResponse amresponse = get(amRepoUrl);
+        ClientResponse amresponse = get(amRepoUrl, DatacenterRepositoryDto.MEDIA_TYPE);
         assertEquals(amresponse.getStatusCode(), Status.OK.getStatusCode());
 
         EnterpriseRepositoryDto amrepo = amresponse.getEntity(EnterpriseRepositoryDto.class);

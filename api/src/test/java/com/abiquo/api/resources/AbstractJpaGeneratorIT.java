@@ -90,11 +90,6 @@ public class AbstractJpaGeneratorIT extends AbstractGeneratorTest
             .header("Authorization", "Basic " + basicAuth);
     }
 
-    protected ClientResponse get(final String uri)
-    {
-        return client.resource(uri).accept(MediaType.APPLICATION_XML).get();
-    }
-
     protected ClientResponse get(final String uri, final String username, final String password)
     {
         String basicAuth = basicAuth(username, password);
@@ -138,13 +133,14 @@ public class AbstractJpaGeneratorIT extends AbstractGeneratorTest
         return resource.post(dto);
     }
 
-    protected ClientResponse post(final String uri, final SingleResourceTransportDto dto, final String mediaType)
+    protected ClientResponse post(final String uri, final SingleResourceTransportDto dto,
+        final String mediaType)
     {
         return client.resource(uri).accept(mediaType).contentType(mediaType).post(dto);
     }
 
-    protected ClientResponse post(final String uri, final SingleResourceTransportDto dto, final String username,
-        final String password)
+    protected ClientResponse post(final String uri, final SingleResourceTransportDto dto,
+        final String username, final String password)
     {
         String basicAuth = basicAuth(username, password);
         Resource resource = client.resource(uri).header("Authorization", "Basic " + basicAuth);
@@ -157,19 +153,19 @@ public class AbstractJpaGeneratorIT extends AbstractGeneratorTest
         return resource.post(dto);
     }
 
-    protected ClientResponse post(final String uri, final SingleResourceTransportDto dto, final String username,
-        final String password, final String produces, final String consumes)
+    protected ClientResponse post(final String uri, final SingleResourceTransportDto dto,
+        final String username, final String password, final String accept, final String contentType)
     {
         String basicAuth = basicAuth(username, password);
 
         Resource res = client.resource(uri).header("Authorization", "Basic " + basicAuth);
-        if (produces != null)
+        if (accept != null)
         {
-            res.accept(produces);
+            res.accept(accept);
         }
-        if (consumes != null)
+        if (contentType != null)
         {
-            res.contentType(consumes);
+            res.contentType(contentType);
         }
         return res.post(dto);
     }
@@ -186,13 +182,14 @@ public class AbstractJpaGeneratorIT extends AbstractGeneratorTest
         return resource.put(dto);
     }
 
-    protected ClientResponse put(final String uri, final SingleResourceTransportDto dto, final String mediaType)
+    protected ClientResponse put(final String uri, final SingleResourceTransportDto dto,
+        final String mediaType)
     {
         return client.resource(uri).accept(mediaType).contentType(mediaType).put(dto);
     }
-    
-    protected ClientResponse put(final String uri, final SingleResourceTransportDto dto, final String username,
-        final String password)
+
+    protected ClientResponse put(final String uri, final SingleResourceTransportDto dto,
+        final String username, final String password)
     {
         String basicAuth = basicAuth(username, password);
         Resource resource = client.resource(uri).header("Authorization", "Basic " + basicAuth);
@@ -205,8 +202,8 @@ public class AbstractJpaGeneratorIT extends AbstractGeneratorTest
         return resource.put(dto);
     }
 
-    protected ClientResponse put(final String uri, final SingleResourceTransportDto dto, final String username,
-        final String password, final String mediaType)
+    protected ClientResponse put(final String uri, final SingleResourceTransportDto dto,
+        final String username, final String password, final String mediaType)
     {
         String basicAuth = basicAuth(username, password);
 
@@ -214,18 +211,32 @@ public class AbstractJpaGeneratorIT extends AbstractGeneratorTest
             .header("Authorization", "Basic " + basicAuth).put(dto);
     }
 
+    protected ClientResponse put(final String uri, final SingleResourceTransportDto dto,
+        final String username, final String password, final String accept, final String contentType)
+    {
+        String basicAuth = basicAuth(username, password);
+        Resource resource = client.resource(uri);
+        if (accept != null)
+        {
+            resource.accept(accept);
+        }
+        if (contentType != null)
+        {
+            resource.contentType(contentType);
+        }
+        return resource.header("Authorization", "Basic " + basicAuth).put(dto);
+    }
+
     protected ClientResponse delete(final String uri)
     {
-        return client.resource(uri).accept(MediaType.APPLICATION_XML).delete();
+        return client.resource(uri).delete();
     }
 
     protected ClientResponse delete(final String uri, final String username, final String password)
     {
         String basicAuth = basicAuth(username, password);
 
-        return client.resource(uri).accept(MediaType.APPLICATION_XML)
-            .contentType(MediaType.APPLICATION_XML).header("Authorization", "Basic " + basicAuth)
-            .delete();
+        return client.resource(uri).header("Authorization", "Basic " + basicAuth).delete();
     }
 
     protected ClientResponse delete(final String uri, final String username, final String password,

@@ -34,6 +34,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 
 import org.apache.wink.common.annotations.Parent;
@@ -208,7 +209,7 @@ public class VirtualApplianceResource
 
     @POST
     @Path(VIRTUAL_APPLIANCE_DEPLOY_PATH)
-    @Consumes(AcceptedRequestDto.MEDIA_TYPE)
+    @Consumes(VirtualMachineTaskDto.MEDIA_TYPE)
     @Produces(AcceptedRequestDto.MEDIA_TYPE)
     public AcceptedRequestDto<String> deploy(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
@@ -250,7 +251,7 @@ public class VirtualApplianceResource
 
     @POST
     @Path(VIRTUAL_APPLIANCE_UNDEPLOY_PATH)
-    @Consumes(AcceptedRequestDto.MEDIA_TYPE)
+    @Consumes(VirtualMachineTaskDto.MEDIA_TYPE)
     @Produces(AcceptedRequestDto.MEDIA_TYPE)
     public AcceptedRequestDto<String> undeploy(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
@@ -343,6 +344,7 @@ public class VirtualApplianceResource
 
     @GET
     @Path(VIRTUAL_APPLIANCE_PRICE_PATH)
+    @Produces(MediaType.TEXT_PLAIN)
     public String getPriceVirtualAppliance(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
