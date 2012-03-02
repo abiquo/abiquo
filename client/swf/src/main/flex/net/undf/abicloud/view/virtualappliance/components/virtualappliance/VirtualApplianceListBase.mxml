@@ -60,6 +60,16 @@
             import net.undf.abicloud.vo.virtualappliance.VirtualDataCenter;
             import mx.events.DataGridEvent;
 
+            public var requiredPrivileges:ArrayCollection = new ArrayCollection([
+                PrivilegeType.VDC_MANAGE_VAPP, 
+                PrivilegeType.VAPP_CUSTOMISE_SETTINGS, 
+                PrivilegeType.VAPP_PERFORM_ACTIONS,
+                PrivilegeType.VAPP_DEPLOY_UNDEPLOY, 
+                PrivilegeType.VAPP_ASSIGN_NETWORK, 
+                PrivilegeType.VAPP_ASSIGN_VOLUME, 
+                PrivilegeType.VAPP_CREATE_STATEFUL, 
+                PrivilegeType.VAPP_CREATE_INSTANCE]);
+                
             //The VirtualAppliance that is currently selected
             [Bindable]
             private var _selectedVirtualAppliance:VirtualAppliance;
@@ -187,11 +197,12 @@
             {
                 if (virtualApplianceDataGrid.selectedIndex > -1)
                 {
-                	if(SecuredPrivilegeAccess.userHasPrivilege(PrivilegeType.VAPP_CUSTOMISE_SETTINGS)){
-	                    var virtualApplianceEvent:VirtualApplianceEvent = new VirtualApplianceEvent(VirtualApplianceEvent.VIRTUAL_APPLIANCE_SELECTED);
-	                    virtualApplianceEvent.virtualAppliance = virtualApplianceDataGrid.selectedItem as VirtualAppliance;
-	                    dispatchEvent(virtualApplianceEvent);                		
-                	}
+                	if(!SecuredPrivilegeAccess.userHasAtLeastOnPrivilege(requiredPrivileges))
+                    {
+                       var virtualApplianceEvent:VirtualApplianceEvent = new VirtualApplianceEvent(VirtualApplianceEvent.VIRTUAL_APPLIANCE_SELECTED);
+                       virtualApplianceEvent.virtualAppliance = virtualApplianceDataGrid.selectedItem as VirtualAppliance;
+                       dispatchEvent(virtualApplianceEvent);
+                    }
                 }
             }
 
@@ -213,9 +224,12 @@
             {
                 if (virtualApplianceTile.selectedIndex > -1)
                 {
-                    var virtualApplianceEvent:VirtualApplianceEvent = new VirtualApplianceEvent(VirtualApplianceEvent.VIRTUAL_APPLIANCE_SELECTED);
-                    virtualApplianceEvent.virtualAppliance = virtualApplianceTile.selectedItem as VirtualAppliance;
-                    dispatchEvent(virtualApplianceEvent);
+                    if(!SecuredPrivilegeAccess.userHasAtLeastOnPrivilege(requiredPrivileges))
+                    {
+                       var virtualApplianceEvent:VirtualApplianceEvent = new VirtualApplianceEvent(VirtualApplianceEvent.VIRTUAL_APPLIANCE_SELECTED);
+                       virtualApplianceEvent.virtualAppliance = virtualApplianceDataGrid.selectedItem as VirtualAppliance;
+                       dispatchEvent(virtualApplianceEvent);
+                    }
                 }
             }
 
@@ -364,6 +378,7 @@
                                 	>
                                     <mx:Script>
                                         <![CDATA[
+                                        	import mx.collections.ArrayCollection;
                                         	import net.undf.abicloud.vo.user.PrivilegeType;
                                         	import net.undf.abicloud.utils.SecuredPrivilegeAccess;
                                             import net.undf.abicloud.events.VirtualApplianceEvent;
@@ -372,8 +387,12 @@
                                             [Bindable]
                                             private var _virtualAppliance:VirtualAppliance;
                                             
-                                            private function onCreationComplete():void{
-                                            	SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.VDC_MANAGE_VAPP,"removeChild",accessButton,vappBox);
+                                            private function onCreationComplete():void
+                                            {
+                                            	if(!SecuredPrivilegeAccess.userHasAtLeastOnPrivilege(VirtualApplianceList(outerDocument).requiredPrivileges))
+                                            	{
+                                            		vappBox.removeChild(accessButton);
+                                            	}
                                             }
 
                                             override public function set data(value:Object):void

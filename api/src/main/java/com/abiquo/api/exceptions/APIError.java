@@ -365,8 +365,11 @@ public enum APIError
         "The remote service does not have the *abiquo.datacenter.id* property set"), REMOTE_SERVICE_DATACENTER_UUID_INCONSISTENT(
         "RS-15",
         "The remote service is configured with a different datacenter UUID, please adjust the *abiquo.datacenter.id* property in the remote service."), REMOTE_SERVICE_UNDEFINED_PORT(
-        "RS-16", "A port must be defined in the uri"), APPLIANCE_MANAGER_CALL("AM-1",
-        "Failed Appliance Manager communication"),
+        "RS-16", "A port must be defined in the uri"), REMOTE_SERVICE_NON_POOLABLE("RS-17",
+        "The provided remote service can not be used in for a remote service client pool"), REMOTE_SERVICE_ERROR_BORROWING(
+        "RS-18",
+        "An unexpected error occured while getting the remote service client from the client pool"), APPLIANCE_MANAGER_CALL(
+        "AM-1", "Failed Appliance Manager communication"),
 
     // OVF PACKAGE LIST
     TEMPLATE_DEFINITION_LIST_NAME_ALREADY_EXIST("OVF-PACKAGE-LIST-0",
@@ -457,10 +460,9 @@ public enum APIError
         "VSM-1", "An error occurred when shutting down the monitored physical machine"), SUBSCRIPTION_PROBLEM(
         "VSM-2", "An error occurred when subscribing the virtual machine"), UNSUBSCRIPTION_PROBLEM(
         "VSM-3", "An error occurred when unsubscribing the virtual machine"), REFRESH_STATE_PROBLEM(
-        "VSM-4", "An error occurred when refreshing the virtual machine state"), VSMCLIENTFROMPOOL_PROBLEM(
-        "VSM-5", "A VSMClient instance cannot be returned from connection pool."), INVALIDATE_STATE_PROBLEM(
-        "VSM-6", "An error occurred when resetting the last known state of the virtual machine"), VSM_UNAVAILABE(
-        "VSM-7", "VSM service unavailable, check the URL service."),
+        "VSM-4", "An error occurred when refreshing the virtual machine state"), INVALIDATE_STATE_PROBLEM(
+        "VSM-5", "An error occurred when resetting the last known state of the virtual machine"), VSM_UNAVAILABE(
+        "VSM-6", "VSM service unavailable, check the URL service."),
 
     // LICENSE
     LICENSE_UNEXISTING("LICENSE-0", "The requested license does not exist"), LICENSE_INVALID(
@@ -532,6 +534,17 @@ public enum APIError
         "An unexpected error occurred while detaching the volume. Please contact the Administrator"), VOLUME_RECONFIGURE_ERROR(
         "VOL-29", "An unexpected error occurred while reconfiguring storage"), VOLUME_WRONG_NEW_VIRTUALDATACENTER(
         "VOL-39", "The volume can only be moved between Virtual Datacenters of the same Datacenter"),
+
+    // SSM
+    SSM_GET_POOLS_ERROR("SSM-1", "Could not get the storage pools in the target storage device"), SSM_GET_POOL_ERROR(
+        "SSM-2", "Could not get the given storage pool in the target storage device"), SSM_GET_VOLUMES_ERROR(
+        "SSM-3", "Could not get the volumes in the given storage pool"), SSM_GET_VOLUME_ERROR(
+        "SSM-4", "Could not get the given volume in the given storage pool"), SSM_CREATE_VOLUME_ERROR(
+        "SSM-5", "Could not create the volume in the target storage device"), SSM_DELETE_VOLUME_ERROR(
+        "SSM-6", "Could not delete the volume from the target storage device"), SSM_UPDATE_ERROR(
+        "SSM-7", "Could not update the volume in the target storage devide"), SSM_ADD_INITIATOR_ERROR(
+        "SSM-8", "Could not add the given iscsi initiator in the target storage device"), SSM_REMOVE_INITIATOR_ERROR(
+        "SSM-9", "Could not remove the given iscsi initiator from the target storage device"),
 
     // RULES
     NON_EXISTENT_EER("RULE-1", "The requested restrict shared server rule does not exist"), NON_EXISTENT_FPR(
@@ -709,8 +722,8 @@ public enum APIError
         // Outputs all errors in wiki table format
         for (APIError error : errors)
         {
-            System.out.println(String.format("| %s | %s | %s |", error.code, error.message, error
-                .name()));
+            System.out.println(String.format("| %s | %s | %s |", error.code, error.message,
+                error.name()));
         }
 
         System.out.println("\n ************ Flex client labels ************** \n");
