@@ -204,7 +204,7 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
         {
             updateUsageDatastore(virtualMachine, true);
             updateUsagePhysicalMachine(physicalMachine, virtualMachine, true);
-            rollbackNetworkingResources(physicalMachine, virtualMachine);
+            // rollbackNetworkingResources(physicalMachine, virtualMachine);
 
             virtualMachine.setState(VirtualMachineState.UNKNOWN);
         }
