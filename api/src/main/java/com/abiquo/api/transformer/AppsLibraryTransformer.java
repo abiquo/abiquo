@@ -69,6 +69,7 @@ public class AppsLibraryTransformer extends DefaultApiService
         dto.setProductVersion(templateDef.getProductVersion());
         dto.setUrl(templateDef.getUrl());
         dto.setDiskFileSize(templateDef.getDiskFileSize());
+        dto.setIconUrl(templateDef.getIconUrl());
 
         dto.setDiskFormatType(String.valueOf(templateDef.getType() == null ? //
             "UNKNOWN" : templateDef.getType().name()));
