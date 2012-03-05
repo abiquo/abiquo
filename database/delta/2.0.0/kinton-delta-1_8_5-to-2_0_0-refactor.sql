@@ -367,93 +367,24 @@ BEGIN
 		ALTER TABLE kinton.rasd_management ADD COLUMN sequence int(10) unsigned default NULL; 
 	END IF;
 
-	-- ######################################## --	
-	-- ######## SCHEMA: COLUMNS REMOVED ####### --
-	-- ######################################## --
-	SELECT "STEP 4 REMOVING DEPRECATED COLUMNS..." as " ";	
-	-- Columns dropped from virtualimage
-	IF EXISTS (SELECT * FROM information_schema.columns WHERE table_schema= 'kinton' AND table_name='virtualimage' AND column_name='treaty') THEN
-		ALTER TABLE kinton.virtualimage DROP COLUMN treaty;
-	END IF;
-	--
-	IF EXISTS (SELECT * FROM information_schema.columns WHERE table_schema= 'kinton' AND table_name='virtualimage' AND column_name='deleted') THEN
-		ALTER TABLE kinton.virtualimage DROP COLUMN deleted;
-	END IF;
-	-- Columns dropped from physicalmachine
-	IF EXISTS (SELECT * FROM information_schema.columns WHERE table_schema= 'kinton' AND table_name='physicalmachine' AND column_name='realram') THEN
-		ALTER TABLE kinton.physicalmachine DROP COLUMN realram;
-	END IF;
-	--
-	IF EXISTS (SELECT * FROM information_schema.columns WHERE table_schema= 'kinton' AND table_name='physicalmachine' AND column_name='realcpu') THEN
-		ALTER TABLE kinton.physicalmachine DROP COLUMN realcpu;
-	END IF;
-	--
-	IF EXISTS (SELECT * FROM information_schema.columns WHERE table_schema= 'kinton' AND table_name='physicalmachine' AND column_name='realStorage') THEN
-		ALTER TABLE kinton.physicalmachine DROP COLUMN realStorage;
-	END IF;
-	--
-	IF EXISTS (SELECT * FROM information_schema.columns WHERE table_schema= 'kinton' AND table_name='physicalmachine' AND column_name='hd') THEN
-		ALTER TABLE kinton.physicalmachine DROP COLUMN hd;
-	END IF;
-	--
-	IF EXISTS (SELECT * FROM information_schema.columns WHERE table_schema= 'kinton' AND table_name='physicalmachine' AND column_name='hdUsed') THEN
-		ALTER TABLE kinton.physicalmachine DROP COLUMN hdUsed;
-	END IF;
-	--
-	IF EXISTS (SELECT * FROM information_schema.columns WHERE table_schema= 'kinton' AND table_name='physicalmachine' AND column_name='cpuRatio') THEN
-		ALTER TABLE kinton.physicalmachine DROP COLUMN cpuRatio;
-	END IF;
-	-- Columns dropped from virtualapp
-	IF EXISTS (SELECT * FROM information_schema.columns WHERE table_schema= 'kinton' AND table_name='virtualapp' AND column_name='state') THEN
-		ALTER TABLE kinton.virtualapp DROP COLUMN state;
-	END IF;
-	--
-	IF EXISTS (SELECT * FROM information_schema.columns WHERE table_schema= 'kinton' AND table_name='virtualapp' AND column_name='substate') THEN
-		ALTER TABLE kinton.virtualapp DROP COLUMN substate; 
-	END IF;
-	-- Columns dropped from vappstateful_conversions
-	IF EXISTS (SELECT * FROM information_schema.columns WHERE table_schema= 'kinton' AND table_name='vappstateful_conversions' AND column_name='state') THEN
-		ALTER TABLE kinton.vappstateful_conversions DROP COLUMN state;
-	END IF;
-	--
-	IF EXISTS (SELECT * FROM information_schema.columns WHERE table_schema= 'kinton' AND table_name='vappstateful_conversions' AND column_name='substate') THEN
-		ALTER TABLE kinton.vappstateful_conversions DROP COLUMN substate; 
-	END IF;
-	-- Columns dropped from ip_pool_management
-	IF EXISTS (SELECT * FROM information_schema.columns WHERE table_schema= 'kinton' AND table_name='ip_pool_management' AND column_name='configureGateway') THEN
-		-- Updating data is needed to remove this column/FK
-		UPDATE vlan_network vl, ip_pool_management ip, rasd_management rm, virtualmachine vm SET vm.network_configuration_id = vl.network_configuration_id WHERE ip.vlan_network_id = vl.vlan_network_id AND ip.idManagement = rm.idManagement and configureGateway = 1 AND rm.idvm = vm.idvm;	
-		ALTER TABLE kinton.ip_pool_management DROP COLUMN configureGateway;
-	END IF;
-	--
-	IF EXISTS (SELECT * FROM information_schema.columns WHERE table_schema= 'kinton' AND table_name='ip_pool_management' AND column_name='dhcp_service_id') THEN
-		ALTER TABLE kinton.ip_pool_management DROP FOREIGN KEY ippool_dhcpservice_FK;
-		ALTER TABLE kinton.ip_pool_management DROP KEY ippool_dhcpservice_FK;
-		ALTER TABLE kinton.ip_pool_management DROP COLUMN dhcp_service_id;
-	END IF;
-	-- Columns dropped from network_configuration
-	IF EXISTS (SELECT * FROM information_schema.columns WHERE table_schema= 'kinton' AND table_name='network_configuration' AND column_name='dhcp_service_id') THEN
-		ALTER TABLE kinton.network_configuration DROP FOREIGN KEY configuration_dhcp_FK;
-		ALTER TABLE kinton.network_configuration DROP KEY configuration_dhcp_FK;
-		ALTER TABLE kinton.network_configuration DROP COLUMN dhcp_service_id;
+	-- Adding icon url on virtualImage
+	IF NOT EXISTS (SELECT * FROM information_schema.columns WHERE table_schema= 'kinton' AND table_name='virtualimage' AND column_name='iconUrl') THEN
+
+		SELECT "Adding iconUrl on virtualImage" as " ";
+		ALTER TABLE kinton.virtualimage ADD COLUMN iconUrl VARCHAR(255) DEFAULT NULL AFTER cpu_required;
 	END IF;
 
-	-- ######################################## --	
-	-- ######## SCHEMA: TABLES REMOVED ######## --
-	-- ######################################## --
-	--
-	-- Definition of table kinton.dhcp_service
-	--	
-	SELECT "STEP 5 REMOVING DEPRECATED TABLES..." as " ";	
-	IF EXISTS(SELECT * FROM information_schema.tables WHERE table_schema='kinton' AND table_name='dhcp_service') THEN
-		SELECT "Removing table dhcp_service..." as " ";
-		DROP  TABLE IF EXISTS kinton.dhcp_service;
+	-- Adding icon url on ovf_package
+	IF NOT EXISTS (SELECT * FROM information_schema.columns WHERE table_schema= 'kinton' AND table_name='ovf_package' AND column_name='iconUrl') THEN
+
+		SELECT "Adding iconUrl on ovf_package" as " ";
+		ALTER TABLE kinton.ovf_package ADD COLUMN iconUrl VARCHAR(255) DEFAULT NULL AFTER description;
 	END IF;
 
 	-- ######################################## --	
 	-- ######## SCHEMA: COLUMNS MODIFIED ###### --
 	-- ######################################## --
-	SELECT "STEP 5 MODIFIYING EXISTING COLUMNS..." as " ";
+	SELECT "STEP 4 MODIFIYING EXISTING COLUMNS..." as " ";
 	ALTER TABLE kinton.physicalmachine MODIFY COLUMN vswitchName varchar(200) NOT NULL;
 	ALTER TABLE kinton.ovf_package MODIFY COLUMN name VARCHAR(255)  CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL;
 	ALTER TABLE kinton.ovf_package MODIFY COLUMN productName VARCHAR(255)  CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL;
@@ -469,7 +400,7 @@ BEGIN
 	-- ############################################ --	
 	-- ######## SCHEMA: CONSTRAINTS MODIFIED ###### --
 	-- ############################################ --	
-	SELECT "STEP 6 MODIFIYING CONSTRAINTS..." as " ";
+	SELECT "STEP 5 MODIFIYING CONSTRAINTS..." as " ";
 	-- Constraint 'fk_ovf_package_list_has_ovf_package_ovf_package1' is rebuilt	
 	IF EXISTS (SELECT * FROM information_schema.table_constraints WHERE table_schema= 'kinton' AND table_name='ovf_package_list_has_ovf_package' AND constraint_name='fk_ovf_package_list_has_ovf_package_ovf_package1') THEN
 		ALTER TABLE kinton.ovf_package_list_has_ovf_package DROP FOREIGN KEY fk_ovf_package_list_has_ovf_package_ovf_package1;
@@ -492,10 +423,6 @@ BEGIN
 	IF NOT EXISTS (SELECT * FROM information_schema.table_constraints WHERE table_schema= 'kinton' AND table_name='category' AND constraint_name='name') THEN
 		ALTER TABLE `kinton`.`category` ADD UNIQUE INDEX `name`(`name`) using BTREE;
 	END IF;
-	-- Index path on icon table
-	IF NOT EXISTS (SELECT * FROM information_schema.table_constraints WHERE table_schema= 'kinton' AND table_name='icon' AND constraint_name='path') THEN
-		ALTER TABLE icon ADD UNIQUE INDEX `path` (`path`); 
-	END IF;
 	-- Index fk_role_enterprise on role table
 	IF NOT EXISTS (SELECT * FROM information_schema.table_constraints WHERE table_schema= 'kinton' AND table_name='role' AND constraint_name='fk_role_enterprise') THEN
 		ALTER TABLE role ADD INDEX `fk_role_enterprise` (`idEnterprise`) USING BTREE; 
@@ -508,7 +435,7 @@ BEGIN
 	-- ########################################################## --	
         -- ######## DATA: NEW DATA (INSERTS, UPDATES, DELETES ####### --
 	-- ########################################################## --
-	SELECT "STEP 7 UPDATING DATA..." as " ";
+	SELECT "STEP 6 UPDATING DATA..." as " ";
 	-- New System Properties
 	SELECT COUNT(*) INTO @existsCount FROM kinton.system_properties WHERE name='client.infra.ucsManagerLink' AND value='/ucsm/ucsm.jnlp' AND description='URL to display UCS Manager Interface';
 	IF @existsCount = 0 THEN 
@@ -785,6 +712,113 @@ BEGIN
 	update kinton.virtualmachine set state = "UNKNOWN" where state = "CRASHED";
 	update kinton.virtualmachine set state = "UNKNOWN" where state = "IN_PROGRESS";
 
+	-- iconURL migration
+	update virtualimage vi, icon i set vi.iconURL = i.path where vi.idIcon = i.idIcon; 
+	update ovf_package ovf, icon i set ovf.iconURL = i.path where ovf.idIcon = i.idIcon;
+
+	-- costCode
+	update virtualimage set cost_code = 0 where cost_code is null;
+
+	-- Enable HeartBeat by default
+	UPDATE alerts al SET al.value='YES' where al.type='HEARTBEAT';
+
+	-- ######################################## --	
+	-- ######## SCHEMA: COLUMNS REMOVED ####### --
+	-- ######################################## --
+	SELECT "STEP 7 REMOVING DEPRECATED COLUMNS..." as " ";	
+	-- Columns dropped from virtualimage
+	IF EXISTS (SELECT * FROM information_schema.columns WHERE table_schema= 'kinton' AND table_name='virtualimage' AND column_name='treaty') THEN
+		ALTER TABLE kinton.virtualimage DROP COLUMN treaty;
+	END IF;
+	--
+	IF EXISTS (SELECT * FROM information_schema.columns WHERE table_schema= 'kinton' AND table_name='virtualimage' AND column_name='deleted') THEN
+		ALTER TABLE kinton.virtualimage DROP COLUMN deleted;
+	END IF;
+	-- Columns dropped from physicalmachine
+	IF EXISTS (SELECT * FROM information_schema.columns WHERE table_schema= 'kinton' AND table_name='physicalmachine' AND column_name='realram') THEN
+		ALTER TABLE kinton.physicalmachine DROP COLUMN realram;
+	END IF;
+	--
+	IF EXISTS (SELECT * FROM information_schema.columns WHERE table_schema= 'kinton' AND table_name='physicalmachine' AND column_name='realcpu') THEN
+		ALTER TABLE kinton.physicalmachine DROP COLUMN realcpu;
+	END IF;
+	--
+	IF EXISTS (SELECT * FROM information_schema.columns WHERE table_schema= 'kinton' AND table_name='physicalmachine' AND column_name='realStorage') THEN
+		ALTER TABLE kinton.physicalmachine DROP COLUMN realStorage;
+	END IF;
+	--
+	IF EXISTS (SELECT * FROM information_schema.columns WHERE table_schema= 'kinton' AND table_name='physicalmachine' AND column_name='hd') THEN
+		ALTER TABLE kinton.physicalmachine DROP COLUMN hd;
+	END IF;
+	--
+	IF EXISTS (SELECT * FROM information_schema.columns WHERE table_schema= 'kinton' AND table_name='physicalmachine' AND column_name='hdUsed') THEN
+		ALTER TABLE kinton.physicalmachine DROP COLUMN hdUsed;
+	END IF;
+	--
+	IF EXISTS (SELECT * FROM information_schema.columns WHERE table_schema= 'kinton' AND table_name='physicalmachine' AND column_name='cpuRatio') THEN
+		ALTER TABLE kinton.physicalmachine DROP COLUMN cpuRatio;
+	END IF;
+	-- Columns dropped from virtualapp
+	IF EXISTS (SELECT * FROM information_schema.columns WHERE table_schema= 'kinton' AND table_name='virtualapp' AND column_name='state') THEN
+		ALTER TABLE kinton.virtualapp DROP COLUMN state;
+	END IF;
+	--
+	IF EXISTS (SELECT * FROM information_schema.columns WHERE table_schema= 'kinton' AND table_name='virtualapp' AND column_name='substate') THEN
+		ALTER TABLE kinton.virtualapp DROP COLUMN substate; 
+	END IF;
+	-- Columns dropped from vappstateful_conversions
+	IF EXISTS (SELECT * FROM information_schema.columns WHERE table_schema= 'kinton' AND table_name='vappstateful_conversions' AND column_name='state') THEN
+		ALTER TABLE kinton.vappstateful_conversions DROP COLUMN state;
+	END IF;
+	--
+	IF EXISTS (SELECT * FROM information_schema.columns WHERE table_schema= 'kinton' AND table_name='vappstateful_conversions' AND column_name='substate') THEN
+		ALTER TABLE kinton.vappstateful_conversions DROP COLUMN substate; 
+	END IF;
+	-- Columns dropped from ip_pool_management
+	IF EXISTS (SELECT * FROM information_schema.columns WHERE table_schema= 'kinton' AND table_name='ip_pool_management' AND column_name='configureGateway') THEN
+		-- Updating data is needed to remove this column/FK
+		UPDATE vlan_network vl, ip_pool_management ip, rasd_management rm, virtualmachine vm SET vm.network_configuration_id = vl.network_configuration_id WHERE ip.vlan_network_id = vl.vlan_network_id AND ip.idManagement = rm.idManagement and configureGateway = 1 AND rm.idvm = vm.idvm;	
+		ALTER TABLE kinton.ip_pool_management DROP COLUMN configureGateway;
+	END IF;
+	--
+	IF EXISTS (SELECT * FROM information_schema.columns WHERE table_schema= 'kinton' AND table_name='ip_pool_management' AND column_name='dhcp_service_id') THEN
+		ALTER TABLE kinton.ip_pool_management DROP FOREIGN KEY ippool_dhcpservice_FK;
+		ALTER TABLE kinton.ip_pool_management DROP KEY ippool_dhcpservice_FK;
+		ALTER TABLE kinton.ip_pool_management DROP COLUMN dhcp_service_id;
+	END IF;
+	-- Columns dropped from network_configuration
+	IF EXISTS (SELECT * FROM information_schema.columns WHERE table_schema= 'kinton' AND table_name='network_configuration' AND column_name='dhcp_service_id') THEN
+		ALTER TABLE kinton.network_configuration DROP FOREIGN KEY configuration_dhcp_FK;
+		ALTER TABLE kinton.network_configuration DROP KEY configuration_dhcp_FK;
+		ALTER TABLE kinton.network_configuration DROP COLUMN dhcp_service_id;
+	END IF;
+	-- Columns dropped from virtualimage for urlIcon feature
+	IF EXISTS (SELECT * FROM information_schema.columns WHERE table_schema= 'kinton' AND table_name='virtualimage' AND column_name='idIcon') THEN
+		ALTER TABLE kinton.virtualimage DROP FOREIGN KEY `virtualImage_FK4`;
+		ALTER TABLE kinton.virtualimage DROP COLUMN idIcon;
+	END IF;
+	-- Columns dropped from ovf_package for urlIcon feature
+	IF EXISTS (SELECT * FROM information_schema.columns WHERE table_schema= 'kinton' AND table_name='ovf_package' AND column_name='idIcon') THEN
+		ALTER TABLE kinton.ovf_package DROP FOREIGN KEY `fk_ovf_package_icon`;
+		ALTER TABLE kinton.ovf_package DROP COLUMN idIcon;
+	END IF;
+
+	-- ######################################## --	
+	-- ######## SCHEMA: TABLES REMOVED ######## --
+	-- ######################################## --
+	--
+	-- Definition of table kinton.dhcp_service
+	--	
+	SELECT "STEP 8 REMOVING DEPRECATED TABLES..." as " ";	
+	IF EXISTS(SELECT * FROM information_schema.tables WHERE table_schema='kinton' AND table_name='dhcp_service') THEN
+		SELECT "Removing table dhcp_service..." as " ";
+		DROP  TABLE IF EXISTS kinton.dhcp_service;
+	END IF;
+	IF EXISTS(SELECT * FROM information_schema.tables WHERE table_schema='kinton' AND table_name='icon') THEN
+		SELECT "Removing table icon..." as " ";
+		DROP  TABLE IF EXISTS kinton.icon;
+	END IF;
+
 END;
 |
 DELIMITER ;
@@ -800,7 +834,7 @@ DROP PROCEDURE IF EXISTS kinton.delta_1_8_5_to_2_0;
 -- ########################################### --
 
 -- THIS TRIGGERS WILL BE REMOVED
-SELECT "STEP 8 REMOVING DEPRECATED TRIGGERS..." as " ";
+SELECT "STEP 9 REMOVING DEPRECATED TRIGGERS..." as " ";
 DROP TRIGGER IF EXISTS kinton.create_nodevirtualimage_update_stats;
 DROP TRIGGER IF EXISTS kinton.create_rasd_management_update_stats;
 DROP TRIGGER IF EXISTS kinton.update_network_configuration_update_stats;
@@ -808,7 +842,7 @@ DROP TRIGGER IF EXISTS kinton.update_network_configuration_update_stats;
 -- ########################################### --	
 -- ######## SCHEMA: TRIGGERS RECREATED ####### --
 -- ########################################### --
-SELECT "STEP 9 UPDATING TRIGGERS..." as " ";
+SELECT "STEP 10 UPDATING TRIGGERS..." as " ";
 DROP TRIGGER IF EXISTS kinton.virtualapp_created;
 DROP TRIGGER IF EXISTS kinton.update_virtualapp_update_stats;
 DROP TRIGGER IF EXISTS kinton.create_physicalmachine_update_stats;
@@ -1824,7 +1858,7 @@ DELIMITER ;
 -- ############################################# --	
 -- ######## SCHEMA: PROCEDURES RECREATED ####### --
 -- ############################################# --
-SELECT "STEP 10 UPDATING PROCEDURES FOR THIS RELEASE..." as " ";
+SELECT "STEP 11 UPDATING PROCEDURES FOR THIS RELEASE..." as " ";
 DROP PROCEDURE IF EXISTS kinton.CalculateCloudUsageStats;
 DROP PROCEDURE IF EXISTS kinton.CalculateEnterpriseResourcesStats;
 DROP PROCEDURE IF EXISTS kinton.CalculateVappEnterpriseStats;
@@ -2395,6 +2429,6 @@ DELIMITER ;
 # This should not be necessary
 CALL kinton.add_version_column_to_all();
 
-SELECT "STEP 11 ENABLING TRIGGERS" as " ";
+SELECT "STEP 12 ENABLING TRIGGERS" as " ";
 SET @DISABLE_STATS_TRIGGERS = null;
 SELECT "#### UPGRADE COMPLETED ####" as " ";
