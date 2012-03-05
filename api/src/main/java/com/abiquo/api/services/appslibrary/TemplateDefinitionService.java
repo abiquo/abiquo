@@ -176,7 +176,7 @@ public class TemplateDefinitionService extends DefaultApiService
     /** #################### ovfindex.xml #################### */
     /** #################### */
 
-    @Transactional(readOnly = true, propagation = Propagation.REQUIRES_NEW)
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
     public TemplateDefinition transformToTemplateDefinition(final OVFDescription descr,
         final String baseRepositorySpaceURL)
     {
