@@ -47,9 +47,6 @@ public class AppsLibraryRep extends DefaultRepBase
     @Autowired
     private CategoryDAO categoryDAO;
 
-    @Autowired
-    private IconDAO iconDAO;
-
     public AppsLibraryRep()
     {
 
@@ -60,7 +57,6 @@ public class AppsLibraryRep extends DefaultRepBase
         this.entityManager = em;
         this.virtualMachineTemplateDAO = new VirtualMachineTemplateDAO(em);
         this.categoryDAO = new CategoryDAO(em);
-        this.iconDAO = new IconDAO(em);
         this.conversionDAO = new VirtualImageConversionDAO(em);
     }
 
@@ -135,62 +131,6 @@ public class AppsLibraryRep extends DefaultRepBase
     public boolean existAnyOtherWithName(final Category category, final String name)
     {
         return categoryDAO.existsAnyOtherWithName(category, name);
-    }
-
-    // Icon
-
-    public void insertIcon(final Icon icon)
-    {
-        iconDAO.persist(icon);
-    }
-
-    public void updateIcon(final Icon icon)
-    {
-        iconDAO.flush();
-    }
-
-    public void deleteIcon(final Icon icon)
-    {
-        iconDAO.remove(icon);
-    }
-
-    public List<Icon> findAllIcons()
-    {
-        return iconDAO.findAll();
-    }
-
-    public Icon findIconById(final Integer icon)
-    {
-        return iconDAO.findById(icon);
-    }
-
-    public Icon findIconByPath(final String path)
-    {
-        return iconDAO.findByPath(path);
-    }
-
-    public Icon findByIconPathOrCreateNew(final String iconPath)
-    {
-        if (iconPath == null)
-        {
-            return null;
-        }
-
-        Icon icon = findIconByPath(iconPath);
-
-        if (icon == null)
-        {
-            icon = new Icon("A name", iconPath); // TODO: name
-
-            insertIcon(icon);
-        }
-
-        return icon;
-    }
-
-    public boolean isIconInUseByVirtualMachineTemplates(final Icon icon)
-    {
-        return iconDAO.iconInUseByVirtualMachineTemplates(icon);
     }
 
     // Virtual Machine Template
@@ -360,4 +300,8 @@ public class AppsLibraryRep extends DefaultRepBase
         return conversionDAO.existDuplicatedConversion(conversion);
     }
 
+    public List<String> findIconsByEnterprise(final Integer enterpriseId)
+    {
+        return virtualMachineTemplateDAO.findIconsByEnterprise(enterpriseId);
+    }
 }

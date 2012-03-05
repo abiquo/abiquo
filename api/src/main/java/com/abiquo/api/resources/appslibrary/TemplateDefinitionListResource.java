@@ -54,8 +54,8 @@ public class TemplateDefinitionListResource extends AbstractResource
 
     public static final String TEMPLATE_DEFINITION_LIST = "templateDefinitionList";
 
-    public static final String TEMPLATE_DEFINITION_LIST_PARAM =
-        "{" + TEMPLATE_DEFINITION_LIST + "}";
+    public static final String TEMPLATE_DEFINITION_LIST_PARAM = "{" + TEMPLATE_DEFINITION_LIST
+        + "}";
 
     public static final String TEMPLATE_DEFINITION_LIST_REPOSITORY_STATUS_PATH =
         "actions/repositoryStatus";
@@ -71,11 +71,12 @@ public class TemplateDefinitionListResource extends AbstractResource
 
     @GET
     public TemplateDefinitionListDto getTemplateDefinitionList(
-        @PathParam(TEMPLATE_DEFINITION_LIST) final Integer TemplateDefinitionListId,
+        @PathParam(EnterpriseResource.ENTERPRISE) final Integer idEnterprise,
+        @PathParam(TEMPLATE_DEFINITION_LIST) final Integer templateDefinitionListId,
         @Context final IRESTBuilder restBuilder) throws Exception
     {
         TemplateDefinitionList templateDefinitionList =
-            service.getTemplateDefinitionList(TemplateDefinitionListId);
+            service.getTemplateDefinitionList(templateDefinitionListId, idEnterprise);
 
         return transformer.createTransferObject(templateDefinitionList, restBuilder);
     }
@@ -83,8 +84,8 @@ public class TemplateDefinitionListResource extends AbstractResource
     @PUT
     public TemplateDefinitionListDto updateTemplateDefinitionList(
         final TemplateDefinitionListDto templateDefinitionList,
-        @PathParam(TEMPLATE_DEFINITION_LIST) final Integer templateDefinitionListId,
         @PathParam(EnterpriseResource.ENTERPRISE) final Integer idEnterprise,
+        @PathParam(TEMPLATE_DEFINITION_LIST) final Integer templateDefinitionListId,
         @Context final IRESTBuilder restBuilder) throws Exception
     {
         TemplateDefinitionList d = transformer.createPersistenceObject(templateDefinitionList);
@@ -97,8 +98,8 @@ public class TemplateDefinitionListResource extends AbstractResource
     @PUT
     @Consumes(MediaType.TEXT_PLAIN)
     public TemplateDefinitionListDto refreshTemplateDefinitionListFromUrl(
-        @PathParam(TEMPLATE_DEFINITION_LIST) final Integer templateDefinitionListId,
         @PathParam(EnterpriseResource.ENTERPRISE) final Integer idEnterprise,
+        @PathParam(TEMPLATE_DEFINITION_LIST) final Integer templateDefinitionListId,
         @Context final IRESTBuilder restBuilder) throws Exception
     {
         TemplateDefinitionList d;
@@ -110,9 +111,10 @@ public class TemplateDefinitionListResource extends AbstractResource
 
     @DELETE
     public void deleteTemplateDefinitionList(
+        @PathParam(EnterpriseResource.ENTERPRISE) final Integer idEnterprise,
         @PathParam(TEMPLATE_DEFINITION_LIST) final Integer templateDefinitionListId)
     {
-        service.removeTemplateDefinitionList(templateDefinitionListId, false);
+        service.removeTemplateDefinitionList(templateDefinitionListId, false, idEnterprise);
     }
 
     /**
@@ -122,8 +124,8 @@ public class TemplateDefinitionListResource extends AbstractResource
     @GET
     @Path(TemplateDefinitionListResource.TEMPLATE_DEFINITION_LIST_REPOSITORY_STATUS_PATH)
     public TemplatesStateDto getTemplateStatusList(
-        @PathParam(TEMPLATE_DEFINITION_LIST) final Integer templateDefinitionId,
         @PathParam(EnterpriseResource.ENTERPRISE) final Integer idEnterprise,
+        @PathParam(TEMPLATE_DEFINITION_LIST) final Integer templateDefinitionId,
         @QueryParam(TEMPLATE_DEFINITION_LIST_REPOSITORY_STATUS_DATACENTER_QUERY_PARAM) final Integer datacenterId,
         @Context final IRESTBuilder restBuilder) throws Exception
     {

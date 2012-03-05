@@ -21,14 +21,10 @@
 
 package com.abiquo.api.services.appslibrary;
 
-import static java.lang.System.getProperty;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
-import java.net.Proxy;
 import java.net.URL;
 
 import javax.xml.bind.JAXBContext;
@@ -43,6 +39,7 @@ import javax.xml.stream.XMLStreamWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.abiquo.appliancemanager.client.ExternalHttpConnection;
 import com.abiquo.appliancemanager.repositoryspace.RepositorySpace;
 import com.abiquo.ovfmanager.ovf.exceptions.XMLException;
 import com.abiquo.ovfmanager.ovf.xml.Stax2Factory;
@@ -55,30 +52,6 @@ public class RepositorySpaceXML
     private final static Logger logger = LoggerFactory.getLogger(RepositorySpaceXML.class);
 
     private final static Boolean JAXB_FORMATTED_OUTPUT = true;
-
-    private static String PROXY_HOST;
-
-    private static Integer PROXY_PORT;
-
-    static
-    {
-
-        PROXY_HOST = getProperty("abiquo.proxy.host", null);
-        try
-        {
-            PROXY_PORT = Integer.parseInt(getProperty("abiquo.proxy.port", "80"));
-        }
-        catch (NumberFormatException e)
-        {
-            logger
-                .debug("Cannot load proxy configuration properly, port must be an Integer, will proceed to use direct connection");
-            PROXY_HOST = null;
-            PROXY_PORT = 80;
-        }
-        proxy = getProxy();
-    }
-
-    private static Proxy proxy;
 
     /** Define the allowed objects to be binded form/into the OVFIndex schema definition. */
     private final JAXBContext contextIndex;
@@ -210,24 +183,28 @@ public class RepositorySpaceXML
     }
 
     /**
-     * XXX
+     * Read a {@link RepositorySpace} from an ovfindex.xml url
      */
     public RepositorySpace obtainRepositorySpace(final String repositorySpaceURL)
         throws XMLException, IOException, MalformedURLException
     {
         RepositorySpace repo;
 
+        ExternalHttpConnection connection = new ExternalHttpConnection();
         try
         {
+            new URL(repositorySpaceURL); // check MalformaedUrl
+            InputStream isRs = connection.openConnection(repositorySpaceURL);
 
-            Proxy proxy = getProxy();
-
-            URL rsUrl = new URL(repositorySpaceURL);
-
-            InputStream isRs = rsUrl.openStream();
-
-            rsUrl.openConnection(proxy);
             repo = readAsXML(isRs);
+            
+            if (!repo.getRepositoryURI().equalsIgnoreCase(repositorySpaceURL))
+            {
+                logger.warn("chang the ''RepositoryURI'' in the ovfindex.xml to " + repositorySpaceURL);
+                repo.setRepositoryURI(repositorySpaceURL);
+            }
+
+            return repo;
         }
         catch (XMLException e) // XMLStreamException or JAXBException
         {
@@ -239,32 +216,15 @@ public class RepositorySpaceXML
             final String msg = "Invalid repository space identifier : " + repositorySpaceURL;
             throw new MalformedURLException(msg);
         }
-        catch (IOException e)
+        catch (Exception e)
         {
             final String msg = "Can not open a connection to : " + repositorySpaceURL;
             throw new IOException(msg);
         }
-
-        repo.setRepositoryURI(repositorySpaceURL); // XXX
-
-        return repo;
-    }
-
-    private static Proxy getProxy()
-    {
-        if (proxy == null)
+        finally
         {
-            if (PROXY_HOST == null)
-            {
-                proxy = Proxy.NO_PROXY;
-            }
-            else
-            {
-                proxy =
-                    new Proxy(Proxy.Type.HTTP, new InetSocketAddress(PROXY_HOST,
-                        Integer.valueOf(PROXY_PORT)));
-            }
+            connection.releaseConnection();
         }
-        return proxy;
     }
+
 }

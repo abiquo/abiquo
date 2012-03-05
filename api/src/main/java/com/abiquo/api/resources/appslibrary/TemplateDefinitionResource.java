@@ -67,7 +67,6 @@ public class TemplateDefinitionResource extends AbstractResource
     public static final String TEMPLATE_DEFINITION_REPOSITORY_STATUS_DATACENTER_QUERY_PARAM =
         "datacenterId";
 
-
     /** Internal logic. */
     @Autowired
     private TemplateDefinitionService service;
@@ -78,10 +77,12 @@ public class TemplateDefinitionResource extends AbstractResource
 
     @GET
     public TemplateDefinitionDto getTemplateDefinition(
+        @PathParam(EnterpriseResource.ENTERPRISE) final Integer idEnterprise,
         @PathParam(TEMPLATE_DEFINITION) final Integer templateDefinitionId,
         @Context final IRESTBuilder restBuilder) throws Exception
     {
-        TemplateDefinition templateDef = service.getTemplateDefinition(templateDefinitionId);
+        TemplateDefinition templateDef =
+            service.getTemplateDefinition(templateDefinitionId, idEnterprise);
         return transformer.createTransferObject(templateDef, restBuilder);
     }
 
@@ -111,9 +112,11 @@ public class TemplateDefinitionResource extends AbstractResource
     }
 
     @DELETE
-    public void deleteTemplateDefinition(@PathParam(TEMPLATE_DEFINITION) final Integer templateDefId)
+    public void deleteTemplateDefinition(
+        @PathParam(EnterpriseResource.ENTERPRISE) final Integer idEnterprise,
+        @PathParam(TEMPLATE_DEFINITION) final Integer templateDefId)
     {
-        service.removeTemplateDefinition(templateDefId);
+        service.removeTemplateDefinition(templateDefId, idEnterprise);
     }
 
     /**

@@ -370,11 +370,20 @@ public enum APIError
         "RS-18",
         "An unexpected error occured while getting the remote service client from the client pool"), APPLIANCE_MANAGER_CALL(
         "AM-1", "Failed Appliance Manager communication"),
+    //
+    AM_CLIENT("AM-0", "Failed Appliance Manager communication"), AM_TIMEOUT("AM-1",
+        "Timeout during Appliance Manager communication"), AM_UNAVAILABE("AM-2",
+        "AM service unavailable, check the URL service."), AM_FAILED_REQUEST("AM-3",
+        "Failed Appliance Manager request."),
 
     // OVF PACKAGE LIST
     TEMPLATE_DEFINITION_LIST_NAME_ALREADY_EXIST("OVF-PACKAGE-LIST-0",
-        "OVF Package list name already exists"), TEMPLATE_DEFINITION_LIST_NAME_NOT_FOUND(
-        "OVF-PACKAGE-LIST-1", "OVF Package list name is required"),
+        "OVF Package list name already exists"), //
+    TEMPLATE_DEFINITION_LIST_REFRESH_NO_URL(
+        "OVF-PACKAGE-LIST-1",
+        "The template definition list isn't associated to any url (ovfindex.xml), so it can't be refreshed form the source"), //
+    TEMPLATE_DEFINITION_LIST_NAME_NOT_FOUND("OVF-PACKAGE-LIST-2",
+        "OVF Package list name is required"),
 
     // OVF PACKAGE
     NON_EXISTENT_OVF_PACKAGE("OVF-PACKAGE-0", "The requested OVF package does not exist"), NON_EXISTENT_TEMPLATE_DEFINITION_LIST(
@@ -407,7 +416,8 @@ public enum APIError
         "VIMAGE-10",
         "The Virtual Machine Template is being used by Virtual Machines and cannot be deleted"), VMTEMPLATE_TEMPLATE_USED_BY_VIRTUAL_MACHINES_CANNOT_BE_UNSHARED(
         "VIMAGE-11",
-        "The Virtual Machine Template is being used by Virtual Machines and cannot be modified to not shared"),
+        "The Virtual Machine Template is being used by Virtual Machines and cannot be modified to not shared"), VIMAGE_MALFORMED_ICON_URI(
+        "VIMAGE-12", "The Icon URL is not well formed"),
 
     // NODE COLLECTOR
     NON_EXISTENT_IP("NC-0", "The requested IP does not exist"), MISSING_IP_PARAMETER("NC-1",

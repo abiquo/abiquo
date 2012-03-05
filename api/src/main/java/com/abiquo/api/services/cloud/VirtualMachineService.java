@@ -70,12 +70,12 @@ import com.abiquo.api.services.NetworkService;
 import com.abiquo.api.services.RemoteServiceService;
 import com.abiquo.api.services.UserService;
 import com.abiquo.api.services.VirtualMachineAllocatorService;
+import com.abiquo.api.services.stub.AMServiceStub;
 import com.abiquo.api.services.stub.TarantinoJobCreator;
 import com.abiquo.api.services.stub.TarantinoService;
 import com.abiquo.api.tracer.TracerLogger;
 import com.abiquo.api.util.URIResolver;
 import com.abiquo.api.util.snapshot.SnapshotUtils.SnapshotType;
-import com.abiquo.appliancemanager.client.ApplianceManagerResourceStubImpl;
 import com.abiquo.commons.amqp.impl.tarantino.domain.builder.VirtualMachineDescriptionBuilder;
 import com.abiquo.model.enumerator.EthernetDriverType;
 import com.abiquo.model.enumerator.HypervisorType;
@@ -185,6 +185,9 @@ public class VirtualMachineService extends DefaultApiService
     @Autowired
     private NetworkService ipService;
 
+    @Autowired
+    private AMServiceStub amService;
+    
     public VirtualMachineService()
     {
 
@@ -1641,16 +1644,11 @@ public class VirtualMachineService extends DefaultApiService
         final String instanceName)
     {
         Datacenter datacenter = virtualMachine.getHypervisor().getMachine().getDatacenter();
-        RemoteService service = remoteServiceService.getAMRemoteService(datacenter);
 
         // Create the folder structure in the destination repository
-        ApplianceManagerResourceStubImpl am =
-            new ApplianceManagerResourceStubImpl(service.getUri());
-
-        String ovfPath =
-            am.preBundleTemplate(String.valueOf(virtualAppliance.getEnterprise().getId()),
-                instanceName);
-
+        String ovfPath = amService.preBundleTemplate(datacenter.getId(), virtualAppliance.getEnterprise().getId(),
+            instanceName);
+        
         // Do the instance
         String snapshotPath = FilenameUtils.getFullPath(ovfPath);
         String snapshotFilename =

@@ -92,8 +92,8 @@ public class IpPoolManagementDAOTest extends
 
         IpPoolManagementDAO dao = createDaoForRollbackTransaction();
         IpPoolManagement available =
-            dao.findNextIpByPrivateVLANAvailable(ipPoolManagement.getVirtualDatacenter().getId(),
-                ipPoolManagement.getVlanNetwork().getId(), excludedIpPoolManagement.getIp());
+            dao.findNextIpAvailable(ipPoolManagement.getVlanNetwork().getId(),
+                excludedIpPoolManagement.getIp());
 
         assertFalse(excludedIpPoolManagement.equals(available));
     }
@@ -114,8 +114,8 @@ public class IpPoolManagementDAOTest extends
 
         IpPoolManagementDAO dao = createDaoForRollbackTransaction();
         IpPoolManagement available =
-            dao.findNextIpByPrivateVLANAvailable(ipPoolManagement.getVirtualDatacenter().getId(),
-                ipPoolManagement.getVlanNetwork().getId(), excludedIpPoolManagement.getIp());
+            dao.findNextIpAvailable(ipPoolManagement.getVlanNetwork().getId(),
+                excludedIpPoolManagement.getIp());
 
         Assert.assertNull(available);
     }
@@ -141,8 +141,7 @@ public class IpPoolManagementDAOTest extends
 
         IpPoolManagementDAO dao = createDaoForRollbackTransaction();
         IpPoolManagement available =
-            dao.findNextIpByPrivateVLANAvailable(excludedIpPoolManagement1.getVirtualDatacenter()
-                .getId(), excludedIpPoolManagement1.getVlanNetwork().getId(),
+            dao.findNextIpAvailable(excludedIpPoolManagement1.getVlanNetwork().getId(),
                 excludedIpPoolManagement1.getIp(), excludedIpPoolManagement2.getIp(),
                 excludedIpPoolManagement3.getIp());
 
@@ -173,8 +172,7 @@ public class IpPoolManagementDAOTest extends
 
         IpPoolManagementDAO dao = createDaoForRollbackTransaction();
         IpPoolManagement available =
-            dao.findNextIpByPrivateVLANAvailable(excludedIpPoolManagement1.getVirtualDatacenter()
-                .getId(), excludedIpPoolManagement1.getVlanNetwork().getId(),
+            dao.findNextIpAvailable(excludedIpPoolManagement1.getVlanNetwork().getId(),
                 excludedIpPoolManagement1.getIp(), excludedIpPoolManagement2.getIp(),
                 excludedIpPoolManagement3.getIp());
 
@@ -193,8 +191,7 @@ public class IpPoolManagementDAOTest extends
 
         IpPoolManagementDAO dao = createDaoForRollbackTransaction();
         IpPoolManagement available =
-            dao.findNextIpByPrivateVLANAvailable(excludedIpPoolManagement.getVirtualDatacenter()
-                .getId(), excludedIpPoolManagement.getVlanNetwork().getId(),
+            dao.findNextIpAvailable(excludedIpPoolManagement.getVlanNetwork().getId(),
                 excludedIpPoolManagement.getIp());
 
         Assert.assertNull(available);
@@ -219,8 +216,7 @@ public class IpPoolManagementDAOTest extends
 
         IpPoolManagementDAO dao = createDaoForRollbackTransaction();
         IpPoolManagement available =
-            dao.findNextIpByPrivateVLANAvailable(excludedIpPoolManagement1.getVirtualDatacenter()
-                .getId(), excludedIpPoolManagement1.getVlanNetwork().getId(),
+            dao.findNextIpAvailable(excludedIpPoolManagement1.getVlanNetwork().getId(),
                 excludedIpPoolManagement1.getIp(), excludedIpPoolManagement2.getIp(),
                 excludedIpPoolManagement3.getIp());
 
@@ -254,8 +250,7 @@ public class IpPoolManagementDAOTest extends
 
         IpPoolManagementDAO dao = createDaoForRollbackTransaction();
         IpPoolManagement available =
-            dao.findNextIpByPrivateVLANAvailable(vdc1.getId(), ipPoolManagement1.getVlanNetwork()
-                .getId());
+            dao.findNextIpAvailable(ipPoolManagement1.getVlanNetwork().getId());
 
         Assert.assertNull(available);
     }
@@ -287,8 +282,7 @@ public class IpPoolManagementDAOTest extends
 
         IpPoolManagementDAO dao = createDaoForRollbackTransaction();
         IpPoolManagement available =
-            dao.findNextIpByPrivateVLANAvailable(vdc1.getId(), ipPoolManagement1.getVlanNetwork()
-                .getId());
+            dao.findNextIpAvailable(ipPoolManagement1.getVlanNetwork().getId());
 
         Assert.assertNull(available);
     }
@@ -319,9 +313,7 @@ public class IpPoolManagementDAOTest extends
         persistAll(ds(), entities, vlan1, vlan2, ipPoolManagement1, ipPoolManagement2);
 
         IpPoolManagementDAO dao = createDaoForRollbackTransaction();
-        IpPoolManagement available =
-            dao.findNextIpByPrivateVLANAvailable(ipPoolManagement1.getVirtualDatacenter().getId(),
-                vlan1.getId());
+        IpPoolManagement available = dao.findNextIpAvailable(vlan1.getId());
 
         Assert.assertNull(available);
     }
@@ -352,9 +344,7 @@ public class IpPoolManagementDAOTest extends
         persistAll(ds(), entities, vlan1, vlan2, ipPoolManagement1, ipPoolManagement2);
 
         IpPoolManagementDAO dao = createDaoForRollbackTransaction();
-        IpPoolManagement available =
-            dao.findNextIpByPrivateVLANAvailable(ipPoolManagement1.getVirtualDatacenter().getId(),
-                vlan1.getId());
+        IpPoolManagement available = dao.findNextIpAvailable(vlan1.getId());
 
         Assert.assertNull(available);
     }

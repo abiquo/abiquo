@@ -21,6 +21,8 @@
 
 package com.abiquo.am.services.filesystem;
 
+import static com.abiquo.appliancemanager.config.AMConfiguration.ENTERPRISE_REPOSITORY_REFRESH_TIMEOUT;
+
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -46,8 +48,6 @@ public class EnterpriseRepositoryFileSystem
     private final static Logger LOG = LoggerFactory.getLogger(EnterpriseRepositoryFileSystem.class);
 
     private final static String BASE_REPO_PATH = AMConfiguration.getRepositoryPath();
-
-    private final static Integer FS_TIMOUT_MS = AMConfiguration.getFsTimeoutMs();
 
     /**
      * Check if it exist or create it.
@@ -87,7 +87,8 @@ public class EnterpriseRepositoryFileSystem
 
         try
         {
-            availableOvs = futureAvailable.get(FS_TIMOUT_MS, TimeUnit.MILLISECONDS);
+            availableOvs =
+                futureAvailable.get(ENTERPRISE_REPOSITORY_REFRESH_TIMEOUT, TimeUnit.MILLISECONDS);
         }
         catch (TimeoutException e)
         {

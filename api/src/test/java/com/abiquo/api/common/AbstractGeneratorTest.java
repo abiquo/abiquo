@@ -36,7 +36,6 @@ import org.testng.annotations.BeforeMethod;
 
 import com.abiquo.server.core.appslibrary.AppsLibraryGenerator;
 import com.abiquo.server.core.appslibrary.CategoryGenerator;
-import com.abiquo.server.core.appslibrary.IconGenerator;
 import com.abiquo.server.core.appslibrary.TemplateDefinitionGenerator;
 import com.abiquo.server.core.appslibrary.VirtualMachineTemplateGenerator;
 import com.abiquo.server.core.cloud.HypervisorGenerator;
@@ -72,7 +71,7 @@ import com.abiquo.server.core.infrastructure.storage.VolumeManagementGenerator;
 import com.abiquo.server.core.pricing.PricingTemplateGenerator;
 import com.softwarementors.commons.test.SeedGenerator;
 
-@TestExecutionListeners({DependencyInjectionTestExecutionListener.class,
+@TestExecutionListeners( {DependencyInjectionTestExecutionListener.class,
 TransactionalTestExecutionListener.class})
 @ContextConfiguration(locations = {"classpath:springresources/applicationContext-test.xml"})
 public abstract class AbstractGeneratorTest extends AbstractTestNGSpringContextTests
@@ -143,8 +142,6 @@ public abstract class AbstractGeneratorTest extends AbstractTestNGSpringContextT
         new TemplateDefinitionGenerator(seed);
 
     protected AppsLibraryGenerator appsLibraryGenerator = new AppsLibraryGenerator(seed);
-
-    protected IconGenerator iconGenerator = new IconGenerator(seed);
 
     protected RepositoryGenerator repositoryGenerator = new RepositoryGenerator(seed);
 
@@ -220,7 +217,7 @@ public abstract class AbstractGeneratorTest extends AbstractTestNGSpringContextT
             "ovf_package_list_has_ovf_package", "ovf_package", "ovf_package_list", "category",
             "apps_library", "license", "system_properties", "vdc_enterprise_stats",
             "vapp_enterprise_stats", "dc_enterprise_stats", "enterprise_resources_stats",
-            "cloud_usage_stats", "log", "metering", "tasks", "alerts", "heartbeatlog", "icon",
+            "cloud_usage_stats", "log", "metering", "tasks", "alerts", "heartbeatlog",
             "repository", "register", "costCodeCurrency", "pricingCostCode", "pricingTier",
             "pricingTemplate", "currency", "costCode"};
 

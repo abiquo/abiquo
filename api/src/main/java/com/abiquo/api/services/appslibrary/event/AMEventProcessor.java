@@ -34,12 +34,11 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.abiquo.api.services.InfrastructureService;
+import com.abiquo.api.services.stub.AMServiceStub;
 import com.abiquo.api.tracer.TracerLogger;
-import com.abiquo.appliancemanager.client.ApplianceManagerResourceStubImpl;
 import com.abiquo.appliancemanager.transport.TemplateDto;
 import com.abiquo.commons.amqp.impl.am.AMCallback;
 import com.abiquo.commons.amqp.impl.am.domain.TemplateStatusEvent;
-import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
 import com.abiquo.server.core.infrastructure.Repository;
 import com.abiquo.tracer.ComponentType;
@@ -60,6 +59,9 @@ public class AMEventProcessor implements AMCallback
 
     @Autowired
     protected TemplateFactory templateFactory;
+
+    @Autowired
+    private AMServiceStub amService;
 
     @Autowired
     private TracerLogger tracer;
@@ -107,15 +109,10 @@ public class AMEventProcessor implements AMCallback
         final String repoLocation = evnt.getRepositoryLocation();
 
         final Repository repository = infService.getRepositoryFromLocation(repoLocation);
-        final Integer dcId = repository.getDatacenter().getId();
 
-        final String amServiceUri =
-            infService.getRemoteService(dcId, RemoteServiceType.APPLIANCE_MANAGER).getUri();
-
-        ApplianceManagerResourceStubImpl amStub =
-            new ApplianceManagerResourceStubImpl(amServiceUri);
-
-        TemplateDto packageInstance = amStub.getTemplate(idEnterp, ovfId);
+        TemplateDto packageInstance =
+            amService.getTemplateBySystem(repository.getDatacenter().getId(),
+                Integer.valueOf(idEnterp), ovfId);
 
         return templateFactory.insertVirtualMachineTemplates(
             Collections.singletonList(packageInstance), repository);

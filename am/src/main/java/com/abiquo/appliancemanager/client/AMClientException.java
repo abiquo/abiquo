@@ -19,17 +19,35 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package com.abiquo.server.core.appslibrary;
+package com.abiquo.appliancemanager.client;
 
-import com.abiquo.server.core.common.DefaultEntityTestBase;
-import com.softwarementors.bzngine.entities.test.InstanceTester;
+import javax.ws.rs.core.Response.Status;
 
-public class IconTest extends DefaultEntityTestBase<Icon>
+/**
+ * {@link AMClient} exceptions
+ */
+public class AMClientException extends Exception
 {
 
-    @Override
-    protected InstanceTester<Icon> createEntityInstanceGenerator()
+    private static final long serialVersionUID = -7446759577321926736L;
+
+    /** The http status error. */
+    private Status status;
+
+    public AMClientException(final Status status, final String message)
     {
-        return new IconGenerator(getSeed());
+        super(message);
+        this.status = status;
+    }
+
+    public AMClientException(final String message)
+    {
+        super(message);
+        this.status = Status.SERVICE_UNAVAILABLE;
+    }
+
+    public Status getStatus()
+    {
+        return status;
     }
 }

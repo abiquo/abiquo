@@ -47,11 +47,11 @@ import com.abiquo.abiserver.persistence.hibernate.HibernateDAOFactory;
 import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.result.DataResult;
 import com.abiquo.abiserver.pojo.virtualimage.Category;
-import com.abiquo.abiserver.pojo.virtualimage.Icon;
 import com.abiquo.abiserver.pojo.virtualimage.OVFPackage;
 import com.abiquo.abiserver.pojo.virtualimage.OVFPackageInstanceStatus;
 import com.abiquo.abiserver.pojo.virtualimage.OVFPackageList;
-import com.abiquo.appliancemanager.client.ApplianceManagerResourceStubImpl;
+import com.abiquo.appliancemanager.client.AMClient;
+import com.abiquo.appliancemanager.client.AMClientException;
 import com.abiquo.appliancemanager.transport.TemplateStateDto;
 import com.abiquo.appliancemanager.transport.TemplatesStateDto;
 import com.abiquo.model.enumerator.DiskFormatType;
@@ -62,7 +62,6 @@ import com.abiquo.server.core.appslibrary.CategoriesDto;
 import com.abiquo.server.core.appslibrary.CategoryDto;
 import com.abiquo.server.core.appslibrary.DiskFormatTypeDto;
 import com.abiquo.server.core.appslibrary.DiskFormatTypesDto;
-import com.abiquo.server.core.appslibrary.IconDto;
 import com.abiquo.server.core.appslibrary.IconsDto;
 import com.abiquo.server.core.appslibrary.TemplateDefinitionDto;
 import com.abiquo.server.core.appslibrary.TemplateDefinitionListDto;
@@ -79,28 +78,6 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
     public static final String TEMPLATE_DEFINITION_PATH = "appslib/templateDefinitions";
 
     public static final String TEMPLATE_DEFINITION_LISTS_PATH = "appslib/templateDefinitionList";
-
-    @Override
-    public DataResult<Icon> createIcon(final IconDto icon)
-    {
-        DataResult<Icon> result = new DataResult<Icon>();
-
-        String uri = createIconsLink();
-
-        ClientResponse response = post(uri, icon);
-
-        if (response.getStatusType().getFamily() == Family.SUCCESSFUL)
-        {
-            result.setSuccess(Boolean.TRUE);
-            result.setData(createFlexIconObject(response.getEntity(IconDto.class)));
-        }
-        else
-        {
-            populateErrors(response, result, "createIcon");
-        }
-
-        return result;
-    }
 
     private Category createFlexCategoryObject(final CategoryDto dto)
     {
@@ -120,8 +97,8 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
         // resource.queryParam("ovfindexURL", ovfpackageListURL);
 
         ClientResponse response =
-            resource(uri).accept(MediaType.APPLICATION_XML).contentType(MediaType.TEXT_PLAIN).post(
-                ovfindexURL);
+            resource(uri).accept(MediaType.APPLICATION_XML).contentType(MediaType.TEXT_PLAIN)
+                .post(ovfindexURL);
 
         if (response.getStatusType().getFamily() != Family.SUCCESSFUL)
         {
@@ -147,8 +124,8 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
             getTemplateDefinitionListIdFromName(idEnterprise, templateDefinitionListName);
 
         String uri =
-            createTemplateDefinitionListLink(idEnterprise.toString(), templateDefinitionListId
-                .toString());
+            createTemplateDefinitionListLink(idEnterprise.toString(),
+                templateDefinitionListId.toString());
         ClientResponse response = delete(uri);
 
         if (response.getStatusType().getFamily() != Family.SUCCESSFUL)
@@ -237,20 +214,28 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
                 factory.endConnection();
             }
 
-            final ApplianceManagerResourceStubImpl amClient =
-                new ApplianceManagerResourceStubImpl(amUrl);
+            // XXX direct server->am communication
+            final AMClient amClient = new AMClient().initialize(amUrl, false);
 
-            TemplateStateDto uploadState =
-                amClient.getTemplateStatus(String.valueOf(idEnterprise), templateDefinitionUrl);
-
-            result.setSuccess(Boolean.TRUE);
-            result.setData(createFlexOVFPackageListObject(uploadState));
-            return result;
+            TemplateStateDto uploadState;
+            try
+            {
+                uploadState = amClient.getTemplateStatus(idEnterprise, templateDefinitionUrl);
+                result.setSuccess(Boolean.TRUE);
+                result.setData(createFlexOVFPackageListObject(uploadState));
+                return result;
+            }
+            catch (AMClientException e)
+            {
+                result.setSuccess(Boolean.FALSE);
+                result.setMessage(e.getMessage());
+                return result;
+            }
         }
 
         final String uri =
-            createTemplateStateLink(String.valueOf(idEnterprise), String
-                .valueOf(templateDefinitionId));
+            createTemplateStateLink(String.valueOf(idEnterprise),
+                String.valueOf(templateDefinitionId));
 
         ClientResponse response = resource(uri).queryParam("datacenterId", datacenterId).get();
 
@@ -306,8 +291,8 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
             getTemplateDefinitionIdByUrl(templateDefinitionUrl, idEnterprise);
 
         final String uri =
-            createTemplateDefinitionInstallLink(String.valueOf(idEnterprise), String
-                .valueOf(templateDefinitionId));
+            createTemplateDefinitionInstallLink(String.valueOf(idEnterprise),
+                String.valueOf(templateDefinitionId));
 
         Resource resource = resource(uri).contentType(MediaType.TEXT_PLAIN);
         ClientResponse response = resource.post(String.valueOf(datacenterId));
@@ -343,8 +328,8 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
             getTemplateDefinitionIdByUrl(templateDefinitionUrl, idEnterprise);
 
         final String uri =
-            createTemplateDefinitionUninstallLink(String.valueOf(idEnterprise), String
-                .valueOf(templateDefinitionId));
+            createTemplateDefinitionUninstallLink(String.valueOf(idEnterprise),
+                String.valueOf(templateDefinitionId));
 
         Resource resource = resource(uri).contentType(MediaType.TEXT_PLAIN);
         ClientResponse response = resource.post(String.valueOf(datacenterId));
@@ -526,8 +511,12 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
         catch (WebApplicationException e)
         {
             result.setSuccess(Boolean.FALSE);
-            result.setMessage(e.getMessage());
+
+            Response response = e.getResponse();
+            result.setMessage(response != null ? String.valueOf(response.getEntity())
+                : "Request fails");
         }
+
         result.setSuccess(Boolean.TRUE);
         result.setData(createFlexOVFPackageListObject(list));
 
@@ -541,8 +530,8 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
 
         String uri = createTemplateDefinitionListLink(idEnterprise.toString(), idList.toString());
         ClientResponse response =
-            resource(uri).accept(MediaType.APPLICATION_XML).contentType(MediaType.TEXT_PLAIN).put(
-                null);
+            resource(uri).accept(MediaType.APPLICATION_XML).contentType(MediaType.TEXT_PLAIN)
+                .put(null);
 
         if (response.getStatusType().getFamily() != Family.SUCCESSFUL)
         {
@@ -581,8 +570,8 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
             getTemplateDefinitionListIdFromName(idEnterprise, templateDefinitionListName);
 
         String uri =
-            createTemplateDefinitionLink(idEnterprise.toString(), templateDefinitionListId
-                .toString());
+            createTemplateDefinitionLink(idEnterprise.toString(),
+                templateDefinitionListId.toString());
         ClientResponse response = get(uri);
 
         if (response.getStatusType().getFamily() != Family.SUCCESSFUL)
@@ -593,61 +582,14 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
         return response.getEntity(TemplateDefinitionsDto.class);
     }
 
+    @Deprecated
     @Override
-    public BasicResult deleteIcon(final Integer idIcon)
-    {
-        BasicResult result = new BasicResult();
-
-        final String uri = createIconLink(idIcon);
-
-        ClientResponse response = delete(uri);
-
-        if (response.getStatusType().getFamily() == Family.SUCCESSFUL)
-        {
-            result.setSuccess(Boolean.TRUE);
-        }
-        else
-        {
-            populateErrors(response, result, "deleteIcon");
-        }
-        return result;
-    }
-
-    @Override
-    public BasicResult editIcon(final Icon icon)
-    {
-        DataResult<Icon> result = new DataResult<Icon>();
-
-        final String uri = createIconLink(icon.getId());
-
-        IconDto iconDto = new IconDto();
-
-        iconDto.setId(icon.getId());
-        iconDto.setName(icon.getName());
-        iconDto.setPath(icon.getPath());
-
-        ClientResponse response = put(uri, iconDto);
-
-        if (response.getStatusType().getFamily() == Family.SUCCESSFUL)
-        {
-            result.setSuccess(Boolean.TRUE);
-            result.setData(createFlexIconObject(response.getEntity(IconDto.class)));
-        }
-        else
-        {
-            populateErrors(response, result, "editIcon");
-        }
-        return result;
-
-    }
-
-    @Override
-    public DataResult<List<Icon>> getIcons()
+    public DataResult<List<String>> getIcons(final Integer idEnterprise)
     {
 
-        DataResult<List<Icon>> result = new DataResult<List<Icon>>();
+        DataResult<List<String>> result = new DataResult<List<String>>();
 
-        final String uri = createIconsLink();
+        final String uri = createIconsLink(idEnterprise);
 
         ClientResponse response = get(uri);
 
@@ -655,12 +597,7 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
         {
             result.setSuccess(Boolean.TRUE);
             IconsDto icons = response.getEntity(IconsDto.class);
-            List<Icon> listIcon = new ArrayList<Icon>();
-            for (IconDto icon : icons.getCollection())
-            {
-                listIcon.add(createFlexIconObject(icon));
-            }
-            result.setData(listIcon);
+            result.setData(icons.getCollection());
         }
         else
         {
@@ -669,15 +606,6 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
 
         return result;
 
-    }
-
-    public static Icon createFlexIconObject(final IconDto iconDto)
-    {
-        Icon icon = new Icon();
-        icon.setName(iconDto.getName());
-        icon.setPath(iconDto.getPath());
-        icon.setId(iconDto.getId());
-        return icon;
     }
 
     @Override
@@ -716,8 +644,8 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
     public static com.abiquo.abiserver.pojo.virtualimage.DiskFormatType createFlexDiskFormatTypeObject(
         final DiskFormatTypeDto diskFormatTypeDto)
     {
-        return new com.abiquo.abiserver.pojo.virtualimage.DiskFormatType(DiskFormatType
-            .fromId(diskFormatTypeDto.getId()));
+        return new com.abiquo.abiserver.pojo.virtualimage.DiskFormatType(DiskFormatType.fromId(diskFormatTypeDto
+            .getId()));
     }
 
     protected OVFPackageList createFlexOVFPackageListObject(final TemplateDefinitionListDto listDto)
@@ -760,11 +688,7 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
         pack.setDescription(packDto.getDescription());
         pack.setDiskFormat(String.valueOf(packDto.getDiskFormatType()));
         pack.setDiskSizeMb(packDto.getDiskFileSize());
-        RESTLink iconLink = packDto.searchLink("icon");
-        if (iconLink != null)
-        {
-            pack.setIconUrl(iconLink.getTitle());
-        }
+        pack.setIconUrl(packDto.getIconUrl());
 
         pack.setIdOVFPackage(packDto.getId());
         pack.setName(packDto.getProductName()); // XXX duplicated name

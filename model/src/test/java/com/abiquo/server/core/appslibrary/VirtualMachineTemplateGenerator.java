@@ -43,8 +43,6 @@ public class VirtualMachineTemplateGenerator extends DefaultEntityGenerator<Virt
 
     private final CategoryGenerator categoryGenerator;
 
-    private final IconGenerator iconGenerator;
-
     private final DatacenterGenerator datacenterGenerator;
 
     public VirtualMachineTemplateGenerator(final SeedGenerator seed)
@@ -53,7 +51,6 @@ public class VirtualMachineTemplateGenerator extends DefaultEntityGenerator<Virt
         enterpriseGenerator = new EnterpriseGenerator(seed);
         repositoryGenerator = new RepositoryGenerator(seed);
         categoryGenerator = new CategoryGenerator(seed);
-        iconGenerator = new IconGenerator(seed);
         datacenterGenerator = new DatacenterGenerator(seed);
     }
 
@@ -70,7 +67,7 @@ public class VirtualMachineTemplateGenerator extends DefaultEntityGenerator<Virt
             VirtualMachineTemplate.HD_REQUIRED_PROPERTY,
             VirtualMachineTemplate.DISK_FILE_SIZE_PROPERTY,
             VirtualMachineTemplate.DESCRIPTION_PROPERTY, VirtualMachineTemplate.SHARED_PROPERTY,
-            VirtualMachineTemplate.COST_CODE_PROPERTY);
+            VirtualMachineTemplate.COST_CODE_PROPERTY, VirtualMachineTemplate.ICON_URL_PROPERTY);
 
         // Required relationships
         enterpriseGenerator.assertAllPropertiesEqual(img1.getEnterprise(), img2.getEnterprise());
@@ -81,10 +78,6 @@ public class VirtualMachineTemplateGenerator extends DefaultEntityGenerator<Virt
         {
             repositoryGenerator
                 .assertAllPropertiesEqual(img1.getRepository(), img2.getRepository());
-        }
-        if (img1.getIcon() != null)
-        {
-            iconGenerator.assertAllPropertiesEqual(img1.getIcon(), img2.getIcon());
         }
         if (img1.getMaster() != null)
         {
@@ -168,6 +161,7 @@ public class VirtualMachineTemplateGenerator extends DefaultEntityGenerator<Virt
             newString(nextSeed(), VirtualMachineTemplate.CREATION_USER_LENGTH_MIN,
                 VirtualMachineTemplate.CREATION_USER_LENGTH_MAX);
 
+        String iconUrl = "http://validiconurl.com/icon.jpg";
         VirtualMachineTemplate vtemplate =
             new VirtualMachineTemplate(enterprise,
                 name,
@@ -183,6 +177,7 @@ public class VirtualMachineTemplateGenerator extends DefaultEntityGenerator<Virt
         vtemplate.setHdRequiredInBytes(hdRequired);
         vtemplate.setOvfid(ovfid);
         vtemplate.setCreationUser(creationUser);
+        vtemplate.setIconUrl(iconUrl);
 
         return vtemplate;
     }
@@ -286,13 +281,6 @@ public class VirtualMachineTemplateGenerator extends DefaultEntityGenerator<Virt
             // Take care of recursion here
             addAuxiliaryEntitiesToPersist(master, entitiesToPersist);
             entitiesToPersist.add(master);
-        }
-
-        if (entity.getIcon() != null)
-        {
-            Icon icon = entity.getIcon();
-            iconGenerator.addAuxiliaryEntitiesToPersist(icon, entitiesToPersist);
-            entitiesToPersist.add(icon);
         }
     }
 

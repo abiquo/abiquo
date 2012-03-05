@@ -55,8 +55,6 @@ import com.abiquo.api.resources.appslibrary.DatacenterRepositoriesResource;
 import com.abiquo.api.resources.appslibrary.DatacenterRepositoryResource;
 import com.abiquo.api.resources.appslibrary.DiskFormatTypesResource;
 import com.abiquo.api.resources.appslibrary.HypervisorTypesResource;
-import com.abiquo.api.resources.appslibrary.IconResource;
-import com.abiquo.api.resources.appslibrary.IconsResource;
 import com.abiquo.api.resources.appslibrary.TemplateDefinitionListResource;
 import com.abiquo.api.resources.appslibrary.TemplateDefinitionListsResource;
 import com.abiquo.api.resources.appslibrary.TemplateDefinitionResource;
@@ -1322,17 +1320,6 @@ public class UriTestResolver
         String uri =
             resolveURI(HypervisorTypesResource.HYPERVISOR_TYPES_PATH, new HashMap<String, String>());
         return uri;
-    }
-
-    public static String resolveIconURI(final Integer iconId)
-    {
-        String template = buildPath(IconsResource.ICONS_PATH, IconResource.ICON_PARAM);
-        return resolveURI(template, Collections.singletonMap(IconResource.ICON, iconId.toString()));
-    }
-
-    public static String resolveIconsURI()
-    {
-        return resolveURI(IconsResource.ICONS_PATH, new HashMap<String, String>());
     }
 
     public static String resolveDisksUri(final Integer vdcId)

@@ -378,7 +378,7 @@
             left="0" right="0" top="0" bottom="0"
             horizontalAlign="center"
             verticalAlign="middle"
-            source="{this._virtualImage.icon.path}"
+            source="{this._virtualImage.iconUrl}"
             defaultImagePath="{VirtualImageManager.DEFAULT_ICON_IMAGE_PATH}"/>
 
         <mx:HBox id="buttonsContainer"

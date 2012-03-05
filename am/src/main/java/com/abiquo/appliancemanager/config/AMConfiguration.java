@@ -23,7 +23,6 @@ package com.abiquo.appliancemanager.config;
 
 import com.abiquo.am.exceptions.AMError;
 import com.abiquo.appliancemanager.exceptions.AMException;
-import com.abiquo.ovfmanager.ovf.xml.OVFSerializer;
 
 /**
  * Main configuration for the Appliance Manager artifact.
@@ -33,79 +32,60 @@ import com.abiquo.ovfmanager.ovf.xml.OVFSerializer;
 public class AMConfiguration
 {
 
-    static
-    {
-        OVFSerializer.getInstance().setFormatOutput(true);
-    }
-
-    /** System property determine to use Proxy connections using this host. */
-    private final static String SYSTEM_PROXY_HOST_ATTRIBUTE = "http.proxyHost";
-
-    /** System property determine to use Proxy connections using this port. */
-    private final static String SYSTEM_PROXY_PORT_ATTRIBUTE = "http.proxyPort";
-
-    public final static Integer REPOSITORY_FILE_MARK_CHECK_TIMEOUT_SECONDS = Integer.valueOf(System
-        .getProperty("abiquo.repository.timeoutSeconds", "10"));
-
-    public final static String UPDATE_INTERVAL_DEFAULT = "5000";
-
-    public final static String DEPLOY_TIMEOUT_DEFAULT = "60000";
-
-    public final static int HTTP_CONNECTION_TIMEOUT = 60 * 1000; // a minute
-
-    public final static int HTTP_IDLE_TIMEOUT = 10 * 60 * 1000; // ten minutes
-
-    public final static int HTTP_REQUEST_TIMEOUT = 24 * 60 * 60 * 1000; // a day
-
-    public final static int HTTP_MAX_CONNECTIONS = Integer.valueOf(System.getProperty(
-        "abiquo.appliancemanager.downloads", "10"));
-
-    /** milliseconds */
-    public final static int DOWNLOADING_PUBLISH_INTERVAL = Integer.valueOf(System.getProperty(
-        "abiquo.appliancemanager.downloadingPublishInterval", "5000"));
+    /** **** ***** REPOSITORY FILESYSTEM **** ******/
 
     /**
-     * Where the ''repositoryLocation'' file system is mounted. Base path on the machine local file
-     * system where the OVF packages files are stored.
+     * Where the ''repositoryPath'' is exported. <br>
+     * Usually a NFS location such 'nsf-devel:/opt/vm_repository' .
      */
-    private static String repositoryPath = System.getProperty(
-        "abiquo.appliancemanager.localRepositoryPath", "/tmp/testrepo"); // TODO do not use default
-                                                                         // values
+    private static String repositoryLocation = //
+        System.getProperty("abiquo.appliancemanager.repositoryLocation", "nfs-test:/test/path");
 
-    /**
-     * Where the ''repositoryPath'' is exported. Usually a NFS location such
-     * 'nsf-devel:/opt/vm_repository' .
-     */
-    private static String repositoryLocation = System.getProperty(
-        "abiquo.appliancemanager.repositoryLocation", "nfs-test:/test/path"); // TODO do not use
-                                                                              // default values
+    /** Where the ''repositoryLocation'' file system is mounted. */
+    private static String repositoryPath = //
+        System.getProperty("abiquo.appliancemanager.localRepositoryPath", "/tmp/testrepo");
 
-    /** proxy host server. if any. */
-    private static String proxyHost = System.getProperty(SYSTEM_PROXY_HOST_ATTRIBUTE, null);
+    /** **** ***** TIMEOUT REPOSITORYN **** ******/
 
-    /** proxy port server. if any. */
-    private static Integer proxyPort = Integer.valueOf(System.getProperty(
-        SYSTEM_PROXY_PORT_ATTRIBUTE, "80"));
+    /** Max time to check the .abiquo_repository file mark in the filesystem */
+    public final static Integer REPOSITORY_FILE_MARK_CHECK_TIMEOUT_SECONDS = // 5 seconds
+        Integer.parseInt(System.getProperty("abiquo.repository.timeoutSeconds", "5"));
 
-    /** Milliseconds to wait before refresh the download progress. */
-    private static Integer updateProgressInterval = Integer.parseInt(System.getProperty(
-        "abiquo.appliancemanager.upload.progressInterval", UPDATE_INTERVAL_DEFAULT));
+    /** Max time to scan the enterprise repository filesystem folder finding new templates */
+    public final static Integer ENTERPRISE_REPOSITORY_REFRESH_TIMEOUT = // repo check x10
+        Integer.parseInt(System.getProperty("abiquo.appliancemanager.fstimeoutms",
+            String.valueOf(REPOSITORY_FILE_MARK_CHECK_TIMEOUT_SECONDS * 10 * 1000)));
 
-    /** Timeout for remote connection (during deploy). */
-    private static Integer timeout = Integer.parseInt(System.getProperty(
-        "abiquo.appliancemanager.deploy.timeout", DEPLOY_TIMEOUT_DEFAULT));
+    /** **** ***** TIMEOUT CONNECTIONS **** ******/
 
-    /**
-     * Timeout of of available ovf packages refresh on the filesystem (when timeout use cached
-     * result)
-     */
-    private static Integer fstimeoutMs = Integer.parseInt(System.getProperty(
-        "abiquo.appliancemanager.fstimeoutms", "7000"));
+    public final static Integer DOWNLOADING_PUBLISH_INTERVAL = Integer.valueOf(System.getProperty(
+        "abiquo.appliancemanager.upload.progressIntervall", "5000"));
 
-    public static Integer getFsTimeoutMs()
-    {
-        return fstimeoutMs;
-    }
+    public final static Integer HTTP_CONNECTION_TIMEOUT = // 2 minute
+        Integer.parseInt(System.getProperty("abiquo.appliancemanager.deploy.connection", "120000"));
+
+    public final static Integer HTTP_IDLE_TIMEOUT = // ten minutes
+        Integer.parseInt(System.getProperty("abiquo.appliancemanager.deploy.idle", "600000"));
+
+    public final static Integer HTTP_REQUEST_TIMEOUT = // a day
+        Integer.parseInt(System.getProperty("abiquo.appliancemanager.deploy.totalTimeout",
+            "86400000"));
+
+    public final static Integer HTTP_MAX_CONNECTIONS = //
+        Integer.parseInt(System.getProperty("abiquo.appliancemanager.downloads", "-1"));
+
+    /** **** ***** PROXY **** ******/
+    public final static String HTTP_PROXY_USER = //
+        System.getProperty("abiquo.httpProxy.user");
+
+    public final static String HTTP_PROXY_PASS = //
+        System.getProperty("abiquo.httpProxy.password");
+
+    public final static String HTTP_PROXY_HOST = //
+        System.getProperty("abiquo.httpProxy.host");
+
+    public final static Integer HTTP_PROXY_PORT = //
+        Integer.parseInt(System.getProperty("abiquo.httpProxy.port", "80"));
 
     public static String getRepositoryPath()
     {
@@ -132,39 +112,16 @@ public class AMConfiguration
         return repositoryLocation;
     }
 
-    public static Integer getUpdateProgressInterval()
+    public static boolean isProxy()
     {
-        return updateProgressInterval;
+        return HTTP_PROXY_HOST != null;
     }
 
-    public static Integer getTimeout()
-    {
-        return timeout;
-    }
-
-    public static String getProxyHost()
-    {
-        return proxyHost;
-    }
-
-    public static Integer getProxyPort()
-    {
-        return proxyPort;
-    }
-
-    public boolean isProxy()
-    {
-        return proxyHost != null && proxyPort != null;
-    }
-
-    /**
-     * Only serializa elements related to the repository (path and location)
-     */
-
+    /** Only serialize elements related to the repository (path and location) */
     public static String printConfig()
     {
-        return String.format("RepositoryConfiguation : [path:%s, loation:%s]", repositoryPath,
-            repositoryLocation);
+        return String.format("Repository:\nexportLocation '%s'\nmountPoint '%s'",
+            repositoryLocation, repositoryPath);
     }
 
     public static boolean isValidRepositoryPath(final String repositoryPath)

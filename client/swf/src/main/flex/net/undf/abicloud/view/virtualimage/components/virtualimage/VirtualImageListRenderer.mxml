@@ -73,7 +73,7 @@
     <utils:ImageDefault id="nodeIcon"
         width="65"
         left="5" top="5" bottom="5"
-        source="{this._virtualImage.icon.path}"
+        source="{this._virtualImage.iconUrl}"
         scaleContent="true"
         defaultImagePath="{VirtualImageManager.DEFAULT_ICON_IMAGE_PATH}"/>
 

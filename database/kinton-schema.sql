@@ -356,29 +356,7 @@ CREATE TABLE  `kinton`.`hypervisor` (
   CONSTRAINT `Hypervisor_FK1` FOREIGN KEY (`idPhysicalMachine`) REFERENCES `physicalmachine` (`idPhysicalMachine`) ON DELETE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
 
---
--- Definition of table `kinton`.`icon`
---
 
-DROP TABLE IF EXISTS `kinton`.`icon`;
-CREATE TABLE  `kinton`.`icon` (
-  `idIcon` int(10) unsigned NOT NULL auto_increment,
-  `path` varchar(200) NOT NULL,
-  `name` varchar(20) NOT NULL DEFAULT 'icon',
-  PRIMARY KEY  (`idIcon`),
-  UNIQUE KEY (`path`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8;
-
---
--- Dumping data for table `kinton`.`icon`
---
-
-/*!40000 ALTER TABLE `icon` DISABLE KEYS */;
-LOCK TABLES `icon` WRITE;
-INSERT INTO `kinton`.`icon` VALUES  (1,'http://bestwindowssoftware.org/icon/ubuntu_icon.png','ubuntu'),
- (2,'http://www.pixeljoint.com/files/icons/mipreview1.gif','Guybrush');
-UNLOCK TABLES;
-/*!40000 ALTER TABLE `icon` ENABLE KEYS */;
 
 --
 -- Definition of table `kinton`.`log`
@@ -1087,9 +1065,9 @@ CREATE TABLE  `kinton`.`virtualimage` (
   `hd_required` bigint(20) default NULL,
   `ram_required` int(7) unsigned default NULL,
   `cpu_required` int(11) default NULL,
+  `iconUrl` varchar(255) default NULL,
   `idCategory` int(3) unsigned NOT NULL,
   `idRepository` int(3) unsigned default NULL,
-  `idIcon` int(4) unsigned default NULL,
   `type` varchar(50) NOT NULL,
   `ethDriverType` varchar(16) default NULL,
   `idMaster` int(4) unsigned default NULL,
@@ -1106,10 +1084,8 @@ CREATE TABLE  `kinton`.`virtualimage` (
   PRIMARY KEY  (`idImage`),
   KEY `fk_virtualimage_category` (`idCategory`),
   KEY `virtualImage_FK3` (`idRepository`),
-  KEY `virtualImage_FK4` (`idIcon`),
   CONSTRAINT `fk_virtualimage_category` FOREIGN KEY (`idCategory`) REFERENCES `category` (`idCategory`),
   CONSTRAINT `virtualImage_FK3` FOREIGN KEY (`idRepository`) REFERENCES `repository` (`idRepository`) ON DELETE SET NULL,
-  CONSTRAINT `virtualImage_FK4` FOREIGN KEY (`idIcon`) REFERENCES `icon` (`idIcon`) ON DELETE SET NULL,
   CONSTRAINT `virtualImage_FK8` FOREIGN KEY (`idMaster`) REFERENCES `virtualimage` (`idImage`) ON DELETE SET NULL,
   CONSTRAINT `virtualImage_FK9` FOREIGN KEY (`idEnterprise`) REFERENCES `enterprise` (`idEnterprise`) ON DELETE SET NULL
 ) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8;
@@ -1528,13 +1504,12 @@ CREATE  TABLE IF NOT EXISTS `kinton`.`ovf_package` (
   `url` VARCHAR(255) NULL NOT NULL,
   `name` VARCHAR(255) NULL ,
   `description` VARCHAR(255) NULL ,
-  `productName` VARCHAR(255) NULL ,
+  `iconUrl` varchar(255) default NULL,
+  `productName` VARCHAR(45) NULL ,
   `productUrl` VARCHAR(45) NULL ,
   `productVersion` VARCHAR(45) NULL ,
   `productVendor` VARCHAR(45) NULL ,
-
    `idCategory` int(3) unsigned NULL,  -- NOT NULL default 1,
-   `idIcon` int(4) unsigned default NULL,
    `diskSizeMb` bigint(20) NULL,
   `version_c` int(11) default 0,
   `type` varchar(50) not null,
@@ -1545,8 +1520,7 @@ CREATE  TABLE IF NOT EXISTS `kinton`.`ovf_package` (
     REFERENCES `kinton`.`apps_library` (`id_apps_library`)
     ON DELETE CASCADE,
     -- ON UPDATE NO ACTION
-  CONSTRAINT `fk_ovf_package_category` FOREIGN KEY (`idCategory`) REFERENCES `category` (`idCategory`) ON DELETE SET NULL,
-    CONSTRAINT `fk_ovf_package_icon`    FOREIGN KEY (`idIcon`)   REFERENCES `icon` (`idIcon`) ON DELETE SET NULL
+  CONSTRAINT `fk_ovf_package_category` FOREIGN KEY (`idCategory`) REFERENCES `category` (`idCategory`) ON DELETE SET NULL
   )
 ENGINE = InnoDB DEFAULT CHARSET=utf8;
 -- -----------------------------------------------------

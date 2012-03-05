@@ -19,25 +19,24 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package com.abiquo.server.core.appslibrary;
+package com.abiquo.appliancemanager.transport;
 
-import java.util.List;
-
-import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import com.abiquo.model.transport.WrapperDto;
+import com.abiquo.model.transport.SingleResourceTransportDto;
 
-@XmlRootElement(name = "icons")
-public class IconsDto extends WrapperDto<IconDto>
+@XmlRootElement(name = "idTemplate")
+public class TemplateIdDto extends SingleResourceTransportDto
 {
-    private static final long serialVersionUID = 1L;
+    private String ovfId;
 
-    @Override
-    @XmlElement(name = "icon")
-    public List<IconDto> getCollection()
+    public String getOvfId()
     {
-        return collection;
+        return ovfId;
     }
 
+    public void setOvfId(final String ovfId)
+    {
+        this.ovfId = ovfId;
+    }
 }
