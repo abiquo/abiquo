@@ -161,13 +161,16 @@ public class StorageResourceStubImpl extends AbstractAPIStub implements StorageR
 
         ClientResponse response = delete(uri);
 
-        if (response.getStatusCode() == 202 || response.getStatusCode() == 204)
+        if (response.getStatusCode() == 202)
         {
-
+            result.setSuccess(Boolean.TRUE);
+        }
+        else if (response.getStatusCode() == 204)
+        {
             uri = createVirtualDatacenterDiskLink(vdcId, diskId);
             response = delete(uri);
 
-            if (response.getStatusCode() == 202 || response.getStatusCode() == 204)
+            if (response.getStatusCode() == 204)
             {
                 result.setSuccess(Boolean.TRUE);
 
