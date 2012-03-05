@@ -163,7 +163,7 @@
                 //the node that has been setted
                 if (this._node is NodeVirtualImage)
                 {
-                    this._nodeIconSource = (NodeVirtualImage(this._node).virtualImage.icon) ? NodeVirtualImage(this._node).virtualImage.icon.path : null;
+                    this._nodeIconSource = (NodeVirtualImage(this._node).virtualImage.iconUrl) ? NodeVirtualImage(this._node).virtualImage.iconUrl : null;
                     setSourcesFromNodeVirtualImage();
                     //We highlight pending changes when the virtuall appliance is running
                     updatePendingStatus();

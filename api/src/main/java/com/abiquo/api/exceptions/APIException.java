@@ -41,19 +41,30 @@ public abstract class APIException extends RuntimeException
         return errors;
     }
 
-    public APIException(CommonError error)
+    public APIException(final CommonError error)
     {
         getErrors().add(error);
     }
 
-    public APIException(Set<CommonError> errors)
+    public APIException(final Set<CommonError> errors)
     {
         getErrors().addAll(errors);
     }
 
-    public APIException(APIError apiError)
+    public APIException(final APIError apiError)
     {
         getErrors().add(new CommonError(apiError.getCode(), apiError.getMessage()));
     }
 
+    @Override
+    public String toString()
+    {
+        StringBuilder sbuilder = new StringBuilder();
+        for (CommonError error : errors)
+        {
+            sbuilder.append(String.format("%s - %s\n", error.getCode(), error.getMessage()));
+        }
+
+        return sbuilder.toString();
+    }
 }

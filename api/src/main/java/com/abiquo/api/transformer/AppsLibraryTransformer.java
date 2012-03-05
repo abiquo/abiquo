@@ -23,7 +23,10 @@ package com.abiquo.api.transformer;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -31,14 +34,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.resources.appslibrary.CategoryResource;
-import com.abiquo.api.resources.appslibrary.IconResource;
 import com.abiquo.api.services.DefaultApiService;
 import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.model.rest.RESTLink;
+import com.abiquo.model.transport.error.CommonError;
 import com.abiquo.server.core.appslibrary.AppsLibraryRep;
 import com.abiquo.server.core.appslibrary.Category;
-import com.abiquo.server.core.appslibrary.Icon;
 import com.abiquo.server.core.appslibrary.TemplateDefinition;
 import com.abiquo.server.core.appslibrary.TemplateDefinitionDto;
 import com.abiquo.server.core.appslibrary.TemplateDefinitionList;
@@ -48,6 +50,8 @@ import com.abiquo.server.core.appslibrary.TemplateDefinitionsDto;
 @Service
 public class AppsLibraryTransformer extends DefaultApiService
 {
+    private final static Logger LOGGER = LoggerFactory.getLogger(AppsLibraryTransformer.class);
+
     @Autowired
     private AppsLibraryRep appslibraryRep;
 
@@ -65,12 +69,14 @@ public class AppsLibraryTransformer extends DefaultApiService
         dto.setProductVersion(templateDef.getProductVersion());
         dto.setUrl(templateDef.getUrl());
         dto.setDiskFileSize(templateDef.getDiskFileSize());
+        dto.setIconUrl(templateDef.getIconUrl());
 
-        dto.setDiskFormatType(String.valueOf(templateDef.getType().name()));
+        dto.setDiskFormatType(String.valueOf(templateDef.getType() == null ? //
+            "UNKNOWN" : templateDef.getType().name()));
 
         final Integer idEnterprise = templateDef.getAppsLibrary().getEnterprise().getId();
-        dto.addLinks(builder.buildTemplateDefinitionLinks(idEnterprise, dto, templateDef
-            .getCategory(), templateDef.getIcon()));
+        dto.addLinks(builder.buildTemplateDefinitionLinks(idEnterprise, dto,
+            templateDef.getCategory()));
 
         return dto;
     }
@@ -123,23 +129,10 @@ public class AppsLibraryTransformer extends DefaultApiService
             }
         }
 
-        RESTLink iconLink = templateDef.searchLink(IconResource.ICON);
-        Icon icon = appslibraryRep.findIconByPath(iconLink.getTitle());
-        if (icon == null)
-        {
-            if (iconLink.getTitle() != null)
-            {
-                icon = new Icon("Icon name", iconLink.getTitle()); // TODO: icon name
-                appslibraryRep.insertIcon(icon);
-            }
-            // icon is optional
-        }
-
         TemplateDefinition pack = new TemplateDefinition();
-        // pack.setAppsLibrary(appsLibrary) //XXX outside
         pack.setCategory(category);
         pack.setType(diskFormatType);
-        pack.setIcon(icon);
+        pack.setIconUrl(templateDef.getIconUrl());
 
         pack.setId(templateDef.getId());
         pack.setName(templateDef.getProductName()); // XXX TODO
@@ -165,17 +158,36 @@ public class AppsLibraryTransformer extends DefaultApiService
             for (TemplateDefinitionDto templateDefDto : templateDefListDto.getTemplateDefinitions()
                 .getCollection())
             {
-                templateDefinitions.add(createPersistenceObject(templateDefDto));
+                TemplateDefinition template = createPersistenceObject(templateDefDto);
+                if (template.isValid())
+                {
+                    templateDefinitions.add(template);
+                }
+                else
+                {
+                    LOGGER.error("Invalid TemplateDefinition in the list, will skip {} due {}\n",
+                        template.getUrl(), toString(template.getValidationErrors()));
+                }
             }
         }
 
         TemplateDefinitionList pack = new TemplateDefinitionList();
 
-        // pack.setAppsLibrary(appsLibrary) // XXX outside
         pack.setId(templateDefListDto.getId());
         pack.setName(templateDefListDto.getName());
         pack.setTemplateDefinitions(templateDefinitions);
 
         return pack;
+    }
+
+    private String toString(final Set<CommonError> validationErrors)
+    {
+        final StringBuffer sbuilder = new StringBuffer();
+        for (CommonError error : validationErrors)
+        {
+            sbuilder.append(error.getMessage()).append("\n");
+        }
+
+        return sbuilder.toString();
     }
 }

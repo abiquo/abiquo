@@ -27,8 +27,6 @@ import java.net.URL;
 import org.apache.commons.io.FilenameUtils;
 import org.dmtf.schemas.ovf.envelope._1.FileType;
 
-import com.abiquo.am.exceptions.AMError;
-import com.abiquo.appliancemanager.exceptions.AMException;
 import com.abiquo.appliancemanager.exceptions.DownloadException;
 
 public class TemplateConventions
@@ -304,7 +302,7 @@ public class TemplateConventions
     {
         if (filehref.startsWith("http://"))
         {
-            return filehref.substring(filehref.lastIndexOf('/') + 1);
+            return FilenameUtils.getName(filehref);
         }
         else
         // already relative to package

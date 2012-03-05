@@ -25,7 +25,6 @@ import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
-import javax.ws.rs.QueryParam;
 
 import org.apache.wink.common.annotations.Parent;
 import org.springframework.stereotype.Controller;
@@ -56,8 +55,7 @@ public class EnterpriseRepositoryResource extends AbstractResource
 
     @GET
     public EnterpriseRepositoryDto getEnterpriseRepository(
-        @PathParam(EnterpriseRepositoryResource.ENTERPRISE_REPOSITORY) final String erId,
-        @QueryParam("checkCanWrite") final boolean checkCanWrite)
+        @PathParam(EnterpriseRepositoryResource.ENTERPRISE_REPOSITORY) final String erId)
     {
         EnterpriseRepositoryDto repo = new EnterpriseRepositoryDto();
 

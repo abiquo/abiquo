@@ -39,7 +39,6 @@ import com.abiquo.appliancemanager.transport.TemplateDto;
 import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.server.core.appslibrary.AppsLibraryRep;
 import com.abiquo.server.core.appslibrary.Category;
-import com.abiquo.server.core.appslibrary.Icon;
 import com.abiquo.server.core.appslibrary.TemplateDefinition;
 import com.abiquo.server.core.appslibrary.TemplateDefinitionDAO;
 import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
@@ -96,8 +95,8 @@ public class TemplateFactory
                 }
                 catch (Exception pe)
                 {
-                    logger.error("Can not insert virtual machine template [{}]",
-                        disk.getDiskFilePath());
+                    logger.error("Can not insert virtual machine template [{}]", disk
+                        .getDiskFilePath());
                 }
             }
         }
@@ -116,8 +115,8 @@ public class TemplateFactory
                 }
                 catch (Exception pe)
                 {
-                    logger.error("Can not insert bundle virtual machine template [{}]",
-                        disk.getDiskFilePath());
+                    logger.error("Can not insert bundle virtual machine template [{}]", disk
+                        .getDiskFilePath());
                 }
             }
         }
@@ -170,8 +169,8 @@ public class TemplateFactory
         if (disk.getMasterDiskFilePath() != null)
         {
             master =
-                appslibraryRep.findVirtualMachineTemplateByPath(enterprise, repository,
-                    disk.getDiskFilePath());
+                appslibraryRep.findVirtualMachineTemplateByPath(enterprise, repository, disk
+                    .getDiskFilePath());
 
             diskFormat = master.getDiskFormatType();
         }
@@ -183,15 +182,10 @@ public class TemplateFactory
         Category category = getCategory(disk);
 
         VirtualMachineTemplate vmtemplate =
-            new VirtualMachineTemplate(enterprise,
-                disk.getName(),
-                diskFormat,
-                disk.getDiskFilePath(),
-                disk.getDiskFileSize(),
-                category,
-                User.SYSTEM_USER.getName()); // TODO
+            new VirtualMachineTemplate(enterprise, disk.getName(), diskFormat, disk
+                .getDiskFilePath(), disk.getDiskFileSize(), category, User.SYSTEM_USER.getName()); // TODO
 
-        vmtemplate.setIcon(getIcon(disk));
+        vmtemplate.setIconUrl(disk.getIconPath());
         vmtemplate.setDescription(getDescription(disk));
         vmtemplate.setCpuRequired(disk.getCpu());
         vmtemplate.setRamRequired(getRamInMb(disk).intValue());
@@ -225,18 +219,6 @@ public class TemplateFactory
         TemplateDefinition templateDef = templateDefDao.findByUrl(disk.getUrl());
         return templateDef != null ? templateDef.getCategory() : appslibraryRep
             .getDefaultCategory();
-    }
-
-    private Icon getIcon(final TemplateDto disk)
-    {
-        if (!StringUtils.isEmpty(disk.getIconPath()))
-        {
-            return appslibraryRep.findByIconPathOrCreateNew(disk.getIconPath());
-        }
-
-        // try to find in the TemplateDefinition
-        TemplateDefinition templateDef = templateDefDao.findByUrl(disk.getUrl());
-        return templateDef != null ? templateDef.getIcon() : null;
     }
 
     /*

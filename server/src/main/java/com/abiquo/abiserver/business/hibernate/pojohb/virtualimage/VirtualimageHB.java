@@ -46,8 +46,6 @@ public class VirtualimageHB implements java.io.Serializable, IPojoHB<VirtualImag
 
     private RepositoryHB repository;
 
-    private IconHB icon;
-
     private CategoryHB category;
 
     private String name;
@@ -78,6 +76,8 @@ public class VirtualimageHB implements java.io.Serializable, IPojoHB<VirtualImag
 
     private boolean chefEnabled;
 
+    private String iconUrl;
+
     /** Size of the file containing the Disk. in bytes */
     private Long diskFileSize;
 
@@ -107,14 +107,14 @@ public class VirtualimageHB implements java.io.Serializable, IPojoHB<VirtualImag
         this.diskFileSize = diskFileSize;
     }
 
-    public VirtualimageHB(final RepositoryHB repository, final IconHB icon,
+    public VirtualimageHB(final RepositoryHB repository, final String iconUrl,
         final CategoryHB category, final String name, final String description,
         final String pathName, final Long hdRequired, final Integer ramRequired,
         final Integer cpuRequired, final VirtualimageHB master, final int idEnterprise,
         final String ovfId, final Long diskFileSize, final int costCode)
     {
         this.repository = repository;
-        this.icon = icon;
+        this.iconUrl = iconUrl;
         this.category = category;
         this.name = name;
         this.description = description;
@@ -149,16 +149,6 @@ public class VirtualimageHB implements java.io.Serializable, IPojoHB<VirtualImag
     public void setRepository(final RepositoryHB repository)
     {
         this.repository = repository;
-    }
-
-    public IconHB getIcon()
-    {
-        return icon;
-    }
-
-    public void setIcon(final IconHB icon)
-    {
-        this.icon = icon;
     }
 
     public CategoryHB getCategory()
@@ -342,11 +332,7 @@ public class VirtualimageHB implements java.io.Serializable, IPojoHB<VirtualImag
         virtualImage.setCpuRequired(cpuRequired);
         virtualImage.setDescription(description);
         virtualImage.setHdRequired(hdRequired);
-
-        if (icon != null)
-        {
-            virtualImage.setIcon(icon.toPojo());
-        }
+        virtualImage.setIconUrl(iconUrl);
 
         virtualImage.setId(idImage);
         virtualImage.setName(name);
@@ -412,7 +398,7 @@ public class VirtualimageHB implements java.io.Serializable, IPojoHB<VirtualImag
         imageBundled.setCpuRequired(getCpuRequired());
         imageBundled.setDescription(getDescription());
         imageBundled.setHdRequired(getHdRequired());
-        imageBundled.setIcon(getIcon());
+        imageBundled.setIconUrl(getIconUrl());
         imageBundled.setOvfId(getOvfId());
         imageBundled.setRamRequired(getRamRequired());
         imageBundled.setRepository(getRepository());
@@ -467,6 +453,16 @@ public class VirtualimageHB implements java.io.Serializable, IPojoHB<VirtualImag
     public void setType(final DiskFormatType type)
     {
         this.type = type;
+    }
+
+    public void setIconUrl(final String iconUrl)
+    {
+        this.iconUrl = iconUrl;
+    }
+
+    public String getIconUrl()
+    {
+        return iconUrl;
     }
 
 }

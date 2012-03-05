@@ -26,10 +26,8 @@ import static com.abiquo.api.common.Assert.assertLinkExist;
 import static com.abiquo.api.common.UriTestResolver.resolveCategoryURI;
 import static com.abiquo.api.common.UriTestResolver.resolveDatacenterRepositoryURI;
 import static com.abiquo.api.common.UriTestResolver.resolveEnterpriseURI;
-import static com.abiquo.api.common.UriTestResolver.resolveIconURI;
 import static com.abiquo.api.common.UriTestResolver.resolveVirtualMachineTemplateURI;
 import static com.abiquo.api.util.URIResolver.buildPath;
-import static com.abiquo.testng.TestConfig.APPS_INTEGRATION_TESTS;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
@@ -53,7 +51,6 @@ import com.abiquo.api.resources.cloud.VirtualDatacentersResource;
 import com.abiquo.appliancemanager.util.URIResolver;
 import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.model.rest.RESTLink;
-import com.abiquo.server.core.appslibrary.Icon;
 import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
 import com.abiquo.server.core.appslibrary.VirtualMachineTemplateDto;
 import com.abiquo.server.core.common.EnvironmentGenerator;
@@ -214,25 +211,6 @@ public class VirtualMachineTemplateResourceIT extends AbstractJpaGeneratorIT
 
         VirtualMachineTemplateDto dto = response.getEntity(VirtualMachineTemplateDto.class);
         assertVirtualMachineTemplateWithLinks(slave, dto);
-    }
-
-    @Test
-    public void getVirtualMachineTemplateWithIcon()
-    {
-        VirtualMachineTemplate vmtemplate =
-            virtualMachineTemplateGenerator.createInstance(ent, repository);
-        Icon icon = iconGenerator.createUniqueInstance();
-
-        vmtemplate.setIcon(icon);
-        setup(vmtemplate.getCategory(), icon, vmtemplate);
-
-        String uri =
-            resolveVirtualMachineTemplateURI(ent.getId(), datacenter.getId(), vmtemplate.getId());
-        ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
-        assertEquals(response.getStatusCode(), 200);
-
-        VirtualMachineTemplateDto dto = response.getEntity(VirtualMachineTemplateDto.class);
-        assertVirtualMachineTemplateWithLinks(vmtemplate, dto);
     }
 
     @Test
@@ -481,23 +459,19 @@ public class VirtualMachineTemplateResourceIT extends AbstractJpaGeneratorIT
         assertError(response, 409, APIError.VMTEMPLATE_STATEFUL_TEMPLATE_CANNOT_BE_DELETED);
     }
 
-    @Test(groups = {APPS_INTEGRATION_TESTS})
+    @Test//(groups = {APPS_INTEGRATION_TESTS})
     public void deleteSharedMachineTemplateFromOtherEnterpriseByEntAdminRises409()
     {
-
         Enterprise ent1 = enterpriseGenerator.createUniqueInstance();
         Datacenter datacenter1 = datacenterGenerator.createUniqueInstance();
-
         Repository rep = repositoryGenerator.createInstance(datacenter1);
 
         DatacenterLimits limits = datacenterLimitsGenerator.createInstance(ent1, datacenter1);
-
         VirtualMachineTemplate vmtemplate =
             virtualMachineTemplateGenerator.createInstance(ent, repository);
 
         vmtemplate.setShared(Boolean.TRUE);
         vmtemplate.setEnterprise(ent1);
-
         vmtemplate.setOvfid(null);
         setup(ent1, datacenter1, rep, limits, vmtemplate.getCategory(), vmtemplate);
 
@@ -527,13 +501,6 @@ public class VirtualMachineTemplateResourceIT extends AbstractJpaGeneratorIT
         String category = resolveCategoryURI(vi.getCategory().getId());
         assertLinkExist(dto, edit, "edit");
         assertLinkExist(dto, category, CategoryResource.CATEGORY);
-
-        // Optional links
-        if (vi.getIcon() != null)
-        {
-            String icon = resolveIconURI(vi.getIcon().getId());
-            assertLinkExist(dto, icon, IconResource.ICON);
-        }
 
         if (vi.getMaster() != null)
         {
@@ -624,8 +591,8 @@ public class VirtualMachineTemplateResourceIT extends AbstractJpaGeneratorIT
         Enterprise enterprise = env.get(Enterprise.class);
 
         String uri =
-            resolveVirtualMachineTemplateURI(enterprise.getId(), datacenter.getId(),
-                vmtemplate.getId());
+            resolveVirtualMachineTemplateURI(enterprise.getId(), datacenter.getId(), vmtemplate
+                .getId());
         ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
         assertEquals(response.getStatusCode(), 200);
 

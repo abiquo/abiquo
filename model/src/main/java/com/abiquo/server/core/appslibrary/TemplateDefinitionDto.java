@@ -55,6 +55,8 @@ public class TemplateDefinitionDto extends SingleResourceTransportDto
 
     private EthernetDriverType ethernetDriverType;
 
+    private String iconUrl;
+
     public Integer getId()
     {
         return id;
@@ -165,4 +167,13 @@ public class TemplateDefinitionDto extends SingleResourceTransportDto
         this.ethernetDriverType = ethernetDriverType;
     }
 
+    public void setIconUrl(final String iconUrl)
+    {
+        this.iconUrl = iconUrl;
+    }
+
+    public String getIconUrl()
+    {
+        return iconUrl;
+    }
 }

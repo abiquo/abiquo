@@ -73,7 +73,7 @@
 
                     if (this._nodeListItem.node is NodeVirtualImage)
                     {
-                        this._nodeIcon = (NodeVirtualImage(this._nodeListItem.node).virtualImage.icon) ? NodeVirtualImage(this._nodeListItem.node).virtualImage.icon.path : null;
+                        this._nodeIcon = (NodeVirtualImage(this._nodeListItem.node).virtualImage.iconUrl) ? NodeVirtualImage(this._nodeListItem.node).virtualImage.iconUrl : null;
                         this._nodeSize = NodeVirtualImage(this._nodeListItem.node).virtualImage.hdRequired;
                         
                         sizeLabel.text = resourceManager.getString('VirtualAppliance', 'LABEL_SIZE')+ ' : ';

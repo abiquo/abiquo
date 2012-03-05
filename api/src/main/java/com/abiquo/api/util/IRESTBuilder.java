@@ -29,8 +29,6 @@ import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.model.rest.RESTLink;
 import com.abiquo.server.core.appslibrary.Category;
 import com.abiquo.server.core.appslibrary.CategoryDto;
-import com.abiquo.server.core.appslibrary.Icon;
-import com.abiquo.server.core.appslibrary.IconDto;
 import com.abiquo.server.core.appslibrary.TemplateDefinitionDto;
 import com.abiquo.server.core.appslibrary.TemplateDefinitionListDto;
 import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
@@ -113,7 +111,7 @@ public interface IRESTBuilder
         TemplateDefinitionListDto templateDefinitionList);
 
     public List<RESTLink> buildTemplateDefinitionLinks(Integer enterpriseId,
-        TemplateDefinitionDto templateDefinition, Category category, Icon icon);
+        TemplateDefinitionDto templateDefinition, Category category);
 
     public List<RESTLink> buildVirtualDatacenterLinks(VirtualDatacenter vdc, Integer datacenterId,
         Integer enterpriseId);
@@ -238,8 +236,6 @@ public interface IRESTBuilder
         final Integer vappId);
 
     public List<RESTLink> buildCategoryLinks(CategoryDto categorydto);
-
-    public List<RESTLink> buildIconLinks(final IconDto icon);
 
     public List<RESTLink> buildVirtualDatacenterDiskLinks(DiskManagement disk);
 

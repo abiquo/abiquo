@@ -239,7 +239,7 @@ package net.undf.abicloud.business.managers.virtualimage
             virtualImage.deleted = updatedValues.deleted;
             virtualImage.description = updatedValues.description;
             virtualImage.hdRequired = updatedValues.hdRequired;
-            virtualImage.icon = updatedValues.icon;
+            virtualImage.iconUrl = updatedValues.iconUrl;
             virtualImage.name = updatedValues.name;
             virtualImage.path = updatedValues.path;
             virtualImage.ramRequired = updatedValues.ramRequired;

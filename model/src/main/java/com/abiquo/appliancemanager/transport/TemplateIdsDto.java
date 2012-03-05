@@ -19,19 +19,23 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package com.abiquo.abiserver.persistence.dao.virtualimage;
+package com.abiquo.appliancemanager.transport;
 
-import com.abiquo.abiserver.business.hibernate.pojohb.virtualimage.IconHB;
-import com.abiquo.abiserver.persistence.DAO;
+import java.util.List;
 
-/**
- * Specific interface to work with the
- * {@link com.abiquo.abiserver.business.hibernate.pojohb.virtualimage.IconHB} Exposes all the
- * methods that this entity will need to interact with the data source
- * 
- * @author jdevesa@abiquo.com
- */
-public interface IconDAO extends DAO<IconHB, Integer>
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+
+import com.abiquo.model.transport.WrapperDto;
+
+@XmlRootElement(name = "idTemplates")
+public class TemplateIdsDto extends WrapperDto<TemplateIdDto>
 {
-    // add extra functionality
+    @Override
+    @XmlElement(name = "idTemplate")
+    public List<TemplateIdDto> getCollection()
+    {
+        return collection;
+    }
+
 }

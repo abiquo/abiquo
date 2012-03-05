@@ -68,7 +68,6 @@ import com.abiquo.abiserver.pojo.virtualappliance.VirtualAppliancesListResult;
 import com.abiquo.abiserver.pojo.virtualappliance.VirtualDataCenter;
 import com.abiquo.abiserver.pojo.virtualhardware.ResourceAllocationLimit;
 import com.abiquo.abiserver.pojo.virtualimage.Category;
-import com.abiquo.abiserver.pojo.virtualimage.Icon;
 import com.abiquo.abiserver.pojo.virtualimage.VirtualImage;
 import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.model.enumerator.HypervisorType;
@@ -803,6 +802,7 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
         image.setPath(virtualImageDto.getPath());
         image.setRamRequired(virtualImageDto.getRamRequired());
         image.setShared(virtualImageDto.isShared());
+        image.setIconUrl(virtualImageDto.getIconUrl());
 
         // Image is stateful if it is linked to a volume
         image.setStateful(virtualImageDto.searchLink("volume") != null);
@@ -815,15 +815,6 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
             category.setId(Integer.parseInt(getIdFromLink(categoryLink)));
             category.setName(categoryLink.getTitle());
             image.setCategory(category);
-        }
-
-        // Captured images may not have an icon
-        RESTLink iconlLink = virtualImageDto.searchLink("icon");
-        if (iconlLink != null)
-        {
-            Icon icon = new Icon();
-            icon.setPath(iconlLink.getTitle());
-            image.setIcon(icon);
         }
 
         image.setIdEnterprise(virtualImageDto.getIdFromLink("enterprise"));

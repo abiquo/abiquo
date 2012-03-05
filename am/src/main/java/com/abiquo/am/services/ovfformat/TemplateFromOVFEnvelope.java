@@ -29,6 +29,7 @@ import java.util.Map;
 
 import javax.xml.namespace.QName;
 
+import org.apache.commons.io.FilenameUtils;
 import org.dmtf.schemas.ovf.envelope._1.ContentType;
 import org.dmtf.schemas.ovf.envelope._1.DiskSectionType;
 import org.dmtf.schemas.ovf.envelope._1.EnvelopeType;
@@ -216,7 +217,15 @@ public class TemplateFromOVFEnvelope
 
                     // Note that getHRef() will now return the relative path
                     // of the file at the downloaded repository space
-                    diskInfo.setDiskFilePath(filePath);
+
+                    if (filePath.startsWith("http:"))
+                    {
+                        diskInfo.setDiskFilePath(FilenameUtils.getName(filePath));
+                    }
+                    else
+                    {
+                        diskInfo.setDiskFilePath(filePath);
+                    }
 
                     diskInfo.setIconPath(iconPath);
                     diskInfo.setDescription(description);
