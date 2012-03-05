@@ -515,13 +515,12 @@ public class AbstractAPIStub
         Map<String, String[]> queryParams = new HashMap<String, String[]>();
         if (!StringUtils.isEmpty(filter))
         {
-            queryParams.put("filter", new String[] {filter});
+            queryParams.put(FILTER, new String[] {filter});
         }
         if (firstElem != null && numResults != null)
         {
-
-            queryParams.put("START_WITH", new String[] {firstElem.toString()});
-            queryParams.put("numResults", new String[] {numResults.toString()});
+            queryParams.put(START_WITH, new String[] {firstElem.toString()});
+            queryParams.put(LIMIT, new String[] {numResults.toString()});
         }
 
         return UriHelper.appendQueryParamsToPath(uri, queryParams, false);
