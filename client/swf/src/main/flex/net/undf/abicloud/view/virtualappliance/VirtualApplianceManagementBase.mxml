@@ -259,13 +259,10 @@
 
             private function requestCategories():void
             {
-                if(SecuredPrivilegeAccess.userHasPrivilege(PrivilegeType.VDC_MANAGE_VAPP))
-                {
-	                //Requesting the list of virtual image categories for the current User Enterprise
-	                var virtualImageEvent:VirtualImageEvent = new VirtualImageEvent(VirtualImageEvent.GET_CATEGORIES);
-	                virtualImageEvent.enterprise = AbiCloudModel.getInstance().loginManager.user.enterprise;
-	                dispatchEvent(virtualImageEvent);
-                }
+                //Requesting the list of virtual image categories for the current User Enterprise
+                var virtualImageEvent:VirtualImageEvent = new VirtualImageEvent(VirtualImageEvent.GET_CATEGORIES);
+                virtualImageEvent.enterprise = AbiCloudModel.getInstance().loginManager.user.enterprise;
+                dispatchEvent(virtualImageEvent);
             }
 
             private function onCategoriesChange(event:Event):void
