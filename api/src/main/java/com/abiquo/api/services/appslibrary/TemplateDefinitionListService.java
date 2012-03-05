@@ -24,7 +24,6 @@ package com.abiquo.api.services.appslibrary;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -132,24 +131,33 @@ public class TemplateDefinitionListService extends DefaultApiService
 
         repo.persistTemplateDefinitionList(templateDefList);
 
-        List<TemplateDefinition> correctTemplates = new LinkedList<TemplateDefinition>();
+        // List<TemplateDefinition> correctTemplates = new LinkedList<TemplateDefinition>();
         for (TemplateDefinition templateDef : templateDefList.getTemplateDefinitions())
         {
-            try
-            {
-                templateDefinitionService.addTemplateDefinition(templateDef, idEnterprise);
-                templateDef.addToTemplateDefinitionLists(templateDefList);
-                correctTemplates.add(templateDef);
-            }
-            catch (Exception e)
-            {
-                tracer.log(SeverityType.WARNING, ComponentType.APPLIANCE_MANAGER,
-                    EventType.TEMPLATE_DEFINITION_LIST_MODIFIED, "templateDefinition.createError",
-                    templateDef.getName(), e.toString());
-            }
+            // try
+            // {
+            // // TemplateDefinition tDef =
+            templateDefinitionService.addTemplateDefinition(templateDef, idEnterprise);
+
+            templateDef.addToTemplateDefinitionLists(templateDefList);
+
+            // tDef.addToTemplateDefinitionLists(templateDefList);
+            // correctTemplates.add(tDef);
+            // }
+            // catch (Exception e)
+            // {
+            //
+            // templateDef.getTemplateDefinitionLists().clear();
+            // if (tracer != null)
+            // {
+            // tracer.log(SeverityType.WARNING, ComponentType.APPLIANCE_MANAGER,
+            // EventType.TEMPLATE_DEFINITION_LIST_MODIFIED,
+            // "templateDefinition.createError", templateDef.getName(), e.toString());
+            // }
+            // }
         }
 
-        templateDefList.setTemplateDefinitions(correctTemplates);
+        // templateDefList.setTemplateDefinitions(correctTemplates);
         repo.updateTemplateDefinitionList(templateDefList);
 
         return templateDefList;

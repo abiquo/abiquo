@@ -106,15 +106,15 @@ public class TemplateDefinitionService extends DefaultApiService
         return ovfpackage;
     }
 
-    @Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public TemplateDefinition addTemplateDefinition(final TemplateDefinition templateDef,
         final Integer idEnterprise)
     {
         Enterprise ent = enterpriseService.getEnterprise(idEnterprise); // check can view
         templateDef.setAppsLibrary(appsLibraryDao.findByEnterpriseOrInitialize(ent));
 
-        templateDef.setCategory(appslibraryRep.findByCategoryNameOrCreateNew(templateDef
-            .getCategory().getName()));
+        // templateDef.setCategory(appslibraryRep.findByCategoryNameOrCreateNew(templateDef
+        // .getCategory().getName()));
 
         validate(templateDef);
 
@@ -176,7 +176,7 @@ public class TemplateDefinitionService extends DefaultApiService
     /** #################### ovfindex.xml #################### */
     /** #################### */
 
-    @Transactional(readOnly = true, propagation = Propagation.REQUIRES_NEW)
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
     public TemplateDefinition transformToTemplateDefinition(final OVFDescription descr,
         final String baseRepositorySpaceURL)
     {
