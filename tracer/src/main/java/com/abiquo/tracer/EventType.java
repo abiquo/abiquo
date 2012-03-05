@@ -73,7 +73,7 @@ public enum EventType implements Serializable
         "VLAN Pool excedded in Rack"), MACHINE_CREATE(307, "MACHINE_CREATE",
         "Physical Machine created"), MACHINE_MODIFY(308, "MACHINE_MODIFY",
         "Physical Machine modified"), MACHINE_DELETE(309, "MACHINE_DELETE",
-        "Physical Machine deleted"), MACHINE_CHECK(310, "MACHINE_CHECK", "Physical Machine checked"), MACHINE_RETRIVE_VMS(
+        "Physical Machine deleted"), MACHINE_CHECK(310, "MACHINE_CHECK", "Physical Machine checked"), MACHINE_RETRIEVE_VMS(
         311, "MACHINE_RETRIEVE_VMS", "Virtual Machines discovered from physical machine"), MACHINE_CREATED_RETRIEVED_VMS(
         312, "MACHINE_CREATED_RETRIEVED_VMS",
         "Created Virtual Machines discovered from physical machine"), MACHINE_DELETE_VMS_NOTMANAGED(
