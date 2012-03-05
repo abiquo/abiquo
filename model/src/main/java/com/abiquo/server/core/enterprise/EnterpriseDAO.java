@@ -398,7 +398,6 @@ class EnterpriseDAO extends DefaultDAOBase<Integer, Enterprise>
         {
             criteria.add(withoutPricingTemplate());
         }
-
         if (enterpriseId != null)
         {
             criteria.add(Restrictions.eq(PersistentEntity.ID_PROPERTY, enterpriseId));
