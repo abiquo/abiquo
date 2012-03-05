@@ -355,7 +355,6 @@ package net.undf.abicloud.business.managers
          */
         private var _totalEnterprises:int;
 
-        [Bindable]
         public function get totalEnterprises():int
         {
             return this._totalEnterprises;

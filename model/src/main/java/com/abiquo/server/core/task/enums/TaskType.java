@@ -43,7 +43,9 @@ public enum TaskType
 
     SNAPSHOT(VIRTUAL_MACHINE),
 
-    HIGH_AVAILABILITY(VIRTUAL_MACHINE);
+    HA_DEPLOY(VIRTUAL_MACHINE),
+    
+    HA_UNDEPLOY(VIRTUAL_MACHINE);
 
     protected TaskOwnerType ownerType;
 

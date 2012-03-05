@@ -143,9 +143,10 @@ public class TarantinoJobCreator extends DefaultApiService
         final VirtualMachineDescriptionBuilder vmDesc = new VirtualMachineDescriptionBuilder();
 
         vmDesc.setBasics(virtualMachine.getUuid(), virtualMachine.getName());
+        vmDesc.setHA(isHA);
 
         logger.debug("Creating disk information");
-        primaryDiskDefinitionConfiguration(virtualMachine, vmDesc, dcId, isHA);
+        primaryDiskDefinitionConfiguration(virtualMachine, vmDesc, dcId);
         logger.debug("Disk information created!");
 
         vmDesc.hardware(virtualMachine.getCpu(), virtualMachine.getRam());
@@ -329,8 +330,7 @@ public class TarantinoJobCreator extends DefaultApiService
      */
     @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
     protected void primaryDiskDefinitionConfiguration(final VirtualMachine virtualMachine,
-        final VirtualMachineDescriptionBuilder vmDesc, final Integer idDatacenter,
-        final boolean isHA)
+        final VirtualMachineDescriptionBuilder vmDesc, final Integer idDatacenter)
     {
         String datastore = "";
         if (virtualMachine.getDatastore() != null)
@@ -389,7 +389,7 @@ public class TarantinoJobCreator extends DefaultApiService
             url = virtualMachine.getVirtualMachineTemplate().getRepository().getUrl();
         }
         vmDesc.primaryDisk(DiskDescription.DiskFormatType.valueOf(format.name()), size, url, path,
-            datastore, repositoryManager.getUri(), cntrlType, isHA);
+            datastore, repositoryManager.getUri(), cntrlType);
     }
 
     /**
