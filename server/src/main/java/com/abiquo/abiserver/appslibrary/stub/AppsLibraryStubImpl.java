@@ -582,7 +582,6 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
     @Override
     public DataResult<List<String>> getIcons(final Integer idEnterprise)
     {
-
         DataResult<List<String>> result = new DataResult<List<String>>();
 
         return result;
