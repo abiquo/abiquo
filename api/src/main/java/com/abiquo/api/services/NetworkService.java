@@ -39,7 +39,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.abiquo.api.config.ConfigService;
 import com.abiquo.api.exceptions.APIError;
-import com.abiquo.api.exceptions.BadRequestException;
 import com.abiquo.api.services.cloud.VirtualMachineService;
 import com.abiquo.api.tracer.TracerLogger;
 import com.abiquo.model.enumerator.NetworkType;
@@ -58,7 +57,6 @@ import com.abiquo.server.core.infrastructure.management.Rasd;
 import com.abiquo.server.core.infrastructure.network.DhcpOption;
 import com.abiquo.server.core.infrastructure.network.DhcpOptionDto;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
-import com.abiquo.server.core.infrastructure.network.IpPoolManagement.OrderByEnum;
 import com.abiquo.server.core.infrastructure.network.NetworkConfiguration;
 import com.abiquo.server.core.infrastructure.network.VLANNetwork;
 import com.abiquo.server.core.infrastructure.network.VMNetworkConfiguration;
@@ -206,7 +204,7 @@ public class NetworkService extends DefaultApiService
             case INTERNAL:
                 // find next available IP to use.
                 ip =
-                    repo.findNextIpByPrivateVLANAvailable(vdc.getId(), vlan.getId(), vlan
+                    repo.findNextIpAvailable(vlan.getId(), vlan
                         .getConfiguration().getGateway());
 
                 break;
@@ -222,13 +220,8 @@ public class NetworkService extends DefaultApiService
                 break;
 
             default:
-                DatacenterLimits dcLimits =
-                    entRep.findLimitsByEnterpriseAndDatacenter(vdc.getEnterprise(),
-                        vdc.getDatacenter());
                 ip =
-                    repo.findExternalIpsByVlan(vdc.getEnterprise().getId(), dcLimits.getId(),
-                        vlan.getId(), 0, 1, new String(), OrderByEnum.IP, Boolean.TRUE,
-                        Boolean.TRUE).get(0);
+                    repo.findNextExternalIpAvailable(vlan.getId(), vlan.getConfiguration().getGateway());
                 ip.setVirtualDatacenter(vdc);
                 ip.setMac(IPNetworkRang.requestRandomMacAddress(vdc.getHypervisorType()));
                 ip.setName(ip.getMac() + "_host");
@@ -237,17 +230,12 @@ public class NetworkService extends DefaultApiService
         Rasd rasd = createRasdEntity(vm, ip);
 
         repo.insertRasd(rasd);
-        if (ip != null)
-        {
-            ip.setRasd(rasd);
+            
+        ip.setRasd(rasd);
+        ip.attach(0, vm, vapp);
 
-            ip.attach(0, vm, vapp);
-
-            ip.setVirtualAppliance(vapp);
-            ip.setVirtualMachine(vm);
-            ip.setAvailable(Boolean.FALSE);
-            repo.updateIpManagement(ip);
-        }
+        repo.updateIpManagement(ip);
+            
         vm.setNetworkConfiguration(vlan.getConfiguration());
         repo.updateVirtualMachine(vm);
 
