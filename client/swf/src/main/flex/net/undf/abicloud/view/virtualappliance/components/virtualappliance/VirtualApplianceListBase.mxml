@@ -120,15 +120,21 @@
             	//Checking privilege
             	SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.VDC_MANAGE_VAPP,"visible",vappTools);
             	
+            	AbiCloudModel.getInstance().virtualApplianceManager.addEventListener(VirtualApplianceEvent.VIRTUAL_APPLIANCE_CREATED,
+                                                                                                retrieveVirtualAppliances);
+                AbiCloudModel.getInstance().virtualApplianceManager.addEventListener(VirtualApplianceEvent.VIRTUAL_APPLIANCE_EDITED,
+                                                                                                retrieveVirtualAppliances);
+            	
             	resetListRequest();
             }
             
             public function resetListRequest():void
             {
             	this._vappsOrderBy = "name";
+            	this._vappsAsc = true;
                 
                 this._listRequest = new ListRequest();
-                this._listRequest.asc = true; 
+                this._listRequest.asc = this._vappsAsc; 
                 this._listRequest.numberOfNodes = VAPP_RESULTS_PER_PAGE;
                 this._listRequest.offset = 0 ;
                 this._listRequest.orderBy = this._vappsOrderBy;
@@ -276,7 +282,7 @@
             	return ObjectUtil.stringCompare(virtualMachineState1, virtualMachineState2);
             }
 
-             private function retrieveVirtualAppliances():void
+             private function retrieveVirtualAppliances(event:VirtualApplianceEvent = null):void
             {
                 this._listRequest.filterLike = vappsFilter.text;
                 this._listRequest.numberOfNodes = VAPP_RESULTS_PER_PAGE;
