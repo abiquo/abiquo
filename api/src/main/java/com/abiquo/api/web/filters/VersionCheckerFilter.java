@@ -1,12 +1,7 @@
 package com.abiquo.api.web.filters;
 
-import java.io.File;
 import java.io.IOException;
-import java.net.URL;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.Enumeration;
 import java.util.List;
 
 import javax.servlet.Filter;
@@ -20,21 +15,11 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
-import org.springframework.core.io.support.ResourcePatternResolver;
-import org.springframework.core.type.AnnotationMetadata;
-import org.springframework.core.type.classreading.MetadataReader;
-import org.springframework.core.type.classreading.MetadataReaderFactory;
-import org.springframework.core.type.classreading.SimpleMetadataReaderFactory;
 import org.springframework.http.MediaType;
-import org.springframework.util.ClassUtils;
 
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.web.AbiquoHttpServletRequestWrapper;
 import com.abiquo.model.transport.SingleResourceTransportDto;
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.ListMultimap;
 
 /**
  * This class intercepts all the requests to the API and injects the proper version parameter to
@@ -45,21 +30,12 @@ import com.google.common.collect.ListMultimap;
 public class VersionCheckerFilter implements Filter
 {
 
-    /** Header that specifies the client abiquo version. */
-    private static final String ABIQUO_VERSION_HEADER = "X-abiquo-version";
-
     /** Register the logger. */
     private static final Logger LOGGER = LoggerFactory.getLogger(VersionCheckerFilter.class);
 
     /** List of released versions of abiquo API. */
-    private static final List<String> releasedVersions = Arrays.asList("1.0");
-
-    /**
-     * ListMultimap
-     * (http://google-collections.googlecode.com/svn/trunk/javadoc/com/google/common/collect
-     * /ListMultimap.html) that acts as a hashmap of 'media-type'(key) and 'dto' (list of values).
-     */
-    private ListMultimap<String, SingleResourceTransportDto> dtos;
+    private static final List<String> releasedVersions = Arrays
+        .asList(SingleResourceTransportDto.API_VERSION);
 
     @Override
     public void destroy()
@@ -104,7 +80,7 @@ public class VersionCheckerFilter implements Filter
                 }
             }
         }
-        
+
         String contentType = req.getHeader("Content-type");
         if (contentType != null)
         {
@@ -120,8 +96,9 @@ public class VersionCheckerFilter implements Filter
                 if (!releasedVersions.contains(version))
                 {
                     res.setStatus(HttpServletResponse.SC_UNSUPPORTED_MEDIA_TYPE);
-                    res.getWriter().print(
-                        createInvalidVersionNumberXmlError(APIError.STATUS_UNSUPPORTED_MEDIA_TYPE_VERSION));
+                    res.getWriter()
+                        .print(
+                            createInvalidVersionNumberXmlError(APIError.STATUS_UNSUPPORTED_MEDIA_TYPE_VERSION));
                     return;
                 }
             }
@@ -142,12 +119,12 @@ public class VersionCheckerFilter implements Filter
      * 
      * @return the string with the error.
      */
-    private String createInvalidVersionNumberXmlError(APIError error)
+    private String createInvalidVersionNumberXmlError(final APIError error)
     {
         StringBuilder builder = new StringBuilder();
         builder.append("<errors>\n");
         builder.append("<error>\n");
-        builder.append("<code>").append(error.getCode()).append(" </code>\n");
+        builder.append("<code>").append(error.getCode()).append("</code>\n");
         builder.append("<message>").append(error.getMessage()).append("</message>\n");
         builder.append("</error>\n");
         builder.append("</errors>");
