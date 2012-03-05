@@ -152,7 +152,8 @@ public class EnterpriseService extends DefaultApiService
             {
                 pt = findPricingTemplate(idPricingTempl);
             }
-            return repo.findByPricingTemplate(startwith, pt, included, filterName, numResults);
+            return repo
+                .findByPricingTemplate(startwith, pt, included, filterName, numResults, null);
         }
 
         if (!StringUtils.isEmpty(filterName))
