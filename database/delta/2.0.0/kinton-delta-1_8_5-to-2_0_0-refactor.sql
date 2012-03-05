@@ -371,6 +371,10 @@ BEGIN
 	IF EXISTS (SELECT * FROM information_schema.columns WHERE table_schema= 'kinton' AND table_name='physicalmachine' AND column_name='hdUsed') THEN
 		ALTER TABLE kinton.physicalmachine DROP COLUMN hdUsed;
 	END IF;
+	--
+	IF EXISTS (SELECT * FROM information_schema.columns WHERE table_schema= 'kinton' AND table_name='physicalmachine' AND column_name='cpuRatio') THEN
+		ALTER TABLE kinton.physicalmachine DROP COLUMN cpuRatio;
+	END IF;
 	-- Columns dropped from virtualapp
 	IF EXISTS (SELECT * FROM information_schema.columns WHERE table_schema= 'kinton' AND table_name='virtualapp' AND column_name='state') THEN
 		ALTER TABLE kinton.virtualapp DROP COLUMN state;
@@ -415,6 +419,7 @@ BEGIN
 	-- /* ABICLOUDPREMIUM-2878 - For consistency porpouse, changed vharchar(30) to varchar(256) */
 	ALTER TABLE kinton.metering MODIFY COLUMN physicalmachine VARCHAR(256)  CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL;
 	ALTER TABLE kinton.repository MODIFY COLUMN URL VARCHAR(255) NOT NULL;
+	ALTER TABLE kinton.ovf_package_list MODIFY COLUMN name VARCHAR(45) NOT NULL;
 	-- ############################################ --	
 	-- ######## SCHEMA: CONSTRAINTS MODIFIED ###### --
 	-- ############################################ --	
@@ -465,6 +470,34 @@ BEGIN
 	SELECT COUNT(*) INTO @existsCount FROM kinton.system_properties WHERE name='client.wiki.network.staticRoutes' AND value='http://community.abiquo.com/display/ABI20/Manage+Network+Configuration#ManageNetworkConfiguration-ConfiguringStaticRoutesUsingDHCP' AND description='static routes wiki';
 	IF @existsCount = 0 THEN 
 		INSERT INTO kinton.system_properties (name, value, description) VALUES ('client.wiki.network.staticRoutes','http://community.abiquo.com/display/ABI20/Manage+Network+Configuration#ManageNetworkConfiguration-ConfiguringStaticRoutesUsingDHCP','static routes wiki');
+	END IF;
+	SELECT COUNT(*) INTO @existsCount FROM kinton.system_properties WHERE name='client.network.defaultName' AND value='default_private_network' AND description='default private vlan name';
+	IF @existsCount = 0 THEN 
+		INSERT INTO kinton.system_properties (name, value, description) VALUES ('client.network.defaultName','default_private_network','default private vlan name');
+	END IF;
+	SELECT COUNT(*) INTO @existsCount FROM kinton.system_properties WHERE name='client.network.defaultNetmask' AND value='2' AND description='index of available netmask';
+	IF @existsCount = 0 THEN 
+		INSERT INTO kinton.system_properties (name, value, description) VALUES ('client.network.defaultNetmask','2','index of available netmask');
+	END IF;
+	SELECT COUNT(*) INTO @existsCount FROM kinton.system_properties WHERE name='client.network.defaultAddress' AND value='192.168.0.0' AND description='default private vlan address';
+	IF @existsCount = 0 THEN 
+		INSERT INTO kinton.system_properties (name, value, description) VALUES ('client.network.defaultAddress','192.168.0.0','default private vlan address');
+	END IF;
+	SELECT COUNT(*) INTO @existsCount FROM kinton.system_properties WHERE name='client.network.defaultGateway' AND value='192.168.0.1' AND description='default private vlan gateway';
+	IF @existsCount = 0 THEN 
+		INSERT INTO kinton.system_properties (name, value, description) VALUES ('client.network.defaultGateway','192.168.0.1','default private vlan gateway');
+	END IF;
+	SELECT COUNT(*) INTO @existsCount FROM kinton.system_properties WHERE name='client.network.defaultPrimaryDNS' AND value='' AND description='default primary DNS';
+	IF @existsCount = 0 THEN 
+		INSERT INTO kinton.system_properties (name, value, description) VALUES ('client.network.defaultPrimaryDNS','','default primary DNS');
+	END IF;
+	SELECT COUNT(*) INTO @existsCount FROM kinton.system_properties WHERE name='client.network.defaultSecondaryDNS' AND value='' AND description='default secondary DNS';
+	IF @existsCount = 0 THEN 
+		INSERT INTO kinton.system_properties (name, value, description) VALUES ('client.network.defaultSecondaryDNS','','default secondary DNS');
+	END IF;
+	SELECT COUNT(*) INTO @existsCount FROM kinton.system_properties WHERE name='client.network.defaultSufixDNS' AND value='' AND description='default sufix DNS';
+	IF @existsCount = 0 THEN 
+		INSERT INTO kinton.system_properties (name, value, description) VALUES ('client.network.defaultSufixDNS','','default sufix DNS');
 	END IF;
 	
 	-- Update System Properties
@@ -790,7 +823,7 @@ IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN
     END IF;
     IF NEW.idState != 2 THEN
         UPDATE IGNORE cloud_usage_stats SET serversTotal = serversTotal+1, 
-               vCpuTotal=vCpuTotal+(NEW.cpu*NEW.cpuRatio), vMemoryTotal=vMemoryTotal+NEW.ram
+               vCpuTotal=vCpuTotal+NEW.cpu, vMemoryTotal=vMemoryTotal+NEW.ram
         WHERE idDataCenter = NEW.idDataCenter;
     END IF;
 END IF;
@@ -835,7 +868,7 @@ IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN
     END IF;
     IF OLD.idState NOT IN (2, 6, 7) THEN
         UPDATE IGNORE cloud_usage_stats SET serversTotal=serversTotal-1,
-               vCpuTotal=vCpuTotal-(OLD.cpu*OLD.cpuRatio), vMemoryTotal=vMemoryTotal-OLD.ram
+               vCpuTotal=vCpuTotal-OLD.cpu, vMemoryTotal=vMemoryTotal-OLD.ram
         WHERE idDataCenter = OLD.idDataCenter;
     END IF;
 END IF;
@@ -914,14 +947,14 @@ IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN
         IF OLD.idState IN (2, 7) THEN
             -- Machine not managed changes into managed; or disabled_by_ha to Managed
             UPDATE IGNORE cloud_usage_stats SET serversTotal=serversTotal+1,
-                   vCpuTotal=vCpuTotal + (NEW.cpu*NEW.cpuRatio),
+                   vCpuTotal=vCpuTotal + NEW.cpu,
                    vMemoryTotal=vMemoryTotal + NEW.ram
             WHERE idDataCenter = NEW.idDataCenter;
         END IF;
         IF NEW.idState IN (2,7) THEN
             -- Machine managed changes into not managed or DisabledByHA
             UPDATE IGNORE cloud_usage_stats SET serversTotal=serversTotal-1,
-                   vCpuTotal=vCpuTotal-(OLD.cpu*OLD.cpuRatio),
+                   vCpuTotal=vCpuTotal-OLD.cpu,
                    vMemoryTotal=vMemoryTotal-OLD.ram
             WHERE idDataCenter = OLD.idDataCenter;
         END IF;
@@ -942,7 +975,7 @@ IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN
         -- No State Changes
         IF NEW.idState NOT IN (2, 6, 7) THEN
             -- If Machine is in a not managed state, changes into resources are ignored, Should we add 'Disabled' state to this condition?
-            UPDATE IGNORE cloud_usage_stats SET vCpuTotal=vCpuTotal+((NEW.cpu-OLD.cpu)*NEW.cpuRatio),
+            UPDATE IGNORE cloud_usage_stats SET vCpuTotal=vCpuTotal+(NEW.cpu-OLD.cpu),
                    vMemoryTotal=vMemoryTotal + (NEW.ram-OLD.ram)
             WHERE idDataCenter = OLD.idDataCenter;
         END IF;
@@ -1733,7 +1766,7 @@ CREATE PROCEDURE kinton.CalculateCloudUsageStats()
     AND v.state = 'ON'
     and v.idType = 1;
     --
-    SELECT IF (SUM(cpu*cpuRatio) IS NULL,0,SUM(cpu*cpuRatio)), IF (SUM(ram) IS NULL,0,SUM(ram)), IF (SUM(hd) IS NULL,0,SUM(hd)) , IF (SUM(cpuUsed) IS NULL,0,SUM(cpuUsed)), IF (SUM(ramUsed) IS NULL,0,SUM(ramUsed)), IF (SUM(hdUsed) IS NULL,0,SUM(hdUsed)) INTO vCpuTotal, vMemoryTotal, vStorageTotal, vCpuUsed, vMemoryUsed, vStorageUsed
+    SELECT IF (SUM(cpu) IS NULL,0,SUM(cpu)), IF (SUM(ram) IS NULL,0,SUM(ram)), IF (SUM(hd) IS NULL,0,SUM(hd)) , IF (SUM(cpuUsed) IS NULL,0,SUM(cpuUsed)), IF (SUM(ramUsed) IS NULL,0,SUM(ramUsed)), IF (SUM(hdUsed) IS NULL,0,SUM(hdUsed)) INTO vCpuTotal, vMemoryTotal, vStorageTotal, vCpuUsed, vMemoryUsed, vStorageUsed
     FROM physicalmachine
     WHERE idDataCenter = idDataCenterObj
     AND idState = 3; 

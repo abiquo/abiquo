@@ -25,26 +25,37 @@ import static com.abiquo.api.resources.cloud.VirtualApplianceResource.createTran
 
 import java.util.List;
 
+import javax.validation.constraints.Min;
+import javax.ws.rs.DefaultValue;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.UriInfo;
+import javax.ws.rs.core.MediaType;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.wink.common.annotations.Parent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
+import com.abiquo.api.resources.AbstractResource;
+import com.abiquo.api.resources.TaskResourceUtils;
 import com.abiquo.api.services.cloud.VirtualApplianceService;
 import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualApplianceDto;
 import com.abiquo.server.core.cloud.VirtualAppliancesDto;
+import com.abiquo.server.core.task.Task;
+import com.abiquo.server.core.task.TasksDto;
 
 @Parent(VirtualDatacenterResource.class)
 @Path(VirtualAppliancesResource.VIRTUAL_APPLIANCES_PATH)
 @Controller
-public class VirtualAppliancesResource
+public class VirtualAppliancesResource extends AbstractResource
 {
     public static final String VIRTUAL_APPLIANCES_PATH = "virtualappliances";
 
@@ -53,27 +64,59 @@ public class VirtualAppliancesResource
 
     @GET
     public VirtualAppliancesDto getVirtualAppliances(
-        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) Integer vdcId,
-        @Context IRESTBuilder restBuilder) throws Exception
+        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
+        @QueryParam(START_WITH) @DefaultValue("0") @Min(0) final Integer startwith,
+        @QueryParam(BY) @DefaultValue("name") final String orderBy,
+        @QueryParam(FILTER) @DefaultValue("") final String filter,
+        @QueryParam(LIMIT) @Min(1) @DefaultValue(DEFAULT_PAGE_LENGTH_STRING) final Integer limit,
+        @QueryParam(ASC) @DefaultValue("true") final Boolean descOrAsc,
+        @QueryParam("expand") final String expand, @Context final IRESTBuilder restBuilder,
+        @Context final UriInfo uriInfo) throws Exception
     {
-        List<VirtualAppliance> all = service.getVirtualAppliancesByVirtualDatacenter(vdcId);
+        List<VirtualAppliance> all =
+            service.getVirtualAppliancesByVirtualDatacenter(vdcId, startwith, orderBy, filter,
+                limit, descOrAsc);
         VirtualAppliancesDto vappsDto = new VirtualAppliancesDto();
 
         if (all != null && !all.isEmpty())
         {
             for (VirtualAppliance v : all)
             {
-                vappsDto.add(createTransferObject(v, restBuilder));
+                VirtualApplianceDto dto = createTransferObject(v, restBuilder);
+                expandNodes(vdcId, v.getId(), expand, uriInfo, dto);
+                vappsDto.add(dto);
             }
         }
 
         return vappsDto;
     }
 
+    private void expandNodes(final Integer vdcId, final Integer vappId, final String expand,
+        final UriInfo uriInfo, final VirtualApplianceDto dto)
+    {
+        String[] expands = StringUtils.split(expand, ",");
+        if (expands != null)
+        {
+            for (String e : expands)
+            {
+                if ("last_task".equalsIgnoreCase(e))
+                {
+                    List<Task> lastTasks = service.getAllNodesLastTask(vdcId, vappId);
+                    if (lastTasks != null && !lastTasks.isEmpty())
+                    {
+                        TasksDto dtos = TaskResourceUtils.transform(lastTasks, uriInfo);
+                        dto.setLastTasks(dtos);
+                    }
+                }
+            }
+        }
+    }
+
     @POST
+    @Consumes(MediaType.APPLICATION_XML)
     public VirtualApplianceDto createVirtualAppliance(
-        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) Integer vdcId,
-        VirtualApplianceDto dto, @Context IRESTBuilder restBuilder) throws Exception
+        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
+        final VirtualApplianceDto dto, @Context final IRESTBuilder restBuilder) throws Exception
     {
         VirtualAppliance response = service.createVirtualAppliance(vdcId, dto);
 

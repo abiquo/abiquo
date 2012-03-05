@@ -41,6 +41,7 @@ import org.springframework.stereotype.Component;
 
 import com.abiquo.api.services.InfrastructureService;
 import com.abiquo.model.enumerator.FitPolicy;
+import com.abiquo.model.enumerator.NetworkType;
 import com.abiquo.scheduler.workload.NotEnoughResourcesException;
 import com.abiquo.scheduler.workload.VirtualimageAllocationService;
 import com.abiquo.server.core.cloud.HypervisorDAO;
@@ -135,8 +136,8 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
         updateUse(virtualAppliance, virtualMachine, true); // upgrade resources on the target HA
         // hypervisor
         // free resources on the original hypervisor
-        Machine sourceMachine = hypervisorDao.findById(sourceHypervisorId).getMachine();
-        updateUsagePhysicalMachine(sourceMachine, virtualMachine, true);
+        // Machine sourceMachine = hypervisorDao.findById(sourceHypervisorId).getMachine();
+        // updateUsagePhysicalMachine(sourceMachine, virtualMachine, true);
     }
 
     private void updateUse(final VirtualAppliance virtualAppliance,
@@ -181,12 +182,43 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
             cve.printStackTrace(); // FIXME
             throw new ResourceUpgradeUseException(msg.toString());
         }
+        catch (final NotEnoughResourcesException e)
+        {
+            // throwed by the 'updatedNetworkResources' method.
+            throw e;
+        }
         catch (final Exception e)
         // HibernateException NotEnoughResourcesException NoSuchObjectException
         {
             e.printStackTrace(); // FIXME
             throw new ResourceUpgradeUseException("Can not update resource utilization: "
                 + e.getMessage());
+        }
+    }
+
+    @Override
+    public void rollbackUseHA(final VirtualMachine virtualMachine)
+    {
+        final Machine physicalMachine = virtualMachine.getHypervisor().getMachine();
+
+        try
+        {
+            updateUsageDatastore(virtualMachine, true);
+            updateUsagePhysicalMachine(physicalMachine, virtualMachine, true);
+            rollbackNetworkingResources(physicalMachine, virtualMachine);
+
+            virtualMachine.setState(VirtualMachineState.UNKNOWN);
+        }
+        catch (final Exception e)
+        {
+            throw new ResourceUpgradeUseException("Can not update resource use" + e.getMessage());
+        }
+
+        if (physicalMachine != null
+            && getAllocationFitPolicyOnDatacenter(physicalMachine.getDatacenter().getId()).equals(
+                FitPolicy.PROGRESSIVE))
+        {
+            infrastructureService.adjustPoweredMachinesInRack(physicalMachine.getRack());
         }
     }
 
@@ -324,7 +356,7 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
 
             if (!assigned)
             {
-                if (!vlanNetworkDao.isPublic(vlanNetwork))
+                if (vlanNetwork.getType().equals(NetworkType.INTERNAL))
                 {
                     vlanNetwork.setTag(null);
                 }
@@ -436,16 +468,8 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
     public Integer getFreeVLANFromUsedList(final List<Integer> vlanIds, final Rack rack)
         throws NotEnoughResourcesException
     {
-        Integer candidatePort = rack.getVlanIdMin();
-
         // Adding Vlans Id not to add
-
         vlanIds.addAll(getVlansIdAvoidAsCollection(rack));
-
-        if (vlanIds.isEmpty())
-        {
-            return candidatePort;
-        }
 
         // Create a HashSet which allows no duplicates
         HashSet<Integer> hashSet = new HashSet<Integer>(vlanIds);
@@ -456,7 +480,9 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
 
         List<Integer> vlanTemp = new ArrayList<Integer>(vlanIdsOrdered);
 
-        // Removing id min to vlan id min
+        // Removing used port groups minor than minId and bigger then maxId
+        // (that could be only public and external networks with tags ouside the
+        // minid-maxid range)
         for (Integer vlanId : vlanTemp)
         {
             if (vlanId.intValue() < rack.getVlanIdMin())
@@ -464,36 +490,16 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
                 vlanIdsOrdered.remove(vlanId);
             }
         }
-
-        if (vlanIdsOrdered.isEmpty())
+        
+        for (Integer i = rack.getVlanIdMin(); i <= rack.getVlanIdMax(); i ++)
         {
-            return candidatePort;
-        }
-
-        // Checking the minimal interval
-        if (vlanIdsOrdered.get(0).compareTo(rack.getVlanIdMin()) != 0)
-        {
-            return candidatePort;
-        }
-
-        int next = 1;
-
-        // Searching a gap in the vlan used list
-        for (int i = 0; i < vlanIdsOrdered.size(); i++)
-        {
-            if (vlanIds.get(i) == rack.getVlanIdMax())
+            if (!vlanIdsOrdered.contains(i))
             {
-                throw new NotEnoughResourcesException("The maximun number of VLAN id has been reached");
+                return i;
             }
-            if (next == vlanIdsOrdered.size()
-                || vlanIdsOrdered.get(next) != vlanIdsOrdered.get(i) + 1)
-            {
-                return vlanIdsOrdered.get(i) + 1;
-            }
-            next++;
         }
 
-        return candidatePort;
+        throw new NotEnoughResourcesException("The maximun number of VLAN tag has been reached");
     }
 
     public Collection<Integer> getVlansIdAvoidAsCollection(final Rack rack)

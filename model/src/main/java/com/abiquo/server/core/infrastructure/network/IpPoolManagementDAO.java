@@ -22,6 +22,7 @@
 package com.abiquo.server.core.infrastructure.network;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -29,6 +30,7 @@ import javax.persistence.EntityManager;
 
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.Criteria;
+import org.hibernate.LockMode;
 import org.hibernate.Query;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.ProjectionList;
@@ -232,6 +234,9 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
         + " OR ip.mac like :filterLike " + " OR ip.vlanNetwork.name like :filterLike "
         + " OR vapp.name like :filterLike " + " OR vm.name like :filterLike " + ")";
 
+    public static final String BY_VLAN_NEXT_AVAILABLE =
+        "SELECT ip FROM IpPoolManagement ip inner join ip.virtualDatacenter vdc WHERE vdc.id = :vdc_id AND ip.ip.available = 1 AND ip.ip NOT in ( :excludedIp )";
+
     public static final String BY_VLAN_USED_BY_ANY_VDC =
         " SELECT ip FROM ip_pool_management ip  , rasd_management rasd, virtualdatacenter vdc "
             + "  WHERE ip.idManagement= rasd.idManagement and rasd.idVirtualDatacenter "
@@ -261,6 +266,15 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
         + " OR ip.mac like :filterLike " + " OR ip.vlanNetwork.name like :filterLike "
         + " OR vapp.name like :filterLike " + " OR vm.name like :filterLike " + ")";
 
+    private static final String GET_VLAN_ASSIGNED_TO_ANOTHER_VIRTUALMACHINE = 
+        "Select vm "
+        + "FROM com.abiquo.server.core.infrastructure.network.IpPoolManagement ip "
+        + "INNER JOIN ip.virtualMachine vm " 
+        + "INNER JOIN ip.vlanNetwork vlan "
+        + "WHERE vlan.id = :idVlan "
+        + "AND vm.id != :idVm "
+        + "AND vm.state != 'NOT_ALLOCATED'";
+    
     private final static String GET_IPPOOLMANAGEMENT_ASSIGNED_TO_DIFFERENT_VM_AND_DIFFERENT_FROM_NOT_DEPLOYED_SQL =
         "SELECT * " //
             + "FROM ip_pool_management ip, " //
@@ -269,7 +283,8 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
             + "ON vm.idVM = rasd.idVM " + "WHERE rasd.idManagement = ip.idManagement " //
             + "AND rasd.idVM != :idVM " //
             + "AND ip.vlan_network_id = :idVlanNetwork " //
-            + "AND vm.state != 'NOT_DEPLOYED'"; //
+            + "AND vm.state != 'NOT_DEPLOYED' "
+            + "AND ip.idManagement != :ip"; //
 
     private final static String GET_NETWORK_POOL_PURCHASED_BY_ENTERPRISE = "SELECT ip "//
         + "FROM com.abiquo.server.core.infrastructure.Datacenter dc "//
@@ -543,6 +558,38 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
     }
 
     /**
+     * Find next IpPoolManagement created and available by a vLAN with filter options
+     * 
+     * @param vdcId identifier of the virtual datacenter.
+     * @param vlanId identifier of the vlan.
+     * @param excludedIps ips excluded from result if exists
+     * @return next available IP address.
+     */
+    public IpPoolManagement findNextIpByPrivateVLANAvailable(final Integer vdcId,
+        final Integer vlanId, final String... excludedIps)
+    {
+        // Get the query that counts the total results.
+        Query query =
+            getSession().createQuery(
+                BY_VLAN_NEXT_AVAILABLE
+                    + defineOrderBy(IpPoolManagement.OrderByEnum.IP, Boolean.TRUE));
+        query.setInteger("vdc_id", vdcId);
+        query.setMaxResults(1);
+        query.setLockMode("next_ip", LockMode.PESSIMISTIC_WRITE);
+        if (excludedIps != null && excludedIps.length != 0)
+        {
+            query.setParameterList("excludedIp", Arrays.asList(excludedIps));
+        }
+        else
+        {
+            query.setString("excludedIp", null);
+        }
+        List<IpPoolManagement> result = query.list();
+
+        return result.isEmpty() ? null : result.get(0);
+    }
+
+    /**
      * Find all the IpPoolManagement created by a vLAN with filter options
      * 
      * @param vdcId identifier of the virtual datacenter.
@@ -653,14 +700,14 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
         return (IpPoolManagement) finalQuery.uniqueResult();
     }
 
-    public List<IpPoolManagement> findIpsByVirtualMachineWithConfigurationId(
-        final VirtualMachine vm)
+    public List<IpPoolManagement> findIpsByVirtualMachineWithConfigurationId(final VirtualMachine vm)
     {
         List<IpPoolManagement> ips = findIpsByVirtualMachine(vm);
         List<IpPoolManagement> resultIps = new ArrayList<IpPoolManagement>();
         for (IpPoolManagement ip : ips)
         {
-            if (ip.getVlanNetwork().getConfiguration().getId().equals(vm.getNetworkConfiguration().getId()))
+            if (ip.getVlanNetwork().getConfiguration().getId()
+                .equals(vm.getNetworkConfiguration().getId()))
             {
                 resultIps.add(ip);
             }
@@ -996,18 +1043,26 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
         return !query.list().isEmpty();
     }
 
+    /**
+     * Return if there is any virtual machine that is using the VLAN.
+     * 
+     * @param virtualMachineId identifier of the {@link VirtualMachine}
+     * @param vlanNetwork {@link VLANNetwork} to check.
+     * @return true or false. It is a boolean, dude!
+     */
     public Boolean isVlanAssignedToDifferentVM(final Integer virtualMachineId,
         final VLANNetwork vlanNetwork)
     {
         List<IpPoolManagement> ippoolList;
-        Query query =
-            getSession().createSQLQuery(
-                GET_IPPOOLMANAGEMENT_ASSIGNED_TO_DIFFERENT_VM_AND_DIFFERENT_FROM_NOT_DEPLOYED_SQL);
-        query.setParameter("idVlanNetwork", vlanNetwork.getId());
-        query.setParameter("idVM", virtualMachineId);
+        //Query query =
+         //   getSession().createSQLQuery(
+         //       GET_IPPOOLMANAGEMENT_ASSIGNED_TO_DIFFERENT_VM_AND_DIFFERENT_FROM_NOT_DEPLOYED_SQL);
+        Query query = getSession().createQuery(GET_VLAN_ASSIGNED_TO_ANOTHER_VIRTUALMACHINE);
+        query.setParameter("idVlan", vlanNetwork.getId());
+        query.setParameter("idVm", virtualMachineId);
         ippoolList = query.list();
 
-        if (ippoolList.isEmpty())
+        if (ippoolList == null || ippoolList.isEmpty())
         {
             return false;
         }
@@ -1068,7 +1123,7 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
     {
         if (onlyAvailable)
         {
-            return " AND vm is null ";
+            return " AND vm is null AND ip.quarantine = 0 ";
         }
         else
         {

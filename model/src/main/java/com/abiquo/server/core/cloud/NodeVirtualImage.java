@@ -106,4 +106,20 @@ public class NodeVirtualImage extends Node
     {
         super.setName(name);
     }
+
+    /**
+     * This method clone this node virtual image but shares references. Same virtual appliance, same
+     * virtual machine template, same virtual machine.
+     * 
+     * @see java.lang.Object#clone()
+     */
+    @Override
+    public NodeVirtualImage clone()
+    {
+        NodeVirtualImage nodeVirtualImage =
+            new NodeVirtualImage(this.getName(), virtualAppliance, virtualImage, virtualMachine);
+        nodeVirtualImage.setY(getY());
+        nodeVirtualImage.setX(getX());
+        return nodeVirtualImage;
+    }
 }

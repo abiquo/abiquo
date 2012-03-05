@@ -93,6 +93,7 @@ import com.abiquo.server.core.task.JobsDto;
 import com.abiquo.server.core.task.Task;
 import com.abiquo.server.core.task.TaskDto;
 import com.abiquo.server.core.task.TasksDto;
+import com.abiquo.server.core.task.enums.TaskState;
 import com.abiquo.util.ErrorManager;
 import com.abiquo.util.URIResolver;
 import com.abiquo.util.resources.ResourceManager;
@@ -234,7 +235,8 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
                         ClientResponse put =
                             put(linkVirtualMachine, virtualMachineDto, VM_NODE_MEDIA_TYPE);
                         if (put.getStatusCode() != Status.OK.getStatusCode()
-                            && put.getStatusCode() != Status.NO_CONTENT.getStatusCode())
+                            && put.getStatusCode() != Status.NO_CONTENT.getStatusCode()
+                            && put.getStatusCode() != Status.ACCEPTED.getStatusCode())
                         {
                             addErrors(result, errors, put, "updateVirtualApplianceNodes");
                             result.setSuccess(Boolean.FALSE);
@@ -253,19 +255,27 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
         }
         String linkApp = createVirtualApplianceUrl(virtualDatacenterId, virtualAppliance.getId());
 
-        VirtualApplianceDto appDto = virtualApplianceToDto(virtualAppliance);
-        ClientResponse put = put(linkApp, appDto);
-        if (put.getStatusCode() != Status.OK.getStatusCode())
-        {
-            addErrors(result, errors, put, "updateVirtualApplianceNodes");
-        }
-
         ClientResponse response = get(linkApp);
         if (response.getStatusCode() == Status.OK.getStatusCode())
         {
             VirtualApplianceDto entity = response.getEntity(VirtualApplianceDto.class);
             try
             {
+                VirtualApplianceDto appDto = virtualApplianceToDto(virtualAppliance);
+                if (!appDto.getName().equals(entity.getName())
+                    || appDto.getNodeconnections() != null
+                    && !appDto.getNodeconnections().equals(entity.getNodeconnections()))
+                {
+                    ClientResponse put = put(linkApp, appDto);
+                    if (put.getStatusCode() != Status.OK.getStatusCode())
+                    {
+                        addErrors(result, errors, put, "updateVirtualApplianceNodes");
+                    }
+                    else
+                    {
+                        entity = response.getEntity(VirtualApplianceDto.class);
+                    }
+                }
                 VirtualAppliance app = dtoToVirtualAppliance(entity, virtualDatacenterId, result);
                 result.setData(app);
             }
@@ -402,6 +412,17 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
         }
         app.setVirtualDataCenter(virtualDatacenter);
 
+        if (virtualApplianceDto.getLastTasks() != null
+            && !virtualApplianceDto.getLastTasks().isEmpty())
+        {
+            for (TaskDto t : virtualApplianceDto.getLastTasks().getCollection())
+            {
+                if (t.getState() == TaskState.FINISHED_UNSUCCESSFULLY)
+                {
+                    app.setError(Boolean.TRUE);
+                }
+            }
+        }
         return app;
     }
 
@@ -569,7 +590,8 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
         }
         else
         {
-            populateErrors(response, result, methodName);
+            populateErrors(response, result, methodName,
+                "You do not have sufficient privileges to view the contents of the virtual appliance");
         }
 
         return result;
@@ -593,7 +615,8 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
             }
             catch (Exception ex)
             {
-                populateErrors(ex, result, "getVirtualApplianceNodes");
+                populateErrors(ex, result, "getVirtualApplianceNodes",
+                    "You do not have sufficient privileges to view the contents of the appliance library");
             }
             finally
             {
@@ -943,7 +966,8 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
             {
                 VirtualDataCenter virtualDatacenter = dtoToVirtualDatacenter(dto, enterprise);
                 RESTLink app = dto.searchLink("virtualappliances");
-                ClientResponse response = get(app.getHref());
+                // We want to expand the last task to know if there is any error
+                ClientResponse response = get(app.getHref() + "?expand=last_task");
                 VirtualAppliancesDto virtualAppliancesDto =
                     response.getEntity(VirtualAppliancesDto.class);
                 list.addAll(dtosToVirtualAppliance(virtualAppliancesDto, virtualDatacenter, result));
@@ -1267,7 +1291,7 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
         result.setSuccess(false);
         if (ex instanceof AuthorizationException)
         {
-            populateErrors((AuthorizationException) ex, result, methodName);
+            populateErrors(ex, result, methodName);
         }
         else if (ex instanceof AbiquoException)
         {

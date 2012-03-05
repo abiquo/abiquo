@@ -270,8 +270,23 @@
 
             private function onCategoriesChange(event:Event):void
             {
-                if (isShowing && !AbiCloudModel.getInstance().virtualImageManager.repository)
+                var repository:Repository = AbiCloudModel.getInstance().virtualImageManager.repository;
+                var repositoryToBeUpdated:Boolean;
+                
+                if(!repository)
                 {
+                	repositoryToBeUpdated = true;
+                }
+                else
+                {
+                	if(repository.datacenter.id != _currentVirtualDataCenter.idDataCenter)
+                	{
+                		repositoryToBeUpdated = true;
+                	} 
+                } 
+                if (isShowing && repositoryToBeUpdated)
+                {
+                    
                     virtualApplianceDrawTool.nodeTypeView.virtualImageCategories = AbiCloudModel.getInstance().virtualImageManager.categories;
 
                     //Requesting the Repository for the Datacenter where the VirtualAppliance is
@@ -284,7 +299,10 @@
                     virtualImageEvent.refresh = false;
                     dispatchEvent(virtualImageEvent);
                 }
-                displayVirtualImage();
+                else
+                {
+	                displayVirtualImage();
+                }
             } 
 
             private function onRepositoryChange(event:Event):void

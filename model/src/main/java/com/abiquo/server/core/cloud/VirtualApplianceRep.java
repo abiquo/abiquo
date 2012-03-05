@@ -202,4 +202,8 @@ public class VirtualApplianceRep extends DefaultRepBase
             .getDatacenterUUIDByVirtualImageConversionID(idVirtualImageConversion);
     }
 
+    public void persist(final VirtualAppliance vapp)
+    {
+        virtualApplianceDao.persist(vapp);
+    }
 }
