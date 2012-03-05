@@ -262,6 +262,10 @@ public class VirtualApplianceService extends DefaultApiService
         logger.debug("Add virtual appliance to Abiquo with name {}", dto.getName());
         repo.insertVirtualAppliance(vapp);
         logger.debug("Created virtual appliance with name {} !", dto.getName());
+
+        tracer.log(SeverityType.INFO, ComponentType.VIRTUAL_APPLIANCE, EventType.VAPP_CREATE,
+            "virtualAppliance.create", dto.getName());
+
         return vapp;
     }
 
@@ -287,6 +291,9 @@ public class VirtualApplianceService extends DefaultApiService
         vapp.setName(dto.getName());
         vapp.setNodeconnections(dto.getNodeconnections());
         repo.updateVirtualAppliance(vapp);
+
+        tracer.log(SeverityType.INFO, ComponentType.VIRTUAL_APPLIANCE, EventType.VAPP_MODIFY,
+            "virtualAppliance.modify", vapp.getName());
 
         return vapp;
     }
@@ -555,6 +562,9 @@ public class VirtualApplianceService extends DefaultApiService
 
         allocateVirtualAppliance(virtualAppliance, forceLimits);
 
+        tracer.log(SeverityType.INFO, ComponentType.VIRTUAL_APPLIANCE, EventType.VAPP_POWERON,
+            "virtualAppliance.deploy", virtualAppliance.getName());
+
         Map<Integer, String> dto = new HashMap<Integer, String>();
         for (NodeVirtualImage nodevi : virtualAppliance.getNodes())
         {
@@ -602,6 +612,9 @@ public class VirtualApplianceService extends DefaultApiService
                 }
             }
         }
+
+        tracer.log(SeverityType.INFO, ComponentType.VIRTUAL_APPLIANCE, EventType.VAPP_POWEROFF,
+            "virtualAppliance.undeploy", virtualAppliance.getName());
 
         Map<Integer, String> dto = new HashMap<Integer, String>();
         for (NodeVirtualImage machine : virtualAppliance.getNodes())
