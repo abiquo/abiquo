@@ -113,6 +113,9 @@ public class TemplateDefinitionService extends DefaultApiService
         Enterprise ent = enterpriseService.getEnterprise(idEnterprise); // check can view
         templateDef.setAppsLibrary(appsLibraryDao.findByEnterpriseOrInitialize(ent));
 
+        templateDef.setCategory(appslibraryRep.findByCategoryNameOrCreateNew(templateDef
+            .getCategory().getName()));
+
         validate(templateDef);
 
         return repo.addTemplateDefinition(templateDef, ent);
@@ -173,7 +176,7 @@ public class TemplateDefinitionService extends DefaultApiService
     /** #################### ovfindex.xml #################### */
     /** #################### */
 
-    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRES_NEW)
     public TemplateDefinition transformToTemplateDefinition(final OVFDescription descr,
         final String baseRepositorySpaceURL)
     {

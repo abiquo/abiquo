@@ -58,7 +58,6 @@ import com.abiquo.server.core.appslibrary.CategoriesDto;
 import com.abiquo.server.core.appslibrary.CategoryDto;
 import com.abiquo.server.core.appslibrary.DiskFormatTypeDto;
 import com.abiquo.server.core.appslibrary.DiskFormatTypesDto;
-import com.abiquo.server.core.appslibrary.IconsDto;
 import com.abiquo.server.core.appslibrary.TemplateDefinitionDto;
 import com.abiquo.server.core.appslibrary.TemplateDefinitionListDto;
 import com.abiquo.server.core.appslibrary.TemplateDefinitionListsDto;
@@ -567,24 +566,7 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
     @Override
     public DataResult<List<String>> getIcons(final Integer idEnterprise)
     {
-
         DataResult<List<String>> result = new DataResult<List<String>>();
-
-        final String uri = createIconsLink(idEnterprise);
-
-        ClientResponse response = get(uri);
-
-        if (response.getStatusType().getFamily() == Family.SUCCESSFUL)
-        {
-            result.setSuccess(Boolean.TRUE);
-            IconsDto icons = response.getEntity(IconsDto.class);
-            result.setData(icons.getCollection());
-        }
-        else
-        {
-            populateErrors(response, result, "getIcons");
-        }
-
         return result;
 
     }
