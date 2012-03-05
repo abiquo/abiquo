@@ -166,14 +166,6 @@
                 validateForm();
             }
 
-            private function requestIcons():void
-            {
-                var event:VirtualImageEvent = new VirtualImageEvent(VirtualImageEvent.GET_ICONS);
-                event.enterprise = AbiCloudModel.getInstance().loginManager.user.enterprise;
-                dispatchEvent(event)
-            }
-
-
 
             /**
              * Initializes this component to create a new Repository
@@ -193,8 +185,6 @@
 	                categoriesList.removeItemAt(0);             	
                 }                
                 
-                requestIcons();
-
                 this._virtualImage = virtualImage;
                 this.applianceManager = applianceManager;
 
