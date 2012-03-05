@@ -274,6 +274,15 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
             + " OR ip.mac like :filterLike " + " OR ip.vlanNetwork.name like :filterLike "
             + " OR vapp.name like :filterLike " + " OR vm.name like :filterLike " + ")";
 
+    private static final String GET_VLAN_ASSIGNED_TO_ANOTHER_VIRTUALMACHINE = 
+        "Select vm "
+        + "FROM com.abiquo.server.core.infrastructure.network.IpPoolManagement ip "
+        + "INNER JOIN ip.virtualMachine vm " 
+        + "INNER JOIN ip.vlanNetwork vlan "
+        + "WHERE vlan.id = :idVlan "
+        + "AND vm.id != :idVm "
+        + "AND vm.state != 'NOT_ALLOCATED'";
+    
     private final static String GET_IPPOOLMANAGEMENT_ASSIGNED_TO_DIFFERENT_VM_AND_DIFFERENT_FROM_NOT_DEPLOYED_SQL =
         "SELECT * " //
             + "FROM ip_pool_management ip, " //
@@ -282,7 +291,8 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
             + "ON vm.idVM = rasd.idVM " + "WHERE rasd.idManagement = ip.idManagement " //
             + "AND rasd.idVM != :idVM " //
             + "AND ip.vlan_network_id = :idVlanNetwork " //
-            + "AND vm.state != 'NOT_DEPLOYED'"; //
+            + "AND vm.state != 'NOT_DEPLOYED' "
+            + "AND ip.idManagement != :ip"; //
 
     private final static String GET_NETWORK_POOL_PURCHASED_BY_ENTERPRISE =
         "SELECT ip "//
@@ -1043,18 +1053,26 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
         return !query.list().isEmpty();
     }
 
+    /**
+     * Return if there is any virtual machine that is using the VLAN.
+     * 
+     * @param virtualMachineId identifier of the {@link VirtualMachine}
+     * @param vlanNetwork {@link VLANNetwork} to check.
+     * @return true or false. It is a boolean, dude!
+     */
     public Boolean isVlanAssignedToDifferentVM(final Integer virtualMachineId,
         final VLANNetwork vlanNetwork)
     {
         List<IpPoolManagement> ippoolList;
-        Query query =
-            getSession().createSQLQuery(
-                GET_IPPOOLMANAGEMENT_ASSIGNED_TO_DIFFERENT_VM_AND_DIFFERENT_FROM_NOT_DEPLOYED_SQL);
-        query.setParameter("idVlanNetwork", vlanNetwork.getId());
-        query.setParameter("idVM", virtualMachineId);
+        //Query query =
+         //   getSession().createSQLQuery(
+         //       GET_IPPOOLMANAGEMENT_ASSIGNED_TO_DIFFERENT_VM_AND_DIFFERENT_FROM_NOT_DEPLOYED_SQL);
+        Query query = getSession().createQuery(GET_VLAN_ASSIGNED_TO_ANOTHER_VIRTUALMACHINE);
+        query.setParameter("idVlan", vlanNetwork.getId());
+        query.setParameter("idVm", virtualMachineId);
         ippoolList = query.list();
 
-        if (ippoolList.isEmpty())
+        if (ippoolList == null || ippoolList.isEmpty())
         {
             return false;
         }
