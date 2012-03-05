@@ -361,13 +361,6 @@ public class VirtualMachineService extends DefaultApiService
         VirtualAppliance virtualAppliance =
             getVirtualApplianceAndCheckVirtualDatacenter(vdcId, vappId);
 
-        // we currently don't allow to reconfigure imported virtual machines
-        if (virtualMachine.isCaptured())
-        {
-            addConflictErrors(APIError.VIRTUAL_MACHINE_IMPORTED_CAN_NOT_RECONFIGURE);
-            flushErrors();
-        }
-
         VirtualMachine newvm = buildVirtualMachineFromDto(vdc, virtualAppliance, dto);
         newvm.setTemporal(virtualMachine.getId()); // we set the id to temporal since we are trying
 
@@ -435,9 +428,17 @@ public class VirtualMachineService extends DefaultApiService
         final VirtualAppliance vapp, final VirtualMachine vm, final VirtualMachine newValues,
         final VirtualMachineState originalState)
     {
+
         if (checkReconfigureTemplate(vm.getVirtualMachineTemplate(),
             newValues.getVirtualMachineTemplate()))
         {
+            if (vm.isCaptured())
+            {
+                // don't allow to change the template if the machine is capture
+                addConflictErrors(APIError.VIRTUAL_MACHINE_IMPORTED_CAN_NOT_RECONFIGURE);
+                flushErrors();
+            }
+
             LOGGER.debug("Will reconfigure the vm template");
 
             if (originalState.existsInHypervisor())
@@ -638,21 +639,111 @@ public class VirtualMachineService extends DefaultApiService
     private void updateVirtualMachineToNewValues(final VirtualAppliance vapp,
         final VirtualMachine old, final VirtualMachine vmnew)
     {
-        // update the new values of the virtual machine
+        // if client changes cpu or ram, can be changed in captured machines
+        // only if hypervisor is ESXi
+        if (old.getCpu() != vmnew.getCpu() || old.getRam() != vmnew.getRam())
+        {
+            if (old.isCaptured()
+                && !vapp.getVirtualDatacenter().getHypervisorType().equals(HypervisorType.VMX_04))
+            {
+                addConflictErrors(APIError.VIRTUAL_MACHINE_IMPORTED_CAN_NOT_RECONFIGURE);
+                flushErrors();
+
+            }
+        }
+
+        // the rest of values never can be changed when reconfigure.
+        if (differentDescription(old, vmnew) || differentNetworkConfiguration(old, vmnew)
+            || differentPassword(old, vmnew))
+        {
+            if (old.isCaptured()
+                && !vapp.getVirtualDatacenter().getHypervisorType().equals(HypervisorType.VMX_04))
+            {
+                addConflictErrors(APIError.VIRTUAL_MACHINE_IMPORTED_CAN_NOT_RECONFIGURE);
+                flushErrors();
+            }
+            else if (old.isCaptured()
+                && vapp.getVirtualDatacenter().getHypervisorType().equals(HypervisorType.VMX_04))
+            {
+                addConflictErrors(APIError.VIRTUAL_MACHINE_IMPORTED_CAN_NOT_RECONFIGURE_FULLY);
+                flushErrors();
+            }
+        }
+
         old.setCpu(vmnew.getCpu());
         old.setDescription(vmnew.getDescription());
         old.setRam(vmnew.getRam());
         old.setNetworkConfiguration(vmnew.getNetworkConfiguration());
-
         old.setPassword(vmnew.getPassword());
         old.setVirtualMachineTemplate(vmnew.getVirtualMachineTemplate());
 
         List<Integer> usedNICslots = dellocateOldNICs(old, vmnew);
+        // if the number of old nics still used is different from
+        // the number of usedNICslots, OR the number of old nics is different
+        // from the new ones, it means some NICs has changed.
+        if (usedNICslots.size() != old.getIps().size()
+            || old.getIps().size() != vmnew.getIps().size())
+        {
+            if (old.isCaptured()
+                && !vapp.getVirtualDatacenter().getHypervisorType().equals(HypervisorType.VMX_04))
+            {
+                addConflictErrors(APIError.VIRTUAL_MACHINE_IMPORTED_CAN_NOT_RECONFIGURE);
+                flushErrors();
+            }
+            else if (old.isCaptured()
+                && vapp.getVirtualDatacenter().getHypervisorType().equals(HypervisorType.VMX_04))
+            {
+                addConflictErrors(APIError.VIRTUAL_MACHINE_IMPORTED_CAN_NOT_RECONFIGURE_FULLY);
+                flushErrors();
+            }
+        }
         allocateNewNICs(vapp, old, vmnew.getIps(), usedNICslots);
 
-        // never use the slot 0 for storage since it is the virtual image.
+        List<Integer> usedVolumeSlots = dellocateOldVolumes(old, vmnew);
+        // if the number of old volumes still used is different from
+        // the number of usedvolume Slots, OR the number of old volumes is different
+        // from the new ones, it means some Volumes has changed.
+        if (usedVolumeSlots.size() != old.getVolumes().size()
+            || old.getVolumes().size() != vmnew.getVolumes().size())
+        {
+            if (old.isCaptured()
+                && !vapp.getVirtualDatacenter().getHypervisorType().equals(HypervisorType.VMX_04))
+            {
+                addConflictErrors(APIError.VIRTUAL_MACHINE_IMPORTED_CAN_NOT_RECONFIGURE);
+                flushErrors();
+            }
+            else if (old.isCaptured()
+                && vapp.getVirtualDatacenter().getHypervisorType().equals(HypervisorType.VMX_04))
+            {
+                addConflictErrors(APIError.VIRTUAL_MACHINE_IMPORTED_CAN_NOT_RECONFIGURE_FULLY);
+                flushErrors();
+            }
+        }
+
+        // never use the slot 0 for storage since it is the virtual image
         List<Integer> usedStorageSlots = dellocateOldDisks(old, vmnew);
-        usedStorageSlots.addAll(dellocateOldVolumes(old, vmnew));
+
+        // if the number of old hard disks still used is different from
+        // the number of usedhard Slots, OR the number of old storage is different
+        // from the new ones, it means some hard disk has changed.
+        if (usedStorageSlots.size() != old.getDisks().size()
+            || old.getDisks().size() != vmnew.getDisks().size())
+        {
+            if (old.isCaptured()
+                && !vapp.getVirtualDatacenter().getHypervisorType().equals(HypervisorType.VMX_04))
+            {
+                addConflictErrors(APIError.VIRTUAL_MACHINE_IMPORTED_CAN_NOT_RECONFIGURE);
+                flushErrors();
+            }
+            else if (old.isCaptured()
+                && vapp.getVirtualDatacenter().getHypervisorType().equals(HypervisorType.VMX_04))
+            {
+                addConflictErrors(APIError.VIRTUAL_MACHINE_IMPORTED_CAN_NOT_RECONFIGURE_FULLY);
+                flushErrors();
+            }
+        }
+
+        usedStorageSlots.addAll(usedVolumeSlots);
 
         List<RasdManagement> storageResources = new ArrayList<RasdManagement>();
         storageResources.addAll(vmnew.getDisks());
@@ -663,6 +754,89 @@ public class VirtualMachineService extends DefaultApiService
 
         // FIXME: improvement related ABICLOUDPREMIUM-2925
         updateNodeVirtualImage(old, vmnew.getVirtualMachineTemplate());
+    }
+
+    private boolean differentNetworkConfiguration(VirtualMachine old, VirtualMachine vmnew)
+    {
+        if (old.getNetworkConfiguration().getId() == null
+            && vmnew.getNetworkConfiguration().getId() == null)
+        {
+            return false;
+        }
+        else if (old.getNetworkConfiguration().getId() == null
+            && vmnew.getNetworkConfiguration().getId() != null)
+        {
+            return true;
+        }
+        else if (old.getNetworkConfiguration().getId() != null
+            && vmnew.getNetworkConfiguration().getId() == null)
+        {
+            return true;
+        }
+        else
+        {
+            return !old.getNetworkConfiguration().getId()
+                .equals(vmnew.getNetworkConfiguration().getId());
+        }
+    }
+
+    /**
+     * Check if the password has changed.
+     * 
+     * @param old
+     * @param vmnew
+     * @return
+     */
+    private boolean differentPassword(VirtualMachine old, VirtualMachine vmnew)
+    {
+        if (vmnew.getPassword() != null && vmnew.getPassword().isEmpty())
+        {
+            vmnew.setPassword(null);
+        }
+        
+        if (old.getPassword() == null && vmnew.getPassword() == null)
+        {
+            return false;
+        }
+        else if (old.getPassword() == null && vmnew.getPassword() != null)
+        {
+            return true;
+        }
+        else if (old.getPassword() != null && vmnew.getPassword() == null)
+        {
+            return true;
+        }
+        else
+        {
+            return !vmnew.getPassword().equals(old.getPassword());
+        }
+    }
+
+    /**
+     * Check if the description has changed.
+     * 
+     * @param old
+     * @param vmnew
+     * @return
+     */
+    private boolean differentDescription(VirtualMachine old, VirtualMachine vmnew)
+    {
+        if (old.getDescription() == null && vmnew.getDescription() == null)
+        {
+            return false;
+        }
+        else if (old.getDescription() == null && vmnew.getDescription() != null)
+        {
+            return true;
+        }
+        else if (old.getDescription() != null && vmnew.getDescription() == null)
+        {
+            return true;
+        }
+        else
+        {
+            return !old.getDescription().equals(vmnew.getDescription());
+        }
     }
 
     /**
