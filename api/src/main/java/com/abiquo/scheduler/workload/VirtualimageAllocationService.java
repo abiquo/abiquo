@@ -300,7 +300,7 @@ public class VirtualimageAllocationService
                 "The number of deployed VLAN has exceeded the networking resource security quotient";
             log.warn(warning);
             TracerFactory.getTracer().log(SeverityType.WARNING, ComponentType.NETWORK,
-                EventType.RACK_NRSQ_EXCEEDED, warning);
+                EventType.RACK_VLAN_POOL, warning);
         }
         if (numberOfDeployedVLAN.compareTo(new Long(vlanPerSwitch)) >= 0)
         {
