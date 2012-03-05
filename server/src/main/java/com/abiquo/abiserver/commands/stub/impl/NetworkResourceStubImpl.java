@@ -421,7 +421,7 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
         BasicResult result = new BasicResult();
         result.setSuccess(Boolean.FALSE);
         String uri = createEnterpriseLimitsByDatacenterLink(enterpriseId);
-        ClientResponse response = get(uri);
+        ClientResponse response = get(uri, DatacentersLimitsDto.BASE_MEDIA_TYPE);
 
         DatacentersLimitsDto limits = response.getEntity(DatacentersLimitsDto.class);
         for (DatacenterLimitsDto limitDto : limits.getCollection())
