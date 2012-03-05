@@ -106,18 +106,15 @@ public class TemplateDefinitionService extends DefaultApiService
         return ovfpackage;
     }
 
-    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
     public TemplateDefinition addTemplateDefinition(final TemplateDefinition templateDef,
         final Integer idEnterprise)
     {
         Enterprise ent = enterpriseService.getEnterprise(idEnterprise); // check can view
         templateDef.setAppsLibrary(appsLibraryDao.findByEnterpriseOrInitialize(ent));
 
-        if (!templateDef.isValid())
-        {
-            addValidationErrors(templateDef.getValidationErrors());
-            flushErrors();
-        }
+        validate(templateDef);
+
         return repo.addTemplateDefinition(templateDef, ent);
     }
 
@@ -128,11 +125,7 @@ public class TemplateDefinitionService extends DefaultApiService
         Enterprise enterprise = enterpriseService.getEnterprise(idEnterprise); // check can view
         templateDef.setAppsLibrary(appsLibraryDao.findByEnterpriseOrInitialize(enterprise));
 
-        if (!templateDef.isValid())
-        {
-            addValidationErrors(templateDef.getValidationErrors());
-            flushErrors();
-        }
+        validate(templateDef);
 
         return repo.updateTemplateDefinition(templateDefId, templateDef, enterprise);
     }
@@ -192,16 +185,12 @@ public class TemplateDefinitionService extends DefaultApiService
         String name = descr.getProduct().getValue();
         String description = descr.getInfo().getValue();
 
-        // TODO data truncation
-        if (description.length() > 255)
-        {
-            description = description.substring(0, 254);
-        }
-
         TemplateDefinition pack = new TemplateDefinition();
-        pack.setDescription(description);
         pack.setName(name);
-        pack.setProductName(name);
+        // TODO data truncation
+        pack.setProductName(name.length() > 45 ? name.substring(0, 44) : name);
+        pack.setDescription(description.length() > 255 ? description.substring(0, 254)
+            : description);
 
         /**
          * TODO product verison .... url ...
@@ -212,8 +201,8 @@ public class TemplateDefinitionService extends DefaultApiService
         if (descr.getIcon() != null && descr.getIcon().size() == 1)
         {
             String iconPath = descr.getIcon().get(0).getFileRef();
-            // TODO start with http://
             pack.setIconUrl(iconPath);
+            // TODO start with http://
         }
 
         DiskFormatType format = findByDiskFormatNameOrUnknow(descr.getDiskFormat());

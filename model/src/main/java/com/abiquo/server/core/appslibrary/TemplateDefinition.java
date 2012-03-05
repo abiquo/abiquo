@@ -316,7 +316,7 @@ public class TemplateDefinition extends DefaultEntityBase
 
     private final static int PRODUCT_NAME_LENGTH_MIN = 0;
 
-    private final static int PRODUCT_NAME_LENGTH_MAX = 255;
+    private final static int PRODUCT_NAME_LENGTH_MAX = 45;
 
     private final static boolean PRODUCT_NAME_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = true;
 

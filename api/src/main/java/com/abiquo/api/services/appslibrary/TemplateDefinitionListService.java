@@ -24,6 +24,7 @@ package com.abiquo.api.services.appslibrary;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -41,6 +42,7 @@ import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.services.DefaultApiService;
 import com.abiquo.api.services.EnterpriseService;
 import com.abiquo.api.services.stub.AMServiceStub;
+import com.abiquo.api.tracer.TracerLogger;
 import com.abiquo.appliancemanager.repositoryspace.OVFDescription;
 import com.abiquo.appliancemanager.repositoryspace.RepositorySpace;
 import com.abiquo.appliancemanager.transport.TemplatesStateDto;
@@ -59,8 +61,8 @@ import com.abiquo.tracer.SeverityType;
 public class TemplateDefinitionListService extends DefaultApiService
 {
 
-    private final static Logger LOGGER =
-        LoggerFactory.getLogger(TemplateDefinitionListService.class);
+    private final static Logger LOGGER = LoggerFactory
+        .getLogger(TemplateDefinitionListService.class);
 
     @Autowired
     protected AppsLibraryDAO appsLibraryDao;
@@ -77,6 +79,9 @@ public class TemplateDefinitionListService extends DefaultApiService
     @Autowired
     private AMServiceStub amService;
 
+    @Autowired
+    protected TracerLogger tracer;
+
     public TemplateDefinitionListService()
     {
     }
@@ -87,6 +92,7 @@ public class TemplateDefinitionListService extends DefaultApiService
         enterpriseService = new EnterpriseService(em);
         appsLibraryDao = new AppsLibraryDAO(em);
         templateDefinitionService = new TemplateDefinitionService(em);
+        tracer = new TracerLogger();
         amService = new AMServiceStub();
     }
 
@@ -106,19 +112,13 @@ public class TemplateDefinitionListService extends DefaultApiService
         AppsLibrary appsLib = appsLibraryDao.findByEnterpriseOrInitialize(ent);
 
         templateDefList.setAppsLibrary(appsLib);
-        if (!templateDefList.isValid())
-        {
-            addValidationErrors(templateDefList.getValidationErrors());
-            flushErrors();
-        }
+
+        validate(templateDefList);
+
         for (TemplateDefinition templateDef : templateDefList.getTemplateDefinitions())
         {
             templateDef.setAppsLibrary(appsLib);
-            if (!templateDef.isValid())
-            {
-                addValidationErrors(templateDef.getValidationErrors());
-                flushErrors();
-            }
+            validate(templateDef);
         }
 
         TemplateDefinitionList prevlist = null;
@@ -132,12 +132,24 @@ public class TemplateDefinitionListService extends DefaultApiService
 
         repo.persistTemplateDefinitionList(templateDefList);
 
-        for (TemplateDefinition templateDefs : templateDefList.getTemplateDefinitions())
+        List<TemplateDefinition> correctTemplates = new LinkedList<TemplateDefinition>();
+        for (TemplateDefinition templateDef : templateDefList.getTemplateDefinitions())
         {
-            templateDefs.addToTemplateDefinitionLists(templateDefList);
-            templateDefinitionService.addTemplateDefinition(templateDefs, idEnterprise);
+            try
+            {
+                templateDefinitionService.addTemplateDefinition(templateDef, idEnterprise);
+                templateDef.addToTemplateDefinitionLists(templateDefList);
+                correctTemplates.add(templateDef);
+            }
+            catch (Exception e)
+            {
+                tracer.log(SeverityType.WARNING, ComponentType.APPLIANCE_MANAGER,
+                    EventType.TEMPLATE_DEFINITION_LIST_MODIFIED, "templateDefinition.createError",
+                    templateDef.getName(), e.toString());
+            }
         }
 
+        templateDefList.setTemplateDefinitions(correctTemplates);
         repo.updateTemplateDefinitionList(templateDefList);
 
         return templateDefList;
@@ -183,7 +195,7 @@ public class TemplateDefinitionListService extends DefaultApiService
     private String[] getListIds(final TemplateDefinitionList list)
     {
         ArrayList<String> ids = new ArrayList<String>();
-        for(TemplateDefinition tdef : list.getTemplateDefinitions())
+        for (TemplateDefinition tdef : list.getTemplateDefinitions())
         {
             ids.add(tdef.getUrl());
         }
@@ -246,18 +258,11 @@ public class TemplateDefinitionListService extends DefaultApiService
         AppsLibrary appsLib = appsLibraryDao.findByEnterprise(ent);
         old.setAppsLibrary(appsLib);
 
-        if (!old.isValid())
-        {
-            addValidationErrors(old.getValidationErrors());
-            flushErrors();
-        }
+        validate(old);
+
         for (TemplateDefinition templateDef : old.getTemplateDefinitions())
         {
-            if (!templateDef.isValid())
-            {
-                addValidationErrors(templateDef.getValidationErrors());
-                flushErrors();
-            }
+            validate(templateDef);
         }
 
         repo.updateTemplateDefinitionList(old);

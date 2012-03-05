@@ -492,8 +492,12 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
         catch (WebApplicationException e)
         {
             result.setSuccess(Boolean.FALSE);
-            result.setMessage(e.getMessage());
+
+            Response response = e.getResponse();
+            result.setMessage(response != null ? String.valueOf(response.getEntity())
+                : "Request fails");
         }
+
         result.setSuccess(Boolean.TRUE);
         result.setData(createFlexOVFPackageListObject(list));
 
