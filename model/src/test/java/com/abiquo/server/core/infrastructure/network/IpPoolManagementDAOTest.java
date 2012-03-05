@@ -98,7 +98,7 @@ public class IpPoolManagementDAOTest extends
         assertFalse(excludedIpPoolManagement.equals(available));
     }
 
-    @Test
+    @Test(enabled = false)
     public void findNextIpByPrivateVLANNotIpAvailable()
     {
         List<Object> entities = new ArrayList<Object>();
