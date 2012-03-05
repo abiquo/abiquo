@@ -20,7 +20,6 @@
  */
 package com.abiquo.abiserver.appslibrary.stub;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
@@ -35,7 +34,6 @@ import javax.ws.rs.core.Response.Status.Family;
 import org.apache.commons.lang.StringUtils;
 import org.apache.wink.client.ClientResponse;
 import org.apache.wink.client.Resource;
-import org.jclouds.abiquo.domain.DomainWrapper;
 import org.jclouds.abiquo.domain.enterprise.TemplateDefinitionList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,10 +60,8 @@ import com.abiquo.server.core.appslibrary.CategoriesDto;
 import com.abiquo.server.core.appslibrary.CategoryDto;
 import com.abiquo.server.core.appslibrary.DiskFormatTypeDto;
 import com.abiquo.server.core.appslibrary.DiskFormatTypesDto;
-import com.abiquo.server.core.appslibrary.IconsDto;
 import com.abiquo.server.core.appslibrary.TemplateDefinitionDto;
 import com.abiquo.server.core.appslibrary.TemplateDefinitionListDto;
-import com.abiquo.server.core.appslibrary.TemplateDefinitionListsDto;
 import com.abiquo.server.core.appslibrary.TemplateDefinitionsDto;
 
 public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryStub
@@ -588,21 +584,6 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
     {
 
         DataResult<List<String>> result = new DataResult<List<String>>();
-
-        final String uri = createIconsLink(idEnterprise);
-
-        ClientResponse response = get(uri);
-
-        if (response.getStatusType().getFamily() == Family.SUCCESSFUL)
-        {
-            result.setSuccess(Boolean.TRUE);
-            IconsDto icons = response.getEntity(IconsDto.class);
-            result.setData(icons.getCollection());
-        }
-        else
-        {
-            populateErrors(response, result, "getIcons");
-        }
 
         return result;
 
