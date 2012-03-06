@@ -33,6 +33,7 @@
         </property>
     </bean>
     
+    <!-- 
     <bean id="beanReplacementsTest" class="com.abiquo.api.spring.BeanReplacementProcessor">
         <property name="replacements">
             <map>
@@ -41,12 +42,14 @@
                 <entry key="nodecollectorServiceStub" value="nodecollectorServiceStubMock" />
                 <entry key="tarantinoService" value="tarantinoServiceMock" />
                 <entry key="virtualMachineService" value="virtualMachineServiceMock" />
-                <!-- <entry key="virtualMachineAllocatorService" value="virtualMachineAllocatorTestService" /> -->
                 <entry key="remoteServiceService" value="remoteServiceTestService" />
             </map>
         </property>
     </bean>
+    -->
     
+    <import resource="wink-test-beans.xml" />
+    <import resource="mock-beans.xml" />
     <import resource="security-beans.xml" />
     <import resource="redis-beans-test.xml" />
 </beans>

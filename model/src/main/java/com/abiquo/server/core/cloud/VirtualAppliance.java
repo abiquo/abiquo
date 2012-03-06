@@ -329,7 +329,7 @@ public class VirtualAppliance extends DefaultEntityBase
     {
         NAME("name", "vapp.name"), STATE("state", "vapp.state"), ID("id", "vapp.id"), ERROR(
             "error", "vapp.error");
-        
+
         public static OrderByEnum fromValue(final String orderBy)
         {
             for (OrderByEnum currentOrder : OrderByEnum.values())
@@ -362,6 +362,7 @@ public class VirtualAppliance extends DefaultEntityBase
         {
             return columnHQL;
         }
+    }
 
     /**
      * Clones this virtual appliance. But references to objects still the same. Same enterpirse,

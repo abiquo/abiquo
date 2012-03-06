@@ -517,9 +517,12 @@ public class AbstractAPIStub
         {
             queryParams.put(FILTER, new String[] {filter});
         }
-        if (firstElem != null && numResults != null)
+        if (firstElem != null)
         {
             queryParams.put(START_WITH, new String[] {firstElem.toString()});
+        }
+        if (numResults != null)
+        {
             queryParams.put(LIMIT, new String[] {numResults.toString()});
         }
 

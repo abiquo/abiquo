@@ -114,6 +114,7 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
         this.ipPoolManDao = new IpPoolManagementDAO(em);
         this.vlanNetworkDao = new VLANNetworkDAO(em);
         this.hypervisorDao = new HypervisorDAO(em);
+        this.fitPolicyDao = new FitPolicyRuleDAO(em);
     }
 
     /**
@@ -490,8 +491,8 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
                 vlanIdsOrdered.remove(vlanId);
             }
         }
-        
-        for (Integer i = rack.getVlanIdMin(); i <= rack.getVlanIdMax(); i ++)
+
+        for (Integer i = rack.getVlanIdMin(); i <= rack.getVlanIdMax(); i++)
         {
             if (!vlanIdsOrdered.contains(i))
             {
