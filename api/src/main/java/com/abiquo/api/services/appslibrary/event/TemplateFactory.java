@@ -95,8 +95,8 @@ public class TemplateFactory
                 }
                 catch (Exception pe)
                 {
-                    logger.error("Can not insert virtual machine template [{}]", disk
-                        .getDiskFilePath());
+                    logger.error("Can not insert virtual machine template [{}]",
+                        disk.getDiskFilePath());
                 }
             }
         }
@@ -115,8 +115,8 @@ public class TemplateFactory
                 }
                 catch (Exception pe)
                 {
-                    logger.error("Can not insert bundle virtual machine template [{}]", disk
-                        .getDiskFilePath());
+                    logger.error("Can not insert bundle virtual machine template [{}]",
+                        disk.getDiskFilePath());
                 }
             }
         }
@@ -169,8 +169,8 @@ public class TemplateFactory
         if (disk.getMasterDiskFilePath() != null)
         {
             master =
-                appslibraryRep.findVirtualMachineTemplateByPath(enterprise, repository, disk
-                    .getDiskFilePath());
+                appslibraryRep.findVirtualMachineTemplateByPath(enterprise, repository,
+                    disk.getDiskFilePath());
 
             diskFormat = master.getDiskFormatType();
         }
@@ -182,10 +182,15 @@ public class TemplateFactory
         Category category = getCategory(disk);
 
         VirtualMachineTemplate vmtemplate =
-            new VirtualMachineTemplate(enterprise, disk.getName(), diskFormat, disk
-                .getDiskFilePath(), disk.getDiskFileSize(), category, User.SYSTEM_USER.getName()); // TODO
+            new VirtualMachineTemplate(enterprise,
+                disk.getName(),
+                diskFormat,
+                disk.getDiskFilePath(),
+                disk.getDiskFileSize(),
+                category,
+                User.SYSTEM_USER.getName()); // TODO
 
-        vmtemplate.setIconUrl(disk.getIconPath());
+        vmtemplate.setIconUrl(getIcon(disk));
         vmtemplate.setDescription(getDescription(disk));
         vmtemplate.setCpuRequired(disk.getCpu());
         vmtemplate.setRamRequired(getRamInMb(disk).intValue());
@@ -199,6 +204,22 @@ public class TemplateFactory
         }
 
         return vmtemplate;
+    }
+
+    private String getIcon(final TemplateDto template)
+    {
+        if (!StringUtils.isEmpty(template.getIconPath()))
+        {
+            return template.getIconPath();
+        }
+
+        TemplateDefinition tdef = templateDefDao.findByUrl(template.getUrl());
+        if (tdef != null)
+        {
+            logger.warn("Missing icon url in the OVF document, reading from ovfindex");
+            return tdef.getIconUrl();
+        }
+        return null;
     }
 
     private Category getCategory(final TemplateDto disk)
