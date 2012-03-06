@@ -280,17 +280,6 @@ public class InfrastructureService extends DefaultApiService
             flushErrors();
         }
 
-        // [ABICLOUDPREMIUM-2996] These values cannot be changed. Must always reflect the real ones.
-        // Even if the POST to create the machine was made with the information from NodeCollector,
-        // we need to make sure those values have not been changed.
-        Machine remoteMachine =
-            discoverRemoteHypervisor(datacenterId, IPAddress.newIPAddress(machine.getHypervisor()
-                .getIp()), machine.getHypervisor().getType(), machine.getHypervisor().getUser(),
-                machine.getHypervisor().getPassword(), machine.getHypervisor().getPort());
-        machine.setState(remoteMachine.getState());
-        machine.setVirtualRamInMb(remoteMachine.getVirtualRamInMb());
-        machine.setVirtualCpuCores(remoteMachine.getVirtualCpuCores());
-
         checkAvailableCores(machine);
 
         Boolean anyEnabled = Boolean.FALSE;
@@ -323,6 +312,17 @@ public class InfrastructureService extends DefaultApiService
 
         validate(machine.getHypervisor());
         validate(machine);
+
+        // [ABICLOUDPREMIUM-2996] These values cannot be changed. Must always reflect the real ones.
+        // Even if the POST to create the machine was made with the information from NodeCollector,
+        // we need to make sure those values have not been changed.
+        Machine remoteMachine =
+            discoverRemoteHypervisor(datacenterId, IPAddress.newIPAddress(machine.getHypervisor()
+                .getIp()), machine.getHypervisor().getType(), machine.getHypervisor().getUser(),
+                machine.getHypervisor().getPassword(), machine.getHypervisor().getPort());
+        machine.setState(remoteMachine.getState());
+        machine.setVirtualRamInMb(remoteMachine.getVirtualRamInMb());
+        machine.setVirtualCpuCores(remoteMachine.getVirtualCpuCores());
 
         // Part 2: Insert the and machine into database.
         if (repo
