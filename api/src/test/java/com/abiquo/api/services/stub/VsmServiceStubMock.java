@@ -20,30 +20,17 @@
  */
 package com.abiquo.api.services.stub;
 
-import static org.mockito.Mockito.mock;
-
-import org.springframework.stereotype.Service;
-
-import com.abiquo.server.core.infrastructure.RemoteService;
-import com.abiquo.vsm.client.VSMClient;
 
 /**
  * Mock class to simulate the VSM behavior.
  * 
  * @author pnavarro
  */
-@Service
 public class VsmServiceStubMock extends VsmServiceStub
 {
-    @Override
-    protected VSMClient getClientFromPool(RemoteService service)
+    public VsmServiceStubMock()
     {
-        return mock(VSMClient.class);
-    }
-
-    @Override
-    protected void returnClientToPool(VSMClient client)
-    {
-        // Do nothing
+        super();
+        this.clientPool = new RemoteServiceClientPoolMock();
     }
 }
