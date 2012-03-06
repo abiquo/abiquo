@@ -424,7 +424,7 @@ public class InfrastructureWS implements IInfrastructureWS
         for (RemoteService remoteService : remoteServices)
         {
             if (com.abiquo.abiserver.business.hibernate.pojohb.service.RemoteServiceType
-                .valueOf(remoteService.getRemoteServiceType().getValueOf()) == com.abiquo.abiserver.business.hibernate.pojohb.service.RemoteServiceType.TARANTINO)
+                .valueOf(remoteService.getRemoteServiceType().getValueOf()) == com.abiquo.abiserver.business.hibernate.pojohb.service.RemoteServiceType.VIRTUAL_FACTORY)
             {
                 destination = remoteService.getUri();
                 break;

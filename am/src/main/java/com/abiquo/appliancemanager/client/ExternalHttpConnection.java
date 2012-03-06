@@ -58,11 +58,12 @@ public class ExternalHttpConnection
             setIdleConnectionTimeoutInMs(HTTP_IDLE_TIMEOUT). //
             setConnectionTimeoutInMs(HTTP_CONNECTION_TIMEOUT).//
             setRequestTimeoutInMs(HTTP_REQUEST_TIMEOUT).//
-            setMaximumConnectionsTotal(HTTP_MAX_CONNECTIONS);
+            setMaximumConnectionsTotal(HTTP_MAX_CONNECTIONS).//
+            setFollowRedirects(true).setMaximumNumberOfRedirects(6);
 
         if (isProxy())
         {
-            LOG.info("Configure HTTP connections to use the proxy [{}:{}]", //
+            LOG.debug("Configure HTTP connections to use the proxy [{}:{}]", //
                 HTTP_PROXY_HOST, HTTP_PROXY_PORT);
 
             ProxyServer proxy;

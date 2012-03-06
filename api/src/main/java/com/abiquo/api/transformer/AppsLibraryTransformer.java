@@ -21,6 +21,8 @@
 
 package com.abiquo.api.transformer;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -63,6 +65,7 @@ public class AppsLibraryTransformer extends DefaultApiService
 
         dto.setDescription(templateDef.getDescription());
         dto.setId(templateDef.getId());
+        dto.setName(templateDef.getName());
         dto.setProductName(templateDef.getProductName());
         dto.setProductUrl(templateDef.getProductUrl());
         dto.setProductVendor(templateDef.getProductVendor());
@@ -88,8 +91,11 @@ public class AppsLibraryTransformer extends DefaultApiService
         TemplateDefinitionsDto listDto = new TemplateDefinitionsDto();
         for (TemplateDefinition templateDef : templateDefList.getTemplateDefinitions())
         {
-            templateDef.setAppsLibrary(templateDefList.getAppsLibrary());
-            listDto.add(createTransferObject(templateDef, builder));
+            if (templateDef.getId() != null) // invalids
+            {
+                templateDef.setAppsLibrary(templateDefList.getAppsLibrary());
+                listDto.add(createTransferObject(templateDef, builder));
+            }
         }
         TemplateDefinitionListDto dto = new TemplateDefinitionListDto();
         dto.setName(templateDefList.getName());
@@ -107,25 +113,52 @@ public class AppsLibraryTransformer extends DefaultApiService
     public TemplateDefinition createPersistenceObject(final TemplateDefinitionDto templateDef)
         throws Exception
     {
-        DiskFormatType diskFormatType = DiskFormatType.fromValue(templateDef.getDiskFormatType());
+        DiskFormatType diskFormatType = null;
+        try
+        {
+            diskFormatType = DiskFormatType.fromValue(templateDef.getDiskFormatType());
+        }
+        catch (Exception e)
+        {
+
+        }
+
         if (diskFormatType == null)
         {
             addValidationErrors(APIError.INVALID_DISK_FORMAT_TYPE);
             flushErrors();
         }
 
-        RESTLink categoryLink = templateDef.searchLink(CategoryResource.CATEGORY);
-        Category category = appslibraryRep.findCategoryByName(categoryLink.getTitle());
-        if (category == null)
+        try
         {
-            if (categoryLink.getTitle() == null)
+            new URL(templateDef.getUrl());
+        }
+        catch (MalformedURLException e)
+        {
+            addValidationErrors(APIError.INVALID_TEMPLATE_OVF_URL);
+            flushErrors();
+        }
+
+        Category category = null;
+        RESTLink categoryLink = templateDef.searchLink(CategoryResource.CATEGORY);
+        if (categoryLink == null)
+        {
+            category = appslibraryRep.findCategoryByName("Others");
+        }
+        else
+        {
+            category = appslibraryRep.findCategoryByName(categoryLink.getTitle());
+            if (category == null)
             {
-                category = appslibraryRep.findCategoryByName("Others");
-            }
-            else
-            {
-                category = new Category(categoryLink.getTitle());
-                appslibraryRep.insertCategory(category);
+                if (categoryLink.getTitle() == null)
+                {
+                    category = appslibraryRep.findCategoryByName("Others");
+                }
+                else
+                {
+                    category = new Category(categoryLink.getTitle());
+                    appslibraryRep.insertCategory(category);
+                }
             }
         }
 
@@ -135,7 +168,7 @@ public class AppsLibraryTransformer extends DefaultApiService
         pack.setIconUrl(templateDef.getIconUrl());
 
         pack.setId(templateDef.getId());
-        pack.setName(templateDef.getProductName()); // XXX TODO
+        pack.setName(templateDef.getName());
         pack.setDescription(templateDef.getDescription());
         pack.setUrl(templateDef.getUrl());
         pack.setProductName(templateDef.getProductName());

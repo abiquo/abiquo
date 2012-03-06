@@ -352,7 +352,7 @@ public enum APIError
         "This datacenter already has a storage pool assigned"), REMOTE_SERVICE_TYPE_EXISTS("RS-6",
         "This datacenter already has a remote service of that type"), REMOTE_SERVICE_CONNECTION_FAILED(
         "RS-7", "Failed connection to the remote service"), REMOTE_SERVICE_CANNOT_BE_CHECKED(
-        "RS-8", "This remote service is not avilable to be checked"), APPLIANCE_MANAGER_REPOSITORY_ALREADY_DEFINED(
+        "RS-8", "This remote service is not available to be checked"), APPLIANCE_MANAGER_REPOSITORY_ALREADY_DEFINED(
         "AM-0",
         "The repository exported by the current appliance manager is being used in another datacenter"), APPLIANCE_MANAGER_REPOSITORY_IN_USE(
         "AM-1",
@@ -389,10 +389,11 @@ public enum APIError
     // OVF PACKAGE
     NON_EXISTENT_OVF_PACKAGE("OVF-PACKAGE-0", "The requested OVF package does not exist"), NON_EXISTENT_TEMPLATE_DEFINITION_LIST(
         "OVF-PACKAGE-1", "The requested OVF package list does not exist"), OVF_PACKAGE_CANNOT_TRANSFORM(
-        "OVF-PACKAGE-2", "Cannot return the OVFPackage"), INVALID_OVF_INDEX_XML("OVF-PACKAGE-3",
-        "Cannot find the RepositorySpace"), NON_EXISTENT_REPOSITORY_SPACE("OVF-PACKAGE-4",
-        "The requested RepositorySpace does not exist"), INVALID_DISK_FORMAT_TYPE("OVF-PACKAGE-5",
-        "Invalid Disk format type URL"),
+        "OVF-PACKAGE-2", "Cannot return the Template Definition"), INVALID_OVF_INDEX_XML(
+        "OVF-PACKAGE-3", "Cannot find the RepositorySpace"), NON_EXISTENT_REPOSITORY_SPACE(
+        "OVF-PACKAGE-4", "The requested RepositorySpace does not exist"), INVALID_DISK_FORMAT_TYPE(
+        "OVF-PACKAGE-5", "Invalid Disk format type URL"), INVALID_TEMPLATE_OVF_URL("OVF-PACKAGE-6",
+        "Invalid OVF URL in the Template Definition"),
     // VIRTUAL IMAGE
     VIMAGE_INVALID_ALLOCATION_UNITS("VIMAGE-INVALID-OVF-ALLOCATION-INITS",
         "Virtual machine template cannot be added due to invalid allocation units"), VMTEMPLATE_SYNCH_DC_REPO(
