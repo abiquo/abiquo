@@ -75,8 +75,8 @@ public class IpAddressesResource extends AbstractResource
 
     @GET
     public IpsPoolManagementDto getIPAddresses(
-        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
-        @PathParam(PrivateNetworkResource.PRIVATE_NETWORK) final Integer vlanId,
+        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) @Min(1) final Integer vdcId,
+        @PathParam(PrivateNetworkResource.PRIVATE_NETWORK) @Min(1) final Integer vlanId,
         @QueryParam(START_WITH) @DefaultValue("0") @Min(0) final Integer startwith,
         @QueryParam(BY) @DefaultValue("ip") final String orderBy,
         @QueryParam(FILTER) @DefaultValue("") final String filter,
@@ -104,6 +104,29 @@ public class IpAddressesResource extends AbstractResource
 
         return ips;
     }
+    
+    /**
+     * Returns a single IP based on its private network's hierarchy.
+     * 
+     * @param vdcId identifier of the {@link VirtualDatacenter}
+     * @param vlanId identifier of the {@link VLANNetwork}
+     * @param ipId identifier of the {@link IpPoolManagment} we want to retrieve
+     * @param restBuilder Context-injected rest link builder.
+     * @return the found {@link IpPoolManagement} object.
+     */
+    @GET
+    @Path(IpAddressesResource.IP_ADDRESS_PARAM)
+    public IpPoolManagementDto getIPAddress(
+        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) @Min(1) final Integer vdcId,
+        @PathParam(PrivateNetworkResource.PRIVATE_NETWORK) @Min(1) final Integer vlanId,
+        @PathParam(IpAddressesResource.IP_ADDRESS) @Min(1) final Integer ipId,
+        @Context final IRESTBuilder restBuilder) throws Exception
+    {
+        IpPoolManagement ip = service.getIpPoolManagementByVlan(vdcId, vlanId, ipId);
+        
+        return createTransferObject(ip, restBuilder);
+    }
+        
 
     public static IpPoolManagementDto createTransferObject(final IpPoolManagement ip,
         final IRESTBuilder restBuilder) throws Exception

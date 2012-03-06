@@ -309,7 +309,7 @@ public class IpPoolManagement extends RasdManagement
     public Type getType()
     {
         int typeFlag = Integer.valueOf(getRasd().getResourceSubType());
-        return Type.values()[typeFlag];
+        return Type.values()[typeFlag]; 
     }
 
     public void setType(final Type type)
@@ -390,7 +390,7 @@ public class IpPoolManagement extends RasdManagement
         return getVirtualMachine() != null;
     }
 
-    public boolean itHasTheDefaultConfiguration(VirtualMachine vm)
+    public boolean itHasTheDefaultConfiguration(final VirtualMachine vm)
     {
         return vm.getNetworkConfiguration() != null
             && getVlanNetwork().getConfiguration().getId()

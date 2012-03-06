@@ -24,10 +24,17 @@ package com.abiquo.server.core.cloud;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.abiquo.model.transport.SingleResourceTransportDto;
+import com.abiquo.server.core.task.TasksDto;
 
 @XmlRootElement(name = "virtualAppliance")
 public class VirtualApplianceDto extends SingleResourceTransportDto
 {
+    public static final String COPY_VIRTUAL_APPLIANCE_MIME_TYPE =
+        "application/vnd.cp-virtualappliance+xml";
+
+    public static final String MOVE_VIRTUAL_APPLIANCE_MIME_TYPE =
+        "application/vnd.mv-virtualappliance+xml";
+
     /**
      * 
      */
@@ -57,16 +64,16 @@ public class VirtualApplianceDto extends SingleResourceTransportDto
         this.name = name;
     }
 
-    private String nodecollections;
+    private String nodeconnections;
 
-    public String getNodecollections()
+    public String getNodeconnections()
     {
-        return nodecollections;
+        return nodeconnections;
     }
 
-    public void setNodecollections(final String nodecollections)
+    public void setNodeconnections(final String nodeconnections)
     {
-        this.nodecollections = nodecollections;
+        this.nodeconnections = nodeconnections;
     }
 
     private int publicApp;
@@ -127,6 +134,21 @@ public class VirtualApplianceDto extends SingleResourceTransportDto
     public void setState(final VirtualApplianceState state)
     {
         this.state = state;
+    }
+
+    /**
+     * TODO This should be abstracted
+     */
+    private TasksDto lastTasks;
+
+    public TasksDto getLastTasks()
+    {
+        return lastTasks;
+    }
+
+    public void setLastTasks(final TasksDto lastTasks)
+    {
+        this.lastTasks = lastTasks;
     }
 
 }

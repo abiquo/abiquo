@@ -12,18 +12,21 @@
 -- 	SCHEMA: VIEWS
 -- ############################################################################################################### --	
 -- ############################################################################################################### --	
+SELECT "### APPLYING 1_8_5 TO 2_0_0 PATCH. ###" as " ";
 
+SET @DISABLE_STATS_TRIGGERS = 1;
+SELECT "STEP 1 TRIGGERS DISABLED DURING THE UPGRADE" as " ";
 
 DROP PROCEDURE IF EXISTS kinton.delta_1_8_5_to_2_0;
 
 DELIMITER |
 CREATE PROCEDURE kinton.delta_1_8_5_to_2_0() 
 BEGIN
-	SELECT "Applying 1_8_5 to 2_0_0 patch." as " ";
+
 	-- ##################################### --	
 	-- ######## SCHEMA: TABLES ADDED ####### --
 	-- ##################################### --		
-	SELECT "Creating new tables..." as " ";
+	SELECT "STEP 2 CREATING NEW TABLES..." as " ";
 	-- Definition of table kinton.virtualmachinetrackedstate
 	-- 
 	IF NOT EXISTS ( SELECT * FROM information_schema.tables WHERE table_schema='kinton' AND table_name='virtualmachinetrackedstate') THEN
@@ -36,6 +39,7 @@ BEGIN
 		  CONSTRAINT VirtualMachineTrackedState_FK1 FOREIGN KEY (idVM) REFERENCES virtualmachine (idVM) ON DELETE CASCADE
 		  )
 		 ENGINE=InnoDB DEFAULT CHARSET=utf8;
+		SELECT "- Table virtualMachineTrackedstate created" as " ";
 	END IF;
 	--
 	-- Definition of table kinton.pricingCostCode
@@ -238,187 +242,165 @@ BEGIN
 		  version_c int(11) default 0,
 		  PRIMARY KEY (idOneTimeTokenSession)) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
 	END IF;
-	-- ######################################## --	
-	-- ######## SCHEMA: TABLES REMOVED ######## --
-	-- ######################################## --
-	--
-	-- Definition of table kinton.dhcp_service
-	--	
-	IF EXISTS(SELECT * FROM information_schema.tables WHERE table_schema='kinton' AND table_name='dhcp_service') THEN
-		SELECT "Removing table dhcp_service..." as " ";
-		DROP  TABLE IF EXISTS kinton.dhcp_service;
-	END IF;
+
 	-- ###################################### --	
         -- ######## SCHEMA: COLUMNS ADDED ####### --
 	-- ###################################### --
-	SELECT "Creating new columns..." as " ";
+	SELECT "STEP 3 CREATING NEW COLUMNS..." as " ";
 	-- Columns added to ucs_rack
 	IF NOT EXISTS (SELECT * FROM information_schema.columns WHERE table_schema= 'kinton' AND table_name='ucs_rack' AND column_name='defaultTemplate') THEN
+		SELECT "Adding defaultTemplate on ucs_rack" as " ";
 		ALTER TABLE kinton.ucs_rack ADD COLUMN defaultTemplate varchar(200);
 	END IF;
 	--
 	IF NOT EXISTS (SELECT * FROM information_schema.columns WHERE table_schema= 'kinton' AND table_name='ucs_rack' AND column_name='maxMachinesOn') THEN
+		SELECT "Adding maxMachinesOn on ucs_rack" as " ";
 		ALTER TABLE kinton.ucs_rack ADD COLUMN maxMachinesOn int(4) DEFAULT 0;
 	END IF;
 	-- Columns added to virtualimage
 	IF NOT EXISTS (SELECT * FROM information_schema.columns WHERE table_schema= 'kinton' AND table_name='virtualimage' AND column_name='creation_date') THEN
+		SELECT "Adding creation_date on virtualimage" as " ";
 		ALTER TABLE kinton.virtualimage ADD COLUMN creation_date timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP AFTER cost_code;
 	END IF;
 	--
 	IF NOT EXISTS (SELECT * FROM information_schema.columns WHERE table_schema= 'kinton' AND table_name='virtualimage' AND column_name='creation_user') THEN
+		SELECT "Adding creation_user on virtualimage" as " ";
 		ALTER TABLE kinton.virtualimage ADD COLUMN creation_user varchar(128) NOT NULL AFTER creation_date;
 	END IF;
 	--
 	IF NOT EXISTS (SELECT * FROM information_schema.columns WHERE table_schema= 'kinton' AND table_name='virtualimage' AND column_name='chefEnabled') THEN
+		SELECT "Adding chefEnabled on virtualimage" as " ";
 		ALTER TABLE kinton.virtualimage ADD COLUMN chefEnabled BOOLEAN  NOT NULL DEFAULT false AFTER cost_code;
+	END IF;
+	--
+	IF NOT EXISTS (SELECT * FROM information_schema.columns WHERE table_schema= 'kinton' AND table_name='virtualimage' AND column_name='ethDriverType') THEN
+		SELECT "Adding ethDriverType on virtualimage" as " ";
+		ALTER TABLE kinton.virtualimage ADD COLUMN ethDriverType varchar(16) DEFAULT NULL AFTER type;
 	END IF;
 	-- Columns added to virtualmachine
 	IF NOT EXISTS (SELECT * FROM information_schema.columns WHERE table_schema= 'kinton' AND table_name='virtualmachine' AND column_name='subState') THEN
+		SELECT "Adding subState on virtualmachine" as " ";
 		ALTER TABLE kinton.virtualmachine ADD COLUMN subState VARCHAR(50)  DEFAULT NULL AFTER state;
 	END IF;
 	--
 	IF NOT EXISTS (SELECT * FROM information_schema.columns WHERE table_schema= 'kinton' AND table_name='virtualmachine' AND column_name='temporal') THEN
+		SELECT "Adding temporal on virtualmachine" as " ";
 		ALTER TABLE kinton.virtualmachine ADD COLUMN temporal int(10) unsigned default NULL;
 	END IF;
 	--
 	IF NOT EXISTS (SELECT * FROM information_schema.columns WHERE table_schema= 'kinton' AND table_name='virtualmachine' AND column_name='network_configuration_id') THEN
+		SELECT "Adding network_configuration on virtualmachine" as " ";
 		ALTER TABLE kinton.virtualmachine ADD COLUMN network_configuration_id int(11) unsigned; 
+		SELECT "Adding constraint virtualMachine_FK6 on virtualmachine" as " ";
 		ALTER TABLE kinton.virtualmachine ADD CONSTRAINT virtualMachine_FK6 FOREIGN KEY (network_configuration_id) REFERENCES network_configuration (network_configuration_id) ON DELETE SET NULL;		
+	END IF;
+	--
+	IF NOT EXISTS (SELECT * FROM information_schema.columns WHERE table_schema= 'kinton' AND table_name='virtualmachine' AND column_name='ethDriverType') THEN
+		SELECT "Adding ethDriverType on virtualmachine" as " ";
+		ALTER TABLE kinton.virtualmachine ADD COLUMN ethDriverType varchar(16) DEFAULT NULL AFTER temporal;
 	END IF;
 	-- Columns added to enterprise
 	IF NOT EXISTS (SELECT * FROM information_schema.columns WHERE table_schema= 'kinton' AND table_name='enterprise' AND column_name='chef_url') THEN
+		SELECT "Adding chef_url on enterprise" as " ";
 		ALTER TABLE kinton.enterprise ADD COLUMN chef_url VARCHAR(255)  DEFAULT NULL AFTER publicIPHard;
 	END IF;
 	--
 	IF NOT EXISTS (SELECT * FROM information_schema.columns WHERE table_schema= 'kinton' AND table_name='enterprise' AND column_name='chef_client') THEN
+		SELECT "Adding chef_client on enterprise" as " ";
 		ALTER TABLE kinton.enterprise ADD COLUMN chef_client VARCHAR(50)  DEFAULT NULL AFTER chef_url;
 	END IF;
 	--
 	IF NOT EXISTS (SELECT * FROM information_schema.columns WHERE table_schema= 'kinton' AND table_name='enterprise' AND column_name='chef_validator') THEN
+		SELECT "Adding chef_validator on enterprise" as " ";
 		ALTER TABLE kinton.enterprise ADD COLUMN chef_validator VARCHAR(50)  DEFAULT NULL AFTER chef_client;
 	END IF;
 	--
 	IF NOT EXISTS (SELECT * FROM information_schema.columns WHERE table_schema= 'kinton' AND table_name='enterprise' AND column_name='chef_client_certificate') THEN
+		SELECT "Adding client_certificate on enterprise" as " ";
 		ALTER TABLE kinton.enterprise ADD COLUMN chef_client_certificate TEXT  DEFAULT NULL AFTER chef_validator;
 	END IF;
 	--
 	IF NOT EXISTS (SELECT * FROM information_schema.columns WHERE table_schema= 'kinton' AND table_name='enterprise' AND column_name='chef_validator_certificate') THEN
+		SELECT "Adding chef_validator_certificate on enterprise" as " ";
 		ALTER TABLE kinton.enterprise ADD COLUMN chef_validator_certificate TEXT  DEFAULT NULL AFTER chef_client_certificate;
 	END IF;
 	--
 	IF NOT EXISTS (SELECT * FROM information_schema.columns WHERE table_schema= 'kinton' AND table_name='enterprise' AND column_name='idPricingTemplate') THEN
+		SELECT "Adding idPricingTemplate on enterprise" as " ";
 		ALTER TABLE kinton.enterprise ADD COLUMN idPricingTemplate int(10) unsigned DEFAULT NULL;
+		SELECT "Adding constraint enterprise_pricing_FK on enterprise" as " ";
 		ALTER TABLE kinton.enterprise ADD CONSTRAINT enterprise_pricing_FK FOREIGN KEY (idPricingTemplate) REFERENCES kinton.pricingTemplate (idPricingTemplate);
 	END IF;
 	-- Columns added to node_virtual_image_stateful_conversions
 	IF NOT EXISTS (SELECT * FROM information_schema.columns WHERE table_schema= 'kinton' AND table_name='node_virtual_image_stateful_conversions' AND column_name='state') THEN
+		SELECT "Adding state on virtual_image_stateful_conversions" as " ";
 		ALTER TABLE kinton.node_virtual_image_stateful_conversions ADD COLUMN state VARCHAR(50)  NOT NULL AFTER idDiskStatefulConversion;
 	END IF;
 	--
 	IF NOT EXISTS (SELECT * FROM information_schema.columns WHERE table_schema= 'kinton' AND table_name='node_virtual_image_stateful_conversions' AND column_name='subState') THEN
+		SELECT "Adding subState on virtual_image_stateful_conversions" as " ";
 		ALTER TABLE kinton.node_virtual_image_stateful_conversions ADD COLUMN subState VARCHAR(50)  DEFAULT NULL AFTER state;
 	END IF;
 	-- Columns added to datacenter
 	IF NOT EXISTS (SELECT * FROM information_schema.columns WHERE table_schema= 'kinton' AND table_name='datacenter' AND column_name='uuid') THEN
+		SELECT "Adding uuid on datacenter" as " ";
 		ALTER TABLE kinton.datacenter ADD COLUMN uuid VARCHAR(40) DEFAULT NULL AFTER idDataCenter;
 	END IF;
 	-- Columns added to storage_device
 	IF NOT EXISTS (SELECT * FROM information_schema.columns WHERE table_schema= 'kinton' AND table_name='storage_device' AND column_name='username') THEN
+		SELECT "Adding username on storage_device" as " ";
 		ALTER TABLE kinton.storage_device ADD COLUMN username varchar(256) DEFAULT NULL;
 	END IF;
 	-- 
 	IF NOT EXISTS (SELECT * FROM information_schema.columns WHERE table_schema= 'kinton' AND table_name='storage_device' AND column_name='password') THEN
+		SELECT "Adding password on storage_device" as " ";
 		ALTER TABLE kinton.storage_device ADD COLUMN password varchar(256) DEFAULT NULL;
 	END IF;
 	-- Columns added to rasd_management
 	IF NOT EXISTS (SELECT * FROM information_schema.columns WHERE table_schema= 'kinton' AND table_name='rasd_management' AND column_name='temporal') THEN
+		SELECT "Adding temporal on rasd_management" as " ";
 		ALTER TABLE kinton.rasd_management ADD COLUMN temporal int(10) unsigned default NULL; 
 	END IF;
 	--
 	IF NOT EXISTS (SELECT * FROM information_schema.columns WHERE table_schema= 'kinton' AND table_name='rasd_management' AND column_name='sequence') THEN
+		SELECT "Adding sequene on rasd_management" as " ";
 		ALTER TABLE kinton.rasd_management ADD COLUMN sequence int(10) unsigned default NULL; 
 	END IF;
 
-	-- ######################################## --	
-	-- ######## SCHEMA: COLUMNS REMOVED ####### --
-	-- ######################################## --
-	SELECT "Removing deprecated columns..." as " ";	
-	-- Columns dropped from virtualimage
-	IF EXISTS (SELECT * FROM information_schema.columns WHERE table_schema= 'kinton' AND table_name='virtualimage' AND column_name='treaty') THEN
-		ALTER TABLE kinton.virtualimage DROP COLUMN treaty;
+	-- Adding icon url on virtualImage
+	IF NOT EXISTS (SELECT * FROM information_schema.columns WHERE table_schema= 'kinton' AND table_name='virtualimage' AND column_name='iconUrl') THEN
+
+		SELECT "Adding iconUrl on virtualImage" as " ";
+		ALTER TABLE kinton.virtualimage ADD COLUMN iconUrl VARCHAR(255) DEFAULT NULL AFTER cpu_required;
 	END IF;
-	--
-	IF EXISTS (SELECT * FROM information_schema.columns WHERE table_schema= 'kinton' AND table_name='virtualimage' AND column_name='deleted') THEN
-		ALTER TABLE kinton.virtualimage DROP COLUMN deleted;
+
+	-- Adding icon url on ovf_package
+	IF NOT EXISTS (SELECT * FROM information_schema.columns WHERE table_schema= 'kinton' AND table_name='ovf_package' AND column_name='iconUrl') THEN
+
+		SELECT "Adding iconUrl on ovf_package" as " ";
+		ALTER TABLE kinton.ovf_package ADD COLUMN iconUrl VARCHAR(255) DEFAULT NULL AFTER description;
 	END IF;
-	-- Columns dropped from physicalmachine
-	IF EXISTS (SELECT * FROM information_schema.columns WHERE table_schema= 'kinton' AND table_name='physicalmachine' AND column_name='realram') THEN
-		ALTER TABLE kinton.physicalmachine DROP COLUMN realram;
-	END IF;
-	--
-	IF EXISTS (SELECT * FROM information_schema.columns WHERE table_schema= 'kinton' AND table_name='physicalmachine' AND column_name='realcpu') THEN
-		ALTER TABLE kinton.physicalmachine DROP COLUMN realcpu;
-	END IF;
-	--
-	IF EXISTS (SELECT * FROM information_schema.columns WHERE table_schema= 'kinton' AND table_name='physicalmachine' AND column_name='realStorage') THEN
-		ALTER TABLE kinton.physicalmachine DROP COLUMN realStorage;
-	END IF;
-	--
-	IF EXISTS (SELECT * FROM information_schema.columns WHERE table_schema= 'kinton' AND table_name='physicalmachine' AND column_name='hd') THEN
-		ALTER TABLE kinton.physicalmachine DROP COLUMN hd;
-	END IF;
-	--
-	IF EXISTS (SELECT * FROM information_schema.columns WHERE table_schema= 'kinton' AND table_name='physicalmachine' AND column_name='hdUsed') THEN
-		ALTER TABLE kinton.physicalmachine DROP COLUMN hdUsed;
-	END IF;
-	-- Columns dropped from virtualapp
-	IF EXISTS (SELECT * FROM information_schema.columns WHERE table_schema= 'kinton' AND table_name='virtualapp' AND column_name='state') THEN
-		ALTER TABLE kinton.virtualapp DROP COLUMN state;
-	END IF;
-	--
-	IF EXISTS (SELECT * FROM information_schema.columns WHERE table_schema= 'kinton' AND table_name='virtualapp' AND column_name='substate') THEN
-		ALTER TABLE kinton.virtualapp DROP COLUMN substate; 
-	END IF;
-	-- Columns dropped from vappstateful_conversions
-	IF EXISTS (SELECT * FROM information_schema.columns WHERE table_schema= 'kinton' AND table_name='vappstateful_conversions' AND column_name='state') THEN
-		ALTER TABLE kinton.vappstateful_conversions DROP COLUMN state;
-	END IF;
-	--
-	IF EXISTS (SELECT * FROM information_schema.columns WHERE table_schema= 'kinton' AND table_name='vappstateful_conversions' AND column_name='substate') THEN
-		ALTER TABLE kinton.vappstateful_conversions DROP COLUMN substate; 
-	END IF;
-	-- Columns dropped from ip_pool_management
-	IF EXISTS (SELECT * FROM information_schema.columns WHERE table_schema= 'kinton' AND table_name='ip_pool_management' AND column_name='configureGateway') THEN
-		-- Updating data is needed to remove this column/FK
-		UPDATE vlan_network vl, ip_pool_management ip, rasd_management rm, virtualmachine vm SET vm.network_configuration_id = vl.network_configuration_id WHERE ip.vlan_network_id = vl.vlan_network_id AND ip.idManagement = rm.idManagement and configureGateway = 1 AND rm.idvm = vm.idvm;	
-		ALTER TABLE kinton.ip_pool_management DROP COLUMN configureGateway;
-	END IF;
-	--
-	IF EXISTS (SELECT * FROM information_schema.columns WHERE table_schema= 'kinton' AND table_name='ip_pool_management' AND column_name='dhcp_service_id') THEN
-		ALTER TABLE kinton.ip_pool_management DROP FOREIGN KEY ippool_dhcpservice_FK;
-		ALTER TABLE kinton.ip_pool_management DROP KEY ippool_dhcpservice_FK;
-		ALTER TABLE kinton.ip_pool_management DROP COLUMN dhcp_service_id;
-	END IF;
-	-- Columns dropped from network_configuration
-	IF EXISTS (SELECT * FROM information_schema.columns WHERE table_schema= 'kinton' AND table_name='network_configuration' AND column_name='dhcp_service_id') THEN
-		ALTER TABLE kinton.network_configuration DROP FOREIGN KEY configuration_dhcp_FK;
-		ALTER TABLE kinton.network_configuration DROP KEY configuration_dhcp_FK;
-		ALTER TABLE kinton.network_configuration DROP COLUMN dhcp_service_id;
-	END IF;
+
 	-- ######################################## --	
 	-- ######## SCHEMA: COLUMNS MODIFIED ###### --
 	-- ######################################## --
-	SELECT "Modifying existing columns..." as " ";
+	SELECT "STEP 4 MODIFIYING EXISTING COLUMNS..." as " ";
 	ALTER TABLE kinton.physicalmachine MODIFY COLUMN vswitchName varchar(200) NOT NULL;
 	ALTER TABLE kinton.ovf_package MODIFY COLUMN name VARCHAR(255)  CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL;
+	ALTER TABLE kinton.ovf_package MODIFY COLUMN productName VARCHAR(255)  CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL;
 	ALTER TABLE kinton.virtualimage MODIFY COLUMN cost_code int(4) DEFAULT 0;
 	-- /* ABICLOUDPREMIUM-2878 - For consistency porpouse, changed vharchar(30) to varchar(256) */
 	ALTER TABLE kinton.metering MODIFY COLUMN physicalmachine VARCHAR(256)  CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL;
+	ALTER TABLE kinton.metering MODIFY COLUMN user VARCHAR(128) NOT NULL;
 	ALTER TABLE kinton.repository MODIFY COLUMN URL VARCHAR(255) NOT NULL;
+	ALTER TABLE kinton.ovf_package_list MODIFY COLUMN name VARCHAR(45) NOT NULL;
+	ALTER TABLE kinton.accounting_event_detail MODIFY COLUMN costCode INT(4) DEFAULT NULL;
+	ALTER TABLE kinton.accounting_event_vm MODIFY COLUMN costCode INT(4) DEFAULT NULL;
+
 	-- ############################################ --	
 	-- ######## SCHEMA: CONSTRAINTS MODIFIED ###### --
 	-- ############################################ --	
-	SELECT "Modifying constraints..." as " ";
+	SELECT "STEP 5 MODIFIYING CONSTRAINTS..." as " ";
 	-- Constraint 'fk_ovf_package_list_has_ovf_package_ovf_package1' is rebuilt	
 	IF EXISTS (SELECT * FROM information_schema.table_constraints WHERE table_schema= 'kinton' AND table_name='ovf_package_list_has_ovf_package' AND constraint_name='fk_ovf_package_list_has_ovf_package_ovf_package1') THEN
 		ALTER TABLE kinton.ovf_package_list_has_ovf_package DROP FOREIGN KEY fk_ovf_package_list_has_ovf_package_ovf_package1;
@@ -437,10 +419,23 @@ BEGIN
 	IF NOT EXISTS (SELECT * FROM information_schema.table_constraints WHERE table_schema= 'kinton' AND table_name='user' AND constraint_name='user_auth_idx') THEN
 		ALTER TABLE user ADD UNIQUE INDEX user_auth_idx (user, authType); 
 	END IF;
+	-- Index name on category table
+	IF NOT EXISTS (SELECT * FROM information_schema.table_constraints WHERE table_schema= 'kinton' AND table_name='category' AND constraint_name='name') THEN
+		ALTER TABLE `kinton`.`category` ADD UNIQUE INDEX `name`(`name`) using BTREE;
+	END IF;
+	-- Index fk_role_enterprise on role table
+	IF NOT EXISTS (SELECT * FROM information_schema.table_constraints WHERE table_schema= 'kinton' AND table_name='role' AND constraint_name='fk_role_enterprise') THEN
+		ALTER TABLE role ADD INDEX `fk_role_enterprise` (`idEnterprise`) USING BTREE; 
+	END IF;
+	-- Index fk_role_1 on role table deleted
+	IF EXISTS (SELECT * FROM information_schema.table_constraints WHERE table_schema= 'kinton' AND table_name='role' AND constraint_name='fk_role_1') THEN
+		ALTER TABLE `kinton`.`role` DROP INDEX `fk_role_1`;
+	END IF;
+
 	-- ########################################################## --	
         -- ######## DATA: NEW DATA (INSERTS, UPDATES, DELETES ####### --
 	-- ########################################################## --
-	SELECT "Updating data..." as " ";
+	SELECT "STEP 6 UPDATING DATA..." as " ";
 	-- New System Properties
 	SELECT COUNT(*) INTO @existsCount FROM kinton.system_properties WHERE name='client.infra.ucsManagerLink' AND value='/ucsm/ucsm.jnlp' AND description='URL to display UCS Manager Interface';
 	IF @existsCount = 0 THEN 
@@ -465,6 +460,34 @@ BEGIN
 	SELECT COUNT(*) INTO @existsCount FROM kinton.system_properties WHERE name='client.wiki.network.staticRoutes' AND value='http://community.abiquo.com/display/ABI20/Manage+Network+Configuration#ManageNetworkConfiguration-ConfiguringStaticRoutesUsingDHCP' AND description='static routes wiki';
 	IF @existsCount = 0 THEN 
 		INSERT INTO kinton.system_properties (name, value, description) VALUES ('client.wiki.network.staticRoutes','http://community.abiquo.com/display/ABI20/Manage+Network+Configuration#ManageNetworkConfiguration-ConfiguringStaticRoutesUsingDHCP','static routes wiki');
+	END IF;
+	SELECT COUNT(*) INTO @existsCount FROM kinton.system_properties WHERE name='client.network.defaultName' AND value='default_private_network' AND description='default private vlan name';
+	IF @existsCount = 0 THEN 
+		INSERT INTO kinton.system_properties (name, value, description) VALUES ('client.network.defaultName','default_private_network','default private vlan name');
+	END IF;
+	SELECT COUNT(*) INTO @existsCount FROM kinton.system_properties WHERE name='client.network.defaultNetmask' AND value='2' AND description='index of available netmask';
+	IF @existsCount = 0 THEN 
+		INSERT INTO kinton.system_properties (name, value, description) VALUES ('client.network.defaultNetmask','2','index of available netmask');
+	END IF;
+	SELECT COUNT(*) INTO @existsCount FROM kinton.system_properties WHERE name='client.network.defaultAddress' AND value='192.168.0.0' AND description='default private vlan address';
+	IF @existsCount = 0 THEN 
+		INSERT INTO kinton.system_properties (name, value, description) VALUES ('client.network.defaultAddress','192.168.0.0','default private vlan address');
+	END IF;
+	SELECT COUNT(*) INTO @existsCount FROM kinton.system_properties WHERE name='client.network.defaultGateway' AND value='192.168.0.1' AND description='default private vlan gateway';
+	IF @existsCount = 0 THEN 
+		INSERT INTO kinton.system_properties (name, value, description) VALUES ('client.network.defaultGateway','192.168.0.1','default private vlan gateway');
+	END IF;
+	SELECT COUNT(*) INTO @existsCount FROM kinton.system_properties WHERE name='client.network.defaultPrimaryDNS' AND value='' AND description='default primary DNS';
+	IF @existsCount = 0 THEN 
+		INSERT INTO kinton.system_properties (name, value, description) VALUES ('client.network.defaultPrimaryDNS','','default primary DNS');
+	END IF;
+	SELECT COUNT(*) INTO @existsCount FROM kinton.system_properties WHERE name='client.network.defaultSecondaryDNS' AND value='' AND description='default secondary DNS';
+	IF @existsCount = 0 THEN 
+		INSERT INTO kinton.system_properties (name, value, description) VALUES ('client.network.defaultSecondaryDNS','','default secondary DNS');
+	END IF;
+	SELECT COUNT(*) INTO @existsCount FROM kinton.system_properties WHERE name='client.network.defaultSufixDNS' AND value='' AND description='default sufix DNS';
+	IF @existsCount = 0 THEN 
+		INSERT INTO kinton.system_properties (name, value, description) VALUES ('client.network.defaultSufixDNS','','default sufix DNS');
 	END IF;
 	
 	-- Update System Properties
@@ -682,8 +705,120 @@ BEGIN
 		INSERT INTO kinton.enterprise_properties_map VALUES  (1,'Support e-mail','support@abiquo.com');
 	END IF;	
 
+	-- new virtualmachine states
+	update kinton.virtualmachine set state = "NOT_ALLOCATED" where state = "NOT_DEPLOYED";
+	update kinton.virtualmachine set state = "ON" where state = "RUNNING";
+	update kinton.virtualmachine set state = "OFF" where state = "POWERED_OFF";
+	update kinton.virtualmachine set state = "UNKNOWN" where state = "CRASHED";
+	update kinton.virtualmachine set state = "UNKNOWN" where state = "IN_PROGRESS";
+
+	-- iconURL migration
+	update virtualimage vi, icon i set vi.iconURL = i.path where vi.idIcon = i.idIcon; 
+	update ovf_package ovf, icon i set ovf.iconURL = i.path where ovf.idIcon = i.idIcon;
+
+	-- costCode
+	update virtualimage set cost_code = 0 where cost_code is null;
+
+	-- Enable HeartBeat by default
+	UPDATE alerts al SET al.value='YES' where al.type='HEARTBEAT';
+
+	-- ######################################## --	
+	-- ######## SCHEMA: COLUMNS REMOVED ####### --
+	-- ######################################## --
+	SELECT "STEP 7 REMOVING DEPRECATED COLUMNS..." as " ";	
+	-- Columns dropped from virtualimage
+	IF EXISTS (SELECT * FROM information_schema.columns WHERE table_schema= 'kinton' AND table_name='virtualimage' AND column_name='treaty') THEN
+		ALTER TABLE kinton.virtualimage DROP COLUMN treaty;
+	END IF;
 	--
-	SELECT "Updated succesfully from 1.8.5 to 2.0.0..." as " ";
+	IF EXISTS (SELECT * FROM information_schema.columns WHERE table_schema= 'kinton' AND table_name='virtualimage' AND column_name='deleted') THEN
+		ALTER TABLE kinton.virtualimage DROP COLUMN deleted;
+	END IF;
+	-- Columns dropped from physicalmachine
+	IF EXISTS (SELECT * FROM information_schema.columns WHERE table_schema= 'kinton' AND table_name='physicalmachine' AND column_name='realram') THEN
+		ALTER TABLE kinton.physicalmachine DROP COLUMN realram;
+	END IF;
+	--
+	IF EXISTS (SELECT * FROM information_schema.columns WHERE table_schema= 'kinton' AND table_name='physicalmachine' AND column_name='realcpu') THEN
+		ALTER TABLE kinton.physicalmachine DROP COLUMN realcpu;
+	END IF;
+	--
+	IF EXISTS (SELECT * FROM information_schema.columns WHERE table_schema= 'kinton' AND table_name='physicalmachine' AND column_name='realStorage') THEN
+		ALTER TABLE kinton.physicalmachine DROP COLUMN realStorage;
+	END IF;
+	--
+	IF EXISTS (SELECT * FROM information_schema.columns WHERE table_schema= 'kinton' AND table_name='physicalmachine' AND column_name='hd') THEN
+		ALTER TABLE kinton.physicalmachine DROP COLUMN hd;
+	END IF;
+	--
+	IF EXISTS (SELECT * FROM information_schema.columns WHERE table_schema= 'kinton' AND table_name='physicalmachine' AND column_name='hdUsed') THEN
+		ALTER TABLE kinton.physicalmachine DROP COLUMN hdUsed;
+	END IF;
+	--
+	IF EXISTS (SELECT * FROM information_schema.columns WHERE table_schema= 'kinton' AND table_name='physicalmachine' AND column_name='cpuRatio') THEN
+		ALTER TABLE kinton.physicalmachine DROP COLUMN cpuRatio;
+	END IF;
+	-- Columns dropped from virtualapp
+	IF EXISTS (SELECT * FROM information_schema.columns WHERE table_schema= 'kinton' AND table_name='virtualapp' AND column_name='state') THEN
+		ALTER TABLE kinton.virtualapp DROP COLUMN state;
+	END IF;
+	--
+	IF EXISTS (SELECT * FROM information_schema.columns WHERE table_schema= 'kinton' AND table_name='virtualapp' AND column_name='substate') THEN
+		ALTER TABLE kinton.virtualapp DROP COLUMN substate; 
+	END IF;
+	-- Columns dropped from vappstateful_conversions
+	IF EXISTS (SELECT * FROM information_schema.columns WHERE table_schema= 'kinton' AND table_name='vappstateful_conversions' AND column_name='state') THEN
+		ALTER TABLE kinton.vappstateful_conversions DROP COLUMN state;
+	END IF;
+	--
+	IF EXISTS (SELECT * FROM information_schema.columns WHERE table_schema= 'kinton' AND table_name='vappstateful_conversions' AND column_name='substate') THEN
+		ALTER TABLE kinton.vappstateful_conversions DROP COLUMN substate; 
+	END IF;
+	-- Columns dropped from ip_pool_management
+	IF EXISTS (SELECT * FROM information_schema.columns WHERE table_schema= 'kinton' AND table_name='ip_pool_management' AND column_name='configureGateway') THEN
+		-- Updating data is needed to remove this column/FK
+		UPDATE vlan_network vl, ip_pool_management ip, rasd_management rm, virtualmachine vm SET vm.network_configuration_id = vl.network_configuration_id WHERE ip.vlan_network_id = vl.vlan_network_id AND ip.idManagement = rm.idManagement and configureGateway = 1 AND rm.idvm = vm.idvm;	
+		ALTER TABLE kinton.ip_pool_management DROP COLUMN configureGateway;
+	END IF;
+	--
+	IF EXISTS (SELECT * FROM information_schema.columns WHERE table_schema= 'kinton' AND table_name='ip_pool_management' AND column_name='dhcp_service_id') THEN
+		ALTER TABLE kinton.ip_pool_management DROP FOREIGN KEY ippool_dhcpservice_FK;
+		ALTER TABLE kinton.ip_pool_management DROP KEY ippool_dhcpservice_FK;
+		ALTER TABLE kinton.ip_pool_management DROP COLUMN dhcp_service_id;
+	END IF;
+	-- Columns dropped from network_configuration
+	IF EXISTS (SELECT * FROM information_schema.columns WHERE table_schema= 'kinton' AND table_name='network_configuration' AND column_name='dhcp_service_id') THEN
+		ALTER TABLE kinton.network_configuration DROP FOREIGN KEY configuration_dhcp_FK;
+		ALTER TABLE kinton.network_configuration DROP KEY configuration_dhcp_FK;
+		ALTER TABLE kinton.network_configuration DROP COLUMN dhcp_service_id;
+	END IF;
+	-- Columns dropped from virtualimage for urlIcon feature
+	IF EXISTS (SELECT * FROM information_schema.columns WHERE table_schema= 'kinton' AND table_name='virtualimage' AND column_name='idIcon') THEN
+		ALTER TABLE kinton.virtualimage DROP FOREIGN KEY `virtualImage_FK4`;
+		ALTER TABLE kinton.virtualimage DROP COLUMN idIcon;
+	END IF;
+	-- Columns dropped from ovf_package for urlIcon feature
+	IF EXISTS (SELECT * FROM information_schema.columns WHERE table_schema= 'kinton' AND table_name='ovf_package' AND column_name='idIcon') THEN
+		ALTER TABLE kinton.ovf_package DROP FOREIGN KEY `fk_ovf_package_icon`;
+		ALTER TABLE kinton.ovf_package DROP COLUMN idIcon;
+	END IF;
+
+	-- ######################################## --	
+	-- ######## SCHEMA: TABLES REMOVED ######## --
+	-- ######################################## --
+	--
+	-- Definition of table kinton.dhcp_service
+	--	
+	SELECT "STEP 8 REMOVING DEPRECATED TABLES..." as " ";	
+	IF EXISTS(SELECT * FROM information_schema.tables WHERE table_schema='kinton' AND table_name='dhcp_service') THEN
+		SELECT "Removing table dhcp_service..." as " ";
+		DROP  TABLE IF EXISTS kinton.dhcp_service;
+	END IF;
+	IF EXISTS(SELECT * FROM information_schema.tables WHERE table_schema='kinton' AND table_name='icon') THEN
+		SELECT "Removing table icon..." as " ";
+		DROP  TABLE IF EXISTS kinton.icon;
+	END IF;
+
 END;
 |
 DELIMITER ;
@@ -699,19 +834,15 @@ DROP PROCEDURE IF EXISTS kinton.delta_1_8_5_to_2_0;
 -- ########################################### --
 
 -- THIS TRIGGERS WILL BE REMOVED
-SELECT "Removing trigger create_nodevirtualimage_update_stats..." as " ";
+SELECT "STEP 9 REMOVING DEPRECATED TRIGGERS..." as " ";
 DROP TRIGGER IF EXISTS kinton.create_nodevirtualimage_update_stats;
-
-SELECT "Removing trigger create_rasd_management_update_stats..." as " ";
 DROP TRIGGER IF EXISTS kinton.create_rasd_management_update_stats;
-
-SELECT "Removing trigger update_network_configuration_update_stats..." as " ";
 DROP TRIGGER IF EXISTS kinton.update_network_configuration_update_stats;
 
 -- ########################################### --	
 -- ######## SCHEMA: TRIGGERS RECREATED ####### --
 -- ########################################### --
-
+SELECT "STEP 10 UPDATING TRIGGERS..." as " ";
 DROP TRIGGER IF EXISTS kinton.virtualapp_created;
 DROP TRIGGER IF EXISTS kinton.update_virtualapp_update_stats;
 DROP TRIGGER IF EXISTS kinton.create_physicalmachine_update_stats;
@@ -723,6 +854,8 @@ DROP TRIGGER IF EXISTS kinton.update_physicalmachine_update_stats;
 DROP TRIGGER IF EXISTS kinton.create_virtualmachine_update_stats;
 DROP TRIGGER IF EXISTS kinton.delete_virtualmachine_update_stats;
 DROP TRIGGER IF EXISTS kinton.update_virtualmachine_update_stats;
+-- NEW TRIGGER (was removed and it's back)
+DROP TRIGGER IF EXISTS kinton.create_nodevirtualimage_update_stats;
 DROP TRIGGER IF EXISTS kinton.delete_nodevirtualimage_update_stats;
 DROP TRIGGER IF EXISTS kinton.delete_rasd_management_update_stats;
 DROP TRIGGER IF EXISTS kinton.virtualdatacenter_updated;
@@ -790,33 +923,39 @@ IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN
     END IF;
     IF NEW.idState != 2 THEN
         UPDATE IGNORE cloud_usage_stats SET serversTotal = serversTotal+1, 
-               vCpuTotal=vCpuTotal+(NEW.cpu*NEW.cpuRatio), vMemoryTotal=vMemoryTotal+NEW.ram
+               vCpuTotal=vCpuTotal+NEW.cpu, vMemoryTotal=vMemoryTotal+NEW.ram
         WHERE idDataCenter = NEW.idDataCenter;
     END IF;
 END IF;
 END;
 |
 SELECT "Recreating trigger create_datastore_update_stats..." as " ";
-CREATE TRIGGER kinton.create_datastore_update_stats AFTER INSERT ON kinton.datastore_assignment
+CREATE TRIGGER `kinton`.`create_datastore_update_stats` AFTER INSERT ON `kinton`.`datastore_assignment`
 FOR EACH ROW BEGIN
 DECLARE machineState INT UNSIGNED;
 DECLARE idDatacenter INT UNSIGNED;
 DECLARE enabled INT UNSIGNED;
 DECLARE usedSize BIGINT UNSIGNED;
 DECLARE size BIGINT UNSIGNED;
+DECLARE datastoreuuid VARCHAR(255);
 SELECT pm.idState, pm.idDatacenter INTO machineState, idDatacenter FROM physicalmachine pm WHERE pm.idPhysicalMachine = NEW.idPhysicalmachine;
-SELECT d.enabled, d.usedSize, d.size INTO enabled, usedSize, size FROM datastore d WHERE d.idDatastore = NEW.idDatastore;
+SELECT d.enabled, d.usedSize, d.size, d.datastoreUUID INTO enabled, usedSize, size, datastoreuuid FROM datastore d WHERE d.idDatastore = NEW.idDatastore;
 IF (@DISABLED_STATS_TRIGGERS IS NULL) THEN
-    IF machineState = 3 THEN
-        IF enabled = 1 THEN
-            UPDATE IGNORE cloud_usage_stats cus SET cus.vStorageUsed = cus.vStorageUsed + usedSize
-            WHERE cus.idDataCenter = idDatacenter;
+    IF (SELECT count(*) FROM datastore d LEFT OUTER JOIN datastore_assignment da ON d.idDatastore = da.idDatastore
+        LEFT OUTER JOIN physicalmachine pm ON da.idPhysicalMachine = pm.idPhysicalMachine
+        WHERE pm.idDatacenter = idDatacenter AND d.datastoreUUID = datastoreuuid AND d.idDatastore != NEW.idDatastore
+        AND d.enabled = 1) = 0 THEN
+        IF machineState = 3 THEN
+            IF enabled = 1 THEN
+                UPDATE IGNORE cloud_usage_stats cus SET cus.vStorageUsed = cus.vStorageUsed + usedSize
+                WHERE cus.idDataCenter = idDatacenter;
+            END IF;
         END IF;
-    END IF;
-    IF machineState != 2 THEN
-        IF enabled = 1 THEN
-            UPDATE IGNORE cloud_usage_stats cus SET cus.vStorageTotal = cus.vStorageTotal + size
-            WHERE cus.idDataCenter = idDatacenter;
+        IF machineState != 2 THEN
+            IF enabled = 1 THEN
+                UPDATE IGNORE cloud_usage_stats cus SET cus.vStorageTotal = cus.vStorageTotal + size
+                WHERE cus.idDataCenter = idDatacenter;
+            END IF;
         END IF;
     END IF;
 END IF;
@@ -835,74 +974,118 @@ IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN
     END IF;
     IF OLD.idState NOT IN (2, 6, 7) THEN
         UPDATE IGNORE cloud_usage_stats SET serversTotal=serversTotal-1,
-               vCpuTotal=vCpuTotal-(OLD.cpu*OLD.cpuRatio), vMemoryTotal=vMemoryTotal-OLD.ram
+               vCpuTotal=vCpuTotal-OLD.cpu, vMemoryTotal=vMemoryTotal-OLD.ram
         WHERE idDataCenter = OLD.idDataCenter;
     END IF;
 END IF;
 END;
 |
 SELECT "Recreating trigger delete_datastore_update_stats..." as " ";
-CREATE TRIGGER kinton.delete_datastore_update_stats BEFORE DELETE ON kinton.datastore
+CREATE TRIGGER `kinton`.`delete_datastore_update_stats` BEFORE DELETE ON `kinton`.`datastore`
 FOR EACH ROW BEGIN
 DECLARE machineState INT UNSIGNED;
 DECLARE idDatacenter INT UNSIGNED;
 SELECT pm.idState, pm.idDatacenter INTO machineState, idDatacenter FROM physicalmachine pm LEFT OUTER JOIN datastore_assignment da ON pm.idPhysicalMachine = da.idPhysicalMachine
 WHERE da.idDatastore = OLD.idDatastore;
 IF (@DISABLED_STATS_TRIGGERS IS NULL) THEN
-    IF machineState = 3 THEN
-        IF OLD.enabled = 1 THEN
-            UPDATE IGNORE cloud_usage_stats cus SET cus.vStorageUsed = cus.vStorageUsed - OLD.usedSize
-            WHERE cus.idDataCenter = idDatacenter;
+    IF (SELECT count(*) FROM datastore d LEFT OUTER JOIN datastore_assignment da ON d.idDatastore = da.idDatastore
+        LEFT OUTER JOIN physicalmachine pm ON da.idPhysicalMachine = pm.idPhysicalMachine
+        WHERE pm.idDatacenter = idDatacenter AND d.datastoreUUID = OLD.datastoreuuid AND d.idDatastore != OLD.idDatastore
+        AND d.enabled = 1) = 0 THEN
+        IF machineState = 3 THEN
+            IF OLD.enabled = 1 THEN
+                UPDATE IGNORE cloud_usage_stats cus SET cus.vStorageUsed = cus.vStorageUsed - OLD.usedSize
+                WHERE cus.idDataCenter = idDatacenter;
+            END IF;
         END IF;
-    END IF;
-    IF machineState NOT IN (2, 6, 7) THEN
-        IF OLD.enabled = 1 THEN
-            UPDATE IGNORE cloud_usage_stats cus SET cus.vStorageTotal = cus.vStorageTotal - OLD.size
-            WHERE cus.idDataCenter = idDatacenter;
+        IF machineState NOT IN (2, 6, 7) THEN
+            IF OLD.enabled = 1 THEN
+                UPDATE IGNORE cloud_usage_stats cus SET cus.vStorageTotal = cus.vStorageTotal - OLD.size
+                WHERE cus.idDataCenter = idDatacenter;
+            END IF;
         END IF;
     END IF;
 END IF;
 END;
 |
 SELECT "Recreating trigger update_datastore_update_stats..." as " ";
-CREATE TRIGGER kinton.update_datastore_update_stats AFTER UPDATE ON kinton.datastore
-FOR EACH ROW BEGIN
+CREATE TRIGGER `kinton`.`update_datastore_update_stats` AFTER UPDATE ON `kinton`.`datastore`
+    FOR EACH ROW BEGIN
 DECLARE idDatacenter INT UNSIGNED;
 DECLARE machineState INT UNSIGNED;
 SELECT pm.idDatacenter, pm.idState INTO idDatacenter, machineState FROM physicalmachine pm LEFT OUTER JOIN datastore_assignment da ON pm.idPhysicalMachine = da.idPhysicalMachine
 WHERE da.idDatastore = NEW.idDatastore;
 IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN
-    IF OLD.enabled = 1 THEN
-        IF NEW.enabled = 1 THEN
-            IF machineState IN (2, 6, 7) THEN
-                UPDATE IGNORE cloud_usage_stats cus SET cus.vStorageTotal = cus.vStorageTotal - OLD.size + NEW.size
-                WHERE cus.idDatacenter = idDatacenter;
-            ELSE
-                UPDATE IGNORE cloud_usage_stats cus SET cus.vStorageTotal = cus.vStorageTotal - OLD.size + NEW.size,
-                cus.vStorageUsed = cus.vStorageUsed - OLD.usedSize + NEW.usedSize WHERE cus.idDatacenter = idDatacenter;
-            END IF;
-        ELSEIF NEW.enabled = 0 THEN
-            IF machineState IN (2, 6, 7) THEN
-                UPDATE IGNORE cloud_usage_stats cus SET cus.vStorageTotal = cus.vStorageTotal - OLD.size
-                WHERE cus.idDatacenter = idDatacenter;
-            ELSE
-                UPDATE IGNORE cloud_usage_stats cus SET cus.vStorageTotal = cus.vStorageTotal - OLD.size,
-                cus.vStorageUsed = cus.vStorageUsed - OLD.usedSize WHERE cus.idDatacenter = idDatacenter;
-            END IF;
+            IF (SELECT count(*) FROM datastore d LEFT OUTER JOIN datastore_assignment da ON d.idDatastore = da.idDatastore
+                LEFT OUTER JOIN physicalmachine pm ON da.idPhysicalMachine = pm.idPhysicalMachine
+                WHERE pm.idDatacenter = idDatacenter AND d.datastoreUUID = NEW.datastoreUUID AND d.idDatastore != NEW.idDatastore 
+                AND d.enabled = 1) = 0 THEN
+       IF OLD.enabled = 1 THEN
+   IF NEW.enabled = 1 THEN
+       IF machineState IN (2, 6, 7) THEN
+           UPDATE IGNORE cloud_usage_stats cus SET cus.vStorageTotal = cus.vStorageTotal - OLD.size + NEW.size
+           WHERE cus.idDatacenter = idDatacenter;
+       ELSE
+           UPDATE IGNORE cloud_usage_stats cus SET cus.vStorageTotal = cus.vStorageTotal - OLD.size + NEW.size,
+           cus.vStorageUsed = cus.vStorageUsed - OLD.usedSize + NEW.usedSize WHERE cus.idDatacenter = idDatacenter;
+       END IF;
+           ELSEIF NEW.enabled = 0 THEN
+       IF machineState IN (2, 6, 7) THEN
+           UPDATE IGNORE cloud_usage_stats cus SET cus.vStorageTotal = cus.vStorageTotal - OLD.size
+           WHERE cus.idDatacenter = idDatacenter;
+       ELSE
+           UPDATE IGNORE cloud_usage_stats cus SET cus.vStorageTotal = cus.vStorageTotal - OLD.size,
+           cus.vStorageUsed = cus.vStorageUsed - OLD.usedSize WHERE cus.idDatacenter = idDatacenter;
+       END IF;
+   END IF;
+       ELSE
+   IF NEW.enabled = 1 THEN
+       IF machineState IN (2, 6, 7) THEN
+           UPDATE IGNORE cloud_usage_stats cus SET cus.vStorageTotal = cus.vStorageTotal + NEW.size
+           WHERE cus.idDatacenter = idDatacenter;
+       ELSE
+           UPDATE IGNORE cloud_usage_stats cus SET cus.vStorageTotal = cus.vStorageTotal + NEW.size,
+           cus.vStorageUsed = cus.vStorageUsed + NEW.usedSize WHERE cus.idDatacenter = idDatacenter;
+       END IF;
+   END IF;
+       END IF;
+            ELSEIF NEW.usedSize NOT IN (SELECT d.usedSize FROM datastore d LEFT OUTER JOIN datastore_assignment da ON d.idDatastore = da.idDatastore
+                LEFT OUTER JOIN physicalmachine pm ON da.idPhysicalMachine = pm.idPhysicalMachine
+                WHERE pm.idDatacenter = idDatacenter AND d.datastoreUUID = NEW.datastoreUUID AND d.idDatastore != NEW.idDatastore 
+                AND d.enabled = 1) THEN
+                -- repeated code to update only the first shared datastore
+       IF OLD.enabled = 1 THEN
+   IF NEW.enabled = 1 THEN
+       IF machineState IN (2, 6, 7) THEN
+           UPDATE IGNORE cloud_usage_stats cus SET cus.vStorageTotal = cus.vStorageTotal - OLD.size + NEW.size
+           WHERE cus.idDatacenter = idDatacenter;
+       ELSE
+           UPDATE IGNORE cloud_usage_stats cus SET cus.vStorageTotal = cus.vStorageTotal - OLD.size + NEW.size,
+           cus.vStorageUsed = cus.vStorageUsed - OLD.usedSize + NEW.usedSize WHERE cus.idDatacenter = idDatacenter;
+       END IF;
+           ELSEIF NEW.enabled = 0 THEN
+       IF machineState IN (2, 6, 7) THEN
+           UPDATE IGNORE cloud_usage_stats cus SET cus.vStorageTotal = cus.vStorageTotal - OLD.size
+           WHERE cus.idDatacenter = idDatacenter;
+       ELSE
+           UPDATE IGNORE cloud_usage_stats cus SET cus.vStorageTotal = cus.vStorageTotal - OLD.size,
+           cus.vStorageUsed = cus.vStorageUsed - OLD.usedSize WHERE cus.idDatacenter = idDatacenter;
+       END IF;
+   END IF;
+       ELSE
+   IF NEW.enabled = 1 THEN
+       IF machineState IN (2, 6, 7) THEN
+           UPDATE IGNORE cloud_usage_stats cus SET cus.vStorageTotal = cus.vStorageTotal + NEW.size
+           WHERE cus.idDatacenter = idDatacenter;
+       ELSE
+           UPDATE IGNORE cloud_usage_stats cus SET cus.vStorageTotal = cus.vStorageTotal + NEW.size,
+           cus.vStorageUsed = cus.vStorageUsed + NEW.usedSize WHERE cus.idDatacenter = idDatacenter;
+       END IF;
+   END IF;
+       END IF;
+   END IF;
         END IF;
-    ELSE
-        IF NEW.enabled = 1 THEN
-            IF machineState IN (2, 6, 7) THEN
-                UPDATE IGNORE cloud_usage_stats cus SET cus.vStorageTotal = cus.vStorageTotal + NEW.size
-                WHERE cus.idDatacenter = idDatacenter;
-            ELSE
-                UPDATE IGNORE cloud_usage_stats cus SET cus.vStorageTotal = cus.vStorageTotal + NEW.size,
-                cus.vStorageUsed = cus.vStorageUsed + NEW.usedSize WHERE cus.idDatacenter = idDatacenter;
-            END IF;
-        END IF;
-    END IF;
-END IF;
-END;
+    END;
 |
 SELECT "Recreating trigger update_physicalmachine_update_stats..." as " ";
 CREATE TRIGGER kinton.update_physicalmachine_update_stats AFTER UPDATE ON kinton.physicalmachine
@@ -914,14 +1097,14 @@ IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN
         IF OLD.idState IN (2, 7) THEN
             -- Machine not managed changes into managed; or disabled_by_ha to Managed
             UPDATE IGNORE cloud_usage_stats SET serversTotal=serversTotal+1,
-                   vCpuTotal=vCpuTotal + (NEW.cpu*NEW.cpuRatio),
+                   vCpuTotal=vCpuTotal + NEW.cpu,
                    vMemoryTotal=vMemoryTotal + NEW.ram
             WHERE idDataCenter = NEW.idDataCenter;
         END IF;
         IF NEW.idState IN (2,7) THEN
             -- Machine managed changes into not managed or DisabledByHA
             UPDATE IGNORE cloud_usage_stats SET serversTotal=serversTotal-1,
-                   vCpuTotal=vCpuTotal-(OLD.cpu*OLD.cpuRatio),
+                   vCpuTotal=vCpuTotal-OLD.cpu,
                    vMemoryTotal=vMemoryTotal-OLD.ram
             WHERE idDataCenter = OLD.idDataCenter;
         END IF;
@@ -942,7 +1125,7 @@ IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN
         -- No State Changes
         IF NEW.idState NOT IN (2, 6, 7) THEN
             -- If Machine is in a not managed state, changes into resources are ignored, Should we add 'Disabled' state to this condition?
-            UPDATE IGNORE cloud_usage_stats SET vCpuTotal=vCpuTotal+((NEW.cpu-OLD.cpu)*NEW.cpuRatio),
+            UPDATE IGNORE cloud_usage_stats SET vCpuTotal=vCpuTotal+(NEW.cpu-OLD.cpu),
                    vMemoryTotal=vMemoryTotal + (NEW.ram-OLD.ram)
             WHERE idDataCenter = OLD.idDataCenter;
         END IF;
@@ -972,7 +1155,75 @@ CREATE TRIGGER kinton.delete_virtualmachine_update_stats AFTER DELETE ON kinton.
 	END IF;
     END;
 |
-SELECT "Recreating trigger update_virtualmachine_update_stats..." as " ";
+SELECT "Recreating trigger create_nodevirtualimage_update_stats..." as " ";
+CREATE TRIGGER kinton.create_nodevirtualimage_update_stats AFTER INSERT ON kinton.nodevirtualimage
+  FOR EACH ROW BEGIN
+    DECLARE idDataCenterObj INTEGER;
+    DECLARE idVirtualAppObj INTEGER;
+    DECLARE idVirtualDataCenterObj INTEGER;
+    DECLARE idEnterpriseObj INTEGER;
+    DECLARE costCodeObj int(4);
+    DECLARE type INTEGER;
+    DECLARE state VARCHAR(50);
+    DECLARE ram INTEGER;
+    DECLARE cpu INTEGER;
+    DECLARE hd bigint;
+    IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN
+    SELECT vapp.idVirtualApp, vapp.idVirtualDataCenter, vdc.idDataCenter, vdc.idEnterprise  INTO idVirtualAppObj, idVirtualDataCenterObj, idDataCenterObj, idEnterpriseObj
+      FROM node n, virtualapp vapp, virtualdatacenter vdc
+      WHERE vdc.idVirtualDataCenter = vapp.idVirtualDataCenter
+      AND n.idNode = NEW.idNode
+      AND n.idVirtualApp = vapp.idVirtualApp;
+      SELECT vm.idType, vm.state, vm.cpu, vm.ram, vm.hd INTO type, state, cpu, ram, hd
+     FROM virtualmachine vm
+	WHERE vm.idVM = NEW.idVM;
+      --  INSERT INTO debug_msg (msg) VALUES (CONCAT('createNVI ', type, ' - ', state, ' - ', IFNULL(idDataCenterObj,'NULL'), ' - ',IFNULL(idVirtualAppObj,'NULL'), ' - ',IFNULL(idVirtualDataCenterObj,'NULL')));
+    IF type=1 THEN
+    	-- Imported !!!
+		UPDATE IGNORE cloud_usage_stats SET vMachinesTotal = vMachinesTotal+1
+                WHERE idDataCenter = idDataCenterObj;
+                UPDATE IGNORE vapp_enterprise_stats SET vmCreated = vmCreated+1
+                WHERE idVirtualApp = idVirtualAppObj;
+                UPDATE IGNORE vdc_enterprise_stats SET vmCreated = vmCreated+1
+                WHERE idVirtualDataCenter = idVirtualDataCenterObj;
+          IF state = "ON" THEN 	
+			UPDATE IGNORE vapp_enterprise_stats SET vmActive = vmActive+1
+		        WHERE idVirtualApp = idVirtualAppObj;
+		        UPDATE IGNORE vdc_enterprise_stats SET vmActive = vmActive+1
+		        WHERE idVirtualDataCenter = idVirtualDataCenterObj;
+		        UPDATE IGNORE cloud_usage_stats SET vMachinesRunning = vMachinesRunning+1
+		        WHERE idDataCenter = idDataCenterObj;       
+		        UPDATE IGNORE enterprise_resources_stats 
+		            SET vCpuUsed = vCpuUsed + cpu,
+		                memoryUsed = memoryUsed + ram,
+		                localStorageUsed = localStorageUsed + hd
+		        WHERE idEnterprise = idEnterpriseObj;
+		        UPDATE IGNORE dc_enterprise_stats 
+		        SET     vCpuUsed = vCpuUsed + cpu,
+		            memoryUsed = memoryUsed + ram,
+		            localStorageUsed = localStorageUsed + hd
+		        WHERE idEnterprise = idEnterpriseObj AND idDataCenter = idDataCenterObj;
+		        UPDATE IGNORE vdc_enterprise_stats 
+		        SET     vCpuUsed = vCpuUsed + cpu,
+		            memoryUsed = memoryUsed + ram,
+		            localStorageUsed = localStorageUsed + hd
+		        WHERE idVirtualDataCenter = idVirtualDataCenterObj;	
+		END IF;
+    END IF;    
+    SELECT IF(vi.cost_code IS NULL, 0, vi.cost_code) INTO costCodeObj
+        FROM virtualimage vi
+        WHERE vi.idImage = NEW.idImage;
+    IF EXISTS( SELECT * FROM information_schema.ROUTINES WHERE ROUTINE_SCHEMA='kinton' AND ROUTINE_TYPE='PROCEDURE' AND ROUTINE_NAME='AccountingVMRegisterEvents' ) THEN
+       IF EXISTS(SELECT * FROM virtualimage vi WHERE vi.idImage=NEW.idImage AND vi.idRepository IS NOT NULL) THEN 
+	          CALL AccountingVMRegisterEvents(NEW.idVM, type, "NOT_ALLOCATED", state, "NOT_ALLOCATED", ram, cpu, hd, costCodeObj);
+        END IF;              
+     END IF;
+    END IF;
+  END;
+--
+|
+--
+SELECT "Recreating trigger update_virtualmachine_update_stats ..." as " ";
 CREATE TRIGGER kinton.update_virtualmachine_update_stats AFTER UPDATE ON kinton.virtualmachine
     FOR EACH ROW BEGIN
         DECLARE idDataCenterObj INTEGER;
@@ -980,8 +1231,7 @@ CREATE TRIGGER kinton.update_virtualmachine_update_stats AFTER UPDATE ON kinton.
         DECLARE idVirtualDataCenterObj INTEGER;
         DECLARE costCodeObj int(4);
 	DECLARE previousState VARCHAR(50);
-	-- For debugging purposes only
-        -- INSERT INTO debug_msg (msg) VALUES (CONCAT('UPDATE: ', OLD.idType, NEW.idType, OLD.state, NEW.state));	
+	-- For debugging purposes only        
         IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN   
 	-- We always store previous state when starting a transaction
 	IF NEW.state != OLD.state AND NEW.state='LOCKED' THEN
@@ -991,6 +1241,7 @@ CREATE TRIGGER kinton.update_virtualmachine_update_stats AFTER UPDATE ON kinton.
 	SELECT vmts.previousState INTO previousState
         FROM virtualmachinetrackedstate vmts
 	WHERE vmts.idVM = NEW.idVM;
+	-- INSERT INTO debug_msg (msg) VALUES (CONCAT('UPDATE: ', NEW.idVM, ' - ', OLD.idType, ' - ', NEW.idType, ' - ', OLD.state, ' - ', NEW.state, ' - ', previousState));	
         --  Updating enterprise_resources_stats: VCPU Used, Memory Used, Local Storage Used
         IF OLD.idHypervisor IS NULL OR (OLD.idHypervisor != NEW.idHypervisor) THEN
             SELECT pm.idDataCenter INTO idDataCenterObj
@@ -1009,40 +1260,12 @@ CREATE TRIGGER kinton.update_virtualmachine_update_stats AFTER UPDATE ON kinton.
         WHERE NEW.idVM = nvi.idVM
         AND nvi.idNode = n.idNode
         AND vapp.idVirtualApp = n.idVirtualApp;   
+-- INSERT INTO debug_msg (msg) VALUES (CONCAT('update values ', IFNULL(idDataCenterObj,'NULL'), ' - ',IFNULL(idVirtualAppObj,'NULL'), ' - ',IFNULL(idVirtualDataCenterObj,'NULL'), ' - ',IFNULL(previousState,'NULL')));
 	--
-	IF NEW.idType = 1 AND OLD.idType = 0 THEN
-		-- Imported !!!
-		UPDATE IGNORE cloud_usage_stats SET vMachinesTotal = vMachinesTotal+1
-                WHERE idDataCenter = idDataCenterObj;
-                UPDATE IGNORE vapp_enterprise_stats SET vmCreated = vmCreated+1
-                WHERE idVirtualApp = idVirtualAppObj;
-                UPDATE IGNORE vdc_enterprise_stats SET vmCreated = vmCreated+1
-                WHERE idVirtualDataCenter = idVirtualDataCenterObj;
-		IF NEW.state = "ON" AND previousState != "ON" THEN 	
-			UPDATE IGNORE vapp_enterprise_stats SET vmActive = vmActive+1
-		        WHERE idVirtualApp = idVirtualAppObj;
-		        UPDATE IGNORE vdc_enterprise_stats SET vmActive = vmActive+1
-		        WHERE idVirtualDataCenter = idVirtualDataCenterObj;
-		        UPDATE IGNORE cloud_usage_stats SET vMachinesRunning = vMachinesRunning+1
-		        WHERE idDataCenter = idDataCenterObj;       
-		        UPDATE IGNORE enterprise_resources_stats 
-		            SET vCpuUsed = vCpuUsed + NEW.cpu,
-		                memoryUsed = memoryUsed + NEW.ram,
-		                localStorageUsed = localStorageUsed + NEW.hd
-		        WHERE idEnterprise = NEW.idEnterprise;
-		        UPDATE IGNORE dc_enterprise_stats 
-		        SET     vCpuUsed = vCpuUsed + NEW.cpu,
-		            memoryUsed = memoryUsed + NEW.ram,
-		            localStorageUsed = localStorageUsed + NEW.hd
-		        WHERE idEnterprise = NEW.idEnterprise AND idDataCenter = idDataCenterObj;
-		        UPDATE IGNORE vdc_enterprise_stats 
-		        SET     vCpuUsed = vCpuUsed + NEW.cpu,
-		            memoryUsed = memoryUsed + NEW.ram,
-		            localStorageUsed = localStorageUsed + NEW.hd
-		        WHERE idVirtualDataCenter = idVirtualDataCenterObj;	
-		END IF;
+	-- Imported VMs will be updated on create_node_virtual_image
+	-- Used Stats (vCpuUsed, vMemoryUsed, vStorageUsed) are updated from delete_nodevirtualimage_update_stats ON DELETE nodevirtualimage when updating the VApp
 	-- Main case: an imported VM changes its state (from LOCKED to ...)
-	ELSEIF NEW.idType = 1 AND (NEW.state != OLD.state) THEN
+	IF NEW.idType = 1 AND (NEW.state != OLD.state) THEN
             IF NEW.state = "ON" AND previousState != "ON" THEN 
                 -- New Active
                 UPDATE IGNORE vapp_enterprise_stats SET vmActive = vmActive+1
@@ -1066,10 +1289,8 @@ CREATE TRIGGER kinton.update_virtualmachine_update_stats AFTER UPDATE ON kinton.
                     memoryUsed = memoryUsed + NEW.ram,
                     localStorageUsed = localStorageUsed + NEW.hd
                 WHERE idVirtualDataCenter = idVirtualDataCenterObj;
--- cloud_usage_stats Used Stats (vCpuUsed, vMemoryUsed, vStorageUsed) are updated from update_physical_machine_update_stats trigger
-            -- ELSEIF OLD.state = "ON" THEN           * This has to change, OLD.state is always LOCKED
-		ELSEIF (NEW.state IN ("PAUSED","OFF","NOT_ALLOCATED") AND previousState = "ON") THEN
-                -- Active Out
+	    ELSEIF (NEW.state IN ("PAUSED","OFF","NOT_ALLOCATED") AND previousState = "ON") THEN
+                -- When Undeploying a full Vapp
                 UPDATE IGNORE vapp_enterprise_stats SET vmActive = vmActive-1
                 WHERE idVirtualApp = idVirtualAppObj;
                 UPDATE IGNORE vdc_enterprise_stats SET vmActive = vmActive-1
@@ -1091,10 +1312,9 @@ CREATE TRIGGER kinton.update_virtualmachine_update_stats AFTER UPDATE ON kinton.
                     memoryUsed = memoryUsed - NEW.ram,
                     localStorageUsed = localStorageUsed - NEW.hd
                 WHERE idVirtualDataCenter = idVirtualDataCenterObj; 
--- cloud_usage_stats Used Stats (vCpuUsed, vMemoryUsed, vStorageUsed) are updated from update_physical_machine_update_stats trigger
-            END IF;     	    
-            IF NEW.state = "ON" AND previousState = "NOT_ALLOCATED" THEN -- OR OLD.idType != NEW.idType
-                -- VMachine Deployed or VMachine imported
+            END IF;
+            IF NEW.state = "ON" AND previousState = "NOT_ALLOCATED" THEN 
+                -- VMachine Deployed
                 UPDATE IGNORE cloud_usage_stats SET vMachinesTotal = vMachinesTotal+1
                 WHERE idDataCenter = idDataCenterObj;
                 UPDATE IGNORE vapp_enterprise_stats SET vmCreated = vmCreated+1
@@ -1130,24 +1350,55 @@ CREATE TRIGGER kinton.delete_nodevirtualimage_update_stats AFTER DELETE ON kinto
     DECLARE idDataCenterObj INTEGER;
     DECLARE idVirtualAppObj INTEGER;
     DECLARE idVirtualDataCenterObj INTEGER;
+    DECLARE idEnterpriseObj INTEGER;   
+    DECLARE costCodeObj int(4); 
     DECLARE previousState VARCHAR(50);
+    DECLARE state VARCHAR(50);
+    DECLARE ram INTEGER;
+    DECLARE cpu INTEGER;
+    DECLARE hd bigint;
     DECLARE type INTEGER;
     DECLARE isUsingIP INTEGER;
     IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN
-    SELECT vapp.idVirtualApp, vapp.idVirtualDataCenter, vdc.idDataCenter INTO idVirtualAppObj, idVirtualDataCenterObj, idDataCenterObj
+    SELECT vapp.idVirtualApp, vapp.idVirtualDataCenter, vdc.idDataCenter, vdc.idEnterprise INTO idVirtualAppObj, idVirtualDataCenterObj, idDataCenterObj, idEnterpriseObj
       FROM node n, virtualapp vapp, virtualdatacenter vdc
       WHERE vdc.idVirtualDataCenter = vapp.idVirtualDataCenter
       AND n.idNode = OLD.idNode
       AND n.idVirtualApp = vapp.idVirtualApp;
-      SELECT vm.idType INTO type
+      SELECT vm.idType, vm.cpu, vm.ram, vm.hd, vm.state INTO type, cpu, ram, hd, state
      FROM virtualmachine vm
 	WHERE vm.idVM = OLD.idVM;
     SELECT vmts.previousState INTO previousState
      FROM virtualmachinetrackedstate vmts
 	WHERE vmts.idVM = OLD.idVM;
-    -- INSERT INTO debug_msg (msg) VALUES (CONCAT('previousState ', previousState));
+    -- INSERT INTO debug_msg (msg) VALUES (CONCAT('deleteNVI ', IFNULL(idDataCenterObj,'NULL'), ' - ',IFNULL(idVirtualAppObj,'NULL'), ' - ',IFNULL(idVirtualDataCenterObj,'NULL'), ' - ',IFNULL(previousState,'NULL')));
+-- INSERT INTO debug_msg (msg) VALUES (CONCAT('deleteNVI values', IFNULL(cpu,'NULL'), ' - ',IFNULL(ram,'NULL'), ' - ',IFNULL(hd,'NULL')));						
     --
     IF type = 1 THEN
+      IF previousState != "NOT_ALLOCATED" AND previousState != "UNKNOWN" THEN      	
+        UPDATE IGNORE cloud_usage_stats SET vMachinesTotal = vMachinesTotal-1
+          WHERE idDataCenter = idDataCenterObj;
+        UPDATE IGNORE vapp_enterprise_stats SET vmCreated = vmCreated-1
+          WHERE idVirtualApp = idVirtualAppObj;
+        UPDATE IGNORE vdc_enterprise_stats SET vmCreated = vmCreated-1
+          WHERE idVirtualDataCenter = idVirtualDataCenterObj;
+           UPDATE IGNORE enterprise_resources_stats 
+               SET vCpuUsed = vCpuUsed - cpu,
+                   memoryUsed = memoryUsed - ram,
+                   localStorageUsed = localStorageUsed - hd
+           WHERE idEnterprise = idEnterpriseObj;
+           UPDATE IGNORE dc_enterprise_stats 
+           SET     vCpuUsed = vCpuUsed - cpu,
+               memoryUsed = memoryUsed - ram,
+               localStorageUsed = localStorageUsed - hd
+           WHERE idEnterprise = idEnterpriseObj AND idDataCenter = idDataCenterObj;
+           UPDATE IGNORE vdc_enterprise_stats 
+           SET     vCpuUsed = vCpuUsed - cpu,
+               memoryUsed = memoryUsed - ram,
+               localStorageUsed = localStorageUsed - hd
+           WHERE idVirtualDataCenter = idVirtualDataCenterObj;                 
+      END IF;
+      --
       IF previousState != "NOT_ALLOCATED" AND previousState != "UNKNOWN" THEN      	
         UPDATE IGNORE cloud_usage_stats SET vMachinesTotal = vMachinesTotal-1
           WHERE idDataCenter = idDataCenterObj;
@@ -1166,10 +1417,19 @@ CREATE TRIGGER kinton.delete_nodevirtualimage_update_stats AFTER DELETE ON kinto
         WHERE idVirtualDataCenter = idVirtualDataCenterObj;
       END IF;
     END IF;
+    SELECT IF(vi.cost_code IS NULL, 0, vi.cost_code) INTO costCodeObj
+        FROM virtualimage vi
+        WHERE vi.idImage = OLD.idImage;
+    IF EXISTS( SELECT * FROM information_schema.ROUTINES WHERE ROUTINE_SCHEMA='kinton' AND ROUTINE_TYPE='PROCEDURE' AND ROUTINE_NAME='AccountingVMRegisterEvents' ) THEN
+       IF EXISTS(SELECT * FROM virtualimage vi WHERE vi.idImage=OLD.idImage AND vi.idRepository IS NOT NULL) THEN 
+	          CALL AccountingVMRegisterEvents(OLD.idVM, type, "-", "NOT_ALLOCATED", previousState, ram, cpu, hd, costCodeObj);
+        END IF;              
+     END IF;
   END IF;
   END;
-
+--
 |
+--
 SELECT "Recreating trigger delete_rasd_management_update_stats..." as " ";
 CREATE TRIGGER kinton.delete_rasd_management_update_stats AFTER DELETE ON kinton.rasd_management
     FOR EACH ROW BEGIN
@@ -1294,7 +1554,9 @@ CREATE TRIGGER kinton.virtualdatacenter_deleted BEFORE DELETE ON kinton.virtuald
         CLOSE curIpFreed;
         END IF;
     END;
+--
 |
+--
 SELECT "Recreating trigger update_rasd_management_update_stats..." as " ";
 CREATE TRIGGER kinton.update_rasd_management_update_stats AFTER UPDATE ON kinton.rasd_management
     FOR EACH ROW BEGIN
@@ -1350,11 +1612,7 @@ CREATE TRIGGER kinton.update_rasd_management_update_stats AFTER UPDATE ON kinton
 				WHERE r.instanceID = OLD.idResource;
 				-- INSERT INTO debug_msg (msg) VALUES (CONCAT('Updating ExtStorage: ',idState,' - ', IFNULL(idDataCenterObj, 'idDataCenterObj es NULL'), IFNULL(idEnterpriseObj, 'idEnterpriseObj es NULL'), reservedSize));	
 				UPDATE IGNORE cloud_usage_stats SET storageUsed = storageUsed-reservedSize WHERE idDataCenter = idDataCenterObj;
-				
-			
 				UPDATE IGNORE vapp_enterprise_stats SET volAttached = volAttached-1 WHERE idVirtualApp = OLD.idVirtualApp;
-				
-				
 				UPDATE IGNORE enterprise_resources_stats 
 				    SET     extStorageUsed = extStorageUsed - reservedSize
 				    WHERE idEnterprise = idEnterpriseObj;
@@ -1364,7 +1622,6 @@ CREATE TRIGGER kinton.update_rasd_management_update_stats AFTER UPDATE ON kinton
 				UPDATE IGNORE vdc_enterprise_stats 
 				    SET     volAttached = volAttached - 1, extStorageUsed = extStorageUsed - reservedSize
 				WHERE idVirtualDataCenter = OLD.idVirtualDatacenter;
-				UPDATE IGNORE vapp_enterprise_stats SET volAttached = volAttached-1 WHERE idVirtualApp = OLD.idVirtualApp;
 			    END IF;                 
 			END IF;
 			-- Volume added to VDC
@@ -1601,7 +1858,7 @@ DELIMITER ;
 -- ############################################# --	
 -- ######## SCHEMA: PROCEDURES RECREATED ####### --
 -- ############################################# --
-
+SELECT "STEP 11 UPDATING PROCEDURES FOR THIS RELEASE..." as " ";
 DROP PROCEDURE IF EXISTS kinton.CalculateCloudUsageStats;
 DROP PROCEDURE IF EXISTS kinton.CalculateEnterpriseResourcesStats;
 DROP PROCEDURE IF EXISTS kinton.CalculateVappEnterpriseStats;
@@ -1733,7 +1990,7 @@ CREATE PROCEDURE kinton.CalculateCloudUsageStats()
     AND v.state = 'ON'
     and v.idType = 1;
     --
-    SELECT IF (SUM(cpu*cpuRatio) IS NULL,0,SUM(cpu*cpuRatio)), IF (SUM(ram) IS NULL,0,SUM(ram)), IF (SUM(hd) IS NULL,0,SUM(hd)) , IF (SUM(cpuUsed) IS NULL,0,SUM(cpuUsed)), IF (SUM(ramUsed) IS NULL,0,SUM(ramUsed)), IF (SUM(hdUsed) IS NULL,0,SUM(hdUsed)) INTO vCpuTotal, vMemoryTotal, vStorageTotal, vCpuUsed, vMemoryUsed, vStorageUsed
+    SELECT IF (SUM(cpu) IS NULL,0,SUM(cpu)), IF (SUM(ram) IS NULL,0,SUM(ram)), IF (SUM(cpuUsed) IS NULL,0,SUM(cpuUsed)), IF (SUM(ramUsed) IS NULL,0,SUM(ramUsed)) INTO vCpuTotal, vMemoryTotal, vCpuUsed, vMemoryUsed
     FROM physicalmachine
     WHERE idDataCenter = idDataCenterObj
     AND idState = 3; 
@@ -2130,7 +2387,7 @@ CREATE PROCEDURE kinton.get_datastore_size_by_dc(IN idDC INT, OUT size BIGINT UN
 BEGIN
     SELECT IF (SUM(ds_view.size) IS NULL,0,SUM(ds_view.size)) INTO size
     FROM (SELECT d.size as size FROM datastore d LEFT OUTER JOIN datastore_assignment da ON d.idDatastore = da.idDatastore 
-    LEFT OUTER JOIN physicalmachine pm ON da.idPhysicalMachine = pm.idPhysicialMachine
+    LEFT OUTER JOIN physicalmachine pm ON da.idPhysicalMachine = pm.idPhysicalMachine
     WHERE pm.idDataCenter = idDC AND d.enabled = 1 GROUP BY d.datastoreUuid) ds_view;
 END;
 --
@@ -2141,7 +2398,7 @@ CREATE PROCEDURE kinton.get_datastore_used_size_by_dc(IN idDC INT, OUT usedSize 
 BEGIN
     SELECT IF (SUM(ds_view.usedSize) IS NULL,0,SUM(ds_view.usedSize)) INTO usedSize
     FROM (SELECT d.usedSize as usedSize FROM datastore d LEFT OUTER JOIN datastore_assignment da ON d.idDatastore = da.idDatastore
-    LEFT OUTER JOIN physicalmachine pm ON da.idPhysicalMachine = pm.idPhysicialMachine
+    LEFT OUTER JOIN physicalmachine pm ON da.idPhysicalMachine = pm.idPhysicalMachine
     WHERE pm.idDataCenter = idDC AND d.enabled = 1 GROUP BY d.datastoreUuid) ds_view;
 END;
 --
@@ -2171,3 +2428,7 @@ DELIMITER ;
 
 # This should not be necessary
 CALL kinton.add_version_column_to_all();
+
+SELECT "STEP 12 ENABLING TRIGGERS" as " ";
+SET @DISABLE_STATS_TRIGGERS = null;
+SELECT "#### UPGRADE COMPLETED ####" as " ";

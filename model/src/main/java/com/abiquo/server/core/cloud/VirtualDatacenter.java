@@ -71,7 +71,7 @@ public class VirtualDatacenter extends DefaultEntityWithLimits
 
     public final static String NAME_PROPERTY = "name";
 
-    private final static boolean NAME_REQUIRED = false;
+    private final static boolean NAME_REQUIRED = true;
 
     public final static int NAME_LENGTH_MIN = 1;
 
@@ -220,5 +220,47 @@ public class VirtualDatacenter extends DefaultEntityWithLimits
         this.setHypervisorType(type);
         this.setNetwork(network);
         this.setName(name);
+    }
+
+    // ********************************** Others ********************************
+    /**
+     * Ways to order this element in the queries.
+     */
+    public static enum OrderByEnum
+    {
+        NAME("name", "vdc.name"), HYPERVISOR_TYPE("hypervisorType", "vdc.hypervisorType");
+
+        public static OrderByEnum fromValue(final String orderBy)
+        {
+            for (OrderByEnum currentOrder : OrderByEnum.values())
+            {
+                if (currentOrder.name().equalsIgnoreCase(orderBy))
+                {
+                    return currentOrder;
+                }
+            }
+
+            return null;
+        }
+
+        private String columnSQL;
+
+        private String columnHQL;
+
+        private OrderByEnum(final String columnSQL, final String columnHQL)
+        {
+            this.columnSQL = columnSQL;
+            this.columnHQL = columnHQL;
+        }
+
+        public String getColumnSQL()
+        {
+            return columnSQL;
+        }
+
+        public String getColumnHQL()
+        {
+            return columnHQL;
+        }
     }
 }

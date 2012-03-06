@@ -40,7 +40,6 @@ import org.testng.annotations.Test;
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.services.stub.NodecollectorServiceStubMock;
 import com.abiquo.model.enumerator.HypervisorType;
-import com.abiquo.model.enumerator.MachineState;
 import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.infrastructure.Datacenter;
@@ -69,6 +68,8 @@ public class MachinesResourceIT extends AbstractJpaGeneratorIT
     public void setup()
     {
         hypervisor = hypervisorGenerator.createUniqueInstance();
+        hypervisor.setIpService(NodecollectorServiceStubMock.IP_DISCOVER_FIRST);
+
         machine = hypervisor.getMachine();
 
         RemoteService vsm =
@@ -145,19 +146,9 @@ public class MachinesResourceIT extends AbstractJpaGeneratorIT
         assertNotNull(entityPost);
         assertEquals(m.getName(), entityPost.getName());
         assertEquals(m.getDescription(), entityPost.getDescription());
-        assertEquals(m.getVirtualCpuCores(), entityPost.getVirtualCpuCores());
-        assertEquals(m.getVirtualRamUsedInMb(), entityPost.getVirtualRamUsedInMb());
-        assertEquals(m.getVirtualCpusUsed(), entityPost.getVirtualCpusUsed());
-        assertEquals(m.getVirtualCpusPerCore(), entityPost.getVirtualCpusPerCore());
         assertEquals(m.getType(), entityPost.getType());
         assertEquals(m.getIp(), entityPost.getIp());
         assertEquals(m.getIpService(), entityPost.getIpService());
-
-        // Hypervisor credentials are no longer returned by the API
-        // assertEquals(m.getUser(), entityPost.getUser());
-        // assertEquals(m.getPassword(), entityPost.getPassword());
-
-        assertEquals(entityPost.getState(), m.getState());
         assertEquals(entityPost.getVirtualSwitch(), m.getVirtualSwitch());
 
         // Check the datastore was correctly created.
@@ -215,8 +206,11 @@ public class MachinesResourceIT extends AbstractJpaGeneratorIT
     public void canNotCreateMachineVSMNotCreated() throws Exception
     {
         Rack rack = rackGenerator.createUniqueInstance();
+        RemoteService nc =
+            rack.getDatacenter().createRemoteService(RemoteServiceType.NODE_COLLECTOR,
+                "http://localhost:8080/bar", 1);
 
-        setup(rack.getDatacenter(), rack);
+        setup(rack.getDatacenter(), rack, nc);
 
         MachineDto machineDto = getValidMachine();
         DatastoreDto dto = new DatastoreDto();
@@ -309,20 +303,11 @@ public class MachinesResourceIT extends AbstractJpaGeneratorIT
 
         m.setName("machine_test");
         m.setDescription("machine_test_description");
-
-        m.setVirtualRamInMb(2);
-        m.setVirtualRamUsedInMb(4);
-
-        m.setVirtualCpuCores(18);
-        m.setVirtualCpusPerCore(1);
-        m.setVirtualCpusUsed(0);
-
-        m.setState(MachineState.STOPPED);
         m.setVirtualSwitch("192.168.1.1");
 
         m.setType(HypervisorType.HYPERV_301);
-        m.setIp("10.0.0.1");
-        m.setIpService("10.0.0.1");
+        m.setIp(NodecollectorServiceStubMock.IP_DISCOVER_LAST);
+        m.setIpService(NodecollectorServiceStubMock.IP_DISCOVER_LAST);
         m.setPort(3556);
         m.setUser("foo");
         m.setPassword("bar");

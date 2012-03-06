@@ -75,11 +75,11 @@ public class TemplateDefinitionListDAO extends DefaultDAOBase<Integer, TemplateD
     }
 
     @SuppressWarnings("unchecked")
-    public List<TemplateDefinition> findByName(final String name)
+    public TemplateDefinitionList findByName(final String name)
     {
         Criteria criteria = createCriteria(sameName(name));
         criteria.addOrder(Order.asc(TemplateDefinitionList.NAME_PROPERTY));
-        return criteria.list();
+        return (TemplateDefinitionList) criteria.uniqueResult();
     }
 
     private static Criterion sameName(final String name)

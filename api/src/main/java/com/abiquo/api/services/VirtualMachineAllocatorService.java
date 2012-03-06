@@ -53,6 +53,7 @@ import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualApplianceDAO;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineDAO;
+import com.abiquo.server.core.cloud.VirtualMachineRep;
 import com.abiquo.server.core.cloud.VirtualMachineState;
 import com.abiquo.server.core.infrastructure.Machine;
 import com.abiquo.server.core.infrastructure.Rack;
@@ -74,8 +75,8 @@ import com.abiquo.server.core.scheduler.VirtualMachineRequirements;
 @Service
 public class VirtualMachineAllocatorService extends DefaultApiService
 {
-    protected final static Logger LOG = LoggerFactory
-        .getLogger(VirtualMachineAllocatorService.class);
+    protected final static Logger LOG =
+        LoggerFactory.getLogger(VirtualMachineAllocatorService.class);
 
     @Autowired
     private VirtualMachineRequirementsFactory vmRequirements;
@@ -104,6 +105,9 @@ public class VirtualMachineAllocatorService extends DefaultApiService
     @Autowired
     protected InfrastructureService infrastructureService;
 
+    @Autowired
+    protected VirtualMachineRep vmRepo;
+
     public VirtualMachineAllocatorService()
     {
 
@@ -119,6 +123,7 @@ public class VirtualMachineAllocatorService extends DefaultApiService
         this.checkEnterpirse = new EnterpriseLimitChecker(em);
         this.upgradeUse = new ResourceUpgradeUse(em);
         this.vmRequirements = new VirtualMachineRequirementsFactory();
+        this.vmRepo = new VirtualMachineRep(em);
     }
 
     /**
@@ -130,12 +135,10 @@ public class VirtualMachineAllocatorService extends DefaultApiService
      * @param foreceEnterpriseSoftLimits
      */
     @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
-    public void checkAllocate(final Integer idVirtualApp, final Integer virtualMachineId,
+    public void checkAllocate(final Integer idVirtualApp, final VirtualMachine vmachine,
         final VirtualMachineRequirements increaseRequirements,
         final boolean foreceEnterpriseSoftLimits)
     {
-
-        final VirtualMachine vmachine = virtualMachineDao.findById(virtualMachineId);
         final VirtualAppliance vapp = virtualAppDao.findById(idVirtualApp);
         final Machine machine = vmachine.getHypervisor().getMachine();
 
@@ -163,6 +166,8 @@ public class VirtualMachineAllocatorService extends DefaultApiService
             }
 
             upgradeUse.updateUsed(vmachine.getHypervisor().getMachine(), increaseRequirements);
+            upgradeUse.updateNetworkingResources(vmachine.getHypervisor().getMachine(), vmachine,
+                vapp);
 
         }
         catch (NotEnoughResourcesException e)
@@ -178,8 +183,8 @@ public class VirtualMachineAllocatorService extends DefaultApiService
             }
             else
             {
-                addConflictErrors(new CommonError(APIError.SOFT_LIMIT_EXCEEDED.name(),
-                    limite.toString()));
+                addConflictErrors(new CommonError(APIError.SOFT_LIMIT_EXCEEDED.name(), limite
+                    .toString()));
             }
         }
         catch (AllocatorException e)
@@ -204,8 +209,8 @@ public class VirtualMachineAllocatorService extends DefaultApiService
     protected VirtualMachine allocate(final Integer vmid, final Integer vapid,
         final Boolean foreceEnterpriseSoftLimits)
     {
-        return allocateVirtualMachine(virtualMachineDao.findById(vmid),
-            virtualAppDao.findById(vapid), foreceEnterpriseSoftLimits);
+        return allocateVirtualMachine(virtualMachineDao.findById(vmid), virtualAppDao
+            .findById(vapid), foreceEnterpriseSoftLimits);
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
@@ -250,7 +255,7 @@ public class VirtualMachineAllocatorService extends DefaultApiService
             final Integer idDatacenter = vapp.getVirtualDatacenter().getDatacenter().getId();
             final FitPolicy fitPolicy = getAllocationFitPolicyOnDatacenter(idDatacenter);
 
-            checkLimist(vapp, requirements, foreceEnterpriseSoftLimits, true);
+            checkLimist(vapp, requirements, foreceEnterpriseSoftLimits, false);
 
             VirtualMachine allocatedvm =
                 selectPhysicalMachineAndAllocateResources(vmachine, vapp, fitPolicy, requirements);
@@ -272,8 +277,8 @@ public class VirtualMachineAllocatorService extends DefaultApiService
             }
             else
             {
-                addConflictErrors(new CommonError(APIError.SOFT_LIMIT_EXCEEDED.name(),
-                    limite.toString()));
+                addConflictErrors(new CommonError(APIError.SOFT_LIMIT_EXCEEDED.name(), limite
+                    .toString()));
             }
         }
         catch (AllocatorException e)
@@ -336,7 +341,7 @@ public class VirtualMachineAllocatorService extends DefaultApiService
      *         but we wants to move it.
      */
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public VirtualMachine allocateHAVirtualMachine(final Integer vmId,
+    public VirtualMachine allocateHAVirtualMachine(final VirtualMachine vmId,
         final VirtualMachineRequirements requirements, final VirtualMachineState targetState)
         throws AllocatorException, ResourceAllocationException
     {
@@ -368,7 +373,15 @@ public class VirtualMachineAllocatorService extends DefaultApiService
     {
         try
         {
-            upgradeUse.rollbackUse(vmachine);
+            if (vmachine.isManaged())
+            {
+                upgradeUse.rollbackUse(vmachine);
+            }
+            else
+            {
+                vmRepo.deleteVirtualMachine(vmachine);
+            }
+
         }
         catch (ResourceUpgradeUseException e)
         {
@@ -382,11 +395,18 @@ public class VirtualMachineAllocatorService extends DefaultApiService
         }
     }
 
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    public void deallocateVirtualMachineHA(final VirtualMachine vmachine)
+        throws AllocatorException, ResourceAllocationException
+    {
+        LOG.error("community can't *deallocateHAVirtualMachine*");
+    }
+
     protected String virtualMachineInfo(final VirtualMachine vm)
     {
 
-        return String.format("Virtual Machine id:%d name:%s UUID:%s.", vm.getId(), vm.getName(),
-            vm.getUuid());
+        return String.format("Virtual Machine id:%d name:%s UUID:%s.", vm.getId(), vm.getName(), vm
+            .getUuid());
     }
 
     /** ##### CHECK LIMITS ###### */
@@ -416,7 +436,7 @@ public class VirtualMachineAllocatorService extends DefaultApiService
     {
         try
         {
-            checkLimist(vapp, required, force, true);
+            checkLimist(vapp, required, force, false);
         }
         catch (LimitExceededException limite)
         {
@@ -426,8 +446,8 @@ public class VirtualMachineAllocatorService extends DefaultApiService
             }
             else
             {
-                addConflictErrors(new CommonError(APIError.SOFT_LIMIT_EXCEEDED.name(),
-                    limite.toString()));
+                addConflictErrors(new CommonError(APIError.SOFT_LIMIT_EXCEEDED.name(), limite
+                    .toString()));
             }
         }
         catch (Exception e)
@@ -548,8 +568,7 @@ public class VirtualMachineAllocatorService extends DefaultApiService
             }
             catch (Exception e)
             {
-                LOG.error(
-                    "Could not power on the machine id {} name {} the error: {}: {}",
+                LOG.error("Could not power on the machine id {} name {} the error: {}: {}",
                     new Object[] {machine.getId(), machine.getName(), e.getClass().getName(),
                     e.getMessage()});
             }
@@ -573,8 +592,7 @@ public class VirtualMachineAllocatorService extends DefaultApiService
             }
             catch (Exception e)
             {
-                LOG.error(
-                    "Could not power off the machine id {} name {} the error: {}: {}",
+                LOG.error("Could not power off the machine id {} name {} the error: {}: {}",
                     new Object[] {machine.getId(), machine.getName(), e.getClass().getName(),
                     e.getMessage()});
             }

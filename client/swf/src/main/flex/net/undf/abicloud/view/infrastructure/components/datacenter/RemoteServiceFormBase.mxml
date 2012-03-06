@@ -95,10 +95,6 @@
                     remoteServiceFormItem.domainNameInput.text = _remoteService.domainName;
                     remoteServiceFormItem.portInput.text = _remoteService.port.toString();
                     remoteServiceFormItem.serviceMappingInput.text = _remoteService.serviceMapping;
-                    if(_remoteService.remoteServiceType.valueOf == RemoteServiceType.TARANTINO 
-                    && _remoteService.serviceMapping == "tarantino"){
-                        remoteServiceFormItem.serviceMappingInput.text = "virtualfactory";
-                    }
                     remoteServiceFormItem.remoteServiceStatus = _remoteService.status;
                     remoteServiceFormItem.remoteServiceType = _remoteServiceType;
                     
@@ -232,12 +228,8 @@
                     remoteServiceToEdit.protocol = remoteServiceFormItem.protocolInput.text;
                     remoteServiceToEdit.domainName = remoteServiceFormItem.domainNameInput.text;
                     remoteServiceToEdit.port = Number(remoteServiceFormItem.portInput.text);
-                    
-                    remoteServiceToEdit.serviceMapping = remoteServiceFormItem.serviceMappingInput.text;
-                    if(remoteServiceToEdit.remoteServiceType.valueOf == RemoteServiceType.TARANTINO 
-                    && remoteServiceFormItem.serviceMappingInput.text == "virtualfactory"){
-                        remoteServiceToEdit.serviceMapping = "tarantino";
-                    }
+                    remoteServiceToEdit.uri = remoteServiceFormItem.formedUri;
+                    remoteServiceToEdit.serviceMapping = remoteServiceFormItem.serviceMappingInput.text;                    
                     remoteServiceToEdit.name = remoteServiceFormItem.formedUri;
                     remoteServiceToEdit.status = remoteServiceFormItem.remoteServiceStatus;
 
@@ -260,14 +252,8 @@
                     newRemoteService.protocol = remoteServiceFormItem.protocolInput.text;
                     newRemoteService.domainName = remoteServiceFormItem.domainNameInput.text;
                     newRemoteService.port = Number(remoteServiceFormItem.portInput.text);
-                    //TMP -> replace tarantino by virtualfactory
                     newRemoteService.serviceMapping = remoteServiceFormItem.serviceMappingInput.text;
-                    newRemoteService.name = remoteServiceFormItem.formedUri;
-                    if(newRemoteService.remoteServiceType.valueOf == RemoteServiceType.TARANTINO 
-                    && remoteServiceFormItem.serviceMappingInput.text == "virtualfactory"){
-                        newRemoteService.serviceMapping = "tarantino";
-                        newRemoteService.name = newRemoteService.name.replace("virtualfactory","tarantino");
-                    }
+                    newRemoteService.name = remoteServiceFormItem.formedUri;                    
                     
                 }
 

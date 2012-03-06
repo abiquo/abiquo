@@ -93,10 +93,10 @@ public enum APIError
         "Invalid VLAN hard limit; this cannot be greater than the number of VLANS per virtual datacenter: {0}"), LIMITS_DUPLICATED(
         "LIMIT-7", "Duplicate limits by enterprise and datacenter"), LIMITS_NOT_EXIST("LIMIT-8",
         "Limits by enterprise and datacenter do not exist"), //
-    ENTERPRISE_LIMIT_EDIT_ARE_SURPRASED("LIMIT-9",
+    ENTERPRISE_LIMIT_EDIT_ARE_SURPASSED("LIMIT-9",
         "Cannot edit resource limits; current enterprise allocation exceeds the new specified limits "
             + "(see SYSTEM traces in order to determine which resources are at HARD limit)"), //
-    DATACENTER_LIMIT_EDIT_ARE_SURPRASED(
+    DATACENTER_LIMIT_EDIT_ARE_SURPASSED(
         "LIMIT-10",
         "Cannot edit resource limits; current enterprise and datacenter allocation exceeds the new specified limits "
             + "(see SYSTEM traces in order to determine which resources are at HARD limit)"), DATACENTER_LIMIT_DELETE_VDCS(
@@ -178,15 +178,25 @@ public enum APIError
         "Cannot change enterprise because this network is used as the default by a Virtual Datacenter"), VLANS_NOT_UNMANAGED(
         "VLAN-46", "The virtual network is not Unmanaged "), VLANS_UNMANAGED_WITH_VM_CAN_NOT_BE_DELETED(
         "VLAN-47", "Cannot delete Unmanaged Networks associated with Virtual Machines"), VLANS_MISSING_ENTERPRISE_LINK(
-        "VLAN-48", "Missing link to the enterprise"),
+        "VLAN-48", "Enterprise link with rel 'enterprise' is mandatory "),
 
     // VIRTUAL APPLIANCE
     NON_EXISTENT_VIRTUALAPPLIANCE("VAPP-0", "The requested virtual appliance does not exist"), VIRTUALAPPLIANCE_NOT_DEPLOYED(
         "VAPP-1", "The virtual appliance is not deployed"), VIRTUALAPPLIANCE_NOT_RUNNING("VAPP-2",
-        "The virtual appliance is not running"), VIRTUALAPPLIANCE_DEPLOYED("VAPP-1",
+        "The virtual appliance is not running"), VIRTUALAPPLIANCE_DEPLOYED("VAPP-3",
         "The virtual appliance is deployed"), VIRTUALAPPLIANCE_NON_MANAGED_IMAGES("VAPP-4",
         "The virtual appliance has non-managed VM templates"), VIRTUALAPPLIANCE_INVALID_STATE_DELETE(
-        "VAPP-4", "The virtual appliance has non-managed VM templates"),
+        "VAPP-5", "The virtual appliance has non-managed VM templates"), VIRTUALAPPLIANCE_MOVE_MISSING_VDC(
+        "VAPP-6", "The virtual appliance has not the virtual datacenter link"), VIRTUALAPPLIANCE_INVALID_STATE_MOVE_COPY(
+        "VAPP-8", "The virtual appliance cannot be moved since the state is not NOT_DEPLOYED"), VIRTUALAPPLIANCE_INVALID_DC_MOVE_COPY(
+        "VAPP-7",
+        "The virtual appliance cannot be moved or copied since target virtual datacenter is not in the same datacenter"), VIRTUALAPPLIANCE_MOVE_COPY_CAPTURED_VM(
+        "VAPP-9",
+        "The virtual appliance cannot be moved nor copied since it contains captured virtual machines"), VIRTUALAPPLIANCE_MOVE_COPY_INCOMPATIBLE_VM(
+        "VAPP-10",
+        "The virtual appliance cannot be moved nor copied since it contains incompatible virtual machines templates with the hypervisor to be moved"), VIRTUALAPPLIANCE_COPY_PERSISTENT_VM(
+        "VAPP-11",
+        "The virtual appliance cannot be copied since it contains persistent virtual machines templates with the hypervisor to be moved"),
 
     // VIRTUAL CONVERSION
     NON_EXISTENT_VIRTUALAPPLIANCE_STATEFULCONVERSION("VASC-0",
@@ -222,7 +232,9 @@ public enum APIError
         "MACHINE-8", "Invalid IPMI configuration"), MACHINE_INVALID_IP_RANGE("MACHINE-9",
         "Invalid IP range"), MACHINE_IQN_MISSING("MACHINE-10",
         "The IQN of the target Physical Machine is not set"), MANAGED_MACHINE_CANNOT_CHANGE_NAME(
-        "MACHINE-11", "The Machine is in a managed Rack and its name cannot be changed."),
+        "MACHINE-11", "The Machine is in a managed Rack and its name cannot be changed."), MACHINE_CANNOT_BE_RESERVED(
+        "MACHINE-12",
+        "The machine cannot be reserved because another enterprise has deployed virtual machines on it."),
 
     HYPERVISOR_EXIST_IP("HYPERVISOR-1",
         "Invalid hypervisor IP. A hypervisor with that IP already exists"), HYPERVISOR_EXIST_SERVICE_IP(
@@ -299,10 +311,12 @@ public enum APIError
         "Missing privilege parameter"), DELETE_ERROR("ROLE-3",
         "The requested role is blocked. It cannot be deleted"), DELETE_ERROR_WITH_USER("ROLE-4",
         "Cannot delete a role with a user associated"), DELETE_ERROR_WITH_ROLE_LDAP("ROLE-5",
-        "Cannot delete a role with a RoleLdap associated"), DUPLICATED_ROLE_NAME_ENT("ROLE-6",
-        "Cannot create a role with the same name as an existing role for the same enterprise"), DUPLICATED_ROLE_NAME_GEN(
-        "ROLE-7", "Cannot create a global role with the same name as an existing global role"), HAS_NOT_ENOUGH_PRIVILEGE(
-        "ROLE-8", "Not enough privileges to manage this role"),
+        "Cannot delete a role with a RoleLdap associated"), DUPLICATED_ROLE_NAME_ENT(
+        "ROLE-6",
+        "Cannot create a role with the same name as an existing role for the same enterprise or with the same name as an existing global role"), DUPLICATED_ROLE_NAME_GEN(
+        "ROLE-7", "Cannot create a global role with the same name as an existing role"), HAS_NOT_ENOUGH_PRIVILEGE(
+        "ROLE-8", "Not enough privileges to manage this role"), ROLE_NAME_BLANK("ROLE-9",
+        "Property name must not be blank"),
 
     // PRIVILEGE
     NON_EXISTENT_PRIVILEGE("PRIVILEGE-0", "The requested privilege does not exist"),
@@ -349,12 +363,17 @@ public enum APIError
         "The DHCP URI is invalid"), REMOTE_SERVICE_DATACENTER_UUID_NOT_FOUND("RS-13",
         "The remote service does not have the *abiquo.datacenter.id* property set"), REMOTE_SERVICE_DATACENTER_UUID_INCONSISTENT(
         "RS-14",
-        "The remote service is configured with a different datacenter UUID, please adjust the *abiquo.datacenter.id* property in the remote service."), APPLIANCE_MANAGER_CALL(
+        "The remote service is configured with a different datacenter UUID, please adjust the *abiquo.datacenter.id* property in the remote service."), REMOTE_SERVICE_UNDEFINED_PORT(
+        "RS-15", "A port must be defined in the uri"), REMOTE_SERVICE_NON_POOLABLE("RS-16",
+        "The provided remote service can not be used in for a remote service client pool"), REMOTE_SERVICE_ERROR_BORROWING(
+        "RS-17",
+        "An unexpected error occured while getting the remote service client from the client pool"), APPLIANCE_MANAGER_CALL(
         "AM-1", "Failed Appliance Manager communication"),
 
     // OVF PACKAGE LIST
     TEMPLATE_DEFINITION_LIST_NAME_ALREADY_EXIST("OVF-PACKAGE-LIST-0",
-        "OVF Package list name already exists"),
+        "OVF Package list name already exists"), TEMPLATE_DEFINITION_LIST_NAME_NOT_FOUND(
+        "OVF-PACKAGE-LIST-1", "OVF Package list name is required"),
 
     // OVF PACKAGE
     NON_EXISTENT_OVF_PACKAGE("OVF-PACKAGE-0", "The requested OVF package does not exist"), NON_EXISTENT_TEMPLATE_DEFINITION_LIST(
@@ -368,7 +387,7 @@ public enum APIError
         "Virtual machine template cannot be added due to invalid allocation units"), VMTEMPLATE_SYNCH_DC_REPO(
         "VIMAGE-SYNCH-DATACENTER-REPOSITORY", "Cannot obtain downloaded OVF in the datacenter"), VIMAGE_DATACENTER_REPOSITORY_NOT_FOUND(
         "DATACENTER-REPOSITORY-NOT-CREATED",
-        "Datacenter does not have the ApplianceManager properly configured. Repository not created"), VMTEMPLATE_REPOSITORY_CHANGED(
+        "Datacenter Repository not configured; check Datacenter's Appliance Manager. Contact Infrastructure Administrator"), VMTEMPLATE_REPOSITORY_CHANGED(
         "VIMAGE-REPOSITORY-CHANGED", "Datacenter repository location has changed"), VIMAGE_AM_DOWN(
         "VIMAGE-AM-DOWN", "Check Appliance Manager configuration error"), NON_EXISTENT_VIRTUAL_MACHINE_TEMPLATE(
         "VIMAGE-0", "The requested virtual machine template does not exist"), VIMAGE_IS_NOT_BUNDLE(
@@ -385,7 +404,9 @@ public enum APIError
         "VIMAGE-9",
         "Cannot delete the requested shared virtual machine template, because it belongs to another enterprise"), VMTEMPLATE_TEMPLATE_USED_BY_VIRTUAL_MACHINES_CANNOT_BE_DELETED(
         "VIMAGE-10",
-        "The Virtual Machine Template is being used by Virtual Machines and cannot be deleted"),
+        "The Virtual Machine Template is being used by Virtual Machines and cannot be deleted"), VMTEMPLATE_TEMPLATE_USED_BY_VIRTUAL_MACHINES_CANNOT_BE_UNSHARED(
+        "VIMAGE-11",
+        "The Virtual Machine Template is being used by Virtual Machines and cannot be modified to not shared"),
 
     // NODE COLLECTOR
     NON_EXISTENT_IP("NC-0", "The requested IP does not exist"), MISSING_IP_PARAMETER("NC-1",
@@ -438,9 +459,9 @@ public enum APIError
         "VSM-1", "An error occurred when shutting down the monitored physical machine"), SUBSCRIPTION_PROBLEM(
         "VSM-2", "An error occurred when subscribing the virtual machine"), UNSUBSCRIPTION_PROBLEM(
         "VSM-3", "An error occurred when unsubscribing the virtual machine"), REFRESH_STATE_PROBLEM(
-        "VSM-4", "An error occurred when refreshing the virtual machine state"), VSMCLIENTFROMPOOL_PROBLEM(
-        "VSM-5", "A VSMClient instance cannot be returned from connection pool."), INVALIDATE_STATE_PROBLEM(
-        "VSM-6", "An error occurred when resetting the last known state of the virtual machine"),
+        "VSM-4", "An error occurred when refreshing the virtual machine state"), INVALIDATE_STATE_PROBLEM(
+        "VSM-5", "An error occurred when resetting the last known state of the virtual machine"), VSM_UNAVAILABE(
+        "VSM-6", "VSM service unavailable, check the URL service."),
 
     // LICENSE
     LICENSE_UNEXISTING("LICENSE-0", "The requested license does not exist"), LICENSE_INVALID(
@@ -512,6 +533,17 @@ public enum APIError
         "VOL-29", "An unexpected error occurred while reconfiguring storage"), VOLUME_WRONG_NEW_VIRTUALDATACENTER(
         "VOL-39", "The volume can only be moved between Virtual Datacenters of the same Datacenter"),
 
+    // SSM
+    SSM_GET_POOLS_ERROR("SSM-1", "Could not get the storage pools in the target storage device"), SSM_GET_POOL_ERROR(
+        "SSM-2", "Could not get the given storage pool in the target storage device"), SSM_GET_VOLUMES_ERROR(
+        "SSM-3", "Could not get the volumes in the given storage pool"), SSM_GET_VOLUME_ERROR(
+        "SSM-4", "Could not get the given volume in the given storage pool"), SSM_CREATE_VOLUME_ERROR(
+        "SSM-5", "Could not create the volume in the target storage device"), SSM_DELETE_VOLUME_ERROR(
+        "SSM-6", "Could not delete the volume from the target storage device"), SSM_UPDATE_ERROR(
+        "SSM-7", "Could not update the volume in the target storage devide"), SSM_ADD_INITIATOR_ERROR(
+        "SSM-8", "Could not add the given iscsi initiator in the target storage device"), SSM_REMOVE_INITIATOR_ERROR(
+        "SSM-9", "Could not remove the given iscsi initiator from the target storage device"),
+
     // RULES
     NON_EXISTENT_EER("RULE-1", "The requested restrict shared server rule does not exist"), NON_EXISTENT_FPR(
         "RULE-2", "The requested load balance rule does not exist"), NON_EXISTENT_MLR("RULE-3",
@@ -527,7 +559,9 @@ public enum APIError
         "HD-3", "Invalid disk size."), HD_CURRENTLY_ALLOCATED("HD-4",
         "Cannot perform this action because the hard disk is currently attached to a virtual machine"), HD_ATTACH_INVALID_LINK(
         "HD-5", "Invalid link to the hard disk to attach"), HD_ATTACH_INVALID_VDC_LINK("HD-6",
-        "Invalid virtual datacenter in the link to the volume to attach"),
+        "Invalid virtual datacenter in the link to the volume to attach"), HD_CREATION_NOT_UNAVAILABLE(
+        "HD-7",
+        "Cannot perform this action because the hard disk creation is not available for this hypervisor"),
 
     // Chef
     CHEF_ERROR_GETTING_RECIPES("CHEF-0",
@@ -568,7 +602,7 @@ public enum APIError
 
     // TASKS
     NON_EXISTENT_TASK("TASK-1", "The requested task does not exist"), TASK_OWNER_NOT_FOUND(
-        "TASK-2", ""),
+        "TASK-2", "The owner of the requested task could not be found"),
 
     // PRICING TEMPLATE
     CURRENCY_PARAM_NOT_FOUND("PRICINGTEMPLATE-0", "Missing currency parameter"), ENT_PARAM_NOT_FOUND(

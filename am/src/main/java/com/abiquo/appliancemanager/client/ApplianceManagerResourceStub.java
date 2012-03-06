@@ -21,6 +21,7 @@
 
 package com.abiquo.appliancemanager.client;
 
+import java.io.UnsupportedEncodingException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -91,11 +92,33 @@ public class ApplianceManagerResourceStub
         String url =
         // XXX calling from server encode the ''ovfid''
         // URIResolver.resolveURI(serviceUri, "erepos/{erepo}/templates/{template}", params);
-            URIResolver.resolveURI(serviceUri, "erepos/{erepo}/templates", params) + '/' + ovfid;
+            URIResolver.resolveURI(serviceUri, "erepos/{erepo}/templates", params) + '/'
+                + decodedUrl(ovfid);
 
         Resource resource = client.resource(url);
 
         return resource;
+    }
+
+    /**
+     * Check each part of the url is properly encoded (uploading a template name with blanks)
+     */
+    private String decodedUrl(final String url)
+    {
+        try
+        {
+            String[] parts = url.split("/");
+            StringBuffer sb = new StringBuffer();
+            for (String part : parts)
+            {
+                sb.append("/").append(java.net.URLEncoder.encode(part, "UTF-8"));
+            }
+            return sb.toString();
+        }
+        catch (UnsupportedEncodingException e)
+        {
+            throw new RuntimeException(url, e);
+        }
     }
 
     Resource templates(final String idEnterprise)

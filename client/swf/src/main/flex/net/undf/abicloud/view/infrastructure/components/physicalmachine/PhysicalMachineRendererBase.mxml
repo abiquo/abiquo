@@ -82,7 +82,10 @@
                 		this._previousPhysicalMachine = value;
                 		this._saveState = 0;
                 	}
-                	physicalMachineVS.selectedIndex = this._saveState;
+                	//Update physicalMachine View Stack to avoid 
+                	//a display bug
+                	updateViewStack();
+                	
                 	                	
                 }
                 this._physicalMachine = value;
@@ -93,6 +96,16 @@
             public function get physicalMachine():PhysicalMachine
             {
                 return this._physicalMachine;
+            }
+            
+            protected function updateViewStack():void
+            {
+            	physicalMachineVS.removeAllChildren();
+            	physicalMachineVS.addChild(physicalMachineRendererGeneral);
+            	physicalMachineVS.addChild(physicalMachineRendererDescription);
+            	physicalMachineVS.addChild(physicalMachineRendererState);
+            	physicalMachineVS.selectedIndex = this._saveState;
+            	physicalMachineTab.selectedIndex = this._saveState;
             }
 
             /**
@@ -172,14 +185,6 @@
             	this._saveState = ViewStack(event.currentTarget).selectedIndex;
             }
             
-            private function childChange():void{
-            	
-            }
-        	
-        	private function updateTab():void{
-        		
-        	}
-        	
         	private function onHypervisorUpdated():void
         	{
         		hypervisor = physicalMachineRendererGeneral.hypervisor;
@@ -240,7 +245,7 @@
                 click="onClickCancel()"/>
         </mx:HBox>
 
-        <mx:TabBar 
+        <mx:TabBar id="physicalMachineTab"
             width="{nameLabel.width}"
             styleName="CustomVerticalTabBar" dataProvider="physicalMachineVS"
             direction="vertical"/>
@@ -248,8 +253,6 @@
 
     <mx:ViewStack id="physicalMachineVS"
         width="100%" height="100%"
-        childIndexChange="childChange()"
-        tabChildrenChange="updateTab()"
         change="updatePhysicalMachineInfo(event)">
 
         <!-- General Info -->

@@ -113,7 +113,6 @@ public class PhysicalMachineCreation
         }
 
         dto.setVirtualCpuCores(pm.getCpu());
-        dto.setVirtualCpusPerCore(pm.getCpuRatio());
         dto.setVirtualCpusUsed(pm.getCpuUsed());
 
         dto.setVirtualRamInMb(pm.getRam());
@@ -149,7 +148,6 @@ public class PhysicalMachineCreation
         machine.setVswitchName(dto.getVirtualSwitch());
         machine.setIdState(PhysicalmachineHB.transportStateToInteger(dto.getState()));
         machine.setCpu(dto.getVirtualCpuCores());
-        machine.setCpuRatio(dto.getVirtualCpusPerCore());
         machine.setCpuUsed(dto.getVirtualCpusUsed());
         machine.setRam(dto.getVirtualRamInMb());
         machine.setRamUsed(dto.getVirtualRamUsedInMb());

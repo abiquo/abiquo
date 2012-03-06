@@ -154,6 +154,7 @@ public class InfrastructureRep extends DefaultRepBase
         this.vlanDao = new VLANNetworkDAO(entityManager);
         this.ipPoolDao = new IpPoolManagementDAO(entityManager);
         this.dhcpOptionDAO = new DhcpOptionDAO(entityManager);
+        this.virtualMachineDao = new VirtualMachineDAO(entityManager);
     }
 
     public Datacenter findById(final Integer id)
@@ -943,6 +944,22 @@ public class InfrastructureRep extends DefaultRepBase
     public List<Integer> findUsedRemoteDesktopPortsInRack(final Rack rack)
     {
         return rackDao.findUsedVrdpPorts(rack);
+    }
+
+    /**
+     * Returns the total number of cores currently used in the platform.
+     */
+    public Long getTotalUsedCores()
+    {
+        return machineDao.getTotalUsedCores();
+    }
+
+    /**
+     * Returns the total number of cores currently used in the platform ignoring the given machine.
+     */
+    public Long getTotalUsedCoresExceptMachine(final Machine machine)
+    {
+        return machineDao.getTotalUsedCoresExceptMachine(machine);
     }
 
 }

@@ -413,6 +413,45 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
     }
 
     @Override
+    public BasicResult editExternalIp(final Integer enterpriseId, final Integer datacenterId,
+        final Integer vlanId, final IpPoolManagement ipPoolManagement)
+    {
+
+        BasicResult result = new BasicResult();
+        result.setSuccess(Boolean.FALSE);
+        String uri = createEnterpriseLimitsByDatacenterLink(enterpriseId);
+        ClientResponse response = get(uri);
+
+        DatacentersLimitsDto limits = response.getEntity(DatacentersLimitsDto.class);
+        for (DatacenterLimitsDto limitDto : limits.getCollection())
+        {
+            RESTLink dcLink = limitDto.searchLink("datacenter");
+            Integer dcId =
+                Integer.valueOf(dcLink.getHref().substring(dcLink.getHref().lastIndexOf("/") + 1));
+            if (dcId.equals(datacenterId))
+            {
+                String externalIPURI =
+                    createExternalNetworkIPLink(enterpriseId, limitDto.getId(), vlanId,
+                        ipPoolManagement.getIdManagement());
+
+                response = put(externalIPURI, createDtoObject(ipPoolManagement));
+                if (response.getStatusCode() == 200)
+                {
+
+                    result.setSuccess(Boolean.TRUE);
+
+                }
+                else
+                {
+                    populateErrors(response, result, "editExternalIp");
+                }
+            }
+        }
+        return result;
+
+    }
+
+    @Override
     public BasicResult getEnterpriseFromReservedVlanId(final Integer datacenterId,
         final Integer vlanId)
     {
@@ -1545,8 +1584,9 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
                 // configuration
                 // by default.
                 String gatewaysUri = createVirtualMachineConfigurationsLink(vdcId, vappId, vmId);
-                
-                // send an empty list of gateways to enable it means to disable the network configuration.
+
+                // send an empty list of gateways to enable it means to disable the network
+                // configuration.
                 LinksDto linksDto = new LinksDto();
                 response = put(gatewaysUri, linksDto);
                 if (response.getStatusCode() == 202 || response.getStatusCode() == 204)
@@ -1567,14 +1607,15 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
                     // Here we have found the dto. Modify it to inform we want to use this
                     // configuration
                     // by default.
-                    String gatewaysUri = createVirtualMachineConfigurationsLink(vdcId, vappId, vmId);
-                    
+                    String gatewaysUri =
+                        createVirtualMachineConfigurationsLink(vdcId, vappId, vmId);
+
                     String gatewayToEnable =
                         createVirtualMachineConfigurationLink(vdcId, vappId, vmId, dto.getId());
                     RESTLink linkGateway = new RESTLink();
                     linkGateway.setHref(gatewayToEnable);
                     linkGateway.setRel("network_configuration");
-                    
+
                     LinksDto linksDto = new LinksDto();
                     linksDto.addLink(linkGateway);
                     response = put(gatewaysUri, linksDto);
@@ -1800,5 +1841,37 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
             return orderBy;
         }
     }
+
+    @Override
+    public BasicResult getInfrastructureNICsByVirtualMachine(Integer datacenterId, Integer rackId,
+        Integer machineId, Integer virtualMachineId)
+    {
+        DataResult<List<IpPoolManagement>> result = new DataResult<List<IpPoolManagement>>();
+
+        String uri = createInfrastructureVirtualMachineNICsLink(datacenterId, rackId, machineId, virtualMachineId);
+        ClientResponse response = get(uri);
+
+        if (response.getStatusCode() == 200)
+        {
+            NicsDto nics = response.getEntity(NicsDto.class);
+            List<IpPoolManagement> returnIps = new ArrayList<IpPoolManagement>();
+
+            for (NicDto dto : nics.getCollection())
+            {
+                returnIps.add(createFlexObject(dto));
+            }
+
+            result.setData(returnIps);
+            result.setSuccess(Boolean.TRUE);
+        }
+        else
+        {
+            populateErrors(response, result, "getInfrastructureNICsByVirtualMachine");
+        }
+
+        return result;
+    }
+
+
 
 }

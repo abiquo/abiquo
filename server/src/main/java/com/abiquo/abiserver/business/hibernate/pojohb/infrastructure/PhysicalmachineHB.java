@@ -27,7 +27,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.abiquo.abiserver.business.hibernate.pojohb.IPojoHB;
-import com.abiquo.abiserver.config.AbiConfigManager;
 import com.abiquo.abiserver.pojo.infrastructure.Datastore;
 import com.abiquo.abiserver.pojo.infrastructure.PhysicalMachine;
 import com.abiquo.abiserver.pojo.infrastructure.Rack;
@@ -88,13 +87,6 @@ public class PhysicalmachineHB implements java.io.Serializable, IPojoHB<Physical
 
     public static final int STATE_DISABLED_FOR_HA = 7;
 
-    /**
-     * How many virtual CPU are supported for each physical core, so ''cpuUsed'' always below
-     * ''cpu'' * ''cpuRatio''.<br>
-     * Default initialized using the configuration file property.
-     */
-    private int cpuRatio = AbiConfigManager.getInstance().getAbiConfig().getVirtualCpuPerCore();
-
     private int ramUsed;
 
     private int cpuUsed;
@@ -108,22 +100,6 @@ public class PhysicalmachineHB implements java.io.Serializable, IPojoHB<Physical
     private HypervisorHB hypervisor;
 
     private Integer idEnterprise;
-
-    /**
-     * @return the cpuRatio
-     */
-    public int getCpuRatio()
-    {
-        return cpuRatio;
-    }
-
-    /**
-     * @param cpuRatio the cpuRatio to set
-     */
-    public void setCpuRatio(final int cpuRatio)
-    {
-        this.cpuRatio = cpuRatio;
-    }
 
     public Integer getIdPhysicalMachine()
     {
@@ -346,7 +322,6 @@ public class PhysicalmachineHB implements java.io.Serializable, IPojoHB<Physical
         PhysicalMachine physicalMachine = new PhysicalMachine();
 
         physicalMachine.setDataCenter(getDataCenter().toPojo());
-        physicalMachine.setCpuRatio(cpuRatio);
         physicalMachine.setCpu(cpu);
         physicalMachine.setCpuUsed(cpuUsed);
         physicalMachine.setDescription(description);

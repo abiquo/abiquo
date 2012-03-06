@@ -21,8 +21,10 @@
 
 package com.abiquo.nodecollector.domain.collectors;
 
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Method;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -36,10 +38,12 @@ import org.slf4j.LoggerFactory;
 import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.nodecollector.constants.MessageValues;
 import com.abiquo.nodecollector.domain.Collector;
+import com.abiquo.nodecollector.exception.CannotExecuteException;
 import com.abiquo.nodecollector.exception.CollectorException;
 import com.abiquo.nodecollector.exception.ConnectionException;
 import com.abiquo.nodecollector.exception.LoginException;
 import com.abiquo.nodecollector.exception.NoManagedException;
+import com.abiquo.nodecollector.exception.NodecollectorException;
 import com.abiquo.nodecollector.utils.ResourceComparator;
 import com.abiquo.server.core.infrastructure.nodecollector.HostDto;
 import com.abiquo.server.core.infrastructure.nodecollector.HostStatusEnumType;
@@ -52,7 +56,6 @@ import com.abiquo.server.core.infrastructure.nodecollector.VirtualSystemStatusEn
 import com.vmware.vim25.ArrayOfHostHostBusAdapter;
 import com.vmware.vim25.DatastoreSummary;
 import com.vmware.vim25.DynamicProperty;
-import com.vmware.vim25.FileFault;
 import com.vmware.vim25.FileInfo;
 import com.vmware.vim25.FileQuery;
 import com.vmware.vim25.FolderFileQuery;
@@ -132,9 +135,9 @@ public class ESXiCollector extends AbstractCollector
 
     private static ManagedObjectReference siMoref;
 
-    private static final Integer THIRTEEN = 13;
+    private static final String NAME = "name";
 
-    private static final Integer TWELVE = 12;
+    private static final String HARDWARE = "hardware";
 
     private static PropertySpec[] virtualMachineSpec;
 
@@ -357,23 +360,14 @@ public class ESXiCollector extends AbstractCollector
     }
 
     @Override
-    public HostDto getHostInfo() throws CollectorException
+    public HostDto getHostInfo() throws NodecollectorException
     {
         LOGGER.debug("Getting information for host at: {}", getIpAddress());
 
         final HostHardwareInfo hardwareInfo;
         final HostDto physicalInfo = new HostDto();
         // Check the license of the ESXi
-        try
-        {
-            hasValidLicense();
-        }
-        catch (NoManagedException e)
-        {
-            physicalInfo.setStatus(HostStatusEnumType.NOT_MANAGED);
-            physicalInfo.setStatusInfo(e.getMessage());
-            return physicalInfo;
-        }
+        hasValidLicense();
 
         // We take the first one because we use ESXi not VirtualCenter, and there is only one host
         // managed
@@ -393,15 +387,22 @@ public class ESXiCollector extends AbstractCollector
         // Please check the following url to understand the DynamicProperty indexation in this code
         // http://www.vmware.com/support/developer/vc-sdk/visdk25pubs/ReferenceGuide/
         // The order of the properties in the web, are the same here.
-        hardwareInfo = (HostHardwareInfo) hostSystem.getPropSet()[TWELVE].getVal();
-
-        physicalInfo.setName((String) hostSystem.getPropSet()[THIRTEEN].getVal());
-        physicalInfo.setCpu(Long.valueOf(((Short) hardwareInfo.getCpuInfo().getNumCpuCores())
-            .toString()));
-        physicalInfo.setRam(hardwareInfo.getMemorySize());
-        physicalInfo.setHypervisor(getHypervisorType().getValue());
-        physicalInfo.setVersion(getApiVersion());
-        physicalInfo.getResources().addAll(getHostResources(hostSystem));
+        try
+        {
+            hardwareInfo = (HostHardwareInfo) getDynamicProperty(hostSystem, HARDWARE);
+            physicalInfo.setName((String) getDynamicProperty(hostSystem, NAME));
+            physicalInfo.setCpu(Long.valueOf(((Short) hardwareInfo.getCpuInfo().getNumCpuCores())
+                .toString()));
+            physicalInfo.setRam(hardwareInfo.getMemorySize());
+            physicalInfo.setHypervisor(getHypervisorType().getValue());
+            physicalInfo.setVersion(getApiVersion());
+            physicalInfo.getResources().addAll(getHostResources(hostSystem));
+        }
+        catch (Exception e1)
+        {
+            LOGGER.error(MessageValues.UNP_EXCP);
+            throw new CollectorException(MessageValues.UNP_EXCP);
+        }
 
         try
         {
@@ -512,6 +513,8 @@ public class ESXiCollector extends AbstractCollector
                 {
                     // get the machine name for logging.
                     machineName = (String) getDynamicProperty(esxiMachine, "name");
+                    machineName = decodeURLRawString(machineName);
+
                     // Get the virtual machine configuration
                     Object obj = getDynamicProperty(esxiMachine, "config");
 
@@ -520,7 +523,7 @@ public class ESXiCollector extends AbstractCollector
                         VirtualMachineConfigInfo vmConfig = (VirtualMachineConfigInfo) obj;
 
                         VirtualSystemDto vSys = new VirtualSystemDto();
-                        vSys.setName(vmConfig.getName());
+                        vSys.setName(decodeURLRawString(vmConfig.getName()));
                         vSys.setStatus(getStateFromESXiMachine(esxiMachine));
                         vSys.setUuid(vmConfig.getUuid());
                         vSys.setCpu(Long.valueOf(vmConfig.getHardware().getNumCPU()));
@@ -1346,7 +1349,7 @@ public class ESXiCollector extends AbstractCollector
      * 
      * @throws NoManagedException if the license is not valid.
      */
-    private synchronized void hasValidLicense() throws NoManagedException
+    private synchronized void hasValidLicense() throws NodecollectorException
     {
         LOGGER.debug("Checking if host {} has a valid license...", getIpAddress());
 
@@ -1363,7 +1366,7 @@ public class ESXiCollector extends AbstractCollector
                 if (licenseManagerLicenseInfo.getEditionKey().equals("esxBasic"))
                 {
                     LOGGER.debug("Invalid license found!");
-                    throw new NoManagedException(MessageValues.NOMAN_ESXI_LIC);
+                    throw new CannotExecuteException(MessageValues.NOMAN_ESXI_LIC);
                 }
 
                 KeyAnyValue[] properties = licenseManagerLicenseInfo.getProperties();
@@ -1391,7 +1394,7 @@ public class ESXiCollector extends AbstractCollector
                     if (expirationHours.intValue() == 0 && expirationMinutes.intValue() == 0)
                     {
                         LOGGER.debug("Expired license found!");
-                        throw new NoManagedException(MessageValues.NOMAN_ESXI_LIC);
+                        throw new CannotExecuteException(MessageValues.NOMAN_ESXI_LIC);
                     }
                 }
             }
@@ -1400,7 +1403,7 @@ public class ESXiCollector extends AbstractCollector
         catch (Exception e)
         {
             LOGGER.error("An error was occurred when checking the license: {}", e);
-            throw new NoManagedException(MessageValues.NOMAN_ESXI_LIC);
+            throw new CannotExecuteException(MessageValues.NOMAN_ESXI_LIC);
         }
 
         LOGGER.debug("Valid license found");
@@ -1531,4 +1534,16 @@ public class ESXiCollector extends AbstractCollector
         return isIscsiEnable;
     }
 
+    protected String decodeURLRawString(final String value) throws CollectorException
+    {
+        try
+        {
+            return URLDecoder.decode(value, "UTF-8");
+        }
+        catch (UnsupportedEncodingException e)
+        {
+            LOGGER.error("Can not decode {} from URL raw encoding. {}", value, e);
+            throw new CollectorException(MessageValues.COLL_EXCP_DECODE);
+        }
+    }
 }

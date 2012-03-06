@@ -20,13 +20,14 @@
  */
 package com.abiquo.api.services.stub;
 
+import org.apache.wink.client.ClientRuntimeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.abiquo.api.exceptions.APIError;
-import com.abiquo.api.pools.impl.VSMClientPool;
+import com.abiquo.api.pools.RemoteServiceClientPool;
 import com.abiquo.api.services.DefaultApiService;
 import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.cloud.VirtualMachine;
@@ -46,7 +47,7 @@ public class VsmServiceStub extends DefaultApiService
     private final static Logger LOGGER = LoggerFactory.getLogger(VsmServiceStub.class);
 
     @Autowired
-    protected VSMClientPool vsmClientPool;
+    protected RemoteServiceClientPool clientPool;
 
     /**
      * Builds the URI string that represents an hypervisor.
@@ -57,46 +58,6 @@ public class VsmServiceStub extends DefaultApiService
     protected String buildHypervisorURI(final Hypervisor hypervisor)
     {
         return String.format("http://%s:%d/", hypervisor.getIp(), hypervisor.getPort());
-    }
-
-    /**
-     * Borrows an VSMClient from the pool.
-     * 
-     * @return VSMClient instance
-     */
-    protected VSMClient getClientFromPool(final RemoteService service)
-    {
-        VSMClient client = null;
-
-        try
-        {
-            client = vsmClientPool.borrowObject(service.getUri());
-        }
-        catch (Exception e)
-        {
-            LOGGER.error(APIError.VSMCLIENTFROMPOOL_PROBLEM.getMessage(), e);
-            addUnexpectedErrors(APIError.VSMCLIENTFROMPOOL_PROBLEM);
-            flushErrors();
-        }
-
-        return client;
-    }
-
-    /**
-     * Returns an VSMClient instance to the pool.
-     * 
-     * @param client instance to return to the pool
-     */
-    protected void returnClientToPool(final VSMClient client)
-    {
-        try
-        {
-            vsmClientPool.returnObject(client);
-        }
-        catch (Exception e)
-        {
-            LOGGER.trace("Unable to return VSMClient instance to pool.", e);
-        }
     }
 
     /**
@@ -111,12 +72,18 @@ public class VsmServiceStub extends DefaultApiService
      */
     public void monitor(final RemoteService service, final Hypervisor hypervisor)
     {
-        VSMClient client = getClientFromPool(service);
+        VSMClient client = (VSMClient) clientPool.getClientFor(service);
 
         try
         {
             client.monitor(buildHypervisorURI(hypervisor), hypervisor.getType().name(),
                 hypervisor.getUser(), hypervisor.getPassword());
+        }
+        catch (ClientRuntimeException e)
+        {
+            LOGGER.error(APIError.VSM_UNAVAILABE.getMessage(), e);
+            addServiceUnavailableErrors(APIError.VSM_UNAVAILABE);
+            flushErrors();
         }
         catch (Exception e)
         {
@@ -126,7 +93,7 @@ public class VsmServiceStub extends DefaultApiService
         }
         finally
         {
-            returnClientToPool(client);
+            clientPool.releaseClientFor(service, client);
         }
     }
 
@@ -140,11 +107,17 @@ public class VsmServiceStub extends DefaultApiService
      */
     public void shutdownMonitor(final RemoteService service, final Hypervisor hypervisor)
     {
-        VSMClient client = getClientFromPool(service);
+        VSMClient client = (VSMClient) clientPool.getClientFor(service);
 
         try
         {
             client.shutdown(buildHypervisorURI(hypervisor));
+        }
+        catch (ClientRuntimeException e)
+        {
+            LOGGER.error(APIError.VSM_UNAVAILABE.getMessage(), e);
+            addServiceUnavailableErrors(APIError.VSM_UNAVAILABE);
+            flushErrors();
         }
         catch (VSMClientException e)
         {
@@ -154,7 +127,7 @@ public class VsmServiceStub extends DefaultApiService
         }
         finally
         {
-            returnClientToPool(client);
+            clientPool.releaseClientFor(service, client);
         }
     }
 
@@ -171,7 +144,7 @@ public class VsmServiceStub extends DefaultApiService
     public void subscribe(final RemoteService service, final VirtualMachine virtualMachine,
         final boolean logError)
     {
-        VSMClient client = getClientFromPool(service);
+        VSMClient client = (VSMClient) clientPool.getClientFor(service);
 
         try
         {
@@ -179,6 +152,12 @@ public class VsmServiceStub extends DefaultApiService
 
             client.subscribe(buildHypervisorURI(hypervisor), hypervisor.getType().name(),
                 virtualMachine.getName());
+        }
+        catch (ClientRuntimeException e)
+        {
+            LOGGER.error(APIError.VSM_UNAVAILABE.getMessage(), e);
+            addServiceUnavailableErrors(APIError.VSM_UNAVAILABE);
+            flushErrors();
         }
         catch (VSMClientException e)
         {
@@ -191,7 +170,7 @@ public class VsmServiceStub extends DefaultApiService
         }
         finally
         {
-            returnClientToPool(client);
+            clientPool.releaseClientFor(service, client);
         }
     }
 
@@ -222,11 +201,17 @@ public class VsmServiceStub extends DefaultApiService
      */
     public void unsubscribe(final RemoteService service, final VirtualMachine virtualMachine)
     {
-        VSMClient client = getClientFromPool(service);
+        VSMClient client = (VSMClient) clientPool.getClientFor(service);
 
         try
         {
             client.unsubscribe(virtualMachine.getName());
+        }
+        catch (ClientRuntimeException e)
+        {
+            LOGGER.error(APIError.VSM_UNAVAILABE.getMessage(), e);
+            addServiceUnavailableErrors(APIError.VSM_UNAVAILABE);
+            flushErrors();
         }
         catch (VSMClientException e)
         {
@@ -236,7 +221,7 @@ public class VsmServiceStub extends DefaultApiService
         }
         finally
         {
-            returnClientToPool(client);
+            clientPool.releaseClientFor(service, client);
         }
     }
 
@@ -249,12 +234,18 @@ public class VsmServiceStub extends DefaultApiService
     public void refreshVirtualMachineState(final RemoteService service,
         final VirtualMachine virtualMachine)
     {
-        VSMClient client = getClientFromPool(service);
+        VSMClient client = (VSMClient) clientPool.getClientFor(service);
 
         try
         {
             client.publishState(buildHypervisorURI(virtualMachine.getHypervisor()),
                 virtualMachine.getName());
+        }
+        catch (ClientRuntimeException e)
+        {
+            LOGGER.error(APIError.VSM_UNAVAILABE.getMessage(), e);
+            addServiceUnavailableErrors(APIError.VSM_UNAVAILABE);
+            flushErrors();
         }
         catch (VSMClientException e)
         {
@@ -264,7 +255,7 @@ public class VsmServiceStub extends DefaultApiService
         }
         finally
         {
-            returnClientToPool(client);
+            clientPool.releaseClientFor(service, client);
         }
     }
 
@@ -277,12 +268,18 @@ public class VsmServiceStub extends DefaultApiService
     public void invalidateLastKnownVirtualMachineState(final RemoteService service,
         final VirtualMachine virtualMachine)
     {
-        VSMClient client = getClientFromPool(service);
+        VSMClient client = (VSMClient) clientPool.getClientFor(service);
 
         try
         {
             client.invalidateLastKnownState(buildHypervisorURI(virtualMachine.getHypervisor()),
                 virtualMachine.getName());
+        }
+        catch (ClientRuntimeException e)
+        {
+            LOGGER.error(APIError.VSM_UNAVAILABE.getMessage(), e);
+            addServiceUnavailableErrors(APIError.VSM_UNAVAILABE);
+            flushErrors();
         }
         catch (VSMClientException e)
         {
@@ -292,7 +289,48 @@ public class VsmServiceStub extends DefaultApiService
         }
         finally
         {
-            returnClientToPool(client);
+            clientPool.releaseClientFor(service, client);
+        }
+    }
+
+    /**
+     * Returns true if the subscription exists.
+     * 
+     * @param service The VSM {@link RemoteService}
+     * @param name The {@link VirtualMachine#NAME_PROPERTY}
+     * @return True if the virtual machine is subscribed. False otherwise.
+     */
+    public boolean isVirtualMachineSubscribed(final RemoteService service, final String name)
+    {
+        VSMClient client = (VSMClient) clientPool.getClientFor(service);
+
+        try
+        {
+            return client.isSubscribed(name);
+        }
+        finally
+        {
+            clientPool.releaseClientFor(service, client);
+        }
+    }
+
+    /**
+     * Returns true if the hypervisor is monitored.
+     * 
+     * @param service The VSM uri.
+     * @param hypervisor The hypervisor to query.
+     */
+    public boolean isHypervisorMonitored(final RemoteService service, final Hypervisor hypervisor)
+    {
+        VSMClient client = (VSMClient) clientPool.getClientFor(service);
+
+        try
+        {
+            return client.isMonitored(buildHypervisorURI(hypervisor));
+        }
+        finally
+        {
+            clientPool.releaseClientFor(service, client);
         }
     }
 }
