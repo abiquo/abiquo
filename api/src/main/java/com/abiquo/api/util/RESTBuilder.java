@@ -266,14 +266,16 @@ public class RESTBuilder implements IRESTBuilder
 
     @Override
     public List<RESTLink> buildMachineLinks(final Integer datacenterId, final Integer rackId,
-        final Boolean managedRack, final MachineDto machine)
+        final Boolean managedRack, final Enterprise enterprise, final MachineDto machine)
     {
         AbiquoLinkBuilder builder = AbiquoLinkBuilder.createBuilder(linkProcessor);
-        return this.buildMachineLinks(datacenterId, rackId, managedRack, machine, builder);
+        return this.buildMachineLinks(datacenterId, rackId, managedRack, enterprise, machine,
+            builder);
     }
 
     public List<RESTLink> buildMachineLinks(final Integer datacenterId, final Integer rackId,
-        final Boolean managedRack, final MachineDto machine, final AbiquoLinkBuilder builder)
+        final Boolean managedRack, final Enterprise enterprise, final MachineDto machine,
+        final AbiquoLinkBuilder builder)
     {
         List<RESTLink> links = new ArrayList<RESTLink>();
 
@@ -290,6 +292,13 @@ public class RESTBuilder implements IRESTBuilder
             VirtualMachinesInfrastructureResource.VIRTUAL_MACHINES_INFRASTRUCTURE_PARAM, params));
         links.add(builder.buildRestLink(MachineResource.class,
             MachineResource.MACHINE_ACTION_CHECK, MachineResource.MACHINE_CHECK, params));
+
+        if (enterprise != null)
+        {
+            params.put(EnterpriseResource.ENTERPRISE, enterprise.getId().toString());
+            links.add(builder.buildRestLink(EnterpriseResource.class,
+                EnterpriseResource.ENTERPRISE, params));
+        }
 
         return links;
     }
@@ -531,8 +540,8 @@ public class RESTBuilder implements IRESTBuilder
         if (icon != null)
         {
             params.put(IconResource.ICON, String.valueOf(icon.getId()));
-            links.add(builder.buildRestLink(IconResource.class, null, IconResource.ICON, icon
-                .getPath(), params));
+            links.add(builder.buildRestLink(IconResource.class, null, IconResource.ICON,
+                icon.getPath(), params));
 
         }
 
@@ -1082,8 +1091,10 @@ public class RESTBuilder implements IRESTBuilder
             builder.buildRestLink(PrivateNetworkResource.class,
                 PrivateNetworkResource.PRIVATE_NETWORK, params);
         link.setTitle(ip.getVlanNetwork().getName());
-        
-        RESTLink ipLink = builder.buildRestLink(IpAddressesResource.class, IpAddressesResource.IP_ADDRESS_PARAM, REL_SELF, params);
+
+        RESTLink ipLink =
+            builder.buildRestLink(IpAddressesResource.class, IpAddressesResource.IP_ADDRESS_PARAM,
+                REL_SELF, params);
         ipLink.setTitle(VirtualMachineNetworkConfigurationResource.PRIVATE_IP);
 
         links.add(link);
