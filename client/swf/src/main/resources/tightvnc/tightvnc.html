@@ -20,8 +20,8 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 
 <script type="text/javascript">
-	var vncIP = 10.60.20.17;
-	var vncPort = 5939;
+	var vncIP = 0;
+	var vncPort = 5900;
 	var width = 800;
 	var height = 600;
 	
@@ -65,7 +65,7 @@
 <body style="text-align: center;">
 
 	<script type="text/javascript">
-		var appletCode = "<applet code=\"com.glavsoft.viewer.Viewer\" archive=\"VncViewer.jar\"";
+	   var appletCode = "<applet code=\"com/glavsoft/viewer/Viewer\" archive=\"VncViewer.jar\"";
 	
 		appletCode 	   += " width=\"" + width +"\" height=\"" + height + "\" align=\"middle\">";
 		
@@ -73,9 +73,31 @@
 
 		appletCode	   += "<param name=\"Port\" value=\"" + vncPort + "\">";
 
-		appletCode	   += "<param name=\"OpenNewWindow\" value=\"no\">";
-		
-		appletCode	   += "<param name=\"ShowControls\" value=\"yes\">";
+	    appletCode     += "<param name=\"OpenNewWindow\" value=\"no\">";
+        
+        appletCode     += "<param name=\"ShowControls\" value=\"yes\">";
+
+        appletCode     += "<param name=\"ViewOnly\" value=\"no\">";
+        
+        appletCode     += "<param name=\"AllowClipboardTransfer\" value=\"yes\">";
+
+        appletCode     += "<param name=\"ShareDesktop\" value=\"yes\">";
+        
+        appletCode     += "<param name=\"AllowCopyRect\" value=\"yes\">";
+
+        appletCode     += "<param name=\"Encoding\" value=\"Tight\">";
+        
+        appletCode     += "<param name=\"CompressionLevel\" value=\"\">";
+
+        appletCode     += "<param name=\"JpegImageQuality\" value=\"\">";
+        
+        appletCode     += "<param name=\"LocalPointer\" value=\"On\">";
+
+        appletCode     += "<param name=\"ConvertToASCII\" value=\"yes\">";
+
+        appletCode     += "<param name=\"colorDepth\" value=\"\">";
+        
+        appletCode     += "<param name=\"ScalingFactor\" value=\"100\">";
 		
 		appletCode	   += "</applet>";
 		
