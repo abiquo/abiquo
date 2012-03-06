@@ -20,6 +20,7 @@
  */
 package com.abiquo.nodecollector.domain.collectors;
 
+import org.libvirt.Domain;
 import org.libvirt.LibvirtException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -90,4 +91,14 @@ public class KVMCollector extends AbstractLibvirtCollector
             throw new ConnectionException(MessageValues.CONN_EXCP_I, e);
         }
     }
+
+    /**
+     * @see com.abiquo.nodecollector.domain.collectors.AbstractLibvirtCollector#isDomain0(org.libvirt.Domain)
+     */
+    @Override
+    protected boolean isDomain0(final Domain domain) throws LibvirtException
+    {
+        return false;
+    }
+
 }

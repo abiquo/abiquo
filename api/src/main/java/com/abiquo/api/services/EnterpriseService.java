@@ -120,6 +120,7 @@ public class EnterpriseService extends DefaultApiService
         final boolean included, final String filterName, final Integer numResults)
     {
         User user = userService.getCurrentUser();
+
         PricingTemplate pt = null;
 
         // id pricing -1
@@ -141,11 +142,16 @@ public class EnterpriseService extends DefaultApiService
                 return repo.findByPricingTemplate(startwith, pt, included, filterName, numResults,
                     user.getEnterprise().getId());
             }
+
             return Collections.singletonList(user.getEnterprise());
         }
 
         if (idPricingTempl != -1)
         {
+            if (idPricingTempl != 0)
+            {
+                pt = findPricingTemplate(idPricingTempl);
+            }
             return repo
                 .findByPricingTemplate(startwith, pt, included, filterName, numResults, null);
         }
@@ -156,6 +162,7 @@ public class EnterpriseService extends DefaultApiService
         }
 
         return repo.findAll(startwith, numResults);
+
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
@@ -533,11 +540,20 @@ public class EnterpriseService extends DefaultApiService
         }
 
         DatacenterLimits limit =
-            new DatacenterLimits(enterprise, datacenter, dto.getRamSoftLimitInMb(), dto
-                .getCpuCountSoftLimit(), dto.getHdSoftLimitInMb(), dto.getRamHardLimitInMb(), dto
-                .getCpuCountHardLimit(), dto.getHdHardLimitInMb(), dto.getStorageSoft(), dto
-                .getStorageHard(), dto.getPublicIpsSoft(), dto.getPublicIpsHard(), dto
-                .getVlansSoft(), dto.getVlansHard());
+            new DatacenterLimits(enterprise,
+                datacenter,
+                dto.getRamSoftLimitInMb(),
+                dto.getCpuCountSoftLimit(),
+                dto.getHdSoftLimitInMb(),
+                dto.getRamHardLimitInMb(),
+                dto.getCpuCountHardLimit(),
+                dto.getHdHardLimitInMb(),
+                dto.getStorageSoft(),
+                dto.getStorageHard(),
+                dto.getPublicIpsSoft(),
+                dto.getPublicIpsHard(),
+                dto.getVlansSoft(),
+                dto.getVlansHard());
 
         if (!limit.isValid())
         {

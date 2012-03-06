@@ -121,8 +121,7 @@ public class VirtualDatacentersResource extends AbstractResource
         }
 
         Collection<VirtualDatacenter> all =
-            service.getVirtualDatacenters(enterprise, datacenter, startwith, limit, filter,
-                orderBy, descOrAsc);
+            service.getVirtualDatacenters(enterprise, datacenter, null);
         VirtualDatacentersDto vdcs = new VirtualDatacentersDto();
 
         for (VirtualDatacenter d : all)

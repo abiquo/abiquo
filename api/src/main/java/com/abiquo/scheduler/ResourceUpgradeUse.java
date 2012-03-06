@@ -115,6 +115,7 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
         this.ipPoolManDao = new IpPoolManagementDAO(em);
         this.vlanNetworkDao = new VLANNetworkDAO(em);
         this.hypervisorDao = new HypervisorDAO(em);
+        this.fitPolicyDao = new FitPolicyRuleDAO(em);
     }
 
     /**

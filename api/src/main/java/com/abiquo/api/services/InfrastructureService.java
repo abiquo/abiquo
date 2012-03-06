@@ -203,8 +203,8 @@ public class InfrastructureService extends DefaultApiService
         validateCreateInfo(createInfo);
 
         return addMachines(datacenterId, rackId, createInfo.getIpFrom(), createInfo.getIpTo(),
-            createInfo.getHypervisor(), createInfo.getUser(), createInfo.getPassword(), createInfo
-                .getPort(), createInfo.getvSwitch());
+            createInfo.getHypervisor(), createInfo.getUser(), createInfo.getPassword(),
+            createInfo.getPort(), createInfo.getvSwitch());
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
@@ -233,7 +233,7 @@ public class InfrastructureService extends DefaultApiService
         HypervisorType hyType = HypervisorType.fromValue(hypervisor);
         List<Machine> discoveredMachines =
         // nodecollectorServiceStub.getRemoteHypervisors(nodecollector, ipFromOK, ipToOK, hyType,
-            // user, password, port);
+        // user, password, port);
             this.discoverRemoteHypevisors(datacenterId, ipFromOK, ipToOK, hyType, user, password,
                 port, vSwitch);
 
@@ -280,17 +280,6 @@ public class InfrastructureService extends DefaultApiService
             flushErrors();
         }
 
-        // [ABICLOUDPREMIUM-2996] These values cannot be changed. Must always reflect the real ones.
-        // Even if the POST to create the machine was made with the information from NodeCollector,
-        // we need to make sure those values have not been changed.
-        Machine remoteMachine =
-            discoverRemoteHypervisor(datacenterId, IPAddress.newIPAddress(machine.getHypervisor()
-                .getIp()), machine.getHypervisor().getType(), machine.getHypervisor().getUser(),
-                machine.getHypervisor().getPassword(), machine.getHypervisor().getPort());
-        machine.setState(remoteMachine.getState());
-        machine.setVirtualRamInMb(remoteMachine.getVirtualRamInMb());
-        machine.setVirtualCpuCores(remoteMachine.getVirtualCpuCores());
-
         checkAvailableCores(machine);
 
         Boolean anyEnabled = Boolean.FALSE;
@@ -322,6 +311,18 @@ public class InfrastructureService extends DefaultApiService
         }
 
         validate(machine.getHypervisor());
+
+        // [ABICLOUDPREMIUM-2996] These values cannot be changed. Must always reflect the real ones.
+        // Even if the POST to create the machine was made with the information from NodeCollector,
+        // we need to make sure those values have not been changed.
+        Machine remoteMachine =
+            discoverRemoteHypervisor(datacenterId, IPAddress.newIPAddress(machine.getHypervisor()
+                .getIp()), machine.getHypervisor().getType(), machine.getHypervisor().getUser(),
+                machine.getHypervisor().getPassword(), machine.getHypervisor().getPort());
+        machine.setState(remoteMachine.getState());
+        machine.setVirtualRamInMb(remoteMachine.getVirtualRamInMb());
+        machine.setVirtualCpuCores(remoteMachine.getVirtualCpuCores());
+
         validate(machine);
 
         // Part 2: Insert the and machine into database.
@@ -485,9 +486,16 @@ public class InfrastructureService extends DefaultApiService
             }
         }
 
+        deleteMachineRulesFromRack(rack);
+
         repo.deleteRack(rack);
         tracer.log(SeverityType.INFO, ComponentType.RACK, EventType.RACK_DELETE, "rack.deleted",
             rack.getName());
+    }
+
+    protected void deleteMachineRulesFromRack(final Rack rack)
+    {
+        // PREMIUM
     }
 
     public List<Machine> getMachines(final Rack rack)
@@ -849,9 +857,8 @@ public class InfrastructureService extends DefaultApiService
             {
                 if (pd.getReadMethod().invoke(dto) == null)
                 {
-                    addValidationErrors(new CommonError(APIError.STATUS_BAD_REQUEST.getCode(), pd
-                        .getName()
-                        + " can't be null"));
+                    addValidationErrors(new CommonError(APIError.STATUS_BAD_REQUEST.getCode(),
+                        pd.getName() + " can't be null"));
                     flushErrors();
                 }
             }
