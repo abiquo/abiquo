@@ -39,7 +39,6 @@ import com.abiquo.abiserver.pojo.infrastructure.DataCenter;
 import com.abiquo.abiserver.pojo.infrastructure.VirtualMachine;
 import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.result.DataResult;
-import com.abiquo.abiserver.pojo.user.Enterprise;
 import com.abiquo.abiserver.pojo.virtualappliance.Node;
 import com.abiquo.abiserver.pojo.virtualappliance.TaskStatus;
 import com.abiquo.abiserver.pojo.virtualappliance.VirtualAppliance;
@@ -75,11 +74,8 @@ public class NonBlockingService
         try
         {
             infrastructureCommand =
-                (InfrastructureCommand) Thread
-                    .currentThread()
-                    .getContextClassLoader()
-                    .loadClass(
-                        "com.abiquo.abiserver.commands.impl.InfrastructureCommandPremiumImpl")
+                (InfrastructureCommand) Thread.currentThread().getContextClassLoader().loadClass(
+                    "com.abiquo.abiserver.commands.impl.InfrastructureCommandPremiumImpl")
                     .newInstance();
         }
         catch (Exception e)
@@ -90,11 +86,8 @@ public class NonBlockingService
         try
         {
             virtualAppCommand =
-                (VirtualApplianceCommand) Thread
-                    .currentThread()
-                    .getContextClassLoader()
-                    .loadClass(
-                        "com.abiquo.abiserver.commands.impl.VirtualApplianceCommandPremiumImpl")
+                (VirtualApplianceCommand) Thread.currentThread().getContextClassLoader().loadClass(
+                    "com.abiquo.abiserver.commands.impl.VirtualApplianceCommandPremiumImpl")
                     .newInstance();
         }
         catch (Exception e)
@@ -248,37 +241,6 @@ public class NonBlockingService
     {
         return proxyVirtualApplianceResourceStub(session).deleteVirtualAppliance(virtualAppliance,
             false);
-    }
-
-    /**
-     * Retrieves an updated list of VirtualDatacenters and Virtual Appliances that belong to the
-     * same Enterprise The Virtual Appliances retrieved will not contain their list of nodes, for
-     * performance purposes
-     * 
-     * @param userSession
-     * @param enterprise The Enterprise to retrieve the VirtualAppliance list
-     * @return a DataResult<ArrayList> object. The first position will contain an
-     *         ArrayList<VirtualDatacenter> object, and second an ArrayList<VirtualAppliance> object
-     */
-    public BasicResult checkVirtualDatacentersAndAppliancesByEnterprise(
-        final UserSession userSession, final Enterprise enterprise)
-    {
-        VirtualApplianceCommand command =
-            BusinessDelegateProxy.getInstance(userSession, virtualAppCommand,
-                VirtualApplianceCommand.class);
-
-        return command.checkVirtualDatacentersAndAppliancesByEnterprise(userSession, enterprise);
-    }
-
-    public BasicResult checkVirtualDatacentersAndAppliancesByEnterpriseAndDatacenter(
-        final UserSession userSession, final Enterprise enterprise, final DataCenter datacenter)
-    {
-        VirtualApplianceCommand command =
-            BusinessDelegateProxy.getInstance(userSession, virtualAppCommand,
-                VirtualApplianceCommand.class);
-
-        return command.checkVirtualDatacentersAndAppliancesByEnterpriseAndDatacenter(userSession,
-            enterprise, datacenter);
     }
 
     /**

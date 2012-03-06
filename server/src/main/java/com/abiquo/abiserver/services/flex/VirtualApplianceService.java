@@ -31,9 +31,11 @@ import com.abiquo.abiserver.commands.stub.APIStubFactory;
 import com.abiquo.abiserver.commands.stub.VirtualApplianceResourceStub;
 import com.abiquo.abiserver.commands.stub.impl.VirtualApplianceResourceStubImpl;
 import com.abiquo.abiserver.pojo.authentication.UserSession;
+import com.abiquo.abiserver.pojo.infrastructure.DataCenter;
 import com.abiquo.abiserver.pojo.networking.NetworkConfiguration;
 import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.result.DataResult;
+import com.abiquo.abiserver.pojo.result.ListRequest;
 import com.abiquo.abiserver.pojo.user.Enterprise;
 import com.abiquo.abiserver.pojo.virtualappliance.Log;
 import com.abiquo.abiserver.pojo.virtualappliance.VirtualAppliance;
@@ -69,11 +71,8 @@ public class VirtualApplianceService
         try
         {
             virtualApplianceCommand =
-                (VirtualApplianceCommand) Thread
-                    .currentThread()
-                    .getContextClassLoader()
-                    .loadClass(
-                        "com.abiquo.abiserver.commands.impl.VirtualApplianceCommandPremiumImpl")
+                (VirtualApplianceCommand) Thread.currentThread().getContextClassLoader().loadClass(
+                    "com.abiquo.abiserver.commands.impl.VirtualApplianceCommandPremiumImpl")
                     .newInstance();
         }
         catch (Exception e)
@@ -83,9 +82,8 @@ public class VirtualApplianceService
         try
         {
             userCommand =
-                (UserCommand) Thread.currentThread().getContextClassLoader()
-                    .loadClass("com.abiquo.abiserver.commands.impl.UserCommandPremiumImpl")
-                    .newInstance();
+                (UserCommand) Thread.currentThread().getContextClassLoader().loadClass(
+                    "com.abiquo.abiserver.commands.impl.UserCommandPremiumImpl").newInstance();
         }
         catch (Exception e)
         {
@@ -122,18 +120,19 @@ public class VirtualApplianceService
      * 
      * @param userSession The UserSession with the user that called this method
      * @param enterprise The Enterprise of which the VirtualDataCenter will be returned
+     * @param listRequest To filter the number of results
      * @return a BasicResult object, containing an ArrayList<VirtualDataCenter>, with the
      *         VirtualDataCenter assigned to the enterprise
      */
     public BasicResult getVirtualDataCentersByEnterprise(final UserSession userSession,
-        final Enterprise enterprise)
+        final Enterprise enterprise, final ListRequest listRequest)
     {
 
         VirtualApplianceCommand command = proxyCommand(userSession);
 
         try
         {
-            return command.getVirtualDataCentersByEnterprise(userSession, enterprise);
+            return command.getVirtualDataCentersByEnterprise(userSession, enterprise, listRequest);
         }
         catch (UserSessionException e)
         {
@@ -253,6 +252,39 @@ public class VirtualApplianceService
         return proxyVirtualApplianceResourceStub(userSession).getVirtualAppliancesByEnterprise(
             userSession, enterprise);
         // return command.getVirtualAppliancesByEnterprise(userSession, enterprise);
+    }
+
+    public BasicResult getVirtualAppliancesByEnterprise(final UserSession userSession,
+        final Enterprise enterprise, final ListRequest listRequest)
+    {
+        // VirtualApplianceCommand command = proxyCommand(userSession);
+        return proxyVirtualApplianceResourceStub(userSession).getVirtualAppliancesByEnterprise(
+            userSession, enterprise, listRequest);
+        // return command.getVirtualAppliancesByEnterprise(userSession, enterprise);
+    }
+
+    /**
+     * Retrieves a list of Virtual Appliances that belong to the same VirtualDataCenter. The
+     * VirtualAppliance retrieved will not contain their Node list, for performance purposes. It
+     * will also return those VirtualAppliance marked as public
+     * 
+     * @param userSession The UserSession object with the user that called this method
+     * @param vdc The VirtualDataCenter to retrieve the VirtualAppliance list
+     * @return a DataResult<ArrayList<VirtualAppliance>> object with the VirtualAppliance that
+     *         belong to the given enterprise
+     */
+    public BasicResult getVirtualAppliancesByVirtualDatacenter(final UserSession userSession,
+        final VirtualDataCenter vdc, final ListRequest listRequest)
+    {
+        return proxyVirtualApplianceResourceStub(userSession)
+            .getVirtualAppliancesByVirtualDatacenter(userSession, vdc, listRequest);
+    }
+
+    public BasicResult getVirtualAppliancesByEnterpriseAndDatacenter(final UserSession userSession,
+        final Enterprise enterprise, final DataCenter datacenter)
+    {
+        return proxyVirtualApplianceResourceStub(userSession)
+            .getVirtualAppliancesByEnterpriseAndDatacenter(userSession, enterprise, datacenter);
     }
 
     /**
