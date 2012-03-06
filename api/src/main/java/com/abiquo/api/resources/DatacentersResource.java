@@ -36,7 +36,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
 
 import org.apache.wink.common.annotations.Workspace;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,7 +48,6 @@ import com.abiquo.api.services.RemoteServiceService;
 import com.abiquo.api.spring.security.SecurityService;
 import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.model.enumerator.Privileges;
-import com.abiquo.model.transport.LinksDto;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.DatacenterDto;
@@ -79,7 +77,7 @@ public class DatacentersResource extends AbstractResource
     private SecurityService securityService;
 
     @GET
-    @Produces({DatacentersDto.MEDIA_TYPE, LinksDto.MEDIA_TYPE})
+    @Produces(DatacentersDto.MEDIA_TYPE)
     public DatacentersDto getDatacenters(@Context final IRESTBuilder restBuilder,
         @QueryParam(value = "idEnterprise") final String idEnterprise,
         @QueryParam("pricing") final Integer pricingId) throws Exception

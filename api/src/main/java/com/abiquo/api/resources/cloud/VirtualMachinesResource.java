@@ -33,7 +33,6 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
 
 import org.apache.wink.common.annotations.Parent;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,7 +70,7 @@ public class VirtualMachinesResource extends AbstractResource
     protected VirtualDatacenterService vdcService;
 
     @GET
-    @Produces({MediaType.APPLICATION_XML, VirtualMachinesDto.MEDIA_TYPE})
+    @Produces(VirtualMachinesDto.MEDIA_TYPE)
     public VirtualMachinesDto getVirtualMachines(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
@@ -92,8 +91,8 @@ public class VirtualMachinesResource extends AbstractResource
         {
             for (final VirtualMachine v : all)
             {
-                vappsDto.add(VirtualMachineResource.createTransferObject(v, vapp
-                    .getVirtualDatacenter(), vapp.getId(), restBuilder, null, null, null));
+                vappsDto.add(VirtualMachineResource.createTransferObject(v,
+                    vapp.getVirtualDatacenter(), vapp.getId(), restBuilder, null, null, null));
             }
         }
 

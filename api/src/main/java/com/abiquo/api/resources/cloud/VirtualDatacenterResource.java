@@ -28,6 +28,7 @@ import java.util.List;
 import javax.annotation.Resource;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
@@ -115,6 +116,8 @@ public class VirtualDatacenterResource extends AbstractResource
     }
 
     @PUT
+    @Consumes(VirtualDatacenterDto.MEDIA_TYPE)
+    @Produces(VirtualDatacenterDto.MEDIA_TYPE)
     public VirtualDatacenterDto updateVirtualDatacenter(
         @PathParam(VIRTUAL_DATACENTER) final Integer id, final VirtualDatacenterDto dto,
         @Context final IRESTBuilder restBuilder) throws Exception
@@ -227,6 +230,7 @@ public class VirtualDatacenterResource extends AbstractResource
     // should be also changed in enterprise version.
     @PUT
     @Path(VirtualDatacenterResource.DEFAULT_VLAN_PATH)
+    @Consumes(LinksDto.MEDIA_TYPE)
     public void setDefaultVlan(@PathParam(VIRTUAL_DATACENTER) @NotNull @Min(1) final Integer id,
         @NotNull final LinksDto links, @Context final IRESTBuilder restBuilder) throws Exception
     {

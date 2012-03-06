@@ -116,6 +116,8 @@ public class VirtualApplianceResource
     }
 
     @PUT
+    @Consumes(VirtualApplianceDto.MEDIA_TYPE)
+    @Produces(VirtualApplianceDto.MEDIA_TYPE)
     public VirtualApplianceDto updateVirtualAppliance(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,

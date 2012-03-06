@@ -38,7 +38,6 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
 
 import org.apache.wink.common.annotations.Parent;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,6 +69,7 @@ public class MachinesResource extends AbstractResource
     protected InfrastructureService infrastructureService;
 
     @GET
+    @Produces(MachinesDto.MEDIA_TYPE)
     public MachinesDto getMachines(
         @PathParam(DatacenterResource.DATACENTER) @Min(1) final Integer datacenterId,
         @PathParam(RackResource.RACK) @Min(1) final Integer rackId,
