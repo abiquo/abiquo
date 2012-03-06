@@ -325,14 +325,11 @@ public class VirtualAppliance extends DefaultEntityBase
         // value.removeFromDatastores(this);
     }
 
-    // ********************************** Others ********************************
-    /**
-     * Ways to order this element in the queries.
-     */
     public static enum OrderByEnum
     {
-        NAME("name", "vapp.name"), ID("id", "vapp.id");
-
+        NAME("name", "vapp.name"), STATE("state", "vapp.state"), ID("id", "vapp.id"), ERROR(
+            "error", "vapp.error");
+        
         public static OrderByEnum fromValue(final String orderBy)
         {
             for (OrderByEnum currentOrder : OrderByEnum.values())
@@ -365,7 +362,6 @@ public class VirtualAppliance extends DefaultEntityBase
         {
             return columnHQL;
         }
-    }
 
     /**
      * Clones this virtual appliance. But references to objects still the same. Same enterpirse,
@@ -387,6 +383,5 @@ public class VirtualAppliance extends DefaultEntityBase
 
         virtualAppliance.nodesVirtualImage.addAll(this.getNodes());
         return virtualAppliance;
-
     }
 }
