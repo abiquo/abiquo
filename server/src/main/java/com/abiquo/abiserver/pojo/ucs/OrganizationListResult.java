@@ -19,12 +19,12 @@ public class OrganizationListResult
         totalLogicOrganization = 0;
     }
 
-    public Collection<Organization> logicOrganizationList()
+    public Collection<Organization> getLogicOrganizationList()
     {
         return logicOrganizationList;
     }
 
-    public void logicOrganizationList(final Collection<Organization> logicOrganizationList)
+    public void setLogicOrganizationList(final Collection<Organization> logicOrganizationList)
     {
         this.logicOrganizationList = logicOrganizationList;
     }
