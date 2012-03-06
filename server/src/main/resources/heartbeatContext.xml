@@ -47,7 +47,7 @@
     </bean>
     <bean id="heartbeatTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">
         <property name="jobDetail" ref="heartbeatQuartzJob" />
-        <property name="cronExpression" value="0 0/5 * * * ?" />
+        <property name="cronExpression" value="0 0 0 * * ?" />
     </bean>
     <bean id="schedulerFactoryBean" class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
         <property name="autoStartup" value="#{ systemProperties['abiquo.heartbeat.autostart']?:true }" />
