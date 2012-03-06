@@ -39,6 +39,7 @@ import com.abiquo.server.core.infrastructure.management.RasdDAO;
 import com.abiquo.server.core.infrastructure.management.RasdManagement;
 import com.abiquo.server.core.infrastructure.management.RasdManagementDAO;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
+import com.abiquo.server.core.infrastructure.network.IpPoolManagement.OrderByEnum;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagementDAO;
 import com.abiquo.server.core.infrastructure.network.Network;
 import com.abiquo.server.core.infrastructure.network.NetworkAssignment;
@@ -48,7 +49,6 @@ import com.abiquo.server.core.infrastructure.network.NetworkConfigurationDAO;
 import com.abiquo.server.core.infrastructure.network.NetworkDAO;
 import com.abiquo.server.core.infrastructure.network.VLANNetwork;
 import com.abiquo.server.core.infrastructure.network.VLANNetworkDAO;
-import com.abiquo.server.core.infrastructure.network.IpPoolManagement.OrderByEnum;
 import com.abiquo.server.core.infrastructure.storage.DiskManagement;
 import com.abiquo.server.core.infrastructure.storage.DiskManagementDAO;
 
@@ -360,10 +360,22 @@ public class VirtualDatacenterRep extends DefaultRepBase
      * @param excludedIp ip excluded from result if exists
      * @return list of IpPoolManagement.
      */
-    public IpPoolManagement findNextIpByPrivateVLANAvailable(final Integer vdcId,
-        final Integer vlanId, final String... excludedIp)
+    public IpPoolManagement findNextIpAvailable(final Integer vlanId, final String... excludedIp)
     {
-        return ipManagementDAO.findNextIpByPrivateVLANAvailable(vdcId, vlanId, excludedIp);
+        return ipManagementDAO.findNextIpAvailable(vlanId, excludedIp);
+    }
+    
+    /**
+     * Return next available private IP by VLAN with filter options.
+     * 
+     * @param vdcId identifier of the virtual datacenter.
+     * @param vlanId identifier of the vlan
+     * @param excludedIp ip excluded from result if exists
+     * @return list of IpPoolManagement.
+     */
+    public IpPoolManagement findNextExternalIpAvailable(final Integer vlanId, final String... excludedIp)
+    {
+        return ipManagementDAO.findNextExternalIpAvailable(vlanId, excludedIp);
     }
 
     /**

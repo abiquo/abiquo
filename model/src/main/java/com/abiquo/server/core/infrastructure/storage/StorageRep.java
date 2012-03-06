@@ -159,6 +159,11 @@ public class StorageRep extends DefaultRepBase
         return poolDAO.findPoolsByTier(tier);
     }
 
+    public List<StoragePool> findAllPools()
+    {
+        return poolDAO.findAll();
+    }
+
     public Tier findTierById(final Integer tierId)
     {
         return tierDAO.findById(tierId);
