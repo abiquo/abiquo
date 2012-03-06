@@ -27,7 +27,6 @@ import static com.abiquo.api.common.UriTestResolver.resolveMachinesURI;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response.Status;
 
 import org.apache.wink.client.ClientResponse;
@@ -88,7 +87,7 @@ public class MachinesResourceIT extends AbstractJpaGeneratorIT
     {
         Resource resource = client.resource(machinesURI);
 
-        ClientResponse response = resource.accept(MediaType.APPLICATION_XML).get();
+        ClientResponse response = resource.accept(MachinesDto.MEDIA_TYPE).get();
 
         assertEquals(200, response.getStatusCode());
 
@@ -105,7 +104,7 @@ public class MachinesResourceIT extends AbstractJpaGeneratorIT
         String filter = "?filter=notMatches";
         Resource resource = client.resource(machinesURI + filter);
 
-        ClientResponse response = resource.accept(MediaType.APPLICATION_XML).get();
+        ClientResponse response = resource.accept(MachinesDto.MEDIA_TYPE).get();
 
         assertEquals(200, response.getStatusCode());
 
@@ -238,8 +237,8 @@ public class MachinesResourceIT extends AbstractJpaGeneratorIT
 
         Resource resource = client.resource(machinesURI);
         ClientResponse response =
-            resource.contentType(MachinesToCreateDto.MEDIA_TYPE).accept(
-                MachinesToCreateDto.MEDIA_TYPE).post(machinesDto);
+            resource.contentType(MachinesToCreateDto.MEDIA_TYPE)
+                .accept(MachinesToCreateDto.MEDIA_TYPE).post(machinesDto);
 
         // Assert both are created
         assertEquals(response.getStatusCode(), 201);

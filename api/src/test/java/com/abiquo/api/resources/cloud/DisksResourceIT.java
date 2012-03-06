@@ -127,9 +127,7 @@ public class DisksResourceIT extends AbstractJpaGeneratorIT
         DiskManagementDto newDisk = new DiskManagementDto();
         newDisk.setSizeInMb(12000L);
 
-        ClientResponse response =
-            post(uri, newDisk, "basicUser", "basicUser", DisksManagementDto.MEDIA_TYPE,
-                DisksManagementDto.MEDIA_TYPE);
+        ClientResponse response = post(uri, newDisk, "basicUser", "basicUser");
         assertEquals(response.getStatusCode(), Status.CREATED.getStatusCode());
     }
 
@@ -140,9 +138,7 @@ public class DisksResourceIT extends AbstractJpaGeneratorIT
         DiskManagementDto newDisk = new DiskManagementDto();
         newDisk.setSizeInMb(12000L);
 
-        ClientResponse response =
-            post(uri, newDisk, "basicUser", "basicUser", DisksManagementDto.MEDIA_TYPE,
-                DisksManagementDto.MEDIA_TYPE);
+        ClientResponse response = post(uri, newDisk, "basicUser", "basicUser");
         assertEquals(response.getStatusCode(), Status.CONFLICT.getStatusCode());
     }
 
@@ -156,9 +152,7 @@ public class DisksResourceIT extends AbstractJpaGeneratorIT
         DiskManagementDto newDisk = new DiskManagementDto();
         newDisk.setSizeInMb(12000L);
 
-        ClientResponse response =
-            post(uri, newDisk, "basicUser", "basicUser", DisksManagementDto.MEDIA_TYPE,
-                DisksManagementDto.MEDIA_TYPE);
+        ClientResponse response = post(uri, newDisk, "basicUser", "basicUser");
         assertEquals(response.getStatusCode(), Status.BAD_REQUEST.getStatusCode());
     }
 
