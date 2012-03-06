@@ -76,7 +76,7 @@ public class TemplateDefinitionGenerator extends DefaultEntityGenerator<Template
                 newString(nextSeed(), 1, 30),
                 newString(nextSeed(), 1, 30),
                 DiskFormatType.VDI_FLAT,
-                newString(nextSeed(), 1, 30),
+                "http://" + newString(nextSeed(), 1, 30),
                 nextSeed() + 1);
         templateDef.setAppsLibrary(appsLibrary);
         templateDef.setCategory(category);

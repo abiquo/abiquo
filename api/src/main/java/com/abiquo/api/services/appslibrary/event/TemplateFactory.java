@@ -206,6 +206,10 @@ public class TemplateFactory
         return vmtemplate;
     }
 
+    /**
+     * If the icon is not found in the OVF document then look in the {@link TemplateDefinition}
+     * table (from the ovfindex.xml)
+     */
     private String getIcon(final TemplateDto template)
     {
         if (!StringUtils.isEmpty(template.getIconPath()))
