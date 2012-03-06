@@ -21,6 +21,7 @@ import org.springframework.http.MediaType;
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.web.AbiquoHttpServletRequestWrapper;
 import com.abiquo.model.transport.SingleResourceTransportDto;
+import com.abiquo.model.transport.error.ErrorsDto;
 
 /**
  * This class intercepts all the requests to the API and injects the proper version parameter to
@@ -90,15 +91,15 @@ public class VersionCheckerFilter implements Filter
         final HttpServletResponse response, final String header)
         throws UnsupportedVersionInHeaderException
     {
-        String contentType = request.getHeader(header);
-        if (isAbiquoMimeType(contentType))
+        String mimeType = request.getHeader(header);
+        if (isAbiquoMimeType(mimeType))
         {
-            MediaType contentMediaType = MediaType.valueOf(contentType);
+            MediaType contentMediaType = MediaType.valueOf(mimeType);
             String version = contentMediaType.getParameter("version");
             if (version == null)
             {
-                contentType += ";version=" + SingleResourceTransportDto.API_VERSION;
-                request.setHeader(header, contentType);
+                mimeType += ";version=" + SingleResourceTransportDto.API_VERSION;
+                request.setHeader(header, mimeType);
             }
             else
             {
@@ -120,8 +121,11 @@ public class VersionCheckerFilter implements Filter
     private void flushError(final HttpServletResponse response,
         final UnsupportedVersionInHeaderException exception) throws IOException
     {
+        String payload = createInvalidVersionNumberXmlError(exception.errorDetails);
         response.setStatus(exception.errorStatus);
-        response.getWriter().print(createInvalidVersionNumberXmlError(exception.errorDetails));
+        response.setContentType(ErrorsDto.MEDIA_TYPE);
+        response.setContentLength(payload.getBytes().length);
+        response.getWriter().print(payload);
         response.getWriter().flush();
     }
 
