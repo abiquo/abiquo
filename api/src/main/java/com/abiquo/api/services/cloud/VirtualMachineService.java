@@ -755,18 +755,18 @@ public class VirtualMachineService extends DefaultApiService
 
     private boolean differentNetworkConfiguration(VirtualMachine old, VirtualMachine vmnew)
     {
-        if (old.getNetworkConfiguration().getId() == null
-            && vmnew.getNetworkConfiguration().getId() == null)
+        if (old.getNetworkConfiguration() == null
+            && vmnew.getNetworkConfiguration() == null)
         {
             return false;
         }
-        else if (old.getNetworkConfiguration().getId() == null
-            && vmnew.getNetworkConfiguration().getId() != null)
+        else if (old.getNetworkConfiguration() == null
+            && vmnew.getNetworkConfiguration() != null)
         {
             return true;
         }
-        else if (old.getNetworkConfiguration().getId() != null
-            && vmnew.getNetworkConfiguration().getId() == null)
+        else if (old.getNetworkConfiguration() != null
+            && vmnew.getNetworkConfiguration() == null)
         {
             return true;
         }
