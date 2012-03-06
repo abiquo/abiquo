@@ -58,9 +58,6 @@
             import net.undf.abicloud.view.general.AbiCloudAlert;
             import net.undf.abicloud.vo.virtualappliance.VirtualDataCenter;
 
-            //PopUps
-            private var _virtualDatacenterFormEdit:VirtualDatacenterFormEdit;
-            
             private var  _virtualDatacenterAddFormManagement:VirtualDataCenterAddFormManagement;
             
             [Bindable]
@@ -95,13 +92,6 @@
             override protected function createChildren():void
             {
                 super.createChildren();
-
-                //Creating PopUps
-
-                _virtualDatacenterFormEdit = new VirtualDatacenterFormEdit();
-                _virtualDatacenterFormEdit.addEventListener("VirtualDatacenterFormEditClose",
-                                                            closeVirtualDatacenterFormEdit);
-                
             }
 
             [Bindable]
@@ -287,43 +277,6 @@
                 }
             }
 
-            /**
-             * Closes an opened VirtualDataCenterForm
-             */
-            private function closeVirtualDatacenterFormEdit(event:Event):void
-            {
-                PopUpManager.removePopUp(this._virtualDatacenterFormEdit);
-            }
-
-            /**
-             * To filter the VirtualDataCenter list
-             */
-            /* private function onChangeVirtualDataCenterFilter():void
-            {
-                var filterText:String = virtualDataCenterFilter.text;
-
-                if (filterText == null || filterText == "")
-                    virtualDataCenterList.dataProvider = this._virtualDataCenters;
-                else
-                {
-                    var filteredArray:ArrayCollection = new ArrayCollection();
-                    var length:int = this._virtualDataCenters.length;
-                    var i:int;
-                    var virtualDataCenter:VirtualDataCenter;
-
-                    for (i = 0; i < length; i++)
-                    {
-                        virtualDataCenter = this._virtualDataCenters.getItemAt(i) as VirtualDataCenter;
-                        if (virtualDataCenter.name.toLocaleLowerCase().indexOf(filterText.toLocaleLowerCase()) > -1)
-                            filteredArray.addItem(virtualDataCenter);
-                    }
-
-                    virtualDataCenterList.dataProvider = filteredArray;
-                }
-
-                virtualDataCenterList.selectedIndex = ArrayCollection(virtualDataCenterList.dataProvider).getItemIndex(this._selectedVirtualDataCenter);
-            } */
-            
             private function retrieveVirtualDatacenters():void
             {
                 this._listRequest.filterLike = virtualDataCenterFilter.text;

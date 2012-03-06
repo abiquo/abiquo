@@ -332,16 +332,6 @@ public class VirtualDatacenterResourceStubImpl extends AbstractAPIStub implement
                 VirtualDataCenter vdctoadd =
                     VirtualDataCenter.create(vdc, datacenterId, enterprise);
 
-                // TODO set all limits
-                ResourceAllocationLimit limits = new ResourceAllocationLimit();
-
-                Limit publicIpLimit = new Limit();
-                publicIpLimit.setHard(vdc.getPublicIpsHard());
-                publicIpLimit.setSoft(vdc.getPublicIpsSoft());
-                limits.setPublicIP(publicIpLimit);
-
-                vdctoadd.setLimits(limits);
-
                 // Get the default network of the vdc.
                 RESTLink link = vdc.searchLink("defaultnetwork");
                 response = get(link.getHref());
