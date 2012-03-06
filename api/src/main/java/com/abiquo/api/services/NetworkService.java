@@ -206,8 +206,9 @@ public class NetworkService extends DefaultApiService
             case INTERNAL:
                 // find next available IP to use.
                 ip =
-                    repo.findIpsByPrivateVLANAvailableFiltered(vdc.getId(), vlan.getId(), 0, 1,
-                        new String(), OrderByEnum.IP, Boolean.TRUE).get(0);
+                    repo.findNextIpByPrivateVLANAvailable(vdc.getId(), vlan.getId(), vlan
+                        .getConfiguration().getGateway());
+
                 break;
 
             case UNMANAGED:
@@ -236,15 +237,17 @@ public class NetworkService extends DefaultApiService
         Rasd rasd = createRasdEntity(vm, ip);
 
         repo.insertRasd(rasd);
-        ip.setRasd(rasd);
+        if (ip != null)
+        {
+            ip.setRasd(rasd);
 
-        ip.attach(0, vm, vapp);
+            ip.attach(0, vm, vapp);
 
-        ip.setVirtualAppliance(vapp);
-        ip.setVirtualMachine(vm);
-
-        repo.updateIpManagement(ip);
-        
+            ip.setVirtualAppliance(vapp);
+            ip.setVirtualMachine(vm);
+            ip.setAvailable(Boolean.FALSE);
+            repo.updateIpManagement(ip);
+        }
         vm.setNetworkConfiguration(vlan.getConfiguration());
         repo.updateVirtualMachine(vm);
 
@@ -286,29 +289,28 @@ public class NetworkService extends DefaultApiService
      * <p>
      * If the virtual machine is not deployed, the method simply returns <code>null</code>. If the
      * virtual machine is deployed, the attachment will run a reconfigure operation and this method
-     * will return the identifier of the task object associated to the reconfigure operation.
-     * 
-     * If the @param configurationRef is an empty list, we will set no network configuration
-     * to this machine. Stupid behavior, but we allow it.
+     * will return the identifier of the task object associated to the reconfigure operation. If the @param
+     * configurationRef is an empty list, we will set no network configuration to this machine.
+     * Stupid behavior, but we allow it.
      * 
      * @param vdcId identifier of the virtual datacenter.
      * @param vappId identifier of the virtual appliance
      * @param vmId identifier of the virtual machine
      * @param configurationRef the link to the available configuration.
-     * 
      * @return The id of the Tarantino task if the virtual machine is deployed, <code>null</code>
      *         otherwise.
      */
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public Object changeNetworkConfiguration(final Integer vdcId, final Integer vappId, final Integer vmId,
-        final LinksDto configurationRef, final VirtualMachineState originalState)
+    public Object changeNetworkConfiguration(final Integer vdcId, final Integer vappId,
+        final Integer vmId, final LinksDto configurationRef, final VirtualMachineState originalState)
     {
         VirtualDatacenter vdc = getVirtualDatacenter(vdcId);
         VirtualAppliance vapp = getVirtualAppliance(vdc, vappId);
         VirtualMachine oldvm = getVirtualMachine(vapp, vmId);
 
         VirtualMachine newvm = vmService.duplicateVirtualMachineObject(oldvm);
-        NetworkConfiguration netconf = vmService.getNetworkConfigurationFromDto(vapp, newvm, configurationRef);
+        NetworkConfiguration netconf =
+            vmService.getNetworkConfigurationFromDto(vapp, newvm, configurationRef);
 
         newvm.setNetworkConfiguration(netconf);
 
@@ -380,7 +382,7 @@ public class NetworkService extends DefaultApiService
         // once we have validated we have IPs in all IP parameters (isValid() method), we should
         // ensure they are
         // actually PRIVATE IPs. Also check if the gateway is in the range, and
-        checkPrivateAddressAndMaskCoherency(IPAddress.newIPAddress(newVlan.getConfiguration()
+        checkAddressAndMaskCoherency(IPAddress.newIPAddress(newVlan.getConfiguration()
             .getAddress()), newVlan.getConfiguration().getMask());
 
         List<DhcpOption> opts = new ArrayList<DhcpOption>(newVlan.getDhcpOption());
@@ -607,6 +609,31 @@ public class NetworkService extends DefaultApiService
     }
 
     /**
+     * Retrieve a private IP object.
+     * 
+     * @param vdcId identifier of the {@link VirtualDatacenter}
+     * @param vlanId identifier of the {@link VLANNetwork}
+     * @param ipId identifier of the {@link IpPoolManagement} object to retrieve.
+     * @return the found object.
+     */
+    public IpPoolManagement getIpPoolManagementByVlan(Integer vdcId, Integer vlanId, Integer ipId)
+    {
+        VirtualDatacenter vdc = getVirtualDatacenter(vdcId);
+        VLANNetwork vlan = getPrivateVlan(vdc, vlanId);
+        IpPoolManagement ip = repo.findIp(vlan, ipId);
+        
+        if (ip == null)
+        {
+            addNotFoundErrors(APIError.NON_EXISTENT_IP);
+            flushErrors();
+        }
+
+        LOGGER.debug("Returning the private Ip Address with id '" + ip.getId() + "'.");
+        
+        return ip;       
+    }
+
+    /**
      * Asks for all the Private IPs managed by an Enterprise.
      * 
      * @param entId identifier of the Enterprise.
@@ -706,7 +733,7 @@ public class NetworkService extends DefaultApiService
         }
 
     }
-
+    
     /**
      * Asks for all the Private IPs managed by a Virtual Appliance.
      * 
@@ -756,9 +783,10 @@ public class NetworkService extends DefaultApiService
         LOGGER.debug("Returning the list of IPs used by Virtual Machine '" + vm.getName() + "'.");
         return ips;
     }
-    
+
     public List<IpPoolManagement> getListIpPoolManagementByInfrastructureVirtualMachine(
-        Integer datacenterId, Integer rackId, Integer machineId, Integer vmId)
+        final Integer datacenterId, final Integer rackId, final Integer machineId,
+        final Integer vmId)
     {
         Machine pm = datacenterRepo.findMachineByIds(datacenterId, rackId, machineId);
         if (pm == null)
@@ -766,7 +794,7 @@ public class NetworkService extends DefaultApiService
             addNotFoundErrors(APIError.NON_EXISTENT_MACHINE);
             flushErrors();
         }
-        
+
         VirtualMachine vm = vmService.getVirtualMachineByHypervisor(pm.getHypervisor(), vmId);
         VirtualAppliance vapp = repo.findVirtualApplianceByVirtualMachine(vm);
         if (vapp == null)
@@ -889,8 +917,7 @@ public class NetworkService extends DefaultApiService
 
         // Generally there is only one IP, but we avoid problemes and
         // we return IPs
-        List<IpPoolManagement> ips =
-            repo.findIpsWithConfigurationIdInVirtualMachine(vm);
+        List<IpPoolManagement> ips = repo.findIpsWithConfigurationIdInVirtualMachine(vm);
         if (ips == null || ips.isEmpty())
         {
             addNotFoundErrors(APIError.VLANS_NON_EXISTENT_CONFIGURATION);
@@ -902,7 +929,8 @@ public class NetworkService extends DefaultApiService
         IpPoolManagement resultIp = ips.get(0);
         for (IpPoolManagement ip : ips)
         {
-            if (ip.getVlanNetwork().getConfiguration().getId().equals(vm.getNetworkConfiguration().getId()))
+            if (ip.getVlanNetwork().getConfiguration().getId()
+                .equals(vm.getNetworkConfiguration().getId()))
             {
                 resultIp = ip;
                 break;
@@ -915,7 +943,8 @@ public class NetworkService extends DefaultApiService
         vmconfig.setPrimaryDNS(vlan.getConfiguration().getPrimaryDNS());
         vmconfig.setSecondaryDNS(vlan.getConfiguration().getSecondaryDNS());
         vmconfig.setSuffixDNS(vlan.getConfiguration().getSufixDNS());
-        vmconfig.setUsed(vlan.getConfiguration().getId().equals(vm.getNetworkConfiguration().getId()));
+        vmconfig.setUsed(vlan.getConfiguration().getId()
+            .equals(vm.getNetworkConfiguration().getId()));
         vmconfig.setId(vlan.getConfiguration().getId());
 
         LOGGER
@@ -1240,7 +1269,7 @@ public class NetworkService extends DefaultApiService
      * @throws NetworkCommandException if the values are not coherent into a public or private
      *             network environment.
      */
-    protected void checkPrivateAddressAndMaskCoherency(final IPAddress netAddress,
+    protected void checkAddressAndMaskCoherency(final IPAddress netAddress,
         final Integer netmask)
     {
 
@@ -1248,41 +1277,18 @@ public class NetworkService extends DefaultApiService
         IPAddress networkAddress = IPAddress.newIPAddress(netAddress.toString());
 
         // First of all, check if the networkAddress is correct.
-        Integer firstOctet = Integer.parseInt(networkAddress.getFirstOctet());
-        Integer secondOctet = Integer.parseInt(networkAddress.getSecondOctet());
 
         // if the value is a private network.
-        if (firstOctet == 10 || firstOctet == 192 && secondOctet == 168 || firstOctet == 172
-            && secondOctet >= 16 && secondOctet < 32)
+        if (netmask < 22)
         {
-            // check the mask is coherent with the server.
-            if (firstOctet == 10 && netmask < 22)
-            {
-                addConflictErrors(APIError.VLANS_TOO_BIG_NETWORK);
-            }
-            if ((firstOctet == 172 || firstOctet == 192) && netmask < 24)
-            {
-                addConflictErrors(APIError.VLANS_TOO_BIG_NETWORK_II);
-            }
-            if (netmask > 30)
-            {
-                addConflictErrors(APIError.VLANS_TOO_SMALL_NETWORK);
-            }
+            addConflictErrors(APIError.VLANS_TOO_BIG_NETWORK);
             flushErrors();
-
-            // Check the network address depending on the mask. For instance, the network address
-            // 192.168.1.128
-            // is valid for the mask 25, but the same (192.168.1.128) is an invalid network address
-            // for the mask 24.
-            if (!NetworkResolver.isValidNetworkMask(netAddress, netmask))
-            {
-                addValidationErrors(APIError.VLANS_INVALID_NETWORK_AND_MASK);
-                flushErrors();
-            }
         }
-        else
+
+        if (!NetworkResolver.isValidNetworkMask(networkAddress, netmask))
         {
-            throw new BadRequestException(APIError.VLANS_PRIVATE_ADDRESS_WRONG);
+            addValidationErrors(APIError.VLANS_INVALID_NETWORK_AND_MASK);
+            flushErrors();
         }
 
     }

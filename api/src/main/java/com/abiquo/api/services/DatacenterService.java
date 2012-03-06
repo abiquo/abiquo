@@ -327,7 +327,8 @@ public class DatacenterService extends DefaultApiService
         // only delete the datacenter if it doesn't have any virtual datacenter and any storage
         // device associated
         Collection<VirtualDatacenter> vdcs =
-            virtualDatacenterService.getVirtualDatacentersByDatacenter(datacenter);
+            virtualDatacenterService.getVirtualDatacentersByDatacenter(datacenter, 0, 0, "",
+                VirtualDatacenter.OrderByEnum.NAME, true);
         if (vdcs == null || vdcs.isEmpty())
         {
             List<StorageDevice> sDevices = getStorageDevices(datacenter);

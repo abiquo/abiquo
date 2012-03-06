@@ -117,7 +117,6 @@ public class MachineGenerator extends DefaultEntityGenerator<Machine>
         int virtualRamInMb = seed * 10 + 1;
         int virtualRamUsedInMb = seed * 30 + 1;
         int realCpuThreads = seed + 1;
-        int virtualCpusPerThread = 1;
         int currentCpusInUse = seed + 3 + 1;
         MachineState state = newEnum(MachineState.class, seed);
         final String description =
@@ -127,7 +126,7 @@ public class MachineGenerator extends DefaultEntityGenerator<Machine>
 
         Machine machine =
             datacenter.createMachine(name, description, virtualRamInMb, virtualRamUsedInMb,
-                realCpuThreads, currentCpusInUse, virtualCpusPerThread, state, virtualSwitch);
+                realCpuThreads, currentCpusInUse, state, virtualSwitch);
         machine.setInitiatorIQN(InitiatorMappingGenerator.DEFAULT_INITIATOR);
 
         return machine;

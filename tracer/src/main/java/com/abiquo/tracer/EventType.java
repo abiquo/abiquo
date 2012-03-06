@@ -69,12 +69,12 @@ public enum EventType implements Serializable
     DC_CREATE(300, "DC_CREATE", "Datacenter Created"), DC_MODIFY(301, "DC_MODIFY",
         "Datacenter Modified"), DC_DELETE(302, "DC_DELETE", "Datacenter Deleted"), RACK_CREATE(303,
         "RACK_CREATE", "Rack Created"), RACK_MODIFY(304, "RACK_MODIFY", "Rack Modified"), RACK_DELETE(
-        305, "RACK_DELETE", "Rack Deleted"), RACK_NRSQ_EXCEEDED(306, "RACK_VLAN_POOL",
+        305, "RACK_DELETE", "Rack Deleted"), RACK_VLAN_POOL(306, "RACK_VLAN_POOL",
         "VLAN Pool excedded in Rack"), MACHINE_CREATE(307, "MACHINE_CREATE",
         "Physical Machine created"), MACHINE_MODIFY(308, "MACHINE_MODIFY",
         "Physical Machine modified"), MACHINE_DELETE(309, "MACHINE_DELETE",
-        "Physical Machine deleted"), MACHINE_CHECK(310, "MACHINE_CHECK", "Physical Machine checked"), MACHINE_RETRIVE_VMS(
-        311, "MACHINE_RETRIEVE_VMS", "Virtual Machines discovered from physical machine"), MACHINE_CREATED_RETRIVED_VMS(
+        "Physical Machine deleted"), MACHINE_CHECK(310, "MACHINE_CHECK", "Physical Machine checked"), MACHINE_RETRIEVE_VMS(
+        311, "MACHINE_RETRIEVE_VMS", "Virtual Machines discovered from physical machine"), MACHINE_CREATED_RETRIEVED_VMS(
         312, "MACHINE_CREATED_RETRIEVED_VMS",
         "Created Virtual Machines discovered from physical machine"), MACHINE_DELETE_VMS_NOTMANAGED(
         313, "MACHINE_DELETE_VMS_NOTMANAGED", "Not managed Virtual Machines deleted"), REMOTE_SERVICES_CREATE(
@@ -175,7 +175,7 @@ public enum EventType implements Serializable
     // HA Engine Events
     MACHINE_DISABLED_BY_HA(1400, "MACHINE_DISABLED_BY_HA", "Machine disabled by HA engine."), VAPP_BLOCKED_BY_HA(
         1401, "VAPP_BLOCKED_BY_HA", "Virtual appliance block by HA engine"), VM_MOVING_BY_HA(1402,
-        "VAPP_MOVING_BY_HA", "Virtual machine being moved by HA engine"),
+        "VM_MOVING_BY_HA", "Virtual machine being moved by HA engine"),
 
     // ALLOCATION RULES
     ALLOCATION_RULES_APPLIED(1500, "ALLOCATION_RULES_APPLIED", "Allocation rules applied"), ALLOCATION_RULES_REMOVED(
@@ -294,8 +294,8 @@ public enum EventType implements Serializable
         System.out.println("|| Action performed || Description || ");
         for (EventType error : events)
         {
-            System.out.println(String.format("| %s | %s |", error.name(), error
-                .getLongDescription()));
+            System.out.println(String.format("| %s | %s |", error.name(),
+                error.getLongDescription()));
         }
     }
 }

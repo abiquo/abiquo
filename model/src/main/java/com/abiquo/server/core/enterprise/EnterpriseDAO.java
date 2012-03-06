@@ -47,6 +47,7 @@ import com.abiquo.server.core.infrastructure.storage.StorageRep;
 import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
 import com.abiquo.server.core.pricing.PricingTemplate;
 import com.abiquo.server.core.util.PagedList;
+import com.softwarementors.bzngine.entities.PersistentEntity;
 
 @Repository("jpaEnterpriseDAO")
 class EnterpriseDAO extends DefaultDAOBase<Integer, Enterprise>
@@ -116,11 +117,12 @@ class EnterpriseDAO extends DefaultDAOBase<Integer, Enterprise>
     }
 
     public List<Enterprise> findByPricingTemplate(Integer firstElem, final PricingTemplate pt,
-        final boolean included, final String filterName, final Integer numResults)
+        final boolean included, final String filterName, final Integer numResults,
+        final Integer idEnterprise)
     {
         // Check if the page requested is bigger than the last one
 
-        Criteria criteria = createCriteria(pt, included, filterName);
+        Criteria criteria = createCriteria(pt, included, filterName, idEnterprise);
 
         Long total = count(criteria);
 
@@ -129,7 +131,7 @@ class EnterpriseDAO extends DefaultDAOBase<Integer, Enterprise>
             firstElem = total.intValue() - numResults;
         }
 
-        criteria = createCriteria(pt, included, filterName);
+        criteria = createCriteria(pt, included, filterName, idEnterprise);
         criteria.setFirstResult(firstElem);
         criteria.setMaxResults(numResults);
 
@@ -372,7 +374,7 @@ class EnterpriseDAO extends DefaultDAOBase<Integer, Enterprise>
     }
 
     private Criteria createCriteria(final PricingTemplate pricingTemplate, final boolean included,
-        final String filter)
+        final String filter, final Integer enterpriseId)
     {
         Criteria criteria = createCriteria();
 
@@ -395,6 +397,11 @@ class EnterpriseDAO extends DefaultDAOBase<Integer, Enterprise>
         else if (!included && pricingTemplate == null)
         {
             criteria.add(withoutPricingTemplate());
+        }
+
+        if (enterpriseId != null)
+        {
+            criteria.add(Restrictions.eq(PersistentEntity.ID_PROPERTY, enterpriseId));
         }
 
         if (!StringUtils.isEmpty(filter))

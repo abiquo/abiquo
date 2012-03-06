@@ -256,7 +256,8 @@ public class VirtualAppliance extends DefaultEntityBase
     // @Type(type = "com.abiquo.server.core.cloud.VirtualApplianceState")
     @Formula(value = STATE_FORMULA)
     private String state; // This should be VirtualApplianceState but enums does not work with
-                          // formula this bug https://hibernate.onjira.com/browse/HHH-6347
+
+    // formula this bug https://hibernate.onjira.com/browse/HHH-6347
 
     /**
      * @see VirtualApplianceState
@@ -324,4 +325,64 @@ public class VirtualAppliance extends DefaultEntityBase
         // value.removeFromDatastores(this);
     }
 
+    public static enum OrderByEnum
+    {
+        NAME("name", "vapp.name"), STATE("state", "vapp.state"), ID("id", "vapp.id"), ERROR(
+            "error", "vapp.error");
+
+        public static OrderByEnum fromValue(final String orderBy)
+        {
+            for (OrderByEnum currentOrder : OrderByEnum.values())
+            {
+                if (currentOrder.name().equalsIgnoreCase(orderBy))
+                {
+                    return currentOrder;
+                }
+            }
+
+            return null;
+        }
+
+        private String columnSQL;
+
+        private String columnHQL;
+
+        private OrderByEnum(final String columnSQL, final String columnHQL)
+        {
+            this.columnSQL = columnSQL;
+            this.columnHQL = columnHQL;
+        }
+
+        public String getColumnSQL()
+        {
+            return columnSQL;
+        }
+
+        public String getColumnHQL()
+        {
+            return columnHQL;
+        }
+    }
+
+    /**
+     * Clones this virtual appliance. But references to objects still the same. Same enterpirse,
+     * same nodes, same virtual datacenter.
+     * 
+     * @see java.lang.Object#clone()
+     */
+    @Override
+    public VirtualAppliance clone()
+    {
+        VirtualAppliance virtualAppliance = new VirtualAppliance();
+
+        virtualAppliance.setEnterprise(enterprise);
+        virtualAppliance.setHighDisponibility(highDisponibility);
+        virtualAppliance.setName(name);
+        virtualAppliance.setNodeconnections(nodeconnections);
+        virtualAppliance.setPublicApp(publicApp);
+        virtualAppliance.setVirtualDatacenter(virtualDatacenter);
+
+        virtualAppliance.nodesVirtualImage.addAll(this.getNodes());
+        return virtualAppliance;
+    }
 }

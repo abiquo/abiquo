@@ -25,6 +25,7 @@
 package com.abiquo.api.services.cloud;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -42,7 +43,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.exceptions.APIException;
+import com.abiquo.api.services.DatacenterService;
 import com.abiquo.api.services.DefaultApiService;
+import com.abiquo.api.services.EnterpriseService;
+import com.abiquo.api.services.TaskService;
 import com.abiquo.api.services.UserService;
 import com.abiquo.api.services.VirtualMachineAllocatorService;
 import com.abiquo.api.services.stub.TarantinoService;
@@ -61,6 +65,8 @@ import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualDatacenterRep;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineState;
+import com.abiquo.server.core.enterprise.Enterprise;
+import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.management.RasdManagement;
 import com.abiquo.server.core.infrastructure.management.RasdManagementDAO;
 import com.abiquo.server.core.infrastructure.storage.Tier;
@@ -71,6 +77,9 @@ import com.abiquo.server.core.pricing.PricingRep;
 import com.abiquo.server.core.pricing.PricingTemplate;
 import com.abiquo.server.core.pricing.PricingTier;
 import com.abiquo.server.core.scheduler.VirtualMachineRequirements;
+import com.abiquo.server.core.task.Task;
+import com.abiquo.server.core.task.enums.TaskOwnerType;
+import com.abiquo.server.core.util.FilterOptions;
 import com.abiquo.tracer.ComponentType;
 import com.abiquo.tracer.EventType;
 import com.abiquo.tracer.SeverityType;
@@ -84,22 +93,22 @@ import com.abiquo.tracer.SeverityType;
 public class VirtualApplianceService extends DefaultApiService
 {
     /** The logger object **/
-    private final static Logger logger = LoggerFactory.getLogger(VirtualMachineService.class);
+    private final static Logger logger = LoggerFactory.getLogger(VirtualApplianceService.class);
 
     @Autowired
-    TarantinoService tarantino;
+    private TarantinoService tarantino;
 
     @Autowired
     private VirtualDatacenterRep repo;
 
     @Autowired
-    private VirtualDatacenterService vdcService;
+    protected VirtualDatacenterService vdcService;
 
     @Autowired
-    private UserService userService;
+    protected UserService userService;
 
     @Autowired
-    private VirtualApplianceRep virtualApplianceRepo;
+    protected VirtualApplianceRep virtualApplianceRepo;
 
     @Autowired
     private PricingRep pricingRep;
@@ -115,6 +124,15 @@ public class VirtualApplianceService extends DefaultApiService
 
     @Autowired
     private VirtualMachineAllocatorService vmallocator;
+
+    @Autowired
+    private TaskService taskService;
+
+    @Autowired
+    private EnterpriseService entService;
+
+    @Autowired
+    private DatacenterService dcServbice;
 
     public VirtualApplianceService()
     {
@@ -140,12 +158,45 @@ public class VirtualApplianceService extends DefaultApiService
      * @param vdcId identifier of the virtualdatacenter.
      * @return the list of {@link VirtualAppliance} pojo
      */
-
     @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
-    public List<VirtualAppliance> getVirtualAppliancesByVirtualDatacenter(final Integer vdcId)
+    public List<VirtualAppliance> getVirtualAppliancesByVirtualDatacenter(final Integer vdcId,
+        final FilterOptions filterOptions)
     {
         VirtualDatacenter vdc = vdcService.getVirtualDatacenter(vdcId);
-        return (List<VirtualAppliance>) repo.findVirtualAppliancesByVirtualDatacenter(vdc);
+        return (List<VirtualAppliance>) repo.findVirtualAppliancesByVirtualDatacenter(vdc,
+            filterOptions);
+    }
+
+    /**
+     * Retrieves the list of virtual appliances by enterprise
+     * 
+     * @param entId identifier of the enterprise.
+     * @param filterOptions use to filter the results. <code>null</code> if no filtering required
+     * @return the list of {@link VirtualAppliance} pojo
+     */
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
+    public List<VirtualAppliance> getVirtualAppliancesByEnterprise(final Integer entId,
+        final FilterOptions filterOptions)
+    {
+        Enterprise enterprise = entService.getEnterprise(entId);
+        return virtualApplianceRepo.findVirtualAppliancesByEnterprise(enterprise, filterOptions);
+    }
+
+    /**
+     * Retrieves the list of virtual appliances by enterprise and datacenter
+     * 
+     * @param entId identifier of the enterprise.
+     * @param dcId identifier of the datacenter.
+     * @return the list of {@link VirtualAppliance} pojo
+     */
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
+    public List<VirtualAppliance> getVirtualAppliancesByEnterpriseAndDatacenter(
+        final Integer entId, final Integer dcId)
+    {
+        Enterprise enterprise = entService.getEnterprise(entId);
+        Datacenter datacenter = dcServbice.getDatacenter(dcId);
+
+        return virtualApplianceRepo.findVirtualAppliancesByEnterpriseAndDatacenter(entId, dcId);
     }
 
     @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
@@ -161,7 +212,7 @@ public class VirtualApplianceService extends DefaultApiService
      * @param vappId
      * @return
      */
-    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
     public VirtualAppliance getVirtualAppliance(final Integer vdcId, final Integer vappId)
     {
 
@@ -179,6 +230,30 @@ public class VirtualApplianceService extends DefaultApiService
 
         VirtualAppliance vapp = repo.findVirtualApplianceById(vappId);
         if (vapp == null || !vapp.getVirtualDatacenter().getId().equals(vdcId))
+        {
+            addNotFoundErrors(APIError.NON_EXISTENT_VIRTUALAPPLIANCE);
+            flushErrors();
+        }
+        return vapp;
+    }
+
+    /**
+     * Returns the virtual appliance.
+     * 
+     * @param vappId virtual appliance.
+     * @return
+     */
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
+    public VirtualAppliance getVirtualAppliance(final Integer vappId)
+    {
+        if (vappId == 0)
+        {
+            addValidationErrors(APIError.INVALID_ID);
+            flushErrors();
+        }
+
+        VirtualAppliance vapp = repo.findVirtualApplianceById(vappId);
+        if (vapp == null)
         {
             addNotFoundErrors(APIError.NON_EXISTENT_VIRTUALAPPLIANCE);
             flushErrors();
@@ -219,6 +294,10 @@ public class VirtualApplianceService extends DefaultApiService
         logger.debug("Add virtual appliance to Abiquo with name {}", dto.getName());
         repo.insertVirtualAppliance(vapp);
         logger.debug("Created virtual appliance with name {} !", dto.getName());
+
+        tracer.log(SeverityType.INFO, ComponentType.VIRTUAL_APPLIANCE, EventType.VAPP_CREATE,
+            "virtualAppliance.create", dto.getName());
+
         return vapp;
     }
 
@@ -244,6 +323,9 @@ public class VirtualApplianceService extends DefaultApiService
         vapp.setName(dto.getName());
         vapp.setNodeconnections(dto.getNodeconnections());
         repo.updateVirtualAppliance(vapp);
+
+        tracer.log(SeverityType.INFO, ComponentType.VIRTUAL_APPLIANCE, EventType.VAPP_MODIFY,
+            "virtualAppliance.modify", vapp.getName());
 
         return vapp;
     }
@@ -513,6 +595,9 @@ public class VirtualApplianceService extends DefaultApiService
 
         allocateVirtualAppliance(virtualAppliance, forceLimits);
 
+        tracer.log(SeverityType.INFO, ComponentType.VIRTUAL_APPLIANCE, EventType.VAPP_POWERON,
+            "virtualAppliance.deploy", virtualAppliance.getName());
+
         Map<Integer, String> dto = new HashMap<Integer, String>();
         for (NodeVirtualImage nodevi : vappNodes)
         {
@@ -528,7 +613,7 @@ public class VirtualApplianceService extends DefaultApiService
             {
                 logger
                     .error(
-                        "Error already loggegd in the sendDeploy deploying virtual appliance name {}. {}",
+                        "Error already logged in the sendDeploy deploying virtual appliance name {}. {}",
                         virtualAppliance.getName(), e.toString());
             }
         }
@@ -560,6 +645,9 @@ public class VirtualApplianceService extends DefaultApiService
                 }
             }
         }
+
+        tracer.log(SeverityType.INFO, ComponentType.VIRTUAL_APPLIANCE, EventType.VAPP_POWEROFF,
+            "virtualAppliance.undeploy", virtualAppliance.getName());
 
         Map<Integer, String> dto = new HashMap<Integer, String>();
         for (NodeVirtualImage machine : virtualAppliance.getNodes())
@@ -617,4 +705,34 @@ public class VirtualApplianceService extends DefaultApiService
             "virtualAppliance.deleted", virtualAppliance.getName());
     }
 
+    /**
+     * Retrieve the last {@link Task} of every {@link VirtualMachine} in the
+     * {@link VirtualAppliance}
+     * 
+     * @param vdcId datacenter id.
+     * @param vappId virtualappliance id
+     * @return List<Task>
+     */
+    public List<Task> getAllNodesLastTask(final Integer vdcId, final Integer vappId)
+    {
+
+        VirtualAppliance virtualAppliance = getVirtualAppliance(vdcId, vappId);
+        logger.debug("Retrieving all of the nodes last task virtual appliance name {} ",
+            virtualAppliance.getName());
+        List<Task> tasks = new ArrayList<Task>();
+        for (NodeVirtualImage m : virtualAppliance.getNodes())
+        {
+            List<Task> t =
+                taskService.findTasks(TaskOwnerType.VIRTUAL_MACHINE, m.getVirtualMachine().getId()
+                    .toString());
+            if (t != null && !t.isEmpty())
+            {
+                tasks.add(t.get(0));
+            }
+        }
+        logger.debug(
+            "Retrieving all of the nodes last task virtual appliance name {}, added {} tasks ",
+            new Object[] {virtualAppliance.getName(), tasks.size()});
+        return tasks;
+    }
 }

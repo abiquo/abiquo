@@ -183,11 +183,21 @@ public enum APIError
     // VIRTUAL APPLIANCE
     NON_EXISTENT_VIRTUALAPPLIANCE("VAPP-0", "The requested virtual appliance does not exist"), VIRTUALAPPLIANCE_NOT_DEPLOYED(
         "VAPP-1", "The virtual appliance is not deployed"), VIRTUALAPPLIANCE_NOT_RUNNING("VAPP-2",
-        "The virtual appliance is not running"), VIRTUALAPPLIANCE_DEPLOYED("VAPP-1",
+        "The virtual appliance is not running"), VIRTUALAPPLIANCE_DEPLOYED("VAPP-3",
         "The virtual appliance is deployed"), VIRTUALAPPLIANCE_NON_MANAGED_IMAGES("VAPP-4",
         "The virtual appliance has non-managed VM templates"), VIRTUALAPPLIANCE_INVALID_STATE_DELETE(
-        "VAPP-4", "The virtual appliance has non-managed VM templates"), VIRTUALAPPLIANCE_EMPTY(
-        "VAPP-5", "The virtual appliance does not contain any virtual machine"),
+        "VAPP-5", "The virtual appliance has non-managed VM templates"), VIRTUALAPPLIANCE_MOVE_MISSING_VDC(
+        "VAPP-6", "The virtual appliance has not the virtual datacenter link"), VIRTUALAPPLIANCE_INVALID_STATE_MOVE_COPY(
+        "VAPP-8", "The virtual appliance cannot be moved since the state is not NOT_DEPLOYED"), VIRTUALAPPLIANCE_INVALID_DC_MOVE_COPY(
+        "VAPP-7",
+        "The virtual appliance cannot be moved or copied since target virtual datacenter is not in the same datacenter"), VIRTUALAPPLIANCE_MOVE_COPY_CAPTURED_VM(
+        "VAPP-9",
+        "The virtual appliance cannot be moved nor copied since it contains captured virtual machines"), VIRTUALAPPLIANCE_MOVE_COPY_INCOMPATIBLE_VM(
+        "VAPP-10",
+        "The virtual appliance cannot be moved nor copied since it contains incompatible virtual machines templates with the hypervisor to be moved"), VIRTUALAPPLIANCE_COPY_PERSISTENT_VM(
+        "VAPP-11",
+        "The virtual appliance cannot be copied since it contains persistent virtual machines templates with the hypervisor to be moved"), VIRTUALAPPLIANCE_EMPTY(
+        "VAPP-12", "The virtual appliance does not contain any virtual machine"),
 
     // VIRTUAL CONVERSION
     NON_EXISTENT_VIRTUALAPPLIANCE_STATEFULCONVERSION("VASC-0",
@@ -223,7 +233,9 @@ public enum APIError
         "MACHINE-8", "Invalid IPMI configuration"), MACHINE_INVALID_IP_RANGE("MACHINE-9",
         "Invalid IP range"), MACHINE_IQN_MISSING("MACHINE-10",
         "The IQN of the target Physical Machine is not set"), MANAGED_MACHINE_CANNOT_CHANGE_NAME(
-        "MACHINE-11", "The Machine is in a managed Rack and its name cannot be changed."),
+        "MACHINE-11", "The Machine is in a managed Rack and its name cannot be changed."), MACHINE_CANNOT_BE_RESERVED(
+        "MACHINE-12",
+        "The machine cannot be reserved because another enterprise has deployed virtual machines on it."),
 
     HYPERVISOR_EXIST_IP("HYPERVISOR-1",
         "Invalid hypervisor IP. A hypervisor with that IP already exists"), HYPERVISOR_EXIST_SERVICE_IP(
@@ -358,7 +370,8 @@ public enum APIError
 
     // OVF PACKAGE LIST
     TEMPLATE_DEFINITION_LIST_NAME_ALREADY_EXIST("OVF-PACKAGE-LIST-0",
-        "OVF Package list name already exists"),
+        "OVF Package list name already exists"), TEMPLATE_DEFINITION_LIST_NAME_NOT_FOUND(
+        "OVF-PACKAGE-LIST-1", "OVF Package list name is required"),
 
     // OVF PACKAGE
     NON_EXISTENT_OVF_PACKAGE("OVF-PACKAGE-0", "The requested OVF package does not exist"), NON_EXISTENT_TEMPLATE_DEFINITION_LIST(
@@ -372,7 +385,7 @@ public enum APIError
         "Virtual machine template cannot be added due to invalid allocation units"), VMTEMPLATE_SYNCH_DC_REPO(
         "VIMAGE-SYNCH-DATACENTER-REPOSITORY", "Cannot obtain downloaded OVF in the datacenter"), VIMAGE_DATACENTER_REPOSITORY_NOT_FOUND(
         "DATACENTER-REPOSITORY-NOT-CREATED",
-        "Datacenter does not have the ApplianceManager properly configured. Repository not created"), VMTEMPLATE_REPOSITORY_CHANGED(
+        "Datacenter Repository not configured; check Datacenter's Appliance Manager. Contact Infrastructure Administrator"), VMTEMPLATE_REPOSITORY_CHANGED(
         "VIMAGE-REPOSITORY-CHANGED", "Datacenter repository location has changed"), VIMAGE_AM_DOWN(
         "VIMAGE-AM-DOWN", "Check Appliance Manager configuration error"), NON_EXISTENT_VIRTUAL_MACHINE_TEMPLATE(
         "VIMAGE-0", "The requested virtual machine template does not exist"), VIMAGE_IS_NOT_BUNDLE(
@@ -577,7 +590,7 @@ public enum APIError
 
     // TASKS
     NON_EXISTENT_TASK("TASK-1", "The requested task does not exist"), TASK_OWNER_NOT_FOUND(
-        "TASK-2", ""),
+        "TASK-2", "The owner of the requested task could not be found"),
 
     // PRICING TEMPLATE
     CURRENCY_PARAM_NOT_FOUND("PRICINGTEMPLATE-0", "Missing currency parameter"), ENT_PARAM_NOT_FOUND(

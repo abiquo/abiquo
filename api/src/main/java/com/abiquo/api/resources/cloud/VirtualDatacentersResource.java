@@ -24,18 +24,17 @@ package com.abiquo.api.resources.cloud;
 import static com.abiquo.api.resources.DatacenterResource.DATACENTER;
 import static com.abiquo.api.resources.EnterpriseResource.ENTERPRISE;
 import static com.abiquo.api.resources.cloud.VirtualDatacenterResource.createTransferObject;
-import static com.abiquo.api.util.URIResolver.buildPath;
-import static com.abiquo.api.util.URIResolver.resolveFromURI;
 
 import java.util.Collection;
 
 import javax.annotation.Resource;
+import javax.validation.constraints.Min;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MultivaluedMap;
 
 import org.apache.wink.common.annotations.Workspace;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -88,8 +87,13 @@ public class VirtualDatacentersResource extends AbstractResource
     @GET
     public VirtualDatacentersDto getVirtualDatacenters(
         @QueryParam(ENTERPRISE) final Integer enterpriseId,
-        @QueryParam(DATACENTER) final Integer datacenterId, @Context final IRESTBuilder restBuilder)
-        throws Exception
+        @QueryParam(DATACENTER) final Integer datacenterId,
+        @QueryParam(START_WITH) @DefaultValue("0") @Min(0) final Integer startwith,
+        @QueryParam(BY) @DefaultValue("name") final String orderBy,
+        @QueryParam(FILTER) @DefaultValue("") final String filter,
+        @QueryParam(LIMIT) @Min(1) @DefaultValue(DEFAULT_PAGE_LENGTH_STRING) final Integer limit,
+        @QueryParam(ASC) @DefaultValue("true") final Boolean descOrAsc,
+        @Context final IRESTBuilder restBuilder) throws Exception
     {
 
         if (!securityService.hasPrivilege(Privileges.VDC_ENUMERATE)
@@ -116,7 +120,8 @@ public class VirtualDatacentersResource extends AbstractResource
             enterprise = getEnterprise(enterpriseId);
         }
 
-        Collection<VirtualDatacenter> all = service.getVirtualDatacenters(enterprise, datacenter);
+        Collection<VirtualDatacenter> all =
+            service.getVirtualDatacenters(enterprise, datacenter, null);
         VirtualDatacentersDto vdcs = new VirtualDatacentersDto();
 
         for (VirtualDatacenter d : all)
