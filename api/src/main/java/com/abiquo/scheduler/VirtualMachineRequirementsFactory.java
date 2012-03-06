@@ -26,6 +26,7 @@ import org.springframework.stereotype.Component;
 import com.abiquo.server.core.cloud.NodeVirtualImage;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualMachine;
+import com.abiquo.server.core.infrastructure.storage.DiskManagement;
 import com.abiquo.server.core.scheduler.VirtualMachineRequirements;
 
 @Component
@@ -36,7 +37,8 @@ public class VirtualMachineRequirementsFactory
     {
         long cpu = vmachine.getCpu();
         long ram = vmachine.getRam();
-        long hd = vmachine.getHdInBytes();
+        // template + hard disks
+        long hd = vmachine.getHdInBytes() + getDisksSizeInBytes(vmachine);
         long repository = vmachine.getVirtualMachineTemplate().getDiskFileSize(); // XXX or
                                                                                   // conversion
         // TODO get publicIps number
@@ -67,7 +69,7 @@ public class VirtualMachineRequirementsFactory
         long cpu = (long) newVmRequirements.getCpu() - vmachine.getCpu();
         long ram = (long) newVmRequirements.getRam() - vmachine.getRam();
         // TODO hd and repository
-        long hd = 0l;
+        long hd = 0l + getDiskSizeInBytes(vmachine, newVmRequirements);
         long repository = 0l;
         // TODO get publicIps number
         // TODO get storage size
@@ -76,4 +78,25 @@ public class VirtualMachineRequirementsFactory
         return new VirtualMachineRequirements(cpu, ram, hd, repository, 0l, 0l, 0l);
     }
 
+    private long getDisksSizeInBytes(final VirtualMachine vm)
+    {
+        long size = 0;
+        if (vm.getDisks() != null && !vm.getDisks().isEmpty())
+        {
+            for (DiskManagement disk : vm.getDisks())
+            {
+                // bytes
+                size += disk.getSizeInMb() * 1024 * 1024;
+            }
+        }
+        return size;
+    }
+
+    private long getDiskSizeInBytes(final VirtualMachine vmachine,
+        final VirtualMachine newVmRequirements)
+    {
+        long totalDisksSize = getDisksSizeInBytes(vmachine);
+        long newTotalDisksSize = getDisksSizeInBytes(newVmRequirements);
+        return newTotalDisksSize - totalDisksSize;
+    }
 }
