@@ -434,12 +434,14 @@ public class TemplateDefinition extends DefaultEntityBase
         }
     }
 
-    public TemplateDefinition(final String name, final String productName, final String productUrl,
-        final String productVendor, final String productVersion, final DiskFormatType type,
-        final String url, final long diskFileSize)
+    public TemplateDefinition(final String name, final String productName,
+        final String description, final String productUrl, final String productVendor,
+        final String productVersion, final DiskFormatType type, final String url,
+        final long diskFileSize)
     {
         setName(name);
         setProductName(productName);
+        setDescription(description);
         setProductUrl(productUrl);
         setProductVendor(productVendor);
         setProductVersion(productVersion);
