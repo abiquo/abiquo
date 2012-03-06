@@ -515,13 +515,15 @@ public class AbstractAPIStub
         Map<String, String[]> queryParams = new HashMap<String, String[]>();
         if (!StringUtils.isEmpty(filter))
         {
-            queryParams.put("filter", new String[] {filter});
+            queryParams.put(FILTER, new String[] {filter});
         }
-        if (firstElem != null && numResults != null)
+        if (firstElem != null)
         {
-
-            queryParams.put("START_WITH", new String[] {firstElem.toString()});
-            queryParams.put("numResults", new String[] {numResults.toString()});
+            queryParams.put(START_WITH, new String[] {firstElem.toString()});
+        }
+        if (numResults != null)
+        {
+            queryParams.put(LIMIT, new String[] {numResults.toString()});
         }
 
         return UriHelper.appendQueryParamsToPath(uri, queryParams, false);
@@ -555,6 +557,17 @@ public class AbstractAPIStub
 
         return URIResolver.resolveURI(apiUri, "admin/enterprises/{enterprise}/limits/{limit}",
             params);
+    }
+
+    protected String createEnterpriseLimitByDatacenterVirtualAppliancesLink(final int enterpriseId,
+        final int limitId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("enterprise", valueOf(enterpriseId));
+        params.put("limit", valueOf(limitId));
+
+        return URIResolver.resolveURI(apiUri,
+            "admin/enterprises/{enterprise}/limits/{limit}/action/virtualappliances", params);
     }
 
     protected String createExternalNetworkLink(final Integer entId, final Integer vlanId)
@@ -1922,6 +1935,11 @@ public class AbstractAPIStub
         return URIResolver.resolveURI(apiUri,
             "cloud/virtualdatacenters/{virtualDatacenter}/virtualappliances/{virtualApplianceId}",
             params, queryParams);
+    }
+
+    protected String createVirtualAppliancesByVirtualDatacenterLink(final Integer vdcId)
+    {
+        return createVirtualDatacenterLink(vdcId) + "/virtualappliances";
     }
 
     /**

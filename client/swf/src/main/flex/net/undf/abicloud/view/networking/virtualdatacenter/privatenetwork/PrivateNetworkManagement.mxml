@@ -53,6 +53,17 @@
             import net.undf.abicloud.vo.networking.VlanNetwork;
             import net.undf.abicloud.vo.virtualappliance.VirtualDataCenter;
 
+            private var _isShown:Boolean;
+            
+            public function set isShown(value:Boolean):void
+            {
+            	this._isShown = value;
+            }
+            
+            public function get isShown():Boolean
+            {
+                return this._isShown;
+            }
             //PopUps
             private var vlanFormAdd:PrivateVLANFormAdd;
 
@@ -148,7 +159,7 @@
             	}
             	event.virtualDatacenter = this._virtualDatacenter;
             	event.callback = populatePrivateNetworks;
-            	if(this._virtualDatacenter && this.visible){
+            	if(this._virtualDatacenter && this._isShown){
 	            	dispatchEvent(event);            		
             	}
             	

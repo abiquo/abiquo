@@ -1,13 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p" xmlns:http="http://cxf.apache.org/transports/http/configuration"
-    xmlns:sec="http://cxf.apache.org/configuration/security" xmlns:jaxrs="http://cxf.apache.org/jaxrs"
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:p="http://www.springframework.org/schema/p"
+    xmlns:http="http://cxf.apache.org/transports/http/configuration"
+    xmlns:sec="http://cxf.apache.org/configuration/security"
+    xmlns:jaxrs="http://cxf.apache.org/jaxrs"
+    xmlns:context="http://www.springframework.org/schema/context"
     xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
            http://cxf.apache.org/transports/http/configuration http://cxf.apache.org/schemas/configuration/http-conf.xsd
            http://cxf.apache.org/configuration/security http://cxf.apache.org/schemas/configuration/security.xsd
-           http://cxf.apache.org/jaxrs http://cxf.apache.org/schemas/jaxrs.xsd">
+           http://cxf.apache.org/jaxrs http://cxf.apache.org/schemas/jaxrs.xsd
+           http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd">
+           
     <import resource="classpath:META-INF/cxf/cxf.xml" />
     <import resource="classpath:META-INF/cxf/cxf-extension-jaxrs-binding.xml" />
     <import resource="classpath:heartbeat-internal-context.xml" />
+    
+    <context:property-placeholder/>
+    
     <bean id="registrationClient" class="com.abiquo.heartbeat.client.services.impl.RegistrationClientImpl" p:reminderTimeout="259200000" />
     <bean id="heartbeatClient" class="com.abiquo.heartbeat.client.services.impl.HeartbeatClientImpl" p:reminderTimeout="259200000" />
     <bean id="dataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
@@ -18,13 +28,13 @@
     </bean>
     <jaxrs:client id="heartbeatServiceStub" address="https://heartbeat.abiquo.com/heartbeat-server/" serviceClass="com.abiquo.heartbeat.shared.services.HeartbeatService" />
     <jaxrs:client id="registerServiceStub" address="https://heartbeat.abiquo.com/heartbeat-server/" serviceClass="com.abiquo.heartbeat.shared.services.RegisterService" />
-    <!-- <http:conduit name="*.http-conduit"> -->
-    <!-- <http:tlsClientParameters> -->
-    <!-- <sec:trustManagers> -->
-    <!-- <sec:keyStore type="JKS" password="changeit" resource="abikeys.jks"/> -->
-    <!-- </sec:trustManagers> -->
-    <!-- </http:tlsClientParameters> -->
-    <!-- </http:conduit> -->
+     <http:conduit name="*.http-conduit"> 
+     <http:tlsClientParameters> 
+     <sec:trustManagers> 
+     <sec:keyStore type="JKS" password="changeit" resource="abikeys.jks"/> 
+     </sec:trustManagers> 
+     </http:tlsClientParameters> 
+     </http:conduit> 
     <bean id="heartbeatQuartzJob" class="org.springframework.scheduling.quartz.JobDetailBean">
         <property name="jobClass" value="com.abiquo.heartbeat.client.scheduler.HeartbeatJob" />
         <property name="jobDataAsMap">
@@ -40,7 +50,7 @@
         <property name="cronExpression" value="0 0 0 * * ?" />
     </bean>
     <bean id="schedulerFactoryBean" class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
-        <property name="autoStartup" value="false" />
+        <property name="autoStartup" value="#{ systemProperties['abiquo.heartbeat.autostart']?:true }" />
         <property name="triggers">
             <list>
                 <ref bean="heartbeatTrigger" />

@@ -325,13 +325,10 @@ public class VirtualAppliance extends DefaultEntityBase
         // value.removeFromDatastores(this);
     }
 
-    // ********************************** Others ********************************
-    /**
-     * Ways to order this element in the queries.
-     */
     public static enum OrderByEnum
     {
-        NAME("name", "vapp.name"), ID("id", "vapp.id");
+        NAME("name", "vapp.name"), STATE("state", "vapp.state"), ID("id", "vapp.id"), ERROR(
+            "error", "vapp.error");
 
         public static OrderByEnum fromValue(final String orderBy)
         {
@@ -387,6 +384,5 @@ public class VirtualAppliance extends DefaultEntityBase
 
         virtualAppliance.nodesVirtualImage.addAll(this.getNodes());
         return virtualAppliance;
-
     }
 }
