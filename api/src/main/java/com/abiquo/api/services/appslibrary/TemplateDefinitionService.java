@@ -113,9 +113,6 @@ public class TemplateDefinitionService extends DefaultApiService
         Enterprise ent = enterpriseService.getEnterprise(idEnterprise); // check can view
         templateDef.setAppsLibrary(appsLibraryDao.findByEnterpriseOrInitialize(ent));
 
-        // templateDef.setCategory(appslibraryRep.findByCategoryNameOrCreateNew(templateDef
-        // .getCategory().getName()));
-
         validate(templateDef);
 
         return repo.addTemplateDefinition(templateDef, ent);

@@ -69,14 +69,15 @@ public class TemplateDefinitionGenerator extends DefaultEntityGenerator<Template
     public TemplateDefinition createInstance(final AppsLibrary appsLibrary, final Category category)
     {
         TemplateDefinition templateDef =
-            new TemplateDefinition(newString(nextSeed(), 0, 30),
-                newString(nextSeed(), 0, 30),
-                newString(nextSeed(), 0, 30),
-                newString(nextSeed(), 0, 30),
-                newString(nextSeed(), 0, 30),
+            new TemplateDefinition(newString(nextSeed(), 1, 30),
+                newString(nextSeed(), 1, 30),
+                newString(nextSeed(), 1, 30),
+                newString(nextSeed(), 1, 30),
+                newString(nextSeed(), 1, 30),
+                newString(nextSeed(), 1, 30),
                 DiskFormatType.VDI_FLAT,
-                newString(nextSeed(), 0, 30),
-                nextSeed());
+                newString(nextSeed(), 1, 30),
+                nextSeed() + 1);
         templateDef.setAppsLibrary(appsLibrary);
         templateDef.setCategory(category);
         templateDef.setIconUrl("http://validuri.com/icon.png");
