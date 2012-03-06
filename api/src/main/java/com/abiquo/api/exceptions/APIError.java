@@ -351,7 +351,7 @@ public enum APIError
         "This datacenter already has a storage pool assigned"), REMOTE_SERVICE_TYPE_EXISTS("RS-6",
         "This datacenter already has a remote service of that type"), REMOTE_SERVICE_CONNECTION_FAILED(
         "RS-7", "Failed connection to the remote service"), REMOTE_SERVICE_CANNOT_BE_CHECKED(
-        "RS-8", "This remote service is not avilable to be checked"), APPLIANCE_MANAGER_REPOSITORY_ALREADY_DEFINED(
+        "RS-8", "This remote service is not available to be checked"), APPLIANCE_MANAGER_REPOSITORY_ALREADY_DEFINED(
         "AM-0",
         "The repository exported by the current appliance manager is being used in another datacenter"), APPLIANCE_MANAGER_REPOSITORY_IN_USE(
         "AM-1",
