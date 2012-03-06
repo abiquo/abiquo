@@ -139,18 +139,26 @@ public class AppsLibraryTransformer extends DefaultApiService
             flushErrors();
         }
 
+        Category category = null;
         RESTLink categoryLink = templateDef.searchLink(CategoryResource.CATEGORY);
-        Category category = appslibraryRep.findCategoryByName(categoryLink.getTitle());
-        if (category == null)
+        if (categoryLink == null)
         {
-            if (categoryLink.getTitle() == null)
+            category = appslibraryRep.findCategoryByName("Others");
+        }
+        else
+        {
+            category = appslibraryRep.findCategoryByName(categoryLink.getTitle());
+            if (category == null)
             {
-                category = appslibraryRep.findCategoryByName("Others");
-            }
-            else
-            {
-                category = new Category(categoryLink.getTitle());
-                appslibraryRep.insertCategory(category);
+                if (categoryLink.getTitle() == null)
+                {
+                    category = appslibraryRep.findCategoryByName("Others");
+                }
+                else
+                {
+                    category = new Category(categoryLink.getTitle());
+                    appslibraryRep.insertCategory(category);
+                }
             }
         }
 
