@@ -51,7 +51,7 @@ public class RemoteServiceGenerator extends DefaultEntityGenerator<RemoteService
     @Override
     public RemoteService createUniqueInstance()
     {
-        return createInstance(RemoteServiceType.TARANTINO);
+        return createInstance(RemoteServiceType.VIRTUAL_FACTORY);
     }
 
     public RemoteService createInstance(final RemoteServiceType type)
