@@ -30,6 +30,7 @@ public class RulesDto extends SingleResourceTransportDto
 {
 
     public static final String BASE_MEDIA_TYPE = "application/vnd.abiquo.rules+xml";
+
     public static final String MEDIA_TYPE = BASE_MEDIA_TYPE + "; version=" + API_VERSION;
 
     private FitPolicyRulesDto fitPolicyRules;
@@ -72,9 +73,9 @@ public class RulesDto extends SingleResourceTransportDto
     @Override
     public String getMediaType()
     {
-        return MEDIA_TYPE;
+        return RulesDto.MEDIA_TYPE;
     }
-    
+
     @Override
     public String getBaseMediaType()
     {
