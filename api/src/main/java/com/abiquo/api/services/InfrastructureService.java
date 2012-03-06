@@ -203,8 +203,8 @@ public class InfrastructureService extends DefaultApiService
         validateCreateInfo(createInfo);
 
         return addMachines(datacenterId, rackId, createInfo.getIpFrom(), createInfo.getIpTo(),
-            createInfo.getHypervisor(), createInfo.getUser(), createInfo.getPassword(), createInfo
-                .getPort(), createInfo.getvSwitch());
+            createInfo.getHypervisor(), createInfo.getUser(), createInfo.getPassword(),
+            createInfo.getPort(), createInfo.getvSwitch());
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
@@ -233,7 +233,7 @@ public class InfrastructureService extends DefaultApiService
         HypervisorType hyType = HypervisorType.fromValue(hypervisor);
         List<Machine> discoveredMachines =
         // nodecollectorServiceStub.getRemoteHypervisors(nodecollector, ipFromOK, ipToOK, hyType,
-            // user, password, port);
+        // user, password, port);
             this.discoverRemoteHypevisors(datacenterId, ipFromOK, ipToOK, hyType, user, password,
                 port, vSwitch);
 
@@ -485,9 +485,16 @@ public class InfrastructureService extends DefaultApiService
             }
         }
 
+        deleteMachineRulesFromRack(rack);
+
         repo.deleteRack(rack);
         tracer.log(SeverityType.INFO, ComponentType.RACK, EventType.RACK_DELETE, "rack.deleted",
             rack.getName());
+    }
+
+    protected void deleteMachineRulesFromRack(final Rack rack)
+    {
+        // PREMIUM
     }
 
     public List<Machine> getMachines(final Rack rack)
@@ -849,9 +856,8 @@ public class InfrastructureService extends DefaultApiService
             {
                 if (pd.getReadMethod().invoke(dto) == null)
                 {
-                    addValidationErrors(new CommonError(APIError.STATUS_BAD_REQUEST.getCode(), pd
-                        .getName()
-                        + " can't be null"));
+                    addValidationErrors(new CommonError(APIError.STATUS_BAD_REQUEST.getCode(),
+                        pd.getName() + " can't be null"));
                     flushErrors();
                 }
             }

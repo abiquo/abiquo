@@ -43,7 +43,7 @@ public class MachineLoadRuleGenerator extends DefaultEntityGenerator<MachineLoad
 
     RackGenerator rackGen;
 
-    public MachineLoadRuleGenerator(SeedGenerator seed)
+    public MachineLoadRuleGenerator(final SeedGenerator seed)
     {
         super(seed);
         machineGen = new MachineGenerator(seed);
@@ -53,7 +53,7 @@ public class MachineLoadRuleGenerator extends DefaultEntityGenerator<MachineLoad
     }
 
     @Override
-    public void assertAllPropertiesEqual(MachineLoadRule obj1, MachineLoadRule obj2)
+    public void assertAllPropertiesEqual(final MachineLoadRule obj1, final MachineLoadRule obj2)
     {
         AssertEx.assertPropertiesEqualSilent(obj1, obj2,
             MachineLoadRule.CPU_LOAD_PERCENTAGE_PROPERTY,
@@ -75,35 +75,33 @@ public class MachineLoadRuleGenerator extends DefaultEntityGenerator<MachineLoad
         return machineLoadRule;
     }
 
-    public MachineLoadRule createInstance(Machine machine)
+    public MachineLoadRule createInstance(final Datacenter datacenter)
     {
         MachineLoadRule machineLoadRule = createUniqueInstance();
-
-        machineLoadRule.setMachine(machine);
-
-        return machineLoadRule;
-    }
-
-    public MachineLoadRule createInstance(Datacenter datacenter)
-    {
-        MachineLoadRule machineLoadRule = createUniqueInstance();
-
         machineLoadRule.setDatacenter(datacenter);
 
         return machineLoadRule;
     }
 
-    public MachineLoadRule createInstance(Rack rack)
+    public MachineLoadRule createInstance(final Rack rack)
     {
-        MachineLoadRule machineLoadRule = createUniqueInstance();
-
+        MachineLoadRule machineLoadRule = createInstance(rack.getDatacenter());
         machineLoadRule.setRack(rack);
 
         return machineLoadRule;
     }
 
+    public MachineLoadRule createInstance(final Machine machine)
+    {
+        MachineLoadRule machineLoadRule = createInstance(machine.getRack());
+        machineLoadRule.setMachine(machine);
+
+        return machineLoadRule;
+    }
+
     @Override
-    public void addAuxiliaryEntitiesToPersist(MachineLoadRule entity, List<Object> entitiesToPersist)
+    public void addAuxiliaryEntitiesToPersist(final MachineLoadRule entity,
+        final List<Object> entitiesToPersist)
     {
         super.addAuxiliaryEntitiesToPersist(entity, entitiesToPersist);
 
