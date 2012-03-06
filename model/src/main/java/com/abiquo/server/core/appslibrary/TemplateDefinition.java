@@ -235,7 +235,7 @@ public class TemplateDefinition extends DefaultEntityBase
 
     public final static String URL_PROPERTY = "url";
 
-    private final static boolean URL_REQUIRED = false;
+    private final static boolean URL_REQUIRED = true;
 
     private final static int URL_LENGTH_MIN = 0;
 
@@ -312,7 +312,7 @@ public class TemplateDefinition extends DefaultEntityBase
 
     public final static String PRODUCT_NAME_PROPERTY = "productName";
 
-    private final static boolean PRODUCT_NAME_REQUIRED = false;
+    private final static boolean PRODUCT_NAME_REQUIRED = true;
 
     private final static int PRODUCT_NAME_LENGTH_MIN = 0;
 
@@ -340,11 +340,11 @@ public class TemplateDefinition extends DefaultEntityBase
 
     public final static String DISK_FILE_SIZE_PROPERTY = "diskFileSize";
 
-    private final static boolean DISK_FILE_SIZE_REQUIRED = false;
+    private final static boolean DISK_FILE_SIZE_REQUIRED = true;
 
     private final static String DISK_FILE_SIZE_COLUMN = "diskSizeMb";
 
-    private final static long DISK_FILE_SIZE_MIN = Long.MIN_VALUE;
+    private final static long DISK_FILE_SIZE_MIN = 1; // not allow 0
 
     private final static long DISK_FILE_SIZE_MAX = Long.MAX_VALUE;
 
@@ -364,7 +364,7 @@ public class TemplateDefinition extends DefaultEntityBase
 
     public final static String DESCRIPTION_PROPERTY = "description";
 
-    private final static boolean DESCRIPTION_REQUIRED = false;
+    private final static boolean DESCRIPTION_REQUIRED = true;
 
     private final static int DESCRIPTION_LENGTH_MIN = 0;
 

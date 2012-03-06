@@ -98,6 +98,7 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
         if (response.getStatusType().getFamily() != Family.SUCCESSFUL)
         {
             populateErrors(response, result, "createOVFPackageList");
+            result.setMessage(result.getMessage().concat("\n " + ovfindexURL));
         }
         else
         {
@@ -423,7 +424,10 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
                 result.setSuccess(Boolean.FALSE);
                 String message =
                     defaultList != null ? defaultList.getMessage()
-                        : "Cannot add default respository";
+                        : "Cannot add default respository : "
+                            + AbiConfigManager.getInstance().getAbiConfig()
+                                .getDefaultTemplateRepository();
+                ;
                 result.setMessage(message);
 
                 return result;
@@ -637,12 +641,7 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
         RESTLink categoryLink = getLink("category", packDto.getLinks());
         if (categoryLink != null)
         {
-            ClientResponse categoryResponse = get(categoryLink.getHref());
-            if (categoryResponse.getStatusCode() == Status.OK.getStatusCode())
-            {
-                CategoryDto categoryDto = categoryResponse.getEntity(CategoryDto.class);
-                pack.setCategory(categoryDto.getName());
-            }
+            pack.setCategory(categoryLink.getTitle());
         }
         else
         {
@@ -654,7 +653,7 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
         pack.setIconUrl(packDto.getIconUrl());
 
         pack.setIdOVFPackage(packDto.getId());
-        pack.setName(packDto.getProductName()); // XXX duplicated name
+        pack.setName(packDto.getName());
         pack.setProductName(packDto.getProductName());
         pack.setProductUrl(packDto.getProductUrl());
         pack.setProductVendor(packDto.getProductVendor());
