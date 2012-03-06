@@ -19,9 +19,9 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 
-<script type="application/javascript">
-	var vncIP = 0;
-	var vncPort = 5900;
+<script type="text/javascript">
+	var vncIP = 10.60.20.17;
+	var vncPort = 5939;
 	var width = 800;
 	var height = 600;
 	
@@ -64,18 +64,18 @@
 
 <body style="text-align: center;">
 
-	<script type="application/javascript">
-		var appletCode = "<applet code=\"VncViewer.class\" archive=\"VncViewer.jar\"";
+	<script type="text/javascript">
+		var appletCode = "<applet code=\"com.glavsoft.viewer.Viewer\" archive=\"VncViewer.jar\"";
 	
 		appletCode 	   += " width=\"" + width +"\" height=\"" + height + "\" align=\"middle\">";
 		
-		appletCode	   += "<param name=\"HOST\" value=\"" + vncIP + "\">";
+		appletCode	   += "<param name=\"Host\" value=\"" + vncIP + "\">";
 
-		appletCode	   += "<param name=\"PORT\" value=\"" + vncPort + "\">";
+		appletCode	   += "<param name=\"Port\" value=\"" + vncPort + "\">";
+
+		appletCode	   += "<param name=\"OpenNewWindow\" value=\"no\">";
 		
-		appletCode	   += "<param name=\"Show controls\" value=\"YES\">";
-		
-		appletCode	   += "<param name=\"Cursor shape updates\" value=\"Disable\">";
+		appletCode	   += "<param name=\"ShowControls\" value=\"yes\">";
 		
 		appletCode	   += "</applet>";
 		
