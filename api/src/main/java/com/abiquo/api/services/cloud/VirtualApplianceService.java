@@ -43,7 +43,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.exceptions.APIException;
+import com.abiquo.api.services.DatacenterService;
 import com.abiquo.api.services.DefaultApiService;
+import com.abiquo.api.services.EnterpriseService;
 import com.abiquo.api.services.TaskService;
 import com.abiquo.api.services.UserService;
 import com.abiquo.api.services.VirtualMachineAllocatorService;
@@ -63,6 +65,8 @@ import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualDatacenterRep;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineState;
+import com.abiquo.server.core.enterprise.Enterprise;
+import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.management.RasdManagement;
 import com.abiquo.server.core.infrastructure.management.RasdManagementDAO;
 import com.abiquo.server.core.infrastructure.storage.Tier;
@@ -75,6 +79,7 @@ import com.abiquo.server.core.pricing.PricingTier;
 import com.abiquo.server.core.scheduler.VirtualMachineRequirements;
 import com.abiquo.server.core.task.Task;
 import com.abiquo.server.core.task.enums.TaskOwnerType;
+import com.abiquo.server.core.util.FilterOptions;
 import com.abiquo.tracer.ComponentType;
 import com.abiquo.tracer.EventType;
 import com.abiquo.tracer.SeverityType;
@@ -91,7 +96,7 @@ public class VirtualApplianceService extends DefaultApiService
     private final static Logger logger = LoggerFactory.getLogger(VirtualApplianceService.class);
 
     @Autowired
-    TarantinoService tarantino;
+    private TarantinoService tarantino;
 
     @Autowired
     private VirtualDatacenterRep repo;
@@ -123,6 +128,12 @@ public class VirtualApplianceService extends DefaultApiService
     @Autowired
     private TaskService taskService;
 
+    @Autowired
+    private EnterpriseService entService;
+
+    @Autowired
+    private DatacenterService dcServbice;
+
     public VirtualApplianceService()
     {
 
@@ -147,24 +158,45 @@ public class VirtualApplianceService extends DefaultApiService
      * @param vdcId identifier of the virtualdatacenter.
      * @return the list of {@link VirtualAppliance} pojo
      */
-
     @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
     public List<VirtualAppliance> getVirtualAppliancesByVirtualDatacenter(final Integer vdcId,
-        final Integer startwith, final String orderBy, final String filter, final Integer limit,
-        final Boolean descOrAsc)
+        final FilterOptions filterOptions)
     {
-        // Check if the orderBy element is actually one of the available ones
-        VirtualAppliance.OrderByEnum orderByEnum = VirtualAppliance.OrderByEnum.fromValue(orderBy);
-        if (orderByEnum == null)
-        {
-            logger
-                .info("Bad parameter 'by' in request to get the virtual appliances by virtualdatacenter.");
-            addValidationErrors(APIError.QUERY_INVALID_PARAMETER);
-            flushErrors();
-        }
         VirtualDatacenter vdc = vdcService.getVirtualDatacenter(vdcId);
         return (List<VirtualAppliance>) repo.findVirtualAppliancesByVirtualDatacenter(vdc,
-            startwith, limit, filter, orderByEnum, descOrAsc);
+            filterOptions);
+    }
+
+    /**
+     * Retrieves the list of virtual appliances by enterprise
+     * 
+     * @param entId identifier of the enterprise.
+     * @param filterOptions use to filter the results. <code>null</code> if no filtering required
+     * @return the list of {@link VirtualAppliance} pojo
+     */
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
+    public List<VirtualAppliance> getVirtualAppliancesByEnterprise(final Integer entId,
+        final FilterOptions filterOptions)
+    {
+        Enterprise enterprise = entService.getEnterprise(entId);
+        return virtualApplianceRepo.findVirtualAppliancesByEnterprise(enterprise, filterOptions);
+    }
+
+    /**
+     * Retrieves the list of virtual appliances by enterprise and datacenter
+     * 
+     * @param entId identifier of the enterprise.
+     * @param dcId identifier of the datacenter.
+     * @return the list of {@link VirtualAppliance} pojo
+     */
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
+    public List<VirtualAppliance> getVirtualAppliancesByEnterpriseAndDatacenter(
+        final Integer entId, final Integer dcId)
+    {
+        Enterprise enterprise = entService.getEnterprise(entId);
+        Datacenter datacenter = dcServbice.getDatacenter(dcId);
+
+        return virtualApplianceRepo.findVirtualAppliancesByEnterpriseAndDatacenter(entId, dcId);
     }
 
     @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
@@ -252,8 +284,8 @@ public class VirtualApplianceService extends DefaultApiService
         {
             StringBuilder sb = extractErrorsInAString(vapp);
             logger.error(
-                "Error create virtual appliance with name {} due to validation errors: {}",
-                dto.getName(), sb.toString());
+                "Error create virtual appliance with name {} due to validation errors: {}", dto
+                    .getName(), sb.toString());
             tracer.log(SeverityType.CRITICAL, ComponentType.VIRTUAL_APPLIANCE,
                 EventType.VAPP_CREATE, "virtualAppliance.deleteErrorValidations", dto.getName());
             addValidationErrors(vapp.getValidationErrors());
@@ -275,8 +307,8 @@ public class VirtualApplianceService extends DefaultApiService
         StringBuilder sb = new StringBuilder();
         for (CommonError e : errors)
         {
-            sb.append("Error code: ").append(e.getCode()).append(", Message: ")
-                .append(e.getMessage());
+            sb.append("Error code: ").append(e.getCode()).append(", Message: ").append(
+                e.getMessage());
         }
         return sb;
     }
@@ -317,9 +349,9 @@ public class VirtualApplianceService extends DefaultApiService
                 price.replace(PricingModelVariables.CHARGE_PERIOD.getText(), pricingTemplate
                     .getChargingPeriod().name());
             price =
-                price.replace(PricingModelVariables.MIN_CHARGE.getText(),
-                    priceDto.getMinimumChargePeriod() + " "
-                        + pricingTemplate.getCurrency().getSymbol());
+                price.replace(PricingModelVariables.MIN_CHARGE.getText(), priceDto
+                    .getMinimumChargePeriod()
+                    + " " + pricingTemplate.getCurrency().getSymbol());
             price =
                 price.replace(PricingModelVariables.MIN_PERIOD.getText(), pricingTemplate
                     .getMinimumCharge().name());
@@ -362,22 +394,23 @@ public class VirtualApplianceService extends DefaultApiService
                 addVirtualMachineCost(virtualMachinesCost, node.getVirtualMachine(),
                     virtualMachineRequirements, pricingTemplate);
         }
-        dto.setAdditionalVolumCost(rounded(significantDigits,
-            virtualMachinesCost.get(VirtualMachineCost.ADDITIONAL_VOLUME)));
-        dto.setCostCodeCost(rounded(significantDigits,
-            virtualMachinesCost.get(VirtualMachineCost.COST_CODE)));
-        dto.setComputeCost(rounded(significantDigits,
-            virtualMachinesCost.get(VirtualMachineCost.COMPUTE)));
-        dto.setStorageCost(rounded(significantDigits,
-            virtualMachinesCost.get(VirtualMachineCost.STORAGE)));
-        dto.setNetworkCost(rounded(significantDigits,
-            virtualMachinesCost.get(VirtualMachineCost.NETWORK)));
-        dto.setStandingCharge(rounded(significantDigits, pricingTemplate.getStandingChargePeriod()));
+        dto.setAdditionalVolumCost(rounded(significantDigits, virtualMachinesCost
+            .get(VirtualMachineCost.ADDITIONAL_VOLUME)));
+        dto.setCostCodeCost(rounded(significantDigits, virtualMachinesCost
+            .get(VirtualMachineCost.COST_CODE)));
+        dto.setComputeCost(rounded(significantDigits, virtualMachinesCost
+            .get(VirtualMachineCost.COMPUTE)));
+        dto.setStorageCost(rounded(significantDigits, virtualMachinesCost
+            .get(VirtualMachineCost.STORAGE)));
+        dto.setNetworkCost(rounded(significantDigits, virtualMachinesCost
+            .get(VirtualMachineCost.NETWORK)));
+        dto
+            .setStandingCharge(rounded(significantDigits, pricingTemplate.getStandingChargePeriod()));
         dto.setMinimumCharge(pricingTemplate.getMinimumCharge().ordinal());
-        dto.setMinimumChargePeriod(rounded(significantDigits,
-            pricingTemplate.getMinimumChargePeriod()));
-        dto.setTotalCost(rounded(significantDigits,
-            virtualMachinesCost.get(VirtualMachineCost.TOTAL)));
+        dto.setMinimumChargePeriod(rounded(significantDigits, pricingTemplate
+            .getMinimumChargePeriod()));
+        dto.setTotalCost(rounded(significantDigits, virtualMachinesCost
+            .get(VirtualMachineCost.TOTAL)));
         // It is for enterprise so we don't have to add to the price
         // .add( pricingTemplate.getStandingChargePeriod())
 
@@ -403,37 +436,33 @@ public class VirtualApplianceService extends DefaultApiService
         Collection<RasdManagement> resources = rasdManDao.findByVirtualMachine(virtualMachine);
         getAdditionalStorageCost(virtualMachinesCost, resources, pricingTemplate);
 
-        virtualMachinesCost.put(
-            VirtualMachineCost.COMPUTE,
-            virtualMachinesCost.get(VirtualMachineCost.COMPUTE).add(
+        virtualMachinesCost.put(VirtualMachineCost.COMPUTE, virtualMachinesCost.get(
+            VirtualMachineCost.COMPUTE)
+            .add(
                 pricingTemplate.getVcpu().multiply(
                     new BigDecimal(virtualMachineRequirements.getCpu()))));
-        virtualMachinesCost.put(
-            VirtualMachineCost.COMPUTE,
+        virtualMachinesCost.put(VirtualMachineCost.COMPUTE, virtualMachinesCost.get(
+            VirtualMachineCost.COMPUTE).add(
+            pricingTemplate.getMemoryMB().multiply(
+                new BigDecimal(virtualMachineRequirements.getRam()))));
+
+        virtualMachinesCost.put(VirtualMachineCost.STORAGE, virtualMachinesCost.get(
+            VirtualMachineCost.STORAGE).add(
+            pricingTemplate.getHdGB().multiply(
+                new BigDecimal(virtualMachineRequirements.getHd()).divide(BYTES_TO_GB, 2,
+                    BigDecimal.ROUND_HALF_EVEN))));
+
+        virtualMachinesCost.put(VirtualMachineCost.NETWORK, virtualMachinesCost.get(
+            VirtualMachineCost.NETWORK).add(
+            pricingTemplate.getPublicIp().multiply(
+                new BigDecimal(virtualMachineRequirements.getPublicIP()))));
+
+        virtualMachinesCost.put(VirtualMachineCost.TOTAL, virtualMachinesCost.get(
+            VirtualMachineCost.COST_CODE).add(
             virtualMachinesCost.get(VirtualMachineCost.COMPUTE).add(
-                pricingTemplate.getMemoryMB().multiply(
-                    new BigDecimal(virtualMachineRequirements.getRam()))));
-
-        virtualMachinesCost.put(
-            VirtualMachineCost.STORAGE,
-            virtualMachinesCost.get(VirtualMachineCost.STORAGE).add(
-                pricingTemplate.getHdGB().multiply(
-                    new BigDecimal(virtualMachineRequirements.getHd()).divide(BYTES_TO_GB, 2,
-                        BigDecimal.ROUND_HALF_EVEN))));
-
-        virtualMachinesCost.put(
-            VirtualMachineCost.NETWORK,
-            virtualMachinesCost.get(VirtualMachineCost.NETWORK).add(
-                pricingTemplate.getPublicIp().multiply(
-                    new BigDecimal(virtualMachineRequirements.getPublicIP()))));
-
-        virtualMachinesCost.put(
-            VirtualMachineCost.TOTAL,
-            virtualMachinesCost.get(VirtualMachineCost.COST_CODE).add(
-                virtualMachinesCost.get(VirtualMachineCost.COMPUTE).add(
-                    virtualMachinesCost.get(VirtualMachineCost.STORAGE).add(
-                        virtualMachinesCost.get(VirtualMachineCost.ADDITIONAL_VOLUME).add(
-                            virtualMachinesCost.get(VirtualMachineCost.NETWORK))))));
+                virtualMachinesCost.get(VirtualMachineCost.STORAGE).add(
+                    virtualMachinesCost.get(VirtualMachineCost.ADDITIONAL_VOLUME).add(
+                        virtualMachinesCost.get(VirtualMachineCost.NETWORK))))));
         return virtualMachinesCost;
     }
 
@@ -446,10 +475,8 @@ public class VirtualApplianceService extends DefaultApiService
         PricingCostCode pricingCostCode = pricingRep.findPricingCostCode(cc, pricing);
         if (pricingCostCode != null)
         {
-            virtualMachinesCost.put(
-                VirtualMachineCost.COST_CODE,
-                virtualMachinesCost.get(VirtualMachineCost.COST_CODE).add(
-                    pricingCostCode.getPrice()));
+            virtualMachinesCost.put(VirtualMachineCost.COST_CODE, virtualMachinesCost.get(
+                VirtualMachineCost.COST_CODE).add(pricingCostCode.getPrice()));
         }
 
     }
@@ -472,8 +499,7 @@ public class VirtualApplianceService extends DefaultApiService
                 {
                     BigDecimal volum = new BigDecimal(volman.getSizeInMB());
                     BigDecimal toGB = new BigDecimal(1024);
-                    virtualMachinesCost.put(
-                        VirtualMachineCost.ADDITIONAL_VOLUME,
+                    virtualMachinesCost.put(VirtualMachineCost.ADDITIONAL_VOLUME,
                         virtualMachinesCost.get(VirtualMachineCost.ADDITIONAL_VOLUME).add(
                             pricingTier.getPrice().multiply(volum.divide(toGB))));// multiplicar
                     // por
@@ -635,8 +661,8 @@ public class VirtualApplianceService extends DefaultApiService
 
                 // For the Admin to know all errors
                 tracer.systemLog(SeverityType.CRITICAL, ComponentType.VIRTUAL_APPLIANCE,
-                    EventType.VM_UNDEPLOY, "virtualAppliance.deployError", e.toString(),
-                    machine.getName(), e.getMessage());
+                    EventType.VM_UNDEPLOY, "virtualAppliance.deployError", e.toString(), machine
+                        .getName(), e.getMessage());
                 logger
                     .error(
                         "Error undeploying virtual appliance name {}. But we continue with next virtual machine: {}",
@@ -663,7 +689,8 @@ public class VirtualApplianceService extends DefaultApiService
             vmService.deleteVirtualMachine(vmId, virtualAppliance.getId(), n.getVirtualAppliance()
                 .getVirtualDatacenter().getId(), originalStates.get(vmId));
             logger.trace("Deleting the virtual machine with name {}", n.getVirtualMachine()
-                .getName() + " successful!");
+                .getName()
+                + " successful!");
         }
         virtualApplianceRepo.deleteVirtualAppliance(virtualAppliance);
         logger.debug("Deleting the virtual appliance name {} ok!", virtualAppliance.getName());

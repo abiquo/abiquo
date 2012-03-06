@@ -559,6 +559,17 @@ public class AbstractAPIStub
             params);
     }
 
+    protected String createEnterpriseLimitByDatacenterVirtualAppliancesLink(final int enterpriseId,
+        final int limitId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("enterprise", valueOf(enterpriseId));
+        params.put("limit", valueOf(limitId));
+
+        return URIResolver.resolveURI(apiUri,
+            "admin/enterprises/{enterprise}/limits/{limit}/action/virtualappliances", params);
+    }
+
     protected String createExternalNetworkLink(final Integer entId, final Integer vlanId)
     {
         Map<String, String> params = new HashMap<String, String>();
@@ -1924,6 +1935,11 @@ public class AbstractAPIStub
         return URIResolver.resolveURI(apiUri,
             "cloud/virtualdatacenters/{virtualDatacenter}/virtualappliances/{virtualApplianceId}",
             params, queryParams);
+    }
+
+    protected String createVirtualAppliancesByVirtualDatacenterLink(final Integer vdcId)
+    {
+        return createVirtualDatacenterLink(vdcId) + "/virtualappliances";
     }
 
     /**

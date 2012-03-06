@@ -59,6 +59,7 @@ import com.abiquo.server.core.infrastructure.network.Network;
 import com.abiquo.server.core.infrastructure.network.VLANNetwork;
 import com.abiquo.server.core.infrastructure.network.VLANNetworkDto;
 import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
+import com.abiquo.server.core.util.FilterOptions;
 
 @Service
 @Transactional(readOnly = true)
@@ -105,25 +106,14 @@ public class VirtualDatacenterService extends DefaultApiService
     }
 
     public Collection<VirtualDatacenter> getVirtualDatacenters(final Enterprise enterprise,
-        final Datacenter datacenter, final Integer startwith, final Integer limit,
-        final String filter, final String orderBy, final Boolean asc)
+        final Datacenter datacenter, final FilterOptions filterOptions)
     {
         User user = userService.getCurrentUser();
-        // Check if the orderBy element is actually one of the available ones
-        VirtualDatacenter.OrderByEnum orderByEnum =
-            VirtualDatacenter.OrderByEnum.fromValue(orderBy);
-        if (orderByEnum == null)
-        {
-            addValidationErrors(APIError.QUERY_INVALID_PARAMETER);
-            flushErrors();
-        }
-        return getVirtualDatacenters(enterprise, datacenter, user, startwith, limit, filter,
-            orderByEnum, asc);
+        return getVirtualDatacenters(enterprise, datacenter, user, filterOptions);
     }
 
-    Collection<VirtualDatacenter> getVirtualDatacenters(Enterprise enterprise,
-        final Datacenter datacenter, final User user, final Integer startwith, final Integer limit,
-        final String filter, final OrderByEnum orderByEnum, final Boolean asc)
+    public Collection<VirtualDatacenter> getVirtualDatacenters(Enterprise enterprise,
+        final Datacenter datacenter, final User user, final FilterOptions filterOptions)
     {
         boolean findByUser =
             user != null && !securityService.canManageOtherEnterprises()
@@ -137,13 +127,12 @@ public class VirtualDatacenterService extends DefaultApiService
 
         if (findByUser)
         {
-            return repo.findByEnterpriseAndDatacenter(enterprise, datacenter, user, startwith,
-                limit, filter, orderByEnum, asc);
+            return repo.findByEnterpriseAndDatacenterFilter(enterprise, datacenter, user,
+                filterOptions);
         }
         else
         {
-            return repo.findByEnterpriseAndDatacenter(enterprise, datacenter, startwith, limit,
-                filter, orderByEnum, asc);
+            return repo.findByEnterpriseAndDatacenterFilter(enterprise, datacenter, filterOptions);
         }
     }
 

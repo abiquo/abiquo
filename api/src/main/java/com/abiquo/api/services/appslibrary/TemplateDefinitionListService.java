@@ -23,6 +23,7 @@ package com.abiquo.api.services.appslibrary;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -198,9 +199,8 @@ public class TemplateDefinitionListService extends DefaultApiServiceWithApplianc
 
     @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
     public List<TemplateDefinitionList> getTemplateDefinitionListsByEnterprise(
-        final Integer idEnterprise)
+        final Integer idEnterprise) throws SocketTimeoutException
     {
-
         Enterprise ent = entService.getEnterprise(idEnterprise);
         if (ent == null)
         {
