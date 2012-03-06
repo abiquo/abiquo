@@ -28,14 +28,14 @@ package net.undf.abicloud.vo.infrastructure
     public class OrganizationListResult
     {
         //The total number of organization
-        public var totalOrganization:int;
+        public var totalLogicOrganization:int;
 
         //The List of organization
         public var logicOrganizationList:ArrayCollection;
 
         public function OrganizationListResult()
         {
-            totalOrganization = 0;
+            totalLogicOrganization = 0;
             logicOrganizationList = new ArrayCollection();
         }
 
