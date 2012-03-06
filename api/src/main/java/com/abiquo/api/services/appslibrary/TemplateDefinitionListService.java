@@ -26,6 +26,7 @@ import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import javax.persistence.EntityManager;
 
@@ -46,6 +47,7 @@ import com.abiquo.api.tracer.TracerLogger;
 import com.abiquo.appliancemanager.repositoryspace.OVFDescription;
 import com.abiquo.appliancemanager.repositoryspace.RepositorySpace;
 import com.abiquo.appliancemanager.transport.TemplatesStateDto;
+import com.abiquo.model.transport.error.CommonError;
 import com.abiquo.ovfmanager.ovf.exceptions.XMLException;
 import com.abiquo.server.core.appslibrary.AppsLibrary;
 import com.abiquo.server.core.appslibrary.AppsLibraryDAO;
@@ -118,7 +120,7 @@ public class TemplateDefinitionListService extends DefaultApiService
         for (TemplateDefinition templateDef : templateDefList.getTemplateDefinitions())
         {
             templateDef.setAppsLibrary(appsLib);
-            validate(templateDef);
+            // validate(templateDef);
         }
 
         TemplateDefinitionList prevlist = null;
@@ -132,36 +134,44 @@ public class TemplateDefinitionListService extends DefaultApiService
 
         repo.persistTemplateDefinitionList(templateDefList);
 
-        // List<TemplateDefinition> correctTemplates = new LinkedList<TemplateDefinition>();
         for (TemplateDefinition templateDef : templateDefList.getTemplateDefinitions())
         {
-            // try
-            // {
-            // // TemplateDefinition tDef =
-            templateDefinitionService.addTemplateDefinition(templateDef, idEnterprise);
+            if (templateDef.isValid())
+            {// TemplateDefinition tDef =
+                templateDefinitionService.addTemplateDefinition(templateDef, idEnterprise);
 
-            templateDef.addToTemplateDefinitionLists(templateDefList);
+                templateDef.addToTemplateDefinitionLists(templateDefList);
+            }
+            else
+            {
+                templateDef.getTemplateDefinitionLists().clear();
 
-            // tDef.addToTemplateDefinitionLists(templateDefList);
-            // correctTemplates.add(tDef);
-            // }
-            // catch (Exception e)
-            // {
-            //
-            // templateDef.getTemplateDefinitionLists().clear();
-            // if (tracer != null)
-            // {
-            // tracer.log(SeverityType.WARNING, ComponentType.APPLIANCE_MANAGER,
-            // EventType.TEMPLATE_DEFINITION_LIST_MODIFIED,
-            // "templateDefinition.createError", templateDef.getName(), e.toString());
-            // }
-            // }
+                if (tracer != null)
+                {
+                    tracer.log(SeverityType.WARNING, ComponentType.APPLIANCE_MANAGER,
+                        EventType.TEMPLATE_DEFINITION_LIST_MODIFIED,
+                        "templateDefinition.createError", templateDef.getName(),
+                        validationErrors(templateDef.getValidationErrors()));
+                }
+            }
         }
 
         // templateDefList.setTemplateDefinitions(correctTemplates);
         repo.updateTemplateDefinitionList(templateDefList);
 
         return templateDefList;
+    }
+
+    private String validationErrors(final Set<CommonError> errors)
+    {
+        StringBuilder sbuilder = new StringBuilder();
+        for (CommonError error : errors)
+        {
+            sbuilder.append(String.format("%s - %s\n", error.getCode(), error.getMessage()));
+        }
+
+        return sbuilder.toString();
+
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)

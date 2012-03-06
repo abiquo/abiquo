@@ -50,9 +50,11 @@ public enum AMError
     REPO_NO_SPACE("REPO-NO-SPACE", "No space left on the NFS Repository file system"), //
     TEMPLATE_BOUNDLE("TEMPLATE-BOUNDLE", "Cannot create the Template Instance"), //
     TEMPLATE_UPLOAD("TEMPLATE-UPLOAD", "Cannot upload the Template"), //
-    REPO_NOT_ACCESSIBLE("REPO-NOT-ACCESSIBLE",
-        "Repository is not accessible. Check the exported location (NFS is probably down "
-            + "or no write permission"), //
+    REPO_NOT_ACCESSIBLE(
+        "REPO-NOT-ACCESSIBLE",
+        "Repository is not accessible. "
+            + "Check the repositoryLocation property and that the NFS Server is up and Abiquo has write permission."), //
+
     REPO_TIMEOUT_REFRESH("REPO-TIMEOUT-REFRESH",
         "Timeout during NFS Repository file system refresh."), //
     TEMPLATE_DELETE("OVFPI-DELETE", "Cannot delete Template folder"), //
