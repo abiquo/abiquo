@@ -27,12 +27,16 @@ import java.util.List;
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualmachineHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.ResourceManagementHB;
 import com.abiquo.abiserver.pojo.authentication.UserSession;
+import com.abiquo.abiserver.pojo.infrastructure.DataCenter;
 import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.result.DataResult;
+import com.abiquo.abiserver.pojo.result.ListRequest;
 import com.abiquo.abiserver.pojo.user.Enterprise;
 import com.abiquo.abiserver.pojo.virtualappliance.Node;
 import com.abiquo.abiserver.pojo.virtualappliance.TaskStatus;
 import com.abiquo.abiserver.pojo.virtualappliance.VirtualAppliance;
+import com.abiquo.abiserver.pojo.virtualappliance.VirtualAppliancesListResult;
+import com.abiquo.abiserver.pojo.virtualappliance.VirtualDataCenter;
 import com.abiquo.util.ErrorManager;
 
 public interface VirtualApplianceResourceStub
@@ -73,13 +77,22 @@ public interface VirtualApplianceResourceStub
     public DataResult<VirtualAppliance> instanceVirtualApplianceNodes(
         final Integer virtualDatacenterId, final Integer virtualApplianceId, Collection<Node> nodes);
 
-    DataResult<Collection<VirtualAppliance>> getVirtualAppliancesByEnterprise(
+    public DataResult<Collection<VirtualAppliance>> getVirtualAppliancesByEnterprise(
         UserSession userSession, Enterprise enterprise);
 
-    BasicResult deleteVirtualAppliance(VirtualAppliance virtualAppliance, boolean forceDelete);
+    public DataResult<VirtualAppliancesListResult> getVirtualAppliancesByEnterprise(
+        UserSession userSession, Enterprise enterprise, ListRequest listRequest);
 
-    DataResult<VirtualAppliance> applyChangesVirtualAppliance(VirtualAppliance virtualAppliance,
-        UserSession userSession, final boolean force);
+    public DataResult<VirtualAppliancesListResult> getVirtualAppliancesByEnterpriseAndDatacenter(
+        UserSession userSession, Enterprise enterprise, DataCenter datacenter);
+
+    public DataResult<VirtualAppliancesListResult> getVirtualAppliancesByVirtualDatacenter(
+        final UserSession userSession, final VirtualDataCenter vdc, final ListRequest listRequest);
+
+    public BasicResult deleteVirtualAppliance(VirtualAppliance virtualAppliance, boolean forceDelete);
+
+    public DataResult<VirtualAppliance> applyChangesVirtualAppliance(
+        VirtualAppliance virtualAppliance, UserSession userSession, final boolean force);
 
     public DataResult<List<TaskStatus>> updateTask(final TaskStatus task);
 }

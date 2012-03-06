@@ -26,16 +26,16 @@ import static com.abiquo.api.resources.cloud.VirtualApplianceResource.createTran
 import java.util.List;
 
 import javax.validation.constraints.Min;
-import javax.ws.rs.DefaultValue;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.UriInfo;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.wink.common.annotations.Parent;
@@ -51,6 +51,8 @@ import com.abiquo.server.core.cloud.VirtualApplianceDto;
 import com.abiquo.server.core.cloud.VirtualAppliancesDto;
 import com.abiquo.server.core.task.Task;
 import com.abiquo.server.core.task.TasksDto;
+import com.abiquo.server.core.util.FilterOptions;
+import com.abiquo.server.core.util.PagedList;
 
 @Parent(VirtualDatacenterResource.class)
 @Path(VirtualAppliancesResource.VIRTUAL_APPLIANCES_PATH)
@@ -66,16 +68,17 @@ public class VirtualAppliancesResource extends AbstractResource
     public VirtualAppliancesDto getVirtualAppliances(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
         @QueryParam(START_WITH) @DefaultValue("0") @Min(0) final Integer startwith,
+        @QueryParam(LIMIT) @DefaultValue(DEFAULT_PAGE_LENGTH_STRING) @Min(1) final Integer limit,
         @QueryParam(BY) @DefaultValue("name") final String orderBy,
         @QueryParam(FILTER) @DefaultValue("") final String filter,
-        @QueryParam(LIMIT) @Min(1) @DefaultValue(DEFAULT_PAGE_LENGTH_STRING) final Integer limit,
-        @QueryParam(ASC) @DefaultValue("true") final Boolean descOrAsc,
-        @QueryParam("expand") final String expand, @Context final IRESTBuilder restBuilder,
-        @Context final UriInfo uriInfo) throws Exception
+        @QueryParam(ASC) @DefaultValue("true") final Boolean asc,
+        @QueryParam("expand") final String expand, @Context final UriInfo uriInfo,
+        @Context final IRESTBuilder restBuilder) throws Exception
     {
+        FilterOptions filterOptions = new FilterOptions(startwith, limit, filter, orderBy, asc);
+
         List<VirtualAppliance> all =
-            service.getVirtualAppliancesByVirtualDatacenter(vdcId, startwith, orderBy, filter,
-                limit, descOrAsc);
+            service.getVirtualAppliancesByVirtualDatacenter(vdcId, filterOptions);
         VirtualAppliancesDto vappsDto = new VirtualAppliancesDto();
 
         if (all != null && !all.isEmpty())
@@ -84,8 +87,13 @@ public class VirtualAppliancesResource extends AbstractResource
             {
                 VirtualApplianceDto dto = createTransferObject(v, restBuilder);
                 expandNodes(vdcId, v.getId(), expand, uriInfo, dto);
-                vappsDto.add(dto);
+                vappsDto.getCollection().add(dto);
             }
+        }
+
+        if (all.isEmpty() == false)
+        {
+            vappsDto.setTotalSize(((PagedList< ? >) all).getTotalResults());
         }
 
         return vappsDto;
