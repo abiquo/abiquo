@@ -55,16 +55,4 @@ public abstract class APIException extends RuntimeException
     {
         getErrors().add(new CommonError(apiError.getCode(), apiError.getMessage()));
     }
-
-    @Override
-    public String toString()
-    {
-        StringBuilder sbuilder = new StringBuilder();
-        for (CommonError error : errors)
-        {
-            sbuilder.append(String.format("%s - %s\n", error.getCode(), error.getMessage()));
-        }
-
-        return sbuilder.toString();
-    }
 }
