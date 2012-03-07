@@ -85,7 +85,7 @@ public class VirtualMachineTemplateResourceStubImpl extends AbstractAPIStub impl
         final DataResult<List<VirtualImage>> result = new DataResult<List<VirtualImage>>();
 
         final String uri = createVirtualMachineTemplatesLink(idEnterprise, datacenterId);
-        Resource vmtemplatesResource = resource(uri);
+        Resource vmtemplatesResource = resource(uri, VirtualMachineTemplatesDto.MEDIA_TYPE);
 
         if (StringUtils.isNotEmpty(hypervisorTypeName))
         {

@@ -168,17 +168,6 @@ public class AbstractAPIStub
         return user;
     }
 
-    protected ClientResponse delete(final String uri, final String user, final String password)
-    {
-        return resource(uri, user, password).delete();
-    }
-
-    protected ClientResponse delete(final String uri, final String user, final String password,
-        final String mediaType)
-    {
-        return resource(uri, user, password, mediaType).delete();
-    }
-
     protected ClientResponse get(final String uri, final String mediaType)
     {
         UserHB user = getCurrentUserCredentials();
@@ -191,21 +180,22 @@ public class AbstractAPIStub
         return resource(uri, user, password, mediaType, handlers).get();
     }
 
-    protected ClientResponse get(final String uri, final String user, final String password,
-        final ClientHandler... handlers)
-    {
-        return resource(uri, user, password, handlers).get();
-    }
+    // protected ClientResponse get(final String uri, final String user, final String password,
+    // final ClientHandler... handlers)
+    // {
+    // return resource(uri, user, password, handlers).get();
+    // }
 
     protected ClientResponse post(final String uri, final SingleResourceTransportDto dto)
     {
         UserHB user = getCurrentUserCredentials();
-        Resource resource = resource(uri, user.getUser(), user.getPassword());
+        Resource resource = null;
         if (dto != null)
         {
+            resource = resource(uri, user.getUser(), user.getPassword(), dto.getMediaType());
             resource.contentType(dto.getMediaType());
-            resource.accept(dto.getMediaType());
         }
+
         return resource.post(dto);
     }
 
@@ -213,48 +203,42 @@ public class AbstractAPIStub
         final String mediaType)
     {
         UserHB user = getCurrentUserCredentials();
-        return resource(uri, user.getUser(), user.getPassword()).contentType(mediaType)
-            .accept(mediaType).post(dto);
+        return resource(uri, user.getUser(), user.getPassword(), mediaType).post(dto);
     }
 
     protected ClientResponse post(final String uri, final SingleResourceTransportDto dto,
         final String user, final String password)
     {
-        Resource resource = resource(uri, user, password);
+        Resource resource = null;
         if (dto != null)
         {
+            resource = resource(uri, user, password, dto.getMediaType());
             resource.contentType(dto.getMediaType());
-            resource.accept(dto.getMediaType());
+            // resource.accept(dto.getMediaType());
         }
         return resource.post(dto);
-    }
-
-    protected Resource resource(final String uri)
-    {
-        UserHB user = getCurrentUserCredentials();
-        return resource(uri, user.getUser(), user.getPassword()).contentType(
-            MediaType.APPLICATION_XML);
     }
 
     protected ClientResponse put(final String uri, final SingleResourceTransportDto dto)
     {
         UserHB user = getCurrentUserCredentials();
-        Resource resource = resource(uri, user.getUser(), user.getPassword());
+        Resource resource = null;
         if (dto != null)
         {
+            resource = resource(uri, user.getUser(), user.getPassword(), dto.getMediaType());
             resource.contentType(dto.getMediaType());
-            resource.accept(dto.getMediaType());
+            // resource.accept(dto.getMediaType());
         }
         return resource.put(dto);
     }
 
-    protected ClientResponse put(final String uri, final SingleResourceTransportDto dto,
-        final String accept, final String content)
-    {
-        UserHB user = getCurrentUserCredentials();
-        return resource(uri, user.getUser(), user.getPassword(), accept).contentType(content).put(
-            dto);
-    }
+    // protected ClientResponse put(final String uri, final SingleResourceTransportDto dto,
+    // final String accept, final String content)
+    // {
+    // UserHB user = getCurrentUserCredentials();
+    // return resource(uri, user.getUser(), user.getPassword(), accept).contentType(content).put(
+    // dto);
+    // }
 
     protected ClientResponse put(final String uri, final SingleResourceTransportDto dto,
         final String user, final String password, final String accept, final String content)
@@ -265,51 +249,53 @@ public class AbstractAPIStub
     protected ClientResponse delete(final String uri)
     {
         UserHB user = getCurrentUserCredentials();
-        return resource(uri, user.getUser(), user.getPassword()).delete();
+        return resource(uri, user.getUser(), user.getPassword(), MediaType.APPLICATION_XML)
+            .delete();
     }
+
+    // protected ClientResponse delete(final String uri, final String user, final String password)
+    // {
+    // return resource(uri, user, password).delete();
+    // }
+
+    // no se utiliza
+    // protected ClientResponse delete(final String uri, final String user, final String password,
+    // final String mediaType)
+    // {
+    // return resource(uri, user, password, mediaType).delete();
+    // }
+
+    // no se utiliza
+    // protected ClientResponse delete(final String uri, final String mediaType)
+    // {
+    // UserHB user = getCurrentUserCredentials();
+    // return resource(uri, user.getUser(), user.getPassword()).accept(mediaType)
+    // .contentType(mediaType).delete();
+    // }
 
     protected String createLoginLink()
     {
         return URIResolver.resolveURI(apiUri, "/login", Collections.emptyMap());
     }
 
-    protected ClientResponse delete(final String uri, final String mediaType)
+    protected Resource resource(final String uri, final String mediaType)
     {
         UserHB user = getCurrentUserCredentials();
-        return resource(uri, user.getUser(), user.getPassword()).accept(mediaType)
-            .contentType(mediaType).delete();
+        return resource(uri, user.getUser(), user.getPassword(), mediaType);
     }
 
-    private Resource resource(final String uri, final String user, final String password)
-    {
-
-        Resource resource = client.resource(uri).accept(MediaType.APPLICATION_XML);
-        String cookieValue = generateToken(user, password);
-        return resource.cookie(new Cookie("auth", cookieValue));
-    }
+    // private Resource resource(final String uri, final String user, final String password)
+    // {
+    //
+    // Resource resource = client.resource(uri).accept(MediaType.APPLICATION_XML);
+    // String cookieValue = generateToken(user, password);
+    // return resource.cookie(new Cookie("auth", cookieValue));
+    // }
 
     private Resource resource(final String uri, final String user, final String password,
         final String mediaType)
     {
         Resource resource = client.resource(uri).accept(mediaType);
-        String cookieValue = generateToken(user, password);
-        return resource.cookie(new Cookie("auth", cookieValue));
-    }
-
-    /**
-     * Instantiate the {@link Resource} and not add the {@link MediaType.APPLICATION_XML} to the
-     * request.
-     * 
-     * @param uri remote location.
-     * @param user login.
-     * @param password password.
-     * @param mediaType content negotiation.
-     * @return Resource
-     */
-    private Resource resource(final String uri, final String user, final String password,
-        final MediaType mediaType)
-    {
-        Resource resource = client.resource(uri).contentType(mediaType);
         String cookieValue = generateToken(user, password);
         return resource.cookie(new Cookie("auth", cookieValue));
     }
@@ -1461,18 +1447,18 @@ public class AbstractAPIStub
         return resolveURI(apiUri, "admin/datacenters/{dc}/network/{network}/ips/{ip}", params);
     }
 
-    protected Resource resource(final String uri, final String user, final String password,
-        final ClientHandler... handlers)
-    {
-        return resource(uri, user, password, MediaType.APPLICATION_XML, handlers);
-    }
+    // protected Resource resource(final String uri, final String user, final String password,
+    // final ClientHandler... handlers)
+    // {
+    // return resource(uri, user, password, MediaType.APPLICATION_XML, handlers);
+    // }
 
     protected Resource resource(final String uri, final String user, final String password,
         final String mediaType, final ClientHandler... handlers)
     {
         if (handlers == null || handlers.length == 0)
         {
-            return resource(uri, user, password);
+            return resource(uri, user, password, mediaType);
         }
         ClientConfig config = new ClientConfig();
         config.handlers(handlers);

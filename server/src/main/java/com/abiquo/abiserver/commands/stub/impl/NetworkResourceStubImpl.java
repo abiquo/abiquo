@@ -115,8 +115,8 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
         String uri = createDatacenterPublicTagCheck(datacenterId);
         UserHB user = getCurrentUser();
         ClientResponse response =
-            resource(uri, user.getUser(), user.getPassword()).queryParam("tag", proposedVLANTag)
-                .get();
+            resource(uri, user.getUser(), user.getPassword(),
+                VlanTagAvailabilityDto.BASE_MEDIA_TYPE).queryParam("tag", proposedVLANTag).get();
 
         if (response.getStatusCode() == 200)
         {
