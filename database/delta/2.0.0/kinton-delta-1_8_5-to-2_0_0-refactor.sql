@@ -643,6 +643,10 @@ BEGIN
 	IF @existsCount = 1 THEN 
 		UPDATE kinton.system_properties SET value='http://community.abiquo.com/display/ABI20/Manage+Physical+Machines#ManagePhysicalMachines-DiscoveringBladesonManagedRacks' WHERE name='client.wiki.infra.discoverBlades';
 	END IF;
+	SELECT COUNT(*) INTO @existsCount FROM kinton.system_properties WHERE name='client.virtual.moreInfoAboutUploadLimitations' AND value='http://community.abicloud.org/display/ABI16/Appliance+Library+view#ApplianceLibraryview-Uploadingfromourlocalfilesystem';
+	IF @existsCount = 1 THEN 
+		UPDATE kinton.system_properties SET value='http://wiki.abiquo.com/display/ABI20/Adding+VM+Templates+to+the+Appliance+Library#AddingVMTemplatestotheApplianceLibrary-UploadingfromtheLocalFilesystem' WHERE name='client.virtual.moreInfoAboutUploadLimitations';
+	END IF;
 
 
 	-- PRICING --

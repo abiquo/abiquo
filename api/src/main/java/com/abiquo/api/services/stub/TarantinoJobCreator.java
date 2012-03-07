@@ -174,7 +174,8 @@ public class TarantinoJobCreator extends DefaultApiService
     }
 
     public VirtualMachineDescriptionBuilder toTarantinoDto(final VirtualMachine virtualMachine,
-        final VirtualAppliance virtualAppliance){
+        final VirtualAppliance virtualAppliance)
+    {
         return toTarantinoDto(virtualMachine, virtualAppliance, false);
     }
 

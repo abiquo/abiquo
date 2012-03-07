@@ -226,7 +226,6 @@ public class TemplateToOVFEnvelope
                 CIMResourceAllocationSettingDataUtils.createRASDTypeFromCIMRASD(ethDriver);
             OVFVirtualHadwareSectionUtils.addRASD(vhsection, rasdEthDriver);
         }
-
         return vhsection;
     }
 
