@@ -733,10 +733,12 @@
                 	
 	                <mx:TextInput id="iconInput"
 	                    height="18"
+	                    editable="{this._isEditable}"
 	                    change="validateForm()"/>
 	                
 	                <mx:Button id="validateButton"
 	                    height="18"
+	                    enabled="{this._isEditable}"
 	                    label="@Resource(bundle='Common', key='BUTTON_VALIDATE')"
 	                    click="onClickValidateIcon()"/>    
                 </mx:HBox>
