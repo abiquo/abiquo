@@ -94,6 +94,8 @@ public class VirtualAppliancesResource extends AbstractResource
         if (all.isEmpty() == false)
         {
             vappsDto.setTotalSize(((PagedList< ? >) all).getTotalResults());
+            vappsDto.addLinks(restBuilder.buildPaggingLinks(uriInfo.getAbsolutePath().toString(),
+                (PagedList< ? >) all));
         }
 
         return vappsDto;
