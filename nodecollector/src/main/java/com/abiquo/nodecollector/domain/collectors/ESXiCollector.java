@@ -56,6 +56,7 @@ import com.abiquo.server.core.infrastructure.nodecollector.VirtualSystemStatusEn
 import com.vmware.vim25.ArrayOfHostHostBusAdapter;
 import com.vmware.vim25.DatastoreSummary;
 import com.vmware.vim25.DynamicProperty;
+import com.vmware.vim25.FileFault;
 import com.vmware.vim25.FileInfo;
 import com.vmware.vim25.FileQuery;
 import com.vmware.vim25.FolderFileQuery;
@@ -717,6 +718,23 @@ public class ESXiCollector extends AbstractCollector
         String folderUuidMark = UUID.randomUUID().toString();
         String directoryOnDatastore =
             String.format("%s %s%s", dsName, DATASTORE_UUID_MARK, folderUuidMark);
+
+        try
+        {
+            // do not create parent folders (is on the root)
+            serviceInstance.getFileManager().makeDirectory(directoryOnDatastore, dc, false);
+        }
+        catch (FileFault e)
+        {
+            LOGGER.error("Can not create the folder mark at [{}], caused by file fault {}", dsName,
+                e);
+            throw new CollectorException(MessageValues.DATASTRORE_MARK, e);
+        }
+        catch (Exception e)
+        {
+            LOGGER.error("Can not create the folder mark at [{}]\n{}", dsName, e);
+            throw new CollectorException(MessageValues.DATASTRORE_MARK, e);
+        }
 
         return folderUuidMark;
     }
