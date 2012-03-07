@@ -717,8 +717,13 @@ BEGIN
 	update kinton.virtualmachine set state = "UNKNOWN" where state = "IN_PROGRESS";
 
 	-- iconURL migration
-	update virtualimage vi, icon i set vi.iconURL = i.path where vi.idIcon = i.idIcon; 
-	update ovf_package ovf, icon i set ovf.iconURL = i.path where ovf.idIcon = i.idIcon;
+	IF EXISTS (SELECT * FROM information_schema.columns WHERE table_schema= 'kinton' AND table_name='virtualimage' AND column_name='idIcon') THEN
+		update virtualimage vi, icon i set vi.iconURL = i.path where vi.idIcon = i.idIcon; 
+	END IF;
+
+	IF EXISTS (SELECT * FROM information_schema.columns WHERE table_schema= 'kinton' AND table_name='ovf_package' AND column_name='idIcon') THEN
+		update ovf_package ovf, icon i set ovf.iconURL = i.path where ovf.idIcon = i.idIcon;
+	END IF;
 
 	-- costCode
 	update virtualimage set cost_code = 0 where cost_code is null;
