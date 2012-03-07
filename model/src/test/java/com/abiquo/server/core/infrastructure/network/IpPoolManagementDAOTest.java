@@ -92,50 +92,13 @@ public class IpPoolManagementDAOTest extends
 
         IpPoolManagementDAO dao = createDaoForRollbackTransaction();
         IpPoolManagement available =
-<<<<<<< HEAD
-<<<<<<< HEAD
             dao.findNextIpAvailable(ipPoolManagement.getVlanNetwork().getId(),
                 excludedIpPoolManagement.getIp());
-=======
-            dao.findNextIpAvailable(ipPoolManagement.getVlanNetwork().getId(), excludedIpPoolManagement.getIp());
->>>>>>> ABICLOUDPREMIUM-2936
-=======
-            dao.findNextIpAvailable(ipPoolManagement.getVlanNetwork().getId(),
-                excludedIpPoolManagement.getIp());
->>>>>>> cbf485c4427ec5120fc339b190a9dcf3d58c251b
 
         assertFalse(excludedIpPoolManagement.equals(available));
     }
 
     @Test
-<<<<<<< HEAD
-<<<<<<< HEAD
-    public void findNextIpByPrivateVLANNotIpAvailable()
-    {
-        List<Object> entities = new ArrayList<Object>();
-
-        IpPoolManagement ipPoolManagement = eg().createUniqueInstance();
-        ipPoolManagement.setAvailable(Boolean.FALSE);
-        eg().addAuxiliaryEntitiesToPersist(ipPoolManagement, entities);
-
-        IpPoolManagement excludedIpPoolManagement = eg().createUniqueInstance();
-        eg().addAuxiliaryEntitiesToPersist(excludedIpPoolManagement, entities);
-
-        persistAll(ds(), entities, ipPoolManagement, excludedIpPoolManagement);
-
-        IpPoolManagementDAO dao = createDaoForRollbackTransaction();
-        IpPoolManagement available =
-            dao.findNextIpAvailable(ipPoolManagement.getVlanNetwork().getId(),
-                excludedIpPoolManagement.getIp());
-
-        Assert.assertNull(available);
-    }
-
-    @Test
-=======
->>>>>>> ABICLOUDPREMIUM-2936
-=======
->>>>>>> cbf485c4427ec5120fc339b190a9dcf3d58c251b
     public void findNextIpByPrivateVLANExcludeMultiple()
     {
         List<Object> entities = new ArrayList<Object>();
@@ -297,17 +260,8 @@ public class IpPoolManagementDAOTest extends
 
         IpPoolManagementDAO dao = createDaoForRollbackTransaction();
         IpPoolManagement available =
-<<<<<<< HEAD
-<<<<<<< HEAD
-            dao.findNextIpAvailable(ipPoolManagement1.getVlanNetwork().getId());
-=======
             dao.findNextIpAvailable(ipPoolManagement1.getVlanNetwork()
                 .getId());
->>>>>>> ABICLOUDPREMIUM-2936
-=======
-            dao.findNextIpAvailable(ipPoolManagement1.getVlanNetwork()
-                .getId());
->>>>>>> cbf485c4427ec5120fc339b190a9dcf3d58c251b
 
         Assert.assertNull(available);
     }
@@ -338,17 +292,8 @@ public class IpPoolManagementDAOTest extends
         persistAll(ds(), entities, vlan1, vlan2, ipPoolManagement1, ipPoolManagement2);
 
         IpPoolManagementDAO dao = createDaoForRollbackTransaction();
-<<<<<<< HEAD
-<<<<<<< HEAD
-        IpPoolManagement available = dao.findNextIpAvailable(vlan1.getId());
-=======
         IpPoolManagement available =
             dao.findNextIpAvailable(vlan1.getId());
->>>>>>> ABICLOUDPREMIUM-2936
-=======
-        IpPoolManagement available =
-            dao.findNextIpAvailable(vlan1.getId());
->>>>>>> cbf485c4427ec5120fc339b190a9dcf3d58c251b
 
         Assert.assertNull(available);
     }
@@ -379,17 +324,8 @@ public class IpPoolManagementDAOTest extends
         persistAll(ds(), entities, vlan1, vlan2, ipPoolManagement1, ipPoolManagement2);
 
         IpPoolManagementDAO dao = createDaoForRollbackTransaction();
-<<<<<<< HEAD
-<<<<<<< HEAD
-        IpPoolManagement available = dao.findNextIpAvailable(vlan1.getId());
-=======
         IpPoolManagement available =
             dao.findNextIpAvailable(vlan1.getId());
->>>>>>> ABICLOUDPREMIUM-2936
-=======
-        IpPoolManagement available =
-            dao.findNextIpAvailable(vlan1.getId());
->>>>>>> cbf485c4427ec5120fc339b190a9dcf3d58c251b
 
         Assert.assertNull(available);
     }
