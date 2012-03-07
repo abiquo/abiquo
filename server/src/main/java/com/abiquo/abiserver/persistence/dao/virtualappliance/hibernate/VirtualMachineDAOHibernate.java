@@ -59,8 +59,8 @@ public class VirtualMachineDAOHibernate extends HibernateDAO<VirtualmachineHB, I
         try
         {
             vmHB =
-                (VirtualmachineHB) getSession().createCriteria(VirtualmachineHB.class).add(
-                    Restrictions.eq("uuid", uuid)).uniqueResult();
+                (VirtualmachineHB) getSession().createCriteria(VirtualmachineHB.class)
+                    .add(Restrictions.eq("uuid", uuid)).uniqueResult();
         }
         catch (HibernateException e)
         {
@@ -78,8 +78,8 @@ public class VirtualMachineDAOHibernate extends HibernateDAO<VirtualmachineHB, I
         try
         {
             vmHB =
-                (VirtualmachineHB) getSession().createCriteria(VirtualmachineHB.class).add(
-                    Restrictions.eq("name", name)).uniqueResult();
+                (VirtualmachineHB) getSession().createCriteria(VirtualmachineHB.class)
+                    .add(Restrictions.eq("name", name)).uniqueResult();
         }
         catch (HibernateException e)
         {
@@ -117,8 +117,8 @@ public class VirtualMachineDAOHibernate extends HibernateDAO<VirtualmachineHB, I
         try
         {
             listOfvmHB =
-                getSession().createCriteria(VirtualmachineHB.class).add(
-                    Restrictions.eq("datastore.idDatastore", datastoreId)).list();
+                getSession().createCriteria(VirtualmachineHB.class)
+                    .add(Restrictions.eq("datastore.idDatastore", datastoreId)).list();
         }
         catch (HibernateException e)
         {
@@ -127,9 +127,9 @@ public class VirtualMachineDAOHibernate extends HibernateDAO<VirtualmachineHB, I
 
         return listOfvmHB;
     }
-    
+
     @Override
-    public VirtualappHB findVirtualAppFromVM (Integer vmID) throws PersistenceException
+    public VirtualappHB findVirtualAppFromVM(Integer vmID) throws PersistenceException
     {
         VirtualappHB virtualappHB;
 
@@ -147,7 +147,7 @@ public class VirtualMachineDAOHibernate extends HibernateDAO<VirtualmachineHB, I
         }
 
         return virtualappHB;
-        
+
     }
 
 }

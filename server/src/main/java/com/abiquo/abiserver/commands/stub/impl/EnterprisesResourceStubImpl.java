@@ -21,9 +21,12 @@
 package com.abiquo.abiserver.commands.stub.impl;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
+import java.util.Map;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.wink.client.ClientResponse;
 import org.apache.wink.client.Resource;
 import org.apache.wink.common.internal.utils.UriHelper;
@@ -145,10 +148,31 @@ public class EnterprisesResourceStubImpl extends AbstractAPIStub implements Ente
         return result;
     }
 
+    protected EnterpriseDto fromEnterpriseToDtoWithoutPricing(final Enterprise enterprise)
+    {
+        EnterpriseDto dto = new EnterpriseDto();
+        dto.setName(enterprise.getName());
+        dto.setId(enterprise.getId());
+        ResourceAllocationLimit limits = enterprise.getLimits();
+        return (EnterpriseDto) fillLimits(dto, limits);
+    }
+
     protected EnterpriseDto fromEnterpriseToDto(final Enterprise enterprise)
     {
         EnterpriseDto dto = new EnterpriseDto();
         dto.setName(enterprise.getName());
+        dto.setChefURL(enterprise.getChefURL());
+        dto.setChefClient(enterprise.getChefClient());
+        dto.setChefValidator(enterprise.getChefValidator());
+        dto.setChefClientCertificate(enterprise.getChefClientCertificate());
+        dto.setChefValidatorCertificate(enterprise.getChefValidatorCertificate());
+        if (enterprise.getIdPricingTemplate() != null)
+        {
+            dto.addLink(new RESTLink("pricingtemplate", createPricingTemplateLink(enterprise
+                .getIdPricingTemplate())));
+        }
+
+        dto.setIsReservationRestricted(enterprise.getIsReservationRestricted());
 
         ResourceAllocationLimit limits = enterprise.getLimits();
         return (EnterpriseDto) fillLimits(dto, limits);
@@ -384,5 +408,111 @@ public class EnterprisesResourceStubImpl extends AbstractAPIStub implements Ente
         EnterpriseDto responseDto = response.getEntity(EnterpriseDto.class);
         Enterprise enterprise = Enterprise.create(responseDto);
         return enterprise;
+    }
+
+    @Override
+    public DataResult<EnterpriseListResult> getEnterprisesWithPricingTemplate(
+        final ListRequest enterpriseListOptions, final Integer idPricingTemplate,
+        final boolean included)
+    {
+        DataResult<EnterpriseListResult> result = new DataResult<EnterpriseListResult>();
+        String orderBy = enterpriseListOptions.getOrderBy();
+        boolean desc = !enterpriseListOptions.getAsc();
+
+        String uri =
+            createEnterprisesLink(enterpriseListOptions.getFilterLike(),
+                enterpriseListOptions.getOffset(), enterpriseListOptions.getNumberOfNodes());
+
+        Map<String, String[]> queryParams = new HashMap<String, String[]>();
+        if (idPricingTemplate != null)
+        {
+            queryParams.put("idPricingTemplate", new String[] {String.valueOf(idPricingTemplate)});
+        }
+        queryParams.put("included", new String[] {String.valueOf(included)});
+
+        if (!StringUtils.isEmpty(enterpriseListOptions.getOrderBy()))
+        {
+            queryParams.put("orderBy", new String[] {orderBy});
+        }
+        queryParams.put("desc", new String[] {String.valueOf(desc)});
+
+        uri = UriHelper.appendQueryParamsToPath(uri, queryParams, false);
+
+        ClientResponse response = get(uri);
+        if (response.getStatusCode() == 200)
+        {
+            result.setSuccess(true);
+
+            EnterprisesDto responseDto = response.getEntity(EnterprisesDto.class);
+
+            EnterpriseListResult listResult = new EnterpriseListResult();
+            Collection<Enterprise> list = new LinkedHashSet<Enterprise>();
+            for (EnterpriseDto dto : responseDto.getCollection())
+            {
+                list.add(Enterprise.create(dto));
+            }
+            listResult.setEnterprisesList(list);
+
+            Integer total =
+                responseDto.getTotalSize() != null ? responseDto.getTotalSize() : list.size();
+            listResult.setTotalEnterprises(total);
+
+            result.setData(listResult);
+        }
+        else
+        {
+            populateErrors(response, result, "getEnterprises");
+        }
+
+        return result;
+    }
+
+    @Override
+    public DataResult<Enterprise> editEnterprisePricingTemplate(final Integer idEnterprise,
+        final Integer idPricingTemplate)
+    {
+        DataResult<Enterprise> result = new DataResult<Enterprise>();
+        Enterprise enterprise = null;
+
+        String uri = createEnterpriseLink(idEnterprise);
+
+        ClientResponse response = get(uri);
+
+        if (response.getStatusCode() == 200)
+        {
+            result.setSuccess(true);
+
+            enterprise = getEnterprise(response);
+
+            result.setData(enterprise);
+        }
+        else
+        {
+            populateErrors(response, result, "getEnterprise");
+        }
+
+        EnterpriseDto dto = fromEnterpriseToDtoWithoutPricing(enterprise);
+        if (idPricingTemplate != null)
+        {
+            dto.addLink(new RESTLink("pricingtemplate",
+                createPricingTemplateLink(idPricingTemplate)));
+        }
+
+        result = new DataResult<Enterprise>();
+
+        response = put(uri, dto);
+        if (response.getStatusCode() == 200)
+        {
+            Enterprise data = getEnterprise(response);
+
+            result.setSuccess(true);
+            result.setData(data);
+        }
+        else
+        {
+            populateErrors(response, result, "editEnterprisePricingTemplate");
+        }
+
+        return result;
     }
 }

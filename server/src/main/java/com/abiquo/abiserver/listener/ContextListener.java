@@ -32,17 +32,10 @@ import org.slf4j.LoggerFactory;
 import com.abiquo.abicloud.taskservice.TaskService;
 import com.abiquo.abicloud.taskservice.exception.TaskServiceException;
 import com.abiquo.abicloud.taskservice.factory.TaskServiceFactory;
-import com.abiquo.abiserver.eventing.AMSink;
 import com.abiquo.abiserver.eventing.SQLTracerListener;
-import com.abiquo.abiserver.eventing.VSMListener;
 import com.abiquo.abiserver.tracerprocessor.DBTracerProcessor;
-import com.abiquo.commons.amqp.impl.am.AMCallback;
-import com.abiquo.commons.amqp.impl.am.AMConsumer;
 import com.abiquo.commons.amqp.impl.tracer.TracerCallback;
 import com.abiquo.commons.amqp.impl.tracer.TracerConsumer;
-import com.abiquo.commons.amqp.impl.vsm.VSMCallback;
-import com.abiquo.commons.amqp.impl.vsm.VSMConfiguration;
-import com.abiquo.commons.amqp.impl.vsm.VSMConsumer;
 import com.abiquo.tracer.client.TracerFactory;
 import com.abiquo.tracer.server.LoggingTracerProcessor;
 import com.abiquo.tracer.server.TracerCollector;
@@ -60,12 +53,6 @@ public class ContextListener implements ServletContextListener
     /** The task service to run scheduled tasks. */
     private TaskService taskService;
 
-    /** The RabbitMQ consumer for VSM **/
-    protected VSMConsumer consumer;
-
-    /** The RabbitMQ consumer for AM **/
-    protected AMConsumer amconsumer;
-
     /** The RabbitMQ consumer for Tracer **/
     protected TracerConsumer tracerConsumer;
 
@@ -79,8 +66,6 @@ public class ContextListener implements ServletContextListener
 
             initializeTracer();
             initializeTaskService();
-            initializeVSMListener();
-            initializeAMListener();
             initializeTracerListener();
 
             LOGGER.info("The context [" + contextName + "] has been initialized");
@@ -89,19 +74,6 @@ public class ContextListener implements ServletContextListener
         {
             LOGGER.error("An error occurred while initializing the context", ex);
         }
-    }
-
-    /**
-     * Creates an instance of {@link VSMConsumer}, add all the needed listeners {@link VSMCallback}
-     * and starts the consuming.
-     * 
-     * @throws IOException When there is some network error.
-     */
-    protected void initializeVSMListener() throws IOException
-    {
-        consumer = new VSMConsumer(VSMConfiguration.EVENT_SYNK_QUEUE);
-        consumer.addCallback(new VSMListener());
-        consumer.start();
     }
 
     /**
@@ -118,29 +90,6 @@ public class ContextListener implements ServletContextListener
     }
 
     /**
-     * Creates an instance of {@link AMConsumer}, add all the needed listeners {@link AMCallback}
-     * and starts the consuming.
-     * 
-     * @throws IOException When there is some network error.
-     */
-    protected void initializeAMListener() throws IOException
-    {
-        amconsumer = new AMConsumer();
-        amconsumer.addCallback(new AMSink());
-        amconsumer.start();
-    }
-
-    /**
-     * Stops the {@link VSMConsumer}.
-     * 
-     * @throws IOException When there is some network error.
-     */
-    private void shutdownVSMListener() throws IOException
-    {
-        consumer.stop();
-    }
-
-    /**
      * Stops the {@link TracerConsumer}.
      * 
      * @throws IOException When there is some network error.
@@ -148,16 +97,6 @@ public class ContextListener implements ServletContextListener
     private void shutdownTracerListener() throws IOException
     {
         tracerConsumer.stop();
-    }
-
-    /**
-     * Stops the {@link AMConsumer}.
-     * 
-     * @throws IOException When there is some network error.
-     */
-    private void shutdownAMListener() throws IOException
-    {
-        amconsumer.stop();
     }
 
     /**
@@ -243,8 +182,6 @@ public class ContextListener implements ServletContextListener
 
         try
         {
-            shutdownVSMListener();
-            shutdownAMListener();
             shutdownTracerListener();
         }
         catch (IOException e)
@@ -257,5 +194,4 @@ public class ContextListener implements ServletContextListener
 
         LOGGER.info("The context [" + contextName + "] has been destroyed");
     }
-
 }

@@ -28,7 +28,6 @@ import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -38,6 +37,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import org.hibernate.annotations.ForeignKey;
+import org.hibernate.annotations.Formula;
 import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.Range;
 
@@ -57,14 +57,13 @@ public class VirtualAppliance extends DefaultEntityBase
     {
     }
 
-    public VirtualAppliance(Enterprise enterprise, VirtualDatacenter virtualDatacenter,
-        String name, State state, State subState)
+    public VirtualAppliance(final Enterprise enterprise, final VirtualDatacenter virtualDatacenter,
+        final String name, final VirtualApplianceState state)
     {
         setEnterprise(enterprise);
         setVirtualDatacenter(virtualDatacenter);
         setName(name);
         setState(state);
-        setSubState(subState);
         setPublicApp(0);
         setError(0);
         setHighDisponibility(0);
@@ -85,11 +84,11 @@ public class VirtualAppliance extends DefaultEntityBase
 
     public final static String NAME_PROPERTY = "name";
 
-    private final static boolean NAME_REQUIRED = false;
+    private final static boolean NAME_REQUIRED = true;
 
-    private final static int NAME_LENGTH_MIN = 0;
+    private final static int NAME_LENGTH_MIN = 1;
 
-    private final static int NAME_LENGTH_MAX = 255;
+    private final static int NAME_LENGTH_MAX = 30;
 
     private final static boolean NAME_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
 
@@ -106,7 +105,7 @@ public class VirtualAppliance extends DefaultEntityBase
         return this.name;
     }
 
-    public void setName(String name)
+    public void setName(final String name)
     {
         this.name = name;
     }
@@ -119,7 +118,7 @@ public class VirtualAppliance extends DefaultEntityBase
 
     private final static String NODECONNECTIONS_COLUMN = "nodeconnections";
 
-    @Column(name = NODECONNECTIONS_COLUMN, nullable = !NODECONNECTIONS_REQUIRED, columnDefinition="TEXT")
+    @Column(name = NODECONNECTIONS_COLUMN, nullable = !NODECONNECTIONS_REQUIRED, columnDefinition = "TEXT")
     private String nodeconnections;
 
     @Required(value = NODECONNECTIONS_REQUIRED)
@@ -129,7 +128,7 @@ public class VirtualAppliance extends DefaultEntityBase
         return this.nodeconnections;
     }
 
-    public void setNodeconnections(String nodeconnections)
+    public void setNodeconnections(final String nodeconnections)
     {
         this.nodeconnections = nodeconnections;
     }
@@ -151,7 +150,7 @@ public class VirtualAppliance extends DefaultEntityBase
         return this.publicApp;
     }
 
-    public void setPublicApp(int publicApp)
+    public void setPublicApp(final int publicApp)
     {
         this.publicApp = publicApp;
     }
@@ -173,7 +172,7 @@ public class VirtualAppliance extends DefaultEntityBase
         return this.enterprise;
     }
 
-    public void setEnterprise(Enterprise enterprise)
+    public void setEnterprise(final Enterprise enterprise)
     {
         this.enterprise = enterprise;
     }
@@ -195,7 +194,7 @@ public class VirtualAppliance extends DefaultEntityBase
         return this.virtualDatacenter;
     }
 
-    public void setVirtualDatacenter(VirtualDatacenter virtualDatacenter)
+    public void setVirtualDatacenter(final VirtualDatacenter virtualDatacenter)
     {
         this.virtualDatacenter = virtualDatacenter;
     }
@@ -217,7 +216,7 @@ public class VirtualAppliance extends DefaultEntityBase
         return this.highDisponibility;
     }
 
-    public void setHighDisponibility(int highDisponibility)
+    public void setHighDisponibility(final int highDisponibility)
     {
         this.highDisponibility = highDisponibility;
     }
@@ -239,51 +238,45 @@ public class VirtualAppliance extends DefaultEntityBase
         return this.error;
     }
 
-    private void setError(int error)
+    private void setError(final int error)
     {
         this.error = error;
     }
 
-    public final static String SUB_STATE_PROPERTY = "subState";
-
-    private final static boolean SUB_STATE_REQUIRED = true;
-
-    private final static String SUB_STATE_COLUMN = "subState";
-
-    @Enumerated(value = javax.persistence.EnumType.STRING)
-    @Column(name = SUB_STATE_COLUMN, nullable = !SUB_STATE_REQUIRED)
-    private State subState;
-
-    @Required(value = SUB_STATE_REQUIRED)
-    public State getSubState()
-    {
-        return this.subState;
-    }
-
-    public void setSubState(State subState)
-    {
-        this.subState = subState;
-    }
-
     public final static String STATE_PROPERTY = "state";
 
-    private final static boolean STATE_REQUIRED = true;
+    private static final String STATE_FORMULA =
+        "( select case when not exists (  select  virtualmac20_.idVM  from virtualapp virtualapp17_  inner join node nodesvirtu18_ on virtualapp17_.idVirtualApp=nodesvirtu18_.idVirtualApp  inner join nodevirtualimage nodevirtua19_  inner join node nodevirtua19_1_ on nodevirtua19_.idNode=nodevirtua19_1_.idNode  inner join virtualmachine virtualmac20_ on nodevirtua19_.idVM=virtualmac20_.idVM  where virtualapp17_.idVirtualApp=idVirtualApp  and nodesvirtu18_.idNode=nodevirtua19_.idNode ) then 'NOT_DEPLOYED' when exists (  select  virtualmac4_.state  from virtualapp virtualapp1_  inner join node nodesvirtu2_ on virtualapp1_.idVirtualApp=nodesvirtu2_.idVirtualApp  inner join nodevirtualimage nodevirtua3_  inner join node nodevirtua3_1_ on nodevirtua3_.idNode=nodevirtua3_1_.idNode  inner join virtualmachine virtualmac4_ on nodevirtua3_.idVM=virtualmac4_.idVM  where virtualapp1_.idVirtualApp=idVirtualApp  and nodesvirtu2_.idNode=nodevirtua3_.idNode  and virtualmac4_.state='UNKNOWN' ) then 'UNKNOWN' when exists (  select  virtualmac8_.state  from virtualapp virtualapp5_  inner join node nodesvirtu6_ on virtualapp5_.idVirtualApp=nodesvirtu6_.idVirtualApp  inner join nodevirtualimage nodevirtua7_  inner join node nodevirtua7_1_ on nodevirtua7_.idNode=nodevirtua7_1_.idNode  inner join virtualmachine virtualmac8_ on nodevirtua7_.idVM=virtualmac8_.idVM  where virtualapp5_.idVirtualApp=idVirtualApp  and nodesvirtu6_.idNode=nodevirtua7_.idNode  and virtualmac8_.state='LOCKED' ) then 'LOCKED' when not exists (  select  virtualmac12_.state  from virtualapp virtualapp9_  inner join node nodesvirtu10_ on virtualapp9_.idVirtualApp=nodesvirtu10_.idVirtualApp  inner join nodevirtualimage nodevirtua11_  inner join node nodevirtua11_1_ on nodevirtua11_.idNode=nodevirtua11_1_.idNode  inner join virtualmachine virtualmac12_ on nodevirtua11_.idVM=virtualmac12_.idVM  where virtualapp9_.idVirtualApp=idVirtualApp  and nodesvirtu10_.idNode=nodevirtua11_.idNode  and ( virtualmac12_.state not in ('OFF' , 'PAUSED' , 'ON', 'CONFIGURED') ) ) then 'DEPLOYED' when not exists (  select  virtualmac16_.state  from virtualapp virtualapp13_  inner join node nodesvirtu14_ on virtualapp13_.idVirtualApp=nodesvirtu14_.idVirtualApp  inner join nodevirtualimage nodevirtua15_  inner join node nodevirtua15_1_ on nodevirtua15_.idNode=nodevirtua15_1_.idNode  inner join virtualmachine virtualmac16_ on nodevirtua15_.idVM=virtualmac16_.idVM  where virtualapp13_.idVirtualApp=idVirtualApp  and nodesvirtu14_.idNode=nodevirtua15_.idNode  and ( virtualmac16_.state not in ( 'NOT_ALLOCATED' , 'ALLOCATED')) ) then 'NOT_DEPLOYED' else 'NEEDS_SYNC' end)";
 
-    private final static String STATE_COLUMN = "state";
+    /**
+     * @see VirtualApplianceState
+     */
+    // This are the valid mapping when HHH-6347 is fixed
+    // @Enumerated(value = javax.persistence.EnumType.STRING)
+    // @Type(type = "com.abiquo.server.core.cloud.VirtualApplianceState")
+    @Formula(value = STATE_FORMULA)
+    private String state; // This should be VirtualApplianceState but enums does not work with
 
-    @Enumerated(value = javax.persistence.EnumType.STRING)
-    @Column(name = STATE_COLUMN, nullable = !STATE_REQUIRED)
-    private State state;
+    // formula this bug https://hibernate.onjira.com/browse/HHH-6347
 
-    @Required(value = STATE_REQUIRED)
-    public State getState()
+    /**
+     * @see VirtualApplianceState
+     */
+    public VirtualApplianceState getState()
     {
-        return this.state;
+        // enums does not work with
+        // formula this bug https://hibernate.onjira.com/browse/HHH-6347
+        return VirtualApplianceState.valueOf(this.state);
     }
 
-    public void setState(State state)
+    /**
+     * @see VirtualApplianceState
+     */
+    public void setState(final VirtualApplianceState state)
     {
-        this.state = state;
+        // enums does not work with
+        // formula this bug https://hibernate.onjira.com/browse/HHH-6347
+        this.state = state.name();
     }
 
     //
@@ -314,7 +307,7 @@ public class VirtualAppliance extends DefaultEntityBase
         return nodesvi;
     }
 
-    public void addToNodeVirtualImages(NodeVirtualImage value)
+    public void addToNodeVirtualImages(final NodeVirtualImage value)
     {
         assert value != null;
         assert !this.nodesVirtualImage.contains(value);
@@ -323,7 +316,7 @@ public class VirtualAppliance extends DefaultEntityBase
         value.setVirtualAppliance(this);
     }
 
-    public void removeFromNodeVirtualImages(NodeVirtualImage value)
+    public void removeFromNodeVirtualImages(final NodeVirtualImage value)
     {
         assert value != null;
         assert this.nodesVirtualImage.contains(value);
@@ -332,4 +325,64 @@ public class VirtualAppliance extends DefaultEntityBase
         // value.removeFromDatastores(this);
     }
 
+    public static enum OrderByEnum
+    {
+        NAME("name", "vapp.name"), STATE("state", "vapp.state"), ID("id", "vapp.id"), ERROR(
+            "error", "vapp.error");
+
+        public static OrderByEnum fromValue(final String orderBy)
+        {
+            for (OrderByEnum currentOrder : OrderByEnum.values())
+            {
+                if (currentOrder.name().equalsIgnoreCase(orderBy))
+                {
+                    return currentOrder;
+                }
+            }
+
+            return null;
+        }
+
+        private String columnSQL;
+
+        private String columnHQL;
+
+        private OrderByEnum(final String columnSQL, final String columnHQL)
+        {
+            this.columnSQL = columnSQL;
+            this.columnHQL = columnHQL;
+        }
+
+        public String getColumnSQL()
+        {
+            return columnSQL;
+        }
+
+        public String getColumnHQL()
+        {
+            return columnHQL;
+        }
+    }
+
+    /**
+     * Clones this virtual appliance. But references to objects still the same. Same enterpirse,
+     * same nodes, same virtual datacenter.
+     * 
+     * @see java.lang.Object#clone()
+     */
+    @Override
+    public VirtualAppliance clone()
+    {
+        VirtualAppliance virtualAppliance = new VirtualAppliance();
+
+        virtualAppliance.setEnterprise(enterprise);
+        virtualAppliance.setHighDisponibility(highDisponibility);
+        virtualAppliance.setName(name);
+        virtualAppliance.setNodeconnections(nodeconnections);
+        virtualAppliance.setPublicApp(publicApp);
+        virtualAppliance.setVirtualDatacenter(virtualDatacenter);
+
+        virtualAppliance.nodesVirtualImage.addAll(this.getNodes());
+        return virtualAppliance;
+    }
 }

@@ -22,23 +22,29 @@
 package com.abiquo.abiserver.services.flex;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import com.abiquo.abiserver.business.BusinessDelegateProxy;
 import com.abiquo.abiserver.business.UserSessionException;
 import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.HypervisorHB;
-import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.RackHB;
-import com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualmachineHB;
 import com.abiquo.abiserver.commands.InfrastructureCommand;
 import com.abiquo.abiserver.commands.impl.InfrastructureCommandImpl;
 import com.abiquo.abiserver.commands.stub.APIStubFactory;
+import com.abiquo.abiserver.commands.stub.DatacentersResourceStub;
 import com.abiquo.abiserver.commands.stub.MachineResourceStub;
+import com.abiquo.abiserver.commands.stub.MachinesResourceStub;
+import com.abiquo.abiserver.commands.stub.RacksResourceStub;
+import com.abiquo.abiserver.commands.stub.VirtualMachineResourceStub;
+import com.abiquo.abiserver.commands.stub.impl.DatacentersResourceStubImpl;
 import com.abiquo.abiserver.commands.stub.impl.MachineResourceStubImpl;
+import com.abiquo.abiserver.commands.stub.impl.MachinesResourceStubImpl;
+import com.abiquo.abiserver.commands.stub.impl.RacksResourceStubImpl;
+import com.abiquo.abiserver.commands.stub.impl.VirtualMachineResourceStubImpl;
 import com.abiquo.abiserver.exception.InfrastructureCommandException;
 import com.abiquo.abiserver.exception.PersistenceException;
 import com.abiquo.abiserver.pojo.authentication.UserSession;
 import com.abiquo.abiserver.pojo.infrastructure.DataCenter;
 import com.abiquo.abiserver.pojo.infrastructure.HyperVisor;
+import com.abiquo.abiserver.pojo.infrastructure.HypervisorRemoteAccessInfo;
 import com.abiquo.abiserver.pojo.infrastructure.PhysicalMachine;
 import com.abiquo.abiserver.pojo.infrastructure.PhysicalMachineCreation;
 import com.abiquo.abiserver.pojo.infrastructure.Rack;
@@ -58,8 +64,11 @@ public class InfrastructureService
 
     private InfrastructureCommand infrastructureCommand;
 
+    private VirtualMachineResourceStub vmStub;
+
     public InfrastructureService()
     {
+        vmStub = new VirtualMachineResourceStubImpl();
         try
         {
             infrastructureCommand =
@@ -76,10 +85,39 @@ public class InfrastructureService
         }
     }
 
+    protected VirtualMachineResourceStub proxyVmStub(final UserSession userSession)
+    {
+        return APIStubFactory.getInstance(userSession, vmStub, VirtualMachineResourceStub.class);
+    }
+
     private InfrastructureCommand proxyCommand(final UserSession userSession)
     {
         return BusinessDelegateProxy.getInstance(userSession, infrastructureCommand,
             InfrastructureCommand.class);
+    }
+
+    private DatacentersResourceStub proxyDatacentersStub(final UserSession session)
+    {
+        return APIStubFactory.getInstance(session, new DatacentersResourceStubImpl(),
+            DatacentersResourceStub.class);
+    }
+
+    private RacksResourceStub proxyRacksStub(final UserSession session)
+    {
+        return APIStubFactory.getInstance(session, new RacksResourceStubImpl(),
+            RacksResourceStub.class);
+    }
+
+    private MachineResourceStub proxyMachineStub(final UserSession session)
+    {
+        return APIStubFactory.getInstance(session, new MachineResourceStubImpl(),
+            MachineResourceStub.class);
+    }
+
+    private MachinesResourceStub proxyMachinesStub(final UserSession session)
+    {
+        return APIStubFactory.getInstance(session, new MachinesResourceStubImpl(),
+            MachinesResourceStub.class);
     }
 
     /* ______________________________ DATA CENTER _______________________________ */
@@ -115,28 +153,9 @@ public class InfrastructureService
     public BasicResult getRacksByDatacenter(final UserSession userSession,
         final Integer datacenterId, final String filters)
     {
-        DataResult<ArrayList<Rack>> dataResult = new DataResult<ArrayList<Rack>>();
-
-        InfrastructureCommand command = proxyCommand(userSession);
-
-        try
-        {
-            ArrayList<RackHB> commandResult =
-                command.getRacksByDatacenter(userSession, datacenterId, filters);
-            dataResult.setData(new ArrayList<Rack>());
-            for (RackHB singleResult : commandResult)
-            {
-                dataResult.getData().add(singleResult.toPojo());
-            }
-            dataResult.setSuccess(Boolean.TRUE);
-        }
-        catch (InfrastructureCommandException e)
-        {
-            dataResult.setSuccess(Boolean.FALSE);
-            dataResult.setMessage(e.getMessage());
-        }
-
-        return dataResult;
+        DataCenter datacenter =
+            proxyDatacentersStub(userSession).getDatacenter(datacenterId).getData();
+        return proxyRacksStub(userSession).getRacksByDatacenter(datacenter, filters);
     }
 
     /**
@@ -146,29 +165,10 @@ public class InfrastructureService
      * @param rackId the rack identifier
      * @return returns a DataResult, containing an Arraylist of PhysicalMachine
      */
-    public BasicResult getPhysicalMachinesByRack(final UserSession session, final Integer rackId,
-        final String filters)
+    public BasicResult getPhysicalMachinesByRack(final UserSession session,
+        final Integer datacenterId, final Integer rackId, final String filters)
     {
-
-        InfrastructureCommand command = proxyCommand(session);
-        DataResult<List<PhysicalMachine>> result = new DataResult<List<PhysicalMachine>>();
-        try
-        {
-            List<PhysicalMachine> commandResult =
-                command.getPhysicalMachinesByRack(session, rackId, filters);
-
-            result.setData(commandResult);
-
-            result.setSuccess(Boolean.TRUE);
-
-        }
-        catch (InfrastructureCommandException e)
-        {
-            result.setSuccess(Boolean.FALSE);
-            result.setMessage(e.getMessage());
-        }
-
-        return result;
+        return proxyMachinesStub(session).getPhysicalMachinesByRack(datacenterId, rackId, filters);
     }
 
     /**
@@ -214,30 +214,9 @@ public class InfrastructureService
      * @return returns a DataResult, containing an Arraylist of virtualmachine
      */
     public BasicResult getVirtualMachineByPhysicalMachine(final UserSession session,
-        final Integer pmId)
+        final Integer datacenterId, final Integer rackId, final Integer pmId)
     {
-        InfrastructureCommand command = proxyCommand(session);
-        DataResult<ArrayList<VirtualMachine>> result = new DataResult<ArrayList<VirtualMachine>>();
-        try
-        {
-            List<VirtualmachineHB> commandResult =
-                command.getVirtualMachinesByPhysicalMachine(session, pmId);
-
-            result.setData(new ArrayList<VirtualMachine>());
-            for (VirtualmachineHB singleResult : commandResult)
-            {
-                result.getData().add(singleResult.toPojo());
-            }
-            result.setSuccess(Boolean.TRUE);
-
-        }
-        catch (InfrastructureCommandException e)
-        {
-            result.setSuccess(Boolean.FALSE);
-            result.setMessage(e.getMessage());
-        }
-
-        return result;
+        return proxyMachineStub(session).getVirtualMachinesFromMachine(datacenterId, rackId, pmId);
     }
 
     /**
@@ -280,15 +259,7 @@ public class InfrastructureService
      */
     public BasicResult getDataCenters(final UserSession session)
     {
-        InfrastructureCommand command = proxyCommand(session);
-        try
-        {
-            return command.getDataCenters(session);
-        }
-        catch (UserSessionException e)
-        {
-            return e.getResult();
-        }
+        return proxyDatacentersStub(session).getDatacenters();
     }
 
     /**
@@ -298,41 +269,10 @@ public class InfrastructureService
      * @param user
      * @return a DataResult object, with an ArrayList of DataCenter
      */
-    public BasicResult getAllowedDataCenters(final UserSession session)
+    public BasicResult getAllowedDataCenters(final UserSession session,
+        final Integer effectiveEnterpriseId)
     {
-        InfrastructureCommand command = proxyCommand(session);
-        try
-        {
-            return command.getAllowedDataCenters(session);
-        }
-        catch (UserSessionException e)
-        {
-            return e.getResult();
-        }
-    }
-
-    /**
-     * Community or premium. XXX IoC do it yourselfe
-     */
-    private InfrastructureCommand getInfrastructureCommandImplementation()
-    {
-        final String premiumClass =
-            "com.abiquo.abiserver.commands.impl.InfrastructureCommandPremiumImpl";
-
-        InfrastructureCommand instance;
-        try
-        {
-            instance =
-                (InfrastructureCommand) Thread.currentThread().getContextClassLoader()
-                    .loadClass(premiumClass).newInstance();
-
-        }
-        catch (final Exception e)
-        {
-            instance = new InfrastructureCommandImpl();
-        }
-
-        return instance;
+        return proxyDatacentersStub(session).getDatacenters(effectiveEnterpriseId);
     }
 
     /**
@@ -344,15 +284,7 @@ public class InfrastructureService
      */
     public BasicResult createDataCenter(final UserSession session, final DataCenter dataCenter)
     {
-        InfrastructureCommand command = proxyCommand(session);
-        try
-        {
-            return command.createDataCenter(session, dataCenter);
-        }
-        catch (UserSessionException e)
-        {
-            return e.getResult();
-        }
+        return proxyDatacentersStub(session).createDatacenter(dataCenter);
     }
 
     /**
@@ -364,15 +296,7 @@ public class InfrastructureService
      */
     public BasicResult editDataCenter(final UserSession session, final DataCenter dataCenter)
     {
-        InfrastructureCommand command = proxyCommand(session);
-        try
-        {
-            return command.editDataCenter(session, dataCenter);
-        }
-        catch (UserSessionException e)
-        {
-            return e.getResult();
-        }
+        return proxyDatacentersStub(session).modifyDatacenter(dataCenter);
     }
 
     /**
@@ -384,15 +308,7 @@ public class InfrastructureService
      */
     public BasicResult deleteDataCenter(final UserSession session, final DataCenter dataCenter)
     {
-        InfrastructureCommand command = proxyCommand(session);
-        try
-        {
-            return command.deleteDataCenter(session, dataCenter);
-        }
-        catch (UserSessionException e)
-        {
-            return e.getResult();
-        }
+        return proxyDatacentersStub(session).deleteDatacenter(dataCenter);
     }
 
     /* ______________________________ RACKS _______________________________ */
@@ -403,15 +319,7 @@ public class InfrastructureService
      */
     public BasicResult createRack(final UserSession session, final Rack rack)
     {
-        InfrastructureCommand command = proxyCommand(session);
-        try
-        {
-            return command.createRack(session, rack);
-        }
-        catch (UserSessionException e)
-        {
-            return e.getResult();
-        }
+        return proxyRacksStub(session).createRack(rack);
     }
 
     /**
@@ -423,15 +331,7 @@ public class InfrastructureService
      */
     public BasicResult deleteRack(final UserSession session, final Rack rack)
     {
-        InfrastructureCommand command = proxyCommand(session);
-        try
-        {
-            return command.deleteRack(session, rack);
-        }
-        catch (UserSessionException e)
-        {
-            return e.getResult();
-        }
+        return proxyRacksStub(session).deleteRack(rack);
     }
 
     /**
@@ -443,15 +343,7 @@ public class InfrastructureService
      */
     public BasicResult editRack(final UserSession session, final Rack rack)
     {
-        InfrastructureCommand command = proxyCommand(session);
-        try
-        {
-            return command.editRack(session, rack);
-        }
-        catch (UserSessionException e)
-        {
-            return e.getResult();
-        }
+        return proxyRacksStub(session).modifyRack(rack);
     }
 
     /* ______________________________ PHYSICAL MACHINES _______________________________ */
@@ -469,21 +361,8 @@ public class InfrastructureService
         final PhysicalMachineCreation physicalMachineCreation)
     {
 
-        InfrastructureCommand command = proxyCommand(session);
+        return proxyMachinesStub(session).createPhysicalMachine(physicalMachineCreation);
 
-        DataResult<PhysicalMachineCreation> result = new DataResult<PhysicalMachineCreation>();
-
-        try
-        {
-            result = command.createPhysicalMachine(session, physicalMachineCreation);
-        }
-        catch (InfrastructureCommandException e)
-        {
-            result.setSuccess(false);
-            result.setMessage(e.getMessage());
-        }
-
-        return result;
     }
 
     /**
@@ -496,15 +375,7 @@ public class InfrastructureService
     public BasicResult deletePhysicalMachine(final UserSession session,
         final PhysicalMachine physicalMachine)
     {
-        InfrastructureCommand command = proxyCommand(session);
-        try
-        {
-            return command.deletePhysicalMachine(session, physicalMachine);
-        }
-        catch (UserSessionException e)
-        {
-            return e.getResult();
-        }
+        return proxyMachinesStub(session).deletePhysicalMachine(physicalMachine);
     }
 
     /**
@@ -521,63 +392,7 @@ public class InfrastructureService
     public BasicResult editPhysicalMachine(final UserSession session,
         final PhysicalMachineCreation physicalMachineCreation)
     {
-
-        InfrastructureCommand command = proxyCommand(session);
-
-        DataResult<ArrayList<HyperVisor>> result = new DataResult<ArrayList<HyperVisor>>();
-
-        try
-        {
-            result = command.editPhysicalMachine(session, physicalMachineCreation);
-        }
-        catch (InfrastructureCommandException e)
-        {
-            result.setSuccess(false);
-            result.setMessage(e.getMessage());
-        }
-
-        return result;
-    }
-
-    /* ______________________________ HYPERVISORS _______________________________ */
-
-    /**
-     * Creates a new Hypervisor
-     * 
-     * @param userSession
-     * @param hypervisor
-     * @return A DataResult object containing the Hypervisor created
-     */
-    public BasicResult createHypervisor(final UserSession userSession, final HyperVisor hypervisor)
-    {
-        InfrastructureCommand command = proxyCommand(userSession);
-        return command.createHypervisor(userSession, hypervisor);
-    }
-
-    /**
-     * Edits an existing Hypervisor
-     * 
-     * @param session
-     * @param hypervisor
-     * @return a BasicResult object with success = true if the edition was successful
-     */
-    public BasicResult editHypervisor(final UserSession userSession, final HyperVisor hypervisor)
-    {
-        InfrastructureCommand command = proxyCommand(userSession);
-        return command.editHypervisor(userSession, hypervisor);
-    }
-
-    /**
-     * Deletes the hypervisor from the data base
-     * 
-     * @param session
-     * @param hypervisor
-     * @return A BasicResult object with the result of the deletion
-     */
-    public BasicResult deleteHypervisor(final UserSession session, final HyperVisor hypervisor)
-    {
-        InfrastructureCommand command = proxyCommand(session);
-        return command.deleteHypervisor(hypervisor);
+        return proxyMachinesStub(session).editPhysicalMachine(physicalMachineCreation);
     }
 
     /* ______________________________ VIRTUAL MACHINES _______________________________ */
@@ -616,6 +431,22 @@ public class InfrastructureService
     }
 
     /**
+     * Deletes the virtual machine
+     * 
+     * @param sessionKey
+     * @param virtualMachine
+     * @return
+     */
+    public BasicResult deleteVirtualMachine(final UserSession session,
+        final Integer virtualDatacenterId, final Integer virtualApplianceId,
+        final VirtualMachine virtualMachine)
+    {
+
+        return proxyVmStub(session).deleteVirtualMachine(virtualDatacenterId, virtualApplianceId,
+            virtualMachine);
+    }
+
+    /**
      * Edits virtual machine's information
      * 
      * @param sessionKey
@@ -623,11 +454,16 @@ public class InfrastructureService
      * @return
      */
     public BasicResult editVirtualMachine(final UserSession session,
-        final VirtualMachine virtualMachine)
+        final VirtualMachine virtualMachine, final Integer virtualDatacenterId,
+        final Integer virtualApplianceId)
     {
 
-        InfrastructureCommand command = proxyCommand(session);
-        return command.editVirtualMachine(session, virtualMachine);
+        VirtualMachineResourceStub vmachineResource =
+            APIStubFactory.getInstance(session, new VirtualMachineResourceStubImpl(),
+                VirtualMachineResourceStub.class);
+
+        return vmachineResource.updateVirtualMachine(virtualDatacenterId, virtualApplianceId,
+            virtualMachine);
     }
 
     /**
@@ -638,6 +474,7 @@ public class InfrastructureService
      * @param virtualMachine
      * @return
      */
+    @Deprecated
     public BasicResult moveVirtualMachine(final UserSession session,
         final VirtualMachine virtualMachine)
     {
@@ -673,10 +510,7 @@ public class InfrastructureService
     public BasicResult updateUsedResourcesByDatacenter(final UserSession session,
         final DataCenter dataCenter)
     {
-
-        InfrastructureCommand command = proxyCommand(session);
-        return command.updateUsedResourcesByDatacenter(dataCenter.getId());
-
+        return proxyDatacentersStub(session).updateUsedResources(dataCenter.getId());
     }
 
     /**
@@ -737,20 +571,19 @@ public class InfrastructureService
         }
     }
 
-    protected BasicResult deleteNotManagerVirtualMachines(final UserSession userSession,
-        final PhysicalMachine machine)
+    public DataResult<HypervisorRemoteAccessInfo> getHypervisorRemoteAccessInfo(
+        final UserSession userSession, final PhysicalMachine machine)
     {
         MachineResourceStub proxy =
             APIStubFactory.getInstance(userSession, new MachineResourceStubImpl(),
                 MachineResourceStub.class);
 
-        try
-        {
-            return proxy.deleteNotManagedVirtualMachines(machine);
-        }
-        catch (UserSessionException e)
-        {
-            return e.getResult();
-        }
+        return proxy.getHypervisorRemoteAccess(machine);
+    }
+
+    protected BasicResult deleteNotManagerVirtualMachines(final UserSession userSession,
+        final PhysicalMachine machine)
+    {
+        return proxyMachineStub(userSession).deleteNotManagedVirtualMachines(machine);
     }
 }

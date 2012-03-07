@@ -53,8 +53,8 @@ public class AbiClassLoader
      */
     // private static final URLClassLoader urlLoader = (URLClassLoader)
     // ClassLoader.getSystemClassLoader();
-    private static final URLClassLoader urlLoader =
-        (URLClassLoader) AbiClassLoader.class.getClassLoader();
+    private static final URLClassLoader urlLoader = (URLClassLoader) AbiClassLoader.class
+        .getClassLoader();
 
     /**
      * Public method to return all the classes for a given package. It works in two ways: one for
@@ -93,13 +93,13 @@ public class AbiClassLoader
 
                 URL urlSource = allSources.nextElement();
                 String basePath = urlSource.getPath();
-                
+
                 /*
-                 * The URL source converts the spaces of the local paths
-                 * to the '%20' string. We replace to 'space' again. 
+                 * The URL source converts the spaces of the local paths to the '%20' string. We
+                 * replace to 'space' again.
                  */
                 basePath = basePath.replace("%20", " ");
-                
+
                 File rootDirectory = new File(basePath);
                 if (rootDirectory.isDirectory())
                 {
@@ -110,9 +110,9 @@ public class AbiClassLoader
                     // Maybe its a jar...
                     ArrayList<Class< ? extends Object>> jarClasses =
                         loadClassesFromJar(urlSource, parsedName);
-                    
+
                     // logger.error(" url is "+ urlSource);
-                    
+
                     if (jarClasses != null)
                     {
                         classesToRecover.addAll(jarClasses);
@@ -149,8 +149,8 @@ public class AbiClassLoader
             if (children.isDirectory())
             {
                 // add all its children recursively
-                childrenToRecover.addAll(loadClassesFromDir(children, parsedName
-                    + System.getProperty("file.separator") + children.getName()));
+                childrenToRecover.addAll(loadClassesFromDir(children,
+                    parsedName + System.getProperty("file.separator") + children.getName()));
             }
             else
             {
@@ -189,17 +189,18 @@ public class AbiClassLoader
             new ArrayList<Class< ? extends Object>>();
 
         /* Create JarConnection and open an Input Stream and browse the jar */
-       // JarURLConnection jarCon;
+        // JarURLConnection jarCon;
         try
         {
 
-        	 // logger.error(" url is ex_"+ jarURL.toExternalForm());
-             // logger.error(" url is "+ jarURL.toString());
-              
-        	//jarCon = (JarURLConnection) jarURL.openConnection();
-            //String jarName = jarCon.getJarFile().getName();
-            
-            JarInputStream jarFile = new JarInputStream(new FileInputStream(jarURL.toExternalForm()));
+            // logger.error(" url is ex_"+ jarURL.toExternalForm());
+            // logger.error(" url is "+ jarURL.toString());
+
+            // jarCon = (JarURLConnection) jarURL.openConnection();
+            // String jarName = jarCon.getJarFile().getName();
+
+            JarInputStream jarFile =
+                new JarInputStream(new FileInputStream(jarURL.toExternalForm()));
             JarEntry jarEntry;
 
             while ((jarEntry = jarFile.getNextJarEntry()) != null)

@@ -32,7 +32,7 @@ public class State implements Serializable
 {
     /** The logger object */
     private final static Logger logger = LoggerFactory.getLogger(State.class);
-    
+
     private static final long serialVersionUID = 1L;
 
     private int id;
@@ -41,7 +41,7 @@ public class State implements Serializable
 
     public State()
     {
-        this(StateEnum.NOT_DEPLOYED);
+        this(StateEnum.NOT_ALLOCATED);
     }
 
     public State(final StateEnum state)
@@ -84,9 +84,12 @@ public class State implements Serializable
     public StateEnum toEnum()
     {
         StateEnum result = null;
-        try {
-            result =  StateEnum.valueOf(description);    
-        } catch (IllegalArgumentException e) {
+        try
+        {
+            result = StateEnum.valueOf(description);
+        }
+        catch (IllegalArgumentException e)
+        {
             logger.error("State description not recognized : " + description, e);
             result = StateEnum.UNKNOWN;
         }

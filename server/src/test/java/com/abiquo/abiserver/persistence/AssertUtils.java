@@ -25,11 +25,14 @@ import java.util.Collection;
 
 import junit.framework.Assert;
 
-public class AssertUtils {
-	public static <T> void assertContainsAllAndOnly( Collection<T> items, T... expectedItems) {
-		Assert.assertEquals( expectedItems.length, items.size());
-		for( T expectedItem : expectedItems) {
-			Assert.assertTrue( items.contains(expectedItem));
-		}
-	}
+public class AssertUtils
+{
+    public static <T> void assertContainsAllAndOnly(Collection<T> items, T... expectedItems)
+    {
+        Assert.assertEquals(expectedItems.length, items.size());
+        for (T expectedItem : expectedItems)
+        {
+            Assert.assertTrue(items.contains(expectedItem));
+        }
+    }
 }

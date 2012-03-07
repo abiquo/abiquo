@@ -32,7 +32,7 @@
     xmlns:virtualappliance="net.undf.abicloud.view.virtualappliance.*"
     xmlns:virtualimage="net.undf.abicloud.view.virtualimage.*"
     xmlns:user="net.undf.abicloud.view.user.*"
-    xmlns:metering="net.undf.abicloud.view.metering.*">
+    xmlns:metering="net.undf.abicloud.view.metering.*" xmlns:pricing="net.undf.abicloud.view.pricing.*">
 
 
     <mx:Script>
@@ -393,6 +393,8 @@
             <virtualimage:Index/>
 
             <user:Index/>
+            
+            <pricing:Index/>
 
             <metering:Index/>
 

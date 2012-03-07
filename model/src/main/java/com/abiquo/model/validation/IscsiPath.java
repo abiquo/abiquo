@@ -41,7 +41,7 @@ import com.abiquo.model.util.AddressingUtils;
 
 @Documented
 @Constraint(validatedBy = IscsiPath.Validator.class)
-@Target( {METHOD, FIELD, PARAMETER})
+@Target({METHOD, FIELD, PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface IscsiPath
 {

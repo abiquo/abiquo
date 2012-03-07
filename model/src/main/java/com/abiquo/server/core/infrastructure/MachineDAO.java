@@ -22,8 +22,10 @@
 package com.abiquo.server.core.infrastructure;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceException;
@@ -32,15 +34,17 @@ import org.apache.commons.lang.StringUtils;
 import org.hibernate.Criteria;
 import org.hibernate.Query;
 import org.hibernate.criterion.Criterion;
+import org.hibernate.criterion.Disjunction;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 
 import com.abiquo.model.enumerator.HypervisorType;
+import com.abiquo.model.enumerator.MachineState;
 import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
 import com.abiquo.server.core.enterprise.Enterprise;
-import com.abiquo.server.core.infrastructure.Machine.State;
+import com.softwarementors.bzngine.entities.PersistentEntity;
 
 @Repository("jpaMachineDAO")
 @SuppressWarnings("unchecked")
@@ -73,7 +77,7 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
 
     private static Criterion sameId(final Integer id)
     {
-        return Restrictions.eq(Machine.ID_PROPERTY, id);
+        return Restrictions.eq(PersistentEntity.ID_PROPERTY, id);
     }
 
     private static Criterion sameName(final String name)
@@ -88,38 +92,48 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
         return Restrictions.eq(Machine.ENTERPRISE_PROPERTY, enterprise);
     }
 
+    private Criterion filterBy(final String filter)
+    {
+        Disjunction filterDisjunction = Restrictions.disjunction();
+
+        filterDisjunction.add(Restrictions.like(Machine.NAME_PROPERTY, '%' + filter + '%'));
+
+        return filterDisjunction;
+    }
+
     public List<Machine> findMachines(final Datacenter datacenter)
     {
-        assert datacenter != null;
-        assert isManaged2(datacenter);
-
         Criteria criteria = createCriteria(sameDatacenter(datacenter));
         criteria.addOrder(Order.asc(Machine.NAME_PROPERTY));
         List<Machine> result = getResultList(criteria);
         return result;
     }
 
-    /**
-     * @return the list of physical machines of the infrastructure without virtual machines in the
-     *         allocator.
-     */
-    public Machine isMachineInAllocator(final Integer machineId)
+    public boolean isMachineInAllocator(final Integer machineId)
     {
         // The way to define the virtual machines in the allocator is:
         // All the virtual machines with an hypervisor associated and with state=NOT_DEPLOYED
         Query query = getSession().createQuery(QUERY_IS_MACHINE_IN_ALLOCATOR);
         query.setParameter("machineId", machineId);
 
-        return (Machine) query.uniqueResult();
-
+        return !query.list().isEmpty();
     }
 
     public List<Machine> findRackMachines(final Rack rack)
+    {
+        return findRackMachines(rack, null);
+    }
+
+    public List<Machine> findRackMachines(final Rack rack, final String filter)
     {
         assert rack != null;
         assert isManaged2(rack);
 
         Criteria criteria = createCriteria(sameRack(rack));
+        if (filter != null && !filter.isEmpty())
+        {
+            criteria.add(filterBy(filter));
+        }
         criteria.addOrder(Order.asc(Machine.NAME_PROPERTY));
         List<Machine> result = getResultList(criteria);
         return result;
@@ -127,16 +141,38 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
 
     public List<Machine> findRackEnabledForHAMachines(final Rack rack)
     {
+        if (rack instanceof UcsRack)
+        {
+            return findRackEnabledForHAMachinesInUcs((UcsRack) rack);
+        }
         Criteria criteria = createCriteria(sameRack(rack));
         criteria.createAlias(Machine.HYPERVISOR_PROPERTY, "hypervisor");
 
         // Is a managed one
-        criteria.add(Restrictions.eq(Machine.STATE_PROPERTY, State.MANAGED));
+        criteria.add(Restrictions.eq(Machine.STATE_PROPERTY, MachineState.MANAGED));
 
         // Has fencing capabilities
         criteria.add(Restrictions.isNotNull(Machine.IPMI_IP_PROPERTY));
         criteria.add(Restrictions.isNotNull(Machine.IPMI_USER_PROPERTY));
         criteria.add(Restrictions.isNotNull(Machine.IPMI_PASSWORD_PROPERTY));
+
+        // XenServer does not support HA
+        criteria.add(Restrictions.ne("hypervisor." + Hypervisor.TYPE_PROPERTY,
+            HypervisorType.XENSERVER));
+
+        // Order by name
+        criteria.addOrder(Order.asc(Machine.NAME_PROPERTY));
+
+        return getResultList(criteria);
+    }
+
+    public List<Machine> findRackEnabledForHAMachinesInUcs(final UcsRack rack)
+    {
+        Criteria criteria = createCriteria(sameRack(rack));
+        criteria.createAlias(Machine.HYPERVISOR_PROPERTY, "hypervisor");
+
+        // Is a managed one
+        criteria.add(Restrictions.eq(Machine.STATE_PROPERTY, MachineState.MANAGED));
 
         // XenServer does not support HA
         criteria.add(Restrictions.ne("hypervisor." + Hypervisor.TYPE_PROPERTY,
@@ -255,7 +291,7 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
 
         query.setInteger("idVirtualDataCenter", idVirtualDatacenter);
         query.setInteger("idRack", idRack);
-        query.setParameter("state", com.abiquo.server.core.infrastructure.Machine.State.MANAGED);
+        query.setParameter("state", MachineState.MANAGED);
         query.setParameter("enterpriseId", enterprise.getId());
 
         machines = query.list();
@@ -289,8 +325,7 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
             Query query = getSession().createQuery(QUERY_CANDIDATE_MACHINES_RESERVED);
             query.setInteger("idVirtualDataCenter", idVirtualDatacenter);
             query.setInteger("idRack", idRack);
-            query
-                .setParameter("state", com.abiquo.server.core.infrastructure.Machine.State.MANAGED);
+            query.setParameter("state", MachineState.MANAGED);
             query.setParameterList("reserveds", reserveds);
 
             machines = query.list();
@@ -306,8 +341,10 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
         else
         {
             final String msg =
-                String.format("Enterprise work in restricted reserved machines "
-                    + "and any machine is reserver current enterprise : %s", enterprise.getName());
+                String
+                    .format(
+                        "Enterprise works in restricted reserved machines mode but no machine is reserved. Current enterprise: %s",
+                        enterprise.getName());
 
             throw new PersistenceException(msg);
         }
@@ -334,8 +371,7 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
                 getSession().createQuery(QUERY_CANDIDATE_MACHINES_RESERVED_HA_EXCLUDE_ORIGINAL);
             query.setInteger("idVirtualDataCenter", idVirtualDatacenter);
             query.setInteger("idRack", idRack);
-            query
-                .setParameter("state", com.abiquo.server.core.infrastructure.Machine.State.MANAGED);
+            query.setParameter("state", MachineState.MANAGED);
             query.setParameterList("reserveds", reserveds);
             query.setInteger("enterpriseId", enterprise.getId());
             query.setInteger("originalHypervisorId", originalHypervisorId);
@@ -352,8 +388,10 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
         else
         {
             final String msg =
-                String.format("Enterprise work in restricted reserved machines "
-                    + "and any machine is reserver current enterprise : %s", enterprise.getName());
+                String
+                    .format(
+                        "Enterprise works in restricted reserved machines mode but no machine is reserved. Current enterprise: %s",
+                        enterprise.getName());
 
             throw new PersistenceException(msg);
         }
@@ -382,8 +420,7 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
             Query query = getSession().createQuery(QUERY_CANDIDATE_MACHINES_HA_EXCLUDE_ORIGINAL);
             query.setInteger("idVirtualDataCenter", idVirtualDatacenter);
             query.setInteger("idRack", idRack);
-            query
-                .setParameter("state", com.abiquo.server.core.infrastructure.Machine.State.MANAGED);
+            query.setParameter("state", MachineState.MANAGED);
             query.setParameter("enterpriseId", enterprise.getId());
             query.setParameter("originalHypervisorId", originalHypervisorId);
 
@@ -395,8 +432,7 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
             Query query = getSession().createQuery(QUERY_CANDIDATE_MACHINES);
             query.setInteger("idVirtualDataCenter", idVirtualDatacenter);
             query.setInteger("idRack", idRack);
-            query
-                .setParameter("state", com.abiquo.server.core.infrastructure.Machine.State.MANAGED);
+            query.setParameter("state", MachineState.MANAGED);
             query.setParameter("enterpriseId", enterprise.getId());
 
             machines = query.list();
@@ -504,8 +540,7 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
             Query query2 = getSession().createQuery(QUERY_CANDIDATE_MACHINES_RESERVED);
             query2.setInteger("idVirtualDataCenter", idVirtualDatacenter);
             query2.setInteger("idRack", idRack);
-            query2.setParameter("state",
-                com.abiquo.server.core.infrastructure.Machine.State.MANAGED);
+            query2.setParameter("state", MachineState.MANAGED);
             query2.setParameterList("reserveds", reserveds);
 
             List<Integer> query2res = query2.list();
@@ -551,8 +586,7 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
                 getSession().createQuery(WHT_QUERY_CANDIDATE_SAME_VDC_RACK_AND_TYPE_AND_STATE);
             query2.setInteger("idVirtualDataCenter", idVirtualDatacenter);
             query2.setInteger("idRack", idRack);
-            query2.setParameter("state",
-                com.abiquo.server.core.infrastructure.Machine.State.MANAGED);
+            query2.setParameter("state", MachineState.MANAGED);
 
             List<Integer> query2res = query2.list();
 
@@ -570,8 +604,7 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
             Query query3 = getSession().createQuery(QUERY_CANDIDATE_MACHINES);
             query3.setInteger("idVirtualDataCenter", idVirtualDatacenter);
             query3.setInteger("idRack", idRack);
-            query3.setParameter("state",
-                com.abiquo.server.core.infrastructure.Machine.State.MANAGED);
+            query3.setParameter("state", MachineState.MANAGED);
             query3.setParameter("enterpriseId", enterprise.getId());
 
             List<Integer> query3res = query3.list();
@@ -745,17 +778,61 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
             "    AND datastore.datastoreUUID = :datastoreUuid";
 
     private static final String QUERY_IS_MACHINE_IN_ALLOCATOR =
-        "SELECT m FROM com.abiquo.server.core.infrastructure.Machine m " + "WHERE m.id not in ( "
-            + "SELECT mac.id FROM " + "com.abiquo.server.core.cloud.VirtualMachine vm "
-            + "join vm.hypervisor h " + "join h.machine mac "
-            + "WHERE vm.state != 'RUNNING' AND vm.state != 'POWERED_OFF' "
-            + ") AND m.id = :machineId";
+        "SELECT vm FROM com.abiquo.server.core.cloud.VirtualMachine vm "
+            + "join vm.hypervisor h join h.machine m WHERE m.id = :machineId "
+            + "AND vm.state != 'RUNNING' AND vm.state != 'POWERED_OFF' "
+            + "AND vm.state != 'PAUSED' AND vm.state != 'REBOOTED'";
 
     public Machine findByIds(final Integer datacenterId, final Integer rackId,
         final Integer machineId)
     {
         return findUniqueByCriterions(Restrictions.eq("datacenter.id", datacenterId),
             Restrictions.eq("rack.id", rackId), Restrictions.eq("id", machineId));
+    }
+
+    public Machine findByIp(final Datacenter datacenter, final String ip)
+    {
+        Criteria crit = createCriteria();
+        crit.createAlias(Machine.HYPERVISOR_PROPERTY, "hypervisor");
+
+        crit.add(sameDatacenter(datacenter));
+        crit.add(Restrictions.eq("hypervisor.ip", ip));
+
+        return (Machine) crit.uniqueResult();
+    }
+
+    public Set<Integer> findAllIds()
+    {
+        Set<Integer> ids = new HashSet<Integer>();
+        List<Machine> machines = findAll();
+        for (Machine m : machines)
+        {
+            ids.add(m.getId());
+        }
+        return ids;
+    }
+
+    private static final String QUERY_TOTAL_USED_CORES = "SELECT sum(virtualCpuCores) "
+        + "FROM com.abiquo.server.core.infrastructure.Machine";
+
+    public Long getTotalUsedCores()
+    {
+        Query query = getSession().createQuery(QUERY_TOTAL_USED_CORES);
+        Long result = (Long) query.uniqueResult();
+        // If there are no results (no machines in DB) return 0
+        return result == null ? 0L : result;
+    }
+
+    private static final String QUERY_USED_CORES_EXCEPT_MACHINE = "SELECT sum(virtualCpuCores) "
+        + "FROM com.abiquo.server.core.infrastructure.Machine WHERE id != :id";
+
+    public Long getTotalUsedCoresExceptMachine(final Machine machine)
+    {
+        Query query = getSession().createQuery(QUERY_USED_CORES_EXCEPT_MACHINE);
+        query.setInteger("id", machine.getId());
+        Long result = (Long) query.uniqueResult();
+        // If there are no results (no other machines in DB) return 0
+        return result == null ? 0L : result;
     }
 
 }

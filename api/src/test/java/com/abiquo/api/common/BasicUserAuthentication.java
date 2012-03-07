@@ -43,7 +43,7 @@ public class BasicUserAuthentication extends MockAuthentication
     @Override
     public GrantedAuthority[] getAuthorities()
     {
-        return null;
+        return new GrantedAuthority[0];
     }
 
 }

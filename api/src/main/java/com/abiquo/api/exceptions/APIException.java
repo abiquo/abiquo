@@ -30,8 +30,8 @@ public abstract class APIException extends RuntimeException
 {
     private static final long serialVersionUID = -6140840253539726342L;
 
-    private Set<CommonError> errors;    
-   
+    private Set<CommonError> errors;
+
     public Set<CommonError> getErrors()
     {
         if (errors == null)
@@ -41,19 +41,19 @@ public abstract class APIException extends RuntimeException
         return errors;
     }
 
-    public APIException (CommonError error)
+    public APIException(CommonError error)
     {
         getErrors().add(error);
     }
-    
+
     public APIException(Set<CommonError> errors)
     {
         getErrors().addAll(errors);
     }
-    
-    public APIException (APIError apiError)
+
+    public APIException(APIError apiError)
     {
         getErrors().add(new CommonError(apiError.getCode(), apiError.getMessage()));
     }
-    
+
 }

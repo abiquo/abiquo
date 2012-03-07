@@ -31,6 +31,7 @@
     paddingTop="0"
     verticalGap="0"
     show="retrieveNetworks()"
+    hide="onHide()"
     xmlns:mx="http://www.adobe.com/2006/mxml"
     xmlns:privatenetwork="net.undf.abicloud.view.networking.virtualdatacenter.privatenetwork.*">
 
@@ -46,12 +47,13 @@
             public function set virtualDatacenter(value:VirtualDataCenter):void
             {
                 _virtualDatacenter = value;
-                if (this.visible)
+                if (privateNetworkManagement.isShown)
                     privateNetworkManagement.virtualDatacenter = _virtualDatacenter;
             }
             
             //Retrieve the list of private networks when the tab is shown
             private function retrieveNetworks():void{
+            	privateNetworkManagement.isShown = true;
             	if(_virtualDatacenter){
             		privateNetworkManagement.virtualDatacenter = _virtualDatacenter;
             	}
@@ -66,7 +68,7 @@
                 return privateNetworkManagement.selectedVLAN;
             }
 
-            private function onSelectedPrivateVLANChange():void
+            protected function onSelectedPrivateVLANChange(event:Event = null):void
             {
                 dispatchEvent(new Event("selectedPrivateVLANChange"));
             }
@@ -80,10 +82,12 @@
 
             private function onShowPrivateNetworkManagement():void
             {
-                if (privateNetworkManagement.virtualDatacenter != _virtualDatacenter)
-                {
-                    privateNetworkManagement.virtualDatacenter = _virtualDatacenter;
-                }
+               privateNetworkManagement.virtualDatacenter = _virtualDatacenter;
+            }
+            
+            private function onHide():void
+            {
+            	privateNetworkManagement.isShown = false;
             }
         ]]>
     </mx:Script>
@@ -96,7 +100,8 @@
     <mx:ViewStack id="networkManagementVS"
         width="100%" height="100%">
         <privatenetwork:PrivateNetworkManagement id="privateNetworkManagement"
-            label="@Resource(bundle='Networking', key='LABEL_PRIVATE_EXTERNAL')"
+        	vlanType="{VlanNetwork.INTERNAL}"
+            label="@Resource(bundle='Networking', key='LABEL_PRIVATE')"
             show="onShowPrivateNetworkManagement()"
             selectedVLANChange="onSelectedPrivateVLANChange()"/>
     </mx:ViewStack>

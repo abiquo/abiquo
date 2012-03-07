@@ -23,7 +23,11 @@ package net.undf.abicloud.events
 {
     import flash.events.Event;
     
+    import mx.collections.ArrayCollection;
+    
     import net.undf.abicloud.vo.infrastructure.DataCenter;
+    import net.undf.abicloud.vo.infrastructure.PhysicalMachine;
+    import net.undf.abicloud.vo.infrastructure.Rack;
     import net.undf.abicloud.vo.infrastructure.VirtualMachine;
     import net.undf.abicloud.vo.networking.IPAddress;
     import net.undf.abicloud.vo.networking.IPPoolManagement;
@@ -64,6 +68,8 @@ package net.undf.abicloud.events
         public static const GET_FREE_IPs_BY_EXTERNAL_VLAN:String = "getFreeIPsByExternalVLANNetworkingEvent";
 
         public static const GET_NICs_BY_VIRTUAL_MACHINE:String = "getNICsByVirtualMachineNetworkingEvent";
+        
+        public static const GET_INFRASTRUCTURE_NICs_BY_VIRTUAL_MACHINE:String = "getInfrastructureNicsByVirtualMachineNetworkingEvent";
 
         public static const GET_VIRTUAL_MACHINE_GATEWAY:String = "getVirtualMachineGatewayNetworkingEvent";
 
@@ -140,6 +146,14 @@ package net.undf.abicloud.events
         public var orderInList:int;
         
         public var available:Boolean;
+        
+        public var staticRules:ArrayCollection;
+        
+        public var tag:int;
+
+        public var rack:Rack;
+        
+        public var physicalMachine:PhysicalMachine;
 
         /* ------------- Constructor ------------- */
         public function NetworkingEvent(type:String, bubbles:Boolean = true, cancelable:Boolean = false)

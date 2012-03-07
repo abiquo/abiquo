@@ -28,3 +28,4 @@
 
 @javax.xml.bind.annotation.XmlSchema(namespace = "http://www.abicloud.com/model/test/infrastructure", elementFormDefault = javax.xml.bind.annotation.XmlNsForm.QUALIFIED)
 package com.abicloud.model.test.infrastructure;
+

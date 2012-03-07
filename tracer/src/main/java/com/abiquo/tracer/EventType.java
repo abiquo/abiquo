@@ -58,20 +58,32 @@ public enum EventType implements Serializable
         "Virtual Appliance State Refreshed"), VAPP_CRASHED(222, "VAPP_CRASHED",
         "Virtual Appliance turned into 'crashed' state"), VAPP_UNKNOWN(223, "VAPP_UNKNOWN",
         "Virtual Appliance turned into 'unknown' state"), VAPP_BUNDLE(224, "VAPP_BUNDLE",
-        "Virtual Appliance bundle started"),
+        "Virtual Appliance bundle started"), VM_CREATE(225, "VM_CREATE", "Created Virtual Machine"), VM_DELETE(
+        226, "VM_DELETE", "Deleted Virtual Machine"), VM_UNDEPLOY(227, "VM_UNDEPLOY",
+        "Undeploy Virtual Machine"), VM_DEPLOY(228, "VM_DEPLOY", "Deploy Virtual Machine"), VM_STATE(
+        229, "VM_STATE", "Apply state Virtual Machine"), VM_RECONFIGURE(230, "VM_RECONFIGURE",
+        "Reconfigure Virtual Machine"), VM_INSTANCE(231, "VM_INSTANCE", "Instance Virtual Machine"), VM_JOB(
+        232, "VM_JOB", "Common Job for Virtual Machine"),
 
     // Infrastructure-related events
     DC_CREATE(300, "DC_CREATE", "Datacenter Created"), DC_MODIFY(301, "DC_MODIFY",
         "Datacenter Modified"), DC_DELETE(302, "DC_DELETE", "Datacenter Deleted"), RACK_CREATE(303,
         "RACK_CREATE", "Rack Created"), RACK_MODIFY(304, "RACK_MODIFY", "Rack Modified"), RACK_DELETE(
-        305, "RACK_DELETE", "Rack Deleted"), RACK_NRSQ_EXCEEDED(306, "NRSQ_EXCEEDED",
-        "NRSQ excedded in Rack"), MACHINE_CREATE(307, "MACHINE_CREATE", "Physical Machine created"), MACHINE_MODIFY(
-        308, "MACHINE_MODIFY", "Physical Machine modified"), MACHINE_DELETE(309, "MACHINE_DELETE",
-        "Physical Machine deleted"), MACHINE_CHECK(310, "MACHINE_CHECK", "Physical Machine checked"), REMOTE_SERVICES_CREATE(
-        311, "REMOTE_SERVICES_CREATE", "Remote Service created"), REMOTE_SERVICES_UPDATE(312,
-        "REMOTE_SERVICE_UPDATE", "Remote Service updated"), REMOTE_SERVICES_CHECK(313,
-        "REMOTE_SERVICES_CHECK", "Remote service checked"), RACK_RETRIEVAL(314, "RACK_RETRIEVAL",
-        "Retrieve Rack"),
+        305, "RACK_DELETE", "Rack Deleted"), RACK_VLAN_POOL(306, "RACK_VLAN_POOL",
+        "VLAN Pool excedded in Rack"), MACHINE_CREATE(307, "MACHINE_CREATE",
+        "Physical Machine created"), MACHINE_MODIFY(308, "MACHINE_MODIFY",
+        "Physical Machine modified"), MACHINE_DELETE(309, "MACHINE_DELETE",
+        "Physical Machine deleted"), MACHINE_CHECK(310, "MACHINE_CHECK", "Physical Machine checked"), MACHINE_RETRIEVE_VMS(
+        311, "MACHINE_RETRIEVE_VMS", "Virtual Machines discovered from physical machine"), MACHINE_CREATED_RETRIEVED_VMS(
+        312, "MACHINE_CREATED_RETRIEVED_VMS",
+        "Created Virtual Machines discovered from physical machine"), MACHINE_DELETE_VMS_NOTMANAGED(
+        313, "MACHINE_DELETE_VMS_NOTMANAGED", "Not managed Virtual Machines deleted"), REMOTE_SERVICES_CREATE(
+        314, "REMOTE_SERVICES_CREATE", "Remote Service created"), REMOTE_SERVICES_UPDATE(315,
+        "REMOTE_SERVICE_UPDATE", "Remote Service updated"), REMOTE_SERVICES_CHECK(316,
+        "REMOTE_SERVICES_CHECK", "Remote service checked"), REMOTE_SERVICES_DELETE(317,
+        "REMOTE_SERVICES_DELETE", "Remote Service deleted"), RACK_RETRIEVAL(318, "RACK_RETRIEVAL",
+        "Retrieve Rack"), APPLIANCE_MANAGER_CONFIGURATION(319, "APPLIANCE_MANAGER_CONFIGURATION_",
+        "The appliance manager is not well configured"),
 
     // Storage system-related events
     SSM_CREATE(400, "SSM_CREATE", "Storage System Manager created"), SSM_MODIFY(401, "SSM_MODIFY",
@@ -83,16 +95,21 @@ public enum EventType implements Serializable
         "Volume deleted"), VOLUME_ASSIGN(409, "VOLUME_ATTACHED", "Volume attached"), VOLUME_UNASSIGN(
         410, "VOLUME_DETACHED", "Volume detached"), VOLUME_ATTACH(411, "VOLUME_ATTACH",
         "Volume attached"), VOLUME_DETACH(412, "VOLUME_DETACH", "Volume detached"), GET_INITIATOR_MAPPINGS(
-        413, "GET_INITIATOR_MAPPINGS", "Initiator mappings retrieved"),
+        413, "GET_INITIATOR_MAPPINGS", "Initiator mappings retrieved"), HARD_DISK_CREATE(414,
+        "HARD_DISK_CREATE", "Hard disk created"), HARD_DISK_DELETE(415, "HARD_DISK_DELETE",
+        "Hard disk deleted"), HARD_DISK_ASSIGN(416, "HARD_DISK_ASSIGN", "Hard disk assigned"), HARD_DISK_UNASSIGN(
+        417, "HARD_DISK_UNASSIGN", "Hard disk unassigned"),
 
     // Image-related events
     VI_DOWNLOAD(500, "VI_DOWNLOAD", "Virtual Image download from a Remote Repository"), VI_ADD(501,
         "VI_ADD", "Virtual Image added to the Appliance Library"), VI_DELETE(502, "VI_DELETE",
         "Virtual Image deleted from the Appliance Library"), DISK_CONVERSION(503,
         "DISK_CONVERSION", "Disc conversion started"), RAW_IMPORT_CONVERSION(504,
-        "RAW_IMPORT_CONVERSION", "Raw import conversion started"),
+        "RAW_IMPORT_CONVERSION", "Raw import conversion started"), VI_UPDATE(505, "VI_UPDATE",
+        "Virtual Image updated"), CONVERSION_FAILED(506, "CONVERSION_FAILED",
+        "Virtual machine template conversion failed"), CONVERSION_FINISHED(507,
+        "CONVERSION_FINISHED", "Virtual machine template conversion finished"),
 
-    // Stateful related events
     // Stateful related events
     PERSISTENT_PROCESS_START(600, "PERSISTENT_PROCESS_START",
         "A Persistent conversion process has started"), PERSISTENT_RAW_FINISHED(601,
@@ -158,16 +175,74 @@ public enum EventType implements Serializable
     // HA Engine Events
     MACHINE_DISABLED_BY_HA(1400, "MACHINE_DISABLED_BY_HA", "Machine disabled by HA engine."), VAPP_BLOCKED_BY_HA(
         1401, "VAPP_BLOCKED_BY_HA", "Virtual appliance block by HA engine"), VM_MOVING_BY_HA(1402,
-        "VAPP_MOVING_BY_HA", "Virtual machine being moved by HA engine"),
+        "VM_MOVING_BY_HA", "Virtual machine being moved by HA engine"),
 
     // ALLOCATION RULES
     ALLOCATION_RULES_APPLIED(1500, "ALLOCATION_RULES_APPLIED", "Allocation rules applied"), ALLOCATION_RULES_REMOVED(
         1501, "ALLOCATION_RULE_REMOVED", "Allocation rule removed"),
 
+    // PRICING TEMPLATE
+    PRICING_TEMPLATE_CREATED(1600, "PRICING_TEMPLATE_CREATED", "Pricing Template created"), PRICING_TEMPLATE_MODIFIED(
+        1601, "PRICING_TEMPLATE_MODIFIED", "Pricing Template updated"), PRICING_TEMPLATE_DELETED(
+        1602, "PRICING_TEMPLATE_DELETED", "Pricing Template deleted"),
+
+    // COSTCODE_CURRENCY
+    COSTCODE_CURRENCY_CREATED(1900, "COSTCODE_CURRENCY_CREATED", "Cost Code -Currency created"), COSTCODE_CURRENCY_MODIFIED(
+        1901, "COSTCODE_CURRENCY_MODIFIED", "Cost Code -Currency updated"), COSTCODE_CURRENCY_DELETED(
+        1902, "COSTCODE_CURRENCY_DELETED", "Cost Code -Currency deleted"),
+
+    // COSTCODE_CURRENCY
+    COSTCODE_CREATED(1800, "COSTCODE_CREATED", "Cost Code  created"), COSTCODE_MODIFIED(1801,
+        "COSTCODE_MODIFIED", "Cost Code  updated"), COSTCODE_DELETED(1802, "COSTCODE_DELETED",
+        "Cost Code deleted"),
+
+    // CURRENCY
+    CURRENCY_CREATED(1900, "CURRENCY_CREATED", "Currency created"), CURRENCY_MODIFIED(1901,
+        "CURRENCY_MODIFIED", "Currency updated"), CURRENCY_DELETED(1902, "CURRENCY_DELETED",
+        "Currency deleted"),
+
     // STORAGE DEVICE
     STORAGE_DEVICE_CREATED(1600, "STORAGE DEVICE CREATED", "Storage device created"), STORAGE_DEVICE_MODIFIED(
         1601, "STORAGE DEVICE MODIFIED", "Storage device modified"), STORAGE_DEVICE_DELETED(1602,
-        "STORAGE DEVICE DELETED", "Storage device deleted");
+        "STORAGE DEVICE DELETED", "Storage device deleted"),
+
+    // CHEF
+    CHEF_RUNLIST_ADD(1510, "CHEF_RUNLIST_ADD", "Add an element to the runlist"), CHEF_RUNLIST_DELETE(
+        1511, "CHEF_RUNLIST_DELETE", "Remove an element from the runlist"), CHEF_NODE_UPDATE(1512,
+        "CHEF_NODE_UPDATE", "Update a Chef node update"), CHEF_RUNLIST_UPDATE(1513,
+        "CHEF_RUNLIST_UPDATE", "Chef runlist update"), CHEF_CONNECTION(1513, "CHEF_SERVER_CONNECT",
+        "Chef Server connect"),
+
+    // CATEGORY
+    CATEGORY_CREATED(1700, "CATEGORY CREATED", "Category created"), CATEGORY_MODIFIED(1701,
+        "CATEGORY MODIFIED", "Category modified"), CATEGORY_DELETED(1702, "CATEGORY DELETED",
+        "Category deleted"),
+
+    // OVF PACKAGES LISTS
+    OVF_PACKAGES_LIST_CREATED(1800, "OVFPACKAGE LIST CREATED", "OVFPackage list created"), TEMPLATE_DEFINITION_LIST_DELETED(
+        1801, "OVFPACKAGE LIST DELETED", "OVFPackage list deleted"), TEMPLATE_DEFINITION_LIST_MODIFIED(
+        1802, "OVFPACKAGE LIST MODIFIED", "OVFPackage list modified"),
+
+    // INSTANCE PROCESS
+    INSTANCE_PROCESS_START(1803, "INSTANCE_PROCESS_START",
+        "A Intance conversion process has started"), INSTANCE_PROCESS_FINISHED(1804,
+        "INSTANCE_PROCESS_FINISHED", "A Instance conversion process has finished succesfuly"), INSTANCE_PROCESS_FAILED(
+        1805, "INSTANCE_PROCESS_FAILED", "A Instance conversion process has failed"),
+
+    // Asynch handlers
+    ASYNC_HANDLER_RESPONSE(1900, "ASYNC_HANDLER_RESPONSE", "Asynchronous hander response"),
+
+    // UCS
+    UCS_COMMUNICATION(
+        1700,
+        "UCS_COMMUNICATION_PROBLEM",
+        "There is a problem accessing to UCS. Might be due to several causes. Check that UCS is working, reacheable, and the credentials"), UCS_ASSOCIATE(
+        1701, "UCS_BLADE_ASSOCIATION", "Blade association with a Service Profile in UCS"), UCS_DISSOCIATE(
+        1702, "Blade disassociation with a Service Profile in UCS",
+        "Blade disassociation with a Service Profile in UCS"), UCS_DELETED(1703,
+        "SERVICE_PROFILE_DELETED", "Service Profile deletion in UCS"), UCS_BLADE_POWEROFF(1704,
+        "UCS_BLADE_POWER_OFF", "Blade powered off in UCS"), UCS_BLADE_POWERON(1705,
+        "UCS_BLADE_POWER_ON", "Blade powered on in UCS");
 
     private final int event;
 

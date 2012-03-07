@@ -94,7 +94,7 @@
 
             //The VirtualImage being created or edited
             [Bindable]
-            private var _virtualImage:VirtualImage;
+            protected var _virtualImage:VirtualImage;
 
             private var _uploadProgressTimer:Timer;
 
@@ -106,8 +106,18 @@
             [Bindable]
             private var categoriesList:ArrayCollection;
             
+
+            protected var _costCodeId:int;
+
             [Bindable]
             protected var _isEditable:Boolean;
+            
+            //Override this function due to the Javascript component
+            //To avoid a ugly displayed bug
+            override protected function headerMouseDown_handler(mouseEvent:MouseEvent):void
+            {
+            }
+
 			
             private function onCreationComplete():void
             {
@@ -142,6 +152,7 @@
                 this._uploadProgressTimer.addEventListener(TimerEvent.TIMER_COMPLETE, checkVirtualImageUploadProgress);
 
                 requestDiskFormatTypes();
+                
             }
 
             private function requestDiskFormatTypes():void
@@ -236,8 +247,9 @@
                     iconsList.selectedIndex = AbicloudUtils.getValuePositionInArray(virtualImageManager.icons.toArray(),
                                                                                     "id",
                                                                                     _virtualImage.icon);
-                    publicImageInput.selected = this._virtualImage.shared == 1;
-                    costInput.text = this._virtualImage.costCode;
+                    publicImageInput.selected = this._virtualImage.shared;
+                    chefEnabledCombobox.selected = this._virtualImage.chefEnabled;
+                    this._costCodeId = this._virtualImage.costCode;
                 }
                 else
                 {
@@ -257,7 +269,7 @@
                     hdUnitsSelector.selectedIndex = 0;
                     iconInput.text = "";
                     iconsList.selectedIndex = -1;
-                    costInput.text = "";
+                    chefEnabledCombobox.selected = false;
 
                     ovfPackageInstanceDTO = null;
                     ovfPackageInstanceUploadDTO = null;
@@ -290,15 +302,16 @@
                     if (iconsList.selectedIndex > -1)
                         updatedValues.icon = iconsList.selectedItem as Icon;
 
-                    if (publicImageInput.selected)
-                        updatedValues.shared = 1;
-                    else
-                        updatedValues.shared = 0; 
+                    updatedValues.shared = publicImageInput.selected;
                         
-                    updatedValues.costCode = costInput.text;                   
+                    //Chef integration
+                    updatedValues.chefEnabled = chefEnabledCombobox.selected;
+                    updatedValues.costCode = this._costCodeId;                   
 
                     //Announcing that user wants to edit a Virtual Image
                     virtualImageEvent = new VirtualImageEvent(VirtualImageEvent.EDIT_VIRTUAL_IMAGE);
+                    virtualImageEvent.enterprise = AbiCloudModel.getInstance().loginManager.user.enterprise;
+                    virtualImageEvent.datacenterId = applianceManager.idDataCenter;
                     virtualImageEvent.virtualImage = _virtualImage;
                     virtualImageEvent.viUpdatedValues = updatedValues;
                     dispatchEvent(virtualImageEvent);
@@ -341,7 +354,7 @@
 
 
                     //Notifying Javascript to send information to server
-                    var applianceManagerAddress:String = StringUtil.substitute("{0}{1}:{2}/am/erepos/{3}/ovfs",
+                    var applianceManagerAddress:String = StringUtil.substitute("{0}{1}:{2}/am/erepos/{3}/templates",
                                                                                applianceManager.protocol,
                                                                                applianceManager.domainName,
                                                                                applianceManager.port,
@@ -656,7 +669,7 @@
 
 
         <mx:Form id="virtualImageFormContainer"
-            paddingTop="3">
+            paddingTop="3" paddingBottom="{this._virtualImage ? 0:30}">
             <mx:Label 
                 fontWeight="bold"
                 text="@Resource(bundle='VirtualImage', key='LABEL_VIRTUAL_IMAGE_FORM_STEP1')"
@@ -730,10 +743,13 @@
 
             <mx:FormItem label="@Resource(bundle='Infrastructure', key='TEXTINPUT_LABEL_CPU')">
                 <mx:NumericStepper id="cpuInput"
+                	maximum="{AbiCloudModel.MAX_NUMBER_OF_CPU}"
                     width="100" height="20"
                     enabled="{this._isEditable}"
                     change="validateForm()"
-                    minimum="1" maximum="32" stepSize="1"/>
+
+                    minimum="1" stepSize="1"/>
+
             </mx:FormItem>
 
             <mx:FormItem 
@@ -829,15 +845,24 @@
             </mx:FormItem>
             
             <mx:FormItem 
+                id="chefEnabledFormItem"
+                label="@Resource(bundle='VirtualImage', key='LABEL_CHEF_ENABLED')"
+                includeInLayout="{this._virtualImage != null}"
+                visible="{this._virtualImage != null}">
+                <mx:CheckBox id="chefEnabledCombobox"
+                    change="validateForm()"/>
+            </mx:FormItem>
+            
+            <mx:FormItem 
             	id="costCodeFormItem"
                 label="@Resource(bundle='VirtualImage', key='LABEL_COST_CODE')"
                 includeInLayout="{this._virtualImage != null}"
                 visible="{this._virtualImage != null}">
-                <mx:TextInput id="costInput"
-                    height="18"
-                    editable="{this._isEditable}"
-                    maxChars="50"
-                    change="validateForm()"/>
+                <mx:ComboBox id="costInput"
+                	prompt="@Resource(bundle='Common',key='LABEL_NOT_AVAILABLE')"
+                	enabled="{costInput.dataProvider}"
+                	labelField="name"
+                    height="18"/>
             </mx:FormItem>
         </mx:Form>
 
@@ -889,8 +914,7 @@
 
             <mx:ProgressBar id="uploadProgressBar"
                 width="100%" height="12"
-                barColor="#FE9608"
-                borderColor="#666666"
+                styleName="CustomProgressBar"
                 fontSize="10"
                 indeterminateMoveInterval="30"
                 minimum="0" maximum="100" indeterminate="true" label="%3%%"

@@ -24,6 +24,7 @@ package com.abiquo.server.core.enterprise;
 import org.testng.annotations.Test;
 
 import com.abiquo.server.core.common.DefaultEntityTestBase;
+import com.abiquo.server.core.common.DefaultEntityWithLimits;
 import com.abiquo.server.core.common.Limit;
 import com.softwarementors.bzngine.entities.test.InstanceTester;
 
@@ -36,12 +37,19 @@ public class EnterpriseTest extends DefaultEntityTestBase<Enterprise>
         return new EnterpriseGenerator(getSeed());
     }
 
+    @Override
+    protected InstanceTester<Enterprise> eg()
+    {
+        return super.eg();
+    }
+
     @Test
     public void test_setRamLimitsInMb()
     {
         Enterprise entity = createUniqueEntity();
         entity.setRamLimitsInMb(new Limit(1L, 3L));
-        assertEquals(Enterprise.LimitStatus.OK, entity.checkRamStatus((int) Enterprise.NO_LIMIT));
+        assertEquals(Enterprise.LimitStatus.OK,
+            entity.checkRamStatus((int) DefaultEntityWithLimits.NO_LIMIT));
     }
 
     @Test
@@ -49,7 +57,8 @@ public class EnterpriseTest extends DefaultEntityTestBase<Enterprise>
     {
         Enterprise entity = createUniqueEntity();
         entity.setHdLimitsInMb(new Limit(1L, 3L));
-        assertEquals(Enterprise.LimitStatus.OK, entity.checkHdStatus(Enterprise.NO_LIMIT));
+        assertEquals(Enterprise.LimitStatus.OK,
+            entity.checkHdStatus(DefaultEntityWithLimits.NO_LIMIT));
     }
 
     @Test
@@ -57,36 +66,53 @@ public class EnterpriseTest extends DefaultEntityTestBase<Enterprise>
     {
         Enterprise entity = createUniqueEntity();
         entity.setCpuCountLimits(new Limit(1L, 3L));
-        assertEquals(Enterprise.LimitStatus.OK, entity.checkCpuStatus((int) Enterprise.NO_LIMIT));
+        assertEquals(Enterprise.LimitStatus.OK,
+            entity.checkCpuStatus((int) DefaultEntityWithLimits.NO_LIMIT));
     }
 
     @Test
     public void test_isValidLimitRange()
     {
-        assertTrue(Enterprise.isValidLimitRange(Enterprise.NO_LIMIT, Enterprise.NO_LIMIT));
-        assertTrue(Enterprise.isValidLimitRange(4, Enterprise.NO_LIMIT));
-        assertTrue(Enterprise.isValidLimitRange(3, 4));
-        assertTrue(Enterprise.isValidLimitRange(4, 4));
-        assertFalse(Enterprise.isValidLimitRange(Enterprise.NO_LIMIT, 4));
-        assertFalse(Enterprise.isValidLimitRange(5, 4));
-        assertFalse(Enterprise.isValidLimitRange(-3, 4));
-        assertFalse(Enterprise.isValidLimitRange(3, -1));
+        assertTrue(DefaultEntityWithLimits.isValidLimitRange(DefaultEntityWithLimits.NO_LIMIT,
+            DefaultEntityWithLimits.NO_LIMIT));
+        assertTrue(DefaultEntityWithLimits.isValidLimitRange(4, DefaultEntityWithLimits.NO_LIMIT));
+        assertTrue(DefaultEntityWithLimits.isValidLimitRange(3, 4));
+        assertTrue(DefaultEntityWithLimits.isValidLimitRange(4, 4));
+        assertFalse(DefaultEntityWithLimits.isValidLimitRange(DefaultEntityWithLimits.NO_LIMIT, 4));
+        assertFalse(DefaultEntityWithLimits.isValidLimitRange(5, 4));
+        assertFalse(DefaultEntityWithLimits.isValidLimitRange(-3, 4));
+        assertFalse(DefaultEntityWithLimits.isValidLimitRange(3, -1));
     }
 
     @Test
     public void test_checkLimitStatus()
     {
-        assertEquals(Enterprise.LimitStatus.OK, Enterprise.checkLimitStatus(Enterprise.NO_LIMIT,
-            Enterprise.NO_LIMIT, 3));
-        assertEquals(Enterprise.LimitStatus.OK, Enterprise.checkLimitStatus(2, Enterprise.NO_LIMIT,
-            1));
-        assertEquals(Enterprise.LimitStatus.OK, Enterprise.checkLimitStatus(2, 3, 1));
+        assertEquals(Enterprise.LimitStatus.OK, DefaultEntityWithLimits.checkLimitStatus(
+            DefaultEntityWithLimits.NO_LIMIT, DefaultEntityWithLimits.NO_LIMIT, 3));
+        assertEquals(Enterprise.LimitStatus.OK,
+            DefaultEntityWithLimits.checkLimitStatus(2, DefaultEntityWithLimits.NO_LIMIT, 1));
+        assertEquals(Enterprise.LimitStatus.OK, DefaultEntityWithLimits.checkLimitStatus(2, 3, 1));
 
-        assertEquals(Enterprise.LimitStatus.SOFT_LIMIT, Enterprise.checkLimitStatus(2, 4, 2));
-        assertEquals(Enterprise.LimitStatus.SOFT_LIMIT, Enterprise.checkLimitStatus(2, 4, 3));
-        assertEquals(Enterprise.LimitStatus.SOFT_LIMIT, Enterprise.checkLimitStatus(2, 4, 4));
-        
-        assertEquals(Enterprise.LimitStatus.HARD_LIMIT, Enterprise.checkLimitStatus(2, 4, 5));
-        assertEquals(Enterprise.LimitStatus.HARD_LIMIT, Enterprise.checkLimitStatus(2, 4, 6));
+        assertEquals(Enterprise.LimitStatus.SOFT_LIMIT,
+            DefaultEntityWithLimits.checkLimitStatus(2, 4, 2));
+        assertEquals(Enterprise.LimitStatus.SOFT_LIMIT,
+            DefaultEntityWithLimits.checkLimitStatus(2, 4, 3));
+        assertEquals(Enterprise.LimitStatus.SOFT_LIMIT,
+            DefaultEntityWithLimits.checkLimitStatus(2, 4, 4));
+
+        assertEquals(Enterprise.LimitStatus.HARD_LIMIT,
+            DefaultEntityWithLimits.checkLimitStatus(2, 4, 5));
+        assertEquals(Enterprise.LimitStatus.HARD_LIMIT,
+            DefaultEntityWithLimits.checkLimitStatus(2, 4, 6));
+    }
+
+    @Test
+    public void test_isChefEnabled()
+    {
+        Enterprise nochef = createUniqueEntity();
+        assertFalse(nochef.isChefEnabled());
+
+        Enterprise chef = ((EnterpriseGenerator) eg()).createChefInstance();
+        assertTrue(chef.isChefEnabled());
     }
 }

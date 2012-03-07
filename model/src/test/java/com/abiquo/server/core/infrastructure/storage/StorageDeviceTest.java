@@ -19,17 +19,17 @@
  * Boston, MA 02111-1307, USA.
  */
 
-  package com.abiquo.server.core.infrastructure.storage;
+package com.abiquo.server.core.infrastructure.storage;
 
-  import com.abiquo.server.core.common.DefaultEntityTestBase;
-  import com.softwarementors.bzngine.entities.test.InstanceTester;
+import com.abiquo.server.core.common.DefaultEntityTestBase;
+import com.softwarementors.bzngine.entities.test.InstanceTester;
 
-  public class StorageDeviceTest extends DefaultEntityTestBase<StorageDevice>
-  {
+public class StorageDeviceTest extends DefaultEntityTestBase<StorageDevice>
+{
 
-      @Override
-      protected InstanceTester<StorageDevice> createEntityInstanceGenerator()
-      {
-          return new StorageDeviceGenerator(getSeed());
-      }
-  }
+    @Override
+    protected InstanceTester<StorageDevice> createEntityInstanceGenerator()
+    {
+        return new StorageDeviceGenerator(getSeed());
+    }
+}

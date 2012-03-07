@@ -29,57 +29,50 @@ import com.softwarementors.commons.testng.AssertEx;
 
 public class InitiatorMappingGenerator extends DefaultEntityGenerator<InitiatorMapping>
 {
+    public static String DEFAULT_INITIATOR = "iqn.1993-08.org.debian:initiator";
 
-    VolumeManagementGenerator volumeGenerator;
+    private VolumeManagementGenerator volumeGenerator;
 
-    public InitiatorMappingGenerator(SeedGenerator seed)
+    public InitiatorMappingGenerator(final SeedGenerator seed)
     {
         super(seed);
-
         volumeGenerator = new VolumeManagementGenerator(seed);
-
     }
 
     @Override
-    public void assertAllPropertiesEqual(InitiatorMapping obj1, InitiatorMapping obj2)
+    public void assertAllPropertiesEqual(final InitiatorMapping obj1, final InitiatorMapping obj2)
     {
         AssertEx.assertPropertiesEqualSilent(obj1, obj2, InitiatorMapping.TARGET_LUN_PROPERTY,
             InitiatorMapping.TARGET_IQN_PROPERTY, InitiatorMapping.INITIATOR_IQN_PROPERTY);
 
-        volumeGenerator.assertAllPropertiesEqual(obj1.getVolumeManagement(), obj2
-            .getVolumeManagement());
+        volumeGenerator.assertAllPropertiesEqual(obj1.getVolumeManagement(),
+            obj2.getVolumeManagement());
     }
 
     @Override
     public InitiatorMapping createUniqueInstance()
     {
         VolumeManagement vm = volumeGenerator.createUniqueInstance();
-
         return createInstance(vm);
     }
 
-    public InitiatorMapping createInstance(VolumeManagement vm)
+    public InitiatorMapping createInstance(final VolumeManagement vm)
     {
-        final String iIQN = newString(nextSeed(), 1, 10);
-        final String targetIQN = newString(nextSeed(), 1, 10);
-        final Integer targetLUN = nextSeed();
+        String initiator = DEFAULT_INITIATOR;
+        String target = "iqn.1993-08.com.abiquo:target";
 
-        InitiatorMapping initiatorMapping =
-            new InitiatorMapping("IQN" + iIQN, vm, "targetIQN" + targetIQN, targetLUN);
-
-        return initiatorMapping;
+        return new InitiatorMapping(initiator, vm, target, nextSeed());
     }
 
     @Override
-    public void addAuxiliaryEntitiesToPersist(InitiatorMapping entity,
-        List<Object> entitiesToPersist)
+    public void addAuxiliaryEntitiesToPersist(final InitiatorMapping entity,
+        final List<Object> entitiesToPersist)
     {
         super.addAuxiliaryEntitiesToPersist(entity, entitiesToPersist);
 
         VolumeManagement volumeManagement = entity.getVolumeManagement();
         volumeGenerator.addAuxiliaryEntitiesToPersist(volumeManagement, entitiesToPersist);
         entitiesToPersist.add(volumeManagement);
-
     }
 
 }

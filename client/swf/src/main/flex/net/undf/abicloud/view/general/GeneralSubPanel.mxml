@@ -58,7 +58,7 @@
                 //Title
 
                 var label:Label = new Label();
-                label.height = 14;
+                label.height = 16;
                 label.styleName = "GeneralSubPanelTextStyle";
                 BindingUtils.bindProperty(label, "text", this, "title");
                 header.addChild(label);

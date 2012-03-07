@@ -29,6 +29,7 @@ import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.util.ExtendedAppUtil;
 import com.abiquo.util.ServiceUtil;
 import com.abiquo.virtualfactory.constants.MessageValues;
@@ -83,8 +84,8 @@ public class VmwareHypervisor implements IHypervisor
      * @param user TODO
      * @param password TODO
      */
-    private void builtinOptionsEntered(final VmwareHypervisorConfiguration config, String user,
-        String password)
+    private void builtinOptionsEntered(final VmwareHypervisorConfiguration config,
+        final String user, final String password)
     {
         optsEntered.put("username", user);
         optsEntered.put("password", password);
@@ -173,8 +174,7 @@ public class VmwareHypervisor implements IHypervisor
     @Override
     public String getHypervisorType()
     {
-
-        return "vmx-04";
+        return HypervisorType.VMX_04.getValue();
     }
 
     @Override
@@ -202,7 +202,8 @@ public class VmwareHypervisor implements IHypervisor
     }
 
     @Override
-    public void init(final URL url, String user, String password) throws HypervisorException
+    public void init(final URL url, final String user, final String password)
+        throws HypervisorException
     {
         AbiCloudModel model = AbiCloudModel.getInstance();
         Configuration mainConfig = model.getConfigManager().getConfiguration();
@@ -261,10 +262,8 @@ public class VmwareHypervisor implements IHypervisor
                 Long expirationMinutes = new Long(0);
                 boolean neverExpires = true;
 
-                for (int i = 0; i < properties.length; i++)
+                for (KeyAnyValue keyAnyValue : properties)
                 {
-                    KeyAnyValue keyAnyValue = properties[i];
-
                     if ("expirationHours".equals(keyAnyValue.getKey()))
                     {
                         expirationHours = (Long) keyAnyValue.getValue();
@@ -279,7 +278,7 @@ public class VmwareHypervisor implements IHypervisor
 
                 if (!neverExpires)
                 {
-                    if ((expirationHours.intValue() == 0) || (expirationMinutes.intValue() == 0))
+                    if (expirationHours.intValue() == 0 || expirationMinutes.intValue() == 0)
                     {
                         throw new HypervisorException("ESXi version is not supported");
                     }
@@ -334,7 +333,7 @@ public class VmwareHypervisor implements IHypervisor
         catch (VimFault ev)
         {
             String errorDetail =
-                (ev.getFaultMessage() != null && ev.getFaultMessage().length > 0) ? ev
+                ev.getFaultMessage() != null && ev.getFaultMessage().length > 0 ? ev
                     .getFaultMessage()[0].message : ev.getMessage();
 
             throw new HypervisorException(errorMessage + "\n" + errorDetail);
@@ -449,7 +448,7 @@ public class VmwareHypervisor implements IHypervisor
      * @param address the hypervisor address
      * @throws HypervisorException
      */
-    public void init(URL address) throws HypervisorException
+    public void init(final URL address) throws HypervisorException
     {
         init(address, user, password);
 
@@ -462,7 +461,7 @@ public class VmwareHypervisor implements IHypervisor
     }
 
     @Override
-    public AbsVirtualMachine getMachine(VirtualMachineConfiguration virtualMachineConfig)
+    public AbsVirtualMachine getMachine(final VirtualMachineConfiguration virtualMachineConfig)
         throws HypervisorException
     {
         // Gets the VMWare API main interface

@@ -21,6 +21,7 @@
 
 package net.undf.abicloud.vo.configuration
 {
+	import mx.collections.ArrayCollection;
 	import mx.utils.ObjectProxy;
 	
 	import net.undf.abicloud.vo.systemproperties.SystemProperty;
@@ -59,6 +60,7 @@ package net.undf.abicloud.vo.configuration
 		public var client_infra_googleMapsDefaultZoom:SystemProperty;
 		public var client_infra_googleMapskey:SystemProperty;
 		public var client_infra_googleMapsLadTimeOut:SystemProperty;
+		public var client_infra_ucsManagerLink:SystemProperty;
 		public var client_infra_InfrastructureUpdateInterval:SystemProperty;
 		public var client_metering_meteringUpdateInterval:SystemProperty;
 		public var client_network_numberIpAdressesPerPage:SystemProperty;
@@ -79,8 +81,18 @@ package net.undf.abicloud.vo.configuration
 		public var client_virtual_virtualImagesRefreshConversionsInterval:SystemProperty; 
 		public var client_main_enterpriseLogoURL:SystemProperty;
 		public var client_main_billingUrl:SystemProperty;
+		public var client_logout_url:SystemProperty;
 		public var client_main_disableChangePassword:SystemProperty;
 		public var client_main_allowLogout:SystemProperty;
+		
+		//network
+		public var client_network_defaultName:SystemProperty;
+        public var client_network_defaultNetmask:SystemProperty;
+        public var client_network_defaultAddress:SystemProperty;
+        public var client_network_defaultGateway:SystemProperty;
+        public var client_network_defaultPrimaryDNS:SystemProperty;
+        public var client_network_defaultSecondaryDNS:SystemProperty;
+        public var client_network_defaultSufixDNS:SystemProperty;
 		
 		//wiki links
 		public var client_wiki_showHelp:SystemProperty;
@@ -98,6 +110,7 @@ package net.undf.abicloud.vo.configuration
 		public var client_wiki_infra_discoverBlades:SystemProperty;
 		
 		public var client_wiki_network_publicVlan:SystemProperty;
+		public var client_wiki_network_staticRoutes:SystemProperty;
 		
 		public var client_wiki_storage_storageDevice:SystemProperty;
 		public var client_wiki_storage_storagePool:SystemProperty;
@@ -130,7 +143,11 @@ package net.undf.abicloud.vo.configuration
 		public var client_wiki_config_general:SystemProperty;
 		public var client_wiki_config_heartbeat:SystemProperty;
 		public var client_wiki_config_registration:SystemProperty;	
-		public var client_wiki_config_licence:SystemProperty;		
+		public var client_wiki_config_licence:SystemProperty;	
+		
+		public var client_wiki_pricing_createTemplate:SystemProperty;
+		public var client_wiki_pricing_createCostCode:SystemProperty;	
+		public var client_wiki_pricing_createCurrency:SystemProperty;
 		
 
 		private var propertiesIndex:Array;
@@ -177,6 +194,18 @@ package net.undf.abicloud.vo.configuration
 
 			propertiesIndex[propName] = this[propName]; 
 
+		}
+		
+		public function updateProperties(properties:ArrayCollection):void
+		{
+			var systemProperty:SystemProperty;
+			var propName:String;
+            for (var i:int = 0; i < properties.length; i++)
+            {
+            	systemProperty = properties.getItemAt(i) as SystemProperty;
+            	propName = systemProperty.name.split(".").join("_");
+	            this[propName].value = systemProperty.value;
+            }
 		}
 	}
 }

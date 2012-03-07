@@ -29,11 +29,11 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class VlanPopulateReader extends PopulateReader
 {
-    final static Logger LOGGER = LoggerFactory
-    .getLogger(VlanPopulateReader.class);
-    
+    final static Logger LOGGER = LoggerFactory.getLogger(VlanPopulateReader.class);
+
     /**
-     * Rack 1 is full, the virtual machine should be allocated in Rack2 
+     * Rack 1 is full, the virtual machine should be allocated in Rack2
+     * 
      * @return
      */
     public AllocatorAction rackFullModel()
@@ -47,25 +47,21 @@ public class VlanPopulateReader extends PopulateReader
             String r1 = "r1";
             String rack1Parameters = "2,11,1,10,[1]";
             populateInfrastructure.populateInfrastructure(dc1);
-            populateInfrastructure.populateInfrastructure(dc1 + "."
-                + r1 + ":" + rack1Parameters);
+            populateInfrastructure.populateInfrastructure(dc1 + "." + r1 + ":" + rack1Parameters);
 
             // Create 10pm same capacity same hyper
             for (int i = 0; i < 10; i++)
             {
-                populateInfrastructure.createMachine(dc1, r1, "m" + i
-                    + ":" + hyper_type);
+                populateInfrastructure.createMachine(dc1, r1, "m" + i + ":" + hyper_type);
             }
             // Create rack 2
             String r2 = "r2";
-            populateInfrastructure.populateInfrastructure(dc1 + "."
-                + r2 + ":" + rack1Parameters);
+            populateInfrastructure.populateInfrastructure(dc1 + "." + r2 + ":" + rack1Parameters);
 
             // Create 10pm same capacity same hyper
             for (int i = 1; i < 2; i++)
             {
-                populateInfrastructure.createMachine(dc1, r2, "ma" + i
-                    + ":" + "XEN_3");
+                populateInfrastructure.createMachine(dc1, r2, "ma" + i + ":" + "XEN_3");
             }
 
             // 1 vdc/1 vlan/ 1 vapp/ 1 vm/ 1 vnic/
@@ -75,58 +71,61 @@ public class VlanPopulateReader extends PopulateReader
             for (int j = 2; j < 11; j++)
             {
                 populateVirtualInfrastructure
-                .createVirtualInfrastructure(PopulateConstants.DEC_ENTERPRISE + j);
+                    .createVirtualInfrastructure(PopulateConstants.DEC_ENTERPRISE + j);
                 populateVirtualInfrastructure
-                    .createVirtualInfrastructure(PopulateConstants.DEC_ENTERPRISE + j
-                        + "."
-                        + PopulateConstants.DEC_VIRTUAL_DATACENTER + j
-                        + ":" + dc1
-                        + "," + hyper_type);
-//                e1.vi1:dc1,1,1,2
+                    .createVirtualInfrastructure(PopulateConstants.DEC_ENTERPRISE + j + "."
+                        + PopulateConstants.DEC_VIRTUAL_DATACENTER + j + ":" + dc1 + ","
+                        + hyper_type);
+                // e1.vi1:dc1,1,1,2
                 populateVirtualInfrastructure
-                .createVirtualInfrastructure(PopulateConstants.DEC_ENTERPRISE + j + "." + PopulateConstants.DEC_VIRTUAL_IMAGE + j + ":" + dc1 + "," + "1,1,2");
-                populateVirtualInfrastructure.createVirtualInfrastructure(PopulateConstants.DEC_VLAN
-                    + j + ":"
-                    + PopulateConstants.DEC_VIRTUAL_DATACENTER + j
-                    + "," + r1);
+                    .createVirtualInfrastructure(PopulateConstants.DEC_ENTERPRISE + j + "."
+                        + PopulateConstants.DEC_VIRTUAL_IMAGE + j + ":" + dc1 + "," + "1,1,2");
                 populateVirtualInfrastructure
-                .createVirtualInfrastructure(PopulateConstants.DEC_ENTERPRISE + j + "." + PopulateConstants.DEC_VIRTUAL_DATACENTER + j + "." + PopulateConstants.DEC_VIRTUAL_APPLIANCE + j);
+                    .createVirtualInfrastructure(PopulateConstants.DEC_VLAN + j + ":"
+                        + PopulateConstants.DEC_VIRTUAL_DATACENTER + j + "," + r1);
                 populateVirtualInfrastructure
-                    .createVirtualInfrastructure(PopulateConstants.DEC_ENTERPRISE + j + "." + PopulateConstants.DEC_VIRTUAL_DATACENTER + j + "." + PopulateConstants.DEC_VIRTUAL_APPLIANCE + j
-                        + "." + PopulateConstants.DEC_VIRTUAL_MACHINE
-                        + j + ":"
-                        + PopulateConstants.DEC_VIRTUAL_IMAGE + j
-                        + "," + "vnic" + j
-                        + "," + PopulateConstants.DEC_VLAN + j);
-                populateLimits.createLimitRule(PopulateConstants.DEC_LIMIT + "." + dc1 + "." +  PopulateConstants.DEC_ENTERPRISE + j);
+                    .createVirtualInfrastructure(PopulateConstants.DEC_ENTERPRISE + j + "."
+                        + PopulateConstants.DEC_VIRTUAL_DATACENTER + j + "."
+                        + PopulateConstants.DEC_VIRTUAL_APPLIANCE + j);
+                populateVirtualInfrastructure
+                    .createVirtualInfrastructure(PopulateConstants.DEC_ENTERPRISE + j + "."
+                        + PopulateConstants.DEC_VIRTUAL_DATACENTER + j + "."
+                        + PopulateConstants.DEC_VIRTUAL_APPLIANCE + j + "."
+                        + PopulateConstants.DEC_VIRTUAL_MACHINE + j + ":"
+                        + PopulateConstants.DEC_VIRTUAL_IMAGE + j + "," + "vnic" + j + ","
+                        + PopulateConstants.DEC_VLAN + j);
+                populateLimits.createLimitRule(PopulateConstants.DEC_LIMIT + "." + dc1 + "."
+                    + PopulateConstants.DEC_ENTERPRISE + j);
             }
             populateVirtualInfrastructure
-            .createVirtualInfrastructure(PopulateConstants.DEC_ENTERPRISE + 501);
+                .createVirtualInfrastructure(PopulateConstants.DEC_ENTERPRISE + 501);
             // Creation of the virtual machine to allocate
-            populateVirtualInfrastructure.createVirtualInfrastructure(PopulateConstants.DEC_ENTERPRISE
-                + 501 + "." + PopulateConstants.DEC_VIRTUAL_DATACENTER
-                + 501 + ":" + dc1
-                + "," + hyper_type);
             populateVirtualInfrastructure
-            .createVirtualInfrastructure(PopulateConstants.DEC_ENTERPRISE + 501 + "." + PopulateConstants.DEC_VIRTUAL_IMAGE + 501 + ":" + dc1 + "," + "1,1,2");
+                .createVirtualInfrastructure(PopulateConstants.DEC_ENTERPRISE + 501 + "."
+                    + PopulateConstants.DEC_VIRTUAL_DATACENTER + 501 + ":" + dc1 + "," + hyper_type);
+            populateVirtualInfrastructure
+                .createVirtualInfrastructure(PopulateConstants.DEC_ENTERPRISE + 501 + "."
+                    + PopulateConstants.DEC_VIRTUAL_IMAGE + 501 + ":" + dc1 + "," + "1,1,2");
             populateVirtualInfrastructure.createVirtualInfrastructure(PopulateConstants.DEC_VLAN
-                + 501 + ":"
-                + PopulateConstants.DEC_VIRTUAL_DATACENTER + 501);
+                + 501 + ":" + PopulateConstants.DEC_VIRTUAL_DATACENTER + 501);
             populateVirtualInfrastructure
-            .createVirtualInfrastructure(PopulateConstants.DEC_ENTERPRISE + 501 + "." + PopulateConstants.DEC_VIRTUAL_DATACENTER + 501 + "." + PopulateConstants.DEC_VIRTUAL_APPLIANCE + 501);
+                .createVirtualInfrastructure(PopulateConstants.DEC_ENTERPRISE + 501 + "."
+                    + PopulateConstants.DEC_VIRTUAL_DATACENTER + 501 + "."
+                    + PopulateConstants.DEC_VIRTUAL_APPLIANCE + 501);
             populateVirtualInfrastructure
-            .createVirtualInfrastructure(PopulateConstants.DEC_ENTERPRISE + 501 + "." + PopulateConstants.DEC_VIRTUAL_DATACENTER + 501 + "." + PopulateConstants.DEC_VIRTUAL_APPLIANCE + 501
-                + "." + PopulateConstants.DEC_VIRTUAL_MACHINE
-                + 501 + ":"
-                + PopulateConstants.DEC_VIRTUAL_IMAGE + 501
-                + "," + "vnic" + 501
-                + "," + PopulateConstants.DEC_VLAN + 501);
-            populateLimits.createLimitRule(PopulateConstants.DEC_LIMIT + "." + dc1 + "." +  PopulateConstants.DEC_ENTERPRISE + 501);
-            
-            //Charging rule.fit.default:PROGRESSIVE
-            
+                .createVirtualInfrastructure(PopulateConstants.DEC_ENTERPRISE + 501 + "."
+                    + PopulateConstants.DEC_VIRTUAL_DATACENTER + 501 + "."
+                    + PopulateConstants.DEC_VIRTUAL_APPLIANCE + 501 + "."
+                    + PopulateConstants.DEC_VIRTUAL_MACHINE + 501 + ":"
+                    + PopulateConstants.DEC_VIRTUAL_IMAGE + 501 + "," + "vnic" + 501 + ","
+                    + PopulateConstants.DEC_VLAN + 501);
+            populateLimits.createLimitRule(PopulateConstants.DEC_LIMIT + "." + dc1 + "."
+                + PopulateConstants.DEC_ENTERPRISE + 501);
+
+            // Charging rule.fit.default:PROGRESSIVE
+
             populateRules.createRule("rule.fit.default:PROGRESSIVE");
-            
+
             action = populateAction.readAction("action.allocate.vm501=m1");
         }
         catch (PopulateException e)
@@ -135,9 +134,10 @@ public class VlanPopulateReader extends PopulateReader
         }
         return action;
     }
-    
+
     /**
      * Allocation of the VDC 10, in a rack overloading the NRSQ
+     * 
      * @return
      */
     public AllocatorAction rackWithNRSQwarning()
@@ -151,71 +151,73 @@ public class VlanPopulateReader extends PopulateReader
             String r1 = "r1";
             String rack1Parameters = "2,11,1,10,[1]";
             populateInfrastructure.populateInfrastructure(dc1);
-            populateInfrastructure.populateInfrastructure(dc1 + "."
-                + r1 + ":" + rack1Parameters);
+            populateInfrastructure.populateInfrastructure(dc1 + "." + r1 + ":" + rack1Parameters);
 
             // Create 10pm same capacity same hyper
             for (int i = 0; i < 10; i++)
             {
-                populateInfrastructure.createMachine(dc1, r1, "m" + i
-                    + ":" + hyper_type);
+                populateInfrastructure.createMachine(dc1, r1, "m" + i + ":" + hyper_type);
             }
             // 1 vdc/1 vlan/ 1 vapp/ 1 vm/ 1 vnic/
 
             // "e1.vdc1:dc1,XEN_3";
 
-            //Creating 9 vdc, 9 vlans, 9 vapps
+            // Creating 9 vdc, 9 vlans, 9 vapps
             for (int j = 2; j < 11; j++)
             {
                 populateVirtualInfrastructure
-                .createVirtualInfrastructure(PopulateConstants.DEC_ENTERPRISE + j);
+                    .createVirtualInfrastructure(PopulateConstants.DEC_ENTERPRISE + j);
                 populateVirtualInfrastructure
-                    .createVirtualInfrastructure(PopulateConstants.DEC_ENTERPRISE + j
-                        + "."
-                        + PopulateConstants.DEC_VIRTUAL_DATACENTER + j
-                        + ":" + dc1
-                        + "," + hyper_type);
+                    .createVirtualInfrastructure(PopulateConstants.DEC_ENTERPRISE + j + "."
+                        + PopulateConstants.DEC_VIRTUAL_DATACENTER + j + ":" + dc1 + ","
+                        + hyper_type);
                 populateVirtualInfrastructure
-                .createVirtualInfrastructure(PopulateConstants.DEC_ENTERPRISE + j + "." + PopulateConstants.DEC_VIRTUAL_IMAGE + j + ":" + dc1 + "," + "1,1,2");
-                populateVirtualInfrastructure.createVirtualInfrastructure(PopulateConstants.DEC_VLAN
-                    + j + ":"
-                    + PopulateConstants.DEC_VIRTUAL_DATACENTER + j
-                    + "," + r1);
+                    .createVirtualInfrastructure(PopulateConstants.DEC_ENTERPRISE + j + "."
+                        + PopulateConstants.DEC_VIRTUAL_IMAGE + j + ":" + dc1 + "," + "1,1,2");
                 populateVirtualInfrastructure
-                .createVirtualInfrastructure(PopulateConstants.DEC_ENTERPRISE + j + "." + PopulateConstants.DEC_VIRTUAL_DATACENTER + j + "." + PopulateConstants.DEC_VIRTUAL_APPLIANCE + j);
+                    .createVirtualInfrastructure(PopulateConstants.DEC_VLAN + j + ":"
+                        + PopulateConstants.DEC_VIRTUAL_DATACENTER + j + "," + r1);
                 populateVirtualInfrastructure
-                    .createVirtualInfrastructure(PopulateConstants.DEC_ENTERPRISE + j + "." + PopulateConstants.DEC_VIRTUAL_DATACENTER + j + "." + PopulateConstants.DEC_VIRTUAL_APPLIANCE + j
-                        + "." + PopulateConstants.DEC_VIRTUAL_MACHINE
-                        + j + ":"
-                        + PopulateConstants.DEC_VIRTUAL_IMAGE + j
-                        + "," + "vnic" + j
-                        + "," + PopulateConstants.DEC_VLAN + j);
-                populateLimits.createLimitRule(PopulateConstants.DEC_LIMIT + "." + dc1 + "." +  PopulateConstants.DEC_ENTERPRISE + j);
+                    .createVirtualInfrastructure(PopulateConstants.DEC_ENTERPRISE + j + "."
+                        + PopulateConstants.DEC_VIRTUAL_DATACENTER + j + "."
+                        + PopulateConstants.DEC_VIRTUAL_APPLIANCE + j);
+                populateVirtualInfrastructure
+                    .createVirtualInfrastructure(PopulateConstants.DEC_ENTERPRISE + j + "."
+                        + PopulateConstants.DEC_VIRTUAL_DATACENTER + j + "."
+                        + PopulateConstants.DEC_VIRTUAL_APPLIANCE + j + "."
+                        + PopulateConstants.DEC_VIRTUAL_MACHINE + j + ":"
+                        + PopulateConstants.DEC_VIRTUAL_IMAGE + j + "," + "vnic" + j + ","
+                        + PopulateConstants.DEC_VLAN + j);
+                populateLimits.createLimitRule(PopulateConstants.DEC_LIMIT + "." + dc1 + "."
+                    + PopulateConstants.DEC_ENTERPRISE + j);
             }
             // Creating of the virtual image 12
             populateVirtualInfrastructure
-            .createVirtualInfrastructure(PopulateConstants.DEC_ENTERPRISE + 2 + "." + PopulateConstants.DEC_VIRTUAL_IMAGE + 12 + ":" + dc1 + "," + "1,1,2");
-            //Creating the VLAN 12
+                .createVirtualInfrastructure(PopulateConstants.DEC_ENTERPRISE + 2 + "."
+                    + PopulateConstants.DEC_VIRTUAL_IMAGE + 12 + ":" + dc1 + "," + "1,1,2");
+            // Creating the VLAN 12
             populateVirtualInfrastructure.createVirtualInfrastructure(PopulateConstants.DEC_VLAN
-                + 12 + ":"
-                + PopulateConstants.DEC_VIRTUAL_DATACENTER + 2);
+                + 12 + ":" + PopulateConstants.DEC_VIRTUAL_DATACENTER + 2);
             // Creating the virtual appliance 12
             populateVirtualInfrastructure
-            .createVirtualInfrastructure(PopulateConstants.DEC_ENTERPRISE + 2 + "." + PopulateConstants.DEC_VIRTUAL_DATACENTER + 2 + "." + PopulateConstants.DEC_VIRTUAL_APPLIANCE + 12);
-            //Creating the the virtual machine 12 with the virtual image 12
+                .createVirtualInfrastructure(PopulateConstants.DEC_ENTERPRISE + 2 + "."
+                    + PopulateConstants.DEC_VIRTUAL_DATACENTER + 2 + "."
+                    + PopulateConstants.DEC_VIRTUAL_APPLIANCE + 12);
+            // Creating the the virtual machine 12 with the virtual image 12
             populateVirtualInfrastructure
-            .createVirtualInfrastructure(PopulateConstants.DEC_ENTERPRISE + 2 + "." + PopulateConstants.DEC_VIRTUAL_DATACENTER + 2 + "." + PopulateConstants.DEC_VIRTUAL_APPLIANCE + 12
-                + "." + PopulateConstants.DEC_VIRTUAL_MACHINE
-                + 12 + ":"
-                + PopulateConstants.DEC_VIRTUAL_IMAGE + 12
-                + "," + "vnic" + 12
-                + "," + PopulateConstants.DEC_VLAN + 12);
-            populateLimits.createLimitRule(PopulateConstants.DEC_LIMIT + "." + dc1 + "." +  PopulateConstants.DEC_ENTERPRISE + 2);
-            
-            //Charging rule.fit.default:PROGRESSIVE
-            
+                .createVirtualInfrastructure(PopulateConstants.DEC_ENTERPRISE + 2 + "."
+                    + PopulateConstants.DEC_VIRTUAL_DATACENTER + 2 + "."
+                    + PopulateConstants.DEC_VIRTUAL_APPLIANCE + 12 + "."
+                    + PopulateConstants.DEC_VIRTUAL_MACHINE + 12 + ":"
+                    + PopulateConstants.DEC_VIRTUAL_IMAGE + 12 + "," + "vnic" + 12 + ","
+                    + PopulateConstants.DEC_VLAN + 12);
+            populateLimits.createLimitRule(PopulateConstants.DEC_LIMIT + "." + dc1 + "."
+                + PopulateConstants.DEC_ENTERPRISE + 2);
+
+            // Charging rule.fit.default:PROGRESSIVE
+
             populateRules.createRule("rule.fit.default:PROGRESSIVE");
-            
+
             action = populateAction.readAction("action.allocate.vm10=m1");
         }
         catch (PopulateException e)
@@ -224,34 +226,33 @@ public class VlanPopulateReader extends PopulateReader
         }
         return action;
     }
-    
-    private void createVirtualInfrastructure(String virtualName, String datacenterName, String hyperType, String rackName)
+
+    private void createVirtualInfrastructure(String virtualName, String datacenterName,
+        String hyperType, String rackName)
     {
-        populateVirtualInfrastructure
-        .createVirtualInfrastructure(PopulateConstants.DEC_ENTERPRISE + virtualName);
-        populateVirtualInfrastructure
-            .createVirtualInfrastructure(PopulateConstants.DEC_ENTERPRISE + virtualName
-                + "."
-                + PopulateConstants.DEC_VIRTUAL_DATACENTER + virtualName
-                + ":" + PopulateConstants.DEC_DATACENTER + datacenterName
-                + "," + hyperType);
-        populateVirtualInfrastructure
-        .createVirtualInfrastructure(PopulateConstants.DEC_ENTERPRISE + virtualName + "." + PopulateConstants.DEC_VIRTUAL_IMAGE + virtualName + ":" + datacenterName + "," + "1,1,2");
+        populateVirtualInfrastructure.createVirtualInfrastructure(PopulateConstants.DEC_ENTERPRISE
+            + virtualName);
+        populateVirtualInfrastructure.createVirtualInfrastructure(PopulateConstants.DEC_ENTERPRISE
+            + virtualName + "." + PopulateConstants.DEC_VIRTUAL_DATACENTER + virtualName + ":"
+            + PopulateConstants.DEC_DATACENTER + datacenterName + "," + hyperType);
+        populateVirtualInfrastructure.createVirtualInfrastructure(PopulateConstants.DEC_ENTERPRISE
+            + virtualName + "." + PopulateConstants.DEC_VIRTUAL_IMAGE + virtualName + ":"
+            + datacenterName + "," + "1,1,2");
         populateVirtualInfrastructure.createVirtualInfrastructure(PopulateConstants.DEC_VLAN
-            + virtualName + ":"
-            + PopulateConstants.DEC_VIRTUAL_DATACENTER + virtualName
-            + "," + PopulateConstants.DEC_RACK + rackName);
-        populateVirtualInfrastructure
-        .createVirtualInfrastructure(PopulateConstants.DEC_ENTERPRISE + virtualName + "." + PopulateConstants.DEC_VIRTUAL_DATACENTER + virtualName + "." + PopulateConstants.DEC_VIRTUAL_APPLIANCE + virtualName);
-        populateVirtualInfrastructure
-            .createVirtualInfrastructure(PopulateConstants.DEC_ENTERPRISE + virtualName + "." + PopulateConstants.DEC_VIRTUAL_DATACENTER + virtualName + "." + PopulateConstants.DEC_VIRTUAL_APPLIANCE + virtualName
-                + "." + PopulateConstants.DEC_VIRTUAL_MACHINE
-                + virtualName + ":"
-                + PopulateConstants.DEC_VIRTUAL_IMAGE + virtualName
-                + "," + "vnic" + virtualName
-                + "," + PopulateConstants.DEC_VLAN + virtualName);
-        populateLimits.createLimitRule(PopulateConstants.DEC_LIMIT + "." + datacenterName + "." +  PopulateConstants.DEC_ENTERPRISE + virtualName);
-        
+            + virtualName + ":" + PopulateConstants.DEC_VIRTUAL_DATACENTER + virtualName + ","
+            + PopulateConstants.DEC_RACK + rackName);
+        populateVirtualInfrastructure.createVirtualInfrastructure(PopulateConstants.DEC_ENTERPRISE
+            + virtualName + "." + PopulateConstants.DEC_VIRTUAL_DATACENTER + virtualName + "."
+            + PopulateConstants.DEC_VIRTUAL_APPLIANCE + virtualName);
+        populateVirtualInfrastructure.createVirtualInfrastructure(PopulateConstants.DEC_ENTERPRISE
+            + virtualName + "." + PopulateConstants.DEC_VIRTUAL_DATACENTER + virtualName + "."
+            + PopulateConstants.DEC_VIRTUAL_APPLIANCE + virtualName + "."
+            + PopulateConstants.DEC_VIRTUAL_MACHINE + virtualName + ":"
+            + PopulateConstants.DEC_VIRTUAL_IMAGE + virtualName + "," + "vnic" + virtualName + ","
+            + PopulateConstants.DEC_VLAN + virtualName);
+        populateLimits.createLimitRule(PopulateConstants.DEC_LIMIT + "." + datacenterName + "."
+            + PopulateConstants.DEC_ENTERPRISE + virtualName);
+
     }
 
 }

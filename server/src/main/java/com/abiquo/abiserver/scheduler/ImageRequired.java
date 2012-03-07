@@ -24,7 +24,8 @@ package com.abiquo.abiserver.scheduler;
 /**
  * Hold the resource and location requirements for a VirtualImage
  */
-@Deprecated // VirtualMachineRequirements
+@Deprecated
+// VirtualMachineRequirements
 public class ImageRequired
 {
     /** VirtualImage required CPU. */

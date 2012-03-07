@@ -98,6 +98,10 @@
 
             public function willShow():void
             {
+                //clean virtual datacenter list
+                virtualDatacenterList.cleanVirtualDatacenterList();
+                virtualApplianceList.cleanVirtualApplianceList();
+                
                 //selectedVirtualDataCenter = null;
                 checkVirtualDatacentersAndAppliances();
 
@@ -140,6 +144,8 @@
                                                       askVirtualApplianceDeletion);
                 virtualApplianceList.addEventListener("virtualApplianceSelected",
                                                       showVirtualAppliance);
+                virtualApplianceList.addEventListener("requestVirtualAppliances",
+                                                      retrieveVirtualAppliances);                                                      
                 //NetworkManagement
                 vdcNetworkManagement = new NetworkManagement();
                 vdcNetworkManagement.addEventListener("selectedPrivateVLANChange",
@@ -164,9 +170,11 @@
                                                                                      onVirtualApplianceCRUD);
                 AbiCloudModel.getInstance().virtualApplianceManager.addEventListener(VirtualApplianceEvent.VIRTUAL_APPLIANCE_EDITED,
                                                                                      onVirtualApplianceEdited);
+                AbiCloudModel.getInstance().virtualApplianceManager.addEventListener(VirtualApplianceEvent.VIRTUAL_APPLIANCES_RETRIEVED,
+                                                                                     onVirtualApplianceCRUD);                                                                                     
 
                 //Listening for checks in VirtualDatacenters and VirtualAppliances
-                AbiCloudModel.getInstance().virtualApplianceManager.addEventListener(VirtualApplianceEvent.VIRTUAL_DATACENTERS_AND_APPLIANCES_CHECKED,
+                AbiCloudModel.getInstance().virtualApplianceManager.addEventListener(VirtualApplianceEvent.VIRTUAL_DATACENTER_RETRIEVED,
                                                                                      onVirtualDatacentersAndAppliancesChecked);
                 //refresh the list of virtual datacenters when one has been edited
 				AbiCloudModel.getInstance().virtualApplianceManager.addEventListener(VirtualApplianceEvent.VIRTUAL_DATACENTER_EDITED,
@@ -225,7 +233,8 @@
                 hideMoreInfoContainer();
 
                 //Filtering the VirtualAppliance by the VirtualDataCenter that has been selected
-                virtualApplianceList.filterVirtualAppliancesByVirtualDataCenter(virtualDatacenterList.selectedVirtualDataCenter);
+                //virtualApplianceList.filterVirtualAppliancesByVirtualDataCenter(virtualDatacenterList.selectedVirtualDataCenter);
+                retrieveVirtualAppliances();
 
                 //Setting the VirtualDatacenter to manage its network
                 vdcNetworkManagement.virtualDatacenter = virtualDatacenterList.selectedVirtualDataCenter;
@@ -254,6 +263,8 @@
                         if (selectedVirtualAppliance.id == VirtualAppliance(virtualAppliances.getItemAt(i)).id)
                         {
                             selectedVirtualAppliance = virtualAppliances.getItemAt(i) as VirtualAppliance;
+                            virtualApplianceList.virtualApplianceDataGrid.selectedIndex = i;
+                            virtualApplianceList.virtualApplianceTile.selectedIndex = i;
                             virtualApplianceFound = true;
                             break;
                         }
@@ -268,9 +279,6 @@
                 //Setting the VirtualApplianceList component
                 virtualApplianceList.virtualAppliances = virtualAppliances;
                 virtualApplianceList.selectedVirtualAppliance = selectedVirtualAppliance;
-
-                //Showing againg the VirtualAppliances
-                virtualApplianceList.filterVirtualAppliancesByVirtualDataCenter(virtualDatacenterList.selectedVirtualDataCenter);
             }
 
             /**
@@ -291,7 +299,8 @@
                 //from the view
                 if (virtualDatacenterList.selectedVirtualDataCenter && virtualApplianceEvent.virtualAppliance.virtualDataCenter.id != virtualDatacenterList.selectedVirtualDataCenter.id)
                 {
-                    virtualApplianceList.filterVirtualAppliancesByVirtualDataCenter(virtualDatacenterList.selectedVirtualDataCenter);
+                    //virtualApplianceList.filterVirtualAppliancesByVirtualDataCenter(virtualDatacenterList.selectedVirtualDataCenter);
+                    retrieveVirtualAppliances();
                 }
             }
 
@@ -322,7 +331,7 @@
              */
             private function askVirtualApplianceDeletion(event:Event = null):void
             {
-                if(virtualApplianceList.selectedVirtualAppliance.state.id == State.APPLY_CHANGES_NEEDED){
+                if(virtualApplianceList.selectedVirtualAppliance.state.description == State.NEEDS_SYNC.description){
                 	AbiCloudAlert.showError(ResourceManager.getInstance().getString("Common",
                                                                                     "ALERT_TITLE_LABEL"),
                                             ResourceManager.getInstance().getString("VirtualAppliance",
@@ -361,7 +370,7 @@
                 var virtualApplianceToDelete:VirtualAppliance = virtualApplianceList.selectedVirtualAppliance;
                 var virtualApplianceEvent:VirtualApplianceEvent;
 
-                if (virtualApplianceToDelete.state.id == State.RUNNING)
+                if (virtualApplianceToDelete.state.description == State.DEPLOYED.description)
                 {
                     virtualApplianceEvent = new VirtualApplianceEvent(VirtualApplianceEvent.DELETE_VIRTUALAPPLIANCE_NON_BLOCKING);
                     virtualApplianceEvent.virtualAppliance = ObjectUtil.copy(virtualApplianceToDelete) as VirtualAppliance;
@@ -463,21 +472,61 @@
             	//We need to differenciate the background process 
             	//from the manual user interaction in order to show the
             	//appropriate message in case of session expried
-            	AbiCloudModel.getInstance().virtualApplianceManager.callProcessComplete = false;
             	if(event){
             		AbiCloudModel.getInstance().virtualApplianceManager.serverCallType = true;
             	}else{
             		AbiCloudModel.getInstance().virtualApplianceManager.serverCallType = false;
             	}
-                var virtualApplianceEvent:VirtualApplianceEvent = new VirtualApplianceEvent(VirtualApplianceEvent.CHECK_VIRTUAL_DATACENTERS_AND_APPLIANCES_BY_ENTERPRISE);
-                virtualApplianceEvent.enterprise = AbiCloudModel.getInstance().loginManager.user.enterprise;
-                dispatchEvent(virtualApplianceEvent);
+                
+                //Retrieve VirtualDatacenters
+                retrieveVirtualDatacenters();
+                
+                //Retrieve VirtualAppliances
+                retrieveVirtualAppliances();
             }
 
             private function onVirtualDatacentersAndAppliancesChecked(event:Event):void
             {
                 virtualDatacenterList.setVirtualDataCenters(AbiCloudModel.getInstance().virtualApplianceManager.virtualDataCenters);
-                setVirtualAppliances(AbiCloudModel.getInstance().virtualApplianceManager.virtualAppliances);
+            }
+            
+            private function retrieveVirtualDatacenters():void
+            {
+            	if(virtualApplianceList)
+            	{
+	            	var virtualApplianceEvent:VirtualApplianceEvent = new VirtualApplianceEvent(VirtualApplianceEvent.GET_VIRTUAL_DATACENTERS_BY_ENTERPRISE);
+	                virtualApplianceEvent.enterprise = AbiCloudModel.getInstance().loginManager.user.enterprise;
+	                virtualApplianceEvent.listRequest = virtualDatacenterList.listRequest;
+	                dispatchEvent(virtualApplianceEvent);
+            	}
+            }
+            
+            private function retrieveVirtualAppliances(event:Event = null):void
+            {
+            	//Retrieves Vapp by VDC or by Enterprise
+            	var virtualApplianceEvent:VirtualApplianceEvent;
+            	if(virtualDatacenterList.selectedVirtualDataCenter)
+            	{
+	                virtualApplianceEvent = new VirtualApplianceEvent(VirtualApplianceEvent.GET_VIRTUAL_APPLIANCES_BY_VIRTUAL_DATACENTER);
+	                virtualApplianceEvent.virtualDataCenter = virtualDatacenterList.selectedVirtualDataCenter;
+            	}
+            	else
+            	{
+            		virtualApplianceEvent = new VirtualApplianceEvent(VirtualApplianceEvent.GET_VIRTUAL_APPLIANCES_BY_ENTERPRISE);
+            		virtualApplianceEvent.enterprise = AbiCloudModel.getInstance().loginManager.user.enterprise;
+            	}
+            	//Reset the listRequest object
+            	if(!event)
+            	{
+            		virtualApplianceList.resetListRequest();
+            	}
+            	
+                virtualApplianceEvent.listRequest = virtualApplianceList.listRequest;
+                
+                if(virtualApplianceList.visible)
+                {
+	                dispatchEvent(virtualApplianceEvent);
+                }
             }
         ]]>
     </mx:Script>
@@ -490,7 +539,8 @@
 
         <virtualdatacenter:VirtualDatacenterList id="virtualDatacenterList"
             width="100%" height="100%"
-            selectedVirtualDataCenterChange="onSelectedVirtualDatacenterChange()"/>
+            selectedVirtualDataCenterChange="onSelectedVirtualDatacenterChange()"
+            requestVirtualDataCenters="retrieveVirtualDatacenters()"/>
     </general:GeneralPanel>
 
 

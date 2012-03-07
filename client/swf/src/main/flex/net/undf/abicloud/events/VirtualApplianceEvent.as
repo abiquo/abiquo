@@ -26,8 +26,11 @@ package net.undf.abicloud.events
     import mx.collections.ArrayCollection;
     
     import net.undf.abicloud.vo.infrastructure.DataCenter;
+    import net.undf.abicloud.vo.infrastructure.PhysicalMachine;
+    import net.undf.abicloud.vo.infrastructure.Rack;
     import net.undf.abicloud.vo.infrastructure.VirtualMachine;
     import net.undf.abicloud.vo.networking.NetworkConfiguration;
+    import net.undf.abicloud.vo.result.ListRequest;
     import net.undf.abicloud.vo.user.Enterprise;
     import net.undf.abicloud.vo.virtualappliance.Log;
     import net.undf.abicloud.vo.virtualappliance.VirtualAppliance;
@@ -36,8 +39,6 @@ package net.undf.abicloud.events
     public class VirtualApplianceEvent extends Event
     {
         /* ------------- Constants------------- */
-        public static const GET_VIRTUALAPPLIANCES_BY_ENTERPRISE:String = "getVirtualAppliancesByEnterpriseVirtualApplianceEvent";
-
         public static const GET_VIRTUALAPPLIANCE_NODES:String = "getVirtualApplianceNodes_VirtualApplianceEvent";
 
         public static const CREATE_VIRTUALAPPLIANCE:String = "createVirtualApplianceVirtualApplianceEvent";
@@ -62,16 +63,14 @@ package net.undf.abicloud.events
 
         public static const CANCEL_VIRTUAL_APPLIANCE_DEPLOYMENT:String = "cancelVirtualApplianceDeploymentVirtualApplianceEvent";
 
-        public static const CHECK_VIRTUAL_DATACENTERS_AND_APPLIANCES_BY_ENTERPRISE:String = "checkVirtualDatacentersAndAppliancesByEnterpriseVirtualApplianceEvent";
-
         public static const CHECK_VIRTUAL_APPLIANCE:String = "checkVirtualApplianceVirtualApplianceEvent"
-
-        public static const VIRTUAL_DATACENTERS_AND_APPLIANCES_CHECKED:String = "virtualDatacentersAndAppliancesCheckedVirtualApplianceEvent";
 
         public static const CREATE_VIRTUAL_APPLIANCE_BUNDLE:String = "createVirtualApplianceBundleVirtualApplianceEvent";
 
         public static const CREATE_VIRTUAL_APPLIANCE_BUNDLE_AND_UPDATE:String = "createVirtualApplianceBundleAndUpdateVirtualApplianceEvent";
 
+        public static const VIRTUAL_APPLIANCES_RETRIEVED:String = "virtualAppliancesRetrievedVirtualAppliancesEvent"; 
+        
         public static const VIRTUAL_APPLIANCE_NODES_RETRIEVED:String = "virtualApplianceNodesRetrievedVirtualApplianceEvent";
 
         public static const VIRTUAL_APPLIANCE_CREATED:String = "virtualApplianceCreatedVirtualApplianceEvent"
@@ -94,21 +93,36 @@ package net.undf.abicloud.events
 
         public static const EDIT_VIRTUAL_DATACENTER:String = "editVirtualDataCenterVirtualApplianceEvent";
 
-        public static const GET_VIRTUAL_DATACENTER_DHCP_CONF:String = "getVirtualDataCenterDHCPConfVirtualApplianceEvent";
-
         public static const VIRTUAL_DATACENTER_ADDED:String = "virtualDataCenterAddedVirtualApplianceEvent";
 
         public static const VIRTUAL_DATACENTER_EDITED:String = "virtualDataCenterEditedVirtualApplianceEvent";
 
         public static const VIRTUAL_DATACENTER_DELETED:String = "virtualDataCenterDeletedVirtualApplianceEvent";
+        
+        public static const VIRTUAL_DATACENTER_RETRIEVED:String = "virtualDataCenterRetrievedVirtualApplianceEvent";
 
-	public static const CHECK_VIRTUAL_DATACENTERS_AND_APPLIANCES_BY_ENTERPRISE_AND_DATACENTER:String = "checkVirtualDatacentersAndAppliancesByEnterpriseAndDatacenterEvent";
+	   public static const GET_VIRTUAL_APPLIANCES_BY_ENTERPRISE_AND_DATACENTER:String = "checkVirtualDatacentersAndAppliancesByEnterpriseAndDatacenterEvent";
 	
 	   public static const GET_VIRTUAL_DATACENTERS_BY_ENTERPRISE_FASTER:String = "getVirtualDataCenterByEnterpriseFasterVirtualApplianceEvent";
+	   
+	   public static const GET_VIRTUAL_APPLIANCES_BY_VIRTUAL_DATACENTER:String = "getVirtualAppliancesByVirtualDatacenterVirtualApplianceEvent";
+	   
+	   public static const GET_VIRTUAL_APPLIANCES_BY_ENTERPRISE:String = "getVirtualAppliancesByEnterpriseVirtualApplianceEvent";
 	
 	   public static const VIRTUAL_MACHINE_CHANGE_STATE:String = "virtualMachineChangeStateVirtualApplianceEvent";
 	   
 	   public static const GET_VIRTUAL_APPLIANCE_LOGS:String = "getVirtualApplianceLogsVirtualEvent";
+	   
+	   //VIRTUAL MACHINE STORAGE
+        public static const GET_HARD_DISKS_BY_VIRTUAL_MACHINE:String = "getHardDisksByVirtualMachineEvent";
+        
+        public static const GET_HARD_DISKS_BY_VIRTUAL_MACHINE_FROM_INFRASTRUCTURE:String = "getHardDisksByVirtualMachineFromInfrastructureVirtualApplianceEvent";
+        
+        public static const DELETE_HARD_DISK:String = "deleteHardDiskVirtualApplianceEvent";
+        
+        public static const HARD_DISKS_UPDATED:String = "hardDisksUpdatedVirtualApplianceEvent";
+        
+        public static const CREATE_HARD_DISK:String = "createHardDiskVirtualApplianceEvent";
 
         /* ------------- Public atributes ------------- */
         public var virtualAppliance:VirtualAppliance;
@@ -132,6 +146,16 @@ package net.undf.abicloud.events
         public var virtualMachine:VirtualMachine;
         
         public var callback:Function;
+        
+        public var diskId:Number;
+        
+        public var size:Number;
+        
+        public var rack:Rack;
+        
+        public var physicalmachine:PhysicalMachine;
+        
+        public var listRequest:ListRequest;
 
 
         /* ------------- Constructor ------------- */

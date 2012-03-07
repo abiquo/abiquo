@@ -28,11 +28,11 @@ package net.undf.abicloud.view.virtualimage.components.virtualimage
     import mx.containers.Tile;
     import mx.core.Application;
     import mx.events.FlexEvent;
-    import mx.resources.ResourceManager;
     
     import net.undf.abicloud.events.virtualimage.VirtualImageEvent;
     import net.undf.abicloud.model.AbiCloudModel;
     import net.undf.abicloud.vo.infrastructure.HyperVisorType;
+    import net.undf.abicloud.vo.virtualappliance.VirtualDataCenter;
     import net.undf.abicloud.vo.virtualimage.Category;
     import net.undf.abicloud.vo.virtualimage.Repository;
     import net.undf.abicloud.vo.virtualimage.VirtualImage;
@@ -115,6 +115,13 @@ package net.undf.abicloud.view.virtualimage.components.virtualimage
          * Flag that indicates that the VirtualImage renderers must be built
          */
         private var needBuildMiniatures:Boolean = false;
+        
+        private var _virtualDatacenter:VirtualDataCenter;
+        
+        public function set virtualDatacenter(value:VirtualDataCenter):void
+        {
+        	this._virtualDatacenter = value;
+        }
 
         
         public function VirtualImageList():void{
@@ -185,6 +192,7 @@ package net.undf.abicloud.view.virtualimage.components.virtualimage
                     //Request the VirtualImages for this category and Hypervisor type
                     event = new VirtualImageEvent(VirtualImageEvent.GET_VIRTUAL_IMAGES_BY_CATEGORY_AND_HYPERVISOR_TYPE);
                     event.hypervisorType = hypervisorType;
+	                event.virtualDatacenter = this._virtualDatacenter; 
                 }
                 else
                 {
@@ -193,6 +201,7 @@ package net.undf.abicloud.view.virtualimage.components.virtualimage
                 }
 
                 event.enterprise = AbiCloudModel.getInstance().loginManager.user.enterprise;
+                event.datacenter = repository.datacenter;
                 event.repository = repository;
                 event.category = category;
                 event.callback = setVirtualImages;
@@ -313,6 +322,7 @@ package net.undf.abicloud.view.virtualimage.components.virtualimage
                 if(isCorrect){
                 	virtualImageMiniature = new VirtualImageMiniature();
                 	virtualImageMiniature.id = "virtual_image_" + count;
+                	virtualImageMiniature.datacenter = repository.datacenter;
                     virtualImageMiniature.virtualImage = virtualImage;
                     virtualImageMiniature.sizeMultiplier = sizeMultiplier;
                     virtualImageMiniature.editable = editable;
@@ -448,6 +458,7 @@ package net.undf.abicloud.view.virtualimage.components.virtualimage
                     //Build the miniature immediately
                     var virtualImageMiniature:VirtualImageMiniature = new VirtualImageMiniature();
                     virtualImageMiniature.id = "virtual_image_" + (virtualImageMiniatures.length + 1);
+                    virtualImageMiniature.datacenter = repository.datacenter;
                     virtualImageMiniature.sizeMultiplier = sizeMultiplier;
                     virtualImageMiniature.virtualImage = virtualImage;
                     virtualImageMiniature.editable = editable;

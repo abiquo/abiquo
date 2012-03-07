@@ -24,7 +24,7 @@ package com.abiquo.server.core.cloud.stateful;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.abiquo.model.transport.SingleResourceTransportDto;
-import com.abiquo.server.core.cloud.State;
+import com.abiquo.server.core.cloud.VirtualMachineState;
 
 @XmlRootElement(name = "virtualApplianceStatefulConversion")
 public class VirtualApplianceStatefulConversionDto extends SingleResourceTransportDto
@@ -55,26 +55,26 @@ public class VirtualApplianceStatefulConversionDto extends SingleResourceTranspo
         this.idUser = idUser;
     }
 
-    private State subState;
+    private VirtualMachineState subState;
 
-    public State getSubState()
+    public VirtualMachineState getSubState()
     {
         return subState;
     }
 
-    public void setSubState(final State subState)
+    public void setSubState(final VirtualMachineState subState)
     {
         this.subState = subState;
     }
 
-    private State state;
+    private VirtualMachineState state;
 
-    public State getState()
+    public VirtualMachineState getState()
     {
         return state;
     }
 
-    public void setState(final State state)
+    public void setState(final VirtualMachineState state)
     {
         this.state = state;
     }

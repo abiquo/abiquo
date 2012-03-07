@@ -33,6 +33,7 @@
 
     <mx:Script>
         <![CDATA[
+        	import mx.utils.ObjectUtil;
             import mx.collections.ArrayCollection;
             import mx.controls.Alert;
             import mx.core.Application;
@@ -149,12 +150,20 @@
 
             private function onClickDeleteRemoteService():void
             {
+                var message:String;
+                if(RemoteService(remoteServiceList.selectedItem).remoteServiceType.valueOf == RemoteServiceType.DHCP)
+                {
+                	message = ResourceManager.getInstance().getString("Infrastructure","ALERT_DELETE_DHCP_REMOTE_SERVICE_TEXT");;
+                }
+                else
+                {
+                    message = ResourceManager.getInstance().getString("Infrastructure","ALERT_DELETE_REMOTE_SERVICE_TEXT");	
+                }
                 AbiCloudAlert.showAlert(ResourceManager.getInstance().getString("Common",
                                                                                 "ALERT_TITLE_LABEL"),
                                         ResourceManager.getInstance().getString("Infrastructure",
                                                                                 "ALERT_DELETE_REMOTE_SERVICE_HEADER")+" '"+RemoteService(remoteServiceList.selectedItem).remoteServiceType.name+"'",
-                                        ResourceManager.getInstance().getString("Infrastructure",
-                                                                                "ALERT_DELETE_REMOTE_SERVICE_TEXT"),
+                                        message,
                                         Alert.YES | Alert.NO, deleteRemoteService);
             }
 
@@ -184,6 +193,7 @@
             {
                 var event:InfrastructureEvent = new InfrastructureEvent(InfrastructureEvent.CHECK_REMOTE_SERVICE);
                 event.remoteService = remoteServiceList.selectedItem as RemoteService;
+                event.dataCenter = this._datacenter;
                 dispatchEvent(event);
             }
 
@@ -191,6 +201,23 @@
             {
                 PopUpManager.removePopUp(_remoteServiceForm);
 
+            }
+            
+            private function compareRemoteServiceName(remoteService1:Object, remoteService2:Object):int{
+                var remoteServiceName1:String;
+                var remoteServiceName2:String;
+                
+                if (RemoteService(remoteService1).remoteServiceType)
+                    remoteServiceName1 = RemoteService(remoteService1).remoteServiceType.name;
+                else
+                    remoteServiceName1 = "-";
+                
+                if (RemoteService(remoteService2).remoteServiceType)
+                    remoteServiceName2 = RemoteService(remoteService2).remoteServiceType.name;
+                else
+                    remoteServiceName2 = "-";
+                    
+                return ObjectUtil.stringCompare(remoteServiceName1,remoteServiceName2);
             }
         ]]>
     </mx:Script>
@@ -256,6 +283,8 @@
 
                 <mx:DataGridColumn 
                     labelFunction="remoteServiceTypeLabelFunction"
+                    sortable="true"
+                    sortCompareFunction="compareRemoteServiceName"
                     headerText="@Resource(bundle='Infrastructure', key='LABEL_TYPE')"/>
 
                 <mx:DataGridColumn 

@@ -148,11 +148,30 @@ public class VLANNetworkDAO extends DefaultDAOBase<Integer, VLANNetwork>
         {
             if (netType.equals(NetworkType.PUBLIC))
             {
-                criteria.add(Restrictions.isNull(VLANNetwork.ENTERPRISE_PROPERTY));
+
+                criteria.add(Restrictions.eq(VLANNetwork.TYPE_PROPERTY, NetworkType.PUBLIC));
+                // criteria.add(Restrictions.isNull(VLANNetwork.ENTERPRISE_PROPERTY));
             }
-            else
+            else if (netType.equals(NetworkType.EXTERNAL_UNMANAGED))
             {
-                criteria.add(Restrictions.isNotNull(VLANNetwork.ENTERPRISE_PROPERTY));
+                criteria.add(Restrictions.or(
+                    Restrictions.eq(VLANNetwork.TYPE_PROPERTY, NetworkType.EXTERNAL),
+                    Restrictions.eq(VLANNetwork.TYPE_PROPERTY, NetworkType.UNMANAGED)));
+                // criteria.add(Restrictions.isNotNull(VLANNetwork.ENTERPRISE_PROPERTY));
+            }
+            else if (netType.equals(NetworkType.EXTERNAL))
+            {
+                criteria.add(Restrictions.eq(VLANNetwork.TYPE_PROPERTY, NetworkType.EXTERNAL));
+                // criteria.add(Restrictions.isNotNull(VLANNetwork.ENTERPRISE_PROPERTY));
+            }
+            else if (netType.equals(NetworkType.UNMANAGED))
+            {
+                criteria.add(Restrictions.eq(VLANNetwork.TYPE_PROPERTY, NetworkType.UNMANAGED));
+            }
+            else if (netType.equals(NetworkType.INTERNAL))
+            {
+                criteria.add(Restrictions.eq(VLANNetwork.TYPE_PROPERTY, NetworkType.INTERNAL));
+                // criteria.add(Restrictions.isNotNull(VLANNetwork.ENTERPRISE_PROPERTY));
             }
         }
 

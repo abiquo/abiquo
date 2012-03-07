@@ -70,8 +70,8 @@ import com.abiquo.util.resources.ResourceManager;
 public abstract class BasicCommand
 {
 
-    protected final ErrorManager errorManager =
-        ErrorManager.getInstance(AbiCloudConstants.ERROR_PREFIX);
+    protected final ErrorManager errorManager = ErrorManager
+        .getInstance(AbiCloudConstants.ERROR_PREFIX);
 
     // final static private ResourceManager resourceManager = new
     // ResourceManager(BasicCommand.class);

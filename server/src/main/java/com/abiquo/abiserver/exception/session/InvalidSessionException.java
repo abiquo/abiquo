@@ -28,7 +28,7 @@ import com.abiquo.abiserver.exception.AbiCloudException;
  * 
  * @author jdevesa@abiquo.com
  */
-//public class InvalidSessionException extends AbiCloudException
+// public class InvalidSessionException extends AbiCloudException
 public class InvalidSessionException extends Exception
 {
     /**

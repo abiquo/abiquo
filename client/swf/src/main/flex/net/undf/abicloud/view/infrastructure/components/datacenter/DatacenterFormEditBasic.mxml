@@ -84,7 +84,7 @@
         required="true">
         <mx:TextInput id="nameInput"
             height="20"
-            maxChars="19"
+            maxChars="20"
             change="validateForm()"/>
     </mx:FormItem>
 

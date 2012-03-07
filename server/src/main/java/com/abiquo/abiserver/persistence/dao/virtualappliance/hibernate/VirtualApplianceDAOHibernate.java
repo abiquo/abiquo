@@ -149,8 +149,10 @@ public class VirtualApplianceDAOHibernate extends HibernateDAO<VirtualappHB, Int
             Query query =
                 session.createQuery(
                     "SELECT va FROM VirtualappExtendedHB as va WHERE va.state not in (:states)")
-                    .setParameterList("states",
-                        new StateEnum[] {StateEnum.NOT_DEPLOYED, StateEnum.IN_PROGRESS});
+                    .setParameterList(
+                        "states",
+                        new StateEnum[] {StateEnum.NOT_ALLOCATED, StateEnum.ALLOCATED,
+                        StateEnum.LOCKED, StateEnum.UNKNOWN});
 
             apps = query.list();
         }
@@ -206,14 +208,14 @@ public class VirtualApplianceDAOHibernate extends HibernateDAO<VirtualappHB, Int
             (VirtualappHB) getSession().get("VirtualappExtendedHB", virtualAppliance.getId());
 
         StateEnum previousState = StateEnum.valueOf(virtualAppliance.getState().getDescription());
-        if (previousState == virtualAppHB.getState() && previousState != StateEnum.IN_PROGRESS)
+        if (previousState == virtualAppHB.getState() && previousState != StateEnum.LOCKED)
         {
             // The given virtual appliance is up to date, and is not in
             // progress.
             // We set it now to IN_PROGRESS, and return that it is allowed
             // to manipulate it
-            virtualAppHB.setState(StateEnum.IN_PROGRESS);
-            virtualAppHB.setSubState(subState);
+            virtualAppHB.setState(StateEnum.LOCKED);
+            // virtualAppHB.setSubState(subState);
 
             getSession().update("VirtualappHB", virtualAppHB);
 
@@ -240,10 +242,10 @@ public class VirtualApplianceDAOHibernate extends HibernateDAO<VirtualappHB, Int
     public VirtualappHB blockVirtualAppliance(final VirtualappHB virtualApp,
         final StateEnum subState) throws PersistenceException
     {
-        if (virtualApp.getState() != StateEnum.IN_PROGRESS)
+        if (virtualApp.getState() != StateEnum.LOCKED)
         {
-            virtualApp.setState(StateEnum.IN_PROGRESS);
-            virtualApp.setSubState(subState);
+            virtualApp.setState(StateEnum.LOCKED);
+            // virtualApp.setSubState(subState);
 
             makePersistent(virtualApp);
         }
@@ -310,7 +312,7 @@ public class VirtualApplianceDAOHibernate extends HibernateDAO<VirtualappHB, Int
         return readVirtualApps(results);
     }
 
-    private Collection<VirtualappHB> readVirtualApps(List<Object[]> results)
+    private Collection<VirtualappHB> readVirtualApps(final List<Object[]> results)
     {
         List<VirtualappHB> vapps = new ArrayList<VirtualappHB>();
         for (Object[] row : results)
@@ -320,16 +322,16 @@ public class VirtualApplianceDAOHibernate extends HibernateDAO<VirtualappHB, Int
             vapp.setName((String) row[1]);
             vapp.setHighDisponibility((Integer) row[2]);
             vapp.setState((StateEnum) row[3]);
-            vapp.setSubState((StateEnum) row[4]);
-            vapp.setError((Integer) row[5]);
-            vapp.setPublic_((Integer) row[6]);
-            vapp.setNodeConnections((String) row[7]);
+            // vapp.setSubState((StateEnum) row[4]);
+            vapp.setError((Integer) row[4]);
+            vapp.setPublic_((Integer) row[5]);
+            vapp.setNodeConnections((String) row[6]);
 
             VirtualDataCenterHB vdc = new VirtualDataCenterHB();
-            vdc.setIdVirtualDataCenter((Integer) row[8]);
-            vdc.setName((String) row[9]);
-            vdc.setIdDataCenter((Integer) row[10]);
-            vdc.setHypervisorType((HypervisorType) row[11]);
+            vdc.setIdVirtualDataCenter((Integer) row[7]);
+            vdc.setName((String) row[8]);
+            vdc.setIdDataCenter((Integer) row[9]);
+            vdc.setHypervisorType((HypervisorType) row[10]);
 
             vapp.setVirtualDataCenterHB(vdc);
 

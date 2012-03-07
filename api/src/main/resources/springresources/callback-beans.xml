@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+    <!-- Callbacks are out of the scope of the servlet and filters. 
+        This means that the OpenEntityManagerInViewFilter does not create the Hibernate 
+        session for each task execution. We need to define the OpenEntityManagerInterceptor 
+        to create the Hibernate session and proxy the task beans with that interceptor 
+        in order to avoid LazyInitialisation exceptions. -->
+    <!-- Proxied callback bean definitions -->
+    <bean id="AMEventProcessorWithFilters" parent="abstractInterceptedBean">
+        <property name="target" ref="AMEventProcessor" />
+    </bean>
+    <bean id="VSMEventProcessorWithFilters" parent="abstractInterceptedBean">
+        <property name="target" ref="VSMEventProcessor" />
+    </bean>
+</beans>

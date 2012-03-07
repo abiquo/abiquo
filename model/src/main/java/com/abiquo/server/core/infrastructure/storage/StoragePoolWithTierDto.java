@@ -26,12 +26,13 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement(name = "storagePoolWithTier")
 public class StoragePoolWithTierDto extends StoragePoolDto
 {
-    
+
     private static final long serialVersionUID = 1L;
+
     public static final String MEDIA_TYPE = "application/storagepoolwithtierdto+xml";
-    
+
     private TierDto tier;
-    
+
     public void setTier(TierDto tier)
     {
         this.tier = tier;

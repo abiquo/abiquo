@@ -28,12 +28,14 @@ import javax.persistence.EntityManager;
 
 import org.hibernate.Criteria;
 import org.hibernate.Query;
+import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
-import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.Machine;
+import com.abiquo.server.core.infrastructure.Rack;
+import com.softwarementors.bzngine.entities.PersistentEntity;
 
 @Repository("jpaMachineLoadRuleDAO")
 public class MachineLoadRuleDAO extends DefaultDAOBase<Integer, MachineLoadRule>
@@ -43,7 +45,7 @@ public class MachineLoadRuleDAO extends DefaultDAOBase<Integer, MachineLoadRule>
         super(MachineLoadRule.class);
     }
 
-    public MachineLoadRuleDAO(EntityManager entityManager)
+    public MachineLoadRuleDAO(final EntityManager entityManager)
     {
         super(MachineLoadRule.class, entityManager);
     }
@@ -58,7 +60,7 @@ public class MachineLoadRuleDAO extends DefaultDAOBase<Integer, MachineLoadRule>
 
     @SuppressWarnings("unchecked")
     public List<MachineLoadRule> findCandidateMachineLoadRules(
-        Collection<Machine> firstPassCandidateMachines)
+        final Collection<Machine> firstPassCandidateMachines)
     {
         Query query = getSession().createQuery(CANDIDATE_MACHINE_RULES);
         query.setParameterList("machines", firstPassCandidateMachines);
@@ -69,8 +71,54 @@ public class MachineLoadRuleDAO extends DefaultDAOBase<Integer, MachineLoadRule>
     public List<MachineLoadRule> getRulesForDatacenter(final Integer idDatacenter)
     {
         Criteria crit = createNestedCriteria(MachineLoadRule.DATACENTER_PROPERTY);
-        crit.add(Restrictions.eq(Datacenter.ID_PROPERTY, idDatacenter));
+        crit.add(Restrictions.eq(PersistentEntity.ID_PROPERTY, idDatacenter));
         return getResultList(crit);
+    }
+
+    @SuppressWarnings("unchecked")
+    public List<MachineLoadRule> findByMachine(final Integer idMachine)
+    {
+        Query query = getSession().createQuery(QUERY_RULES_BY_MACHINE);
+        query.setInteger("idMachine", idMachine);
+
+        List<MachineLoadRule> rules = query.list();
+        return rules;
+    }
+
+    private final static String QUERY_RULES_BY_MACHINE = //
+        "SELECT obj FROM com.abiquo.server.core.scheduler.MachineLoadRule obj WHERE "
+            + "obj.machine.id = :idMachine";
+
+    public List<MachineLoadRule> findByRack(final Rack rack)
+    {
+        return findByRack(rack, false);
+    }
+
+    @SuppressWarnings("unchecked")
+    public List<MachineLoadRule> findByRack(final Rack rack, final boolean includeMachineRules)
+    {
+        final Criteria criteria;
+        if (includeMachineRules)
+        {
+            // Rules from racks and machines
+            criteria = createCriteria().add(sameRack(rack));
+        }
+        else
+        {
+            // Rules from racks
+            criteria = createCriteria().add(Restrictions.and(sameRack(rack), nullMachine()));
+        }
+        return criteria.list();
+    }
+
+    private Criterion sameRack(final Rack rack)
+    {
+        return Restrictions.eq(MachineLoadRule.RACK_PROPERTY, rack);
+    }
+
+    private Criterion nullMachine()
+    {
+        return Restrictions.isNull(MachineLoadRule.MACHINE_PROPERTY);
     }
 
 }

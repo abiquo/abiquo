@@ -52,6 +52,8 @@ public class DatacenterHB implements java.io.Serializable, IPojoHB<DataCenter>
 
     private NetworkHB network;
 
+    private String datacenterUUID;
+
     private Set<RackHB> racks = new HashSet<RackHB>(0);
 
     /** List of limits established by Enterprise */
@@ -106,6 +108,16 @@ public class DatacenterHB implements java.io.Serializable, IPojoHB<DataCenter>
         this.situation = situation;
     }
 
+    public String getDatacenterUUID()
+    {
+        return datacenterUUID;
+    }
+
+    public void setDatacenterUUID(final String datacenterUUID)
+    {
+        this.datacenterUUID = datacenterUUID;
+    }
+
     public Set<RackHB> getRacks()
     {
         return racks;
@@ -126,12 +138,14 @@ public class DatacenterHB implements java.io.Serializable, IPojoHB<DataCenter>
         this.remoteServicesHB = remoteServicesHB;
     }
 
+    @Override
     public DataCenter toPojo()
     {
         DataCenter dataCenter = new DataCenter();
         dataCenter.setId(idDataCenter);
         dataCenter.setName(name);
         dataCenter.setSituation(situation);
+        dataCenter.setDatacenterUUID(datacenterUUID);
         if (remoteServicesHB != null)
         {
 
@@ -166,7 +180,7 @@ public class DatacenterHB implements java.io.Serializable, IPojoHB<DataCenter>
         return network;
     }
 
-    public void setEntLimits(Set<DatacenterLimitHB> entLimits)
+    public void setEntLimits(final Set<DatacenterLimitHB> entLimits)
     {
         this.entLimits = entLimits;
     }

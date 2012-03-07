@@ -21,23 +21,86 @@
 
 package com.abiquo.abiserver.commands.stub.impl;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.ws.rs.core.Response.Status;
+
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang.StringUtils;
 import org.apache.wink.client.ClientResponse;
 import org.apache.wink.common.internal.utils.UriHelper;
 
+import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.StateEnum;
 import com.abiquo.abiserver.commands.stub.AbstractAPIStub;
 import com.abiquo.abiserver.commands.stub.MachineResourceStub;
+import com.abiquo.abiserver.pojo.infrastructure.HyperVisor;
+import com.abiquo.abiserver.pojo.infrastructure.HyperVisorType;
+import com.abiquo.abiserver.pojo.infrastructure.HypervisorRemoteAccessInfo;
 import com.abiquo.abiserver.pojo.infrastructure.PhysicalMachine;
+import com.abiquo.abiserver.pojo.infrastructure.State;
+import com.abiquo.abiserver.pojo.infrastructure.VirtualMachine;
 import com.abiquo.abiserver.pojo.result.BasicResult;
+import com.abiquo.abiserver.pojo.result.DataResult;
+import com.abiquo.abiserver.pojo.ucs.BladeLocatorLed;
+import com.abiquo.abiserver.pojo.ucs.LogicServer;
+import com.abiquo.abiserver.pojo.user.Enterprise;
+import com.abiquo.abiserver.pojo.user.User;
+import com.abiquo.abiserver.pojo.virtualimage.Category;
+import com.abiquo.abiserver.pojo.virtualimage.Icon;
+import com.abiquo.abiserver.pojo.virtualimage.VirtualImage;
+import com.abiquo.model.enumerator.DiskFormatType;
+import com.abiquo.model.enumerator.HypervisorType;
+import com.abiquo.model.rest.RESTLink;
+import com.abiquo.server.core.appslibrary.VirtualMachineTemplateDto;
+import com.abiquo.server.core.cloud.VirtualMachineDto;
+import com.abiquo.server.core.cloud.VirtualMachinesDto;
+import com.abiquo.server.core.enterprise.EnterpriseDto;
+import com.abiquo.server.core.enterprise.User.AuthType;
+import com.abiquo.server.core.enterprise.UserDto;
 import com.abiquo.server.core.infrastructure.MachineDto;
 
 public class MachineResourceStubImpl extends AbstractAPIStub implements MachineResourceStub
 {
 
     @Override
-    public BasicResult deleteNotManagedVirtualMachines(PhysicalMachine machine)
+    public DataResult<HypervisorRemoteAccessInfo> getHypervisorRemoteAccess(
+        final PhysicalMachine machine)
+    {
+        String uri = createMachineLink(machine) + "?credentials=true";
+
+        DataResult<HypervisorRemoteAccessInfo> result =
+            new DataResult<HypervisorRemoteAccessInfo>();
+
+        ClientResponse response = get(uri);
+        if (response.getStatusCode() == 200)
+        {
+            MachineDto dto = response.getEntity(MachineDto.class);
+
+            HypervisorRemoteAccessInfo info = new HypervisorRemoteAccessInfo();
+
+            String encodedUser = new String(Base64.encodeBase64(dto.getUser().getBytes()));
+            String encodedPass = new String(Base64.encodeBase64(dto.getPassword().getBytes()));
+
+            info.setParam1(encodedUser);
+            info.setParam2(encodedPass);
+
+            result.setSuccess(true);
+            result.setData(info);
+        }
+        else
+        {
+            populateErrors(response, result, "getMachineWithCredentials");
+        }
+
+        return result;
+    }
+
+    @Override
+    public BasicResult deleteNotManagedVirtualMachines(final PhysicalMachine machine)
     {
         String uri = createMachineLink(machine);
-        uri = UriHelper.appendPathToBaseUri(uri, "action/virtualmachines");
+        uri = UriHelper.appendPathToBaseUri(uri, "/virtualmachines");
 
         BasicResult result = new BasicResult();
 
@@ -54,19 +117,13 @@ public class MachineResourceStubImpl extends AbstractAPIStub implements MachineR
         return result;
     }
 
-    public static MachineDto fromPhysicalMachineToDto(PhysicalMachine machine)
+    public static MachineDto fromPhysicalMachineToDto(final PhysicalMachine machine)
     {
         MachineDto dto = new MachineDto();
         dto.setId(machine.getId());
         dto.setDescription(machine.getDescription());
-        dto.setRealCpuCores(machine.getRealCpu());
-        dto.setRealHardDiskInMb(machine.getRealStorage());
-        dto.setRealRamInMb(machine.getRealRam());
         dto.setVirtualCpuCores(machine.getCpu());
         dto.setVirtualCpusUsed(machine.getCpuUsed());
-        dto.setVirtualCpusPerCore(machine.getCpuRatio());
-        dto.setVirtualHardDiskInMb(machine.getHd());
-        dto.setVirtualHardDiskUsedInMb(machine.getHdUsed());
         dto.setVirtualRamInMb(machine.getRam());
         dto.setVirtualRamUsedInMb(machine.getRamUsed());
 
@@ -75,23 +132,275 @@ public class MachineResourceStubImpl extends AbstractAPIStub implements MachineR
     }
 
     /**
-     * @see com.abiquo.abiserver.commands.stub.RacksResourceStub#powerOff(com.abiquo.abiserver.pojo.infrastructure.PhysicalMachine)
+     * @see com.abiquo.abiserver.commands.stub.MachineResourceStub#powerOff(com.abiquo.abiserver.pojo.infrastructure.PhysicalMachine)
      */
     @Override
-    public BasicResult powerOff(PhysicalMachine machine)
+    public BasicResult powerOff(final PhysicalMachine machine)
     {
         // PREMIUM
         return null;
     }
 
     /**
-     * @see com.abiquo.abiserver.commands.stub.RacksResourceStub#powerOn(com.abiquo.abiserver.pojo.infrastructure.PhysicalMachine)
+     * @see com.abiquo.abiserver.commands.stub.MachineResourceStub#powerOn(com.abiquo.abiserver.pojo.infrastructure.PhysicalMachine)
      */
     @Override
-    public BasicResult powerOn(PhysicalMachine machine)
+    public BasicResult powerOn(final PhysicalMachine machine)
     {
         // PREMIUM
         return null;
     }
 
+    @Override
+    public BasicResult deletePhysicalMachine(final PhysicalMachine machine)
+    {
+        // PREMIUM
+        return null;
+    }
+
+    /**
+     * @see com.abiquo.abiserver.commands.stub.MachineResourceStub#bladeLocatorLED(PhysicalMachine)
+     */
+    @Override
+    public BasicResult bladeLocatorLED(final PhysicalMachine machine)
+    {
+        // PREMIUM
+        return null;
+    }
+
+    @Override
+    public BasicResult getVirtualMachinesFromMachine(final Integer datacenterId,
+        final Integer rackId, final Integer machineId)
+    {
+        String uri = createMachineLinkVms(datacenterId, rackId, machineId);
+
+        DataResult<List<VirtualMachine>> result = new DataResult<List<VirtualMachine>>();
+
+        ClientResponse response = get(uri);
+        if (response.getStatusCode() == 200)
+        {
+            VirtualMachinesDto dtos = response.getEntity(VirtualMachinesDto.class);
+            List<VirtualMachine> vms = new ArrayList<VirtualMachine>();
+            for (VirtualMachineDto dto : dtos.getCollection())
+            {
+                VirtualMachine vm = dtoToVirtualMachine(dto);
+                vms.add(vm);
+            }
+            result.setData(vms);
+            result.setSuccess(Boolean.TRUE);
+        }
+        else
+        {
+            populateErrors(response, result, "getVirtualMachinesFromMachine");
+        }
+
+        return result;
+    }
+
+    private VirtualMachine dtoToVirtualMachine(final VirtualMachineDto virtualMachineDto)
+    {
+        VirtualMachine vm = new VirtualMachine();
+        vm.setCpu(virtualMachineDto.getCpu());
+        vm.setDescription(virtualMachineDto.getDescription());
+        vm.setHd(virtualMachineDto.getHdInBytes());
+        vm.setId(virtualMachineDto.getId());
+        vm.setIdType(virtualMachineDto.getIdType());
+        vm.setName(virtualMachineDto.getName());
+        vm.setPassword(virtualMachineDto.getPassword());
+        vm.setRam(virtualMachineDto.getRam());
+        vm.setState(new State(StateEnum.valueOf(virtualMachineDto.getState().name())));
+        vm.setUUID(virtualMachineDto.getUuid());
+        vm.setVdrpIP(virtualMachineDto.getVdrpIP());
+        vm.setVdrpPort(virtualMachineDto.getVdrpPort());
+
+        // Build the hypervisor with the information available.
+        // It will only be used to check the type.
+        RESTLink machineLink = virtualMachineDto.searchLink("machine");
+        HyperVisor hypervisor = new HyperVisor();
+        hypervisor.setType(new HyperVisorType(HypervisorType.valueOf(machineLink.getTitle())));
+        vm.setAssignedTo(hypervisor);
+
+        RESTLink userLink = virtualMachineDto.searchLink("user");
+        if (userLink != null)
+        {
+            ClientResponse userResponse = get(userLink.getHref());
+            if (userResponse.getStatusCode() == Status.OK.getStatusCode())
+            {
+
+                UserDto userDto = userResponse.getEntity(UserDto.class);
+                User user = dtoToUser(userDto);
+                vm.setUser(user);
+            }
+            else
+            {
+                populateErrors(userResponse, new BasicResult(), "getUser");
+            }
+
+        }
+        RESTLink entLink = virtualMachineDto.searchLink("enterprise");
+        if (userLink != null)
+        {
+            ClientResponse entResponse = get(entLink.getHref());
+            if (entResponse.getStatusCode() == Status.OK.getStatusCode())
+            {
+
+                EnterpriseDto entDto = entResponse.getEntity(EnterpriseDto.class);
+                Enterprise ent = dtoToEnterprise(entDto);
+                vm.setEnterprise(ent);
+            }
+            else
+            {
+                populateErrors(entResponse, new BasicResult(), "getEnterpirse");
+            }
+
+        }
+        RESTLink virtualImage = virtualMachineDto.searchLink("virtualmachinetemplate");
+        if (virtualImage != null)
+        {
+            ClientResponse imageResponse = get(virtualImage.getHref());
+            if (imageResponse.getStatusCode() == Status.OK.getStatusCode())
+            {
+
+                VirtualMachineTemplateDto virtualImageDto =
+                    imageResponse.getEntity(VirtualMachineTemplateDto.class);
+                VirtualImage image = dtoToVirtualImage(virtualImageDto);
+                vm.setVirtualImage(image);
+            }
+            else
+            {
+                populateErrors(imageResponse, new BasicResult(), "getVirtualImage");
+            }
+        }
+
+        return vm;
+    }
+
+    private User dtoToUser(final UserDto userDto)
+    {
+        User u = new User();
+
+        u.setId(userDto.getId());
+        u.setEmail(userDto.getEmail());
+        u.setLocale(userDto.getLocale());
+        u.setName(userDto.getName());
+        u.setSurname(userDto.getSurname());
+        u.setUser(userDto.getNick());
+        u.setDescription(userDto.getDescription());
+        if (!StringUtils.isBlank(userDto.getAvailableVirtualDatacenters()))
+        {
+            String[] split = userDto.getAvailableVirtualDatacenters().split(",");
+            if (split != null)
+            {
+                Integer[] a = new Integer[split.length];
+                int i = 0;
+                for (String n : split)
+                {
+                    a[i++] = Integer.valueOf(n);
+                }
+                u.setAvailableVirtualDatacenters(a);
+            }
+        }
+        u.setAuthType(AuthType.valueOf(userDto.getAuthType()));
+        return u;
+    }
+
+    private Enterprise dtoToEnterprise(final EnterpriseDto enterpriseDto)
+    {
+        Enterprise e = new Enterprise();
+        e.setChefClient(enterpriseDto.getChefClient());
+        e.setChefClientCertificate(enterpriseDto.getChefClientCertificate());
+        e.setChefURL(enterpriseDto.getChefURL());
+        e.setChefValidator(enterpriseDto.getChefValidator());
+        e.setChefValidatorCertificate(enterpriseDto.getChefValidatorCertificate());
+        e.setId(enterpriseDto.getId());
+        e.setIsReservationRestricted(enterpriseDto.getIsReservationRestricted());
+        e.setName(enterpriseDto.getName());
+        return e;
+    }
+
+    private VirtualImage dtoToVirtualImage(final VirtualMachineTemplateDto virtualImageDto)
+    {
+        VirtualImage image = new VirtualImage();
+        image.setChefEnabled(virtualImageDto.isChefEnabled());
+        image.setCostCode(virtualImageDto.getCostCode());
+        image.setCpuRequired(virtualImageDto.getCpuRequired());
+        image.setCreationDate(virtualImageDto.getCreationDate());
+        image.setCreationUser(virtualImageDto.getCreationUser());
+        image.setDescription(virtualImageDto.getDescription());
+        image.setDiskFileSize(virtualImageDto.getDiskFileSize());
+        image
+            .setDiskFormatType(new com.abiquo.abiserver.pojo.virtualimage.DiskFormatType(DiskFormatType
+                .fromValue(virtualImageDto.getDiskFormatType())));
+        image.setHdRequired(virtualImageDto.getHdRequired());
+        image.setId(virtualImageDto.getId());
+        image.setName(virtualImageDto.getName());
+        image.setPath(virtualImageDto.getPath());
+        image.setRamRequired(virtualImageDto.getRamRequired());
+        image.setShared(virtualImageDto.isShared());
+
+        // Image is stateful if it is linked to a volume
+        image.setStateful(virtualImageDto.searchLink("volume") != null);
+
+        // Captured images may not have a category
+        RESTLink categoryLink = virtualImageDto.searchLink("category");
+        if (categoryLink != null)
+        {
+            Category category = new Category();
+            category.setId(Integer.parseInt(getIdFromLink(categoryLink)));
+            category.setName(categoryLink.getTitle());
+            image.setCategory(category);
+        }
+
+        // Captured images may not have an icon
+        RESTLink iconlLink = virtualImageDto.searchLink("icon");
+        if (iconlLink != null)
+        {
+            Icon icon = new Icon();
+            icon.setPath(iconlLink.getTitle());
+            image.setIcon(icon);
+        }
+
+        // Captured images may not have a template definition
+        RESTLink templateDefinitionLink = virtualImageDto.searchLink("templatedefinition");
+        if (templateDefinitionLink != null)
+        {
+            image.setOvfId(templateDefinitionLink.getHref());
+        }
+
+        return image;
+    }
+
+    /**
+     * Returns teh {@link LogicServer} in blade.
+     * 
+     * @param ucsRack ucsRack.
+     * @return wrapper which contains the {@link LogicServer} which is the blade. Or in case of
+     *         error the appropiate object.
+     */
+    @Override
+    public DataResult<LogicServer> getBladeLogicServer(final PhysicalMachine machine)
+    {
+        // PREMIUM
+        return null;
+    }
+
+    /**
+     * @see com.abiquo.abiserver.commands.stub.MachineResourceStub#bladeLocatorLEDoff(com.abiquo.abiserver.pojo.infrastructure.PhysicalMachine)
+     */
+    @Override
+    public BasicResult bladeLocatorLEDoff(final PhysicalMachine machine)
+    {
+        // PREMIUM
+        return null;
+    }
+
+    /**
+     * @see com.abiquo.abiserver.commands.stub.MachineResourceStub#getBladeLocatorLed(com.abiquo.abiserver.pojo.infrastructure.PhysicalMachine)
+     */
+    @Override
+    public DataResult<BladeLocatorLed> getBladeLocatorLed(final PhysicalMachine machine)
+    {
+        // PREMIUM
+        return null;
+    }
 }

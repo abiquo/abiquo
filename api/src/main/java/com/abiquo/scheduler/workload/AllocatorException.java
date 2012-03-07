@@ -21,13 +21,12 @@
 
 package com.abiquo.scheduler.workload;
 
-
 public class AllocatorException extends RuntimeException
 {
     private static final long serialVersionUID = -681799381115943994L;
 
     private String message;
-    
+
     public AllocatorException(String message)
     {
         this.setMessage(message);

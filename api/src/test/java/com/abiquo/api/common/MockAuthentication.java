@@ -57,11 +57,13 @@ public class MockAuthentication implements Authentication
         Privileges[] authorityStrings = SecurityService.getAllPrivileges();
         GrantedAuthority[] authorities = new GrantedAuthority[authorityStrings.length];
 
-        for (int i = 0; i < authorityStrings.length; i++)
+        int i = 0;
+        for (Privileges authString : authorityStrings)
         {
             authorities[i] =
                 new GrantedAuthorityImpl(AbiquoUserDetailsService.DEFAULT_ROLE_PREFIX
-                    + authorityStrings[i].name());
+                    + authString.name());
+            i++;
         }
 
         return authorities;

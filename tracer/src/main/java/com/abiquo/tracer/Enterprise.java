@@ -27,17 +27,17 @@ public class Enterprise implements Serializable
 {
     private static final long serialVersionUID = -2787051086998140963L;
 
-    public static Enterprise SYSTEM_ENTERPRISE =
-        Enterprise.enterprise("Abiquo System").user(User.SYSTEM_USER);
+    public static Enterprise SYSTEM_ENTERPRISE = Enterprise.enterprise("Abiquo System").user(
+        User.SYSTEM_USER);
 
     private String name;
 
     private User user;
 
     private VirtualDatacenter virtualDatacenter;
-    
+
     private String chefURL;
-    
+
     private String chefCertificate;
 
     private Enterprise(String storagePool)
@@ -94,7 +94,7 @@ public class Enterprise implements Serializable
 
     public void setChefURL(String URL)
     {
-        this.chefURL= URL;
+        this.chefURL = URL;
     }
 
     public String getURL()

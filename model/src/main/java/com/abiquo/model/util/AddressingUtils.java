@@ -45,9 +45,8 @@ public class AddressingUtils
 
     private static final String PARTITION_PATTERN = "\\d+";
 
-    private static final String PATH_PATTERN =
-        "ip-(" + PORTAL_PATTERN + ")-iscsi-(" + IQN_PATTERN + ")-lun-(" + LUN_PATTERN
-            + ")(?:-part(" + PARTITION_PATTERN + "))?";
+    private static final String PATH_PATTERN = "ip-(" + PORTAL_PATTERN + ")-iscsi-(" + IQN_PATTERN
+        + ")-lun-(" + LUN_PATTERN + ")(?:-part(" + PARTITION_PATTERN + "))?";
 
     private static final String DEVICE_ID_PATTERN = "[a-zA-Z0-9]{32}";
 

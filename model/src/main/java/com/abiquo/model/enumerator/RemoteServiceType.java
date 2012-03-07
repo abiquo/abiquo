@@ -1,3 +1,5 @@
+package com.abiquo.model.enumerator;
+
 /**
  * Abiquo community edition
  * cloud management application for hybrid clouds
@@ -19,8 +21,6 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package com.abiquo.model.enumerator;
-
 import java.net.URI;
 
 import org.apache.commons.lang.StringUtils;
@@ -28,11 +28,13 @@ import org.apache.wink.common.internal.utils.UriHelper;
 
 public enum RemoteServiceType
 {
-    VIRTUAL_FACTORY("Virtualization Manager", "virtualfactory", "http://", 80), STORAGE_SYSTEM_MONITOR(
-        "Storage Manager", "ssm", "http://", 80), VIRTUAL_SYSTEM_MONITOR("Monitor Manager", "vsm",
-        "http://", 80), NODE_COLLECTOR("Discovery Manager", "nodecollector", "http://", 80), DHCP_SERVICE(
-        "DHCP Service", "dhcp", "omapi://", 7911), BPM_SERVICE("Business Process Manager", "bpm",
-        "tcp://", 61616), APPLIANCE_MANAGER("Appliance Manager", "am", "http://", 80);
+    VIRTUAL_FACTORY("Virtualization Manager", "virtualfactory", "http://", 80), //
+    STORAGE_SYSTEM_MONITOR("Storage Manager", "ssm", "http://", 80), //
+    VIRTUAL_SYSTEM_MONITOR("Monitor Manager", "vsm", "http://", 80), //
+    NODE_COLLECTOR("Discovery Manager", "nodecollector", "http://", 80), //
+    DHCP_SERVICE("DHCP Service", "dhcp", "omapi://", 7911), //
+    BPM_SERVICE("Business Process Manager", "bpm-async", "http://", 80), //
+    APPLIANCE_MANAGER("Appliance Manager", "am", "http://", 80);
 
     String name;
 
@@ -71,7 +73,7 @@ public enum RemoteServiceType
         this.defaultPort = defaultPort;
     }
 
-    RemoteServiceType(String name, String serviceMapping)
+    RemoteServiceType(final String name, final String serviceMapping)
     {
         this.name = name;
         this.serviceMapping = serviceMapping;
@@ -79,21 +81,25 @@ public enum RemoteServiceType
 
     public boolean canBeChecked()
     {
-        return this != BPM_SERVICE && this != DHCP_SERVICE;
+        return this != DHCP_SERVICE;
     }
 
     public boolean checkUniqueness()
     {
-        return this == APPLIANCE_MANAGER
-            || this == VIRTUAL_FACTORY;
+        return this == APPLIANCE_MANAGER || this == BPM_SERVICE || this == VIRTUAL_FACTORY;
     }
 
-    public String fixUri(URI uri)
+    public boolean checkDatacenterId()
+    {
+        return this == BPM_SERVICE || this == VIRTUAL_FACTORY;
+    }
+
+    public String fixUri(final URI uri)
     {
         String protocol = uri.getScheme();
         String domainName = uri.getHost();
         Integer port = uri.getPort();
-        String path = this == BPM_SERVICE ? null : uri.getPath();
+        String path = uri.getPath();
 
         String domainHost = domainName + (port != null ? ":" + port : "");
 
@@ -105,6 +111,19 @@ public enum RemoteServiceType
         }
 
         return fullURL;
+    }
+
+    public static RemoteServiceType valueFromName(final String name)
+    {
+        for (RemoteServiceType element : RemoteServiceType.values())
+        {
+            if (name.replaceAll("_", "").equalsIgnoreCase(element.name().replaceAll("_", "")))
+            {
+                return element;
+            }
+        }
+
+        return valueOf(name);
     }
 
     private String fixProtocol(String protocol)

@@ -40,7 +40,7 @@ public class EnterpriseResourcesDAOTest extends
     {
         super.methodSetUp();
     }
-    
+
     @Override
     protected EnterpriseResourcesDAO createDao(EntityManager entityManager)
     {

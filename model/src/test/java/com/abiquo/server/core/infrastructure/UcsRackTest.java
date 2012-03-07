@@ -19,17 +19,17 @@
  * Boston, MA 02111-1307, USA.
  */
 
-  package com.abiquo.server.core.infrastructure;
+package com.abiquo.server.core.infrastructure;
 
-  import com.abiquo.server.core.common.DefaultEntityTestBase;
-  import com.softwarementors.bzngine.entities.test.InstanceTester;
+import com.abiquo.server.core.common.DefaultEntityTestBase;
+import com.softwarementors.bzngine.entities.test.InstanceTester;
 
-  public class UcsRackTest extends DefaultEntityTestBase<UcsRack>
-  {
+public class UcsRackTest extends DefaultEntityTestBase<UcsRack>
+{
 
-      @Override
-      protected InstanceTester<UcsRack> createEntityInstanceGenerator()
-      {
-          return new UcsRackGenerator(getSeed());
-      }
-  }
+    @Override
+    protected InstanceTester<UcsRack> createEntityInstanceGenerator()
+    {
+        return new UcsRackGenerator(getSeed());
+    }
+}

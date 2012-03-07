@@ -21,28 +21,31 @@
 
 package com.abiquo.server.core.infrastructure.storage;
 
-import java.io.Serializable;
-
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.abiquo.model.transport.SingleResourceTransportDto;
 
 @XmlRootElement(name = "tier")
-public class TierDto extends SingleResourceTransportDto implements Serializable
+public class TierDto extends SingleResourceTransportDto
 {
     /**
      * 
      */
-    private static final long serialVersionUID = -3685896838634529469L;
+    private static final long serialVersionUID = 1L;
 
     private Integer id;
+
+    public TierDto()
+    {
+        super();
+    }
 
     public Integer getId()
     {
         return id;
     }
 
-    public void setId(Integer id)
+    public void setId(final Integer id)
     {
         this.id = id;
     }
@@ -54,7 +57,7 @@ public class TierDto extends SingleResourceTransportDto implements Serializable
         return name;
     }
 
-    public void setName(String name)
+    public void setName(final String name)
     {
         this.name = name;
     }
@@ -66,7 +69,7 @@ public class TierDto extends SingleResourceTransportDto implements Serializable
         return enabled;
     }
 
-    public void setEnabled(boolean enabled)
+    public void setEnabled(final boolean enabled)
     {
         this.enabled = enabled;
     }
@@ -78,7 +81,7 @@ public class TierDto extends SingleResourceTransportDto implements Serializable
         return description;
     }
 
-    public void setDescription(String description)
+    public void setDescription(final String description)
     {
         this.description = description;
     }

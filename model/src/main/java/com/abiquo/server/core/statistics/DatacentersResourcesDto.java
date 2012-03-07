@@ -29,10 +29,12 @@ import javax.xml.bind.annotation.XmlRootElement;
 import com.abiquo.model.transport.WrapperDto;
 
 @XmlRootElement(name = "dcsresources")
-public class DatacentersResourcesDto extends WrapperDto<DatacenterResourcesDto> {
-	@XmlElement(name = "dcresources")
-	public List<DatacenterResourcesDto> getCollection() {
-		return collection;
-	}
+public class DatacentersResourcesDto extends WrapperDto<DatacenterResourcesDto>
+{
+    @XmlElement(name = "dcresources")
+    public List<DatacenterResourcesDto> getCollection()
+    {
+        return collection;
+    }
 
 }

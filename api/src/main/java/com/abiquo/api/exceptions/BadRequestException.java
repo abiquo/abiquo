@@ -32,13 +32,13 @@ public class BadRequestException extends APIException
     public BadRequestException(APIError error)
     {
         super(error);
-    }    
-    
+    }
+
     public BadRequestException(CommonError error)
     {
         super(error);
     }
-    
+
     public BadRequestException(Set<CommonError> errors)
     {
         super(errors);

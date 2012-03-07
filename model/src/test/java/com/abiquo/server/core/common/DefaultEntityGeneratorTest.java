@@ -27,20 +27,24 @@ import java.util.Set;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-public class DefaultEntityGeneratorTest {
-	enum MyEnum {
-		A, B
-	}
-	
+public class DefaultEntityGeneratorTest
+{
+    enum MyEnum
+    {
+        A, B
+    }
+
     @Test
-    public void test_newEnum() {
-      // Make sure all enum values are generated!
-      Set<MyEnum> generatedValues = new HashSet<MyEnum>();
-    	
-      for( int i = 0; i < 10; i++ ) {
-    	  generatedValues.add( DefaultEntityGenerator.newEnum(MyEnum.class, i) );
-      }
-      
-      Assert.assertEquals( generatedValues.size(), 2);
+    public void test_newEnum()
+    {
+        // Make sure all enum values are generated!
+        Set<MyEnum> generatedValues = new HashSet<MyEnum>();
+
+        for (int i = 0; i < 10; i++)
+        {
+            generatedValues.add(DefaultEntityGenerator.newEnum(MyEnum.class, i));
+        }
+
+        Assert.assertEquals(generatedValues.size(), 2);
     }
 }

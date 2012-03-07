@@ -61,6 +61,7 @@ public class IpAddressesResourceIT extends AbstractJpaGeneratorIT
 
     RemoteService rs;
 
+    @Override
     @BeforeMethod
     public void setup()
     {
@@ -80,13 +81,13 @@ public class IpAddressesResourceIT extends AbstractJpaGeneratorIT
     {
         // The mask indicates the number of
         VLANNetwork vlan = vlanGenerator.createInstance(vdc.getNetwork(), rs, "255.255.255.0");
-        setup(vlan.getConfiguration().getDhcp(), vlan.getConfiguration(), vlan);
+        setup(vlan.getConfiguration(), vlan);
 
         IPAddress ip = IPAddress.newIPAddress(vlan.getConfiguration().getAddress()).nextIPAddress();
         IPAddress lastIP =
-            IPNetworkRang.lastIPAddressWithNumNodes(IPAddress.newIPAddress(vlan.getConfiguration()
-                .getAddress()), IPNetworkRang
-                .masktoNumberOfNodes(vlan.getConfiguration().getMask()));
+            IPNetworkRang.lastIPAddressWithNumNodes(
+                IPAddress.newIPAddress(vlan.getConfiguration().getAddress()),
+                IPNetworkRang.masktoNumberOfNodes(vlan.getConfiguration().getMask()));
 
         while (!ip.equals(lastIP))
         {
@@ -115,7 +116,7 @@ public class IpAddressesResourceIT extends AbstractJpaGeneratorIT
     public void createVLANRaisesErrorWhenWithoutIPs()
     {
         VLANNetwork vlan = vlanGenerator.createInstance(vdc.getNetwork(), rs);
-        setup(vlan.getConfiguration().getDhcp(), vlan.getConfiguration(), vlan);
+        setup(vlan.getConfiguration(), vlan);
         validURI = resolvePrivateNetworkIPsURI(vdc.getId(), vlan.getId());
 
         Resource resource = client.resource(validURI);

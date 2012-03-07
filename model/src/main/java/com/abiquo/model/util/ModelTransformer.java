@@ -88,6 +88,7 @@ public class ModelTransformer
                             setter(name, targetClass, field.getType()).invoke(target,
                                 new Object[] {value});
                         }
+
                     }
                 }
                 catch (InvocationTargetException e)

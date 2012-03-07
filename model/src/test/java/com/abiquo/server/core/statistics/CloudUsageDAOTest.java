@@ -41,7 +41,7 @@ public class CloudUsageDAOTest extends DefaultDAOTestBase<CloudUsageDAO, CloudUs
     {
         super.methodSetUp();
     }
-    
+
     @AfterMethod
     protected void tearDown()
     {

@@ -47,7 +47,7 @@ public class Repository implements IPojo<RepositoryHB>
         return repositoryCapacityMb;
     }
 
-    public void setRepositoryCapacityMb(Long repositoryCapacityMb)
+    public void setRepositoryCapacityMb(final Long repositoryCapacityMb)
     {
         this.repositoryCapacityMb = repositoryCapacityMb;
     }
@@ -57,7 +57,7 @@ public class Repository implements IPojo<RepositoryHB>
         return repositoryEnterpriseUsedMb;
     }
 
-    public void setRepositoryEnterpriseUsedMb(Long repositoryEnterpriseUsedMb)
+    public void setRepositoryEnterpriseUsedMb(final Long repositoryEnterpriseUsedMb)
     {
         this.repositoryEnterpriseUsedMb = repositoryEnterpriseUsedMb;
     }
@@ -67,7 +67,7 @@ public class Repository implements IPojo<RepositoryHB>
         return repositoryRemainingMb;
     }
 
-    public void setRepositoryRemainingMb(Long repositoryRemainingMb)
+    public void setRepositoryRemainingMb(final Long repositoryRemainingMb)
     {
         this.repositoryRemainingMb = repositoryRemainingMb;
     }
@@ -85,7 +85,7 @@ public class Repository implements IPojo<RepositoryHB>
         return id;
     }
 
-    public void setId(int id)
+    public void setId(final int id)
     {
         this.id = id;
     }
@@ -95,7 +95,7 @@ public class Repository implements IPojo<RepositoryHB>
         return name;
     }
 
-    public void setName(String name)
+    public void setName(final String name)
     {
         this.name = name;
     }
@@ -105,7 +105,7 @@ public class Repository implements IPojo<RepositoryHB>
         return URL;
     }
 
-    public void setURL(String url)
+    public void setURL(final String url)
     {
         URL = url;
     }
@@ -115,11 +115,12 @@ public class Repository implements IPojo<RepositoryHB>
         return datacenter;
     }
 
-    public void setDatacenter(DataCenter datacenter)
+    public void setDatacenter(final DataCenter datacenter)
     {
         this.datacenter = datacenter;
     }
 
+    @Override
     public RepositoryHB toPojoHB()
     {
         RepositoryHB repositoryHB = new RepositoryHB();
@@ -128,8 +129,11 @@ public class Repository implements IPojo<RepositoryHB>
         repositoryHB.setName(name);
         repositoryHB.setUrl(URL);
         // repositoryHB.setEnterprise(enterpirse.toPojoHB());
-        repositoryHB.setDatacenter(datacenter.toPojoHB());
-        
+        if (datacenter != null)
+        {
+            repositoryHB.setDatacenter(datacenter.toPojoHB());
+        }
+
         return repositoryHB;
     }
 

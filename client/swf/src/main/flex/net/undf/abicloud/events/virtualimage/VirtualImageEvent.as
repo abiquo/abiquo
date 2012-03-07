@@ -29,6 +29,7 @@ package net.undf.abicloud.events.virtualimage
     import net.undf.abicloud.vo.infrastructure.DataCenter;
     import net.undf.abicloud.vo.infrastructure.HyperVisorType;
     import net.undf.abicloud.vo.user.Enterprise;
+    import net.undf.abicloud.vo.virtualappliance.VirtualDataCenter;
     import net.undf.abicloud.vo.virtualimage.Category;
     import net.undf.abicloud.vo.virtualimage.Icon;
     import net.undf.abicloud.vo.virtualimage.Repository;
@@ -82,6 +83,8 @@ package net.undf.abicloud.events.virtualimage
         public static const VIRTUAL_IMAGE_UNCHECKED:String = "virtualImageUncheckedVirtualImageEvent";
         
         public static const VIRTUAL_IMAGE_UPLOAD_ERROR:String = "virtualImageUploadErrorVirtualImageEvent";
+        
+        public static const GET_ALLOWED_DATACENTERS:String = "virtualImageGetAllowedDatacentersVirtualImageEvent";
 
         /* ------------- Public atributes ------------- */
 
@@ -108,7 +111,15 @@ package net.undf.abicloud.events.virtualimage
         public var ovfInstanceId:String;
         
         public var virtualImageMiniature:VirtualImageMiniature;
-
+        
+        public var datacenterId:int;
+        
+        public var refresh:Boolean;
+        
+        public var enterpriseId:int;
+        
+        public var virtualDatacenter:VirtualDataCenter;
+        
         /* ------------- Constructor ------------- */
         public function VirtualImageEvent(type:String, bubbles:Boolean = true, cancelable:Boolean = false)
         {

@@ -30,6 +30,7 @@
     paddingTop="10"
     verticalGap="0"
     creationComplete="onCreationComplete()"
+    show="retrieveVirtualAppliances()"
     xmlns:mx="http://www.adobe.com/2006/mxml"
     xmlns:utils="net.undf.abicloud.utils.*"
     xmlns:general="net.undf.abicloud.view.general.*"
@@ -40,10 +41,14 @@
 		[Event(name="addVirtualAppliance", type="flash.events.Event")]
 		[Event(name="editVirtualAppliance", type="flash.events.Event")]
 		[Event(name="deleteVirtualAppliance", type="flash.events.Event")]
+		[Event(name="requestVirtualAppliances", type="flash.events.Event")]
 	</mx:Metadata>
 
     <mx:Script>
         <![CDATA[
+        	import net.undf.abicloud.model.AbiCloudModel;
+        	import net.undf.abicloud.vo.result.ListRequest;
+        	import net.undf.abicloud.utils.AbicloudUtils;
         	import net.undf.abicloud.vo.user.PrivilegeType;
         	import net.undf.abicloud.utils.SecuredPrivilegeAccess;
         	import mx.utils.ObjectUtil;
@@ -53,10 +58,36 @@
             import net.undf.abicloud.vo.infrastructure.State;
             import net.undf.abicloud.vo.virtualappliance.VirtualAppliance;
             import net.undf.abicloud.vo.virtualappliance.VirtualDataCenter;
+            import mx.events.DataGridEvent;
 
+            public var requiredPrivileges:ArrayCollection = new ArrayCollection([
+                PrivilegeType.VDC_MANAGE_VAPP, 
+                PrivilegeType.VAPP_CUSTOMISE_SETTINGS, 
+                PrivilegeType.VAPP_PERFORM_ACTIONS,
+                PrivilegeType.VAPP_DEPLOY_UNDEPLOY, 
+                PrivilegeType.VAPP_ASSIGN_NETWORK, 
+                PrivilegeType.VAPP_ASSIGN_VOLUME, 
+                PrivilegeType.VAPP_CREATE_STATEFUL, 
+                PrivilegeType.VAPP_CREATE_INSTANCE]);
+                
             //The VirtualAppliance that is currently selected
             [Bindable]
             private var _selectedVirtualAppliance:VirtualAppliance;
+            
+            [Bindable]
+            private var _listRequest:ListRequest;
+            
+            private var _vappsAsc:Boolean;
+
+            private var _vappsOrderBy:String;
+            
+            [Bindable]
+            private var VAPP_RESULTS_PER_PAGE:int = AbiCloudModel.getInstance().configurationManager.config.client_user_numberUsersPerPage.value;
+            
+            public function get listRequest():ListRequest
+            {
+            	return this._listRequest;
+            }
 
             [Bindable(event="selectedVirtualApplianceChange")]
             public function get selectedVirtualAppliance():VirtualAppliance
@@ -74,9 +105,6 @@
             [Bindable]
             private var _virtualAppliances:ArrayCollection = new ArrayCollection();
 
-            //The array of VirtualAppliances that will be shown
-            [Bindable]
-            private var _virtualAppliancesFiltered:ArrayCollection = new ArrayCollection();
 
             public function get virtualAppliances():ArrayCollection
             {
@@ -91,6 +119,33 @@
             private function onCreationComplete():void{
             	//Checking privilege
             	SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.VDC_MANAGE_VAPP,"visible",vappTools);
+            	
+            	AbiCloudModel.getInstance().virtualApplianceManager.addEventListener(VirtualApplianceEvent.VIRTUAL_APPLIANCE_CREATED,
+                                                                                                retrieveVirtualAppliances);
+                AbiCloudModel.getInstance().virtualApplianceManager.addEventListener(VirtualApplianceEvent.VIRTUAL_APPLIANCE_EDITED,
+                                                                                                retrieveVirtualAppliances);
+            	
+            	resetListRequest();
+            }
+            
+            public function resetListRequest():void
+            {
+            	this._vappsOrderBy = "name";
+            	this._vappsAsc = true;
+                
+                this._listRequest = new ListRequest();
+                this._listRequest.asc = this._vappsAsc; 
+                this._listRequest.numberOfNodes = VAPP_RESULTS_PER_PAGE;
+                this._listRequest.offset = 0 ;
+                this._listRequest.orderBy = this._vappsOrderBy;
+                
+                virtualappliancesPaginatorSlider.value = 1;
+            }
+            
+            public function cleanVirtualApplianceList():void
+            {
+                AbiCloudModel.getInstance().virtualApplianceManager.virtualAppliances = new ArrayCollection();
+                AbiCloudModel.getInstance().virtualApplianceManager.totalVirtualAppliances = 0;
             }
             
 
@@ -148,11 +203,12 @@
             {
                 if (virtualApplianceDataGrid.selectedIndex > -1)
                 {
-                	if(SecuredPrivilegeAccess.userHasPrivilege(PrivilegeType.VAPP_CUSTOMISE_SETTINGS)){
-	                    var virtualApplianceEvent:VirtualApplianceEvent = new VirtualApplianceEvent(VirtualApplianceEvent.VIRTUAL_APPLIANCE_SELECTED);
-	                    virtualApplianceEvent.virtualAppliance = virtualApplianceDataGrid.selectedItem as VirtualAppliance;
-	                    dispatchEvent(virtualApplianceEvent);                		
-                	}
+                	if(!SecuredPrivilegeAccess.userHasAtLeastOnPrivilege(requiredPrivileges))
+                    {
+                       var virtualApplianceEvent:VirtualApplianceEvent = new VirtualApplianceEvent(VirtualApplianceEvent.VIRTUAL_APPLIANCE_SELECTED);
+                       virtualApplianceEvent.virtualAppliance = virtualApplianceDataGrid.selectedItem as VirtualAppliance;
+                       dispatchEvent(virtualApplianceEvent);
+                    }
                 }
             }
 
@@ -174,48 +230,17 @@
             {
                 if (virtualApplianceTile.selectedIndex > -1)
                 {
-                    var virtualApplianceEvent:VirtualApplianceEvent = new VirtualApplianceEvent(VirtualApplianceEvent.VIRTUAL_APPLIANCE_SELECTED);
-                    virtualApplianceEvent.virtualAppliance = virtualApplianceTile.selectedItem as VirtualAppliance;
-                    dispatchEvent(virtualApplianceEvent);
-                }
-            }
-
-            public function filterVirtualAppliancesByVirtualDataCenter(virtualDataCenter:VirtualDataCenter):void
-            {
-                if (virtualDataCenter == null)
-                {
-                    //Virtual Appliances are not filtered. Showing them all
-                    this._virtualAppliancesFiltered = this._virtualAppliances;
-                }
-                else
-                {
-                    //Filtering virtualAppliances by virtualDataCenter
-                    var virtualAppliancesFiltered:ArrayCollection = new ArrayCollection();
-                    var virtualAppliance:VirtualAppliance;
-                    var length:int = this._virtualAppliances ? this._virtualAppliances.length:0;
-                    var i:int;
-                    for (i = 0; i < length; i++)
+                    if(!SecuredPrivilegeAccess.userHasAtLeastOnPrivilege(requiredPrivileges))
                     {
-                        virtualAppliance = this._virtualAppliances.getItemAt(i) as VirtualAppliance;
-                        if (virtualAppliance.virtualDataCenter.id == virtualDataCenter.id)
-                        {
-                            virtualAppliancesFiltered.addItem(virtualAppliance);
-                        }
+                       var virtualApplianceEvent:VirtualApplianceEvent = new VirtualApplianceEvent(VirtualApplianceEvent.VIRTUAL_APPLIANCE_SELECTED);
+                       virtualApplianceEvent.virtualAppliance = virtualApplianceDataGrid.selectedItem as VirtualAppliance;
+                       dispatchEvent(virtualApplianceEvent);
                     }
-
-                    //Showing the filtered VirtualAppliances
-                    this._virtualAppliancesFiltered = virtualAppliancesFiltered;
-                }
-
-                //Update view if _virtualAppliancesFiltered is not null
-                if(this._virtualAppliancesFiltered){
-	                if (virtualApplianceDataGrid)
-	                    virtualApplianceDataGrid.selectedIndex = this._virtualAppliancesFiltered.getItemIndex(this._selectedVirtualAppliance);
-	                if (virtualApplianceTile)
-	                    virtualApplianceTile.selectedIndex = this._virtualAppliancesFiltered.getItemIndex(this._selectedVirtualAppliance);                	
                 }
             }
 
+            private var _virtualDatacenter:VirtualDataCenter;
+            
             /**
              * Announces that user wants to create a new Virtual Appliance
              */
@@ -251,11 +276,41 @@
              }
              
              private function compareVirtualImageState(virtualImg1:VirtualAppliance, virtualImg2:VirtualAppliance):int{
-            	var virtualMachineState1:Number = virtualImg1.state.id;
-            	var virtualMachineState2:Number = virtualImg2.state.id;
+            	var virtualMachineState1:String = virtualImg1.state.description;
+            	var virtualMachineState2:String = virtualImg2.state.description;
             	
-            	return ObjectUtil.numericCompare(virtualMachineState1, virtualMachineState2);
+            	return ObjectUtil.stringCompare(virtualMachineState1, virtualMachineState2);
             }
+
+             private function retrieveVirtualAppliances(event:VirtualApplianceEvent = null):void
+            {
+                this._listRequest.filterLike = vappsFilter.text;
+                this._listRequest.numberOfNodes = VAPP_RESULTS_PER_PAGE;
+                this._listRequest.offset = (virtualappliancesPaginatorSlider.value - 1) * VAPP_RESULTS_PER_PAGE ;
+                this._listRequest.orderBy = this._vappsOrderBy;
+                this._listRequest.asc = this._vappsAsc;
+                
+                if(this.visible)
+                {
+	                dispatchEvent(new Event("requestVirtualAppliances"));
+                }
+            }
+            
+            /**
+             * To sort the Data Grid by column
+             **/
+             private function onDGColumnHeaderRelease(event:DataGridEvent):void
+            {
+                 event.preventDefault();
+
+                if (this._vappsOrderBy == event.dataField)
+                    this._vappsAsc = !this._vappsAsc;
+                else
+                    this._vappsOrderBy = event.dataField;
+
+                virtualappliancesPaginatorSlider.value = 1; 
+                retrieveVirtualAppliances();
+            } 
         ]]>
     </mx:Script>
 
@@ -279,7 +334,21 @@
             toolTip="@Resource(bundle='Common', key='BUTTON_ICONSMODE_TOOLTIP')"
             click="onClickViewOptions('iconsMode')"/>
 
-        <mx:HBox id="vAHeaderMoreButtonsContainer"/>
+        <mx:HBox id="vAHeaderMoreButtonsContainer" width="100%"/>
+        
+        <mx:Image 
+                id="vappListMagnifier"
+                creationComplete="AbicloudUtils.getImageFromStyle('UserListMagnifier', vappListMagnifier)"
+                useHandCursor="true"
+                buttonMode="true"
+                mouseChildren="false"
+                click="retrieveVirtualAppliances()"/>
+
+        <mx:TextInput id="vappsFilter"
+            height="20"
+            toolTip="@Resource(bundle='Common', key='BUTTON_FILTER_TOOLTIP')"
+            change="this._listRequest.filterLike = vappsFilter.text"
+            enter="retrieveVirtualAppliances()"/>
     </mx:HBox>
 
 
@@ -292,10 +361,11 @@
             verticalScrollPolicy="off" horizontalScrollPolicy="off">
             <mx:DataGrid id="virtualApplianceDataGrid"
                 width="100%" height="100%"
-                dataProvider="{this._virtualAppliancesFiltered}"
+                dataProvider="{AbiCloudModel.getInstance().virtualApplianceManager.virtualAppliances}"
                 doubleClickEnabled="true"
                 click="onClickVirtualApplianceDataGrid()"
                 doubleClick="onDoubleClickVirtualApplianceDataGrid()"
+                headerRelease="onDGColumnHeaderRelease(event)"
                 sortableColumns="true">
 
                 <mx:columns>
@@ -314,6 +384,7 @@
                                 	>
                                     <mx:Script>
                                         <![CDATA[
+                                        	import mx.collections.ArrayCollection;
                                         	import net.undf.abicloud.vo.user.PrivilegeType;
                                         	import net.undf.abicloud.utils.SecuredPrivilegeAccess;
                                             import net.undf.abicloud.events.VirtualApplianceEvent;
@@ -322,8 +393,12 @@
                                             [Bindable]
                                             private var _virtualAppliance:VirtualAppliance;
                                             
-                                            private function onCreationComplete():void{
-                                            	SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.VAPP_CUSTOMISE_SETTINGS,"removeChild",accessButton,vappBox);
+                                            private function onCreationComplete():void
+                                            {
+                                            	if(!SecuredPrivilegeAccess.userHasAtLeastOnPrivilege(VirtualApplianceList(outerDocument).requiredPrivileges))
+                                            	{
+                                            		vappBox.removeChild(accessButton);
+                                            	}
                                             }
 
                                             override public function set data(value:Object):void
@@ -379,6 +454,7 @@
                     <mx:DataGridColumn 
                         width="24"
                         sortCompareFunction="compareVirtualImageState"
+                        dataField="state"
                         sortable="true"
                         resizable="false"
                         headerText="">
@@ -408,10 +484,10 @@
                                         width="14" height="14"
                                         horizontalCenter="0"
                                         verticalCenter="0"
-                                        includeInLayout="{this._virtualAppliance.subState.id != State.UNKNOWN}"
-                                        source="{(this._virtualAppliance.state.id == State.RUNNING) ? StateIcons.RUNNING : 
-						   										((this._virtualAppliance.state.id == State.APPLY_CHANGES_NEEDED) ? StateIcons.APPLY_CHANGES_NEEDED : StateIcons.POWERED_OFF)}"
-                                        visible="{this._virtualAppliance.subState.id != State.IN_PROGRESS &amp;&amp; this._virtualAppliance.subState.id != State.UNKNOWN}"/>
+                                        includeInLayout="{this._virtualAppliance.state.description != State.UNKNOWN.description}"
+                                        source="{(this._virtualAppliance.state.description == State.DEPLOYED.description) ? StateIcons.RUNNING : 
+						   										((this._virtualAppliance.state.description == State.NEEDS_SYNC.description) ? StateIcons.APPLY_CHANGES_NEEDED : StateIcons.OFF)}"
+                                        visible="{this._virtualAppliance.state.description != State.LOCKED.description &amp;&amp; this._virtualAppliance.state.description != State.UNKNOWN.description}"/>
 									        
 									   <utils:SmoothImage 
 									        width="18" height="18"
@@ -419,8 +495,8 @@
                                         	verticalCenter="0"
 									        source="{CommonAssets.unknownIcon}"
 									        toolTip="@Resource(bundle='Infrastructure', key='LABEL_VM_UNKNOWN')"
-									        includeInLayout="{this._virtualAppliance.subState.id == State.UNKNOWN}"
-									        visible="{this._virtualAppliance.subState.id == State.UNKNOWN}"/>
+									        includeInLayout="{this._virtualAppliance.state.description == State.UNKNOWN.description}"
+									        visible="{this._virtualAppliance.state.description == State.UNKNOWN.description}"/>
                                    
                                     <mx:SWFLoader
                                     	id="virtualApplicanceListBaseLoadingSmall" 
@@ -428,7 +504,7 @@
                                         horizontalCenter="0"
                                         verticalCenter="0"
                                         creationComplete="AbicloudUtils.getImageFromStyle('VirtualApplianceBusyIconSmall', virtualApplicanceListBaseLoadingSmall)"
-                                        visible="{this._virtualAppliance.state.id == State.IN_PROGRESS}"/>
+                                        visible="{this._virtualAppliance.state.description == State.LOCKED.description}"/>
                                 </mx:Canvas>
                             </mx:Component>
                         </mx:itemRenderer>
@@ -446,17 +522,41 @@
                                     width="12" height="13">
                                     <mx:Script>
                                         <![CDATA[
+                                        	import mx.core.Application;
+                                        	import mx.managers.PopUpManager;
+                                        	import mx.controls.Alert;
                                             import net.undf.abicloud.vo.virtualappliance.VirtualAppliance;
                                             import net.undf.abicloud.vo.infrastructure.State;
 
                                             [Bindable]
                                             private var _virtualAppliance:VirtualAppliance;
+                                            
+                                            //Pop Up used to display Virtual Appliance error
+                                            private var _virtualApplianceError:VirtualApplianceError;
 
                                             override public function set data(value:Object):void
                                             {
                                                 super.data = value;
                                                 this._virtualAppliance = value as VirtualAppliance;
                                             }
+                                            
+                                            private function openVirtualApplianceError():void
+                                            {
+                                            	_virtualApplianceError = new VirtualApplianceError();
+                                            	_virtualApplianceError.addEventListener("virtualApplianceErrorClose",
+                                                           closeVirtualApplianceError);
+                                               
+                                                PopUpManager.addPopUp(this._virtualApplianceError,Application.application as DisplayObject, true);
+                                                PopUpManager.centerPopUp(this._virtualApplianceError);
+                                                
+                                                _virtualApplianceError.init(this._virtualAppliance);
+                                            }
+                                            
+                                            private function closeVirtualApplianceError(event:Event = null):void
+								            {
+								                //Closing the Pop Up
+								                PopUpManager.removePopUp(_virtualApplianceError);
+								            }
                                         ]]>
                                     </mx:Script>
                                     <utils:SmoothImage 
@@ -464,9 +564,13 @@
                                         horizontalCenter="0"
                                         verticalCenter="0"
                                         id="virtualApplianceListBaseAlertIcon"
+                                        click="openVirtualApplianceError()"
+                                        buttonMode="true"
+                                        useHandCursor="true"
                                         creationComplete="net.undf.abicloud.utils.AbicloudUtils.getImageFromStyle('VirtualApplianceMiniatureAlertIcon', virtualApplianceListBaseAlertIcon)"
                                         visible="{this._virtualAppliance.error || 
-													   			 this._virtualAppliance.state.id == State.FAILED}"/>
+                                                                 this._virtualAppliance.state.description == State.UNKNOWN.description}"/>
+                                
                                 </mx:Canvas>
                             </mx:Component>
                         </mx:itemRenderer>
@@ -485,7 +589,7 @@
                 paddingLeft="0"
                 paddingRight="0"
                 paddingTop="0"
-                dataProvider="{this._virtualAppliancesFiltered}"
+                dataProvider="{AbiCloudModel.getInstance().virtualApplianceManager.virtualAppliances}"
                 doubleClickEnabled="true"
                 itemRenderer="net.undf.abicloud.view.virtualappliance.components.virtualappliance.VirtualApplianceMiniature"
                 click="onClickVirtualApplianceTile()"
@@ -494,12 +598,12 @@
 
     </mx:ViewStack>
 
-
     <!-- Tool Box -->
     <general:GeneralPanelToolBox 
-        width="100%" height="32"
+        width="100%" 
         styleName="GeneralDataPanelBottomSkin">
-        <mx:HBox id="vappTools" width="100%" verticalAlign="middle">        	
+        
+        <mx:HBox id="vappTools" width="100%" verticalAlign="middle" height="100%">        	
 	        <mx:Button id="addVirtualApplianceButton"
 	            styleName="AddButton"
 	            toolTip="@Resource(bundle='Common', key='BUTTON_NEW_TOOLTIP')"
@@ -507,17 +611,33 @@
 	
 	        <mx:Button id="deleteVirtualApplianceButton"
 	            enabled="{this._selectedVirtualAppliance != null &amp;&amp; 
-					   			 this._selectedVirtualAppliance.state.id != State.IN_PROGRESS &amp;&amp;
-					   			 this._selectedVirtualAppliance.subState.id != State.UNKNOWN}"
+					   			 this._selectedVirtualAppliance.state.description != State.LOCKED.description}"
 	            styleName="RemoveButton"
 	            toolTip="@Resource(bundle='Common', key='BUTTON_DEL_TOOLTIP')"
 	            click="deleteVirtualAppliance()"/>
 	
-	        <mx:Spacer width="100%"/>
+	        <mx:Canvas 
+                width="100%" height="100%">
+                <mx:Label 
+                    top="2"
+                    horizontalCenter="0"
+                    text="{virtualappliancesPaginatorSlider.value +
+                          ' / ' + 
+                          (int(Math.ceil(AbiCloudModel.getInstance().virtualApplianceManager.totalVirtualAppliances / VAPP_RESULTS_PER_PAGE)) > 0 ?
+                          int(Math.ceil(AbiCloudModel.getInstance().virtualApplianceManager.totalVirtualAppliances / VAPP_RESULTS_PER_PAGE)) : '1')}"/>
+    
+                <mx:HSlider id="virtualappliancesPaginatorSlider"
+                    bottom="3"
+                    horizontalCenter="0"
+                    minimum="1" snapInterval="1"
+                    maximum="{int(Math.ceil(AbiCloudModel.getInstance().virtualApplianceManager.totalVirtualAppliances / VAPP_RESULTS_PER_PAGE))}"
+                    liveDragging="true" showDataTip="false"
+                    change="retrieveVirtualAppliances()"/>
+            </mx:Canvas>
 	
 	        <mx:Button id="editVirtualApplianceButton"
 	            enabled="{this._selectedVirtualAppliance != null &amp;&amp; 
-					   			 this._selectedVirtualAppliance.state.id != State.IN_PROGRESS}"
+					   			 this._selectedVirtualAppliance.state.description != State.LOCKED.description}"
 	            styleName="ConfigurationButton"
 	            toolTip="@Resource(bundle='Common', key='BUTTON_EDIT_TOOLTIP')"
 	            click="editVirtualAppliance()"/>

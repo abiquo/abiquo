@@ -27,12 +27,11 @@ import com.abiquo.abiserver.persistence.hibernate.HibernateDAO;
 
 /**
  * Class that implements the extra DAO functions for the
- * {@link com.abiquo.abiserver.persistence.dao.virtualimage.IconDAO}
- * interface
+ * {@link com.abiquo.abiserver.persistence.dao.virtualimage.IconDAO} interface
  * 
  * @author jdevesa@abiquo.com
  */
 public class IconDAOHibernate extends HibernateDAO<IconHB, Integer> implements IconDAO
 {
-    //implement extra functionality
+    // implement extra functionality
 }

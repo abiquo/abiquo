@@ -60,9 +60,10 @@ public class IPNetworkRang
      * 
      * @param mask integer mask
      * @return an IP address containing a the mask
-     * @throws InvalidIPAddressException 
+     * @throws InvalidIPAddressException
      */
-    public static IPAddress transformIntegerMaskToIPMask(Integer mask) throws InvalidIPAddressException
+    public static IPAddress transformIntegerMaskToIPMask(Integer mask)
+        throws InvalidIPAddressException
     {
         switch (mask)
         {
@@ -146,9 +147,10 @@ public class IPNetworkRang
      * @param networkAddress address that defines the network.
      * @param mask mask of the network in the Integer way.
      * @return the list of IPAddress.
-     * @throws InvalidIPAddressException 
+     * @throws InvalidIPAddressException
      */
-    public static List<IPAddress> calculateWholeRange(IPAddress networkAddress, Integer mask) throws InvalidIPAddressException
+    public static List<IPAddress> calculateWholeRange(IPAddress networkAddress, Integer mask)
+        throws InvalidIPAddressException
     {
         List<IPAddress> wholeRange = new ArrayList<IPAddress>();
 
@@ -313,7 +315,7 @@ public class IPNetworkRang
      * @param networkAddress network address
      * @param numberOfNodes
      * @return
-     * @throws InvalidIPAddressException 
+     * @throws InvalidIPAddressException
      */
     public static IPAddress lastIPAddressWithNumNodes(IPAddress networkAddress,
         Integer numberOfNodes) throws InvalidIPAddressException

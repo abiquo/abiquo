@@ -56,6 +56,13 @@
             private var IP_RESULTS_PER_PAGE:int = AbiCloudModel.getInstance().configurationManager.config.client_network_numberIpAdressesPerPage.value;
 
             private var networkManagement:NetworkManagement = null;
+            
+            private var _vlanType:String;
+            
+            public function set vlanType(value:String):void
+            {
+                this._vlanType = value;	
+            }
 
             private var _enterprise:Enterprise;
 
@@ -89,7 +96,7 @@
 
             //List of IPPoolManagement object
             [Bindable]
-            private var ipList:ArrayCollection;
+            public var ipList:ArrayCollection;
 
             //Total number of private IPs that match the listRequest
             [Bindable]
@@ -128,7 +135,7 @@
 
                 if (_vlanNetwork != null)
                 {
-                    if(_vlanNetwork.networkType == VlanNetwork.EXTERNAL){
+                    if(_vlanNetwork.networkType == VlanNetwork.EXTERNAL || _vlanNetwork.networkType == VlanNetwork.UNMANAGED){
 	                    event = new NetworkingEvent(NetworkingEvent.GET_EXTERNAL_IPs_BY_VLAN);
                         event.available = false;                   	
                     }else{
@@ -141,6 +148,7 @@
                 {
                     event = new NetworkingEvent(NetworkingEvent.GET_PRIVATE_IPs_BY_VDC);
                     event.virtualDatacenter = _virtualDatacenter;
+                    event.networkName = this._vlanType;
                 }
                 else if (_enterprise != null)
                 {
@@ -149,7 +157,7 @@
                 }
 
 
-                if (event != null)
+                if (event != null && this.visible)
                 {
                     event.listRequest = listRequest;
                     event.callback = setPrivateIPs;
@@ -269,7 +277,7 @@
                             </mx:Script>
                             <mx:Label 
                                 truncateToFit="true"
-                                text="{IPPoolManagement(data).ip}"/>
+                                text="{IPPoolManagement(data).ip == '' ? '-':IPPoolManagement(data).ip}"/>
 
                             <utils:SmoothImage
                             	id="privateIPListGateway"
@@ -314,8 +322,7 @@
             minimum="1" snapInterval="1"
             maximum="{int(Math.ceil(totalNumIPs / IP_RESULTS_PER_PAGE))}"
             liveDragging="true" showDataTip="false"
-            change="onChangeIpPaginator()"
-            mouseDown="onMouseDownIpPaginator()"/>
+            change="onChangeIpPaginator()"/>
     </mx:Canvas>
 
 </mx:VBox>

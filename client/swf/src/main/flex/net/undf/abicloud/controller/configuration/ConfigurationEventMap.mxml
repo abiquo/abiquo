@@ -92,7 +92,7 @@
             <resultHandlers>
                 <MethodInvoker generator="{ConfigurationResultHandler}"
                     method="handleSendRegistrationInfo"
-                    arguments="{[resultObject, event.registration]}"/>
+                    arguments="{[resultObject]}"/>
 
                 <!-- Unblock screen -->
                 <InlineInvoker method="ScreenBlocker.unblockScreen"/>

@@ -51,8 +51,8 @@ import com.abiquo.server.core.cloud.VirtualMachineDto;
 public class VlanScenariosTestIT extends TestPopulate
 {
     public static final String RACK_FULL_PROVIDER = "rackFullModel";
-    
-    public static final String RACK_WITH_1_VLAN_SLOT= "rackWithNRSQwarning";
+
+    public static final String RACK_WITH_1_VLAN_SLOT = "rackWithNRSQwarning";
 
     private static final String FORCE_ENTERPRISE_LIMITS = "true";
 
@@ -78,20 +78,19 @@ public class VlanScenariosTestIT extends TestPopulate
         conf.readTimeout(CLIENT_TIMEOUT);
         client = new RestClient(conf);
     }
-    
+
     @BeforeMethod
     public void setupModel()
     {
         setup();
     }
-    
 
     @Test(dataProvider = RACK_FULL_PROVIDER, enabled = false)
     public void testRackFullAllocation(AllocatorAction allocatorAction)
     {
         allocatorAction(allocatorAction);
     }
-    
+
     @Test(dataProvider = RACK_WITH_1_VLAN_SLOT, enabled = false)
     public void testrackWithNRSQwarning(AllocatorAction allocatorAction)
     {
@@ -105,7 +104,7 @@ public class VlanScenariosTestIT extends TestPopulate
         models.add(new Object[] {vlanPopulateReader.rackFullModel()});
         return models.iterator();
     }
-    
+
     @DataProvider(name = RACK_WITH_1_VLAN_SLOT)
     public Iterator<Object[]> rackWithNRSQwarning()
     {
@@ -126,8 +125,8 @@ public class VlanScenariosTestIT extends TestPopulate
 
         // http://localhost:9009/api/cloud/virtualdatacenters/1/vapps/1/virtualMachines/1
         Resource resource =
-            client.resource(vmUrl).contentType(MediaType.TEXT_PLAIN).accept(
-                MediaType.APPLICATION_XML);
+            client.resource(vmUrl).contentType(MediaType.TEXT_PLAIN)
+                .accept(MediaType.APPLICATION_XML);
 
         if (action.allocate)
         {

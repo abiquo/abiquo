@@ -38,6 +38,7 @@ public class AbiquoRestServlet extends RestServlet
     public void init() throws ServletException
     {
         super.init();
+
         DeploymentConfiguration configuration = getRequestProcessor().getConfiguration();
         configuration.setServletConfig(getServletConfig());
         configuration.setServletContext(getServletContext());

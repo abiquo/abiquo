@@ -28,7 +28,6 @@ package com.abiquo.abiserver.exception;
  * Encapsulates all the virtual appliance command exceptions
  * 
  * @author jdevesa@abiquo.com
- *
  */
 public class VirtualApplianceCommandException extends AbiCloudException
 {

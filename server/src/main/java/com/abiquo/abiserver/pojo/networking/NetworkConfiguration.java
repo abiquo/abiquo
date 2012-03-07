@@ -58,7 +58,7 @@ public class NetworkConfiguration implements Serializable, IPojo<NetworkConfigur
     protected String networkAddress;
 
     /**
-     * The mask value in the integer way (/24) 
+     * The mask value in the integer way (/24)
      */
     protected Integer mask;
 
@@ -83,7 +83,7 @@ public class NetworkConfiguration implements Serializable, IPojo<NetworkConfigur
     protected String sufixDNS;
 
     /**
-     * Fencemode (Bridged as default). 
+     * Fencemode (Bridged as default).
      */
     protected String fenceMode;
 
@@ -235,7 +235,7 @@ public class NetworkConfiguration implements Serializable, IPojo<NetworkConfigur
     public NetworkConfigurationHB toPojoHB()
     {
         NetworkConfigurationHB nconfHB = new NetworkConfigurationHB();
-        
+
         nconfHB.setNetworkConfigurationId(getNetworkConfigurationId());
         nconfHB.setGateway(getGateway());
         nconfHB.setMask(getMask());
@@ -245,7 +245,7 @@ public class NetworkConfiguration implements Serializable, IPojo<NetworkConfigur
         nconfHB.setSecondaryDNS(getSecondaryDNS());
         nconfHB.setSufixDNS(getSufixDNS());
         nconfHB.setFenceMode(getFenceMode());
-        
+
         return nconfHB;
     }
 

@@ -30,6 +30,7 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.virtualfactory.constants.MessageValues;
 import com.abiquo.virtualfactory.exception.HypervisorException;
 import com.abiquo.virtualfactory.exception.VirtualMachineException;
@@ -125,7 +126,7 @@ public class XenServerHypervisor implements IHypervisor
     @Override
     public String getHypervisorType()
     {
-        return "xenserver";
+        return HypervisorType.XENSERVER.getValue();
     }
 
     @Override
@@ -352,7 +353,7 @@ public class XenServerHypervisor implements IHypervisor
     }
 
     @Override
-    public AbsVirtualMachine getMachine(VirtualMachineConfiguration virtualMachineConfig)
+    public AbsVirtualMachine getMachine(final VirtualMachineConfiguration virtualMachineConfig)
         throws HypervisorException
     {
         try

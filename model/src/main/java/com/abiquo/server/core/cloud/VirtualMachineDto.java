@@ -23,11 +23,20 @@ package com.abiquo.server.core.cloud;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
+import org.springframework.util.StringUtils;
+
 import com.abiquo.model.transport.SingleResourceTransportDto;
+import com.abiquo.server.core.cloud.chef.RunlistElementsDto;
 
 @XmlRootElement(name = "virtualMachine")
-public class VirtualMachineDto extends SingleResourceTransportDto
+public class VirtualMachineDto extends SingleResourceTransportDto implements
+    Comparable<VirtualMachineDto>
 {
+    /**
+     * 
+     */
+    private static final long serialVersionUID = -8877350185009627544L;
+
     private Integer id;
 
     public Integer getId()
@@ -88,16 +97,16 @@ public class VirtualMachineDto extends SingleResourceTransportDto
         this.cpu = cpu;
     }
 
-    private long hd;
+    private long hdInBytes;
 
-    public long getHd()
+    public long getHdInBytes()
     {
-        return hd;
+        return hdInBytes;
     }
 
-    public void setHd(final long hd)
+    public void setHdInBytes(final long hdInBytes)
     {
-        this.hd = hd;
+        this.hdInBytes = hdInBytes;
     }
 
     private int vdrpPort;
@@ -136,14 +145,14 @@ public class VirtualMachineDto extends SingleResourceTransportDto
         this.idState = idState;
     }
 
-    private State state;
+    private VirtualMachineState state;
 
-    public void setState(final State state)
+    public void setState(final VirtualMachineState state)
     {
         this.state = state;
     }
 
-    public State getState()
+    public VirtualMachineState getState()
     {
         return state;
     }
@@ -182,6 +191,51 @@ public class VirtualMachineDto extends SingleResourceTransportDto
     public void setPassword(final String password)
     {
         this.password = password;
+    }
+
+    private String uuid;
+
+    public String getUuid()
+    {
+        return uuid;
+    }
+
+    public void setUuid(final String uuid)
+    {
+        this.uuid = uuid;
+    }
+
+    @Override
+    public int compareTo(final VirtualMachineDto vm2)
+    {
+        if (StringUtils.hasText(this.getName()) && StringUtils.hasText(vm2.getName()))
+        {
+            return this.getName().compareTo(vm2.getName());
+        }
+        else if (!StringUtils.hasText(this.getName()) && !StringUtils.hasText(vm2.getName()))
+        {
+            return 0;
+        }
+        else if (!StringUtils.hasText(this.getName()) && StringUtils.hasText(vm2.getName()))
+        {
+            return -1;
+        }
+        else
+        {
+            return 1;
+        }
+    }
+
+    private RunlistElementsDto runlistElements;
+
+    public RunlistElementsDto getRunlist()
+    {
+        return runlistElements;
+    }
+
+    public void setRunlist(final RunlistElementsDto runlistElements)
+    {
+        this.runlistElements = runlistElements;
     }
 
 }

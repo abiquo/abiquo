@@ -89,9 +89,9 @@ public class VirtualImageConversionsDAOHibernate extends
             (Long) getSession()
                 .createQuery(
                     "select count(*) from com.abiquo.abiserver.business.hibernate.pojohb.virtualimage.VirtualImageConversionsHB"
-                        + " where image.id = :idImage and state = :state").setParameter("idImage",
-                    image.getIdImage()).setParameter("state", StateConversionEnum.FINISHED)
-                .uniqueResult();
+                        + " where image.id = :idImage and state = :state")
+                .setParameter("idImage", image.getIdImage())
+                .setParameter("state", StateConversionEnum.FINISHED).uniqueResult();
 
         return existConversion > 0;
     }
@@ -103,8 +103,9 @@ public class VirtualImageConversionsDAOHibernate extends
                 .createQuery(
                     "select count(*) from com.abiquo.abiserver.business.hibernate.pojohb.virtualimage.VirtualImageConversionsHB"
                         + " where image.id = :idImage and state = :state and targetType = :type")
-                .setParameter("idImage", image.getIdImage()).setParameter("state",
-                    StateConversionEnum.FINISHED).setParameter("type", targetType).uniqueResult();
+                .setParameter("idImage", image.getIdImage())
+                .setParameter("state", StateConversionEnum.FINISHED)
+                .setParameter("type", targetType).uniqueResult();
 
         return existConversion > 0;
     }
@@ -112,8 +113,9 @@ public class VirtualImageConversionsDAOHibernate extends
     @SuppressWarnings("unchecked")
     public Collection<VirtualImageConversionsHB> getConversions(final Collection<Integer> imageIds)
     {
-        return getSession().createSQLQuery(
-            "select * from virtualimage_conversions where idImage in (:idImage)").addEntity(
-            VirtualImageConversionsHB.class).setParameterList("idImage", imageIds).list();
+        return getSession()
+            .createSQLQuery("select * from virtualimage_conversions where idImage in (:idImage)")
+            .addEntity(VirtualImageConversionsHB.class).setParameterList("idImage", imageIds)
+            .list();
     }
 }

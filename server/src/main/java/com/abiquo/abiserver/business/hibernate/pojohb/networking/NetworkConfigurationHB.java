@@ -31,13 +31,14 @@ import com.abiquo.abiserver.pojo.networking.NetworkConfiguration;
  * 
  * @author jdevesa@abiquo.com
  */
-public class NetworkConfigurationHB extends NetworkConfigurationType implements IPojoHB<NetworkConfiguration>
+public class NetworkConfigurationHB extends NetworkConfigurationType implements
+    IPojoHB<NetworkConfiguration>
 {
     /**
      * Identifer of the configuration.
      */
     private Integer networkConfigurationId;
-    
+
     /**
      * @return the networkConfigurationId
      */
@@ -58,7 +59,7 @@ public class NetworkConfigurationHB extends NetworkConfigurationType implements 
     public NetworkConfiguration toPojo()
     {
         NetworkConfiguration nconf = new NetworkConfiguration();
-        
+
         nconf.setNetworkConfigurationId(getNetworkConfigurationId());
         nconf.setGateway(getGateway());
         nconf.setMask(getMask());
@@ -68,9 +69,8 @@ public class NetworkConfigurationHB extends NetworkConfigurationType implements 
         nconf.setSecondaryDNS(getSecondaryDNS());
         nconf.setSufixDNS(getSufixDNS());
         nconf.setFenceMode(getFenceMode());
-        
+
         return nconf;
     }
-    
-    
+
 }

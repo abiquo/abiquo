@@ -21,7 +21,6 @@
 
 package com.abiquo.server.core.scheduler;
 
-
 public interface Rule<RESOURCE, TARGET, CONTEXT_DATA>
 {
     boolean pass(RESOURCE resource, TARGET machine, CONTEXT_DATA contextData);

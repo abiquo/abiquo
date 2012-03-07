@@ -26,18 +26,18 @@
 // Generated on: 2011.05.26 at 12:13:14 PM CEST 
 //
 
-
 package com.abiquo.server.core.infrastructure.nodecollector;
 
 import javax.xml.bind.annotation.XmlEnum;
 import javax.xml.bind.annotation.XmlType;
 
-
 /**
- * <p>Java class for RackEnumTypeDto.
- * 
- * <p>The following schema fragment specifies the expected content contained within this class.
  * <p>
+ * Java class for RackEnumTypeDto.
+ * <p>
+ * The following schema fragment specifies the expected content contained within this class.
+ * <p>
+ * 
  * <pre>
  * &lt;simpleType name="RackEnumTypeDto">
  *   &lt;restriction base="{http://www.w3.org/2001/XMLSchema}string">
@@ -45,19 +45,21 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;/restriction>
  * &lt;/simpleType>
  * </pre>
- * 
  */
 @XmlType(name = "RackEnumTypeDto")
 @XmlEnum
-public enum RackEnumTypeDto {
+public enum RackEnumTypeDto
+{
 
     UCS;
 
-    public String value() {
+    public String value()
+    {
         return name();
     }
 
-    public static RackEnumTypeDto fromValue(String v) {
+    public static RackEnumTypeDto fromValue(String v)
+    {
         return valueOf(v);
     }
 

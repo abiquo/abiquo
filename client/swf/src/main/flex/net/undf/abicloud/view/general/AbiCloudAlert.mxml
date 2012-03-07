@@ -107,12 +107,14 @@
 
             private var _responseHandler:Function;
 
+            public static var customAlert:AbiCloudAlert;
+            
             public static function showConfirmation(title:String, header:String,
                                                     main:String, flags:uint = 0x4,
                                                     responseHandler:Function = null,
                                                     allowClipboard:Boolean = false):void
             {
-                var customAlert:AbiCloudAlert = new AbiCloudAlert;
+                customAlert = new AbiCloudAlert();
                 customAlert._titleText = title;
                 customAlert._headerText = header;
                 customAlert.id = header;
@@ -130,7 +132,7 @@
                                              allowClipboard:Boolean = false,
                                              additionalObject:Object = null):void
             {
-                var customAlert:AbiCloudAlert = new AbiCloudAlert;
+                customAlert = new AbiCloudAlert();
 
                 customAlert._titleText = title;
                 customAlert._headerText = header;
@@ -151,10 +153,10 @@
 
             public static function showError(title:String, header:String, main:String,
                                              flags:uint = 0x4, responseHandler:Function = null,
-                                             allowClipboard:Boolean = false,
+                                             allowClipboard:Boolean = true,
                                              additionalObject:Object = null):void
             {
-                var customAlert:AbiCloudAlert = new AbiCloudAlert();
+                customAlert = new AbiCloudAlert();
                 
                 customAlert._titleText = title;
                 customAlert._headerText = header;
@@ -211,6 +213,10 @@
 	                //Making the AbiCloudAlert bigger if mainTextArea does not fit
 	                if (mainText.textHeight > mainText.minHeight)
 	                {
+	                	if(_titleText == ResourceManager.getInstance().getString("VirtualAppliance","ALERT_DHCP_TITLE_LABEL"))
+	                	{
+                            mainText.verticalScrollPolicy = 'auto';
+                        }
 	                    var newHeight:int = height + mainText.textHeight - mainText.minHeight;
 	                    //height = height + mainText.textHeight - mainText.minHeight;
 	                    if (newHeight <= maxHeight && newHeight >= minHeight)
@@ -339,7 +345,7 @@
 
             private function onClickClipboardButton():void
             {
-                System.setClipboard(this._mainText);
+                System.setClipboard(mainText.text);
             }
 
             /**
@@ -353,6 +359,15 @@
                     //When users presses the Enter key, it is like a click
                     keyboardEvent.target.dispatchEvent(new MouseEvent(MouseEvent.CLICK));
                 }
+            }
+            
+            public static function externalClose():void
+            {
+            	if(customAlert)
+            	{
+            		customAlert.close(new MouseEvent(MouseEvent.CLICK));
+            	}
+            	
             }
         ]]>
     </mx:Script>
@@ -376,6 +391,8 @@
 
     <mx:Label id="headerLabel"
         left="70" top="36"
+        maxWidth="350"
+        truncateToFit="true"
         text="{_headerText}" styleName="AbiCloudAlertSubtitle"/>
 
 
@@ -427,6 +444,7 @@
 
         <mx:Button id="clipBoardButton"
             height="18"
+            styleName="AlternativeButton"
             includeInLayout="false"
             click="onClickClipboardButton()"
             visible="false"/>

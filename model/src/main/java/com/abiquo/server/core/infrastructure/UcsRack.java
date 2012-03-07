@@ -48,19 +48,22 @@ public class UcsRack extends Rack
     }
 
     /* package */UcsRack(final String name, final Datacenter datacenter, final Integer vlanIdMin,
-        final Integer vlanIdMax, final Integer vlanPerVdcExpected, final Integer nrsq,
-        final String ip, final Integer port, final String user, final String password)
+        final Integer vlanIdMax, final Integer vlanPerVdcExpected, final Integer vlanPerVdcReserved, final Integer nrsq,
+        final String ip, final Integer port, final String user, final String password,
+        final String defaultTemplate, final Integer maxMachinesOn)
     {
         setDatacenter(datacenter);
         setName(name);
         setVlanIdMin(vlanIdMin);
         setVlanIdMax(vlanIdMax);
-        setVlanPerVdcExpected(vlanPerVdcExpected);
+        setVlanPerVdcReserved(vlanPerVdcReserved);
         setNrsq(nrsq);
         setIp(ip);
         setPort(port);
         setUser(user);
         setPassword(password);
+        setDefaultTemplate(defaultTemplate);
+        setMaxMachinesOn(maxMachinesOn);
     }
 
     public final static String PORT_PROPERTY = "port";
@@ -84,7 +87,7 @@ public class UcsRack extends Rack
         return this.port;
     }
 
-    public void setPort(Integer port)
+    public void setPort(final Integer port)
     {
         this.port = port;
     }
@@ -113,7 +116,7 @@ public class UcsRack extends Rack
         return this.ip;
     }
 
-    public void setIp(String ip)
+    public void setIp(final String ip)
     {
         this.ip = ip;
     }
@@ -141,7 +144,7 @@ public class UcsRack extends Rack
         return this.password;
     }
 
-    public void setPassword(String password)
+    public void setPassword(final String password)
     {
         this.password = password;
     }
@@ -169,9 +172,61 @@ public class UcsRack extends Rack
         return this.user;
     }
 
-    public void setUser(String user)
+    public void setUser(final String user)
     {
         this.user = user;
     }
 
+    public final static String DEFAULT_TEMPLATE_PROPERTY = "defaultTemplate";
+
+    private final static boolean DEFAULT_TEMPLATE_REQUIRED = false;
+
+    private final static int DEFAULT_TEMPLATE_LENGTH_MIN = 0;
+
+    private final static int DEFAULT_TEMPLATE_LENGTH_MAX = 255;
+
+    private final static boolean DEFAULT_TEMPLATE_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
+
+    private final static String DEFAULT_TEMPLATE_COLUMN = "defaultTemplate";
+
+    @Column(name = DEFAULT_TEMPLATE_COLUMN, nullable = !DEFAULT_TEMPLATE_REQUIRED, length = DEFAULT_TEMPLATE_LENGTH_MAX)
+    private String defaultTemplate;
+
+    @Required(value = DEFAULT_TEMPLATE_REQUIRED)
+    @Length(min = DEFAULT_TEMPLATE_LENGTH_MIN, max = DEFAULT_TEMPLATE_LENGTH_MAX)
+    @LeadingOrTrailingWhitespace(allowed = DEFAULT_TEMPLATE_LEADING_OR_TRAILING_WHITESPACES_ALLOWED)
+    public String getDefaultTemplate()
+    {
+        return this.defaultTemplate;
+    }
+
+    public void setDefaultTemplate(final String defaultTemplate)
+    {
+        this.defaultTemplate = defaultTemplate;
+    }
+
+    public final static String MAX_MACHINES_ON_PROPERTY = "maxMachinesOn";
+
+    private final static boolean MAX_MACHINES_ON_REQUIRED = false;
+
+    private final static String MAX_MACHINES_ON_COLUMN = "maxMachinesOn";
+
+    private final static int MAX_MACHINES_ON_MIN = 0;
+
+    private final static int MAX_MACHINES_ON_MAX = Integer.MAX_VALUE;
+
+    @Column(name = MAX_MACHINES_ON_COLUMN, nullable = !MAX_MACHINES_ON_REQUIRED)
+    @Range(min = MAX_MACHINES_ON_MIN, max = MAX_MACHINES_ON_MAX)
+    @Required(value = MAX_MACHINES_ON_REQUIRED)
+    private Integer maxMachinesOn;
+
+    public Integer getMaxMachinesOn()
+    {
+        return this.maxMachinesOn;
+    }
+
+    public void setMaxMachinesOn(final Integer maxMachinesOn)
+    {
+        this.maxMachinesOn = maxMachinesOn;
+    }
 }

@@ -21,7 +21,6 @@
 
 package com.abiquo.abiserver.model.ovf;
 
-
 public class OVFModelFactory
 {
 

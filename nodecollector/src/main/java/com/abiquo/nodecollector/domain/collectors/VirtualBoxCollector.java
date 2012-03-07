@@ -84,13 +84,17 @@ public class VirtualBoxCollector extends AbstractCollector
 
     Integer vboxPort = 18083;
 
+    String IDECONTROLLER = "IDESController";
+
+    String SATACONTROLLER = "SATASController";
+
     /**
      * WsmanCollector
      */
     protected AimCollector aimcollector;
 
     @Override
-    public void connect(String user, String password) throws ConnectionException
+    public void connect(final String user, final String password) throws ConnectionException
     {
         wsmanuser = user;
         wsmanpassword = password;
@@ -105,8 +109,7 @@ public class VirtualBoxCollector extends AbstractCollector
         {
             throw new ConnectionException(MessageValues.CONN_EXCP_I, e);
         }
-        
-        
+
         try
         {
             aimcollector = new AimCollectorImpl(getIpAddress(), getAimPort());
@@ -115,7 +118,7 @@ public class VirtualBoxCollector extends AbstractCollector
         {
             throw new ConnectionException(MessageValues.CONN_EXCP_IV, e);
         }
-        
+
     }
 
     @Override
@@ -211,7 +214,7 @@ public class VirtualBoxCollector extends AbstractCollector
 
             if (state.compareTo(MachineState.Running) == 0)
             {
-                nextVMachine.setStatus(VirtualSystemStatusEnumType.RUNNING);
+                nextVMachine.setStatus(VirtualSystemStatusEnumType.ON);
             }
             else if (state.compareTo(MachineState.Paused) == 0)
             {
@@ -219,7 +222,7 @@ public class VirtualBoxCollector extends AbstractCollector
             }
             else
             {
-                nextVMachine.setStatus(VirtualSystemStatusEnumType.POWERED_OFF);
+                nextVMachine.setStatus(VirtualSystemStatusEnumType.OFF);
             }
 
             List<IMediumAttachment> mediumAttachments = machine.getMediumAttachments();
@@ -234,9 +237,9 @@ public class VirtualBoxCollector extends AbstractCollector
                     if (medium.getDeviceType().compareTo(DeviceType.HardDisk) == 0)
                     {
                         String formatName = medium.getFormat();
-                        newResource.setResourceType(ResourceEnumType.STORAGE_DISK);
                         if (!"iSCSI".equals(formatName))
                         {
+                            newResource.setResourceType(ResourceEnumType.HARD_DISK);
                             newResource.setAddress(medium.getLocation());
                             newResource.setUnits(medium.getSize().longValue());
                             newResource.setConnection(getDatastoreFromFile(medium.getLocation()));
@@ -247,9 +250,20 @@ public class VirtualBoxCollector extends AbstractCollector
                         else
                         {
                             newResource.setAddress("unknown");
-                            newResource.setUnits(new Long(0));
-                            newResource.setResourceSubType(VirtualDiskEnumType.STATEFUL.value());
                             newResource.setConnection("unknown");
+                            if (iMediumAttachment.getController().contains(IDECONTROLLER))
+                            {
+                                newResource.setResourceType(ResourceEnumType.HARD_DISK);
+                                newResource.setUnits(new Long(0));
+                                newResource
+                                    .setResourceSubType(VirtualDiskEnumType.STATEFUL.value());
+                            }
+                            else if (iMediumAttachment.getController().contains(SATACONTROLLER))
+                            {
+                                newResource.setResourceType(ResourceEnumType.VOLUME_DISK);
+                                newResource.setUnits(medium.getSize().longValue());
+                                newResource.setResourceSubType(VirtualDiskEnumType.UNKNOWN.value());
+                            }
                         }
                     }
 
@@ -272,8 +286,11 @@ public class VirtualBoxCollector extends AbstractCollector
     private String getDatastoreFromFile(final String fileName)
     {
         int count = StringUtils.countMatches(fileName, "/");
-        if (count == 1) return "/";
-    	int indexEndDirectory = fileName.lastIndexOf('/');
+        if (count == 1)
+        {
+            return "/";
+        }
+        int indexEndDirectory = fileName.lastIndexOf('/');
         return fileName.substring(0, indexEndDirectory);
     }
 
@@ -291,7 +308,7 @@ public class VirtualBoxCollector extends AbstractCollector
         }
     }
 
-    private int getFreePortFromPortsList(String csvPorts)
+    private int getFreePortFromPortsList(final String csvPorts)
     {
         List<Integer> portList = new ArrayList<Integer>();
         try
@@ -322,7 +339,7 @@ public class VirtualBoxCollector extends AbstractCollector
         }
     }
 
-    private VirtualDiskEnumType mediumFormatToVirtualDiskEnum(String formatId)
+    private VirtualDiskEnumType mediumFormatToVirtualDiskEnum(final String formatId)
     {
         if ("raw".equals(formatId))
         {

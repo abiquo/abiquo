@@ -33,6 +33,7 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 
 import com.abiquo.abiserver.abicloudws.AbiCloudConstants;
+import com.abiquo.abiserver.business.hibernate.pojohb.networking.IpPoolManagementHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.networking.VlanNetworkHB;
 import com.abiquo.abiserver.exception.PersistenceException;
 import com.abiquo.abiserver.persistence.dao.networking.VlanNetworkDAO;
@@ -204,7 +205,7 @@ public class VlanNetworkDAOHibernate extends HibernateDAO<VlanNetworkHB, Integer
 
     @SuppressWarnings("unchecked")
     @Override
-    public List<VlanNetworkHB> findPrivateVLANsByDatacenter(Integer idDatacenter)
+    public List<VlanNetworkHB> findPrivateVLANsByDatacenter(final Integer idDatacenter)
         throws PersistenceException
     {
         try
@@ -219,5 +220,37 @@ public class VlanNetworkDAOHibernate extends HibernateDAO<VlanNetworkHB, Integer
         {
             throw new PersistenceException(e.getMessage(), e);
         }
+    }
+
+    /**
+     * Named Queries.
+     */
+    private static String VLAN_GET_AVAILABLE_IP_MANAGEMENT = "VLAN_GET_AVAILABLE_IP_MANAGEMENT";
+
+    @Override
+    public IpPoolManagementHB getNextAvailableIp(final Integer vlanNetworkId, final String gateway)
+        throws PersistenceException
+    {
+        try
+        {
+            Session session = HibernateDAOFactory.getSessionFactory().getCurrentSession();
+            Query query = session.getNamedQuery(VLAN_GET_AVAILABLE_IP_MANAGEMENT);
+            query.setInteger("vlanNetworkId", vlanNetworkId);
+            query.setString("gateway", gateway);
+
+            if (query.list().size() > 0)
+            {
+                return (IpPoolManagementHB) query.list().get(0);
+            }
+            else
+            {
+                return null;
+            }
+        }
+        catch (HibernateException e)
+        {
+            throw new PersistenceException(e.getMessage(), e);
+        }
+
     }
 }

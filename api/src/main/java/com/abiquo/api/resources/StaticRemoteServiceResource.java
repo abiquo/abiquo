@@ -39,28 +39,32 @@ public abstract class StaticRemoteServiceResource extends AbstractResource
 
     @GET
     public RemoteServiceDto getRemoteService(
-        @PathParam(DatacenterResource.DATACENTER) Integer datacenterId,
-        @Context IRESTBuilder restBuilder) throws Exception
+        @PathParam(DatacenterResource.DATACENTER) final Integer datacenterId,
+        @Context final IRESTBuilder restBuilder) throws Exception
     {
-        return remoteServiceResource.getRemoteService(datacenterId, getRemoteServiceType(),
+        return remoteServiceResource.getRemoteService(datacenterId, getRemoteServicePath(),
             restBuilder);
     }
 
     @PUT
     public RemoteServiceDto modifyRemoteService(
-        @PathParam(DatacenterResource.DATACENTER) Integer datacenterId,
-        RemoteServiceDto remoteService, @Context IRESTBuilder restBuilder) throws Exception
+        @PathParam(DatacenterResource.DATACENTER) final Integer datacenterId,
+        final RemoteServiceDto remoteService, @Context final IRESTBuilder restBuilder)
+        throws Exception
     {
-        return remoteServiceResource.modifyRemoteService(datacenterId, getRemoteServiceType(),
+        return remoteServiceResource.modifyRemoteService(datacenterId, getRemoteServicePath(),
             remoteService, restBuilder);
     }
 
     @DELETE
-    public void deleteRemoteService(@PathParam(DatacenterResource.DATACENTER) Integer datacenterId)
+    public void deleteRemoteService(
+        @PathParam(DatacenterResource.DATACENTER) final Integer datacenterId)
     {
-        remoteServiceResource.deleteRemoteService(datacenterId, getRemoteServiceType());
+        remoteServiceResource.deleteRemoteService(datacenterId, getRemoteServicePath());
     }
 
     protected abstract String getRemoteServiceType();
+
+    protected abstract String getRemoteServicePath();
 
 }

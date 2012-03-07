@@ -82,6 +82,14 @@
                 toggledContainer.selectedIndex = 0;
                 this._virtualDataCenterAdd.virtualDatacenter = virtualDatacenter;
                 this._virtualDataCenterAdd.init();
+                if(virtualDatacenter && virtualDatacenter.id != 0)
+                {
+                    titleText = resourceManager.getString('VirtualAppliance', 'POPUP_TITLE_VIRTUALDATACENTER_EDIT');	
+                }
+                else
+                {
+                	titleText = resourceManager.getString('VirtualAppliance', 'POPUP_TITLE_VIRTUALDATACENTER_ADD');
+                }
                 
                 //Registering Keyboard events, for standard application behaivor
                 this.addEventListener(KeyboardEvent.KEY_UP, keyboardHandler);
@@ -96,6 +104,7 @@
             
             public function getAllowedDatacenter():void{
             	var lsDatacenters:InfrastructureEvent = new InfrastructureEvent(InfrastructureEvent.GET_ALLOWED_DATACENTERS);
+            	lsDatacenters.enterpriseId = AbiCloudModel.getInstance().loginManager.user.enterprise.id;
                 dispatchEvent(lsDatacenters);  
             }
             

@@ -34,28 +34,41 @@ public class LicenseContextListener implements ServletContextListener
 {
 
     public static final Logger logger = LoggerFactory.getLogger("");
-    
+
     @Override
     public void contextInitialized(ServletContextEvent sce)
     {
-    	logger.info("********************************************************************************");    
-    	logger.info("*                              ABICLOUD: SERVER                                *");
-    	logger.info("********************************************************************************");
-        logger.info("* This application is free software; you can redistribute it and/or modify it  *");
-        logger.info("* under the terms of the GNU LESSER GENERAL PUBLIC LICENSE as published by     *");	
-        logger.info("* the Free Software Foundation under version 3 of the License.                 *");
-        logger.info("*                                                                              *");
-        logger.info("* This software is distributed in the hope that it will be useful, but WITHOUT *"); 
-        logger.info("* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or        *");
-        logger.info("* FITNESS FOR A PARTICULAR PURPOSE.  See the GNU LESSER GENERAL PUBLIC LICENSE *");
-        logger.info("* v.3 for more details.                                                        *");
-    	logger.info("********************************************************************************");
+        logger
+            .info("********************************************************************************");
+        logger
+            .info("*                              ABICLOUD: SERVER                                *");
+        logger
+            .info("********************************************************************************");
+        logger
+            .info("* This application is free software; you can redistribute it and/or modify it  *");
+        logger
+            .info("* under the terms of the GNU LESSER GENERAL PUBLIC LICENSE as published by     *");
+        logger
+            .info("* the Free Software Foundation under version 3 of the License.                 *");
+        logger
+            .info("*                                                                              *");
+        logger
+            .info("* This software is distributed in the hope that it will be useful, but WITHOUT *");
+        logger
+            .info("* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or        *");
+        logger
+            .info("* FITNESS FOR A PARTICULAR PURPOSE.  See the GNU LESSER GENERAL PUBLIC LICENSE *");
+        logger
+            .info("* v.3 for more details.                                                        *");
+        logger
+            .info("********************************************************************************");
 
     }
 
-	@Override
-	public void contextDestroyed(ServletContextEvent arg0) {
-		
-	}
+    @Override
+    public void contextDestroyed(ServletContextEvent arg0)
+    {
+
+    }
 
 }

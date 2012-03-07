@@ -21,6 +21,7 @@
 
 package com.abiquo.server.core.infrastructure;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -29,11 +30,13 @@ import org.apache.commons.lang.StringUtils;
 import org.hibernate.Criteria;
 import org.hibernate.Query;
 import org.hibernate.SQLQuery;
+import org.hibernate.Session;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 
+import com.abiquo.model.enumerator.MachineState;
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
 import com.softwarementors.bzngine.entities.PersistentEntity;
 
@@ -67,12 +70,55 @@ import com.softwarementors.bzngine.entities.PersistentEntity;
 
     public List<Rack> findRacks(final Datacenter datacenter)
     {
+        return findRacks(datacenter, null);
+    }
+
+    private final static String QUERY_GET_FILTERED_RACKS = //
+        "SELECT  r.idRack, r.idDataCenter, r.name, r.shortDescription, r.largeDescription, r.vlan_id_min, r.vlan_id_max, "
+            + "r.vlans_id_avoided, r.vlan_per_vdc_expected, r.nrsq, r.haEnabled, r.version_c FROM " //
+            + "rack r LEFT OUTER JOIN datacenter dc ON r.idDatacenter = dc.idDatacenter "
+            + "WHERE dc.idDatacenter = :idDatacenter " //
+            + "AND (r.name like :filter "
+            + "OR r.idRack in (SELECT pms.idRack FROM physicalmachine pms LEFT OUTER JOIN enterprise ent ON pms.idEnterprise = ent.idEnterprise "
+            + "WHERE ent.name like :filter OR pms.name like :filter ) " + ")";
+
+    public List<Rack> findRacks(final Datacenter datacenter, final String filter)
+    {
         assert datacenter != null;
         assert isManaged2(datacenter);
 
+        if (filter != null && !filter.isEmpty())
+        {
+            Query query = getSession().createSQLQuery(QUERY_GET_FILTERED_RACKS);
+            query.setParameter("idDatacenter", datacenter.getId());
+            query.setString("filter", "%" + filter + "%");
+
+            List<Rack> racks = getSQLQueryResults(getSession(), query, Rack.class, 0);
+            return racks;
+
+        }
         Criteria criteria = createCriteria(sameDatacenter(datacenter));
         criteria.addOrder(Order.asc(Rack.NAME_PROPERTY));
         List<Rack> result = getResultList(criteria);
+        return result;
+    }
+
+    @SuppressWarnings("unchecked")
+    private <T> List<T> getSQLQueryResults(final Session session, final Query query,
+        final Class<T> objectClass, final int idFieldPosition)
+    {
+        List<T> result = new ArrayList<T>();
+        List<Object[]> sqlResult = query.list();
+
+        if (sqlResult != null && !sqlResult.isEmpty())
+        {
+            for (Object[] res : sqlResult)
+            {
+                T obj = (T) session.get(objectClass, (Integer) res[idFieldPosition]);
+                result.add(obj);
+            }
+        }
+
         return result;
     }
 
@@ -177,8 +223,25 @@ import com.softwarementors.bzngine.entities.PersistentEntity;
      */
     public List<Rack> findAllNotManagedRacksByDatacenter(final Integer datacenterId)
     {
-        Query q = getSession().createQuery(HQL_NOT_MANAGED_RACKS_BY_DATACENTER);
+        return findAllNotManagedRacksByDatacenter(datacenterId, null);
+    }
+
+    public List<Rack> findAllNotManagedRacksByDatacenter(final Integer datacenterId,
+        final String filter)
+    {
+        String hql = HQL_NOT_MANAGED_RACKS_BY_DATACENTER;
+        if (filter != null && !filter.isEmpty())
+        {
+            hql += " AND nmr.name like :filter";
+        }
+
+        Query q = getSession().createQuery(hql);
         q.setInteger("idDatacenter", datacenterId);
+        if (filter != null && !filter.isEmpty())
+        {
+            q.setString("filter", "%" + filter + "%");
+        }
+
         return q.list();
     }
 
@@ -192,5 +255,85 @@ import com.softwarementors.bzngine.entities.PersistentEntity;
         Query query = getSession().createQuery(QUERY_USED_VDRP);
         query.setParameter("rack", rack);
         return query.list();
+    }
+
+    private final static String HQL_EMPTY_OFF_MACHINES_IN_RACK =
+        "select m from Machine m where m.rack.id = :rackId and m.state = "
+            + MachineState.HALTED_FOR_SAVE.ordinal();
+
+    private final static String HQL_EMPTY_ON_MACHINES_IN_RACK =
+        "select m from Machine m where m.rack.id = :rackId and m.state = "
+            + MachineState.MANAGED.ordinal()
+            + " and not exists (select vm from VirtualMachine vm where vm.hypervisor.machine = m)";
+
+    /**
+     * Return all machines in a rack that are empty of VM and powered off.
+     * 
+     * @param rackId rack.
+     * @return Integer
+     */
+    public Integer getEmptyOffMachines(final Integer rackId)
+    {
+        Query q =
+            getSession().createQuery(HQL_EMPTY_OFF_MACHINES_IN_RACK).setInteger("rackId", rackId);
+        return q.list().size();
+    }
+
+    /**
+     * Return all machines in a rack that are empty of VM.
+     * 
+     * @param rackId rack.
+     * @return Integer
+     */
+    public Integer getEmptyOnMachines(final Integer rackId)
+    {
+        Query q =
+            getSession().createQuery(HQL_EMPTY_ON_MACHINES_IN_RACK).setInteger("rackId", rackId);
+        return q.list().size();
+    }
+
+    /**
+     * Returns any machine that is in the rack in HALTED_FOR_SAVE.
+     * 
+     * @param rackId rack.
+     * @return Machine
+     */
+    public List<Machine> getRandomMachinesToStartFromRack(final Integer rackId,
+        final Integer howMany)
+    {
+
+        Query q =
+            getSession().createQuery(HQL_EMPTY_OFF_MACHINES_IN_RACK).setInteger("rackId", rackId);
+
+        List<Machine> machines = q.list();
+        if (machines.isEmpty())
+        {
+            return null;
+        }
+        return machines.subList(0, howMany < machines.size() ? howMany : machines.size());
+    }
+
+    /**
+     * Returns any machine that is in the rack in MANAGED.
+     * 
+     * @param rackId rack.
+     * @return Machine
+     */
+    public List<Machine> getRandomMachinesToShutDownFromRack(final Integer rackId,
+        final Integer howMany)
+    {
+        if (howMany <= 0)
+        {
+            return null;
+        }
+        Query q =
+            getSession().createQuery(HQL_EMPTY_ON_MACHINES_IN_RACK).setInteger("rackId", rackId);
+
+        List<Machine> machines = q.list();
+        if (machines.isEmpty())
+        {
+            return null;
+        }
+        return machines.subList(0, howMany < machines.size() ? howMany : machines.size());
     }
 }

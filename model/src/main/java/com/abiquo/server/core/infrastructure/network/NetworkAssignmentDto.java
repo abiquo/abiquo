@@ -19,25 +19,25 @@
  * Boston, MA 02111-1307, USA.
  */
 
-  package com.abiquo.server.core.infrastructure.network;
+package com.abiquo.server.core.infrastructure.network;
 
-  import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlRootElement;
 
-  import com.abiquo.model.transport.SingleResourceTransportDto;
+import com.abiquo.model.transport.SingleResourceTransportDto;
 
-  @XmlRootElement(name = "")
-  public class NetworkAssignmentDto extends SingleResourceTransportDto
-  {
-      private Integer id;
-      public Integer getId()
-      {
-          return id;
-      }
+@XmlRootElement(name = "")
+public class NetworkAssignmentDto extends SingleResourceTransportDto
+{
+    private Integer id;
 
-      public void setId(Integer id)
-      {
-          this.id = id;
-      }
+    public Integer getId()
+    {
+        return id;
+    }
 
-      
-  }
+    public void setId(Integer id)
+    {
+        this.id = id;
+    }
+
+}

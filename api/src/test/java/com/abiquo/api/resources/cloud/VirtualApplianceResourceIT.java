@@ -110,10 +110,10 @@ public class VirtualApplianceResourceIT extends AbstractJpaGeneratorIT
         VirtualApplianceDto vappdto = response.getEntity(VirtualApplianceDto.class);
         assertNotNull(vappdto);
         assertLinkExist(vappdto,
-            resolveVirtualApplianceActionGetIPsURI(vdc.getId(), vapp1.getId()), "action",
+            resolveVirtualApplianceActionGetIPsURI(vdc.getId(), vapp1.getId()),
             IpAddressesResource.IP_ADDRESSES);
         assertLinkExist(vappdto, resolveVirtualMachinesURI(vdc.getId(), vapp1.getId()),
-            VirtualMachineResource.VIRTUAL_MACHINE);
+            VirtualMachinesResource.VIRTUAL_MACHINES_PATH);
 
         // Check for vapp2
         response = get(resolveVirtualApplianceURI(vdc.getId(), vapp2.getId()));
@@ -121,10 +121,10 @@ public class VirtualApplianceResourceIT extends AbstractJpaGeneratorIT
         vappdto = response.getEntity(VirtualApplianceDto.class);
         assertNotNull(vappdto);
         assertLinkExist(vappdto,
-            resolveVirtualApplianceActionGetIPsURI(vdc.getId(), vapp2.getId()), "action",
+            resolveVirtualApplianceActionGetIPsURI(vdc.getId(), vapp2.getId()),
             IpAddressesResource.IP_ADDRESSES);
         assertLinkExist(vappdto, resolveVirtualMachinesURI(vdc.getId(), vapp2.getId()),
-            VirtualMachineResource.VIRTUAL_MACHINE);
+            VirtualMachinesResource.VIRTUAL_MACHINES_PATH);
     }
 
     /**
@@ -225,6 +225,29 @@ public class VirtualApplianceResourceIT extends AbstractJpaGeneratorIT
         VirtualApplianceDto responseDto = response.getEntity(VirtualApplianceDto.class);
 
         assertEquals(responseDto.getName(), expectedName);
+    }
+
+    @Test
+    public void updateVirtualApplianceWithNode() throws Exception
+    {
+        VirtualAppliance vapp = vappGenerator.createInstance(vdc);
+        vapp.setNodeconnections("1,4");
+        setup(vapp);
+
+        VirtualApplianceDto dto =
+            ModelTransformer.transportFromPersistence(VirtualApplianceDto.class, vapp);
+
+        String nodeconnections = "4,1";
+
+        dto.setNodeconnections(nodeconnections);
+
+        String uri = resolveVirtualApplianceURI(vdc.getId(), vapp.getId());
+        ClientResponse response = put(uri, dto, SYSADMIN, SYSADMIN);
+
+        assertEquals(response.getStatusCode(), 200);
+        VirtualApplianceDto responseDto = response.getEntity(VirtualApplianceDto.class);
+
+        assertEquals(responseDto.getNodeconnections(), nodeconnections);
     }
 
 }

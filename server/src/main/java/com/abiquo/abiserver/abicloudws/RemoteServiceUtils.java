@@ -86,7 +86,8 @@ public class RemoteServiceUtils
 
         if (destination == null)
         {
-            throw new RemoteServiceException("There is no Virtual Factory remote service configured for this datacenter");
+            throw new RemoteServiceException("There is no Virtual Factory remote service configured for this datacenter. "
+                + "Check datacenter configuration in Infrastructure view.");
         }
 
         return destination;
@@ -130,7 +131,8 @@ public class RemoteServiceUtils
 
         if (destination == null)
         {
-            throw new RemoteServiceException("There is no VirtualSystemMonitor remote service configured for this datacenter.");
+            throw new RemoteServiceException("There is no VirtualSystemMonitor remote service configured for this datacenter. "
+                + "Check datacenter configuration in Infrastructure view.");
         }
 
         return destination;
@@ -169,7 +171,8 @@ public class RemoteServiceUtils
 
         if (destination == null)
         {
-            throw new RemoteServiceException("There is no VirtualSystemMonitor remote service configured for this datacenter");
+            throw new RemoteServiceException("There is no VirtualSystemMonitor remote service configured for this datacenter. "
+                + "Check datacenter configuration in Infrastructure view.");
         }
 
         return destination;
@@ -204,7 +207,8 @@ public class RemoteServiceUtils
 
         if (destination == null)
         {
-            throw new RemoteServiceException("There is no NodeCollector remote service configured for this datacenter");
+            throw new RemoteServiceException("There is no NodeCollector remote service configured for this datacenter."
+                + "Check datacenter configuration in Infrastructure view.");
         }
 
         return destination;
@@ -239,7 +243,8 @@ public class RemoteServiceUtils
 
         if (destination == null)
         {
-            throw new RemoteServiceException("There is no Virtual system monitor remote service configured for this datacenter");
+            throw new RemoteServiceException("There is no Virtual system monitor remote service configured for this datacenter."
+                + " Check datacenter configuration in Infrastructure view.");
         }
 
         return destination;
@@ -275,7 +280,8 @@ public class RemoteServiceUtils
 
         if (destination == null)
         {
-            throw new RemoteServiceException("There is no NodeCollector remote service configured for this datacenter");
+            throw new RemoteServiceException("There is no NodeCollector remote service configured for this datacenter."
+                + " Check datacenter configuration in Infrastructure view.");
         }
 
         return destination;
@@ -304,7 +310,7 @@ public class RemoteServiceUtils
         }
         catch (URISyntaxException e)
         {
-            logger.error("The dhcp address has a malformed URI:" + dhcpComplexAddress);
+            logger.error("The DHCP server address has a malformed URI:" + dhcpComplexAddress);
         }
 
         return addressAddressURL.getHost() + ":" + addressAddressURL.getPort();
@@ -340,8 +346,8 @@ public class RemoteServiceUtils
 
         if (destination == null)
         {
-            throw new RemoteServiceException("There is no remote service type: "
-                + remoteServiceType + "configured for this datacenter");
+            throw new RemoteServiceException("There is no remote service of type: "
+                + remoteServiceType + "configured for this datacenter.");
         }
 
         return destination;

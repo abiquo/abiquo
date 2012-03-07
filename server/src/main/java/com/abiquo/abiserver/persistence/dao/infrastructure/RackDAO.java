@@ -44,12 +44,10 @@ public interface RackDAO extends DAO<RackHB, Integer>
      * and with vms deployed from min to max VLAN count
      */
     List<Integer> getRackIdByMinVlanCount(Integer vlan_vdc, Integer idVApp);
-    
-    
+
     /**
-     * Return all the physicalmachines registered into a rack. It can filter the physicalmachine by name, 
-     * and if an enterprise is associated to any physical machine, the enterprise
-     * by name
+     * Return all the physicalmachines registered into a rack. It can filter the physicalmachine by
+     * name, and if an enterprise is associated to any physical machine, the enterprise by name
      * 
      * @param rackId identifier of the id
      * @param filters filters the search
@@ -57,4 +55,3 @@ public interface RackDAO extends DAO<RackHB, Integer>
      */
     List<PhysicalmachineHB> getPhysicalMachines(Integer rackId, String filters);
 }
-

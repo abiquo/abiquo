@@ -21,11 +21,21 @@
 
 package com.abiquo.abiserver.commands.stub.impl;
 
-import org.apache.wink.client.ClientResponse;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
+import org.apache.wink.client.ClientResponse;
+import org.jclouds.abiquo.domain.infrastructure.Datacenter;
+import org.jclouds.abiquo.predicates.infrastructure.RemoteServicePredicates;
+
+import com.abiquo.abiserver.abicloudws.RemoteServiceClient;
 import com.abiquo.abiserver.commands.BasicCommand;
 import com.abiquo.abiserver.commands.stub.AbstractAPIStub;
 import com.abiquo.abiserver.commands.stub.RemoteServicesResourceStub;
+import com.abiquo.abiserver.exception.RemoteServiceException;
+import com.abiquo.abiserver.pojo.authentication.UserSession;
 import com.abiquo.abiserver.pojo.result.DataResult;
 import com.abiquo.abiserver.pojo.service.RemoteService;
 import com.abiquo.model.enumerator.RemoteServiceType;
@@ -42,23 +52,29 @@ public class RemoteServicesResourceStubImpl extends AbstractAPIStub implements
     public DataResult<RemoteService> addRemoteService(final RemoteService remoteService)
     {
         DataResult<RemoteService> result = new DataResult<RemoteService>();
-        RemoteServiceDto dto = getApiResource(remoteService);
 
-        String uri = createRemoteServicesLink(remoteService.getIdDataCenter());
-
-        ClientResponse response = post(uri, dto);
-        if (response.getStatusCode() == 201)
+        try
         {
-            result.setSuccess(true);
-
-            RemoteService responseService =
-                getReponseService(remoteService, result, response, EventType.REMOTE_SERVICES_CREATE);
-
-            result.setData(responseService);
+            Datacenter dc =
+                getApiClient().getAdministrationService().getDatacenter(
+                    remoteService.getIdDataCenter());
+            org.jclouds.abiquo.domain.infrastructure.RemoteService rs =
+                org.jclouds.abiquo.domain.infrastructure.RemoteService.builder(getApiClient(), dc)
+                    .ip(remoteService.getDomainName()).type(
+                        RemoteServiceType
+                            .valueOf(remoteService.getRemoteServiceType().getValueOf())).port(
+                        remoteService.getPort()).build();
+            rs.save();
+            result.setData(RemoteService.create(rs.unwrap(), remoteService.getIdDataCenter()));
+            result.setSuccess(Boolean.TRUE);
         }
-        else
+        catch (Exception ex)
         {
-            populateErrors(response, result, "addRemoteService");
+            populateErrors(ex, result, "addRemoteService");
+        }
+        finally
+        {
+            releaseApiClient();
         }
 
         return result;
@@ -91,20 +107,26 @@ public class RemoteServicesResourceStubImpl extends AbstractAPIStub implements
     {
         DataResult<Boolean> result = new DataResult<Boolean>();
 
-        String uri =
-            createRemoteServiceLink(remoteService.getIdDataCenter(), remoteService
-                .getRemoteServiceType().toEnum().toString());
+        try
+        {
+            Datacenter dc =
+                getApiClient().getAdministrationService().getDatacenter(
+                    remoteService.getIdDataCenter());
+            org.jclouds.abiquo.domain.infrastructure.RemoteService rs =
+                dc.findRemoteService(RemoteServicePredicates.type(RemoteServiceType
+                    .valueOf(remoteService.getRemoteServiceType().getValueOf())));
 
-        ClientResponse response = delete(uri);
-        if (response.getStatusCode() == 204)
-        {
-            result.setSuccess(true);
-            result.setData(true);
+            rs.delete();
+            result.setData(Boolean.TRUE);
+            result.setSuccess(Boolean.TRUE);
         }
-        else
+        catch (Exception ex)
         {
-            populateErrors(response, result, "deleteRemoteService");
-            result.setData(false);
+            populateErrors(ex, result, "deleteRemoteService");
+        }
+        finally
+        {
+            releaseApiClient();
         }
 
         return result;
@@ -114,38 +136,134 @@ public class RemoteServicesResourceStubImpl extends AbstractAPIStub implements
     public DataResult<RemoteService> modifyRemoteService(final RemoteService remoteService)
     {
         DataResult<RemoteService> result = new DataResult<RemoteService>();
-        RemoteServiceDto dto = getApiResource(remoteService);
 
-        String uri =
-            createRemoteServiceLink(remoteService.getIdDataCenter(), remoteService
-                .getRemoteServiceType().toEnum().toString());
-
-        ClientResponse response = put(uri, dto);
-        if (response.getStatusCode() == 200)
+        try
         {
-            result.setSuccess(true);
+            Datacenter dc =
+                getApiClient().getAdministrationService().getDatacenter(
+                    remoteService.getIdDataCenter());
+            org.jclouds.abiquo.domain.infrastructure.RemoteService rs =
+                dc.findRemoteService(RemoteServicePredicates.type(RemoteServiceType
+                    .valueOf(remoteService.getRemoteServiceType().getValueOf())));
+            rs.setUri(remoteService.getUri());
+            rs.update();
 
-            RemoteService responseService =
-                getReponseService(remoteService, result, response, EventType.REMOTE_SERVICES_UPDATE);
-
-            result.setData(responseService);
+            result.setData(RemoteService.create(rs.unwrap(), dc.getId()));
+            result.setSuccess(Boolean.TRUE);
         }
-        else
+        catch (Exception ex)
         {
-            populateErrors(response, result, "modifyRemoteService");
+            populateErrors(ex, result, "modifyRemoteService");
+        }
+        finally
+        {
+            releaseApiClient();
         }
 
         return result;
     }
 
-    private RemoteServiceDto getApiResource(final RemoteService remoteService)
+    @Override
+    public DataResult<List<RemoteService>> getRemoteServices(final Integer idDatacenter,
+        final String type)
     {
-        RemoteServiceDto dto = new RemoteServiceDto();
-        dto.setUri(remoteService.getUri());
-        dto.setType(RemoteServiceType.valueOf(remoteService.getRemoteServiceType().toEnum()
-            .toString()));
+        DataResult<List<RemoteService>> result = new DataResult<List<RemoteService>>();
+        result.setData(new ArrayList<RemoteService>());
 
-        return dto;
+        try
+        {
+            Datacenter dc = getApiClient().getAdministrationService().getDatacenter(idDatacenter);
+            org.jclouds.abiquo.domain.infrastructure.RemoteService rs =
+                dc.findRemoteService(RemoteServicePredicates.type(RemoteServiceType.valueOf(type)));
+            result.getData().add(RemoteService.create(rs.unwrap(), idDatacenter));
+            result.setSuccess(Boolean.TRUE);
+        }
+        catch (Exception ex)
+        {
+            populateErrors(ex, result, "getRemoteServices");
+        }
+        finally
+        {
+            releaseApiClient();
+        }
+
+        return result;
+    }
+
+    @Override
+    public DataResult<Boolean> checkRemoteService(final Integer idDatacenter, final String type)
+    {
+        DataResult<Boolean> result = new DataResult<Boolean>();
+
+        try
+        {
+            Datacenter dc = getApiClient().getAdministrationService().getDatacenter(idDatacenter);
+            org.jclouds.abiquo.domain.infrastructure.RemoteService rs =
+                dc.findRemoteService(RemoteServicePredicates.type(RemoteServiceType.valueOf(type)));
+            result.setData(rs.isAvailable());
+            result.setSuccess(Boolean.TRUE);
+        }
+        catch (Exception ex)
+        {
+            populateErrors(ex, result, "checkRemoteService");
+        }
+        finally
+        {
+            releaseApiClient();
+        }
+
+        return result;
+    }
+
+    @Override
+    public DataResult<Boolean> checkRemoteService(final UserSession userSession, final String type,
+        final String uri)
+    {
+        DataResult<Boolean> result = new DataResult<Boolean>();
+
+        RemoteServiceType rsType = RemoteServiceType.valueOf(type);
+
+        // If a Remote Service cannot be checked by definition, we assume it is
+        // OK
+        if (!rsType.canBeChecked())
+        {
+            result.setSuccess(Boolean.TRUE);
+            result.setData(Boolean.TRUE);
+            return result;
+        }
+
+        try
+        {
+            new URL(uri);
+        }
+        catch (MalformedURLException ex)
+        {
+            result.setSuccess(Boolean.FALSE);
+            result.setData(Boolean.FALSE);
+            result.setMessage("Inavlid url to check (" + uri + ")");
+            return result;
+        }
+
+        RemoteServiceClient remoteServiceClient = new RemoteServiceClient(uri);
+        try
+        {
+            remoteServiceClient.ping();
+            result.setSuccess(Boolean.TRUE);
+            result.setData(Boolean.TRUE);
+        }
+        catch (RemoteServiceException ex)
+        {
+            result.setSuccess(Boolean.TRUE);
+            result.setData(Boolean.FALSE);
+        }
+        catch (IllegalArgumentException ex)
+        {
+            result.setSuccess(Boolean.FALSE);
+            result.setData(Boolean.FALSE);
+            result.setMessage(ex.getMessage());
+        }
+
+        return result;
     }
 
 }

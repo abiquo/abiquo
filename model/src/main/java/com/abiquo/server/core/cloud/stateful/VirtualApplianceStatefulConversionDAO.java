@@ -21,10 +21,17 @@
 
 package com.abiquo.server.core.cloud.stateful;
 
+import java.util.Collection;
+
 import javax.persistence.EntityManager;
 
+import org.hibernate.Criteria;
+import org.hibernate.criterion.Criterion;
+import org.hibernate.criterion.Disjunction;
+import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 
+import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
 
 @Repository("jpaVirtualApplianceStatefulConversionDAO")
@@ -39,6 +46,24 @@ public class VirtualApplianceStatefulConversionDAO extends
     public VirtualApplianceStatefulConversionDAO(final EntityManager entityManager)
     {
         super(VirtualApplianceStatefulConversion.class, entityManager);
+    }
+
+    public static Criterion sameVirtualAppliance(final VirtualAppliance vApp)
+    {
+        Disjunction filterDisjunction = Restrictions.disjunction();
+
+        filterDisjunction.add(Restrictions.eq(
+            VirtualApplianceStatefulConversion.VIRTUAL_APPLIANCE_PROPERTY, vApp));
+
+        return filterDisjunction;
+    }
+
+    public Collection<VirtualApplianceStatefulConversion> findByVirtualAppliance(
+        final VirtualAppliance virtualAppliance)
+    {
+        Criteria criteria = createCriteria();
+        criteria.add(sameVirtualAppliance(virtualAppliance));
+        return getResultList(criteria);
     }
 
 }

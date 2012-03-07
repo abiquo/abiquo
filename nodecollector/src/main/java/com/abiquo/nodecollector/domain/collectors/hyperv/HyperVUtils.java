@@ -178,11 +178,58 @@ public final class HyperVUtils
         if (type == HyperVConstants.VIRTUAL_DISK_RESOURCE_TYPE)
         {
             String subType = dispatch.get("ResourceSubType").getObjectAsString2();
-            return subType.equals(HyperVConstants.VIRTUAL_DISK_RESOURCE_SUBTYPE);
+            return subType.equalsIgnoreCase(HyperVConstants.VIRTUAL_DISK_RESOURCE_SUBTYPE);
         }
 
         return false;
     }
+
+    // /**
+    // * Checks if the specified object is a virtual hard disk.
+    // *
+    // * @param dispatch The object to be checked.
+    // * @return Boolean indicating if the specified object is a virtual hard disk.
+    // * @throws JIException If an error occurs.
+    // */
+    // public static boolean isDiskResourceType(final IJIDispatch dispatch) throws JIException
+    // {
+    // int type = dispatch.get("ResourceType").getObjectAsInt();
+    //
+    // return (type == HyperVConstants.DISK_RESOURCE_TYPE);
+    // }
+
+    /**
+     * Checks if the specified object is a virtual hard disk.
+     * 
+     * @param dispatch The object to be checked.
+     * @return Boolean indicating if the specified object is a virtual hard disk.
+     * @throws JIException If an error occurs.
+     */
+    public static boolean isVolumeDisk(final IJIDispatch dispatch) throws JIException
+    {
+        int type = dispatch.get("ResourceType").getObjectAsInt();
+
+        if (type == HyperVConstants.DISK_RESOURCE_TYPE)
+        {
+            String subType = dispatch.get("ResourceSubType").getObjectAsString2();
+            return subType.equalsIgnoreCase(HyperVConstants.DISKPHYSICAL);
+        }
+        return false;
+
+    }
+
+    /**
+     * Checks if the specified object is a virtual hard disk.
+     * 
+     * @param dispatch The object to be checked.
+     * @return Boolean indicating if the specified object is a virtual hard disk.
+     * @throws JIException If an error occurs.
+     */
+    // public static boolean isVirtualHardDisk(final IJIDispatch dispatch) throws JIException
+    // {
+    // String subType = dispatch.get("ResourceSubType").getObjectAsString2();
+    // return subType.equals(HyperVConstants.DISKSYNTHETIC);
+    // }
 
     /**
      * Translates an HyperV state code into an {@link VirtualMachineStateType}.
@@ -192,26 +239,27 @@ public final class HyperVUtils
      */
     public static VirtualSystemStatusEnumType translateState(final int state)
     {
-        HyperVState st = null; 
+        HyperVState st = null;
         try
         {
             st = HyperVState.fromValue(state);
         }
         catch (IllegalArgumentException e)
         {
-            // Probably we got a transition state Starting (32770), Saving (32773), Saving (32773), Stopping (32774), Pausing (32776), Resuming (32777) or Unknown 
+            // Probably we got a transition state Starting (32770), Saving (32773), Saving (32773),
+            // Stopping (32774), Pausing (32776), Resuming (32777) or Unknown
             LOGGER.warn("Could not translate virtual machine state: {}", state);
             return null;
         }
-        
+
         switch (st)
         {
             case POWER_ON:
-                return VirtualSystemStatusEnumType.RUNNING;
+                return VirtualSystemStatusEnumType.ON;
             case POWER_OFF:
-                return VirtualSystemStatusEnumType.POWERED_OFF;
+                return VirtualSystemStatusEnumType.OFF;
             case SUSPENDED:
-                return VirtualSystemStatusEnumType.POWERED_OFF;
+                return VirtualSystemStatusEnumType.OFF;
             case PAUSED:
                 return VirtualSystemStatusEnumType.PAUSED;
             default:

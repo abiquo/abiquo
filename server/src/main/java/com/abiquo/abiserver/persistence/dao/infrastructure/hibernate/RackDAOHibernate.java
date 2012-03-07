@@ -45,14 +45,14 @@ public class RackDAOHibernate extends HibernateDAO<RackHB, Integer> implements R
 {
 
     private final static String FIND_BY_MIN_VLANS = "RACKS.FIND_BY_MIN_VLANS";
-    private final static String GET_PHYSICAL_MACHINES_BY_RACK = "RACKS.GET_PHYSICAL_MACHINE_BY_RACK";
 
-    private static String GET_LOWEST_VLANIDMAX_VALUE =
-        "RACK.GET_LOWEST_VLANIDMAX_VALUE";
+    private final static String GET_PHYSICAL_MACHINES_BY_RACK =
+        "RACKS.GET_PHYSICAL_MACHINE_BY_RACK";
+
+    private static String GET_LOWEST_VLANIDMAX_VALUE = "RACK.GET_LOWEST_VLANIDMAX_VALUE";
 
     @Override
-    public List<Integer> getRackIdByMinVlanCount(Integer vlan_vdc,
-        Integer idVApp)
+    public List<Integer> getRackIdByMinVlanCount(Integer vlan_vdc, Integer idVApp)
     {
         Session session = HibernateDAOFactory.getSessionFactory().getCurrentSession();
         Query query = session.getNamedQuery(FIND_BY_MIN_VLANS);
@@ -72,7 +72,8 @@ public class RackDAOHibernate extends HibernateDAO<RackHB, Integer> implements R
             final Session session = HibernateDAOFactory.getSessionFactory().getCurrentSession();
             final Query query = session.getNamedQuery(GET_PHYSICAL_MACHINES_BY_RACK);
             query.setInteger("idRack", rackId);
-//            query.setString("filterLike", (filters == null || filters.isEmpty()) ? "%" : "%" + filters + "%");
+            // query.setString("filterLike", (filters == null || filters.isEmpty()) ? "%" : "%" +
+            // filters + "%");
 
             return (ArrayList<PhysicalmachineHB>) query.list();
         }

@@ -1,0 +1,15 @@
+public final static String <%= @upcase %>_PROPERTY = "<%= @property %>";
+private final static String <%= @upcase %>_COLUMN = "<%= @property %>";
+
+
+@Column( name=<%= @upcase %>_COLUMN, nullable= true)
+
+private BigDecimal <%= @property %>;
+
+public BigDecimal get<%= @camelcase_first_upcase %>() {
+    return this.<%= @property %>;
+}
+  
+private void set<%= @camelcase_first_upcase %>( BigDecimal <%= @property %> ) {
+    this.<%= @property %> = <%= @property %>;
+}

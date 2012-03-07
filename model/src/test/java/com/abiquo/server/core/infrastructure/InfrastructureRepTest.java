@@ -340,7 +340,8 @@ public class InfrastructureRepTest extends DefaultJpaDataAccessTestBase
         }
         catch (AssertionError ae)
         {
-            Assert.assertEquals(ae.getMessage(), InfrastructureRep.BUG_INSERT_RACK_NAME_MUST_BE_UNIQUE);
+            Assert.assertEquals(ae.getMessage(),
+                InfrastructureRep.BUG_INSERT_RACK_NAME_MUST_BE_UNIQUE);
         }
     }
 
@@ -400,7 +401,8 @@ public class InfrastructureRepTest extends DefaultJpaDataAccessTestBase
         }
         catch (AssertionError e)
         {
-            Assert.assertEquals(e.getMessage(), InfrastructureRep.BUG_UPDATE_RACK_NAME_MUST_BE_UNIQUE);
+            Assert.assertEquals(e.getMessage(),
+                InfrastructureRep.BUG_UPDATE_RACK_NAME_MUST_BE_UNIQUE);
         }
     }
 
@@ -631,13 +633,13 @@ public class InfrastructureRepTest extends DefaultJpaDataAccessTestBase
             new DuplicatedDatastoreTest(ds(), datastoreGenerator, machine)
             {
                 @Override
-                public Datastore getDuplicatedDatastoreToInsert(Machine machine)
+                public Datastore getDuplicatedDatastoreToInsert(final Machine machine)
                 {
                     return new Datastore(machine, datastore.getName(), "rootPath", "dsDirectory");
                 }
 
                 @Override
-                public Datastore getDuplicatedDatastoreToUpdate(Datastore duplicatedDatastore)
+                public Datastore getDuplicatedDatastoreToUpdate(final Datastore duplicatedDatastore)
                 {
                     duplicatedDatastore.setName(this.datastore.getName());
                     return duplicatedDatastore;
@@ -655,13 +657,13 @@ public class InfrastructureRepTest extends DefaultJpaDataAccessTestBase
             new DuplicatedDatastoreTest(ds(), datastoreGenerator, machine)
             {
                 @Override
-                public Datastore getDuplicatedDatastoreToInsert(Machine machine)
+                public Datastore getDuplicatedDatastoreToInsert(final Machine machine)
                 {
                     return new Datastore(machine, "dsName", "rootPath", datastore.getDirectory());
                 }
 
                 @Override
-                public Datastore getDuplicatedDatastoreToUpdate(Datastore duplicatedDatastore)
+                public Datastore getDuplicatedDatastoreToUpdate(final Datastore duplicatedDatastore)
                 {
                     duplicatedDatastore.setDirectory(this.datastore.getDirectory());
                     return duplicatedDatastore;
@@ -707,8 +709,8 @@ public class InfrastructureRepTest extends DefaultJpaDataAccessTestBase
 
         protected Datastore datastore;
 
-        public DuplicatedDatastoreTest(EntityManagerFactoryTestSupport ds,
-            DatastoreGenerator datastoreGenerator, Machine machine)
+        public DuplicatedDatastoreTest(final EntityManagerFactoryTestSupport ds,
+            final DatastoreGenerator datastoreGenerator, final Machine machine)
         {
             this.ds = ds;
             this.datastoreGenerator = datastoreGenerator;

@@ -37,6 +37,8 @@
 
     <mx:Script>
         <![CDATA[
+        	import net.undf.abicloud.vo.user.PrivilegeType;
+        	import net.undf.abicloud.utils.SecuredPrivilegeAccess;
         	import net.undf.abicloud.vo.user.Enterprise;
         	import net.undf.abicloud.utils.AbicloudUtils;
             import mx.resources.ResourceManager;
@@ -50,7 +52,11 @@
             private var _vlanNetwork:VlanNetwork;
             
             [Bindable]
+            private var _enterprise:Enterprise;
+
+            [Bindable]
             private var _networkType:String;
+
 
             public function set vlanNetwork(value:VlanNetwork):void
             {
@@ -66,12 +72,20 @@
                         case VlanNetwork.INTERNAL:
                           this._networkType = resourceManager.getString('NetworkingPremium','LABEL_INTERNAL_VLAN');
                           break;
+                        case VlanNetwork.UNMANAGED:
+                          this._networkType = resourceManager.getString('NetworkingPremium','LABEL_UNMANAGED');
+                          break;
 	                }
                 }
             }
             
-            [Bindable]
-            public var enterprise:Enterprise;
+            public function set enterprise(value:Enterprise):void{
+            	this._enterprise = value;
+            }
+            
+            public function get enterprise():Enterprise{
+            	return this._enterprise;
+            }
 
 
         ]]>
@@ -119,8 +133,10 @@
                     <mx:Label text="{_vlanNetwork.configuration.gateway}"/>
                 </mx:FormItem>
 
-                <mx:FormItem label="@Resource(bundle='Networking', key='LABEL_TAG')">
-                    <mx:Label text="{_vlanNetwork.vlanTag.toString()}"/>
+                <mx:FormItem label="@Resource(bundle='Networking', key='LABEL_TAG')"
+                	includeInLayout="{SecuredPrivilegeAccess.userHasPrivilege(PrivilegeType.PHYS_DC_ALLOW_MODIFY_NETWORK)}"
+                    visible="{SecuredPrivilegeAccess.userHasPrivilege(PrivilegeType.PHYS_DC_ALLOW_MODIFY_NETWORK)}">
+                    <mx:Label text="{_vlanNetwork.vlanTag ? _vlanNetwork.vlanTag.toString():resourceManager.getString('Networking','LABEL_UNASSIGNED')}"/>
                 </mx:FormItem>
             </mx:Form>
 
@@ -129,9 +145,9 @@
                 horizontalScrollPolicy="off" verticalScrollPolicy="off">
 
                  <mx:FormItem label="@Resource(bundle='User', key='LABEL_ENTERPRISE')"
-                 	includeInLayout="{enterprise}"
-                 	visible="{enterprise}">
-                    <mx:Label text="{enterprise.name}"/>
+                 	includeInLayout="{this._enterprise != null}"
+                 	visible="{this._enterprise != null}">
+                    <mx:Label text="{this._enterprise.name}"/>
                 </mx:FormItem>
                 
                 <mx:FormItem label="@Resource(bundle='Networking', key='LABEL_PRIMARY_DNS')">

@@ -23,20 +23,20 @@ package com.abiquo.tracer;
 
 import java.io.Serializable;
 
-public enum SeverityType implements Serializable {
-	NORMAL (0),
-    INFO (1), 
-    WARNING (2),
-    MINOR (3), 
-    MAJOR (4), 
-    CRITICAL (5);
-    
+public enum SeverityType implements Serializable
+{
+    NORMAL(0), INFO(1), WARNING(2), MINOR(3), MAJOR(4), CRITICAL(5);
+
     private final int severity;
 
-    private  SeverityType(int level) {
-    	this.severity = level;
+    private SeverityType(int level)
+    {
+        this.severity = level;
     }
-    
-    public int getValue() { return severity; }
+
+    public int getValue()
+    {
+        return severity;
+    }
 
 }

@@ -277,6 +277,8 @@
         <mx:Label id="downloadLabel" text="@Resource(bundle='VirtualImage', key='LABEL_TO_DOWNLOAD')"/>
         <mx:CheckBox id="downloadCheck"
             selected="{this._ovfPackage.selectedToDownload}"
+            visible="{this._ovfPackage.ovfPackageStatus.status != OVFPackageInstanceStatus.DOWNLOAD}"
+            includeInLayout="{this._ovfPackage.ovfPackageStatus.status != OVFPackageInstanceStatus.DOWNLOAD}"
             change="onDownloadCheckChange()"/>
     </mx:HBox>
 

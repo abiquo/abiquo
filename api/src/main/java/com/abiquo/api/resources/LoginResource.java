@@ -56,13 +56,11 @@ public class LoginResource extends AbstractResource
      * @throws Exception UserDto
      */
     @GET
-    public UserDto getUserByName(@Context IRESTBuilder restBuilder) throws Exception
+    public UserDto getUserByName(@Context final IRESTBuilder restBuilder) throws Exception
     {
         User user = userService.getCurrentUser();
         UserDto userDto = UserResource.createTransferObject(user);
-        userDto.setIdEnterprise(user.getEnterprise().getId());
-        userDto.setIdRole(user.getRole().getId());
-        addLinks(restBuilder, userDto, userDto.getIdEnterprise(), userDto.getIdRole());
+        addLinks(restBuilder, userDto, user.getEnterprise().getId(), user.getRole().getId());
         return userDto;
     }
 
@@ -75,7 +73,8 @@ public class LoginResource extends AbstractResource
      * @param roleId id.
      * @return UserDto
      */
-    private UserDto addLinks(IRESTBuilder restBuilder, UserDto userDto, int enterpriseId, int roleId)
+    private UserDto addLinks(final IRESTBuilder restBuilder, final UserDto userDto,
+        final int enterpriseId, final int roleId)
     {
         userDto.addLinks(restBuilder.buildUserLinks(enterpriseId, roleId, userDto));
 

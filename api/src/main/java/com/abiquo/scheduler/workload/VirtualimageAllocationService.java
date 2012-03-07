@@ -26,31 +26,34 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.Resource;
 import javax.jms.ResourceAllocationException;
+import javax.persistence.EntityManager;
 import javax.persistence.PersistenceException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.abiquo.model.enumerator.FitPolicy;
 import com.abiquo.scheduler.fit.AllocationFitMax;
 import com.abiquo.scheduler.fit.AllocationFitMin;
 import com.abiquo.scheduler.fit.IAllocationFit;
+import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualApplianceDAO;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
-import com.abiquo.server.core.cloud.VirtualImage;
 import com.abiquo.server.core.enterprise.Enterprise;
+import com.abiquo.server.core.infrastructure.Datastore;
 import com.abiquo.server.core.infrastructure.InfrastructureRep;
 import com.abiquo.server.core.infrastructure.Machine;
 import com.abiquo.server.core.infrastructure.Rack;
 import com.abiquo.server.core.infrastructure.network.NetworkAssignment;
 import com.abiquo.server.core.infrastructure.network.NetworkAssignmentDAO;
 import com.abiquo.server.core.scheduler.MachineLoadRule;
-import com.abiquo.server.core.scheduler.FitPolicyRule.FitPolicy;
+import com.abiquo.server.core.scheduler.VirtualMachineRequirements;
 import com.abiquo.tracer.ComponentType;
 import com.abiquo.tracer.EventType;
 import com.abiquo.tracer.SeverityType;
@@ -85,7 +88,7 @@ import com.abiquo.tracer.client.TracerFactory;
  * defined via FitPolicy.
  * 
  * @author pedro.agullo
- * @param RESOURCE: the resource to be assigned to a target (for example, a Virtualimage)
+ * @param RESOURCE: the resource to be assigned to a target (for example, a VirtualMachineTemplate)
  * @param TARGET: the place where we want to assign a resource (for example, a Physicalmachine)
  * @param CONTEXT_DATA: optative additional data that might be convenient or needed to perform
  *            processing.
@@ -116,7 +119,6 @@ import com.abiquo.tracer.client.TracerFactory;
  * NOTE: the current implementation only fetch once the physical machine rules.
  */
 @Service
-@Transactional
 public class VirtualimageAllocationService
 {
 
@@ -131,14 +133,20 @@ public class VirtualimageAllocationService
     @Autowired
     private NetworkAssignmentDAO networkAssignmentDao;
 
-    /** Replacement to use premium implementation (@see persistencebeans-premium.xml). */
-    private SecondPassRuleFinder<VirtualImage, Machine, Integer> ruleFinder;
+    @Autowired
+    private SecondPassRuleFinder<VirtualMachineTemplate, Machine, Integer> ruleFinder;
 
-    @Resource(name = "physicalmachineRuleFinder")
-    // premium impl by replacements
-    public void setRuleFinder(final SecondPassRuleFinder<VirtualImage, Machine, Integer> ruleFinder)
+    public VirtualimageAllocationService()
     {
-        this.ruleFinder = ruleFinder;
+
+    }
+
+    public VirtualimageAllocationService(final EntityManager em)
+    {
+        this.datacenterRepo = new InfrastructureRep(em);
+        this.virtualApplianceDao = new VirtualApplianceDAO(em);
+        this.networkAssignmentDao = new NetworkAssignmentDAO(em);
+        this.ruleFinder = new PhysicalmachineRuleFinder(em);
     }
 
     /** Starting best fit. (none ''computeRank'' can be higher) */
@@ -151,10 +159,11 @@ public class VirtualimageAllocationService
      * @throws ResourceAllocationException, it there isn't enough resources to fulfilling the
      *             target.
      */
-    public Machine findBestTarget(final VirtualImage vimage, final FitPolicy fitPolicy,
-        final Integer idVirtualAppliance)
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
+    public Machine findBestTarget(final VirtualMachineRequirements requirements,
+        final FitPolicy fitPolicy, final VirtualAppliance virtualAppliance)
     {
-        final List<Integer> rackCandidates = getCandidateRacks(idVirtualAppliance);
+        final List<Integer> rackCandidates = getCandidateRacks(virtualAppliance);
 
         if (rackCandidates.isEmpty())
         {
@@ -172,14 +181,14 @@ public class VirtualimageAllocationService
             try
             {
                 final Collection<Machine> firstPassCandidates =
-                    findFirstPassCandidates(vimage, idVirtualAppliance, rack);
+                    findFirstPassCandidates(requirements, virtualAppliance, rack);
 
                 log.debug(String.format(
                     "All the virtual machines of the current virtual datacenter "
                         + "will be deployed on the rack id : %d", idRack));
 
-                return findSecondPassCandidates(firstPassCandidates, vimage, idVirtualAppliance,
-                    fitPolicy);
+                return findSecondPassCandidates(firstPassCandidates, requirements,
+                    virtualAppliance, fitPolicy);
             }
             catch (Exception e) // NotEnoughResourcesException or PersistenceException
             {
@@ -204,26 +213,27 @@ public class VirtualimageAllocationService
      * Finds the targets that best fits a given resource. If there is no target that can accept the
      * resource, then null will be returned.
      * 
+     * @param requirements, specify the hardware needs of the desired virtual machine
      * @param datastoreUuid, the selected machine should have this datastore enabled.
      * @param originalHypervisorId, the selected machine IS NOT this provided hypervisor.
      * @param rackId, the rack is already defined.
      * @throws ResourceAllocationException, it there isn't enough resources to fulfilling the
      *             target.
      */
-    public Machine findBestTarget(final VirtualImage vimage, final FitPolicy fitPolicy,
-        final Integer idVirtualAppliance, String datastoreUuid, Integer originalHypervisorId,
-        Integer rackId) throws ResourceAllocationException
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
+    public Machine findBestTarget(final VirtualMachineRequirements requirements,
+        final FitPolicy fitPolicy, final VirtualAppliance vapp, final String datastoreUuid,
+        final Integer originalHypervisorId, final Integer rackId)
+        throws ResourceAllocationException
     {
 
-        final VirtualAppliance vapp = virtualApplianceDao.findById(idVirtualAppliance);
         final Integer virtualDatacenterId = vapp.getVirtualDatacenter().getId();
 
         final Collection<Machine> firstPassCandidates =
-
             datacenterRepo.findCandidateMachines(rackId, virtualDatacenterId, vapp.getEnterprise(),
                 datastoreUuid, originalHypervisorId);
 
-        return findSecondPassCandidates(firstPassCandidates, vimage, idVirtualAppliance, fitPolicy);
+        return findSecondPassCandidates(firstPassCandidates, requirements, vapp, fitPolicy);
 
     }
 
@@ -231,9 +241,8 @@ public class VirtualimageAllocationService
      * Return a sorted list of racks (sorted by rack goodness based on network params). If some
      * network assigment on the datacenter then the rack is already defined.
      */
-    protected List<Integer> getCandidateRacks(final Integer idVirtualApp)
+    protected List<Integer> getCandidateRacks(final VirtualAppliance vapp)
     {
-        final VirtualAppliance vapp = virtualApplianceDao.findById(idVirtualApp);
 
         final VirtualDatacenter virtualDatacenter = vapp.getVirtualDatacenter();
 
@@ -264,12 +273,11 @@ public class VirtualimageAllocationService
         }
     }
 
-    protected Collection<Machine> findFirstPassCandidates(final VirtualImage vimage,
-        final Integer idVirtualApp, final Rack rack) throws NotEnoughResourcesException
+    protected Collection<Machine> findFirstPassCandidates(
+        final VirtualMachineRequirements requirements, final VirtualAppliance vapp, final Rack rack)
+        throws NotEnoughResourcesException
     {
         Collection<Machine> candidateMachines;
-
-        final VirtualAppliance vapp = virtualApplianceDao.findById(idVirtualApp);
 
         final Enterprise enterprise = vapp.getEnterprise();
         final VirtualDatacenter virtualDatacenter = vapp.getVirtualDatacenter();
@@ -278,12 +286,12 @@ public class VirtualimageAllocationService
 
         final Long numberOfDeployedVLAN =
             datacenterRepo.getNumberOfDeployedVlanNetworksByRack(idRack);
-        final Integer vlanPerSwitch = (rack.getVlanIdMax() - rack.getVlanIdMin()) + 1;
+        final Integer vlanPerSwitch = rack.getVlanIdMax() - rack.getVlanIdMin() + 1;
 
         log.debug("The number of deployed VLAN for the rack: {}, is: {}", idRack,
             numberOfDeployedVLAN);
 
-        final int second_operator = Math.round((vlanPerSwitch * rack.getNrsq()) / 100);
+        final int second_operator = Math.round(vlanPerSwitch * rack.getNrsq() / 100);
         final int vlan_soft_limit = vlanPerSwitch - second_operator;
 
         if (numberOfDeployedVLAN.intValue() >= vlan_soft_limit)
@@ -292,7 +300,7 @@ public class VirtualimageAllocationService
                 "The number of deployed VLAN has exceeded the networking resource security quotient";
             log.warn(warning);
             TracerFactory.getTracer().log(SeverityType.WARNING, ComponentType.NETWORK,
-                EventType.RACK_NRSQ_EXCEEDED, warning);
+                EventType.RACK_VLAN_POOL, warning);
         }
         if (numberOfDeployedVLAN.compareTo(new Long(vlanPerSwitch)) >= 0)
         {
@@ -304,13 +312,11 @@ public class VirtualimageAllocationService
         // log.debug("The network assigned to the VM, VLAN network ID: {},  "
         // + "has already been assigned to rack : {}.", na.getVlanNetwork().getId(), idRack);
 
-        final Long hdRequiredOnDatastore = vimage.getHdRequiredInBytes();
-
         try
         {
             candidateMachines =
                 datacenterRepo.findCandidateMachines(idRack, virtualDatacenter.getId(),
-                    hdRequiredOnDatastore, enterprise);
+                    requirements.getHd(), enterprise);
         }
         catch (PersistenceException e)
         {
@@ -326,27 +332,36 @@ public class VirtualimageAllocationService
     class DefaultLoadRule extends MachineLoadRule
     {
         @Override
-        public boolean pass(final VirtualImage image, final Machine machine,
+        public boolean pass(final VirtualMachineRequirements requirements, final Machine machine,
             final Integer contextData)
         {
 
             final boolean passCPU =
-                pass(Long.valueOf(machine.getVirtualCpusUsed()),
-                    Long.valueOf(image.getCpuRequired()),
-                    Long.valueOf(machine.getVirtualCpuCores() * machine.getVirtualCpusPerCore()),
-                    100);
+                pass(Long.valueOf(machine.getVirtualCpusUsed()), requirements.getCpu(),
+                    Long.valueOf(machine.getVirtualCpuCores()), 100);
 
             final boolean passRAM =
-                pass(Long.valueOf(machine.getVirtualRamUsedInMb()),
-                    Long.valueOf(image.getRamRequired()),
+                pass(Long.valueOf(machine.getVirtualRamUsedInMb()), requirements.getRam(),
                     Long.valueOf(machine.getVirtualRamInMb()), 100);
 
             // BYTE to MB
-            Long imageRequiredMb = image.getHdRequiredInBytes() / (1024 * 1024);
-            Long machineAllowedMb = machine.getVirtualHardDiskInBytes() / (1024 * 1024);
-            Long machineUsedMb = machine.getVirtualHardDiskUsedInBytes() / (1024 * 1024);
+            Long templateRequiredMb = requirements.getHd() / (1024 * 1024);
 
-            final boolean passHD = pass(machineUsedMb, imageRequiredMb, machineAllowedMb, 100);
+            Long machineAllowedMb = 0L;
+            Long machineUsedMb = 0L;
+            if (machine.getDatastores() != null && !machine.getDatastores().isEmpty())
+            {
+                for (Datastore d : machine.getDatastores())
+                {
+                    machineAllowedMb += d.getSize() / (1024 * 1024);
+                    machineUsedMb += d.getUsedSize() / (1024 * 1024);
+                }
+            }
+
+            // machine.getVirtualHardDiskInBytes() / (1024 * 1024);
+            // machine.getVirtualHardDiskUsedInBytes() / (1024 * 1024);
+
+            final boolean passHD = pass(machineUsedMb, templateRequiredMb, machineAllowedMb, 100);
 
             return passCPU && passRAM && passHD;
         }
@@ -357,12 +372,13 @@ public class VirtualimageAllocationService
     /**
      * TODO TBD
      * 
+     * @param requirements, specify the hardware needs of the desired virtual machine
      * @throws ResourceAllocationException, it there isn't enough resources to fulfilling the
      *             target.
      */
     protected final Machine findSecondPassCandidates(final Collection<Machine> firstPassCandidates,
-        final VirtualImage vimage, final Integer virtualApplianceId, final FitPolicy fitPolicy)
-        throws NotEnoughResourcesException
+        final VirtualMachineRequirements requirements, final VirtualAppliance virtualAppliance,
+        final FitPolicy fitPolicy) throws NotEnoughResourcesException
     {
         IAllocationFit physicalMachineFit;
 
@@ -371,7 +387,7 @@ public class VirtualimageAllocationService
             ruleFinder.initializeMachineLoadRuleCache(firstPassCandidates);
 
         physicalMachineFit =
-            (fitPolicy == FitPolicy.PROGRESSIVE) ? new AllocationFitMax() : new AllocationFitMin();
+            fitPolicy == FitPolicy.PROGRESSIVE ? new AllocationFitMax() : new AllocationFitMin();
 
         Machine bestTarget = null;
         long bestFitTarget = NO_FIT;
@@ -386,13 +402,15 @@ public class VirtualimageAllocationService
 
                 if (rules == null || rules.isEmpty())
                 {
-                    pass = DEFAULT_RULE.pass(vimage, target, virtualApplianceId);
+                    // XXX unused vappid
+                    pass = DEFAULT_RULE.pass(requirements, target, virtualAppliance.getId());
                 }
                 else
                 {
                     for (final MachineLoadRule rule : rules)
                     {
-                        if (!rule.pass(vimage, target, virtualApplianceId))
+                        // XXX unused vappid
+                        if (!rule.pass(requirements, target, virtualAppliance.getId()))
                         {
                             pass = false;
                             break;
@@ -403,7 +421,8 @@ public class VirtualimageAllocationService
             else
             // default rule is to check the actual resource utilization (load = 100%)
             {
-                pass = DEFAULT_RULE.pass(vimage, target, virtualApplianceId);
+                // XXX unused vappid
+                pass = DEFAULT_RULE.pass(requirements, target, virtualAppliance.getId());
             }
 
             if (pass)
@@ -435,9 +454,8 @@ public class VirtualimageAllocationService
                     + "or suitable Datastore with enought free size).\n"
                     + "Please check the workload rules or the physical machine resources "
                     + "available on the datacenter from the infrastructure view.\n"
-                    + "Virtual machine [%s] requires %d Cpu -- %d Ram \n"
-                    + "Candidate machines : %s", firstPassCandidates.size(), vimage.getName(),
-                    vimage.getCpuRequired(), vimage.getRamRequired(),
+                    + "Virtual machine requires %d Cpu -- %d Ram \n" + "Candidate machines : %s",
+                    firstPassCandidates.size(), requirements.getCpu(), requirements.getRam(),
                     candidateNames(firstPassCandidates));
 
             throw new NotEnoughResourcesException(cause);
@@ -468,10 +486,10 @@ public class VirtualimageAllocationService
 
     /**
      * When editing a virtual machine this method checks if the increases resources (setted at
-     * vimage) are allowed by the workload rules.
+     * vmtemplate) are allowed by the workload rules.
      */
     public boolean checkVirtualMachineResourceIncrease(final Machine machine,
-        final VirtualImage vimage, final Integer virtualApplianceId)
+        final VirtualMachineRequirements increaseRequirements, final Integer virtualApplianceId)
     {
         // get all the rules of the candiate machines
         Map<Machine, List<MachineLoadRule>> machineRulesMap =
@@ -485,13 +503,13 @@ public class VirtualimageAllocationService
 
             if (rules == null || rules.isEmpty())
             {
-                pass = DEFAULT_RULE.pass(vimage, machine, virtualApplianceId);
+                pass = DEFAULT_RULE.pass(increaseRequirements, machine, virtualApplianceId);
             }
             else
             {
                 for (final MachineLoadRule rule : rules)
                 {
-                    if (!rule.pass(vimage, machine, virtualApplianceId))
+                    if (!rule.pass(increaseRequirements, machine, virtualApplianceId))
                     {
                         pass = false;
                         break;
@@ -502,10 +520,58 @@ public class VirtualimageAllocationService
         else
         // default rule is to check the actual resource utilization (load = 100%)
         {
-            pass = DEFAULT_RULE.pass(vimage, machine, virtualApplianceId);
+            pass = DEFAULT_RULE.pass(increaseRequirements, machine, virtualApplianceId);
         }
 
         return pass;
     }
 
+    /**
+     * Return all machines in a rack that are empty of VM.
+     * 
+     * @param rackId rack.
+     * @return Integer
+     */
+    public Integer getEmptyOffMachines(final Integer rackId)
+    {
+
+        return datacenterRepo.getEmptyOffMachines(rackId);
+    }
+
+    /**
+     * Return all machines in a rack that are empty of VM.
+     * 
+     * @param rackId rack.
+     * @return Integer
+     */
+    public Integer getEmptyOnMachines(final Integer rackId)
+    {
+
+        return datacenterRepo.getEmptyOnMachines(rackId);
+    }
+
+    /**
+     * Returns any machine that is in the rack in HALTED_FOR_SAVE.
+     * 
+     * @param rackId rack.
+     * @return Machine
+     */
+
+    public List<Machine> getRandomMachinesToStartFromRack(final Integer rackId,
+        final Integer howMany)
+    {
+        return datacenterRepo.getRandomMachinesToStartFromRack(rackId, howMany);
+    }
+
+    /**
+     * Returns any machine that is in the rack in MANAGED.
+     * 
+     * @param rackId rack.
+     * @return Machine
+     */
+    public List<Machine> getRandomMachinesToShutDownFromRack(final Integer rackId,
+        final Integer howMany)
+    {
+        return datacenterRepo.getRandomMachinesToShutDownFromRack(rackId, howMany);
+    }
 }

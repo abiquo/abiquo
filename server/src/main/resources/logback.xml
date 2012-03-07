@@ -18,6 +18,7 @@
             <maxHistory>5</maxHistory>
         </rollingPolicy>
     </appender>
+    
     <appender name="HEALTH" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>${catalina.base}/logs/health.log</file>
         <layout class="ch.qos.logback.classic.PatternLayout">
@@ -28,6 +29,18 @@
             <maxHistory>5</maxHistory>
         </rollingPolicy>
     </appender>
+    
+    <appender name="AUTHENTICATION" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${catalina.base}/logs/authentication.log</file>
+        <layout class="ch.qos.logback.classic.PatternLayout">
+            <Pattern>%date %level %logger{10} [%file:%line] %msg%n</Pattern>
+        </layout>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${catalina.base}/logs/authentication-%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>5</maxHistory>
+        </rollingPolicy>
+    </appender>
+    
     <logger name="org.hibernate">
         <level value="WARN" />
     </logger>
@@ -36,6 +49,9 @@
     </logger>
     <logger name="com.abiquo.abiserver.healthcheck">
         <appender-ref ref="HEALTH" />
+    </logger>
+    <logger name="com.abiquo.abiserver.business.authentication">
+        <appender-ref ref="AUTHENTICATION" />
     </logger>
     <logger name="org.apache.wink">
         <level value="WARN" />

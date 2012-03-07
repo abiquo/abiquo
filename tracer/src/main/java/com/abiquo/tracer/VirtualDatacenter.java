@@ -23,70 +23,87 @@ package com.abiquo.tracer;
 
 import java.io.Serializable;
 
-public class VirtualDatacenter implements Serializable {
+public class VirtualDatacenter implements Serializable
+{
 
-	/**
+    /**
 	 * 
 	 */
-	private static final long serialVersionUID = -349334484003700495L;
+    private static final long serialVersionUID = -349334484003700495L;
 
-	private String name;
-	private VirtualAppliance virtualAppliance;
-	private Volume volume;
-	private Network network;
+    private String name;
 
-	private VirtualDatacenter(String virtualDatacenter) {
-		this.setName(virtualDatacenter);
-	}
+    private VirtualAppliance virtualAppliance;
 
-	public static VirtualDatacenter virtualDatacenter(String virtualDatacenter) {
-		return new VirtualDatacenter(virtualDatacenter);
-	}
+    private Volume volume;
 
-	public VirtualDatacenter virtualAppliance(VirtualAppliance virtualAppliance) {
-		this.setVirtualAppliance(virtualAppliance);
-		return this;
-	}
+    private Network network;
 
-	public VirtualDatacenter volume(Volume volume) {
-		this.setVolume(volume);
-		return this;
-	}
+    private VirtualDatacenter(String virtualDatacenter)
+    {
+        this.setName(virtualDatacenter);
+    }
 
-	public VirtualDatacenter network(Network network) {
-		this.setNetwork(network);
-		return this;
-	}
+    public static VirtualDatacenter virtualDatacenter(String virtualDatacenter)
+    {
+        return new VirtualDatacenter(virtualDatacenter);
+    }
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    public VirtualDatacenter virtualAppliance(VirtualAppliance virtualAppliance)
+    {
+        this.setVirtualAppliance(virtualAppliance);
+        return this;
+    }
 
-	public String getName() {
-		return name;
-	}
+    public VirtualDatacenter volume(Volume volume)
+    {
+        this.setVolume(volume);
+        return this;
+    }
 
-	public void setVirtualAppliance(VirtualAppliance virtualAppliance) {
-		this.virtualAppliance = virtualAppliance;
-	}
+    public VirtualDatacenter network(Network network)
+    {
+        this.setNetwork(network);
+        return this;
+    }
 
-	public VirtualAppliance getVirtualAppliance() {
-		return virtualAppliance;
-	}
+    public void setName(String name)
+    {
+        this.name = name;
+    }
 
-	public void setVolume(Volume volume) {
-		this.volume = volume;
-	}
+    public String getName()
+    {
+        return name;
+    }
 
-	public Volume getVolume() {
-		return volume;
-	}
+    public void setVirtualAppliance(VirtualAppliance virtualAppliance)
+    {
+        this.virtualAppliance = virtualAppliance;
+    }
 
-	public void setNetwork(Network network) {
-		this.network = network;
-	}
+    public VirtualAppliance getVirtualAppliance()
+    {
+        return virtualAppliance;
+    }
 
-	public Network getNetwork() {
-		return network;
-	}
+    public void setVolume(Volume volume)
+    {
+        this.volume = volume;
+    }
+
+    public Volume getVolume()
+    {
+        return volume;
+    }
+
+    public void setNetwork(Network network)
+    {
+        this.network = network;
+    }
+
+    public Network getNetwork()
+    {
+        return network;
+    }
 }

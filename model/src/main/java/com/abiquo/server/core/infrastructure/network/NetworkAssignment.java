@@ -180,7 +180,5 @@ public class NetworkAssignment extends DefaultEntityBase
             return false;
         return true;
     }
-    
-    
 
 }

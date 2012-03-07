@@ -25,6 +25,7 @@
 package com.abiquo.abiserver.persistence;
 
 import com.abiquo.abiserver.exception.PersistenceException;
+import com.abiquo.abiserver.persistence.dao.authorization.OneTimeTokenSessionDAO;
 import com.abiquo.abiserver.persistence.dao.infrastructure.DataCenterDAO;
 import com.abiquo.abiserver.persistence.dao.infrastructure.DatastoreDAO;
 import com.abiquo.abiserver.persistence.dao.infrastructure.HyperVisorDAO;
@@ -32,7 +33,6 @@ import com.abiquo.abiserver.persistence.dao.infrastructure.PhysicalMachineDAO;
 import com.abiquo.abiserver.persistence.dao.infrastructure.RackDAO;
 import com.abiquo.abiserver.persistence.dao.infrastructure.RemoteServiceDAO;
 import com.abiquo.abiserver.persistence.dao.metering.MeterDAO;
-import com.abiquo.abiserver.persistence.dao.networking.DHCPServiceDAO;
 import com.abiquo.abiserver.persistence.dao.networking.IpPoolManagementDAO;
 import com.abiquo.abiserver.persistence.dao.networking.NetworkAssigmntDAO;
 import com.abiquo.abiserver.persistence.dao.networking.NetworkConfigurationDAO;
@@ -103,8 +103,6 @@ public interface DAOFactory
     // Network interfaces
     public abstract IpPoolManagementDAO getIpPoolManagementDAO();
 
-    public abstract DHCPServiceDAO getDHCPServiceDAO();
-
     public abstract NetworkConfigurationDAO getNetworkConfigurationDAO();
 
     public abstract VlanNetworkDAO getVlanNetworkDAO();
@@ -166,5 +164,7 @@ public interface DAOFactory
     public abstract UserSessionDAO getUserSessionDAO();
 
     public abstract NetworkAssigmntDAO getNetworkAssigmentDAO();
+
+    public abstract OneTimeTokenSessionDAO getOneTimeTokenSessionDAO();
 
 }

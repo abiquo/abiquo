@@ -62,7 +62,7 @@ public class AbiCloudError
      * General Virtual Image error
      */
     public static final int VIRTUAL_IMAGE_ERROR = 23;
-    
+
     public static final int PUBLIC_IP_USED = 12;
 
     private final Integer idVirtualAppliance;
@@ -79,7 +79,7 @@ public class AbiCloudError
 
     private final Exception exception;
 
-	private final String errorID;
+    private final String errorID;
 
     private final String[] msgs;
 
@@ -109,7 +109,7 @@ public class AbiCloudError
         this.errorCode = errorCode;
         this.errorName = errorName;
         this.errorMsgTemplate = errorMsgTemplate;
-        this.errorID = String.valueOf(System.currentTimeMillis()/1000);
+        this.errorID = String.valueOf(System.currentTimeMillis() / 1000);
         this.exception = exception;
         this.logMsgTemplate = logMsgTemplate;
         this.msgs = msgs;
@@ -127,7 +127,7 @@ public class AbiCloudError
         this.errorMsgTemplate = errorMsgTemplate;
         this.errorName = errorName;
         this.errorCode = errorCode;
-        this.errorID = String.valueOf(System.currentTimeMillis()/1000);
+        this.errorID = String.valueOf(System.currentTimeMillis() / 1000);
         this.contactInstructions = contactInstructions;
         this.idVirtualAppliance = idVirtualAppliance;
         errorMsg = extraMsg;

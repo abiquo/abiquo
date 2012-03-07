@@ -30,7 +30,6 @@ import com.abiquo.abiserver.pojo.IPojo;
  * Common values of the resource management objects.
  * 
  * @author jdevesa@abiquo.com
- *
  */
 public abstract class ResourceManagement implements Serializable, IPojo<ResourceManagementHB>
 {
@@ -38,7 +37,7 @@ public abstract class ResourceManagement implements Serializable, IPojo<Resource
      * Default serial version.
      */
     private static final long serialVersionUID = 1L;
-    
+
     /**
      * Variable which corresponds with column 'idManagement'
      */
@@ -53,19 +52,23 @@ public abstract class ResourceManagement implements Serializable, IPojo<Resource
      * Variable which corresponds with column 'idVirtualDataCenter'
      */
     private Integer virtualDatacenterId;
+
     private String virtualDatacenterName;
 
     /**
      * Variable which corresponds with column 'idVM'
      */
     private Integer virtualMachineId;
+
     private String virtualMachineName;
 
     /**
      * Variable which corresponds with column 'idVirtualApp'
      */
     private Integer virtualApplianceId;
+
     private String virtualApplianceName;
+
     /**
      * @return the idManagement
      */
@@ -73,6 +76,7 @@ public abstract class ResourceManagement implements Serializable, IPojo<Resource
     {
         return idManagement;
     }
+
     /**
      * @param idManagement the idManagement to set
      */
@@ -80,6 +84,7 @@ public abstract class ResourceManagement implements Serializable, IPojo<Resource
     {
         this.idManagement = idManagement;
     }
+
     /**
      * @return the idResourceType
      */
@@ -87,6 +92,7 @@ public abstract class ResourceManagement implements Serializable, IPojo<Resource
     {
         return idResourceType;
     }
+
     /**
      * @param idResourceType the idResourceType to set
      */
@@ -94,6 +100,7 @@ public abstract class ResourceManagement implements Serializable, IPojo<Resource
     {
         this.idResourceType = idResourceType;
     }
+
     /**
      * @return the virtualDatacenterId
      */
@@ -101,6 +108,7 @@ public abstract class ResourceManagement implements Serializable, IPojo<Resource
     {
         return virtualDatacenterId;
     }
+
     /**
      * @param virtualDatacenterId the virtualDatacenterId to set
      */
@@ -108,6 +116,7 @@ public abstract class ResourceManagement implements Serializable, IPojo<Resource
     {
         this.virtualDatacenterId = virtualDatacenterId;
     }
+
     /**
      * @return the virtualDatacenterName
      */
@@ -115,6 +124,7 @@ public abstract class ResourceManagement implements Serializable, IPojo<Resource
     {
         return virtualDatacenterName;
     }
+
     /**
      * @param virtualDatacenterName the virtualDatacenterName to set
      */
@@ -122,6 +132,7 @@ public abstract class ResourceManagement implements Serializable, IPojo<Resource
     {
         this.virtualDatacenterName = virtualDatacenterName;
     }
+
     /**
      * @return the virtualMachineId
      */
@@ -129,6 +140,7 @@ public abstract class ResourceManagement implements Serializable, IPojo<Resource
     {
         return virtualMachineId;
     }
+
     /**
      * @param virtualMachineId the virtualMachineId to set
      */
@@ -136,6 +148,7 @@ public abstract class ResourceManagement implements Serializable, IPojo<Resource
     {
         this.virtualMachineId = virtualMachineId;
     }
+
     /**
      * @return the virtualMachineName
      */
@@ -143,6 +156,7 @@ public abstract class ResourceManagement implements Serializable, IPojo<Resource
     {
         return virtualMachineName;
     }
+
     /**
      * @param virtualMachineName the virtualMachineName to set
      */
@@ -150,6 +164,7 @@ public abstract class ResourceManagement implements Serializable, IPojo<Resource
     {
         this.virtualMachineName = virtualMachineName;
     }
+
     /**
      * @return the virtualApplianceId
      */
@@ -157,6 +172,7 @@ public abstract class ResourceManagement implements Serializable, IPojo<Resource
     {
         return virtualApplianceId;
     }
+
     /**
      * @param virtualApplianceId the virtualApplianceId to set
      */
@@ -164,6 +180,7 @@ public abstract class ResourceManagement implements Serializable, IPojo<Resource
     {
         this.virtualApplianceId = virtualApplianceId;
     }
+
     /**
      * @return the virtualApplianceName
      */
@@ -171,6 +188,7 @@ public abstract class ResourceManagement implements Serializable, IPojo<Resource
     {
         return virtualApplianceName;
     }
+
     /**
      * @param virtualApplianceName the virtualApplianceName to set
      */
@@ -178,7 +196,5 @@ public abstract class ResourceManagement implements Serializable, IPojo<Resource
     {
         this.virtualApplianceName = virtualApplianceName;
     }
-    
-    
 
 }

@@ -54,9 +54,9 @@ import com.abiquo.model.transport.error.ErrorDto;
 import com.abiquo.model.transport.error.ErrorsDto;
 
 /**
- * This class checks if the Path Params and Query Params annotated with constraints in the 
- * chosen resource to execute pass these constraints.
- * That avoids a lot of {if ... else ... } clauses in the Resource layer.
+ * This class checks if the Path Params and Query Params annotated with constraints in the chosen
+ * resource to execute pass these constraints. That avoids a lot of {if ... else ... } clauses in
+ * the Resource layer.
  * 
  * @author jdevesa@abiquo.com
  */
@@ -64,7 +64,6 @@ public class InputParamConstraintHandler implements RequestHandler
 {
 
     MethodValidator validator;
-
 
     @Override
     public void init(Properties props)
@@ -90,14 +89,15 @@ public class InputParamConstraintHandler implements RequestHandler
         Set<MethodConstraintViolation<Object>> constraintViolations;
         Object rsInstance = rs.getInstance(context);
         Set<CommonError> paramErrors = new LinkedHashSet<CommonError>();
-        
-        // Iterate the paramters and convert constraint violations into InvalidParameterConstraint error code.
+
+        // Iterate the paramters and convert constraint violations into InvalidParameterConstraint
+        // error code.
         for (int index = 0; index < fp.size(); index++)
         {
             Injectable inj = fp.get(index);
             Object value = new Object();
             String paramName = new String();
-            
+
             // Check it only if it is a QueryParam or a PathParam (forget EntityParams aka DTOs!!)
             if (inj instanceof QueryParamBinding)
             {
@@ -122,11 +122,11 @@ public class InputParamConstraintHandler implements RequestHandler
                 constraintViolations = new LinkedHashSet<MethodConstraintViolation<Object>>();
             }
 
-            
             // Build the error object
             for (MethodConstraintViolation<Object> constraintViolation : constraintViolations)
             {
-                paramErrors.add(transformConstraintViolationToCommonError(constraintViolation, String.valueOf(value), paramName));
+                paramErrors.add(transformConstraintViolationToCommonError(constraintViolation,
+                    String.valueOf(value), paramName));
             }
         }
 
@@ -138,10 +138,10 @@ public class InputParamConstraintHandler implements RequestHandler
                 ErrorDto error = new ErrorDto();
                 error.setCode(commonError.getCode());
                 error.setMessage(commonError.getMessage());
-                
+
                 errors.getCollection().add(error);
             }
-            
+
             // If there are param errors set the exception in the 'searchResult' object
             // and return back.
             ResponseBuilder builder = new ResponseBuilderImpl();
@@ -161,6 +161,7 @@ public class InputParamConstraintHandler implements RequestHandler
 
     /**
      * Build the object InvalidParameterConstraint from the MethodConstraintViolation object.
+     * 
      * @param constraintViolation
      * @param value
      * @param paramName
@@ -169,8 +170,13 @@ public class InputParamConstraintHandler implements RequestHandler
     private CommonError transformConstraintViolationToCommonError(
         MethodConstraintViolation<Object> constraintViolation, String value, String paramName)
     {
-        String code = "CONSTR-" + constraintViolation.getConstraintDescriptor().getAnnotation().annotationType().getSimpleName().toUpperCase();
-        String message = "Parameter '" + paramName + "' " + constraintViolation.getMessage() + " but value '" + value + "' was found";
+        String code =
+            "CONSTR-"
+                + constraintViolation.getConstraintDescriptor().getAnnotation().annotationType()
+                    .getSimpleName().toUpperCase();
+        String message =
+            "Parameter '" + paramName + "' " + constraintViolation.getMessage() + " but value '"
+                + value + "' was found";
         return new CommonError(code, message);
     }
 

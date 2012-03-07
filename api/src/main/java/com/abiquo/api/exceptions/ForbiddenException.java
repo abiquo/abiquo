@@ -27,7 +27,6 @@ import com.abiquo.model.transport.error.CommonError;
 
 /**
  * @author jdevesa
- *
  */
 public class ForbiddenException extends APIException
 {
@@ -37,13 +36,13 @@ public class ForbiddenException extends APIException
     public ForbiddenException(APIError error)
     {
         super(error);
-    }    
-    
+    }
+
     public ForbiddenException(CommonError error)
     {
         super(error);
     }
-    
+
     public ForbiddenException(Set<CommonError> errors)
     {
         super(errors);

@@ -95,14 +95,14 @@ package net.undf.abicloud.vo.virtualhardware
            usedHD = convertValue(String(used_value[3]).slice(0,String(used_value[3]).search(' ')),ExceedLimit.MBYTES);  
            usedStorage = convertValue(String(used_value[4]).slice(0,String(used_value[4]).search(' ')),ExceedLimit.MBYTES);
            usedVLAN = String(used_value[5]).slice(0,String(used_value[5]).search(' '));
-           usedIP = String(used_value[6]);
+           usedIP = String(used_value[6]).replace(" \t","");
                     
            requiredCPU = String(required_value[1]).slice(0,String(required_value[1]).search(' '));
            requiredRAM  = convertValue(String(required_value[2]).slice(0,String(required_value[2]).search(' ')),ExceedLimit.MBYTES);
            requiredHD= convertValue(String(required_value[3]).slice(0,String(required_value[3]).search(' ')),ExceedLimit.MBYTES);   
            requiredStorage = convertValue(String(required_value[4]).slice(0,String(required_value[4]).search(' ')),ExceedLimit.MBYTES);
            requiredVLAN  = String(required_value[5]).slice(0,String(required_value[5]).search(' '));
-           requiredIP= String(required_value[6]); 
+           requiredIP= String(required_value[6]).replace(" \t",""); 
                     
            softCPU  = displayUnlimitedValue(String(soft_value[1]).slice(0,String(soft_value[1]).search(' ')));
            softRAM  = displayUnlimitedValue(String(soft_value[2]).slice(0,String(soft_value[2]).search(' ')),true,ExceedLimit.MBYTES); 
@@ -123,7 +123,8 @@ package net.undf.abicloud.vo.virtualhardware
            statusHD = String(status_value[3]).slice(0,String(status_value[3]).search(' '));
            statusStorage  = String(status_value[4]).slice(0,String(status_value[4]).search(' '));
            statusVLAN  = String(status_value[5]).slice(0,String(status_value[5]).search(' ')); 
-           statusIP = String(status_value[6]);
+           statusIP = String(status_value[6]).replace("\t","");
+           statusIP = String(statusIP).replace("  ","");
            
            includeStorage = updateInclude(statusStorage);   
            includeVLAN = updateInclude(statusVLAN);

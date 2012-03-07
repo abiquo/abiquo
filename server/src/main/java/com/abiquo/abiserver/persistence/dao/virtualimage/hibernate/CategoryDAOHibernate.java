@@ -27,8 +27,7 @@ import com.abiquo.abiserver.persistence.hibernate.HibernateDAO;
 
 /**
  * Class that implements the extra DAO functions for the
- * {@link com.abiquo.abiserver.persistence.dao.virtualimage.CategoryDAO}
- * interface
+ * {@link com.abiquo.abiserver.persistence.dao.virtualimage.CategoryDAO} interface
  * 
  * @author jdevesa@abiquo.com, apuig
  */
@@ -37,11 +36,12 @@ public class CategoryDAOHibernate extends HibernateDAO<CategoryHB, Integer> impl
     @Override
     public CategoryHB findByName(final String name)
     {
-        return (CategoryHB) getSession().createQuery(
-            "FROM com.abiquo.abiserver.business.hibernate.pojohb.virtualimage.CategoryHB "
-                + "WHERE name = :name").setParameter("name", name).uniqueResult();
+        return (CategoryHB) getSession()
+            .createQuery(
+                "FROM com.abiquo.abiserver.business.hibernate.pojohb.virtualimage.CategoryHB "
+                    + "WHERE name = :name").setParameter("name", name).uniqueResult();
     }
-    
+
     @Override
     public CategoryHB findDefault()
     {
@@ -50,5 +50,5 @@ public class CategoryDAOHibernate extends HibernateDAO<CategoryHB, Integer> impl
             "FROM com.abiquo.abiserver.business.hibernate.pojohb.virtualimage.CategoryHB "
                 + "WHERE isDefault = 1").uniqueResult();
     }
- 
+
 }

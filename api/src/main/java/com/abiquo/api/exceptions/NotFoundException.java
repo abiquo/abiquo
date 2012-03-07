@@ -33,12 +33,12 @@ public class NotFoundException extends APIException
     {
         super(apiError);
     }
-    
+
     public NotFoundException(CommonError error)
     {
         super(error);
     }
-    
+
     public NotFoundException(Set<CommonError> errors)
     {
         super(errors);

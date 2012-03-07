@@ -31,10 +31,9 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.abiquo.model.transport.WrapperDto;
-import com.abiquo.server.core.infrastructure.network.IpPoolManagementDto;
 
 /**
- * Wrapper class anotation for class {@link IpPoolManagementDto} object
+ * Wrapper class anotation for class {@link VolumeManagementDto} object
  * 
  * @author jdevesa@abiquo.com
  */

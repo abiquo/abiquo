@@ -31,8 +31,6 @@
         <property name="fenceMode" type="string">
             <column length="20" name="fence_mode" />
         </property>
-        <many-to-one class="com.abiquo.abiserver.business.hibernate.pojohb.networking.DHCPServiceHB" lazy="false" fetch="select" name="dhcpService">
-            <column name="dhcp_service_id" />
-        </many-to-one>
+      
     </class>
 </hibernate-mapping>

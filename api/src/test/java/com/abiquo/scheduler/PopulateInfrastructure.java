@@ -22,6 +22,9 @@
 package com.abiquo.scheduler;
 
 import static junit.framework.Assert.assertTrue;
+
+import java.util.UUID;
+
 import junit.framework.Assert;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +32,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.abiquo.model.enumerator.HypervisorType;
+import com.abiquo.model.enumerator.MachineState;
 import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.cloud.HypervisorGenerator;
 import com.abiquo.server.core.enterprise.DatacenterLimits;
@@ -37,11 +41,10 @@ import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.EnterpriseRep;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.DatacenterGenerator;
-import com.abiquo.server.core.infrastructure.InfrastructureRep;
 import com.abiquo.server.core.infrastructure.Datastore;
 import com.abiquo.server.core.infrastructure.DatastoreGenerator;
+import com.abiquo.server.core.infrastructure.InfrastructureRep;
 import com.abiquo.server.core.infrastructure.Machine;
-import com.abiquo.server.core.infrastructure.Machine.State;
 import com.abiquo.server.core.infrastructure.MachineGenerator;
 import com.abiquo.server.core.infrastructure.Rack;
 import com.abiquo.server.core.infrastructure.RackGenerator;
@@ -67,19 +70,19 @@ public class PopulateInfrastructure extends PopulateConstants
     private RepositoryDAO repoDao; // TODO on dcRep
 
     // Generators
-    private SeedGenerator sgen = new SeedGenerator();
+    private final SeedGenerator sgen = new SeedGenerator();
 
-    private DatacenterGenerator dcGen = new DatacenterGenerator(sgen);
+    private final DatacenterGenerator dcGen = new DatacenterGenerator(sgen);
 
-    private RackGenerator rackGen = new RackGenerator(sgen);
+    private final RackGenerator rackGen = new RackGenerator(sgen);
 
-    private MachineGenerator machineGen = new MachineGenerator(sgen);
+    private final MachineGenerator machineGen = new MachineGenerator(sgen);
 
-    private HypervisorGenerator hyperGen = new HypervisorGenerator(sgen);
+    private final HypervisorGenerator hyperGen = new HypervisorGenerator(sgen);
 
-    private RepositoryGenerator repoGen = new RepositoryGenerator(sgen);
+    private final RepositoryGenerator repoGen = new RepositoryGenerator(sgen);
 
-    private DatastoreGenerator datastoreGen = new DatastoreGenerator(sgen);
+    private final DatastoreGenerator datastoreGen = new DatastoreGenerator(sgen);
 
     public PopulateInfrastructure()
     {
@@ -92,7 +95,7 @@ public class PopulateInfrastructure extends PopulateConstants
      * <li>d1.r1.m1:HTYPE [ :cpu,used:ram,used:hd,used ]
      * </ul>
      */
-    public void populateInfrastructure(String declar)
+    public void populateInfrastructure(final String declar)
     {
         //
         String datacenterName;
@@ -138,7 +141,7 @@ public class PopulateInfrastructure extends PopulateConstants
         }
     }
 
-    public Datacenter createDatacenter(String dcStr)
+    public Datacenter createDatacenter(final String dcStr)
     {
         Datacenter dc = dcRep.findByName(dcStr);
 
@@ -160,7 +163,7 @@ public class PopulateInfrastructure extends PopulateConstants
         }
     }
 
-    private void allowAllEnterpriseByDefault(Datacenter dc)
+    private void allowAllEnterpriseByDefault(final Datacenter dc)
     {
         for (Enterprise enterprise : enterpriseRep.findAll())
         {
@@ -175,7 +178,7 @@ public class PopulateInfrastructure extends PopulateConstants
      * @param rackStr, r1:2,1002,2,10,[3;4] -- minVlan, maxVlna, vlanxvdcexpected, NRSQ,
      *            vlansIdAvoided
      */
-    public Rack createRack(String dcStr, String rackStr)
+    public Rack createRack(final String dcStr, final String rackStr)
     {
         String[] frags = rackStr.split(DELIMITER_DEFINITION);
 
@@ -207,7 +210,7 @@ public class PopulateInfrastructure extends PopulateConstants
 
                 rack.setVlanIdMin(Integer.valueOf(minVlan));
                 rack.setVlanIdMax(Integer.valueOf(maxVlan));
-                rack.setVlanPerVdcExpected(Integer.valueOf(vlanxvdcExpected));
+                rack.setVlanPerVdcReserved(Integer.valueOf(vlanxvdcExpected));
                 rack.setNrsq(Integer.valueOf(nsqr));
 
                 avoids = avoids.substring(1, avoids.length() - 1);
@@ -230,7 +233,7 @@ public class PopulateInfrastructure extends PopulateConstants
     /**
      * @param mStr, m1:HTYPE [ :cpu,used:ram,used:hd,used ]
      */
-    public Machine createMachine(String dcStr, String rackStr, String machineDef)
+    public Machine createMachine(final String dcStr, final String rackStr, final String machineDef)
     {
         String mFrg[] = machineDef.split(DELIMITER_DEFINITION);
 
@@ -253,14 +256,15 @@ public class PopulateInfrastructure extends PopulateConstants
             org.testng.Assert.assertNotNull(rack, "Rack not found " + rackStr);
 
             machine = machineGen.createMachine(rack.getDatacenter(), rack);
-            machine.setState(State.MANAGED);
-            dcRep.insertMachine(machine);
-
             Hypervisor hyper = hyperGen.createInstance(machine, htype);
-            dcRep.insertHypervisor(hyper);
+            // machine.createHypervisor(type, ip, ipService, port, user, password);
 
             machine.setName(mName);
+            machine.setState(MachineState.MANAGED);
             machine.setHypervisor(hyper);
+
+            dcRep.insertMachine(machine);
+            // dcRep.insertHypervisor(hyper);
 
             long cpu = DEF_MACHINE_CPU, ram = DEF_MACHINE_RAM, hd = DEF_MACHINE_HD;
 
@@ -274,21 +278,16 @@ public class PopulateInfrastructure extends PopulateConstants
             Datastore ds = datastoreGen.createInstance(machine);
             ds.setEnabled(true);
             ds.setUsedSize(0);
-            ds.setSize(hd * GB_TO_MB * (1014 * 1024)); // TODO Datastore size is bytes
+            ds.setSize(hd * GB_TO_MB * 1014 * 1024); // TODO Datastore size is bytes
+            ds.setDatastoreUUID(UUID.randomUUID().toString());
 
             dcRep.insertDatastore(ds);
 
-            machine.setRealCpuCores((int) cpu);
             machine.setVirtualCpuCores((int) cpu);
             machine.setVirtualCpusUsed(0);
 
-            machine.setRealRamInMb((int) (ram * GB_TO_MB));
             machine.setVirtualRamInMb((int) (ram * GB_TO_MB));
             machine.setVirtualRamUsedInMb(0);
-
-            machine.setRealHardDiskInBytes(hd * GB_TO_MB * (1014 * 1024));
-            machine.setVirtualHardDiskInBytes(hd * GB_TO_MB * (1014 * 1024));
-            machine.setVirtualHardDiskUsedInBytes(0L);
 
             dcRep.updateMachine(machine);
         }

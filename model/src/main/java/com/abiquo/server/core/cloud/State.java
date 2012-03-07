@@ -23,14 +23,29 @@ package com.abiquo.server.core.cloud;
 
 public enum State
 {
-    RUNNING, PAUSED, POWERED_OFF, REBOOTED, NOT_DEPLOYED, IN_PROGRESS, APPLY_CHANGES_NEEDED, UPDATING_NODES, FAILED, COPYING, MOVING, CHECKING, BUNDLING, STATEFUL, UNKNOWN, HA_IN_PROGRESS;
+    ON, OFF, PAUSED, ALLOCATED, CONFIGURED, UNKNOWN, NOT_ALLOCATED, LOCKED;
+
+    public static State fromValue(final String value)
+    {
+        return State.valueOf(value.toUpperCase());
+    }
+
+    public State travel(final StateTransition transaction)
+    {
+        if (!transaction.isValidOrigin(this))
+        {
+            throw new RuntimeException("Invalid origin " + this + " for transaction " + transaction);
+        }
+
+        return transaction.getEndState();
+    }
 
     public int id()
     {
         return ordinal() + 1;
     }
 
-    public static State fromId(int id)
+    public static State fromId(final int id)
     {
         return State.values()[id - 1];
     }
@@ -39,14 +54,12 @@ public enum State
     {
         switch (this)
         {
-            case RUNNING:
+            case ON:
                 return "POWERUP_ACTION";
             case PAUSED:
                 return "PAUSE_ACTION";
-            case POWERED_OFF:
+            case OFF:
                 return "POWERDOWN_ACTION";
-            case REBOOTED:
-                return "RESUME_ACTION";
         }
         return null;
     }
@@ -55,15 +68,38 @@ public enum State
     {
         switch (this)
         {
-            case RUNNING:
+            case ON:
                 return "PowerUp";
             case PAUSED:
                 return "Pause";
-            case POWERED_OFF:
+            case OFF:
                 return "PowerOff";
-            case REBOOTED:
-                return "Resume";
+                // case REBOOTED:
+                // return "Resume";
         }
         return null;
+    }
+
+    @Override
+    public String toString()
+    {
+        return "";
+    }
+
+    public boolean isDeployed()
+    {
+        switch (this)
+        {
+            case ON:
+            case OFF:
+            case PAUSED:
+                return true;
+            // Configured state. The VM is in the hypervisor but it
+            // has never been powered on. The Chef agent has not run
+            // yet and the node does not exist in the Chef server.
+            case CONFIGURED:
+            default:
+                return false;
+        }
     }
 }

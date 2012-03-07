@@ -36,6 +36,8 @@ import com.abiquo.server.core.common.DefaultEntityWithLimits;
 import com.abiquo.server.core.common.DefaultEntityWithLimits.LimitStatus;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.infrastructure.Datacenter;
+import com.abiquo.server.core.scheduler.VirtualMachineRequirements;
+import com.abiquo.server.core.scheduler.VirtualMachineRequirementsEmpty;
 import com.abiquo.tracer.ComponentType;
 import com.abiquo.tracer.EventType;
 import com.abiquo.tracer.SeverityType;
@@ -165,7 +167,7 @@ public abstract class EntityLimitChecker<T extends DefaultEntityWithLimits>
         int actualAndRequiredRam = (int) (actualAllocated.getRamInMb() + required.getRam());
         long actualAndRequiredHd = actualAllocated.getHdInMb() + required.getHd();
         long actualAndRequiredStorage = actualAllocated.getStorage() + required.getStorage();
-        if (checkVLAN)
+        if (checkVLAN)// && required.getPublicVLAN() != 0)
         {
             int actualAndRequiredVLANs =
                 (int) (actualAllocated.getVlanCount() + required.getPublicVLAN());
@@ -173,12 +175,12 @@ public abstract class EntityLimitChecker<T extends DefaultEntityWithLimits>
 
         }
 
-        if (checkIPs)
+        if (checkIPs)// && required.getPublicIP() != 0
         {
             int actualAndRequiredIPs =
                 (int) (actualAllocated.getPublicIp() + required.getPublicIP());
-            limitStatus.put(LimitResource.PUBLICIP,
-                limits.checkPublicIpStatus(actualAndRequiredIPs));
+            limitStatus.put(LimitResource.PUBLICIP, limits
+                .checkPublicIpStatus(actualAndRequiredIPs));
 
         }
         limitStatus.put(LimitResource.CPU, limits.checkCpuStatus(actualAndRequiredCpu));
@@ -214,11 +216,11 @@ public abstract class EntityLimitChecker<T extends DefaultEntityWithLimits>
 
         LimitStatus totalLimitStatus;
 
-        if (statusMap.containsValue(LimitStatus.HARD_LIMIT))// statusMap.keySet().contains(LimitStatus.HARD_LIMIT))
+        if (statusMap.containsValue(LimitStatus.HARD_LIMIT))
         {
             totalLimitStatus = LimitStatus.HARD_LIMIT;
         }
-        else if (statusMap.containsValue(LimitStatus.SOFT_LIMIT))// (statusMap.keySet().contains(LimitStatus.SOFT_LIMIT))
+        else if (statusMap.containsValue(LimitStatus.SOFT_LIMIT))
         {
             totalLimitStatus = LimitStatus.SOFT_LIMIT;
         }
@@ -230,7 +232,8 @@ public abstract class EntityLimitChecker<T extends DefaultEntityWithLimits>
         if (totalLimitStatus != LimitStatus.OK)
         {
             LimitExceededException exc =
-                new LimitExceededException(statusMap,
+                new LimitExceededException(totalLimitStatus == LimitStatus.HARD_LIMIT,
+                    statusMap,
                     entity,
                     requirements,
                     actual,

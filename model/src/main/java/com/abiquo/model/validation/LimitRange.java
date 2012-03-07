@@ -38,7 +38,7 @@ import com.abiquo.server.core.common.Limit;
 
 @Documented
 @Constraint(validatedBy = LimitRange.Validator.class)
-@Target( {METHOD})
+@Target({METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface LimitRange
 {

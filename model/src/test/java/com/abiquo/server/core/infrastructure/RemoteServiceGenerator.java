@@ -33,7 +33,7 @@ public class RemoteServiceGenerator extends DefaultEntityGenerator<RemoteService
 
     DatacenterGenerator datacenterGenerator;
 
-    public RemoteServiceGenerator(SeedGenerator seed)
+    public RemoteServiceGenerator(final SeedGenerator seed)
     {
         super(seed);
 
@@ -42,7 +42,7 @@ public class RemoteServiceGenerator extends DefaultEntityGenerator<RemoteService
     }
 
     @Override
-    public void assertAllPropertiesEqual(RemoteService obj1, RemoteService obj2)
+    public void assertAllPropertiesEqual(final RemoteService obj1, final RemoteService obj2)
     {
         AssertEx.assertPropertiesEqualSilent(obj1, obj2, RemoteService.URI_PROPERTY,
             RemoteService.TYPE_PROPERTY, RemoteService.STATUS_PROPERTY);
@@ -54,20 +54,21 @@ public class RemoteServiceGenerator extends DefaultEntityGenerator<RemoteService
         return createInstance(RemoteServiceType.VIRTUAL_FACTORY);
     }
 
-    public RemoteService createInstance(RemoteServiceType type)
+    public RemoteService createInstance(final RemoteServiceType type)
     {
         Datacenter datacenter = datacenterGenerator.createUniqueInstance();
 
         return createInstance(type, datacenter);
     }
 
-    public RemoteService createInstance(RemoteServiceType type, Datacenter datacenter)
+    public RemoteService createInstance(final RemoteServiceType type, final Datacenter datacenter)
     {
         return datacenter.createRemoteService(type, "http://localhost:8080/fooo", 1);
     }
 
     @Override
-    public void addAuxiliaryEntitiesToPersist(RemoteService entity, List<Object> entitiesToPersist)
+    public void addAuxiliaryEntitiesToPersist(final RemoteService entity,
+        final List<Object> entitiesToPersist)
     {
         super.addAuxiliaryEntitiesToPersist(entity, entitiesToPersist);
 

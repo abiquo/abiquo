@@ -23,6 +23,7 @@ package com.abiquo.abiserver.persistence.dao.networking;
 
 import java.util.List;
 
+import com.abiquo.abiserver.business.hibernate.pojohb.networking.IpPoolManagementHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.networking.VlanNetworkHB;
 import com.abiquo.abiserver.exception.PersistenceException;
 import com.abiquo.abiserver.persistence.DAO;
@@ -111,4 +112,14 @@ public interface VlanNetworkDAO extends DAO<VlanNetworkHB, Integer>
     List<VlanNetworkHB> findPrivateVLANsByDatacenter(final Integer idDatacenter)
         throws PersistenceException;
 
+    /**
+     * Search for the next available {@link IpPoolManagement} object in the list of resources.
+     * 
+     * @param vlanNetworkId vlanNetwork identifier
+     * @param gateway gateway IP of the vlan
+     * @return an available {@link IpPoolManagement} object.
+     * @throws PersistenceException if there is any problem trying to access to database.
+     */
+    public IpPoolManagementHB getNextAvailableIp(Integer vlanNetworkId, String gateway)
+        throws PersistenceException;
 }

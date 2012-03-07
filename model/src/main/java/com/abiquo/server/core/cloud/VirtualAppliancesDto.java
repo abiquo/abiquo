@@ -33,6 +33,7 @@ import com.abiquo.model.transport.WrapperDto;
 
 /**
  * Represents a collection of {@link VirtualApplianceDto}
+ * 
  * @author jdevesa@abiquo.com
  */
 @XmlRootElement(name = "virtualAppliances")

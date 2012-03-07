@@ -16,7 +16,7 @@
     <parent>
         <groupId>com.abiquo.abicloud</groupId>
         <artifactId>platform</artifactId>
-        <version>1.8.5-HF4</version>
+        <version>2.0-SNAPSHOT</version>
     </parent>
     <!-- Dependences -->
     <dependencies>
@@ -35,6 +35,12 @@
             <groupId>com.abiquo.abicloud</groupId>
             <artifactId>ovfmanager</artifactId>
             <version>${pom.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.abiquo</groupId>
+            <artifactId>model</artifactId>
+            <version>${pom.version}</version>
+            <classifier>transport</classifier>
         </dependency>
         <dependency>
             <groupId>org.libvirt</groupId>

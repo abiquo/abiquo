@@ -37,6 +37,6 @@ public interface RepositoryDAO extends DAO<RepositoryHB, Integer>
     public RepositoryHB findByDatacenter(final Integer idDatacenter);
 
     public RepositoryHB findByLocation(final String repositoryLocation);
-    
+
     public RepositoryHB findByDatacenterDAO(final Integer datacenterId) throws PersistenceException;
 }

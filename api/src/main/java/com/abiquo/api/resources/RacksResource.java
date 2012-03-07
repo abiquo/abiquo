@@ -32,12 +32,17 @@ import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
 
 import org.apache.wink.common.annotations.Parent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
+import com.abiquo.api.exceptions.APIError;
+import com.abiquo.api.exceptions.BadRequestException;
 import com.abiquo.api.services.InfrastructureService;
 import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.server.core.infrastructure.Rack;
@@ -57,13 +62,15 @@ public class RacksResource extends AbstractResource
     protected InfrastructureService infrastructureService;
 
     @GET
+    @Produces(MediaType.APPLICATION_XML)
     public RacksDto getRacks(
         @PathParam(DatacenterResource.DATACENTER) @NotNull @Min(1) final Integer datacenterId,
-        @Context final IRESTBuilder restBuilder) throws Exception
+        @QueryParam("filter") final String filter, @Context final IRESTBuilder restBuilder)
+        throws Exception
     {
 
         // Receive the Racks and convert them as RacksDto in the 'createTransferObject' loop.
-        List<Rack> all = infrastructureService.getRacksByDatacenter(datacenterId);
+        List<Rack> all = infrastructureService.getRacksByDatacenter(datacenterId, filter);
         RacksDto racks = new RacksDto();
         if (all != null && !all.isEmpty())
         {
@@ -79,6 +86,12 @@ public class RacksResource extends AbstractResource
     public RackDto postRack(@PathParam(DatacenterResource.DATACENTER) final Integer datacenterId,
         final RackDto rackDto, @Context final IRESTBuilder restBuilder) throws Exception
     {
+        // The rack must not exists
+        if (rackDto.getId() != null)
+        {
+            throw new BadRequestException(APIError.STATUS_BAD_REQUEST);
+        }
+
         Rack rack = createPersistenceObject(rackDto);
         Rack r = infrastructureService.addRack(rack, datacenterId);
         return createTransferObject(r, restBuilder);

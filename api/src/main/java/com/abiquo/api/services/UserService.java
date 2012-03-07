@@ -201,12 +201,28 @@ public class UserService extends DefaultApiService
 
         checkEnterpriseAdminCredentials(enterprise);
 
+        if (dto.getPassword() == null || dto.getPassword().isEmpty())
+        {
+            addValidationErrors(APIError.USER_PASSWORD_IS_NECESSARY);
+            flushErrors();
+        }
+        if (dto.getNick() == null || dto.getNick().isEmpty())
+        {
+            addValidationErrors(APIError.USER_NICK_IS_NECESSARY);
+            flushErrors();
+        }
+        if (dto.getName() == null || dto.getName().isEmpty())
+        {
+            addValidationErrors(APIError.USER_NAME_IS_NECESSARY);
+            flushErrors();
+        }
+
         User user =
             enterprise.createUser(role, dto.getName(), dto.getSurname(), dto.getEmail(),
                 dto.getNick(), encrypt(dto.getPassword()), dto.getLocale());
         user.setActive(dto.isActive() ? 1 : 0);
         user.setDescription(dto.getDescription());
-
+        validate(user);
         if (securityService.hasPrivilege(Privileges.USERS_PROHIBIT_VDC_RESTRICTION, user))
         {
             user.setAvailableVirtualDatacenters(null);
@@ -234,13 +250,10 @@ public class UserService extends DefaultApiService
 
         repo.insertUser(user);
 
-        tracer.log(
-            SeverityType.INFO,
-            ComponentType.USER,
-            EventType.USER_CREATE,
-            "User " + user.getName() + " has been created [Enterprise: " + enterprise.getName()
-                + " Name: " + user.getName() + " Surname: " + user.getSurname() + " Role: "
-                + user.getRole() + "]");
+        tracer
+            .log(SeverityType.INFO, ComponentType.USER, EventType.USER_CREATE, "user.created",
+                user.getName(), enterprise.getName(), user.getName(), user.getSurname(),
+                user.getRole());
 
         return user;
     }
@@ -301,7 +314,11 @@ public class UserService extends DefaultApiService
             old.setPassword(encrypt(user.getPassword()));
         }
         old.setSurname(user.getSurname());
-        old.setNick(user.getNick());
+        if (!old.getNick().equalsIgnoreCase(user.getNick()))
+        {
+            addConflictErrors(APIError.USER_NICK_CANNOT_BE_CHANGED);
+            flushErrors();
+        }
         old.setDescription(user.getDescription());
 
         if (securityService.hasPrivilege(Privileges.USERS_PROHIBIT_VDC_RESTRICTION, old))
@@ -376,13 +393,9 @@ public class UserService extends DefaultApiService
 
         updateUser(old);
 
-        tracer.log(
-            SeverityType.INFO,
-            ComponentType.USER,
-            EventType.USER_MODIFY,
-            "User " + old.getName() + " has been modified [Enterprise: "
-                + old.getEnterprise().getName() + " Name: " + old.getName() + " Surname: "
-                + old.getSurname() + " Role: " + old.getRole() + "]");
+        tracer.log(SeverityType.INFO, ComponentType.USER, EventType.USER_MODIFY, "user.modified",
+            old.getName(), old.getEnterprise().getName(), old.getName(), old.getSurname(),
+            old.getRole());
 
         return old;
     }
@@ -421,13 +434,9 @@ public class UserService extends DefaultApiService
 
         repo.removeUser(user);
 
-        tracer.log(
-            SeverityType.INFO,
-            ComponentType.USER,
-            EventType.USER_DELETE,
-            "User " + user.getName() + " has been deleted [Enterprise: "
-                + user.getEnterprise().getName() + " Name: " + user.getName() + " Surname: "
-                + user.getSurname() + " Role: " + user.getRole() + "]");
+        tracer.log(SeverityType.INFO, ComponentType.USER, EventType.USER_DELETE, "user.deleted",
+            user.getName(), user.getEnterprise().getName(), user.getName(), user.getSurname(),
+            user.getRole());
     }
 
     public boolean isAssignedTo(final Integer enterpriseId, final Integer userId)
@@ -461,7 +470,13 @@ public class UserService extends DefaultApiService
 
     private Role findRole(final UserDto dto)
     {
-        return repo.findRoleById(getRoleId(dto));
+        Role role = repo.findRoleById(getRoleId(dto));
+        if (role == null)
+        {
+            addNotFoundErrors(APIError.NON_EXISTENT_ROLE);
+            flushErrors();
+        }
+        return role;
     }
 
     private Integer getRoleId(final UserDto user)
@@ -575,6 +590,14 @@ public class UserService extends DefaultApiService
         {
             throw new AccessDeniedException("Missing privilege to manage info from other enterprises");
         }
+    }
+
+    /**
+     * Retrieves the user by nick in the DB. This method assumes that the login is unique.
+     */
+    public User getUserByLogin(final String login)
+    {
+        return repo.getUserByUserName(login);
     }
 
     private Boolean emailIsValid(final String email)

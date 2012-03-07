@@ -25,17 +25,12 @@ package net.undf.abicloud.controller.login
     import flash.net.URLRequest;
     import flash.net.navigateToURL;
     
-    import mx.collections.ArrayCollection;
-    
     import net.undf.abicloud.controller.ResultHandler;
     import net.undf.abicloud.model.AbiCloudModel;
     import net.undf.abicloud.utils.ScreenBlocker;
     import net.undf.abicloud.vo.authentication.LoginResult;
     import net.undf.abicloud.vo.result.BasicResult;
     import net.undf.abicloud.vo.result.DataResult;
-    import net.undf.abicloud.vo.user.Role;
-    import net.undf.abicloud.vo.user.Privilege;
-    import net.undf.abicloud.vo.user.PrivilegeType;
 
     public class LoginResultHandler extends ResultHandler
     {
@@ -102,7 +97,13 @@ package net.undf.abicloud.controller.login
                 }else{
                 	ExternalInterface.call("closeBrowser");
                 }   */
-                navigateToURL(new URLRequest("javascript:location.replace('"+AbiCloudModel.getInstance().configurationManager.config.currentUrl+"')"),
+                var returnUrl:String = AbiCloudModel.getInstance().configurationManager.config.currentUrl;
+                
+                if(AbiCloudModel.getInstance().configurationManager.config.client_logout_url.value){
+                	returnUrl = AbiCloudModel.getInstance().configurationManager.config.client_logout_url.value;
+                }
+                
+                navigateToURL(new URLRequest("javascript:location.replace('"+returnUrl+"')"),
 	                              "_self");
             }
             else

@@ -28,19 +28,20 @@ public class BundleException extends RuntimeException
 {
     private final String message;
 
-    private State previousState = new State(StateEnum.NOT_DEPLOYED);
+    private State previousState = new State(StateEnum.ALLOCATED);
 
-    public BundleException(String message)
+    public BundleException(final String message)
     {
         this.message = message;
     }
 
-    public BundleException(String message, State previousState)
+    public BundleException(final String message, final State previousState)
     {
         this(message);
         this.previousState = previousState;
     }
 
+    @Override
     public String getMessage()
     {
         return message;

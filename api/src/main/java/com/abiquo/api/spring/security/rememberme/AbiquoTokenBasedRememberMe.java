@@ -56,7 +56,6 @@ public class AbiquoTokenBasedRememberMe extends TokenBasedRememberMeServices
     public UserDetails processAutoLoginCookie(final String[] cookieTokens,
         final HttpServletRequest request, final HttpServletResponse response)
     {
-
         if (cookieTokens.length != 4)
         {
             throw new InvalidCookieException("Cookie token did not contain " + 4
@@ -80,6 +79,7 @@ public class AbiquoTokenBasedRememberMe extends TokenBasedRememberMeServices
             throw new InvalidCookieException("Cookie token[1] has expired (expired on '"
                 + new Date(tokenExpiryTime) + "'; current time is '" + new Date() + "')");
         }
+
         synchronized (this) // Concurrency might change the value of the authType before the read.
         {
             // Since UserDetails is an Abiquo Implementation we set the authType
@@ -137,6 +137,7 @@ public class AbiquoTokenBasedRememberMe extends TokenBasedRememberMeServices
      * @return runtime instance.
      * @throws Exception T
      */
+    @SuppressWarnings("unchecked")
     protected <T> T getTargetObject(final Object proxy, final Class<T> targetClass)
         throws Exception
     {
@@ -174,7 +175,7 @@ public class AbiquoTokenBasedRememberMe extends TokenBasedRememberMeServices
 
         String signatureValue = makeTokenSignature(expiryTime, username, password);
 
-        setCookie(new String[] {username, Long.toString(expiryTime), signatureValue + authType},
+        setCookie(new String[] {username, Long.toString(expiryTime), signatureValue, authType},
             tokenLifetime, request, response);
 
         if (logger.isTraceEnabled())

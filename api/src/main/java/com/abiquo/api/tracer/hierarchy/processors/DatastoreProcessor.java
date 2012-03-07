@@ -26,8 +26,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.abiquo.api.resources.DatastoresResource;
 import com.abiquo.api.tracer.hierarchy.AbstractHierarchyProcessor;
-import com.abiquo.server.core.infrastructure.InfrastructureRep;
 import com.abiquo.server.core.infrastructure.Datastore;
+import com.abiquo.server.core.infrastructure.InfrastructureRep;
 
 /**
  * Processes the hierarchy to extract {@link Datastore} data.
@@ -52,7 +52,7 @@ public class DatastoreProcessor extends AbstractHierarchyProcessor<Datastore>
     protected String getResourceName(final String resourceId)
     {
         Datastore datastore = dao.findDatastoreById(Integer.valueOf(resourceId));
-        return datastore.getName();
+        return datastore != null ? datastore.getName() : null;
     }
 
 }

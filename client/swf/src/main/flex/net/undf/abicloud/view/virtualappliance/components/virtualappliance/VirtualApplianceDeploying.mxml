@@ -29,10 +29,17 @@
     paddingTop="15"
     styleName="VirtualApplianceDeployingSkin"
     show="checkVirtualApplianceState()"
-    xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:info="net.undf.abicloud.view.general.components.info.*">
+    minWidth="300"
+    creationComplete="onCreationComplete()"
+    xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:info="net.undf.abicloud.view.general.components.info.*" xmlns:general="net.undf.abicloud.view.general.*" xmlns:virtualappliance="net.undf.abicloud.view.virtualappliance.components.virtualappliance.*">
 
     <mx:Script>
         <![CDATA[
+        	import net.undf.abicloud.vo.virtualappliance.Timestamp;
+        	import net.undf.abicloud.vo.virtualappliance.Task;
+        	import net.undf.abicloud.vo.virtualappliance.Job;
+        	import mx.collections.ArrayCollection;
+        	import mx.controls.dataGridClasses.DataGridColumn;
         	import net.undf.abicloud.model.AbiCloudModel;
         	import net.undf.abicloud.controller.ThemeHandler;
         	import net.undf.abicloud.view.main.CommonAssets;
@@ -66,17 +73,32 @@
 
             [ResourceBundle("VirtualAppliance")]
             private var rb2:ResourceBundle;
+            
+            private function onCreationComplete():void
+            {
+            	AbiCloudModel.getInstance().virtualApplianceManager.addEventListener("nodesUpdates",updateNodes);
+            }
+            
+            //Force updating node task status
+            private function updateNodes(event:Event):void
+            {
+            	if(nodeStatuses && nodeStatuses.nodesList && this._virtualAppliance)
+            	{
+	            	nodeStatuses.nodesList.dataProvider = this._virtualAppliance.nodes;
+            	}
+            }
 
             public function set virtualAppliance(value:VirtualAppliance):void
             {
                 this._virtualAppliance = value;
+                nodeStatuses.nodesList.dataProvider = this._virtualAppliance.nodes;
 
                 if (visible)
                 {
                     checkVirtualApplianceState();
                 }
             }
-
+            
             private function checkVirtualApplianceState():void
             {
                 //Cleaning things
@@ -86,7 +108,7 @@
 
                 //Checking that we have a valid VirtualAppliance, and that its
                 //Nodes list is retrieved
-                if (this._virtualAppliance && this._virtualAppliance.state.id == State.IN_PROGRESS && this._virtualAppliance.nodes)
+                if (this._virtualAppliance && this._virtualAppliance.state.description == State.LOCKED.description && this._virtualAppliance.nodes)
                 {
                     //Checking Nodes' state
                     var length:int = this._virtualAppliance.nodes.length;
@@ -103,7 +125,7 @@
                                 var virtualMachine:VirtualMachine = NodeVirtualImage(node).virtualMachine;
                                 if (virtualMachine == null)
                                     this._nodesNotDeployed++;
-                                else if (virtualMachine.state.id == State.RUNNING)
+                                else if (virtualMachine.state.description == State.ON.description)
                                     this._nodesRunning++;
                                 else
                                     this._nodesStopped++;
@@ -124,6 +146,8 @@
                 virtualApplianceEvent.virtualAppliance = this._virtualAppliance;
                 dispatchEvent(virtualApplianceEvent);
             }        
+            
+            
         ]]>
     </mx:Script>
     <mx:HBox width="100%" 
@@ -155,16 +179,6 @@
                 styleName="AlternativeButton"
                 click="onClickForceRefreshStateButton()"/>
             <mx:Spacer height="40%"/>
-
-           <!--This button in not used anymore -> 	ABICLOUDPREMIUM-547-->
-           
-           <!-- <mx:Button id="cancelButton"
-                height="18"
-                label="@Resource(bundle='Common', key='BUTTON_CANCEL')"
-                styleName="AlternativeButton"
-                includeInLayout="{setCancelButtonAvailability(_virtualAppliance.subState)}"
-                visible="{setCancelButtonAvailability(_virtualAppliance.subState)}"
-                click="onClickCancelButton()"/>-->
                 
         </mx:VBox>
         <!-- Animated icon, force refresh button and title -->
@@ -172,7 +186,8 @@
 
         <mx:VBox 
             width="100%" height="100%"
-            verticalGap="3">
+            verticalGap="3"
+            verticalAlign="middle">
 
             <!-- VirtualAppliance title -->
             <mx:HBox horizontalGap="0">
@@ -185,63 +200,23 @@
                 <mx:Label text="{ResourceManager.getInstance().getString('VirtualAppliance', 'LABEL_IN_PROGRESS')}"/>
             </mx:HBox>
 
-            <!-- Node info -->
-            <mx:Label text="{ResourceManager.getInstance().getString('VirtualAppliance', 'LABEL_NUMBER_OF_NODES') + ' ' + this._virtualAppliance.nodes.length}"/>
-
-            <mx:HRule width="100%"/>
-
-            <mx:HBox 
-                horizontalGap="0"
-                includeInLayout="{this._virtualAppliance.subState.id != State.UPDATING_NODES}"
-                visible="{this._virtualAppliance.subState.id != State.UPDATING_NODES}">
-                <mx:Label text="{ResourceManager.getInstance().getString('VirtualAppliance', 'LABEL_NOT_DEPLOYED') + ': '}"/>
-                <mx:Label 
-                    fontSize="12"
-                    text="{this._nodesNotDeployed.toString()}"/>
-            </mx:HBox>
-
-            <mx:HRule 
-                width="100%"
-                includeInLayout="{this._virtualAppliance.subState.id != State.UPDATING_NODES}"
-                visible="{this._virtualAppliance.subState.id != State.UPDATING_NODES}"/>
-
-            <mx:HBox 
-                horizontalGap="0"
-                includeInLayout="{this._virtualAppliance.subState.id != State.UPDATING_NODES}"
-                visible="{this._virtualAppliance.subState.id != State.UPDATING_NODES}">
-                <mx:Label text="{ResourceManager.getInstance().getString('VirtualAppliance', 'LABEL_STOPPED') + ': '}"/>
-                <mx:Label 
-                    fontSize="12"
-                    text="{this._nodesStopped.toString()}"/>
-            </mx:HBox>
-
-            <mx:HRule 
-                width="100%"
-                includeInLayout="{this._virtualAppliance.subState.id != State.UPDATING_NODES}"
-                visible="{this._virtualAppliance.subState.id != State.UPDATING_NODES}"/>
-
-            <mx:HBox 
-                horizontalGap="0"
-                includeInLayout="{this._virtualAppliance.subState.id != State.UPDATING_NODES}"
-                visible="{this._virtualAppliance.subState.id != State.UPDATING_NODES}">
-                <mx:Label text="{ResourceManager.getInstance().getString('VirtualAppliance', 'LABEL_RUNNING') + ': '}"/>
-                <mx:Label 
-                    fontSize="12"
-                    text="{this._nodesRunning.toString()}"/>
-            </mx:HBox>
-
             <mx:HBox 
                 width="100%"
-                includeInLayout="{this._virtualAppliance.subState.id == State.UPDATING_NODES}"
-                visible="{this._virtualAppliance.subState.id == State.UPDATING_NODES}">
+                includeInLayout="{this._virtualAppliance.state.description == State.LOCKED.description}"
+                visible="{this._virtualAppliance.state.description == State.LOCKED.description}">
                 <mx:Label text="@Resource(bundle='VirtualAppliance', key='LABEL_UPDATING_NODES')"/>
             </mx:HBox>
 
             <mx:HRule width="100%"/>
         </mx:VBox>
     </mx:HBox>
-
-    <mx:Spacer height="15"/>
+    
+    <virtualappliance:NodeStatuses 
+        id="nodeStatuses" 
+        width="100%"
+        height="100%"
+        virtualAppliance="{this._virtualAppliance}"
+        title="@Resource(bundle='VirtualAppliance', key='LABEL_STATUS')"/>
 
     <!-- Custom Progress Bar -->
     <mx:Canvas 
@@ -252,19 +227,17 @@
         <mx:ProgressBar id="deployProgressBar"
             width="0"
             top="-1" bottom="-1"
-            barColor="#FE9608"
-            trackHeight="14"
+            styleName="CustomProgressBar"
             minWidth="0" indeterminate="true" mode="event"
-            visible="{this._virtualAppliance.subState.id != State.UPDATING_NODES}"/>
+            visible="{this._virtualAppliance.state.description != State.LOCKED.description}"/>
 
         <mx:ProgressBar id="indeterminateDeployProgressBar"
             width="100%"
             top="-1" bottom="-1"
-            barColor="#FE9608"
+            styleName="CustomProgressBar"
             indeterminateMoveInterval="30"
-            trackHeight="14"
             minWidth="0" label="" labelPlacement="center" indeterminate="true"
-            visible="{this._virtualAppliance.subState.id == State.UPDATING_NODES}"/>
+            visible="{this._virtualAppliance.state.description == State.LOCKED.description}"/>
     </mx:Canvas>
 
 

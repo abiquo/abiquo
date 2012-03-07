@@ -24,10 +24,8 @@
 
 <mx:HBox 
     width="100%" height="100%"
-    paddingBottom="6"
-    paddingLeft="6"
-    paddingRight="6"
     paddingTop="6"
+    verticalGap="0"
     verticalAlign="top"
     verticalScrollPolicy="off" horizontalScrollPolicy="off"
     xmlns:mx="http://www.adobe.com/2006/mxml">
@@ -70,31 +68,38 @@
             {
                 this._physicalMachine = value;
                 this._physicalMachineEdited = ObjectUtil.copy(value) as PhysicalMachine;
-
-
-                //Building chart's Data Providers
                 
-                var ramUsed:int =  _physicalMachine.ramUsed;
-                var cpuUsed:int =  _physicalMachine.cpuUsed;
-                var hdObject:Object = returnDataStoresSizes();
+                var ramUsed:int =  0;
+                var cpuUsed:int =  0;
+                var hdObject:Object;
 
-                var ramFree:int = (_physicalMachine.ram - _physicalMachine.ramUsed) > 0 ? (_physicalMachine.ram - _physicalMachine.ramUsed) : 0;
-                var cpuFree:int = ((_physicalMachine.cpu * _physicalMachine.cpuRatio) - _physicalMachine.cpuUsed) > 0 ? ((_physicalMachine.cpu * _physicalMachine.cpuRatio) - _physicalMachine.cpuUsed) : 0;
-                var hdFree:String = (hdObject.free) > 0 ? Number((hdObject.free) / AbiCloudModel.GB_TO_BYTES).toFixed(1) : "0";
+                var ramFree:int = 0;
+                var cpuFree:int = 0;
+                var hdFree:String = "";
 				
 				var ramOversubscrived:int = 0;
 				var cpuOversubscrived:int = 0;
 				var hdOversubscrived:int = 0;
-				
-				if(ramFree == 0){
-					ramUsed = 0;
-					ramOversubscrived = _physicalMachine.ramUsed;
-				}
-				if(cpuFree == 0){
-					cpuUsed = 0;
-					cpuOversubscrived = _physicalMachine.cpuUsed;
-				}
-                
+                if(value)
+                {
+                	ramUsed =  _physicalMachine.ramUsed;
+	                cpuUsed =  _physicalMachine.cpuUsed;
+	                hdObject = returnDataStoresSizes();
+	
+	                ramFree = (_physicalMachine.ram - _physicalMachine.ramUsed) > 0 ? (_physicalMachine.ram - _physicalMachine.ramUsed) : 0;
+	                cpuFree = (_physicalMachine.cpu - _physicalMachine.cpuUsed) > 0 ? (_physicalMachine.cpu - _physicalMachine.cpuUsed) : 0;
+	                hdFree = (hdObject.free) > 0 ? Number((hdObject.free) / AbiCloudModel.GB_TO_BYTES).toFixed(1) : "0";
+	                
+	                if(ramFree == 0){
+	                    ramUsed = 0;
+	                    ramOversubscrived = _physicalMachine.ramUsed;
+	                }
+	                if(cpuFree == 0){
+	                    cpuUsed = 0;
+	                    cpuOversubscrived = _physicalMachine.cpuUsed;
+	                }
+                }
+
                 _ramChartDP = new ArrayCollection([ { id: 'ramUsed', label: ResourceManager.getInstance().getString("Infrastructure",
                                                                                                                     "LABEL_USED"), data: ramUsed },
                                                     { id: 'ramFree', label: ResourceManager.getInstance().getString("Infrastructure",
@@ -152,16 +157,16 @@
                 		total = _physicalMachine.ram;
                 		break;
                 	case "cpuOver":
-                		total = _physicalMachine.cpu * _physicalMachine.cpuRatio;
+                		total = _physicalMachine.cpu;
                 		if(itemChart.item.data != 0){
-	                		percentage = Math.ceil((itemChart.item.data / (_physicalMachine.cpu * _physicalMachine.cpuRatio))*100);
+	                		percentage = Math.ceil((itemChart.item.data / _physicalMachine.cpu)*100);
 	                	}
                 		break;
                 	case "cpuUsed":
-                		total = _physicalMachine.cpu * _physicalMachine.cpuRatio;
+                		total = _physicalMachine.cpu;
                 		break;
                 	case "cpuFree":
-                		total = _physicalMachine.cpu * _physicalMachine.cpuRatio;
+                		total = _physicalMachine.cpu;
                 		break;
                 	default:
                 		total = int(Number(hdObject.total / AbiCloudModel.GB_TO_BYTES).toFixed(1)); 
@@ -183,15 +188,17 @@
             	sizeObject.used = 0;
             	
             	var datastore:Datastore;
-            	
-            	for(var i:int = 0 ; i < this._physicalMachine.datastores.length; i++){
-            		datastore = this._physicalMachine.datastores.getItemAt(i) as Datastore;
-            		if(datastore.enabled){
-            			sizeObject.total += datastore.size;
-            			sizeObject.free += datastore.size - datastore.usedSize;
-            			sizeObject.used += datastore.usedSize;
-            		}
-            	}            	
+            	if(this._physicalMachine.datastores)
+            	{
+	            	for(var i:int = 0 ; i < this._physicalMachine.datastores.length; i++){
+	            		datastore = this._physicalMachine.datastores.getItemAt(i) as Datastore;
+	            		if(datastore.enabled){
+	            			sizeObject.total += datastore.size;
+	            			sizeObject.free += datastore.size - datastore.usedSize;
+	            			sizeObject.used += datastore.usedSize;
+	            		}
+	            	}            	
+            	}
             	return sizeObject;
             }
 
@@ -233,22 +240,25 @@
                 alpha="1"/>
         </mx:entries>
     </mx:RadialGradient>
-
-    <mx:Label text="RAM (MB)"/>
-    <mx:PieChart id="ramChart"
-        width="33%" height="100%"
-        dataProvider="{_ramChartDP}"
-        showDataTips="true"
-        dataTipFunction="pieChart_dataTipFunction">
-
-        <mx:series>
-            <mx:PieSeries labelPosition="none"
-                field="data"
-                nameField="label"
-                filters="{[]}"
-                fills="{[usedColorRadial, freeColorRadial, oversubscrivedColorRadial]}"/>
-        </mx:series>
-    </mx:PieChart>
+    <mx:VBox width="33%" 
+    	horizontalAlign="center" height="100%" verticalGap="0">
+	    <mx:Label text="RAM (MB)" width="100%"/>    	
+	    <mx:PieChart id="ramChart"
+	    	paddingBottom="0" paddingTop="0" paddingLeft="0" paddingRight="0"
+	        width="100%" height="100%"
+	        dataProvider="{_ramChartDP}"
+	        showDataTips="true"
+	        dataTipFunction="pieChart_dataTipFunction">
+	
+	        <mx:series>
+	            <mx:PieSeries labelPosition="none"
+	                field="data"
+	                nameField="label"
+	                filters="{[]}"
+	                fills="{[usedColorRadial, freeColorRadial, oversubscrivedColorRadial]}"/>
+	        </mx:series>
+	    </mx:PieChart>
+    </mx:VBox>
 
 
 
@@ -257,23 +267,26 @@
         horizontalCenter="0"
         styleName="PhysicalMachineRendererStateVRule"
         />
-
-    <mx:Label text="CPU (V-CPU)"/>
-    <mx:PieChart id="cpuChart"
-        width="33%" height="100%"
-        dataProvider="{_cpuChartDP}"
-        showDataTips="true"
-        dataTipFunction="pieChart_dataTipFunction">
-
-        <mx:series>
-            <mx:PieSeries labelPosition="none"
-                field="data"
-                nameField="label"
-                filters="{[]}"
-                fills="{[usedColorRadial, freeColorRadial, oversubscrivedColorRadial]}"/>
-        </mx:series>
-    </mx:PieChart>
-
+    
+    <mx:VBox width="33%" 
+        horizontalAlign="center" height="100%" verticalGap="0">
+	    <mx:Label text="CPU (V-CPU)" width="100%"/>
+	    <mx:PieChart id="cpuChart"
+	        paddingBottom="0" paddingTop="0" paddingLeft="0" paddingRight="0"
+            width="100%" height="100%"
+	        dataProvider="{_cpuChartDP}"
+	        showDataTips="true"
+	        dataTipFunction="pieChart_dataTipFunction">
+	
+	        <mx:series>
+	            <mx:PieSeries labelPosition="none"
+	                field="data"
+	                nameField="label"
+	                filters="{[]}"
+	                fills="{[usedColorRadial, freeColorRadial, oversubscrivedColorRadial]}"/>
+	        </mx:series>
+	    </mx:PieChart>
+    </mx:VBox>
 
     <mx:VRule 
         width="1" height="100%"
@@ -281,21 +294,24 @@
         styleName="PhysicalMachineRendererStateVRule"/>
 
 
-    <mx:Label text="{ResourceManager.getInstance().getString('Infrastructure', 'LABEL_HD') + ' (GB)'}"/>
-
-    <mx:PieChart id="hdChart"
-        width="33%" height="100%"
-        dataProvider="{_hdChartDP}"
-        showDataTips="true"
-        dataTipFunction="pieChart_dataTipFunction">
-
-        <mx:series>
-            <mx:PieSeries labelPosition="none"
-                field="data"
-                nameField="label"
-                filters="{[]}"
-                fills="{[usedColorRadial, freeColorRadial]}"/>
-        </mx:series>
-    </mx:PieChart>
-
+    <mx:VBox width="33%" 
+        horizontalAlign="center" height="100%" verticalGap="0">
+	    <mx:Label text="{ResourceManager.getInstance().getString('Infrastructure', 'LABEL_HD') + ' (GB)'}" width="100%"/>
+	
+	    <mx:PieChart id="hdChart"
+	       paddingBottom="0" paddingTop="0" paddingLeft="0" paddingRight="0"
+            width="100%" height="100%"
+	        dataProvider="{_hdChartDP}"
+	        showDataTips="true"
+	        dataTipFunction="pieChart_dataTipFunction">
+	
+	        <mx:series>
+	            <mx:PieSeries labelPosition="none"
+	                field="data"
+	                nameField="label"
+	                filters="{[]}"
+	                fills="{[usedColorRadial, freeColorRadial]}"/>
+	        </mx:series>
+	    </mx:PieChart>
+    </mx:VBox>
 </mx:HBox>

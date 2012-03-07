@@ -32,6 +32,7 @@
 
     <mx:Script>
         <![CDATA[
+        	import mx.collections.ArrayCollection;
         	import net.undf.abicloud.vo.user.PrivilegeType;
         	import net.undf.abicloud.utils.SecuredPrivilegeAccess;
             import mx.binding.utils.ChangeWatcher;
@@ -61,7 +62,7 @@
             private static const revenueDP:Array = [ "1M", "5M", "10M", "20M", "50M", "100M", "200M", "500M", "more500M" ];
 
             [Bindable]
-            private var _countryCodes:Array;
+            private var _countryCodes:ArrayCollection;
 
             [Bindable]
             private var _countryNames:Array;
@@ -119,7 +120,7 @@
                     countryCodes.push(String(countriesXML.country[i].code));
                 }
                 this._countryNames = countryNames;
-                this._countryCodes = countryCodes;
+                this._countryCodes = new ArrayCollection(countryCodes);
 
                 //USA states data
                 var usaStateNames:Array = new Array();
@@ -152,7 +153,7 @@
                     //Company
                     companyNameInput.text = this._configurationManager.registration.companyName;
                     companyAddressInput.text = this._configurationManager.registration.companyAddress;
-                    companyCountryInput.selectedIndex = this._countryCodes.indexOf(this._configurationManager.registration.companyCountryCode);
+                    companyCountryInput.selectedIndex = this._countryCodes.getItemIndex(this._configurationManager.registration.companyCountryCode);
                     companyStateInput.selectedIndex = this._usaStateCodes.indexOf(this._configurationManager.registration.companyState);
                     companyIndustryInput.selectedIndex = industryDP.indexOf(this._configurationManager.registration.companyIndustry);
                     companyRevenueInput.selectedIndex = revenueDP.indexOf(this._configurationManager.registration.companySizeRevenue);
@@ -259,7 +260,7 @@
                 registration.companyName = companyNameInput.text;
                 registration.companyAddress = companyAddressInput.text;
                 if (companyCountryInput.selectedIndex > -1)
-                    registration.companyCountryCode = this._countryCodes[companyCountryInput.selectedIndex];
+                    registration.companyCountryCode = this._countryCodes.getItemAt(companyCountryInput.selectedIndex).toString();
                 if (companyStateInput.selectedIndex > -1)
                     registration.companyState = this._usaStateCodes[companyStateInput.selectedIndex];
                 if (companyIndustryInput.selectedIndex > -1)
@@ -366,8 +367,8 @@
         <mx:FormItem 
             width="100%"
             label="@Resource(bundle='Configuration', key='LABEL_STATE')"
-            includeInLayout="{companyCountryInput.selectedIndex > 0 ? (this._countryCodes[companyCountryInput.selectedIndex] == 'US') : false}"
-            visible="{companyCountryInput.selectedIndex > 0 ? (this._countryCodes[companyCountryInput.selectedIndex] == 'US') : false}">
+            includeInLayout="{companyCountryInput.selectedIndex > 0 ? (this._countryCodes.getItemAt(companyCountryInput.selectedIndex) == 'US') : false}"
+            visible="{companyCountryInput.selectedIndex > 0 ? (this._countryCodes.getItemAt(companyCountryInput.selectedIndex) == 'US') : false}">
             <mx:ComboBox id="companyStateInput"
                 width="340" height="18"
                 selectedIndex="-1" dataProvider="{this._usaStateNames}"

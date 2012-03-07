@@ -30,7 +30,7 @@ package net.undf.abicloud.vo.infrastructure
         /* ------------- Public atributes ------------- */
         public var id:int;
 
-        public var name:String;
+        protected var _name:String;
 
         //The Infrastructure Element which this infrastructure element is assigned to
         protected var _assignedTo:InfrastructureElement;
@@ -70,6 +70,17 @@ package net.undf.abicloud.vo.infrastructure
         public function get assignedTo():InfrastructureElement
         {
             return _assignedTo;
+        }
+        
+        //Assign the InfrastructureElement name
+        public function set name(value:String):void
+        {
+            _name = value;
+        }
+
+        public function get name():String
+        {
+            return _name;
         }
     }
 }

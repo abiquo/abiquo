@@ -20,6 +20,8 @@
  */
 package com.abiquo.vsm.monitor.esxi;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -37,8 +39,6 @@ import com.abiquo.vsm.monitor.Monitor;
 import com.abiquo.vsm.monitor.Monitor.Type;
 import com.abiquo.vsm.monitor.executor.AbstractTask;
 import com.abiquo.vsm.monitor.executor.PeriodicalExecutor;
-import com.abiquo.vsm.redis.dao.RedisDao;
-import com.abiquo.vsm.redis.dao.RedisDaoFactory;
 import com.vmware.vim25.ObjectContent;
 import com.vmware.vim25.VirtualMachineConfigInfo;
 
@@ -59,9 +59,6 @@ public class ExecutorBasedESXiPoller extends AbstractMonitor
     /** HyperV WMI based connector */
     private ESXiConnector esx;
 
-    /** The dao used to access stored data. */
-    private RedisDao dao;
-
     // Polling stuff
 
     /** The executor */
@@ -75,10 +72,12 @@ public class ExecutorBasedESXiPoller extends AbstractMonitor
      */
     public ExecutorBasedESXiPoller()
     {
+        int pollingInterval =
+            Integer.valueOf(System.getProperty("abiquo.vsm.esx.pollinginterval", "5000"));
+
         esx = new ESXiConnector();
-        dao = RedisDaoFactory.getInstance();
         poller = new Poller();
-        executor = createExecutor(poller, Poller.POLLING_INTERVAL);
+        executor = createExecutor(poller, pollingInterval);
     }
 
     @Override
@@ -138,6 +137,8 @@ public class ExecutorBasedESXiPoller extends AbstractMonitor
      */
     private PeriodicalExecutor createExecutor(final Poller poller, final int pollInterval)
     {
+        LOGGER.debug("Creating new ESX monitor with polling interval: {} ms", pollInterval);
+
         return new PeriodicalExecutor(poller, pollInterval)
         {
             @Override
@@ -155,9 +156,6 @@ public class ExecutorBasedESXiPoller extends AbstractMonitor
      */
     private class Poller extends AbstractTask
     {
-        /** The polling interval. */
-        public static final int POLLING_INTERVAL = 5000;
-
         @Override
         public void execute() throws Exception
         {
@@ -184,29 +182,31 @@ public class ExecutorBasedESXiPoller extends AbstractMonitor
                         // Get states
                         ObjectContent[] vms = esx.getAllVMs();
 
-                        for (ObjectContent vm : vms)
+                        if (vms != null)
                         {
-                            VirtualMachineConfigInfo vmConfig =
-                                esx.getVMConfigFromObjectContent(vm);
-
-                            if (vmConfig == null)
+                            for (ObjectContent vm : vms)
                             {
-                                continue;
+                                VirtualMachineConfigInfo vmConfig = esx.getVMConfigFromObjectContent(vm);
+
+                                if (vmConfig == null)
+                                {
+                                    continue;
+                                }
+
+                                // Save the VM in the list of current VMs
+                                String vmName = decodeURLRawString(vmConfig.getName());
+                                currentVMs.add(vmName);
+
+                                // Get the new state of the VM
+                                VMEventType state = esx.getStateForObject(vm);
+                                LOGGER.trace("Found VM {} in state {}", vmName, state.name());
+
+                                VMEvent event = new VMEvent(state, physicalMachineAddress, vmName);
+
+                                // Propagate the event. RedisSubscriber will decide if it must be
+                                // notified, based on subscription information
+                                ExecutorBasedESXiPoller.this.notify(event);
                             }
-
-                            // Save the VM in the list of current VMs
-                            String vmName = vmConfig.getName();
-                            currentVMs.add(vmName);
-
-                            // Get the new state of the VM
-                            VMEventType state = esx.getStateForObject(vm);
-                            LOGGER.trace("Found VM {} in state {}", vmName, state.name());
-
-                            VMEvent event = new VMEvent(state, physicalMachineAddress, vmName);
-
-                            // Propagate the event. RedisSubscriber will decide if it must be
-                            // notified, based on subscription information
-                            ExecutorBasedESXiPoller.this.notify(event);
                         }
 
                         if (LOGGER.isTraceEnabled())
@@ -277,4 +277,16 @@ public class ExecutorBasedESXiPoller extends AbstractMonitor
         }
     }
 
+    protected String decodeURLRawString(final String value)
+    {
+        try
+        {
+            return URLDecoder.decode(value, "UTF-8");
+        }
+        catch (UnsupportedEncodingException e)
+        {
+            LOGGER.error("Can not decode {} from URL raw encoding. {}", value, e);
+            return value;
+        }
+    }
 }

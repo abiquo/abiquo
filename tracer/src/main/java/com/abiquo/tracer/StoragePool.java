@@ -23,43 +23,52 @@ package com.abiquo.tracer;
 
 import java.io.Serializable;
 
-public class StoragePool implements Serializable {
+public class StoragePool implements Serializable
+{
 
-	/**
+    /**
 	 * 
 	 */
-	private static final long serialVersionUID = -6616802479119986928L;
+    private static final long serialVersionUID = -6616802479119986928L;
 
-	private String name;
-	private Volume volume;
+    private String name;
 
-	private StoragePool(String storagePool) {
-		this.setName(storagePool);
-	}
+    private Volume volume;
 
-	public static StoragePool storagePool(String storagePool) {
-		return new StoragePool(storagePool);
-	}
+    private StoragePool(String storagePool)
+    {
+        this.setName(storagePool);
+    }
 
-	public StoragePool volume(Volume volume) {
-		this.setVolume(volume);
-		return this;
-	}
+    public static StoragePool storagePool(String storagePool)
+    {
+        return new StoragePool(storagePool);
+    }
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    public StoragePool volume(Volume volume)
+    {
+        this.setVolume(volume);
+        return this;
+    }
 
-	public String getName() {
-		return name;
-	}
+    public void setName(String name)
+    {
+        this.name = name;
+    }
 
-	public void setVolume(Volume volume) {
-		this.volume = volume;
-	}
+    public String getName()
+    {
+        return name;
+    }
 
-	public Volume getVolume() {
-		return volume;
-	}
+    public void setVolume(Volume volume)
+    {
+        this.volume = volume;
+    }
+
+    public Volume getVolume()
+    {
+        return volume;
+    }
 
 }

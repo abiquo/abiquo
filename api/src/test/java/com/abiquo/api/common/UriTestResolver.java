@@ -45,16 +45,26 @@ import com.abiquo.api.resources.RemoteServiceResource;
 import com.abiquo.api.resources.RemoteServicesResource;
 import com.abiquo.api.resources.RoleResource;
 import com.abiquo.api.resources.RolesResource;
+import com.abiquo.api.resources.TaskResourceUtils;
 import com.abiquo.api.resources.UserResource;
 import com.abiquo.api.resources.UsersResource;
-import com.abiquo.api.resources.appslibrary.EnterpriseRepositoriesResource;
-import com.abiquo.api.resources.appslibrary.EnterpriseRepositoryResource;
-import com.abiquo.api.resources.appslibrary.OVFPackageInstanceResource;
-import com.abiquo.api.resources.appslibrary.OVFPackageInstancesResource;
-import com.abiquo.api.resources.appslibrary.OVFPackageListResource;
-import com.abiquo.api.resources.appslibrary.OVFPackageListsResource;
-import com.abiquo.api.resources.appslibrary.OVFPackageResource;
-import com.abiquo.api.resources.appslibrary.OVFPackagesResource;
+import com.abiquo.api.resources.VirtualMachinesInfrastructureResource;
+import com.abiquo.api.resources.appslibrary.CategoriesResource;
+import com.abiquo.api.resources.appslibrary.CategoryResource;
+import com.abiquo.api.resources.appslibrary.DatacenterRepositoriesResource;
+import com.abiquo.api.resources.appslibrary.DatacenterRepositoryResource;
+import com.abiquo.api.resources.appslibrary.DiskFormatTypesResource;
+import com.abiquo.api.resources.appslibrary.HypervisorTypesResource;
+import com.abiquo.api.resources.appslibrary.IconResource;
+import com.abiquo.api.resources.appslibrary.IconsResource;
+import com.abiquo.api.resources.appslibrary.TemplateDefinitionListResource;
+import com.abiquo.api.resources.appslibrary.TemplateDefinitionListsResource;
+import com.abiquo.api.resources.appslibrary.TemplateDefinitionResource;
+import com.abiquo.api.resources.appslibrary.TemplateDefinitionsResource;
+import com.abiquo.api.resources.appslibrary.VirtualMachineTemplateResource;
+import com.abiquo.api.resources.appslibrary.VirtualMachineTemplatesResource;
+import com.abiquo.api.resources.cloud.DiskResource;
+import com.abiquo.api.resources.cloud.DisksResource;
 import com.abiquo.api.resources.cloud.IpAddressesResource;
 import com.abiquo.api.resources.cloud.PrivateNetworkResource;
 import com.abiquo.api.resources.cloud.PrivateNetworksResource;
@@ -64,6 +74,7 @@ import com.abiquo.api.resources.cloud.VirtualDatacenterResource;
 import com.abiquo.api.resources.cloud.VirtualDatacentersResource;
 import com.abiquo.api.resources.cloud.VirtualMachineNetworkConfigurationResource;
 import com.abiquo.api.resources.cloud.VirtualMachineResource;
+import com.abiquo.api.resources.cloud.VirtualMachineStorageConfigurationResource;
 import com.abiquo.api.resources.cloud.VirtualMachinesResource;
 import com.abiquo.api.resources.config.PrivilegeResource;
 import com.abiquo.api.resources.config.PrivilegesResource;
@@ -71,6 +82,7 @@ import com.abiquo.api.resources.config.SystemPropertiesResource;
 import com.abiquo.api.resources.config.SystemPropertyResource;
 import com.abiquo.api.util.URIResolver;
 import com.abiquo.model.enumerator.RemoteServiceType;
+import com.abiquo.model.enumerator.StatefulInclusion;
 
 public class UriTestResolver
 {
@@ -97,21 +109,29 @@ public class UriTestResolver
     public static String resolveEnterpriseURI(final Integer enterpriseId)
     {
         String template =
-            buildPath(EnterprisesResource.ENTERPRISES_PATH, EnterpriseResource.ENTERPRISE_PARAM);
+            buildPath(EnterprisesResource.ENTERPRISES_PATH + "/",
+                EnterpriseResource.ENTERPRISE_PARAM);
 
-        return resolveURI(template,
-            Collections.singletonMap(EnterpriseResource.ENTERPRISE, enterpriseId.toString()));
+        return resolveURI(template, Collections.singletonMap(EnterpriseResource.ENTERPRISE,
+            enterpriseId.toString()));
     }
 
     public static String resolveEnterpriseActionGetIPsURI(final Integer entId)
     {
-        return resolveEnterpriseURI(entId) + EnterpriseResource.ENTERPRISE_ACTION_GET_IPS;
+        return resolveEnterpriseURI(entId) + "/"
+            + EnterpriseResource.ENTERPRISE_ACTION_GET_IPS_PATH;
     }
 
     public static String resolveEnterpriseActionGetVirtualMachinesURI(final Integer entId)
     {
-        return resolveEnterpriseURI(entId)
-            + EnterpriseResource.ENTERPRISE_ACTION_GET_VIRTUALMACHINES;
+        return resolveEnterpriseURI(entId) + "/"
+            + EnterpriseResource.ENTERPRISE_ACTION_GET_VIRTUALMACHINES_PATH;
+    }
+
+    public static String resolveEnterpriseActionGetVirtualAppliancesURI(final Integer entId)
+    {
+        return resolveEnterpriseURI(entId) + "/"
+            + EnterpriseResource.ENTERPRISE_ACTION_GET_VIRTUALAPPLIANCES_PATH;
     }
 
     public static String resolveEnterprisesByDatacenterURI(final Integer datacenterId)
@@ -130,8 +150,8 @@ public class UriTestResolver
         String template =
             buildPath(PrivilegesResource.PRIVILEGES_PATH, PrivilegeResource.PRIVILEGE_PARAM);
 
-        return resolveURI(template,
-            Collections.singletonMap(PrivilegeResource.PRIVILEGE, privilegeId.toString()));
+        return resolveURI(template, Collections.singletonMap(PrivilegeResource.PRIVILEGE,
+            privilegeId.toString()));
     }
 
     public static String resolveRoleURI(final Integer roleId)
@@ -143,7 +163,7 @@ public class UriTestResolver
 
     public static String resolveRoleActionGetPrivilegesURI(final Integer entId)
     {
-        return resolveRoleURI(entId) + RoleResource.ROLE_ACTION_GET_PRIVILEGES;
+        return resolveRoleURI(entId) + "/" + RoleResource.ROLE_ACTION_GET_PRIVILEGES_PATH;
     }
 
     public static String resolveUsersURI(final Serializable enterpriseId)
@@ -179,7 +199,8 @@ public class UriTestResolver
     public static String resolveUserActionGetVirtualMachinesURI(final Integer enterpriseId,
         final Integer userId)
     {
-        return resolveUserURI(enterpriseId, userId) + UserResource.USER_ACTION_GET_VIRTUALMACHINES;
+        return resolveUserURI(enterpriseId, userId) + "/"
+            + UserResource.USER_ACTION_GET_VIRTUALMACHINES_PATH;
     }
 
     public static String resolveDatacentersURI()
@@ -193,8 +214,8 @@ public class UriTestResolver
     {
         String template =
             buildPath(DatacentersResource.DATACENTERS_PATH, DatacenterResource.DATACENTER_PARAM);
-        return resolveURI(template,
-            Collections.singletonMap(DatacenterResource.DATACENTER, datacenterId.toString()));
+        return resolveURI(template, Collections.singletonMap(DatacenterResource.DATACENTER,
+            datacenterId.toString()));
     }
 
     public static String resolveRacksURI(final Integer datacenterId)
@@ -202,8 +223,8 @@ public class UriTestResolver
         String template =
             buildPath(DatacentersResource.DATACENTERS_PATH, DatacenterResource.DATACENTER_PARAM,
                 RacksResource.RACKS_PATH);
-        return resolveURI(template,
-            Collections.singletonMap(DatacenterResource.DATACENTER, datacenterId.toString()));
+        return resolveURI(template, Collections.singletonMap(DatacenterResource.DATACENTER,
+            datacenterId.toString()));
     }
 
     public static String resolveRackURI(final Integer datacenterId, final Integer rackId)
@@ -320,6 +341,24 @@ public class UriTestResolver
         return resolveURI(template, values);
     }
 
+    public static String resolveDatacenterURIActionDiscoverHypervidor(final Integer datacenterId,
+        final String ip)
+    {
+        return resolveDatacenterURI(datacenterId) + "/"
+            + DatacenterResource.ACTION_DISCOVER_HYPERVISOR_TYPE + "?ip=" + ip;
+    }
+
+    public static String resolveDatacenterURIActionDiscover(final Integer datacenterId)
+    {
+        return resolveDatacenterURI(datacenterId) + "/" + DatacenterResource.ACTION_DISCOVER_SINGLE;
+    }
+
+    public static String resolveDatacenterURIActionDiscoverMultiple(final Integer datacenterId)
+    {
+        return resolveDatacenterURI(datacenterId) + "/"
+            + DatacenterResource.ACTION_DISCOVER_MULTIPLE;
+    }
+
     /**
      * Creates something like
      * http://example.com/admin/datacenters/{$datacenterId}/racks/{$rackId}/machines
@@ -334,7 +373,7 @@ public class UriTestResolver
         final Integer rackId, final Integer machineId)
     {
         return UriHelper.appendPathToBaseUri(resolveMachineURI(datacenterId, rackId, machineId),
-            MachineResource.MACHINE_ACTION_GET_VIRTUALMACHINES);
+            VirtualMachinesInfrastructureResource.VIRTUAL_MACHINES_INFRASTRUCTURE_PARAM);
     }
 
     public static String resolveRemoteServicesURI(final Integer datacenterId)
@@ -359,16 +398,17 @@ public class UriTestResolver
 
         Map<String, String> values = new HashMap<String, String>();
         values.put(DatacenterResource.DATACENTER, datacenterId.toString());
-        values.put(RemoteServiceResource.REMOTE_SERVICE, type.toString().toLowerCase());
+        values.put(RemoteServiceResource.REMOTE_SERVICE, type.toString().toLowerCase().replace("_",
+            ""));
 
         return resolveURI(template, values);
     }
 
-    public static String resolveOVFPackageListsURI(final Integer enterpriseId)
+    public static String resolveTemplateDefinitionListsURI(final Integer enterpriseId)
     {
         String template =
             buildPath(EnterprisesResource.ENTERPRISES_PATH, EnterpriseResource.ENTERPRISE_PARAM,
-                OVFPackageListsResource.OVF_PACKAGE_LISTS_PATH);
+                TemplateDefinitionListsResource.TEMPLATE_DEFINITION_LISTS_PATH);
 
         Map<String, String> values = new HashMap<String, String>();
         values.put(EnterpriseResource.ENTERPRISE, String.valueOf(enterpriseId));
@@ -377,28 +417,29 @@ public class UriTestResolver
 
     }
 
-    public static String resolveOVFPackageListURI(final Integer enterpriseId,
+    public static String resolveTemplateDefinitionListURI(final Integer enterpriseId,
         final Integer ovfPackageListId)
     {
         String template =
             buildPath(EnterprisesResource.ENTERPRISES_PATH, EnterpriseResource.ENTERPRISE_PARAM,
-                OVFPackageListsResource.OVF_PACKAGE_LISTS_PATH,
-                OVFPackageListResource.OVF_PACKAGE_LIST_PARAM);
+                TemplateDefinitionListsResource.TEMPLATE_DEFINITION_LISTS_PATH,
+                TemplateDefinitionListResource.TEMPLATE_DEFINITION_LIST_PARAM);
 
         Map<String, String> values = new HashMap<String, String>();
         values.put(EnterpriseResource.ENTERPRISE, String.valueOf(enterpriseId));
-        values.put(OVFPackageListResource.OVF_PACKAGE_LIST, ovfPackageListId.toString());
+        values.put(TemplateDefinitionListResource.TEMPLATE_DEFINITION_LIST, ovfPackageListId
+            .toString());
 
         return resolveURI(template, values);
 
     }
 
-    public static String resolveOVFPackagesURI(final Integer enterpriseId)
+    public static String resolveTemplateDefinitionsURI(final Integer enterpriseId)
     {
 
         String template =
             buildPath(EnterprisesResource.ENTERPRISES_PATH, EnterpriseResource.ENTERPRISE_PARAM,
-                OVFPackagesResource.OVF_PACKAGES_PATH);
+                TemplateDefinitionsResource.TEMPLATE_DEFINITIONS_PATH);
 
         Map<String, String> values = new HashMap<String, String>();
         values.put(EnterpriseResource.ENTERPRISE, String.valueOf(enterpriseId));
@@ -406,58 +447,60 @@ public class UriTestResolver
         return resolveURI(template, values);
     }
 
-    public static String resolveOVFPackageInstancesURI(final Integer datacenterId,
-        final String remoteServiceType, final Integer enterpriseId)
-    {
+    // public static String resolveOVFPackageInstancesURI(final Integer datacenterId,
+    // final String remoteServiceType, final Integer enterpriseId)
+    // {
+    //
+    // String template =
+    // buildPath(DatacentersResource.DATACENTERS_PATH, DatacenterResource.DATACENTER_PARAM,
+    // RemoteServicesResource.REMOTE_SERVICES_PATH,
+    // RemoteServiceResource.REMOTE_SERVICE_PARAM,
+    // EnterpriseRepositoriesResource.ENTERPRISE_REP_PATH,
+    // EnterpriseRepositoryResource.ENTERPRISE_PARAM,
+    // OVFPackageInstancesResource.OVF_PACKAGE_INSTANCES_PATH);
+    //
+    // Map<String, String> values = new HashMap<String, String>();
+    // values.put(DatacenterResource.DATACENTER, String.valueOf(datacenterId));
+    // values.put(RemoteServiceResource.REMOTE_SERVICE, remoteServiceType);
+    // values.put(EnterpriseRepositoryResource.ENTERPRISE, String.valueOf(enterpriseId));
+    //
+    // return resolveURI(template, values);
+    // }
+    //
+    // public static String resolveOVFPackageInstanceURI(final Integer datacenterId,
+    // final String remoteServiceType, final Integer enterpriseId, final String ovfUrl)
+    // {
+    //
+    // String template =
+    // buildPath(DatacentersResource.DATACENTERS_PATH, DatacenterResource.DATACENTER_PARAM,
+    // RemoteServicesResource.REMOTE_SERVICES_PATH,
+    // RemoteServiceResource.REMOTE_SERVICE_PARAM,
+    // EnterpriseRepositoriesResource.ENTERPRISE_REP_PATH,
+    // EnterpriseRepositoryResource.ENTERPRISE_PARAM,
+    // OVFPackageInstancesResource.OVF_PACKAGE_INSTANCES_PATH,
+    // OVFPackageInstanceResource.OVF_PACKAGE_INSTANCE_PARAM);
+    //
+    // Map<String, String> values = new HashMap<String, String>();
+    // values.put(DatacenterResource.DATACENTER, String.valueOf(datacenterId));
+    // values.put(RemoteServiceResource.REMOTE_SERVICE, remoteServiceType);
+    // values.put(EnterpriseRepositoryResource.ENTERPRISE, String.valueOf(enterpriseId));
+    // values.put(OVFPackageInstanceResource.OVF_PACKAGE_INSTANCE, ovfUrl);
+    //
+    // return resolveURI(template, values);
+    // }
 
-        String template =
-            buildPath(DatacentersResource.DATACENTERS_PATH, DatacenterResource.DATACENTER_PARAM,
-                RemoteServicesResource.REMOTE_SERVICES_PATH,
-                RemoteServiceResource.REMOTE_SERVICE_PARAM,
-                EnterpriseRepositoriesResource.ENTERPRISE_REP_PATH,
-                EnterpriseRepositoryResource.ENTERPRISE_PARAM,
-                OVFPackageInstancesResource.OVF_PACKAGE_INSTANCES_PATH);
-
-        Map<String, String> values = new HashMap<String, String>();
-        values.put(DatacenterResource.DATACENTER, String.valueOf(datacenterId));
-        values.put(RemoteServiceResource.REMOTE_SERVICE, remoteServiceType);
-        values.put(EnterpriseRepositoryResource.ENTERPRISE, String.valueOf(enterpriseId));
-
-        return resolveURI(template, values);
-    }
-
-    public static String resolveOVFPackageInstanceURI(final Integer datacenterId,
-        final String remoteServiceType, final Integer enterpriseId, final String ovfUrl)
-    {
-
-        String template =
-            buildPath(DatacentersResource.DATACENTERS_PATH, DatacenterResource.DATACENTER_PARAM,
-                RemoteServicesResource.REMOTE_SERVICES_PATH,
-                RemoteServiceResource.REMOTE_SERVICE_PARAM,
-                EnterpriseRepositoriesResource.ENTERPRISE_REP_PATH,
-                EnterpriseRepositoryResource.ENTERPRISE_PARAM,
-                OVFPackageInstancesResource.OVF_PACKAGE_INSTANCES_PATH,
-                OVFPackageInstanceResource.OVF_PACKAGE_INSTANCE_PARAM);
-
-        Map<String, String> values = new HashMap<String, String>();
-        values.put(DatacenterResource.DATACENTER, String.valueOf(datacenterId));
-        values.put(RemoteServiceResource.REMOTE_SERVICE, remoteServiceType);
-        values.put(EnterpriseRepositoryResource.ENTERPRISE, String.valueOf(enterpriseId));
-        values.put(OVFPackageInstanceResource.OVF_PACKAGE_INSTANCE, ovfUrl);
-
-        return resolveURI(template, values);
-    }
-
-    public static String resolveOVFPackageURI(final Integer enterpriseId, final Integer ovfPackageId)
+    public static String resolveTemplateDefinitionURI(final Integer enterpriseId,
+        final Integer ovfPackageId)
     {
 
         String template =
             buildPath(EnterprisesResource.ENTERPRISES_PATH, EnterpriseResource.ENTERPRISE_PARAM,
-                OVFPackagesResource.OVF_PACKAGES_PATH, OVFPackageResource.OVF_PACKAGE_PARAM);
+                TemplateDefinitionsResource.TEMPLATE_DEFINITIONS_PATH,
+                TemplateDefinitionResource.TEMPLATE_DEFINITION_PARAM);
 
         Map<String, String> values = new HashMap<String, String>();
         values.put(EnterpriseResource.ENTERPRISE, String.valueOf(enterpriseId));
-        values.put(OVFPackageResource.OVF_PACKAGE, ovfPackageId.toString());
+        values.put(TemplateDefinitionResource.TEMPLATE_DEFINITION, ovfPackageId.toString());
 
         return resolveURI(template, values);
     }
@@ -467,8 +510,8 @@ public class UriTestResolver
         String template =
             DatacentersResource.DATACENTERS_PATH + "/" + DatacenterResource.DATACENTER_PARAM + "/"
                 + RacksResource.RACKS_PATH;
-        return resolveURI(template,
-            Collections.singletonMap(DatacenterResource.DATACENTER, datacenterId.toString()));
+        return resolveURI(template, Collections.singletonMap(DatacenterResource.DATACENTER,
+            datacenterId.toString()));
     }
 
     public static String resolvePrivateNetworksURI(final Integer virtualDatacenterId)
@@ -512,7 +555,24 @@ public class UriTestResolver
         values.put(PrivateNetworkResource.PRIVATE_NETWORK, vlanId.toString());
 
         return resolveURI(template, values);
+    }
 
+    public static String resolvePrivateNetworkIPURI(final Integer virtualDatacenterId,
+        final Integer vlanId, final Integer ipId)
+    {
+        String template =
+            buildPath(VirtualDatacentersResource.VIRTUAL_DATACENTERS_PATH,
+                VirtualDatacenterResource.VIRTUAL_DATACENTER_PARAM,
+                PrivateNetworksResource.PRIVATE_NETWORKS_PATH,
+                PrivateNetworkResource.PRIVATE_NETWORK_PARAM, IpAddressesResource.IP_ADDRESSES,
+                IpAddressesResource.IP_ADDRESS_PARAM);
+
+        Map<String, String> values = new HashMap<String, String>();
+        values.put(VirtualDatacenterResource.VIRTUAL_DATACENTER, virtualDatacenterId.toString());
+        values.put(PrivateNetworkResource.PRIVATE_NETWORK, vlanId.toString());
+        values.put(IpAddressesResource.IP_ADDRESS, ipId.toString());
+
+        return resolveURI(template, values);
     }
 
     /**
@@ -559,6 +619,80 @@ public class UriTestResolver
 
     /**
      * Creates something like
+     * http://example.com/cloud/virtualdatacenters/{vdcId}/virtualappliances/{vappId}/action/deploy
+     * 
+     * @param vdcId identifier of the virtual datacenter
+     * @param vappId identifier of the virtual apliance
+     * @return URI of the virtual appliance resource into string object
+     */
+    public static String resolveVirtualApplianceDeployURI(final Integer vdcId, final Integer vappId)
+    {
+        String template =
+            buildPath(VirtualDatacentersResource.VIRTUAL_DATACENTERS_PATH,
+                VirtualDatacenterResource.VIRTUAL_DATACENTER_PARAM,
+                VirtualAppliancesResource.VIRTUAL_APPLIANCES_PATH,
+                VirtualApplianceResource.VIRTUAL_APPLIANCE_PARAM,
+                VirtualApplianceResource.VIRTUAL_APPLIANCE_DEPLOY_PATH);
+
+        Map<String, String> values = new HashMap<String, String>();
+        values.put(VirtualDatacenterResource.VIRTUAL_DATACENTER, vdcId.toString());
+        values.put(VirtualApplianceResource.VIRTUAL_APPLIANCE, vappId.toString());
+
+        return resolveURI(template, values);
+    }
+
+    /**
+     * Creates something like
+     * http://example.com/cloud/virtualdatacenters/{vdcId}/virtualappliances/{vappId}/state
+     * 
+     * @param vdcId identifier of the virtual datacenter
+     * @param vappId identifier of the virtual apliance
+     * @return URI of the virtual appliance resource into string object
+     */
+    public static String resolveVirtualApplianceStateURI(final Integer vdcId, final Integer vappId)
+    {
+        String template =
+            buildPath(VirtualDatacentersResource.VIRTUAL_DATACENTERS_PATH,
+                VirtualDatacenterResource.VIRTUAL_DATACENTER_PARAM,
+                VirtualAppliancesResource.VIRTUAL_APPLIANCES_PATH,
+                VirtualApplianceResource.VIRTUAL_APPLIANCE_PARAM,
+                VirtualApplianceResource.VIRTUAL_APPLIANCE_STATE_REL);
+
+        Map<String, String> values = new HashMap<String, String>();
+        values.put(VirtualDatacenterResource.VIRTUAL_DATACENTER, vdcId.toString());
+        values.put(VirtualApplianceResource.VIRTUAL_APPLIANCE, vappId.toString());
+
+        return resolveURI(template, values);
+    }
+
+    /**
+     * Creates something like
+     * http://example.com/cloud/virtualdatacenters/{vdcId}/virtualappliances/{
+     * vappId}/action/undeploy
+     * 
+     * @param vdcId identifier of the virtual datacenter
+     * @param vappId identifier of the virtual apliance
+     * @return URI of the virtual appliance resource into string object
+     */
+    public static String resolveVirtualApplianceUndeployURI(final Integer vdcId,
+        final Integer vappId)
+    {
+        String template =
+            buildPath(VirtualDatacentersResource.VIRTUAL_DATACENTERS_PATH,
+                VirtualDatacenterResource.VIRTUAL_DATACENTER_PARAM,
+                VirtualAppliancesResource.VIRTUAL_APPLIANCES_PATH,
+                VirtualApplianceResource.VIRTUAL_APPLIANCE_PARAM,
+                VirtualApplianceResource.VIRTUAL_APPLIANCE_UNDEPLOY_PATH);
+
+        Map<String, String> values = new HashMap<String, String>();
+        values.put(VirtualDatacenterResource.VIRTUAL_DATACENTER, vdcId.toString());
+        values.put(VirtualApplianceResource.VIRTUAL_APPLIANCE, vappId.toString());
+
+        return resolveURI(template, values);
+    }
+
+    /**
+     * Creates something like
      * http://example.com/cloud/virtualdatacenters/{vdcId}/virtualappliances/{vappId}/action/ips
      * 
      * @param vdcId identifier of the virtual datacenter
@@ -568,8 +702,8 @@ public class UriTestResolver
     public static String resolveVirtualApplianceActionGetIPsURI(final Integer vdcId,
         final Integer vappId)
     {
-        return resolveVirtualApplianceURI(vdcId, vappId)
-            + VirtualApplianceResource.VIRTUAL_APPLIANCE_ACTION_GET_IPS;
+        return resolveVirtualApplianceURI(vdcId, vappId) + "/"
+            + VirtualApplianceResource.VIRTUAL_APPLIANCE_GET_IPS_PATH;
     }
 
     /**
@@ -603,7 +737,7 @@ public class UriTestResolver
      * vappId}/virtualmachines/{vmId}/
      * 
      * @param vdcId identifier of the virtual datacenter
-     * @param vappId identifier of the virtual apliance
+     * @param vappId identifier of the virtual appliance
      * @param vmId identifier of the virtual machine
      * @return URI of the virtual appliance resource into string object
      */
@@ -622,6 +756,287 @@ public class UriTestResolver
         values.put(VirtualDatacenterResource.VIRTUAL_DATACENTER, vdcId.toString());
         values.put(VirtualApplianceResource.VIRTUAL_APPLIANCE, vappId.toString());
         values.put(VirtualMachineResource.VIRTUAL_MACHINE, vmId.toString());
+
+        return resolveURI(template, values);
+    }
+
+    /**
+     * Creates something like
+     * http://example.com/cloud/virtualdatacenters/{vdcId}/virtualappliances/{
+     * vappId}/virtualmachines/{vmId}/tasks/{taskId}
+     * 
+     * @param vdcId identifier of the virtual datacenter
+     * @param vappId identifier of the virtual appliance
+     * @param vmId identifier of the virtual machine
+     * @param taskId The id of the task.
+     * @return URI of the virtual appliance resource into string object
+     */
+    public static String resolveVirtualMachineTaskURI(final Integer vdcId, final Integer vappId,
+        final Integer vmId, final String taskId)
+    {
+        String template =
+            buildPath(VirtualDatacentersResource.VIRTUAL_DATACENTERS_PATH,
+                VirtualDatacenterResource.VIRTUAL_DATACENTER_PARAM,
+                VirtualAppliancesResource.VIRTUAL_APPLIANCES_PATH,
+                VirtualApplianceResource.VIRTUAL_APPLIANCE_PARAM,
+                VirtualMachinesResource.VIRTUAL_MACHINES_PATH,
+                VirtualMachineResource.VIRTUAL_MACHINE_PARAM, TaskResourceUtils.TASK_PATH);
+
+        Map<String, String> values = new HashMap<String, String>();
+        values.put(VirtualDatacenterResource.VIRTUAL_DATACENTER, vdcId.toString());
+        values.put(VirtualApplianceResource.VIRTUAL_APPLIANCE, vappId.toString());
+        values.put(VirtualMachineResource.VIRTUAL_MACHINE, vmId.toString());
+        values.put(TaskResourceUtils.TASK, taskId);
+
+        return resolveURI(template, values);
+    }
+
+    /**
+     * Creates something like
+     * http://example.com/cloud/virtualdatacenters/{vdcId}/virtualappliances/{
+     * vappId}/virtualmachines/{vmId}/state
+     * 
+     * @param vdcId identifier of the virtual datacenter
+     * @param vappId identifier of the virtual apliance
+     * @param vmId identifier of the virtual machine
+     * @return URI of the virtual appliance resource into string object
+     */
+    public static String resolveVirtualMachineStateURI(final Integer vdcId, final Integer vappId,
+        final Integer vmId)
+    {
+        String template =
+            buildPath(VirtualDatacentersResource.VIRTUAL_DATACENTERS_PATH,
+                VirtualDatacenterResource.VIRTUAL_DATACENTER_PARAM,
+                VirtualAppliancesResource.VIRTUAL_APPLIANCES_PATH,
+                VirtualApplianceResource.VIRTUAL_APPLIANCE_PARAM,
+                VirtualMachinesResource.VIRTUAL_MACHINES_PATH,
+                VirtualMachineResource.VIRTUAL_MACHINE_PARAM,
+                VirtualMachineResource.VIRTUAL_MACHINE_STATE_PATH);
+
+        Map<String, String> values = new HashMap<String, String>();
+        values.put(VirtualDatacenterResource.VIRTUAL_DATACENTER, vdcId.toString());
+        values.put(VirtualApplianceResource.VIRTUAL_APPLIANCE, vappId.toString());
+        values.put(VirtualMachineResource.VIRTUAL_MACHINE, vmId.toString());
+
+        return resolveURI(template, values);
+    }
+
+    /**
+     * Creates something like
+     * http://example.com/cloud/virtualdatacenters/{vdcId}/virtualappliances/{
+     * vappId}/virtualmachines/{vmId}/action/deploy
+     * 
+     * @param vdcId identifier of the virtual datacenter
+     * @param vappId identifier of the virtual appliance
+     * @param vmId identifier of the virtual machine
+     * @return URI of the virtual appliance resource into string object
+     */
+    public static String resolveVirtualMachineDeployURI(final Integer vdcId, final Integer vappId,
+        final Integer vmId)
+    {
+        String template =
+            buildPath(VirtualDatacentersResource.VIRTUAL_DATACENTERS_PATH,
+                VirtualDatacenterResource.VIRTUAL_DATACENTER_PARAM,
+                VirtualAppliancesResource.VIRTUAL_APPLIANCES_PATH,
+                VirtualApplianceResource.VIRTUAL_APPLIANCE_PARAM,
+                VirtualMachinesResource.VIRTUAL_MACHINES_PATH,
+                VirtualMachineResource.VIRTUAL_MACHINE_PARAM,
+                VirtualMachineResource.VIRTUAL_MACHINE_DEPLOY_PATH);
+
+        Map<String, String> values = new HashMap<String, String>();
+        values.put(VirtualDatacenterResource.VIRTUAL_DATACENTER, vdcId.toString());
+        values.put(VirtualApplianceResource.VIRTUAL_APPLIANCE, vappId.toString());
+        values.put(VirtualMachineResource.VIRTUAL_MACHINE, vmId.toString());
+
+        return resolveURI(template, values);
+    }
+
+    /**
+     * Creates something like
+     * http://example.com/cloud/virtualdatacenters/{vdcId}/virtualappliances/{
+     * vappId}/virtualmachines/{vmId}/action/deploy
+     * 
+     * @param vdcId identifier of the virtual datacenter
+     * @param vappId identifier of the virtual appliance
+     * @param vmId identifier of the virtual machine
+     * @return URI of the virtual appliance resource into string object
+     */
+    public static String resolveVirtualMachineUndeployURI(final Integer vdcId,
+        final Integer vappId, final Integer vmId)
+    {
+        String template =
+            buildPath(VirtualDatacentersResource.VIRTUAL_DATACENTERS_PATH,
+                VirtualDatacenterResource.VIRTUAL_DATACENTER_PARAM,
+                VirtualAppliancesResource.VIRTUAL_APPLIANCES_PATH,
+                VirtualApplianceResource.VIRTUAL_APPLIANCE_PARAM,
+                VirtualMachinesResource.VIRTUAL_MACHINES_PATH,
+                VirtualMachineResource.VIRTUAL_MACHINE_PARAM,
+                VirtualMachineResource.VIRTUAL_MACHINE_UNDEPLOY_PATH);
+
+        Map<String, String> values = new HashMap<String, String>();
+        values.put(VirtualDatacenterResource.VIRTUAL_DATACENTER, vdcId.toString());
+        values.put(VirtualApplianceResource.VIRTUAL_APPLIANCE, vappId.toString());
+        values.put(VirtualMachineResource.VIRTUAL_MACHINE, vmId.toString());
+
+        return resolveURI(template, values);
+    }
+
+    /**
+     * Creates something like
+     * http://example.com/cloud/virtualdatacenters/{vdcId}/virtualappliances/{
+     * vappId}/virtualmachines/{vmId}/action/deploy
+     * 
+     * @param vdcId identifier of the virtual datacenter
+     * @param vappId identifier of the virtual appliance
+     * @param vmId identifier of the virtual machine
+     * @return URI of the virtual appliance resource into string object
+     */
+    public static String resolveVirtualMachineResetURI(final Integer vdcId, final Integer vappId,
+        final Integer vmId)
+    {
+        String template =
+            buildPath(VirtualDatacentersResource.VIRTUAL_DATACENTERS_PATH,
+                VirtualDatacenterResource.VIRTUAL_DATACENTER_PARAM,
+                VirtualAppliancesResource.VIRTUAL_APPLIANCES_PATH,
+                VirtualApplianceResource.VIRTUAL_APPLIANCE_PARAM,
+                VirtualMachinesResource.VIRTUAL_MACHINES_PATH,
+                VirtualMachineResource.VIRTUAL_MACHINE_PARAM,
+                VirtualMachineResource.VIRTUAL_MACHINE_ACTION_RESET);
+
+        Map<String, String> values = new HashMap<String, String>();
+        values.put(VirtualDatacenterResource.VIRTUAL_DATACENTER, vdcId.toString());
+        values.put(VirtualApplianceResource.VIRTUAL_APPLIANCE, vappId.toString());
+        values.put(VirtualMachineResource.VIRTUAL_MACHINE, vmId.toString());
+
+        return resolveURI(template, values);
+    }
+
+    /**
+     * Creates something like
+     * http://example.com/cloud/virtualdatacenters/{vdcId}/virtualappliances/{
+     * vappId}/virtualmachines/{vmId}/storage/disks
+     * 
+     * @param vdcId identifier of the virtual datacenter
+     * @param vappId identifier of the virtual apliance
+     * @param vmId identifier of the virtual machine
+     * @return URI of the virtual appliance resource into string object
+     */
+    public static String resolveVirtualMachineDisksUri(final Integer vdcId, final Integer vappId,
+        final Integer vmId)
+    {
+        String template =
+            buildPath(VirtualDatacentersResource.VIRTUAL_DATACENTERS_PATH,
+                VirtualDatacenterResource.VIRTUAL_DATACENTER_PARAM,
+                VirtualAppliancesResource.VIRTUAL_APPLIANCES_PATH,
+                VirtualApplianceResource.VIRTUAL_APPLIANCE_PARAM,
+                VirtualMachinesResource.VIRTUAL_MACHINES_PATH,
+                VirtualMachineResource.VIRTUAL_MACHINE_PARAM,
+                VirtualMachineStorageConfigurationResource.STORAGE,
+                VirtualMachineStorageConfigurationResource.DISKS_PATH);
+
+        Map<String, String> values = new HashMap<String, String>();
+        values.put(VirtualDatacenterResource.VIRTUAL_DATACENTER, vdcId.toString());
+        values.put(VirtualApplianceResource.VIRTUAL_APPLIANCE, vappId.toString());
+        values.put(VirtualMachineResource.VIRTUAL_MACHINE, vmId.toString());
+
+        return resolveURI(template, values);
+    }
+
+    /**
+     * Creates something like
+     * http://example.com/cloud/virtualdatacenters/{vdcId}/virtualappliances/{
+     * vappId}/virtualmachines/{vmId}/storage/disks/{diskOrder}
+     * 
+     * @param vdcId identifier of the virtual datacenter
+     * @param vappId identifier of the virtual apliance
+     * @param vmId identifier of the virtual machine
+     * @param diskId identifier of the disk inside the virtual machine.
+     * @return URI of the virtual appliance resource into string object
+     */
+    public static String resolveVirtualMachineDiskUri(final Integer vdcId, final Integer vappId,
+        final Integer vmId, final Integer diskId)
+    {
+        String template =
+            buildPath(VirtualDatacentersResource.VIRTUAL_DATACENTERS_PATH,
+                VirtualDatacenterResource.VIRTUAL_DATACENTER_PARAM,
+                VirtualAppliancesResource.VIRTUAL_APPLIANCES_PATH,
+                VirtualApplianceResource.VIRTUAL_APPLIANCE_PARAM,
+                VirtualMachinesResource.VIRTUAL_MACHINES_PATH,
+                VirtualMachineResource.VIRTUAL_MACHINE_PARAM,
+                VirtualMachineStorageConfigurationResource.STORAGE,
+                VirtualMachineStorageConfigurationResource.DISKS_PATH,
+                VirtualMachineStorageConfigurationResource.DISK_PARAM);
+
+        Map<String, String> values = new HashMap<String, String>();
+        values.put(VirtualDatacenterResource.VIRTUAL_DATACENTER, vdcId.toString());
+        values.put(VirtualApplianceResource.VIRTUAL_APPLIANCE, vappId.toString());
+        values.put(VirtualMachineResource.VIRTUAL_MACHINE, vmId.toString());
+        values.put(VirtualMachineStorageConfigurationResource.DISK, diskId.toString());
+
+        return resolveURI(template, values);
+    }
+
+    /**
+     * Creates something like
+     * http://example.com/cloud/virtualdatacenters/{vdcId}/virtualappliances/{
+     * vappId}/virtualmachines/{vmId}/network/ips
+     * 
+     * @param vdcId identifier of the virtual datacenter
+     * @param vappId identifier of the virtual apliance
+     * @param vmId identifier of the virtual machine
+     * @return URI of the virtual appliance resource into string object
+     */
+    public static String resolveVirtualMachineIpsUri(final Integer vdcId, final Integer vappId,
+        final Integer vmId)
+    {
+        String template =
+            buildPath(VirtualDatacentersResource.VIRTUAL_DATACENTERS_PATH,
+                VirtualDatacenterResource.VIRTUAL_DATACENTER_PARAM,
+                VirtualAppliancesResource.VIRTUAL_APPLIANCES_PATH,
+                VirtualApplianceResource.VIRTUAL_APPLIANCE_PARAM,
+                VirtualMachinesResource.VIRTUAL_MACHINES_PATH,
+                VirtualMachineResource.VIRTUAL_MACHINE_PARAM,
+                VirtualMachineNetworkConfigurationResource.NETWORK,
+                VirtualMachineNetworkConfigurationResource.NICS_PATH);
+
+        Map<String, String> values = new HashMap<String, String>();
+        values.put(VirtualDatacenterResource.VIRTUAL_DATACENTER, vdcId.toString());
+        values.put(VirtualApplianceResource.VIRTUAL_APPLIANCE, vappId.toString());
+        values.put(VirtualMachineResource.VIRTUAL_MACHINE, vmId.toString());
+
+        return resolveURI(template, values);
+    }
+
+    /**
+     * Creates something like
+     * http://example.com/cloud/virtualdatacenters/{vdcId}/virtualappliances/{
+     * vappId}/virtualmachines/{vmId}/network/ips/{ipId}
+     * 
+     * @param vdcId identifier of the virtual datacenter
+     * @param vappId identifier of the virtual apliance
+     * @param vmId identifier of the virtual machine
+     * @param ipId identifier of the ip inside the virtual machine.
+     * @return URI of the virtual appliance resource into string object
+     */
+    public static String resolveVirtualMachineIpUri(final Integer vdcId, final Integer vappId,
+        final Integer vmId, final Integer diskOrder)
+    {
+        String template =
+            buildPath(VirtualDatacentersResource.VIRTUAL_DATACENTERS_PATH,
+                VirtualDatacenterResource.VIRTUAL_DATACENTER_PARAM,
+                VirtualAppliancesResource.VIRTUAL_APPLIANCES_PATH,
+                VirtualApplianceResource.VIRTUAL_APPLIANCE_PARAM,
+                VirtualMachinesResource.VIRTUAL_MACHINES_PATH,
+                VirtualMachineResource.VIRTUAL_MACHINE_PARAM,
+                VirtualMachineNetworkConfigurationResource.NETWORK,
+                VirtualMachineNetworkConfigurationResource.NICS_PATH,
+                VirtualMachineNetworkConfigurationResource.NIC_PARAM);
+
+        Map<String, String> values = new HashMap<String, String>();
+        values.put(VirtualDatacenterResource.VIRTUAL_DATACENTER, vdcId.toString());
+        values.put(VirtualApplianceResource.VIRTUAL_APPLIANCE, vappId.toString());
+        values.put(VirtualMachineResource.VIRTUAL_MACHINE, vmId.toString());
+        values.put(VirtualMachineNetworkConfigurationResource.NIC, diskOrder.toString());
 
         return resolveURI(template, values);
     }
@@ -658,14 +1073,14 @@ public class UriTestResolver
     public static String resolveVirtualDatacenterActionGetIPsURI(final Integer virtualDatacenterId)
     {
         return resolveVirtualDatacenterURI(virtualDatacenterId)
-            + VirtualDatacenterResource.VIRTUAL_DATACENTER_ACTION_GET_IPS;
+            + VirtualDatacenterResource.VIRTUAL_DATACENTER_GET_IPS_PATH;
     }
 
     public static String resolveVirtualDatacenterActionGetDHCPInfoURI(
         final Integer virtualDatacenterId)
     {
         return resolveVirtualDatacenterURI(virtualDatacenterId)
-            + VirtualDatacenterResource.VIRTUAL_DATACENTER_ACTION_GET_DHCP_INFO;
+            + VirtualDatacenterResource.VIRTUAL_DATACENTER_DHCP_INFO_PATH;
     }
 
     public static String resolveVirtualDatacentersURI()
@@ -684,6 +1099,146 @@ public class UriTestResolver
 
         Map<String, String> values = new HashMap<String, String>();
         values.put(DatacenterResource.DATACENTER, datacenterId.toString());
+
+        return resolveURI(template, values);
+    }
+
+    /**
+     * Creates something like
+     * http://example.com/admin/enterprises/{enterpriseId}/datacenterrepositories/{datacenterId}/
+     */
+    public static String resolveDatacenterRepositoryURI(final Integer enterpriseId,
+        final Integer datacenterId)
+    {
+        String template =
+            buildPath(EnterprisesResource.ENTERPRISES_PATH,
+                EnterpriseResource.ENTERPRISE_PARAM, //
+                DatacenterRepositoriesResource.DATACENTER_REPOSITORIES_PATH,
+                DatacenterRepositoryResource.DATACENTER_REPOSITORY_PARAM);
+
+        Map<String, String> values = new HashMap<String, String>();
+        values.put(EnterpriseResource.ENTERPRISE, String.valueOf(enterpriseId));
+        values
+            .put(DatacenterRepositoryResource.DATACENTER_REPOSITORY, String.valueOf(datacenterId));
+
+        return resolveURI(template, values);
+    }
+
+    public static String resolveVirtualMachineTemplatesURI(final Integer enterpriseId,
+        final Integer datacenterId)
+    {
+        String template =
+            buildPath(EnterprisesResource.ENTERPRISES_PATH,
+                EnterpriseResource.ENTERPRISE_PARAM, //
+                DatacenterRepositoriesResource.DATACENTER_REPOSITORIES_PATH,
+                DatacenterRepositoryResource.DATACENTER_REPOSITORY_PARAM, //
+                VirtualMachineTemplatesResource.VIRTUAL_MACHINE_TEMPLATES_PATH);
+
+        Map<String, String> values = new HashMap<String, String>();
+        values.put(EnterpriseResource.ENTERPRISE, String.valueOf(enterpriseId));
+        values
+            .put(DatacenterRepositoryResource.DATACENTER_REPOSITORY, String.valueOf(datacenterId));
+
+        return resolveURI(template, values);
+    }
+
+    public static String resolveStatefulVirtualMachineTemplatesURI(final Integer enterpriseId,
+        final Integer datacenterId, final StatefulInclusion stateful)
+    {
+        String template =
+            buildPath(EnterprisesResource.ENTERPRISES_PATH,
+                EnterpriseResource.ENTERPRISE_PARAM, //
+                DatacenterRepositoriesResource.DATACENTER_REPOSITORIES_PATH,
+                DatacenterRepositoryResource.DATACENTER_REPOSITORY_PARAM, //
+                VirtualMachineTemplatesResource.VIRTUAL_MACHINE_TEMPLATES_PATH);
+
+        Map<String, String> values = new HashMap<String, String>();
+        values.put(EnterpriseResource.ENTERPRISE, String.valueOf(enterpriseId));
+        values
+            .put(DatacenterRepositoryResource.DATACENTER_REPOSITORY, String.valueOf(datacenterId));
+
+        Map<String, String[]> queryParams = new HashMap<String, String[]>();
+        queryParams.put(
+            VirtualMachineTemplatesResource.VIRTUAL_MACHINE_TEMPLATE_GET_STATEFUL_QUERY_PARAM,
+            new String[] {stateful.name()});
+
+        return resolveURI(template, values, queryParams);
+    }
+
+    public static String resolveStatefulVirtualMachineTemplatesURIWithCategory(
+        final Integer enterpriseId, final Integer datacenterId, final String categoryName,
+        final StatefulInclusion stateful)
+    {
+        String template =
+            buildPath(EnterprisesResource.ENTERPRISES_PATH,
+                EnterpriseResource.ENTERPRISE_PARAM, //
+                DatacenterRepositoriesResource.DATACENTER_REPOSITORIES_PATH,
+                DatacenterRepositoryResource.DATACENTER_REPOSITORY_PARAM, //
+                VirtualMachineTemplatesResource.VIRTUAL_MACHINE_TEMPLATES_PATH);
+
+        Map<String, String> values = new HashMap<String, String>();
+        values.put(EnterpriseResource.ENTERPRISE, String.valueOf(enterpriseId));
+        values
+            .put(DatacenterRepositoryResource.DATACENTER_REPOSITORY, String.valueOf(datacenterId));
+
+        Map<String, String[]> queryParams = new HashMap<String, String[]>();
+        queryParams.put(
+            VirtualMachineTemplatesResource.VIRTUAL_MACHINE_TEMPLATE_GET_CATEGORY_QUERY_PARAM,
+            new String[] {categoryName});
+        queryParams.put(
+            VirtualMachineTemplatesResource.VIRTUAL_MACHINE_TEMPLATE_GET_STATEFUL_QUERY_PARAM,
+            new String[] {stateful.name()});
+
+        return resolveURI(template, values, queryParams);
+    }
+
+    public static String resolveStatefulVirtualMachineTemplatesURIWithCategoryAndVirtualDatacenter(
+        final Integer enterpriseId, final Integer datacenterId, final String categoryName,
+        final Integer virtualDatacenterId, final StatefulInclusion stateful)
+    {
+        String template =
+            buildPath(EnterprisesResource.ENTERPRISES_PATH,
+                EnterpriseResource.ENTERPRISE_PARAM, //
+                DatacenterRepositoriesResource.DATACENTER_REPOSITORIES_PATH,
+                DatacenterRepositoryResource.DATACENTER_REPOSITORY_PARAM, //
+                VirtualMachineTemplatesResource.VIRTUAL_MACHINE_TEMPLATES_PATH);
+
+        Map<String, String> values = new HashMap<String, String>();
+        values.put(EnterpriseResource.ENTERPRISE, String.valueOf(enterpriseId));
+        values
+            .put(DatacenterRepositoryResource.DATACENTER_REPOSITORY, String.valueOf(datacenterId));
+        values.put(VirtualMachineTemplatesResource.VIRTUAL_MACHINE_TEMPLATE_GET_VDC_QUERY_PARAM,
+            String.valueOf(virtualDatacenterId));
+
+        Map<String, String[]> queryParams = new HashMap<String, String[]>();
+        queryParams.put(
+            VirtualMachineTemplatesResource.VIRTUAL_MACHINE_TEMPLATE_GET_CATEGORY_QUERY_PARAM,
+            new String[] {categoryName});
+        queryParams.put(
+            VirtualMachineTemplatesResource.VIRTUAL_MACHINE_TEMPLATE_GET_STATEFUL_QUERY_PARAM,
+            new String[] {stateful.name()});
+
+        return resolveURI(template, values, queryParams);
+    }
+
+    public static String resolveVirtualMachineTemplateURI(final Integer enterpriseId,
+        final Integer datacenterId, final Integer virtualMachineTemplateId)
+    {
+        String template =
+            buildPath(
+                EnterprisesResource.ENTERPRISES_PATH,
+                EnterpriseResource.ENTERPRISE_PARAM, //
+                DatacenterRepositoriesResource.DATACENTER_REPOSITORIES_PATH,
+                DatacenterRepositoryResource.DATACENTER_REPOSITORY_PARAM, //
+                VirtualMachineTemplatesResource.VIRTUAL_MACHINE_TEMPLATES_PATH,
+                VirtualMachineTemplateResource.VIRTUAL_MACHINE_TEMPLATE_PARAM);
+
+        Map<String, String> values = new HashMap<String, String>();
+        values.put(EnterpriseResource.ENTERPRISE, String.valueOf(enterpriseId));
+        values
+            .put(DatacenterRepositoryResource.DATACENTER_REPOSITORY, String.valueOf(datacenterId));
+        values.put(VirtualMachineTemplateResource.VIRTUAL_MACHINE_TEMPLATE, String
+            .valueOf(virtualMachineTemplateId));
 
         return resolveURI(template, values);
     }
@@ -723,13 +1278,86 @@ public class UriTestResolver
         String template =
             buildPath(SystemPropertiesResource.SYSTEM_PROPERTIES_PATH,
                 SystemPropertyResource.SYSTEM_PROPERTY_PARAM);
-        return resolveURI(template,
-            Collections.singletonMap(SystemPropertyResource.SYSTEM_PROPERTY, propertyId.toString()));
+        return resolveURI(template, Collections.singletonMap(
+            SystemPropertyResource.SYSTEM_PROPERTY, propertyId.toString()));
     }
 
     public static String resolveLoginURI()
     {
         return resolveURI(LoginResource.LOGIN_PATH, new HashMap<String, String>());
+    }
+
+    /**
+     * Creates something like http://example.com/config/categories/${categoryId}
+     * 
+     * @param categoryId identifier of the category
+     * @return the an URI-like string to call the 'ips' action.
+     */
+    public static String resolveCategoryURI(final Integer categoryId)
+    {
+        String template =
+            buildPath(CategoriesResource.CATEGORIES_PATH, CategoryResource.CATEGORY_PARAM);
+
+        return resolveURI(template, Collections.singletonMap(CategoryResource.CATEGORY, categoryId
+            .toString()));
+    }
+
+    public static String resolveCategoriesURI()
+    {
+        String uri = resolveURI(CategoriesResource.CATEGORIES_PATH, new HashMap<String, String>());
+        return uri;
+    }
+
+    public static String resolveDiskFormatTypesURI()
+    {
+        String uri =
+            resolveURI(DiskFormatTypesResource.DISK_FORMAT_TYPES_PATH,
+                new HashMap<String, String>());
+        return uri;
+    }
+
+    public static String resolveHypervisorTypesURI()
+    {
+        String uri =
+            resolveURI(HypervisorTypesResource.HYPERVISOR_TYPES_PATH, new HashMap<String, String>());
+        return uri;
+    }
+
+    public static String resolveIconURI(final Integer iconId)
+    {
+        String template = buildPath(IconsResource.ICONS_PATH, IconResource.ICON_PARAM);
+        return resolveURI(template, Collections.singletonMap(IconResource.ICON, iconId.toString()));
+    }
+
+    public static String resolveIconsURI()
+    {
+        return resolveURI(IconsResource.ICONS_PATH, new HashMap<String, String>());
+    }
+
+    public static String resolveDisksUri(final Integer vdcId)
+    {
+        String template =
+            buildPath(VirtualDatacentersResource.VIRTUAL_DATACENTERS_PATH,
+                VirtualDatacenterResource.VIRTUAL_DATACENTER_PARAM, DisksResource.DISKS_PATH);
+
+        Map<String, String> values = new HashMap<String, String>();
+        values.put(VirtualDatacenterResource.VIRTUAL_DATACENTER, vdcId.toString());
+
+        return resolveURI(template, values);
+    }
+
+    public static String resolveDiskUri(final Integer vdcId, final Integer diskId)
+    {
+        String template =
+            buildPath(VirtualDatacentersResource.VIRTUAL_DATACENTERS_PATH,
+                VirtualDatacenterResource.VIRTUAL_DATACENTER_PARAM, DisksResource.DISKS_PATH,
+                DiskResource.DISK_PARAM);
+
+        Map<String, String> values = new HashMap<String, String>();
+        values.put(VirtualDatacenterResource.VIRTUAL_DATACENTER, vdcId.toString());
+        values.put(DiskResource.DISK, diskId.toString());
+
+        return resolveURI(template, values);
     }
 
 }

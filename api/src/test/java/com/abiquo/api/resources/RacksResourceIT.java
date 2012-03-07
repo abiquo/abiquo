@@ -94,8 +94,8 @@ public class RacksResourceIT extends AbstractJpaGeneratorIT
         assertEquals(response.getStatusCode(), 409);
 
         ErrorsDto errors = response.getEntity(ErrorsDto.class);
-        assertEquals(errors.getCollection().get(0).getCode(), APIError.RACK_DUPLICATED_NAME
-            .getCode());
+        assertEquals(errors.getCollection().get(0).getCode(),
+            APIError.RACK_DUPLICATED_NAME.getCode());
     }
 
     protected ClientResponse createRack(String name, String shortDescription, String longDescription)

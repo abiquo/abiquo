@@ -22,14 +22,16 @@
 package com.abiquo.api.resources;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 
 import org.apache.wink.common.annotations.Parent;
@@ -37,8 +39,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
 import com.abiquo.api.exceptions.APIError;
+import com.abiquo.api.exceptions.APIException;
+import com.abiquo.api.exceptions.ConflictException;
 import com.abiquo.api.exceptions.NotFoundException;
-import com.abiquo.api.resources.cloud.VirtualMachinesResource;
 import com.abiquo.api.services.InfrastructureService;
 import com.abiquo.api.services.MachineService;
 import com.abiquo.api.services.cloud.VirtualApplianceService;
@@ -46,16 +49,15 @@ import com.abiquo.api.services.cloud.VirtualDatacenterService;
 import com.abiquo.api.services.cloud.VirtualMachineService;
 import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.model.enumerator.HypervisorType;
+import com.abiquo.model.enumerator.MachineState;
 import com.abiquo.model.util.ModelTransformer;
 import com.abiquo.server.core.cloud.Hypervisor;
-import com.abiquo.server.core.cloud.VirtualAppliance;
-import com.abiquo.server.core.cloud.VirtualDatacenter;
-import com.abiquo.server.core.cloud.VirtualMachine;
-import com.abiquo.server.core.cloud.VirtualMachinesDto;
+import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.infrastructure.Datastore;
 import com.abiquo.server.core.infrastructure.DatastoreDto;
 import com.abiquo.server.core.infrastructure.Machine;
 import com.abiquo.server.core.infrastructure.MachineDto;
+import com.abiquo.server.core.infrastructure.MachineStateDto;
 import com.abiquo.server.core.infrastructure.MachinesDto;
 
 @Parent(MachinesResource.class)
@@ -63,27 +65,52 @@ import com.abiquo.server.core.infrastructure.MachinesDto;
 @Controller
 public class MachineResource extends AbstractResource
 {
+
     public static final String MACHINE = "machine";
 
     public static final String MACHINE_PARAM = "{" + MACHINE + "}";
 
     public static final String MOVE_TARGET_QUERY_PARAM = "target";
 
-    public static final String MACHINE_ACTION_GET_VIRTUALMACHINES = "action/virtualmachines";
-    
-    public static final String MACHINE_ACTION_POWER_OFF = "action/powerOff";
-    
-    public static final String MACHINE_ACTION_POWER_OFF_REL = "powerOff";
+    public static final String MACHINE_ACTION_GET_VIRTUALMACHINES_PATH = "action/virtualmachines";
 
-    public static final String MACHINE_ACTION_POWER_ON = "action/powerOn";
-    
-    public static final String MACHINE_ACTION_POWER_ON_REL = "powerOn";
+    public static final String MACHINE_ACTION_POWER_OFF_PATH = "action/poweroff";
+
+    public static final String MACHINE_ACTION_POWER_OFF_REL = "poweroff";
+
+    public static final String MACHINE_ACTION_POWER_ON_PATH = "action/poweron";
+
+    public static final String MACHINE_ACTION_POWER_ON_REL = "poweron";
+
+    public static final String MACHINE_ACTION_CHECK = "action/checkstate";
+
+    public static final String MACHINE_CHECK = "checkstate";
+
+    public static final String SHOW_CREDENTIALS_QUERY_PARAM = "credentials";
+
+    public static final String MACHINE_ACTION_GET_VIRTUALMACHINES = "action/virtualmachines";
+
+    public static final String MACHINE_ACTION_LED_ON = "action/ledon";
+
+    public static final String MACHINE_ACTION_LED_ON_REL = "ledon";
+
+    public static final String MACHINE_ACTION_LS = "logicserver";
+
+    public static final String MACHINE_ACTION_LED_OFF = "action/ledoff";
+
+    public static final String MACHINE_ACTION_LED_OFF_REL = "ledoff";
+
+    public static final String MACHINE_ACTION_LS__REL = "logicserver";
+
+    public static final String MACHINE_LOCATOR_LED = "led";
+
+    public static final String MACHINE_LOCATOR_LED_REL = "led";
 
     @Autowired
     MachineService service;
 
     @Autowired
-    InfrastructureService rackService;
+    InfrastructureService infraService;
 
     @Autowired
     VirtualMachineService vmService;
@@ -98,13 +125,24 @@ public class MachineResource extends AbstractResource
     public MachineDto getMachine(
         @PathParam(DatacenterResource.DATACENTER) final Integer datacenterId,
         @PathParam(RackResource.RACK) final Integer rackId,
-        @PathParam(MACHINE) final Integer machineId, @Context final IRESTBuilder restBuilder)
-        throws Exception
+        @PathParam(MACHINE) final Integer machineId,
+        @QueryParam(SHOW_CREDENTIALS_QUERY_PARAM) final Boolean showCredentials,
+        @Context final IRESTBuilder restBuilder) throws Exception
     {
         validatePathParameters(datacenterId, rackId, machineId);
 
         Machine machine = service.getMachine(machineId);
-        return createTransferObject(machine, restBuilder);
+        MachineDto dto = createTransferObject(machine, restBuilder);
+
+        // Credentials are only returned if they are requested
+        if (showCredentials != null && showCredentials.equals(Boolean.TRUE)
+            && machine.getHypervisor() != null)
+        {
+            dto.setUser(machine.getHypervisor().getUser());
+            dto.setPassword(machine.getHypervisor().getPassword());
+        }
+
+        return dto;
     }
 
     @PUT
@@ -115,6 +153,20 @@ public class MachineResource extends AbstractResource
         @Context final IRESTBuilder restBuilder) throws Exception
     {
         validatePathParameters(datacenterId, rackId, machineId);
+
+        Machine old = service.getMachine(machineId);
+
+        // if we enable the machine then we force a check
+        if (old.getState().equals(MachineState.HALTED)
+            && !machine.getState().equals(MachineState.HALTED))
+        {
+            MachineState newState =
+                infraService.checkMachineState(datacenterId, machine.getIp(), machine.getType(),
+                    old.getHypervisor().getUser(), old.getHypervisor().getPassword(),
+                    machine.getPort());
+            // machine will be updated with the given state
+            machine.setState(newState);
+        }
 
         Machine m = service.modifyMachine(machineId, machine);
 
@@ -130,69 +182,54 @@ public class MachineResource extends AbstractResource
         service.removeMachine(machineId);
     }
 
+    /**
+     * Check the machine state and update it.
+     * 
+     * @param datacenterId The ID of the datacenter where this remote service and machine are
+     *            assigned.
+     * @param ip The IP of the target cloud node.
+     * @param hypervisorType The cloud node hypervisor type.
+     * @param user The hypervisor user.
+     * @param password The hypervisor password.
+     * @param port The hypervisor AIM port.
+     * @return The actual machine's state.
+     */
     @GET
-    @Path(MachineResource.MACHINE_ACTION_GET_VIRTUALMACHINES)
-    public VirtualMachinesDto getVirtualMachines(
+    @Path(MACHINE_ACTION_CHECK)
+    public MachineStateDto checkMachineState(
         @PathParam(DatacenterResource.DATACENTER) final Integer datacenterId,
         @PathParam(RackResource.RACK) final Integer rackId,
         @PathParam(MachineResource.MACHINE) final Integer machineId,
+        @QueryParam("sync") @DefaultValue("false") final boolean sync,
         @Context final IRESTBuilder restBuilder) throws Exception
     {
-        Hypervisor hypervisor = getHypervisor(datacenterId, rackId, machineId);
-
-        Collection<VirtualMachine> vms = vmService.findByHypervisor(hypervisor);
-
-        List<VirtualAppliance> vapps = new ArrayList<VirtualAppliance>();
-        VirtualMachinesDto vmDto = new VirtualMachinesDto();
-        for (VirtualMachine vm : vms)
+        try
         {
-            if (vm.getEnterprise() != null)
-            {
-                Collection<VirtualDatacenter> vdcs =
-                    vdcService.getVirtualDatacenters(vm.getEnterprise(), vm.getHypervisor()
-                        .getMachine().getDatacenter());
-                for (VirtualDatacenter vdc : vdcs)
-                {
-                    vapps = vappService.getVirtualAppliancesByVirtualDatacenter(vdc.getId());
-                    for (VirtualAppliance vapp : vapps)
-                    {
-                        List<VirtualMachine> all = vmService.findByVirtualAppliance(vapp);
+            Machine m = service.getMachine(machineId);
+            Hypervisor h = m.getHypervisor();
 
-                        if (all != null && !all.isEmpty())
-                        {
-                            for (VirtualMachine v : all)
-                            {
-                                if (v.equals(vm))
-                                    vmDto.add(VirtualMachinesResource
-                                        .createCloudAdminTransferObject(v, vapp
-                                            .getVirtualDatacenter().getId(), vapp.getId(),
-                                            restBuilder));
-                            }
-                        }
-                    }
-                }
-            }
-            else
+            MachineState state =
+                infraService.checkMachineState(datacenterId, h.getIp(), h.getType(), h.getUser(),
+                    h.getPassword(), h.getPort());
+
+            if (sync)
             {
-                vmDto.add(VirtualMachinesResource.createAdminTransferObjects(vm, restBuilder));
+                m.setState(state);
+                MachineDto machineDto = createTransferObject(m, restBuilder);
+                service.modifyMachine(machineId, machineDto);
             }
+
+            MachineStateDto dto = new MachineStateDto();
+            dto.setState(state);
+            return dto;
         }
-        return vmDto;
+        catch (Exception e)
+        {
+            throw translateException(e);
+        }
     }
 
-    @DELETE
-    @Path(MachineResource.MACHINE_ACTION_GET_VIRTUALMACHINES)
-    public void deleteVirtualMachinesNotManaged(
-        @PathParam(DatacenterResource.DATACENTER) final Integer datacenterId,
-        @PathParam(RackResource.RACK) final Integer rackId,
-        @PathParam(MachineResource.MACHINE) final Integer machineId,
-        @Context final IRESTBuilder restBuilder) throws Exception
-    {
-        Hypervisor hypervisor = getHypervisor(datacenterId, rackId, machineId);
-
-        vmService.deleteNotManagedVirtualMachines(hypervisor);
-    }
-
+    // protected methods
     protected Hypervisor getHypervisor(final Integer datacenterId, final Integer rackId,
         final Integer machineId)
     {
@@ -211,10 +248,11 @@ public class MachineResource extends AbstractResource
     }
 
     protected static MachineDto addLinks(final IRESTBuilder restBuilder,
-        final Integer datacenterId, final Integer rackId, Boolean managedRack,
-        final MachineDto machine)
+        final Integer datacenterId, final Integer rackId, final Boolean managedRack,
+        final Enterprise enterprise, final MachineDto machine)
     {
-        machine.setLinks(restBuilder.buildMachineLinks(datacenterId, rackId, managedRack, machine));
+        machine.setLinks(restBuilder.buildMachineLinks(datacenterId, rackId, managedRack,
+            enterprise, machine));
 
         return machine;
     }
@@ -227,32 +265,29 @@ public class MachineResource extends AbstractResource
         dto.setDescription(machine.getDescription());
         dto.setId(machine.getId());
         dto.setName(machine.getName());
-        dto.setRealCpuCores(machine.getRealCpuCores());
-        dto.setRealHardDiskInMb(machine.getRealHardDiskInBytes());
-        dto.setRealRamInMb(machine.getRealRamInMb());
         dto.setState(machine.getState());
         dto.setVirtualCpuCores(machine.getVirtualCpuCores());
-        dto.setVirtualCpusPerCore(machine.getVirtualCpusPerCore());
         dto.setVirtualCpusUsed(machine.getVirtualCpusUsed());
-        dto.setVirtualHardDiskInMb(machine.getVirtualHardDiskInBytes());
-        dto.setVirtualHardDiskUsedInMb(machine.getVirtualHardDiskUsedInBytes());
         dto.setVirtualRamInMb(machine.getVirtualRamInMb());
         dto.setVirtualRamUsedInMb(machine.getVirtualRamUsedInMb());
         dto.setVirtualSwitch(machine.getVirtualSwitch());
-        dto.setIpmiIp(machine.getIpmiIP());
+        dto.setIpmiIP(machine.getIpmiIP());
         dto.setIpmiPort(machine.getIpmiPort());
         dto.setIpmiUser(machine.getIpmiUser());
         dto.setIpmiPassword(machine.getIpmiPassword());
-        
+        dto.setInitiatorIQN(machine.getInitiatorIQN());
+
         if (machine.getHypervisor() != null)
         {
             dto.setIp(machine.getHypervisor().getIp());
             dto.setIpService(machine.getHypervisor().getIpService());
             dto.setType(machine.getHypervisor().getType());
-            dto.setUser(machine.getHypervisor().getUser());
-            dto.setPassword(machine.getHypervisor().getPassword());
+            dto.setPort(machine.getHypervisor().getPort());
+            // Credentials are not returned by default
+            // dto.setUser(machine.getHypervisor().getUser());
+            // dto.setPassword(machine.getHypervisor().getPassword());
         }
-        
+
         if (machine.getDatastores() != null)
         {
             for (Datastore datastore : machine.getDatastores())
@@ -265,18 +300,21 @@ public class MachineResource extends AbstractResource
                 dataDto.setRootPath(datastore.getRootPath());
                 dataDto.setSize(datastore.getSize());
                 dataDto.setUsedSize(datastore.getUsedSize());
-                
+                dataDto.setDatastoreUUID(datastore.getDatastoreUUID());
                 dto.getDatastores().add(dataDto);
             }
         }
-        
-        // if the machine comes from the discovery manager it is not already saved in database and it does not have
+
+        // if the machine comes from the discovery manager it is not already saved in database and
+        // it does not have
         // any rack nor datacenter. Don't build the links.
         if (machine.getRack() != null)
-        {            
-            dto = addLinks(restBuilder, machine.getDatacenter().getId(), machine.getRack().getId(), machine.getBelongsToManagedRack(), dto);
+        {
+            dto =
+                addLinks(restBuilder, machine.getDatacenter().getId(), machine.getRack().getId(),
+                    machine.getBelongsToManagedRack(), machine.getEnterprise(), dto);
         }
-        
+
         return dto;
     }
 
@@ -288,33 +326,35 @@ public class MachineResource extends AbstractResource
             throw new NotFoundException(APIError.NOT_ASSIGNED_MACHINE_DATACENTER_RACK);
         }
     }
-    
+
     // Create the persistence object.
-    public static Machine createPersistenceObject(MachineDto dto) throws Exception
+    public static Machine createPersistenceObject(final MachineDto dto) throws Exception
     {
         // Set the machine values.
         Machine machine = ModelTransformer.persistenceFromTransport(Machine.class, dto);
-                
+
         HypervisorType type = dto.getType();
         String ip = dto.getIp();
         String ipService = dto.getIpService();
         Integer port = dto.getPort();
         String user = dto.getUser();
         String password = dto.getPassword();
-        Hypervisor hypervisor = new Hypervisor(machine, type, ip, ipService, port, user, password);
-        machine.setHypervisor(hypervisor);
-        
+
+        // usused Hypervisor
+        machine.createHypervisor(type, ip, ipService, port, user, password);
+
         // Set the datastores
         for (DatastoreDto datastoreDto : dto.getDatastores().getCollection())
         {
             machine.getDatastores().add(DatastoreResource.createPersistenceObject(datastoreDto));
         }
-        
+
         return machine;
-        
+
     }
 
-    public static List<Machine> createPersistenceObjects(MachinesDto machinesDto) throws Exception
+    public static List<Machine> createPersistenceObjects(final MachinesDto machinesDto)
+        throws Exception
     {
         List<Machine> machines = new ArrayList<Machine>();
         for (MachineDto machineDto : machinesDto.getCollection())
@@ -324,16 +364,31 @@ public class MachineResource extends AbstractResource
         return machines;
     }
 
-    public static MachinesDto createTransferObjects(List<Machine> machinesCreated,
-        IRESTBuilder restBuilder) throws Exception
+    public static MachinesDto createTransferObjects(final List<Machine> machinesCreated,
+        final IRESTBuilder restBuilder) throws Exception
     {
         MachinesDto machinesDto = new MachinesDto();
-        
+
         for (Machine currentMachine : machinesCreated)
         {
             machinesDto.getCollection().add(createTransferObject(currentMachine, restBuilder));
         }
-        
+
         return machinesDto;
+    }
+
+    /**
+     * Translates the Node Collector client exception into a {@link WebApplicationException}.
+     * 
+     * @param e The Exception to transform.
+     * @return The transformed Exception.
+     */
+    protected APIException translateException(final Exception e)
+    {
+        if (e instanceof APIException)
+        {
+            return (APIException) e;
+        }
+        return new ConflictException(APIError.NODECOLLECTOR_ERROR);
     }
 }

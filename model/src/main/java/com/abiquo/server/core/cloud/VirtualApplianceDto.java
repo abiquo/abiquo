@@ -24,10 +24,22 @@ package com.abiquo.server.core.cloud;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.abiquo.model.transport.SingleResourceTransportDto;
+import com.abiquo.server.core.task.TasksDto;
 
 @XmlRootElement(name = "virtualAppliance")
 public class VirtualApplianceDto extends SingleResourceTransportDto
 {
+    public static final String COPY_VIRTUAL_APPLIANCE_MIME_TYPE =
+        "application/vnd.cp-virtualappliance+xml";
+
+    public static final String MOVE_VIRTUAL_APPLIANCE_MIME_TYPE =
+        "application/vnd.mv-virtualappliance+xml";
+
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 6614050007994524638L;
+
     private Integer id;
 
     public Integer getId()
@@ -35,7 +47,7 @@ public class VirtualApplianceDto extends SingleResourceTransportDto
         return id;
     }
 
-    public void setId(Integer id)
+    public void setId(final Integer id)
     {
         this.id = id;
     }
@@ -47,21 +59,21 @@ public class VirtualApplianceDto extends SingleResourceTransportDto
         return name;
     }
 
-    public void setName(String name)
+    public void setName(final String name)
     {
         this.name = name;
     }
 
-    private String nodecollections;
+    private String nodeconnections;
 
-    public String getNodecollections()
+    public String getNodeconnections()
     {
-        return nodecollections;
+        return nodeconnections;
     }
 
-    public void setNodecollections(String nodecollections)
+    public void setNodeconnections(final String nodeconnections)
     {
-        this.nodecollections = nodecollections;
+        this.nodeconnections = nodeconnections;
     }
 
     private int publicApp;
@@ -71,7 +83,7 @@ public class VirtualApplianceDto extends SingleResourceTransportDto
         return publicApp;
     }
 
-    public void setPublicApp(int publicApp)
+    public void setPublicApp(final int publicApp)
     {
         this.publicApp = publicApp;
     }
@@ -83,7 +95,7 @@ public class VirtualApplianceDto extends SingleResourceTransportDto
         return highDisponibility;
     }
 
-    public void setHighDisponibility(int highDisponibility)
+    public void setHighDisponibility(final int highDisponibility)
     {
         this.highDisponibility = highDisponibility;
     }
@@ -95,33 +107,48 @@ public class VirtualApplianceDto extends SingleResourceTransportDto
         return error;
     }
 
-    public void setError(int error)
+    public void setError(final int error)
     {
         this.error = error;
     }
 
-    private State subState;
+    private VirtualApplianceState subState;
 
-    public State getSubState()
+    public VirtualApplianceState getSubState()
     {
         return subState;
     }
 
-    public void setSubState(State subState)
+    public void setSubState(final VirtualApplianceState subState)
     {
         this.subState = subState;
     }
 
-    private State state;
+    private VirtualApplianceState state;
 
-    public State getState()
+    public VirtualApplianceState getState()
     {
         return state;
     }
 
-    public void setState(State state)
+    public void setState(final VirtualApplianceState state)
     {
         this.state = state;
+    }
+
+    /**
+     * TODO This should be abstracted
+     */
+    private TasksDto lastTasks;
+
+    public TasksDto getLastTasks()
+    {
+        return lastTasks;
+    }
+
+    public void setLastTasks(final TasksDto lastTasks)
+    {
+        this.lastTasks = lastTasks;
     }
 
 }

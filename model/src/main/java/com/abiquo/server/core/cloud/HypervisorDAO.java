@@ -21,6 +21,9 @@
 
 package com.abiquo.server.core.cloud;
 
+import java.util.Collection;
+import java.util.List;
+
 import javax.persistence.EntityManager;
 
 import org.apache.commons.lang.StringUtils;
@@ -29,6 +32,7 @@ import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 
+import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
 
 @Repository("jpaHypervisorDAO")
@@ -64,8 +68,21 @@ public class HypervisorDAO extends DefaultDAOBase<Integer, Hypervisor>
         return Restrictions.eq(propertyName, ip);
     }
 
+    private final String QUERY_USED_VDRP = "SELECT vm.vdrpPort " + //
+        "FROM com.abiquo.server.core.cloud.VirtualMachine vm, " + //
+        "com.abiquo.server.core.cloud.Hypervisor h " + //
+        "WHERE vm.hypervisor.id = :idHyper ";
+
+    public List<Integer> getUsedPorts(final int idHyper)
+    {
+        Query query = getSession().createQuery(QUERY_USED_VDRP);
+        query.setParameter("idHyper", idHyper);
+
+        return query.list();
+    }
+
     /**
-     * Returns {@link Hypervisor} with same ip and in the same datacenter.
+     * Returns {@link Hypervisor} with same ip in the same datacenter.
      */
     private final String QUERY_SAME_IP_DATACENTER = "SELECT h " + //
         "FROM com.abiquo.server.core.cloud.Hypervisor h " + //
@@ -86,5 +103,50 @@ public class HypervisorDAO extends DefaultDAOBase<Integer, Hypervisor>
         query.setParameter("datacenterId", datacenterId);
 
         return !query.list().isEmpty();
+    }
+
+    /**
+     * Returns {@link Hypervisor} with same ipService in the same datacenter.
+     */
+    private final String QUERY_SAME_IP_SERVICE_DATACENTER = "SELECT h " + //
+        "FROM com.abiquo.server.core.cloud.Hypervisor h " + //
+        "WHERE h.ipService = :ip AND h.machine.datacenter.id = :datacenterId";
+
+    /**
+     * {@link Hypervisor} with same ipService and in the same datacenter.
+     * 
+     * @param ip {@link Hypervisor} ip.
+     * @param datacenterId {@link Hypervisor} machines datacenter.
+     * @return false is there is no other {@link Hypervisor} with same ipService and same datacenter
+     *         boolean
+     */
+    public boolean existsAnyWithIpServiceAndDatacenter(final String ip, final Integer datacenterId)
+    {
+        Query query = getSession().createQuery(QUERY_SAME_IP_SERVICE_DATACENTER);
+        query.setParameter("ip", ip);
+        query.setParameter("datacenterId", datacenterId);
+
+        return !query.list().isEmpty();
+    }
+
+    /**
+     * Returns a list of {@link HypervisorType} from all hypervisors in a datacenter.
+     */
+    private final String QUERY_HTYPES_DATACENTER = "SELECT h.type " + //
+        "FROM com.abiquo.server.core.cloud.Hypervisor h " + //
+        "WHERE h.machine.datacenter.id = :datacenterId";
+
+    /**
+     * List of {@link HypervisorType} from all hypervisors in a datacenter.
+     * 
+     * @param datacenterId {@link Hypervisor} machines datacenter.
+     * @return list of {@link HypervisorType} from all hypervisors in a datacenter.
+     */
+    public Collection<HypervisorType> findTypesfromDatacenter(final Integer datacenterId)
+    {
+        Query query = getSession().createQuery(QUERY_HTYPES_DATACENTER);
+        query.setParameter("datacenterId", datacenterId);
+
+        return query.list();
     }
 }

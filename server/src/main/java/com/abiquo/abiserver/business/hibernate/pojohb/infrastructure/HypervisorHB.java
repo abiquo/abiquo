@@ -68,7 +68,7 @@ public class HypervisorHB implements java.io.Serializable, IPojoHB<HyperVisor>
         return ipService;
     }
 
-    public void setIpService(String ipService)
+    public void setIpService(final String ipService)
     {
         this.ipService = ipService;
     }
@@ -78,7 +78,7 @@ public class HypervisorHB implements java.io.Serializable, IPojoHB<HyperVisor>
         return idHyper;
     }
 
-    public void setIdHyper(Integer idHyper)
+    public void setIdHyper(final Integer idHyper)
     {
         this.idHyper = idHyper;
     }
@@ -88,7 +88,7 @@ public class HypervisorHB implements java.io.Serializable, IPojoHB<HyperVisor>
         return virtualmachines;
     }
 
-    public void setVirtualmachines(Set<VirtualmachineHB> virtualmachines)
+    public void setVirtualmachines(final Set<VirtualmachineHB> virtualmachines)
     {
         this.virtualmachines = virtualmachines;
     }
@@ -98,7 +98,7 @@ public class HypervisorHB implements java.io.Serializable, IPojoHB<HyperVisor>
         return ip;
     }
 
-    public void setIp(String ip)
+    public void setIp(final String ip)
     {
         this.ip = ip;
     }
@@ -108,7 +108,7 @@ public class HypervisorHB implements java.io.Serializable, IPojoHB<HyperVisor>
         return port;
     }
 
-    public void setPort(Integer port)
+    public void setPort(final Integer port)
     {
         this.port = port;
     }
@@ -118,7 +118,7 @@ public class HypervisorHB implements java.io.Serializable, IPojoHB<HyperVisor>
         return physicalMachine;
     }
 
-    public void setPhysicalMachine(PhysicalmachineHB physicalMachine)
+    public void setPhysicalMachine(final PhysicalmachineHB physicalMachine)
     {
         this.physicalMachine = physicalMachine;
     }
@@ -128,7 +128,7 @@ public class HypervisorHB implements java.io.Serializable, IPojoHB<HyperVisor>
         return user;
     }
 
-    public void setUser(String user)
+    public void setUser(final String user)
     {
         this.user = user;
     }
@@ -138,33 +138,36 @@ public class HypervisorHB implements java.io.Serializable, IPojoHB<HyperVisor>
         return password;
     }
 
-    public void setPassword(String password)
+    public void setPassword(final String password)
     {
         this.password = password;
     }
-    
+
+    @Override
     public HyperVisor toPojo()
     {
-    	return toPojo(physicalMachine.toPojo());
+        return toPojo(physicalMachine.toPojo());
     }
-    
-    public HyperVisor toPojo(PhysicalMachine physicalMachine)
+
+    public HyperVisor toPojo(final PhysicalMachine physicalMachine)
     {
         HyperVisor hyperVisor = new HyperVisor();
 
         hyperVisor.setAssignedTo(physicalMachine);
-        
+
         hyperVisor.setId(idHyper);
         hyperVisor.setName(getType().getValue());
-        
 
         hyperVisor.setIp(ip);
         hyperVisor.setIpService(ipService);
         hyperVisor.setPort(port);
 
         hyperVisor.setType(new HyperVisorType(type));
-        hyperVisor.setUser(user);
-        hyperVisor.setPassword(password);
+
+        // Commented to avoid returning it. If we return it, every user sniffing traffic (for
+        // example with Charles, would be able to access this info)
+        // hyperVisor.setUser(user);
+        // hyperVisor.setPassword(password);
 
         return hyperVisor;
     }
@@ -174,7 +177,7 @@ public class HypervisorHB implements java.io.Serializable, IPojoHB<HyperVisor>
         return type;
     }
 
-    public void setType(HypervisorType type)
+    public void setType(final HypervisorType type)
     {
         this.type = type;
     }

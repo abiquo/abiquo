@@ -23,6 +23,8 @@ package com.abiquo.virtualfactory.hypervisor.impl;
 
 import java.net.URL;
 
+import com.abiquo.model.enumerator.HypervisorType;
+
 public class KVMHypervisor extends AbsLibvirtHypervisor
 {
 
@@ -47,6 +49,6 @@ public class KVMHypervisor extends AbsLibvirtHypervisor
     @Override
     public String getHypervisorType()
     {
-        return "kvm";
+        return HypervisorType.KVM.getValue();
     }
 }

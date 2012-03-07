@@ -25,7 +25,9 @@
 package com.abiquo.abiserver.exception;
 
 /**
- * This exception is thrown when the {@link IPAddress} object obtains an invalid IP format in its constructor
+ * This exception is thrown when the {@link IPAddress} object obtains an invalid IP format in its
+ * constructor
+ * 
  * @author jdevesa@abiquo.com
  */
 public class InvalidIPAddressException extends NetworkCommandException
@@ -35,7 +37,7 @@ public class InvalidIPAddressException extends NetworkCommandException
      * Generatio serial version UID
      */
     private static final long serialVersionUID = 1288945402878829209L;
- 
+
     /**
      * @param message construct the exception with a message
      */
@@ -43,5 +45,5 @@ public class InvalidIPAddressException extends NetworkCommandException
     {
         super(message);
     }
-    
+
 }

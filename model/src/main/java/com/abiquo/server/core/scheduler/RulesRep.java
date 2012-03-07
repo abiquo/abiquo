@@ -33,6 +33,7 @@ import org.springframework.stereotype.Repository;
 
 import com.abiquo.server.core.common.DefaultRepBase;
 import com.abiquo.server.core.enterprise.EnterpriseDto;
+import com.abiquo.server.core.infrastructure.Rack;
 
 @Repository
 public class RulesRep extends DefaultRepBase
@@ -148,6 +149,21 @@ public class RulesRep extends DefaultRepBase
     public MachineLoadRule findMachineLoadRuleById(final Integer id)
     {
         return this.machineLoadRuleDao.findById(id);
+    }
+
+    public List<MachineLoadRule> findMachineLoadRuleByMachine(final Integer id)
+    {
+        return this.machineLoadRuleDao.findByMachine(id);
+    }
+
+    public List<MachineLoadRule> findMachineLoadRuleByRack(final Rack rack)
+    {
+        return this.machineLoadRuleDao.findByRack(rack);
+    }
+
+    public List<MachineLoadRule> findMachineLoadRuleByRackIncludingMachines(final Rack rack)
+    {
+        return this.machineLoadRuleDao.findByRack(rack, true);
     }
 
     public void deleteMachineLoadRule(final MachineLoadRule machineLoadRule)

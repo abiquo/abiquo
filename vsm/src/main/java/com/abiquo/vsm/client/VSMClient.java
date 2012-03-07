@@ -45,6 +45,7 @@ import com.abiquo.vsm.model.transport.VirtualMachinesDto;
  * Client stub to connect to the VSM module.
  * 
  * @author ibarrera
+ * @author enric.ruiz@abiquo.com
  */
 public class VSMClient
 {
@@ -58,32 +59,11 @@ public class VSMClient
     private String basePath;
 
     /**
-     * Creates a new client for the given host and port.
-     * 
-     * @param host The target host.
-     * @param port The target port.
-     */
-    public VSMClient(final String host, final int port)
-    {
-        ClientConfig clientConfig = new ClientConfig();
-        clientConfig.readTimeout(0);
-        clientConfig.connectTimeout(0);
-
-        client = new RestClient(clientConfig);
-        basePath = "http://" + host + ":" + port + "/" + DEFAULT_CONTEXT_PATH;
-
-        if (!isValidURI(basePath))
-        {
-            throw new IllegalArgumentException("The provided parameters do not conform a valid URL.");
-        }
-    }
-
-    /**
-     * Creates a new client for the given URI.
+     * Initializes an existent instance for the given URI.
      * 
      * @param uri The target URI.
      */
-    public VSMClient(String uri)
+    public VSMClient initialize(final String uri)
     {
         if (!isValidURI(uri))
         {
@@ -106,6 +86,31 @@ public class VSMClient
         {
             throw new IllegalArgumentException("The provided parameter is not a valid URL.");
         }
+
+        return this;
+    }
+
+    /**
+     * Initializes an existent instance for the given host and port.
+     * 
+     * @param host The target host.
+     * @param port The target port.
+     */
+    public VSMClient initialize(final String host, final int port)
+    {
+        ClientConfig clientConfig = new ClientConfig();
+        clientConfig.readTimeout(0);
+        clientConfig.connectTimeout(0);
+
+        client = new RestClient(clientConfig);
+        basePath = "http://" + host + ":" + port + "/" + DEFAULT_CONTEXT_PATH;
+
+        if (!isValidURI(basePath))
+        {
+            throw new IllegalArgumentException("The provided parameters do not conform a valid URL.");
+        }
+
+        return this;
     }
 
     /**
@@ -129,7 +134,7 @@ public class VSMClient
      * @return The monitored physical machine.
      * @throws VSMClientException If there is no monitored machine with the given address.
      */
-    public PhysicalMachineDto getMonitoredMachine(String physicalMachineAddress)
+    public PhysicalMachineDto getMonitoredMachine(final String physicalMachineAddress)
         throws VSMClientException
     {
         Resource resource =
@@ -150,8 +155,8 @@ public class VSMClient
      * @return The just added physical machine.
      * @throws VSMClientException If the monitor operation cannot be completed.
      */
-    public PhysicalMachineDto monitor(String physicalMachineAddress, String type, String username,
-        String password) throws VSMClientException
+    public PhysicalMachineDto monitor(final String physicalMachineAddress, final String type,
+        final String username, final String password) throws VSMClientException
     {
         PhysicalMachineDto pm = new PhysicalMachineDto();
         pm.setAddress(physicalMachineAddress);
@@ -174,7 +179,7 @@ public class VSMClient
      * @param physicalMachineAddress The physical machine to monitor.
      * @throws VSMClientException If the shutdown operation cannot be completed.
      */
-    public void shutdown(String physicalMachineAddress) throws VSMClientException
+    public void shutdown(final String physicalMachineAddress) throws VSMClientException
     {
         PhysicalMachineDto pm = getMonitoredMachine(physicalMachineAddress);
         Resource resource = client.resource(basePath + "/physicalmachines/" + pm.getId());
@@ -189,7 +194,7 @@ public class VSMClient
      * @param virtualMachineName The name of the virtual machine.
      * @throws VSMClientException If the state of the virtual machine cannot be retrieved.
      */
-    public void publishState(String physicalMachineAddress, String virtualMachineName)
+    public void publishState(final String physicalMachineAddress, final String virtualMachineName)
         throws VSMClientException
     {
         PhysicalMachineDto pm = getMonitoredMachine(physicalMachineAddress);
@@ -199,6 +204,27 @@ public class VSMClient
 
         Resource resource = client.resource(path);
         ClientResponse response = resource.accept(MediaType.APPLICATION_XML_TYPE).get();
+        checkResponseErrors(response);
+    }
+
+    /**
+     * Invalidate the last known state of the given virtual machine.
+     * 
+     * @param physicalMachineAddress The physical machine where the virtual machine is deployed.
+     * @param virtualMachineName The name of the virtual machine.
+     * @throws VSMClientException If the last known state of the virtual machine cannot be
+     *             invalidated.
+     */
+    public void invalidateLastKnownState(final String physicalMachineAddress,
+        final String virtualMachineName) throws VSMClientException
+    {
+        PhysicalMachineDto pm = getMonitoredMachine(physicalMachineAddress);
+
+        String path =
+            basePath + "/physicalmachines/" + pm.getId() + "/virtualmachine/" + virtualMachineName;
+
+        Resource resource = client.resource(path);
+        ClientResponse response = resource.accept(MediaType.APPLICATION_XML_TYPE).delete();
         checkResponseErrors(response);
     }
 
@@ -224,7 +250,8 @@ public class VSMClient
      * @throws VSMClientException If there is no subscription for the given virtual machine.
      * @throws UnsupportedEncodingException
      */
-    public VirtualMachineDto getSubscription(String virtualMachineName) throws VSMClientException
+    public VirtualMachineDto getSubscription(final String virtualMachineName)
+        throws VSMClientException
     {
 
         Resource resource =
@@ -265,7 +292,7 @@ public class VSMClient
     {
         try
         {
-            PhysicalMachineDto dto = getMonitoredMachine(physicalMachineAddress);
+            getMonitoredMachine(physicalMachineAddress);
             return true;
         }
         catch (VSMClientException e)
@@ -283,8 +310,8 @@ public class VSMClient
      * @return The subscription details to the virtual machine changes.
      * @throws VSMClientException If the subscription operation cannot be completed.
      */
-    public VirtualMachineDto subscribe(String physicalMachineAddress, String type,
-        String virtualMachineName) throws VSMClientException
+    public VirtualMachineDto subscribe(final String physicalMachineAddress, final String type,
+        final String virtualMachineName) throws VSMClientException
     {
         PhysicalMachineDto pm = new PhysicalMachineDto();
         pm.setAddress(physicalMachineAddress);
@@ -309,7 +336,7 @@ public class VSMClient
      * @param virtualMachineName The name of the virtual machine.
      * @throws VSMClientException if the unsubscribe operation cannot be perforned.
      */
-    public void unsubscribe(String virtualMachineName) throws VSMClientException
+    public void unsubscribe(final String virtualMachineName) throws VSMClientException
     {
         VirtualMachineDto vm = getSubscription(virtualMachineName);
         Resource resource = client.resource(basePath + "/subscriptions/" + vm.getId());
@@ -324,7 +351,7 @@ public class VSMClient
      * @param password The password to encode.
      * @return The Basic Authentication encoded credentials.
      */
-    private String toBasicAuth(String username, String password)
+    private String toBasicAuth(final String username, final String password)
     {
         String token = username + ":" + password;
         return new String(Base64.encodeBase64(token.getBytes()));

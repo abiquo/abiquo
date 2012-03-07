@@ -23,10 +23,11 @@ package com.abiquo.tracer.server;
 
 import com.abiquo.tracer.TracerTo;
 
-public interface TracerProcessor {
-	
-	void process(TracerTo object) throws TracerCollectorException;
-	
-	void destroy() throws TracerCollectorException;
+public interface TracerProcessor
+{
+
+    void process(TracerTo object) throws TracerCollectorException;
+
+    void destroy() throws TracerCollectorException;
 
 }

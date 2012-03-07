@@ -20,9 +20,9 @@
  */
 package com.abiquo.api.resources.config;
 
-import static com.abiquo.api.resources.config.PrivilegeResource.createTransferObject;
-
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -35,6 +35,7 @@ import org.springframework.stereotype.Controller;
 import com.abiquo.api.resources.AbstractResource;
 import com.abiquo.api.services.EnterpriseService;
 import com.abiquo.api.util.IRESTBuilder;
+import com.abiquo.model.rest.RESTLink;
 import com.abiquo.model.util.ModelTransformer;
 import com.abiquo.server.core.enterprise.Privilege;
 import com.abiquo.server.core.enterprise.PrivilegeDto;
@@ -55,13 +56,7 @@ public class PrivilegesResource extends AbstractResource
     {
         Collection<Privilege> ps = service.findAllPrivileges();
 
-        PrivilegesDto privileges = new PrivilegesDto();
-        for (Privilege p : ps)
-        {
-            privileges.add(createTransferObject(p, restBuilder));
-        }
-
-        return privileges;
+        return createAdminTransferObjects(ps, restBuilder);
     }
 
     public static PrivilegesDto createAdminTransferObjects(final Collection<Privilege> privs,
@@ -72,11 +67,26 @@ public class PrivilegesResource extends AbstractResource
         {
             PrivilegeDto pDto =
                 ModelTransformer.transportFromPersistence(PrivilegeDto.class, privilege);
-
+            pDto.setLinks(restBuilder.buildPrivilegeListLink(pDto));
             privileges.add(pDto);
         }
 
         return privileges;
+    }
+
+    public static PrivilegesDto addPrivilegesLinks(final IRESTBuilder restBuilder,
+        final List<Privilege> privileges)
+    {
+        PrivilegesDto ps = new PrivilegesDto();
+        List<RESTLink> links = new ArrayList<RESTLink>();
+        for (Privilege p : privileges)
+        {
+            PrivilegeDto pDto = new PrivilegeDto(p.getId(), p.getName());
+            pDto.setLinks(restBuilder.buildPrivilegeListLink(pDto));
+            links.addAll(pDto.getLinks());
+        }
+        ps.setLinks(links);
+        return ps;
     }
 
 }

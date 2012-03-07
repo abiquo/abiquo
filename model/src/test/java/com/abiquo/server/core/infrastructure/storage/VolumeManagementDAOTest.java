@@ -30,11 +30,17 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.abiquo.model.enumerator.StorageTechnologyType;
+import com.abiquo.server.core.cloud.VirtualAppliance;
+import com.abiquo.server.core.cloud.VirtualApplianceGenerator;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualDatacenterGenerator;
+import com.abiquo.server.core.cloud.VirtualMachine;
+import com.abiquo.server.core.cloud.VirtualMachineGenerator;
 import com.abiquo.server.core.common.persistence.DefaultDAOTestBase;
+import com.abiquo.server.core.common.persistence.JPAConfiguration;
 import com.abiquo.server.core.common.persistence.TestDataAccessManager;
 import com.abiquo.server.core.infrastructure.management.Rasd;
+import com.abiquo.server.core.infrastructure.management.RasdManagement;
 import com.softwarementors.bzngine.engines.jpa.test.configuration.EntityManagerFactoryForTesting;
 import com.softwarementors.bzngine.entities.test.PersistentInstanceTester;
 
@@ -45,6 +51,10 @@ public class VolumeManagementDAOTest extends
 
     private StoragePoolGenerator poolGenerator;
 
+    private VirtualMachineGenerator vmGenerator;
+
+    private VirtualApplianceGenerator vappGenerator;
+
     @Override
     @BeforeMethod
     protected void methodSetUp()
@@ -52,6 +62,8 @@ public class VolumeManagementDAOTest extends
         super.methodSetUp();
         vdcGenerator = new VirtualDatacenterGenerator(getSeed());
         poolGenerator = new StoragePoolGenerator(getSeed());
+        vmGenerator = new VirtualMachineGenerator(getSeed());
+        vappGenerator = new VirtualApplianceGenerator(getSeed());
     }
 
     @Override
@@ -134,7 +146,10 @@ public class VolumeManagementDAOTest extends
     public void testGetStatefulCandidatesWithAssociatedState()
     {
         VolumeManagement volume = eg().createUniqueInstance();
-        volume.associate();
+        VirtualMachine vm =
+            vmGenerator.createInstance(volume.getVirtualDatacenter().getEnterprise());
+
+        volume.attach(RasdManagement.FIRST_ATTACHMENT_SEQUENCE, vm);
 
         List<Object> entitiesToPersist = new ArrayList<Object>();
         eg().addAuxiliaryEntitiesToPersist(volume, entitiesToPersist);
@@ -225,7 +240,7 @@ public class VolumeManagementDAOTest extends
         assertSize(results, 2);
     }
 
-	@Test
+    @Test
     public void testGetVolumesByRasd()
     {
         // Test without filtering
@@ -239,6 +254,132 @@ public class VolumeManagementDAOTest extends
 
         VolumeManagement vol = dao.getVolumeByRasd(rasd);
 
-        eg().assertAllPropertiesEqual(vol,volume);
+        eg().assertAllPropertiesEqual(vol, volume);
+    }
+
+    /**
+     * Create five machines, three with the temporal value set, and two without the temporal values
+     * set. Check the default behaviour (check {@link VirtualMachine} entity filters) is to return
+     * only the ones without the temporal values.
+     */
+    @Test(enabled = false)
+    public void findAllWithNotTemporalFilters()
+    {
+        createFiveVolumesWithTemporalAndNotTemporalValueSetAndPersistThem();
+
+        VolumeManagementDAO dao = createDaoForRollbackTransaction();
+
+        List<VolumeManagement> all = dao.findAll();
+        assertEquals(all.size(), 2);
+    }
+
+    /**
+     * Create five resources, three with the temporal value set, and two without the temporal values
+     * set. Disable the filter {@link RasdManagement.NOT_TEMP}. Check the behaviour (
+     * {@link RasdManagement} entity filters) is to return all the resources. Whatever happens,
+     * enable the filter
+     */
+    @Test(enabled = false)
+    public void findAllWithoutFilters()
+    {
+        createFiveVolumesWithTemporalAndNotTemporalValueSetAndPersistThem();
+        VolumeManagementDAO dao = createDaoForRollbackTransaction();
+
+        try
+        {
+            JPAConfiguration.disableAllFilters(dao.getEntityManager());
+            List<VolumeManagement> all = dao.findAll();
+            assertEquals(all.size(), 5);
+        }
+        finally
+        {
+            JPAConfiguration.enableDefaultFilters(dao.getEntityManager());
+        }
+    }
+
+    /**
+     * Create five resources, three with the temporal value set, and two without the temporal values
+     * set. Disable the filter {@link RasdManagement.NOT_TEMP} and enable the
+     * {@link RasdManagement.ONLY_TEMP} one. Check the behaviour ({@link RasdManagement} entity
+     * filters) is to return only the ones with the temporal values. Whatever happens, enable the
+     * filter
+     */
+    @Test(enabled = false)
+    public void findAllOnlyTempFilters()
+    {
+        createFiveVolumesWithTemporalAndNotTemporalValueSetAndPersistThem();
+        VolumeManagementDAO dao = createDaoForRollbackTransaction();
+
+        try
+        {
+            JPAConfiguration.enableOnlyTemporalFilters(dao.getEntityManager());
+            List<VolumeManagement> all = dao.findAll();
+            assertEquals(all.size(), 3);
+        }
+        finally
+        {
+            JPAConfiguration.enableDefaultFilters(dao.getEntityManager());
+        }
+    }
+
+    /**
+     * Create five resources, three with the temporal value set, and two without the temporal values
+     * set.
+     */
+    private void createFiveVolumesWithTemporalAndNotTemporalValueSetAndPersistThem()
+    {
+        VolumeManagement rm1 = eg().createUniqueInstance();
+        rm1.setTemporal(23);
+        List<Object> resourceList = new ArrayList<Object>();
+        eg().addAuxiliaryEntitiesToPersist(rm1, resourceList);
+
+        VolumeManagement rm2 = eg().createUniqueInstance();
+        rm2.setTemporal(24);
+        eg().addAuxiliaryEntitiesToPersist(rm2, resourceList);
+
+        VolumeManagement rm3 = eg().createUniqueInstance();
+        rm3.setTemporal(35);
+        eg().addAuxiliaryEntitiesToPersist(rm3, resourceList);
+
+        VolumeManagement rm4 = eg().createUniqueInstance();
+        eg().addAuxiliaryEntitiesToPersist(rm4, resourceList);
+
+        VolumeManagement rm5 = eg().createUniqueInstance();
+        eg().addAuxiliaryEntitiesToPersist(rm5, resourceList);
+
+        persistAll(ds(), resourceList, rm1, rm2, rm3, rm4, rm5);
+    }
+
+    @Test
+    public void testGetSameVirtualAppliance()
+    {
+        VirtualDatacenter vdc = vdcGenerator.createUniqueInstance();
+
+        VirtualAppliance vapp = vappGenerator.createInstance(vdc);
+        VirtualAppliance vapp1 = vappGenerator.createInstance(vdc);
+
+        VolumeManagement volume = eg().createInstance(vdc);
+        VolumeManagement volume1 = eg().createInstance(vdc);
+        VolumeManagement volume2 = eg().createInstance(vdc);
+
+        volume.setVirtualAppliance(vapp);
+        volume1.setVirtualAppliance(vapp);
+        volume2.setVirtualAppliance(vapp1);
+
+        List<Object> entitiesToPersist = new ArrayList<Object>();
+        vdcGenerator.addAuxiliaryEntitiesToPersist(vdc, entitiesToPersist);
+        persistAll(ds(), entitiesToPersist, vdc.getDatacenter(), vdc.getEnterprise(), vdc, volume
+            .getStoragePool().getDevice(), volume.getStoragePool().getTier(),
+            volume.getStoragePool(), volume.getRasd(), volume,
+            volume1.getStoragePool().getDevice(), volume1.getStoragePool().getTier(),
+            volume1.getStoragePool(), volume1.getRasd(), volume1, volume2.getStoragePool()
+                .getDevice(), volume2.getStoragePool().getTier(), volume2.getStoragePool(),
+            volume2.getRasd(), volume2, vapp, vapp1);
+
+        VolumeManagementDAO dao = createDaoForRollbackTransaction();
+
+        List<VolumeManagement> results = dao.getVolumesByVirtualAppliance(vapp);
+
+        assertEquals(results.size(), 2);
     }
 }

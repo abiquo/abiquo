@@ -22,7 +22,6 @@
 package com.abiquo.scheduler.fit;
 
 import com.abiquo.server.core.infrastructure.Machine;
-import com.abiquo.server.core.scheduler.FitPolicyRule.FitPolicy;
 
 /**
  * Inverse {@link AllocationFitMax}

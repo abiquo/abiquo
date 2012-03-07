@@ -111,7 +111,7 @@ public class VirtualAppResourcesDto extends SingleResourceTransportDto
     {
         this.idEnterprise = idEnterprise;
     }
-    
+
     private int idVirtualDataCenter;
 
     public int getIdVirtualDataCenter()

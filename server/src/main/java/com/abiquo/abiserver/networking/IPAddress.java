@@ -216,7 +216,7 @@ public class IPAddress
      * Given a IPAddress, calculates its previous IPAddress.
      * 
      * @return previous IPAddress.
-     * @throws InvalidIPAddressException 
+     * @throws InvalidIPAddressException
      */
     public IPAddress previousIPAddress() throws InvalidIPAddressException
     {
@@ -263,10 +263,10 @@ public class IPAddress
     {
         return ip;
     }
-    
-    
+
     /**
      * Compare if the current object is bigger than the incoming ipAddress.
+     * 
      * @param ip
      * @return
      */
@@ -288,9 +288,9 @@ public class IPAddress
         {
             return Integer.valueOf(getFourthOctet()) > (Integer.valueOf(ip.getFourthOctet()));
         }
-        
+
         return false;
-        
+
     }
 
 };

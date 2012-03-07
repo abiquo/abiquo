@@ -23,11 +23,9 @@ package com.abiquo.abiserver.commands;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 import org.hibernate.Session;
 
-import com.abiquo.abiserver.abicloudws.IVirtualApplianceWS;
 import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.StateEnum;
 import com.abiquo.abiserver.business.hibernate.pojohb.networking.NetworkConfigurationHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.user.UserHB;
@@ -36,18 +34,19 @@ import com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.NodeVirtu
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualappHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualmachineHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualimage.VirtualimageHB;
-import com.abiquo.abiserver.exception.NetworkCommandException;
 import com.abiquo.abiserver.exception.PersistenceException;
 import com.abiquo.abiserver.exception.VirtualApplianceCommandException;
 import com.abiquo.abiserver.pojo.authentication.UserSession;
 import com.abiquo.abiserver.pojo.infrastructure.DataCenter;
 import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.result.DataResult;
+import com.abiquo.abiserver.pojo.result.ListRequest;
 import com.abiquo.abiserver.pojo.user.Enterprise;
 import com.abiquo.abiserver.pojo.virtualappliance.Log;
 import com.abiquo.abiserver.pojo.virtualappliance.Node;
 import com.abiquo.abiserver.pojo.virtualappliance.VirtualAppliance;
 import com.abiquo.abiserver.pojo.virtualappliance.VirtualDataCenter;
+import com.abiquo.abiserver.pojo.virtualappliance.VirtualDatacentersListResult;
 import com.abiquo.abiserver.pojo.virtualimage.VirtualImageConversions;
 
 public interface VirtualApplianceCommand
@@ -64,24 +63,6 @@ public interface VirtualApplianceCommand
      */
     public abstract DataResult<VirtualAppliance> checkVirtualAppliance(
         final VirtualAppliance virtualAppliance);
-
-    /**
-     * Retrieves an updated list of VirtualDatacenters and Virtual Appliances that belong to the
-     * same Enterprise The Virtual Appliances retrieved will not contain their list of nodes, for
-     * performance purposes Method used in the enterprise version to retrieve the virtual appliances
-     * to fetch a non managed machine.
-     * 
-     * @param enterprise The Enterprise to retrieve the VirtualAppliance list
-     * @return a DataResult<ArrayList> object. The first position will contain an
-     *         ArrayList<VirtualDatacenter> object, and second an ArrayList<VirtualAppliance> object
-     */
-    @SuppressWarnings("unchecked")
-    public abstract DataResult<ArrayList<Collection>> checkVirtualDatacentersAndAppliancesByEnterprise(
-        UserSession userSession, final Enterprise enterprise);
-
-    @SuppressWarnings("unchecked")
-    public abstract DataResult<ArrayList<Collection>> checkVirtualDatacentersAndAppliancesByEnterpriseAndDatacenter(
-        UserSession userSession, final Enterprise enterprise, final DataCenter datacenter);
 
     /**
      * Creates a new Virtual Appliance, that belongs to the user who called this method
@@ -105,15 +86,6 @@ public interface VirtualApplianceCommand
         final String networkName, final NetworkConfigurationHB configuration);
 
     /**
-     * Deletes a VirtualAppliance that exists in the Data Base
-     * 
-     * @param virtualAppliance the virtualApp to delete
-     * @return a BasicResult object, containing success = true if the deletion was successful
-     */
-    public abstract BasicResult deleteVirtualAppliance(final UserSession userSession,
-        final VirtualAppliance virtualAppliance);
-
-    /**
      * Deletes a VirtualDataCenter from the DataBase. A VirtualDataCenter can only be deleted if any
      * of its Virtual Appliances are powered on
      * 
@@ -124,29 +96,6 @@ public interface VirtualApplianceCommand
      */
     public abstract BasicResult deleteVirtualDataCenter(final UserSession userSession,
         final VirtualDataCenter virtualDataCenter);
-
-    /**
-     * Modifies the information of a VirtualAppliance that already exists in the Data Base
-     * 
-     * @param userSession the active user.
-     * @param virtualAppliance to modify
-     * @return A DataResult object, containing a list of nodes modified
-     */
-    public abstract DataResult<VirtualAppliance> editVirtualAppliance(
-        final UserSession userSession, VirtualAppliance virtualAppliance);
-
-    /**
-     * Apply the changes of a VirtualAppliance modification
-     * 
-     * @param userSession the active user.
-     * @param force , indicating if the virtual appliance should be started even when the soft limit
-     *            is exceeded. if false and the soft limit is reached the BasicResult result code is
-     *            set to SOFT_LIMT_EXCEEDED.
-     * @param virtualAppliance to modify
-     * @return A DataResult object, containing a list of nodes modified
-     */
-    public abstract BasicResult applyChangesVirtualAppliance(final UserSession userSession,
-        VirtualAppliance virtualAppliance, final Boolean force);
 
     /**
      * Updates an existing VirtualDataCenter with new information
@@ -196,43 +145,14 @@ public interface VirtualApplianceCommand
 
     public abstract BasicResult markLogAsDeleted(final Log log);
 
-    /**
-     * Retrieves a list of VirtualDataCenter that belongs to the same Enterprise
-     * 
-     * @param enterprise The Enterprise of which the virtualdatacenter will be returned. If null, an
-     *            empty Array will be returned
-     * @return a DataResult object, containing an ArrayList<VirtualDataCenter>, with the
-     *         VirtualDataCenter assigned to the enterprise
-     */
-    public abstract DataResult<Collection<VirtualDataCenter>> getVirtualDataCentersByEnterprise(
-        UserSession userSession, final Enterprise enterprise);
+    public DataResult<VirtualDatacentersListResult> getVirtualDataCentersByEnterprise(
+        final UserSession userSession, final Enterprise enterprise, final ListRequest listRequest);
 
     public abstract DataResult<Collection<VirtualDataCenter>> getVirtualDataCentersByEnterpriseFaster(
         UserSession userSession, final Enterprise enterprise);
 
-    public abstract DataResult<Collection<VirtualDataCenter>> getVirtualDataCentersByEnterpriseAndDatacenter(
-        UserSession userSession, final Enterprise enterprise, final DataCenter datacenter);
-
-    /**
-     * Performs a "Shutdown" action in the Virtual Machine
-     * 
-     * @param virtualAppliance
-     * @return a DataResult object, with a State object that represents the state "Powered Off"
-     */
-    public abstract DataResult<VirtualAppliance> shutdownVirtualAppliance(
-        final UserSession userSession, VirtualAppliance virtualAppliance);
-
     public abstract boolean blockVirtualAppliance(final VirtualAppliance virtualAppliance,
         final StateEnum subState) throws PersistenceException;
-
-    /**
-     * @param userSession
-     * @param vApp
-     * @param force
-     * @return
-     */
-    public abstract DataResult<VirtualAppliance> beforeStartVirtualAppliance(
-        final UserSession userSession, final VirtualAppliance vApp, final Boolean force);
 
     // public abstract DataResult<VirtualAppliance> traceErrorStartingVirtualAppliance(
     // VirtualAppliance vApp, final State state, final State subState, final UserHB userHB,
@@ -264,15 +184,6 @@ public interface VirtualApplianceCommand
      */
     public abstract void beforeCallingVirtualFactory(final VirtualAppliance virtualAppliance)
         throws Exception;
-
-    /**
-     * Forces an state refresh in the virtual Appliance
-     * 
-     * @param virtualAppliance the virtual appliances to refresh
-     * @return BasicResult with the operation result
-     */
-    public abstract BasicResult forceRefreshVirtualApplianceState(
-        final VirtualAppliance virtualAppliance);
 
     /**
      * Private helper to create an empty virtual machine used for pre-instantiating a virtual
@@ -307,16 +218,6 @@ public interface VirtualApplianceCommand
      */
     public abstract DataResult<VirtualAppliance> updateOnlyStateInDB(
         VirtualAppliance virtualappliance, final StateEnum newState);
-
-    /**
-     * Creates or updates all the NetworkResources for the virtual appliance
-     * 
-     * @param updatedNodes nodes updated for
-     * @param virtualappHBPojo virtual appliance which nodes belong to
-     * @throws NetworkCommandException if any problem occurs
-     */
-    public abstract void updateNetworkResources(final UserHB user, final List<Node> updatedNodes,
-        final Integer vappId) throws NetworkCommandException;
 
     /**
      * This method deletes the existing rasd of a node
@@ -363,17 +264,6 @@ public interface VirtualApplianceCommand
     public abstract void afterCreatingNode(final Session session,
         final VirtualAppliance virtualAppliance, final NodeHB newNode);
 
-    /**
-     * @param virtualApplianceWs the virtualApplianceWs to set
-     */
-    public abstract void setVirtualApplianceWs(IVirtualApplianceWS virtualApplianceWs);
-
-    /**
-     * @return the virtualApplianceWs
-     */
-    public abstract IVirtualApplianceWS getVirtualApplianceWs();
-
     public abstract DataResult<Collection<Log>> getVirtualApplianceLogs(UserSession userSession,
         VirtualAppliance virtualAppliance);
-
 }

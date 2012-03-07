@@ -287,9 +287,9 @@ public class UsersResourceStubImpl extends AbstractAPIStub implements UsersResou
             createUsersLink(enterpriseWildcard, userListOptions.getOffset(),
                 userListOptions.getLength());
 
-        uri = UriHelper.appendQueryParamsToPath(uri, queryParams, false);
+        uri = UriHelper.appendQueryParamsToPath(uri, queryParams, true);
 
-        ClientResponse response = getWithMediaType(uri, FLAT_MEDIA_TYPE, FLAT_MEDIA_TYPE);
+        ClientResponse response = get(uri, FLAT_MEDIA_TYPE);
         if (response.getStatusCode() == 200)
         {
             UsersWithRolesDto usersDto = response.getEntity(UsersWithRolesDto.class);
@@ -537,7 +537,7 @@ public class UsersResourceStubImpl extends AbstractAPIStub implements UsersResou
 
         if (getPrivileges)
         {
-            RESTLink privilegesLink = role.searchLink("action", "privileges");
+            RESTLink privilegesLink = role.searchLink("privileges");
 
             if (privilegesLink != null)
             {
@@ -561,7 +561,7 @@ public class UsersResourceStubImpl extends AbstractAPIStub implements UsersResou
         Map<String, String[]> queryParams = new HashMap<String, String[]>();
         if (enterprise != null)
         {
-            queryParams.put("idEnterprise", new String[] {String.valueOf(enterprise.getId())});
+            queryParams.put("identerprise", new String[] {String.valueOf(enterprise.getId())});
         }
         if (!StringUtils.isEmpty(roleListOptions.getFilterLike()))
         {

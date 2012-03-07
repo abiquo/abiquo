@@ -22,7 +22,6 @@
 package com.abiquo.api.handlers;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import org.apache.wink.server.handlers.HandlersFactory;
@@ -35,20 +34,27 @@ public class RESTHandlerFactory extends HandlersFactory
     public List< ? extends RequestHandler> getRequestHandlers()
     {
         List<RequestHandler> listOfHandlers = new ArrayList<RequestHandler>();
-        
-        // Check the input constraints 
+
+        // Check the input constraints
         listOfHandlers.add(new InputParamConstraintHandler());
-        
+
         // Injects the IRESTLinkBuilder object to all the methods.
         listOfHandlers.add(new RESTHandler());
-        
+
         return listOfHandlers;
     }
 
     @Override
     public List< ? extends ResponseHandler> getResponseHandlers()
     {
-        return Collections.singletonList(new RESTHandler());
+        List<ResponseHandler> listOfHandlers = new ArrayList<ResponseHandler>();
+
+        listOfHandlers.add(new RESTHandler());
+
+        // Check dto links permissions
+        listOfHandlers.add(new CheckLinksPermissionsHandler());
+
+        return listOfHandlers;
     }
 
 }

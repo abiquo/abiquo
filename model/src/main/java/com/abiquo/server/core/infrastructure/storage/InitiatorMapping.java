@@ -49,8 +49,8 @@ public class InitiatorMapping extends DefaultEntityBase
     {
     }
 
-    public InitiatorMapping(final String initiatorIQN, VolumeManagement volumeManagementProperty,
-        final String targetIQN, final int targetLUN)
+    public InitiatorMapping(final String initiatorIQN,
+        final VolumeManagement volumeManagementProperty, final String targetIQN, final int targetLUN)
     {
         this.setInitiatorIqn(initiatorIQN);
         this.setTargetIqn(targetIQN);
@@ -66,6 +66,7 @@ public class InitiatorMapping extends DefaultEntityBase
     @Column(name = ID_COLUMN, nullable = false)
     private Integer id;
 
+    @Override
     public Integer getId()
     {
         return this.id;
@@ -73,25 +74,25 @@ public class InitiatorMapping extends DefaultEntityBase
 
     public final static String TARGET_LUN_PROPERTY = "targetLun";
 
-    private final static boolean TARGET_LUN_REQUIRED = true;
-
-   // private final static boolean TARGET_LUN_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
-
     private final static String TARGET_LUN_COLUMN = "targetLun";
 
+    /* package */final static long TARGET_LUN_MIN = 0;
+
+    /* package */final static long TARGET_LUN_MAX = Integer.MAX_VALUE;
+
+    private final static boolean TARGET_LUN_REQUIRED = true;
+
     @Column(name = TARGET_LUN_COLUMN, nullable = !TARGET_LUN_REQUIRED)
-    @Range(min = TARGET_IQN_LENGTH_MIN, max = TARGET_IQN_LENGTH_MAX)
-    private Integer targetLun;
-//
-//    @Required(value = TARGET_LUN_REQUIRED)
-//    @Length(min = TARGET_LUN_LENGTH_MIN, max = TARGET_LUN_LENGTH_MAX)
-   // @LeadingOrTrailingWhitespace(allowed = TARGET_LUN_LEADING_OR_TRAILING_WHITESPACES_ALLOWED)
-    public Integer getTargetLun()
+    @Range(min = TARGET_LUN_MIN, max = TARGET_LUN_MAX)
+    private int targetLun;
+
+    @Required(value = TARGET_LUN_REQUIRED)
+    public int getTargetLun()
     {
         return this.targetLun;
     }
 
-    private void setTargetLun(int targetLun)
+    private void setTargetLun(final int targetLun)
     {
         this.targetLun = targetLun;
     }
@@ -100,9 +101,9 @@ public class InitiatorMapping extends DefaultEntityBase
 
     private final static boolean TARGET_IQN_REQUIRED = true;
 
-    private final static int TARGET_IQN_LENGTH_MIN = 0;
+    /* package */final static int TARGET_IQN_LENGTH_MIN = 0;
 
-    private final static int TARGET_IQN_LENGTH_MAX = 255;
+    /* package */final static int TARGET_IQN_LENGTH_MAX = 255;
 
     private final static boolean TARGET_IQN_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
 
@@ -119,7 +120,7 @@ public class InitiatorMapping extends DefaultEntityBase
         return this.targetIqn;
     }
 
-    private void setTargetIqn(String targetIqn)
+    private void setTargetIqn(final String targetIqn)
     {
         this.targetIqn = targetIqn;
     }
@@ -128,9 +129,9 @@ public class InitiatorMapping extends DefaultEntityBase
 
     private final static boolean INITIATOR_IQN_REQUIRED = true;
 
-    private final static int INITIATOR_IQN_LENGTH_MIN = 0;
+    /* package */final static int INITIATOR_IQN_LENGTH_MIN = 0;
 
-    private final static int INITIATOR_IQN_LENGTH_MAX = 255;
+    /* package */final static int INITIATOR_IQN_LENGTH_MAX = 255;
 
     private final static boolean INITIATOR_IQN_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
 
@@ -147,7 +148,7 @@ public class InitiatorMapping extends DefaultEntityBase
         return this.initiatorIqn;
     }
 
-    private void setInitiatorIqn(String initiatorIqn)
+    private void setInitiatorIqn(final String initiatorIqn)
     {
         this.initiatorIqn = initiatorIqn;
     }
@@ -169,7 +170,7 @@ public class InitiatorMapping extends DefaultEntityBase
         return this.volume;
     }
 
-    public void setVolumeManagement(VolumeManagement volumeManagement)
+    public void setVolumeManagement(final VolumeManagement volumeManagement)
     {
         this.volume = volumeManagement;
     }

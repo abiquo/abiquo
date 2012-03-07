@@ -24,46 +24,65 @@
  */
 package com.abiquo.api.services.cloud;
 
-import static com.abiquo.server.core.cloud.State.NOT_DEPLOYED;
-
+import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import javax.persistence.EntityManager;
 
-import org.dmtf.schemas.ovf.envelope._1.EnvelopeType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import org.w3c.dom.Document;
 
-import com.abiquo.api.config.ConfigService;
 import com.abiquo.api.exceptions.APIError;
-import com.abiquo.api.exceptions.ConflictException;
+import com.abiquo.api.exceptions.APIException;
+import com.abiquo.api.services.DatacenterService;
 import com.abiquo.api.services.DefaultApiService;
-import com.abiquo.api.services.InfrastructureService;
+import com.abiquo.api.services.EnterpriseService;
+import com.abiquo.api.services.TaskService;
 import com.abiquo.api.services.UserService;
 import com.abiquo.api.services.VirtualMachineAllocatorService;
-import com.abiquo.api.services.ovf.OVFGeneratorService;
-import com.abiquo.api.util.EventingSupport;
-import com.abiquo.model.enumerator.RemoteServiceType;
+import com.abiquo.api.services.stub.TarantinoService;
 import com.abiquo.model.transport.error.CommonError;
-import com.abiquo.ovfmanager.ovf.xml.OVFSerializer;
+import com.abiquo.scheduler.VirtualMachineRequirementsFactory;
+import com.abiquo.scheduler.limit.VirtualMachinePrice;
+import com.abiquo.scheduler.limit.VirtualMachinePrice.PricingModelVariables;
+import com.abiquo.scheduler.limit.VirtualMachinePrice.VirtualMachineCost;
 import com.abiquo.server.core.cloud.NodeVirtualImage;
-import com.abiquo.server.core.cloud.State;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualApplianceDto;
+import com.abiquo.server.core.cloud.VirtualAppliancePriceDto;
 import com.abiquo.server.core.cloud.VirtualApplianceRep;
+import com.abiquo.server.core.cloud.VirtualApplianceState;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualDatacenterRep;
-import com.abiquo.server.core.cloud.VirtualImageDto;
 import com.abiquo.server.core.cloud.VirtualMachine;
-import com.abiquo.server.core.cloud.VirtualMachineChangeStateResultDto;
+import com.abiquo.server.core.cloud.VirtualMachineState;
+import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.infrastructure.Datacenter;
-import com.abiquo.server.core.infrastructure.RemoteService;
-import com.sun.ws.management.client.Resource;
-import com.sun.ws.management.client.ResourceFactory;
+import com.abiquo.server.core.infrastructure.management.RasdManagement;
+import com.abiquo.server.core.infrastructure.management.RasdManagementDAO;
+import com.abiquo.server.core.infrastructure.storage.Tier;
+import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
+import com.abiquo.server.core.pricing.CostCode;
+import com.abiquo.server.core.pricing.PricingCostCode;
+import com.abiquo.server.core.pricing.PricingRep;
+import com.abiquo.server.core.pricing.PricingTemplate;
+import com.abiquo.server.core.pricing.PricingTier;
+import com.abiquo.server.core.scheduler.VirtualMachineRequirements;
+import com.abiquo.server.core.task.Task;
+import com.abiquo.server.core.task.enums.TaskOwnerType;
+import com.abiquo.server.core.util.FilterOptions;
+import com.abiquo.tracer.ComponentType;
+import com.abiquo.tracer.EventType;
+import com.abiquo.tracer.SeverityType;
 
 /**
  * Implements the business logic of the class {@link VirtualAppliance}
@@ -71,36 +90,49 @@ import com.sun.ws.management.client.ResourceFactory;
  * @author jdevesa@abiquo.com
  */
 @Service
-@Transactional(readOnly = true)
 public class VirtualApplianceService extends DefaultApiService
 {
-
-    private static final String RESOURCE_URI =
-        "http://schemas.dmtf.org/ovf/envelope/1/virtualApplianceService/virtualApplianceResource";
-
-    @Autowired
-    VirtualDatacenterRep repo;
+    /** The logger object **/
+    private final static Logger logger = LoggerFactory.getLogger(VirtualApplianceService.class);
 
     @Autowired
-    VirtualDatacenterService vdcService;
+    private TarantinoService tarantino;
 
     @Autowired
-    OVFGeneratorService ovfService;
+    private VirtualDatacenterRep repo;
 
     @Autowired
-    InfrastructureService infrastructureService;
+    protected VirtualDatacenterService vdcService;
 
     @Autowired
-    VirtualMachineAllocatorService allocatorService;
+    protected UserService userService;
 
     @Autowired
-    UserService userService;
+    protected VirtualApplianceRep virtualApplianceRepo;
 
     @Autowired
-    VirtualApplianceRep virtualApplianceRepo;
+    private PricingRep pricingRep;
 
     @Autowired
-    VirtualMachineService vmService;
+    private RasdManagementDAO rasdManDao;
+
+    @Autowired
+    private VirtualMachineService vmService;
+
+    @Autowired
+    private VirtualMachineRequirementsFactory requirements;
+
+    @Autowired
+    private VirtualMachineAllocatorService vmallocator;
+
+    @Autowired
+    private TaskService taskService;
+
+    @Autowired
+    private EnterpriseService entService;
+
+    @Autowired
+    private DatacenterService dcServbice;
 
     public VirtualApplianceService()
     {
@@ -110,10 +142,14 @@ public class VirtualApplianceService extends DefaultApiService
     public VirtualApplianceService(final EntityManager em)
     {
         this.repo = new VirtualDatacenterRep(em);
+        this.vdcService = new VirtualDatacenterService(em);
+        this.userService = new UserService(em);
         this.virtualApplianceRepo = new VirtualApplianceRep(em);
-        this.vdcService = new VirtualDatacenterService(em);
-        this.vdcService = new VirtualDatacenterService(em);
-        this.infrastructureService = new InfrastructureService(em);
+        this.pricingRep = new PricingRep(em);
+        this.rasdManDao = new RasdManagementDAO(em);
+        this.vmService = new VirtualMachineService(em);
+        this.vmallocator = new VirtualMachineAllocatorService(em);
+        this.requirements = new VirtualMachineRequirementsFactory();
     }
 
     /**
@@ -122,12 +158,48 @@ public class VirtualApplianceService extends DefaultApiService
      * @param vdcId identifier of the virtualdatacenter.
      * @return the list of {@link VirtualAppliance} pojo
      */
-    public List<VirtualAppliance> getVirtualAppliancesByVirtualDatacenter(final Integer vdcId)
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
+    public List<VirtualAppliance> getVirtualAppliancesByVirtualDatacenter(final Integer vdcId,
+        final FilterOptions filterOptions)
     {
         VirtualDatacenter vdc = vdcService.getVirtualDatacenter(vdcId);
-        return (List<VirtualAppliance>) repo.findVirtualAppliancesByVirtualDatacenter(vdc);
+        return (List<VirtualAppliance>) repo.findVirtualAppliancesByVirtualDatacenter(vdc,
+            filterOptions);
     }
 
+    /**
+     * Retrieves the list of virtual appliances by enterprise
+     * 
+     * @param entId identifier of the enterprise.
+     * @param filterOptions use to filter the results. <code>null</code> if no filtering required
+     * @return the list of {@link VirtualAppliance} pojo
+     */
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
+    public List<VirtualAppliance> getVirtualAppliancesByEnterprise(final Integer entId,
+        final FilterOptions filterOptions)
+    {
+        Enterprise enterprise = entService.getEnterprise(entId);
+        return virtualApplianceRepo.findVirtualAppliancesByEnterprise(enterprise, filterOptions);
+    }
+
+    /**
+     * Retrieves the list of virtual appliances by enterprise and datacenter
+     * 
+     * @param entId identifier of the enterprise.
+     * @param dcId identifier of the datacenter.
+     * @return the list of {@link VirtualAppliance} pojo
+     */
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
+    public List<VirtualAppliance> getVirtualAppliancesByEnterpriseAndDatacenter(
+        final Integer entId, final Integer dcId)
+    {
+        Enterprise enterprise = entService.getEnterprise(entId);
+        Datacenter datacenter = dcServbice.getDatacenter(dcId);
+
+        return virtualApplianceRepo.findVirtualAppliancesByEnterpriseAndDatacenter(entId, dcId);
+    }
+
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
     public VirtualAppliance getVirtualApplianceByVirtualMachine(final VirtualMachine virtualMachine)
     {
         return virtualApplianceRepo.findVirtualApplianceByVirtualMachine(virtualMachine);
@@ -140,6 +212,7 @@ public class VirtualApplianceService extends DefaultApiService
      * @param vappId
      * @return
      */
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
     public VirtualAppliance getVirtualAppliance(final Integer vdcId, final Integer vappId)
     {
 
@@ -164,75 +237,28 @@ public class VirtualApplianceService extends DefaultApiService
         return vapp;
     }
 
-    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public void startVirtualAppliance(final Integer vdcId, final Integer vappId)
+    /**
+     * Returns the virtual appliance.
+     * 
+     * @param vappId virtual appliance.
+     * @return
+     */
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
+    public VirtualAppliance getVirtualAppliance(final Integer vappId)
     {
-        VirtualAppliance virtualAppliance = getVirtualAppliance(vdcId, vappId);
-        Datacenter datacenter = virtualAppliance.getVirtualDatacenter().getDatacenter();
-
-        try
+        if (vappId == 0)
         {
-            if (virtualAppliance.getState() == State.NOT_DEPLOYED)
-            {
-                allocate(virtualAppliance);
-
-                virtualAppliance.setState(State.IN_PROGRESS);
-                repo.updateVirtualAppliance(virtualAppliance);
-
-                EnvelopeType envelop = ovfService.createVirtualApplication(virtualAppliance);
-
-                Document docEnvelope = OVFSerializer.getInstance().bindToDocument(envelop, false);
-
-                RemoteService vsm =
-                    infrastructureService.getRemoteService(datacenter.getId(),
-                        RemoteServiceType.VIRTUAL_SYSTEM_MONITOR);
-
-                RemoteService vf =
-                    infrastructureService.getRemoteService(datacenter.getId(),
-                        RemoteServiceType.VIRTUAL_FACTORY);
-
-                long timeout = Long.valueOf(ConfigService.getServerTimeout());
-
-                Resource resource =
-                    ResourceFactory.create(vf.getUri(), RESOURCE_URI, timeout, docEnvelope,
-                        ResourceFactory.LATEST);
-
-                EventingSupport.subscribeToAllVA(virtualAppliance, vsm.getUri());
-
-                changeState(resource, envelop, State.RUNNING.toResourceState());
-            }
+            addValidationErrors(APIError.INVALID_ID);
+            flushErrors();
         }
-        catch (Exception e)
+
+        VirtualAppliance vapp = repo.findVirtualApplianceById(vappId);
+        if (vapp == null)
         {
-            virtualAppliance.setState(State.NOT_DEPLOYED);
-            repo.updateVirtualAppliance(virtualAppliance);
+            addNotFoundErrors(APIError.NON_EXISTENT_VIRTUALAPPLIANCE);
+            flushErrors();
         }
-    }
-
-    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public void addImage(final Integer virtualDatacenterId, final Integer virtualApplianceId,
-        final VirtualImageDto image)
-    {
-
-    }
-
-    private void allocate(final VirtualAppliance virtualAppliance)
-    {
-        for (NodeVirtualImage node : virtualAppliance.getNodes())
-        {
-            allocatorService.allocateVirtualMachine(node.getVirtualMachine().getId(),
-                virtualAppliance.getId(), false);
-        }
-    }
-
-    private void changeState(final Resource resource, final EnvelopeType envelope,
-        final String machineState) throws Exception
-    {
-        EnvelopeType envelopeRunning = ovfService.changeStateVirtualMachine(envelope, machineState);
-        Document docEnvelopeRunning =
-            OVFSerializer.getInstance().bindToDocument(envelopeRunning, false);
-
-        resource.put(docEnvelopeRunning);
+        return vapp;
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
@@ -242,26 +268,49 @@ public class VirtualApplianceService extends DefaultApiService
         VirtualDatacenter vdc = vdcService.getVirtualDatacenter(vdcId);
         userService.checkCurrentEnterpriseForPostMethods(vdc.getEnterprise());
 
+        logger.debug("Create virtual appliance with name {}", dto.getName());
+        // Only empty virtual appliances can be created
         VirtualAppliance vapp =
             new VirtualAppliance(vdc.getEnterprise(),
                 vdc,
                 dto.getName(),
-                NOT_DEPLOYED,
-                NOT_DEPLOYED);
+                VirtualApplianceState.NOT_DEPLOYED);
 
         vapp.setHighDisponibility(dto.getHighDisponibility());
         vapp.setPublicApp(dto.getPublicApp());
-        vapp.setNodeconnections(dto.getNodecollections());
+        vapp.setNodeconnections(dto.getNodeconnections());
 
         if (!vapp.isValid())
         {
+            StringBuilder sb = extractErrorsInAString(vapp);
+            logger.error(
+                "Error create virtual appliance with name {} due to validation errors: {}", dto
+                    .getName(), sb.toString());
+            tracer.log(SeverityType.CRITICAL, ComponentType.VIRTUAL_APPLIANCE,
+                EventType.VAPP_CREATE, "virtualAppliance.deleteErrorValidations", dto.getName());
             addValidationErrors(vapp.getValidationErrors());
             flushErrors();
         }
-
+        logger.debug("Add virtual appliance to Abiquo with name {}", dto.getName());
         repo.insertVirtualAppliance(vapp);
+        logger.debug("Created virtual appliance with name {} !", dto.getName());
+
+        tracer.log(SeverityType.INFO, ComponentType.VIRTUAL_APPLIANCE, EventType.VAPP_CREATE,
+            "virtualAppliance.create", dto.getName());
 
         return vapp;
+    }
+
+    private StringBuilder extractErrorsInAString(final VirtualAppliance vapp)
+    {
+        Set<CommonError> errors = vapp.getValidationErrors();
+        StringBuilder sb = new StringBuilder();
+        for (CommonError e : errors)
+        {
+            sb.append("Error code: ").append(e.getCode()).append(", Message: ").append(
+                e.getMessage());
+        }
+        return sb;
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
@@ -272,59 +321,411 @@ public class VirtualApplianceService extends DefaultApiService
         userService.checkCurrentEnterpriseForPostMethods(vapp.getEnterprise());
 
         vapp.setName(dto.getName());
-
+        vapp.setNodeconnections(dto.getNodeconnections());
         repo.updateVirtualAppliance(vapp);
+
+        tracer.log(SeverityType.INFO, ComponentType.VIRTUAL_APPLIANCE, EventType.VAPP_MODIFY,
+            "virtualAppliance.modify", vapp.getName());
 
         return vapp;
     }
 
-    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public List<VirtualMachineChangeStateResultDto> changeVirtualAppMachinesState(
-        final Integer vdcId, final Integer vappId, final State state)
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
+    public String getPriceVirtualApplianceText(final Integer vdcId, final Integer vappId)
     {
-        VirtualAppliance vapp = getVirtualAppliance(vdcId, vappId);
-        if (vapp.getState().equals(State.NOT_DEPLOYED))
+        String price = "";
+        VirtualAppliance virtualAppliance = getVirtualAppliance(vdcId, vappId);
+        // if enterprise has pt associated
+        PricingTemplate pricingTemplate = virtualAppliance.getEnterprise().getPricingTemplate();
+        if (pricingTemplate != null && pricingTemplate.isShowChangesBefore())
         {
-            addConflictErrors(APIError.VIRTUALAPPLIANCE_NOT_DEPLOYED);
+            VirtualAppliancePriceDto priceDto =
+                getPriceVirtualAppliance(virtualAppliance, pricingTemplate);
+            price = pricingTemplate.getDescription();
+            price =
+                price.replace(PricingModelVariables.CHARGE.getText(), priceDto.getTotalCost() + " "
+                    + pricingTemplate.getCurrency().getSymbol());
+            price =
+                price.replace(PricingModelVariables.CHARGE_PERIOD.getText(), pricingTemplate
+                    .getChargingPeriod().name());
+            price =
+                price.replace(PricingModelVariables.MIN_CHARGE.getText(), priceDto
+                    .getMinimumChargePeriod()
+                    + " " + pricingTemplate.getCurrency().getSymbol());
+            price =
+                price.replace(PricingModelVariables.MIN_PERIOD.getText(), pricingTemplate
+                    .getMinimumCharge().name());
+
+        }
+        if (!price.equals(""))
+        {
+            price = price + "\n";
+        }
+        return price;// + "\n";
+    }
+
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
+    public VirtualAppliancePriceDto getPriceVirtualAppliance(
+        final VirtualAppliance virtualAppliance, final PricingTemplate pricingTemplate)
+    {
+        BigDecimal cost = new BigDecimal(0);
+        Map<VirtualMachineCost, BigDecimal> virtualMachinesCost =
+            new HashMap<VirtualMachinePrice.VirtualMachineCost, BigDecimal>();
+        virtualMachinesCost.put(VirtualMachineCost.COMPUTE, cost);
+        virtualMachinesCost.put(VirtualMachineCost.COST_CODE, cost);
+        virtualMachinesCost.put(VirtualMachineCost.NETWORK, cost);
+        virtualMachinesCost.put(VirtualMachineCost.ADDITIONAL_VOLUME, cost);
+        virtualMachinesCost.put(VirtualMachineCost.STORAGE, cost);
+        virtualMachinesCost.put(VirtualMachineCost.STANDING_CHARGE, cost);
+        virtualMachinesCost.put(VirtualMachineCost.TOTAL, cost);
+
+        VirtualAppliancePriceDto dto =
+            new VirtualAppliancePriceDto(cost, cost, cost, cost, cost, cost);
+
+        int significantDigits = pricingTemplate.getCurrency().getDigits();
+
+        for (NodeVirtualImage node : virtualAppliance.getNodes())
+        {
+            final VirtualMachine vmachine = node.getVirtualMachine();
+            VirtualMachineRequirements virtualMachineRequirements =
+                requirements.createVirtualMachineRequirements(vmachine);
+
+            virtualMachinesCost =
+                addVirtualMachineCost(virtualMachinesCost, node.getVirtualMachine(),
+                    virtualMachineRequirements, pricingTemplate);
+        }
+        dto.setAdditionalVolumCost(rounded(significantDigits, virtualMachinesCost
+            .get(VirtualMachineCost.ADDITIONAL_VOLUME)));
+        dto.setCostCodeCost(rounded(significantDigits, virtualMachinesCost
+            .get(VirtualMachineCost.COST_CODE)));
+        dto.setComputeCost(rounded(significantDigits, virtualMachinesCost
+            .get(VirtualMachineCost.COMPUTE)));
+        dto.setStorageCost(rounded(significantDigits, virtualMachinesCost
+            .get(VirtualMachineCost.STORAGE)));
+        dto.setNetworkCost(rounded(significantDigits, virtualMachinesCost
+            .get(VirtualMachineCost.NETWORK)));
+        dto
+            .setStandingCharge(rounded(significantDigits, pricingTemplate.getStandingChargePeriod()));
+        dto.setMinimumCharge(pricingTemplate.getMinimumCharge().ordinal());
+        dto.setMinimumChargePeriod(rounded(significantDigits, pricingTemplate
+            .getMinimumChargePeriod()));
+        dto.setTotalCost(rounded(significantDigits, virtualMachinesCost
+            .get(VirtualMachineCost.TOTAL)));
+        // It is for enterprise so we don't have to add to the price
+        // .add( pricingTemplate.getStandingChargePeriod())
+
+        return dto;
+    }
+
+    private BigDecimal rounded(final int significantDigits, final BigDecimal aNumber)
+    {
+        return aNumber.setScale(significantDigits, BigDecimal.ROUND_UP);
+    }
+
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
+    private Map<VirtualMachineCost, BigDecimal> addVirtualMachineCost(
+        final Map<VirtualMachineCost, BigDecimal> virtualMachinesCost,
+        final VirtualMachine virtualMachine,
+        final VirtualMachineRequirements virtualMachineRequirements,
+        final PricingTemplate pricingTemplate)
+    {
+        BigDecimal BYTES_TO_GB = new BigDecimal(1024l * 1024l * 1024l);
+
+        getCostCodeCost(virtualMachinesCost, virtualMachine, pricingTemplate);
+
+        Collection<RasdManagement> resources = rasdManDao.findByVirtualMachine(virtualMachine);
+        getAdditionalStorageCost(virtualMachinesCost, resources, pricingTemplate);
+
+        virtualMachinesCost.put(VirtualMachineCost.COMPUTE, virtualMachinesCost.get(
+            VirtualMachineCost.COMPUTE)
+            .add(
+                pricingTemplate.getVcpu().multiply(
+                    new BigDecimal(virtualMachineRequirements.getCpu()))));
+        virtualMachinesCost.put(VirtualMachineCost.COMPUTE, virtualMachinesCost.get(
+            VirtualMachineCost.COMPUTE).add(
+            pricingTemplate.getMemoryMB().multiply(
+                new BigDecimal(virtualMachineRequirements.getRam()))));
+
+        virtualMachinesCost.put(VirtualMachineCost.STORAGE, virtualMachinesCost.get(
+            VirtualMachineCost.STORAGE).add(
+            pricingTemplate.getHdGB().multiply(
+                new BigDecimal(virtualMachineRequirements.getHd()).divide(BYTES_TO_GB, 2,
+                    BigDecimal.ROUND_HALF_EVEN))));
+
+        virtualMachinesCost.put(VirtualMachineCost.NETWORK, virtualMachinesCost.get(
+            VirtualMachineCost.NETWORK).add(
+            pricingTemplate.getPublicIp().multiply(
+                new BigDecimal(virtualMachineRequirements.getPublicIP()))));
+
+        virtualMachinesCost.put(VirtualMachineCost.TOTAL, virtualMachinesCost.get(
+            VirtualMachineCost.COST_CODE).add(
+            virtualMachinesCost.get(VirtualMachineCost.COMPUTE).add(
+                virtualMachinesCost.get(VirtualMachineCost.STORAGE).add(
+                    virtualMachinesCost.get(VirtualMachineCost.ADDITIONAL_VOLUME).add(
+                        virtualMachinesCost.get(VirtualMachineCost.NETWORK))))));
+        return virtualMachinesCost;
+    }
+
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
+    private void getCostCodeCost(final Map<VirtualMachineCost, BigDecimal> virtualMachinesCost,
+        final VirtualMachine virtualMachine, final PricingTemplate pricing)
+    {
+        CostCode cc =
+            pricingRep.findCostCodeById(virtualMachine.getVirtualMachineTemplate().getCostCode());
+        PricingCostCode pricingCostCode = pricingRep.findPricingCostCode(cc, pricing);
+        if (pricingCostCode != null)
+        {
+            virtualMachinesCost.put(VirtualMachineCost.COST_CODE, virtualMachinesCost.get(
+                VirtualMachineCost.COST_CODE).add(pricingCostCode.getPrice()));
+        }
+
+    }
+
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
+    private void getAdditionalStorageCost(
+        final Map<VirtualMachineCost, BigDecimal> virtualMachinesCost,
+        final Collection<RasdManagement> resources, final PricingTemplate pricing)
+    {
+
+        for (final RasdManagement resource : resources)
+        {
+            if (resource instanceof VolumeManagement)
+            {
+                final VolumeManagement volman = (VolumeManagement) resource;
+                // accum += volman.getSizeInMB();
+                Tier tier = pricingRep.findTierById(volman.getStoragePool().getTier().getId());
+                PricingTier pricingTier = pricingRep.findPricingTier(tier, pricing);
+                if (pricingTier != null)
+                {
+                    BigDecimal volum = new BigDecimal(volman.getSizeInMB());
+                    BigDecimal toGB = new BigDecimal(1024);
+                    virtualMachinesCost.put(VirtualMachineCost.ADDITIONAL_VOLUME,
+                        virtualMachinesCost.get(VirtualMachineCost.ADDITIONAL_VOLUME).add(
+                            pricingTier.getPrice().multiply(volum.divide(toGB))));// multiplicar
+                    // por
+                    // _MB
+                }
+            }
+        }
+    }
+
+    private void allocateVirtualAppliance(final VirtualAppliance vapp,
+        final boolean foreceEnterpriseSoftLimits)
+    {
+
+        VirtualMachineRequirements required = requirements.createVirtualMachineRequirements(vapp);
+        vmallocator.checkLimist(vapp, required, foreceEnterpriseSoftLimits);
+
+        try
+        {
+            for (NodeVirtualImage nvi : vapp.getNodes())
+            {
+                final VirtualMachine virtualMachine = nvi.getVirtualMachine();
+
+                // XXX duplicated limit checker
+                vmService.allocate(virtualMachine, vapp, foreceEnterpriseSoftLimits);
+
+            }
+            // XXX consider (try to) having the SchechedulerLock by each VM
+            // for (Integer vmid : nviDao.findVirtualMachineIdsByVirtualAppliance(vapp))
+            // { final String msg = String.format("Allocate %d", vmid); try {
+            // SchedulerLock.acquire(msg); final VirtualMachine virtualMachine =
+            // vmService.getVirtualMachine(vmid); vmService.allocate(virtualMachine, vapp,
+            // foreceEnterpriseSoftLimits); } finally { SchedulerLock.release(msg); } }
+        }
+        catch (APIException e)
+        {
+            for (NodeVirtualImage nvi : vapp.getNodes())
+            {
+
+                VirtualMachine vm = nvi.getVirtualMachine();
+                if (vm.getState() == VirtualMachineState.ALLOCATED)
+                {
+                    vmallocator.deallocateVirtualMachine(vm);
+
+                    // TODO consider moving the set NOT_ALLOCATED in deallocateVM
+                    vm.setState(VirtualMachineState.NOT_ALLOCATED);
+                    vmService.updateVirtualMachineBySystem(vm);
+                }
+            }
+            throw e;
+        }
+        catch (RuntimeException e)
+        {
+            for (NodeVirtualImage nvi : vapp.getNodes())
+            {
+
+                VirtualMachine vm = nvi.getVirtualMachine();
+                if (vm.getState() == VirtualMachineState.ALLOCATED)
+                {
+                    vmallocator.deallocateVirtualMachine(vm);
+
+                    // TODO consider moving the set NOT_ALLOCATED in deallocateVM
+                    vm.setState(VirtualMachineState.NOT_ALLOCATED);
+                    vmService.updateVirtualMachineBySystem(vm);
+                }
+            }
+            addUnexpectedErrors(APIError.STATUS_INTERNAL_SERVER_ERROR);
             flushErrors();
         }
-        if (!vapp.getState().equals(State.RUNNING))
+
+    }
+
+    /**
+     * Deploys all of the {@link VirtualMachine} belonging to this {@link VirtualAppliance}
+     * <p>
+     * TODO force TRUE
+     * 
+     * @param vdcId {@link VirtualDatacenter}
+     * @param vappId {@link VirtualAppliance}
+     * @return List<String>
+     */
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    public Map<Integer, String> deployVirtualAppliance(final Integer vdcId, final Integer vappId,
+        final boolean forceLimits)
+    {
+        VirtualAppliance virtualAppliance = getVirtualAppliance(vdcId, vappId);
+
+        allocateVirtualAppliance(virtualAppliance, forceLimits);
+
+        tracer.log(SeverityType.INFO, ComponentType.VIRTUAL_APPLIANCE, EventType.VAPP_POWERON,
+            "virtualAppliance.deploy", virtualAppliance.getName());
+
+        Map<Integer, String> dto = new HashMap<Integer, String>();
+        for (NodeVirtualImage nodevi : virtualAppliance.getNodes())
         {
-            addConflictErrors(APIError.VIRTUALAPPLIANCE_NOT_RUNNING);
-            flushErrors();
-        }
-        List<VirtualMachine> vmachines = vmService.findByVirtualAppliance(vapp);
-        List<VirtualMachineChangeStateResultDto> results =
-            new ArrayList<VirtualMachineChangeStateResultDto>();
-        for (VirtualMachine vm : vmachines)
-        {
+            VirtualMachine vmachine = nodevi.getVirtualMachine();
+
             try
             {
-                if (!vmService.sameState(vm, state))
-                {
-                    vmService.changeVirtualMachineState(vm.getId(), vappId, vdcId, state);
-                }
-                VirtualMachineChangeStateResultDto result =
-                    new VirtualMachineChangeStateResultDto();
-                result.setId(vm.getId());
-                result.setName(vm.getName());
-                result.setSuccess(true);
-                results.add(result);
+                String link = vmService.sendDeploy(vmachine, virtualAppliance);
+
+                dto.put(vmachine.getId(), link);
             }
-            catch (ConflictException e)
+            catch (Exception e)
             {
-                VirtualMachineChangeStateResultDto result =
-                    new VirtualMachineChangeStateResultDto();
-                result.setId(vm.getId());
-                result.setName(vm.getName());
-                result.setSuccess(false);
-                for (CommonError er : e.getErrors())
-                {
-                    result.setMessage(er.getMessage());
-                }
-                results.add(result);
+                logger
+                    .error(
+                        "Error already logged in the sendDeploy deploying virtual appliance name {}. {}",
+                        virtualAppliance.getName(), e.toString());
             }
         }
-        return results;
+        return dto;
+    }
+
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
+    public VirtualApplianceState getVirtualApplianceState(final Integer vdcId, final Integer vappId)
+    {
+        VirtualAppliance virtualAppliance = getVirtualAppliance(vdcId, vappId);
+        return virtualAppliance.getState();
+    }
+
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
+    public Map<Integer, String> undeployVirtualAppliance(final Integer vdcId, final Integer vappId,
+        final Boolean forceUndeploy, final Map<Integer, VirtualMachineState> originalStates)
+    {
+        VirtualAppliance virtualAppliance = getVirtualAppliance(vdcId, vappId);
+
+        // first check if there is any imported virtualmachine.
+        if (!forceUndeploy)
+        {
+            for (NodeVirtualImage node : virtualAppliance.getNodes())
+            {
+                if (node.getVirtualMachine().isCaptured())
+                {
+                    addConflictErrors(APIError.VIRTUAL_MACHINE_IMPORTED_WILL_BE_DELETED);
+                    flushErrors();
+                }
+            }
+        }
+
+        tracer.log(SeverityType.INFO, ComponentType.VIRTUAL_APPLIANCE, EventType.VAPP_POWEROFF,
+            "virtualAppliance.undeploy", virtualAppliance.getName());
+
+        Map<Integer, String> dto = new HashMap<Integer, String>();
+        for (NodeVirtualImage machine : virtualAppliance.getNodes())
+        {
+            Integer vmId = machine.getVirtualMachine().getId();
+            try
+            {
+                String link =
+                    vmService.undeployVirtualMachine(vmId, vappId, vdcId, forceUndeploy,
+                        originalStates.get(vmId));
+                dto.put(machine.getVirtualMachine().getId(), link);
+            }
+            catch (Exception e)
+            {
+                // The virtual appliance is in an unknown state
+                tracer.log(SeverityType.CRITICAL, ComponentType.VIRTUAL_APPLIANCE,
+                    EventType.VM_UNDEPLOY, APIError.GENERIC_OPERATION_ERROR.getMessage());
+
+                // For the Admin to know all errors
+                tracer.systemLog(SeverityType.CRITICAL, ComponentType.VIRTUAL_APPLIANCE,
+                    EventType.VM_UNDEPLOY, "virtualAppliance.deployError", e.toString(), machine
+                        .getName(), e.getMessage());
+                logger
+                    .error(
+                        "Error undeploying virtual appliance name {}. But we continue with next virtual machine: {}",
+                        virtualAppliance.getName(), e.toString());
+            }
+        }
+        return dto;
+    }
+
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    public void deleteVirtualAppliance(final Integer vdcId, final Integer vappId,
+        final Map<Integer, VirtualMachineState> originalStates)
+    {
+        VirtualAppliance virtualAppliance = getVirtualAppliance(vdcId, vappId);
+        userService.checkCurrentEnterpriseForPostMethods(virtualAppliance.getEnterprise());
+        logger.debug("Deleting the virtual appliance name {} ", virtualAppliance.getName());
+
+        // We must delete all of its virtual machines
+        for (NodeVirtualImage n : virtualAppliance.getNodes())
+        {
+            Integer vmId = n.getVirtualMachine().getId();
+            logger.trace("Deleting the virtual machine with name {}", n.getVirtualMachine()
+                .getName());
+            vmService.deleteVirtualMachine(vmId, virtualAppliance.getId(), n.getVirtualAppliance()
+                .getVirtualDatacenter().getId(), originalStates.get(vmId));
+            logger.trace("Deleting the virtual machine with name {}", n.getVirtualMachine()
+                .getName()
+                + " successful!");
+        }
+        virtualApplianceRepo.deleteVirtualAppliance(virtualAppliance);
+        logger.debug("Deleting the virtual appliance name {} ok!", virtualAppliance.getName());
+        tracer.log(SeverityType.INFO, ComponentType.VIRTUAL_APPLIANCE, EventType.VAPP_DELETE,
+            "virtualAppliance.deleted", virtualAppliance.getName());
+    }
+
+    /**
+     * Retrieve the last {@link Task} of every {@link VirtualMachine} in the
+     * {@link VirtualAppliance}
+     * 
+     * @param vdcId datacenter id.
+     * @param vappId virtualappliance id
+     * @return List<Task>
+     */
+    public List<Task> getAllNodesLastTask(final Integer vdcId, final Integer vappId)
+    {
+
+        VirtualAppliance virtualAppliance = getVirtualAppliance(vdcId, vappId);
+        logger.debug("Retrieving all of the nodes last task virtual appliance name {} ",
+            virtualAppliance.getName());
+        List<Task> tasks = new ArrayList<Task>();
+        for (NodeVirtualImage m : virtualAppliance.getNodes())
+        {
+            List<Task> t =
+                taskService.findTasks(TaskOwnerType.VIRTUAL_MACHINE, m.getVirtualMachine().getId()
+                    .toString());
+            if (t != null && !t.isEmpty())
+            {
+                tasks.add(t.get(0));
+            }
+        }
+        logger.debug(
+            "Retrieving all of the nodes last task virtual appliance name {}, added {} tasks ",
+            new Object[] {virtualAppliance.getName(), tasks.size()});
+        return tasks;
     }
 }

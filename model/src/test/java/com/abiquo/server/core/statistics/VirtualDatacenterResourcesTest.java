@@ -19,17 +19,18 @@
  * Boston, MA 02111-1307, USA.
  */
 
-  package com.abiquo.server.core.statistics;
+package com.abiquo.server.core.statistics;
 
-  import com.abiquo.server.core.common.DefaultEntityTestBase;
-  import com.softwarementors.bzngine.entities.test.InstanceTester;
+import com.abiquo.server.core.common.DefaultEntityTestBase;
+import com.softwarementors.bzngine.entities.test.InstanceTester;
 
-  public class VirtualDatacenterResourcesTest extends DefaultEntityTestBase<VirtualDatacenterResources>
-  {
+public class VirtualDatacenterResourcesTest extends
+    DefaultEntityTestBase<VirtualDatacenterResources>
+{
 
-      @Override
-      protected InstanceTester<VirtualDatacenterResources> createEntityInstanceGenerator()
-      {
-          return new VirtualDatacenterResourcesGenerator(getSeed());
-      }
-  }
+    @Override
+    protected InstanceTester<VirtualDatacenterResources> createEntityInstanceGenerator()
+    {
+        return new VirtualDatacenterResourcesGenerator(getSeed());
+    }
+}

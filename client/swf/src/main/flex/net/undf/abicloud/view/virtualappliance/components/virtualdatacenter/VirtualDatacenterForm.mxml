@@ -91,7 +91,7 @@
 	                hyperTypeInput.selectedIndex = -1;
 	                hyperTypeInput.dataProvider = null;
 	                defaultPrivateNetworkRadioButton.selected = true;
-	                privateNetworkForm.init("default_network");
+	                privateNetworkForm.init(AbiCloudModel.getInstance().configurationManager.config.client_network_defaultName.value);
                 }              
                 
 
@@ -178,6 +178,12 @@
                         break;
                     }
                 }
+                
+                //Hypervisor was not found
+                if(hyperTypeInput.selectedIndex == -1 && this._virtualDatacenter.hyperType.id != 0)
+                {
+                    hyperTypeInput.prompt = HyperVisorType.HYPERVISOR_NAMES[this._virtualDatacenter.hyperType.id];
+                }
             }
 
             private function hypervisorTypeInputLabelFunction(item:Object):String
@@ -192,7 +198,7 @@
             {
                 if (privateNetworkInput.selectedValue == "default")
                 {
-                    privateNetworkForm.init("default_network");
+                    privateNetworkForm.init(AbiCloudModel.getInstance().configurationManager.config.client_network_defaultName.value);
                 }
             }
 

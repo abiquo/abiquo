@@ -32,6 +32,8 @@ public enum Privileges
 
     PHYS_DC_ENUMERATE,
 
+    PHYS_DC_ALLOW_MODIFY_NETWORK,
+
     USERS_MANAGE_OTHER_ENTERPRISES,
 
     USERS_MANAGE_ROLES,
@@ -52,7 +54,13 @@ public enum Privileges
 
     VDC_ENUMERATE,
 
+    VDC_MANAGE_VAPP,
+
     PRICING_VIEW,
+
+    AUTHENTICATED,
+
+    PRICING_MANAGE,
 
     ENTERPRISE_ENUMERATE;
 }

@@ -16,19 +16,20 @@
         <!-- end : infrastructure -->
         <!-- appliance library -->
         <class>com.abiquo.server.core.appslibrary.AppsLibrary</class>
-        <class>com.abiquo.server.core.appslibrary.OVFPackage</class>
-        <class>com.abiquo.server.core.appslibrary.OVFPackageList</class>
-        <class>com.abiquo.server.core.appslibrary.Category</class>
         <class>com.abiquo.server.core.appslibrary.Icon</class>
+        <class>com.abiquo.server.core.appslibrary.Category</class>
+        <class>com.abiquo.server.core.appslibrary.VirtualMachineTemplate</class>
+        <class>com.abiquo.server.core.appslibrary.VirtualImageConversion</class>
+        <class>com.abiquo.server.core.appslibrary.TemplateDefinition</class>
+        <class>com.abiquo.server.core.appslibrary.TemplateDefinitionList</class>
         <!-- end: appliance library -->
         <!-- cloud infrastructure -->
         <class>com.abiquo.server.core.cloud.VirtualDatacenter</class>
         <class>com.abiquo.server.core.cloud.VirtualAppliance</class>
         <class>com.abiquo.server.core.cloud.Hypervisor</class>
         <class>com.abiquo.server.core.cloud.VirtualMachine</class>
-        <class>com.abiquo.server.core.cloud.VirtualImage</class>
-        <class>com.abiquo.server.core.cloud.VirtualImageConversion</class>
         <class>com.abiquo.server.core.cloud.NodeVirtualImage</class>
+	<class>com.abiquo.server.core.cloud.chef.RunlistElement</class> 
         <!-- end: cloud infrastructure -->
         <!-- stateful -->
         <class>com.abiquo.server.core.cloud.stateful.DiskStatefulConversion</class>
@@ -37,20 +38,22 @@
         <!-- end: stateful -->
         <!-- enterprise -->
         <class>com.abiquo.server.core.enterprise.Enterprise</class>
+	<class>com.abiquo.server.core.enterprise.EnterpriseProperties</class>
         <class>com.abiquo.server.core.enterprise.Role</class>
         <class>com.abiquo.server.core.enterprise.RoleLdap</class>
         <class>com.abiquo.server.core.enterprise.Privilege</class>
         <class>com.abiquo.server.core.enterprise.User</class>
         <class>com.abiquo.server.core.enterprise.DatacenterLimits</class>
         <class>com.abiquo.server.core.enterprise.Session</class>
+	<class>com.abiquo.server.core.enterprise.OneTimeTokenSession</class>
         <!-- end: enterprise -->
         <!-- networking -->
         <class>com.abiquo.server.core.infrastructure.network.VLANNetwork</class>
         <class>com.abiquo.server.core.infrastructure.network.Network</class>
         <class>com.abiquo.server.core.infrastructure.network.NetworkConfiguration</class>
-        <class>com.abiquo.server.core.infrastructure.network.Dhcp</class>
         <class>com.abiquo.server.core.infrastructure.network.IpPoolManagement</class>
         <class>com.abiquo.server.core.infrastructure.network.NetworkAssignment</class>
+        <class>com.abiquo.server.core.infrastructure.network.DhcpOption</class>
         <!-- end: networking -->
         <!-- storage -->
         <class>com.abiquo.server.core.infrastructure.storage.Tier</class>
@@ -58,6 +61,7 @@
         <class>com.abiquo.server.core.infrastructure.storage.StoragePool</class>
         <class>com.abiquo.server.core.infrastructure.storage.VolumeManagement</class>
         <class>com.abiquo.server.core.infrastructure.storage.InitiatorMapping</class>
+        <class>com.abiquo.server.core.infrastructure.storage.DiskManagement</class>
         <!-- end: storage -->
         <!-- workload -->
         <class>com.abiquo.server.core.scheduler.EnterpriseExclusionRule</class>
@@ -66,7 +70,16 @@
         <!-- end:workload -->
         <!-- configuration -->
         <class>com.abiquo.server.core.config.SystemProperty</class>
-        <class>com.abiquo.server.core.tasks.Task</class>
+        <!-- end: configuration --> 
+	<!-- pricing -->
+	<class>com.abiquo.server.core.pricing.PricingTemplate</class>
+	<class>com.abiquo.server.core.pricing.CostCode</class>
+	<class>com.abiquo.server.core.pricing.Currency</class>
+        <class>com.abiquo.server.core.pricing.CostCodeCurrency</class>
+        <class>com.abiquo.server.core.pricing.PricingCostCode</class>
+        <class>com.abiquo.server.core.pricing.PricingTier</class>
+	<!-- end:pricing-->
+		
         <!-- end: configuration -->
         <properties>
             <property name="dialect" value="org.hibernate.dialect.MySQL5InnoDBDialect" />

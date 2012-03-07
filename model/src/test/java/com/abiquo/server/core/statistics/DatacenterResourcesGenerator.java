@@ -32,18 +32,29 @@ import com.softwarementors.commons.testng.AssertEx;
 public class DatacenterResourcesGenerator extends DefaultEntityGenerator<DatacenterResources>
 {
 
-    
-
     public DatacenterResourcesGenerator(SeedGenerator seed)
     {
         super(seed);
-        
+
     }
 
     @Override
     public void assertAllPropertiesEqual(DatacenterResources obj1, DatacenterResources obj2)
     {
-      AssertEx.assertPropertiesEqualSilent(obj1, obj2, DatacenterResources.REPOSITORY_RESERVED_PROPERTY,DatacenterResources.MEMORY_RESERVED_PROPERTY,DatacenterResources.VLAN_RESERVED_PROPERTY,DatacenterResources.PUBLIC_I_PS_USED_PROPERTY,DatacenterResources.PUBLIC_I_PS_RESERVED_PROPERTY,DatacenterResources.LOCAL_STORAGE_RESERVED_PROPERTY,DatacenterResources.EXT_STORAGE_USED_PROPERTY,DatacenterResources.VLAN_USED_PROPERTY,DatacenterResources.EXT_STORAGE_RESERVED_PROPERTY,DatacenterResources.LOCAL_STORAGE_USED_PROPERTY,DatacenterResources.V_CPU_USED_PROPERTY,DatacenterResources.V_CPU_RESERVED_PROPERTY,DatacenterResources.ID_DATA_CENTER_PROPERTY,DatacenterResources.REPOSITORY_USED_PROPERTY,DatacenterResources.MEMORY_USED_PROPERTY,DatacenterResources.ID_ENTERPRISE_PROPERTY);
+        AssertEx.assertPropertiesEqualSilent(obj1, obj2,
+            DatacenterResources.REPOSITORY_RESERVED_PROPERTY,
+            DatacenterResources.MEMORY_RESERVED_PROPERTY,
+            DatacenterResources.VLAN_RESERVED_PROPERTY,
+            DatacenterResources.PUBLIC_I_PS_USED_PROPERTY,
+            DatacenterResources.PUBLIC_I_PS_RESERVED_PROPERTY,
+            DatacenterResources.LOCAL_STORAGE_RESERVED_PROPERTY,
+            DatacenterResources.EXT_STORAGE_USED_PROPERTY, DatacenterResources.VLAN_USED_PROPERTY,
+            DatacenterResources.EXT_STORAGE_RESERVED_PROPERTY,
+            DatacenterResources.LOCAL_STORAGE_USED_PROPERTY,
+            DatacenterResources.V_CPU_USED_PROPERTY, DatacenterResources.V_CPU_RESERVED_PROPERTY,
+            DatacenterResources.ID_DATA_CENTER_PROPERTY,
+            DatacenterResources.REPOSITORY_USED_PROPERTY, DatacenterResources.MEMORY_USED_PROPERTY,
+            DatacenterResources.ID_ENTERPRISE_PROPERTY);
     }
 
     @Override
@@ -53,17 +64,15 @@ public class DatacenterResourcesGenerator extends DefaultEntityGenerator<Datacen
 
         DatacenterResources datacenterResources = new DatacenterResources();
 
-        
-
         return datacenterResources;
     }
 
     @Override
-    public void addAuxiliaryEntitiesToPersist(DatacenterResources entity, List<Object> entitiesToPersist)
+    public void addAuxiliaryEntitiesToPersist(DatacenterResources entity,
+        List<Object> entitiesToPersist)
     {
         super.addAuxiliaryEntitiesToPersist(entity, entitiesToPersist);
-        
-        
+
     }
 
 }

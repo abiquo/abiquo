@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+
+     Abiquo community edition
+     cloud management application for hybrid clouds
+     Copyright (C) 2008-2010 - Abiquo Holdings S.L.
+
+     This application is free software; you can redistribute it and/or
+     modify it under the terms of the GNU LESSER GENERAL PUBLIC
+     LICENSE as published by the Free Software Foundation under
+     version 3 of the License
+
+     This software is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+     LESSER GENERAL PUBLIC LICENSE v.3 for more details.
+
+     You should have received a copy of the GNU Lesser General Public
+     License along with this library; if not, write to the
+     Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+     Boston, MA 02111-1307, USA.
+
+-->
+
+<mx:VBox 
+    width="225"
+    horizontalAlign="center"
+    verticalAlign="middle"
+    verticalGap="11"
+    creationComplete="onCreationComplete()"
+    creationPolicy="all" verticalScrollPolicy="off" horizontalScrollPolicy="off"
+    styleName="MainLoginStyle"
+    xmlns:mx="http://www.adobe.com/2006/mxml"
+    xmlns:utils="net.undf.abicloud.utils.*"
+    >
+
+
+    <!-- ********************************************************
+
+         Loading screen when token is used
+
+
+         ********************************************************* -->
+
+
+    <mx:Script>
+        <![CDATA[
+        	import mx.controls.Alert;
+        	import net.undf.abicloud.controller.ThemeHandler;
+        	import net.undf.abicloud.model.AbiCloudModel;
+        	import net.undf.abicloud.business.managers.LoginManager;
+        	import net.undf.abicloud.utils.AbicloudUtils;
+            import com.adobe.crypto.MD5;
+            
+            import mx.events.ValidationResultEvent;
+            import mx.resources.ResourceBundle;
+            import mx.resources.ResourceManager;
+            import mx.validators.ValidationResult;
+            
+            import net.undf.abicloud.events.LoginEvent;
+            import net.undf.abicloud.view.general.AbiCloudAlert;
+            import net.undf.abicloud.vo.authentication.Login;
+
+            [ResourceBundle("Login")]
+            private var rb:ResourceBundle;
+
+            [ResourceBundle("Common")]
+            private var rb2:ResourceBundle;
+            
+            [Bindable]
+            private var _showError:Boolean;
+            
+            private function onCreationComplete():void
+            {
+            	loading_txt.text = resourceManager.getString('Login','LABEL_LOADING_APPLICATION');
+            }
+            
+            //Display error if authentication fails
+            public function showError():void
+            {
+            	this._showError = true;
+            }
+
+
+             //First we try to load a custom logo
+             //if no exists, display the default one
+             private function displayDefaultImage():void{
+             	customLogo.visible = false;
+             	customLogo.includeInLayout = false;
+             	loginLogoImage.visible = true;
+             	loginLogoImage.includeInLayout = true;
+             }
+        ]]>
+    </mx:Script>
+    <utils:SmoothImage id="loginLogoImage"
+    	visible="false" includeInLayout="false"  
+    	creationComplete="{AbicloudUtils.getImageFromStyle('loginLogo',loginLogoImage)}"/>
+    <mx:Image id="customLogo" source="themes/base/logo.png" ioError="displayDefaultImage()"/>
+    
+
+        <!-- Login -->
+        <mx:VBox 
+            width="100%" height="100%"
+            horizontalAlign="center"
+            verticalAlign="middle"
+            paddingBottom="20"
+            verticalGap="5"
+            horizontalScrollPolicy="off" verticalScrollPolicy="off">
+            <mx:ProgressBar 
+            	visible="{!this._showError}"
+            	includeInLayout="{!this._showError}"
+            	indeterminate="true" width="100%" 
+            	height="12"
+            	styleName="TokenProgressBar"
+            	label="" labelWidth="0"/>
+            <mx:Label
+            	id="loading_txt"
+                visible="{!this._showError}"
+                includeInLayout="{!this._showError}"
+                color="red"
+                fontWeight="bold"
+                />
+            <mx:Label
+            	text="@Resource(bundle='Login',key='LABEL_ERROR_AUTHENTICATION')" 
+                visible="{this._showError}"
+                includeInLayout="{this._showError}"
+                color="red"
+                fontWeight="bold"
+                />
+        </mx:VBox>
+
+</mx:VBox>

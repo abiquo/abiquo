@@ -34,8 +34,8 @@ import com.abiquo.abiserver.persistence.hibernate.HibernateDAO;
  * 
  * @author jdevesa@abiquo.com
  */
-public class NetworkConfigurationDAOHibernate extends HibernateDAO<NetworkConfigurationHB, Integer> implements
-    NetworkConfigurationDAO
+public class NetworkConfigurationDAOHibernate extends HibernateDAO<NetworkConfigurationHB, Integer>
+    implements NetworkConfigurationDAO
 {
 
 }

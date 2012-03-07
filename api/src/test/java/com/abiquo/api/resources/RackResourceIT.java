@@ -35,11 +35,9 @@ import javax.ws.rs.core.MediaType;
 import org.apache.wink.client.ClientResponse;
 import org.apache.wink.client.ClientWebException;
 import org.apache.wink.client.Resource;
-import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.abiquo.api.exceptions.APIError;
 import com.abiquo.model.transport.error.ErrorsDto;
 import com.abiquo.server.core.infrastructure.Rack;
 import com.abiquo.server.core.infrastructure.RackDto;
@@ -55,6 +53,7 @@ public class RackResourceIT extends AbstractJpaGeneratorIT
 
     private String invalidRack;
 
+    @Override
     @BeforeMethod
     public void setup()
     {
@@ -79,8 +78,8 @@ public class RackResourceIT extends AbstractJpaGeneratorIT
         assertNotNull(rack);
 
         assertLinkExist(rack, validRackUri, "edit");
-        assertLinkExist(rack, resolveMachinesURI(validRack.getDatacenter().getId(), validRack
-            .getId()), "machines");
+        assertLinkExist(rack,
+            resolveMachinesURI(validRack.getDatacenter().getId(), validRack.getId()), "machines");
         assertLinkExist(rack, resolveDatacenterURI(validRack.getDatacenter().getId()), "datacenter");
     }
 
@@ -115,8 +114,8 @@ public class RackResourceIT extends AbstractJpaGeneratorIT
         rack.setShortDescription("dummy_description");
 
         ClientResponse response =
-            resource.accept(MediaType.APPLICATION_XML).contentType(MediaType.APPLICATION_XML).put(
-                rack);
+            resource.accept(MediaType.APPLICATION_XML).contentType(MediaType.APPLICATION_XML)
+                .put(rack);
         assertEquals(200, response.getStatusCode());
 
         RackDto modified = response.getEntity(RackDto.class);
@@ -135,8 +134,8 @@ public class RackResourceIT extends AbstractJpaGeneratorIT
         rack.setName("rack_test");
 
         response =
-            resource.accept(MediaType.APPLICATION_XML).contentType(MediaType.APPLICATION_XML).put(
-                rack);
+            resource.accept(MediaType.APPLICATION_XML).contentType(MediaType.APPLICATION_XML)
+                .put(rack);
         assertEquals(response.getStatusCode(), 409);
 
     }
@@ -153,8 +152,8 @@ public class RackResourceIT extends AbstractJpaGeneratorIT
         resource = client.resource(invalidRack);
 
         ClientResponse response =
-            resource.accept(MediaType.APPLICATION_XML).contentType(MediaType.APPLICATION_XML).put(
-                rack);
+            resource.accept(MediaType.APPLICATION_XML).contentType(MediaType.APPLICATION_XML)
+                .put(rack);
 
         assertEquals(404, response.getStatusCode());
     }
@@ -172,8 +171,8 @@ public class RackResourceIT extends AbstractJpaGeneratorIT
         resource = client.resource(rackInvalidDatacenter);
 
         ClientResponse response =
-            resource.accept(MediaType.APPLICATION_XML).contentType(MediaType.APPLICATION_XML).put(
-                rack);
+            resource.accept(MediaType.APPLICATION_XML).contentType(MediaType.APPLICATION_XML)
+                .put(rack);
 
         assertEquals(404, response.getStatusCode());
 
@@ -185,8 +184,7 @@ public class RackResourceIT extends AbstractJpaGeneratorIT
         assertEquals(old, rack.getShortDescription());
     }
 
-    // FIXME: delete is now valid now
-    @Test(enabled = false)
+    @Test
     public void removeRack() throws ClientWebException
     {
         Resource resource = client.resource(validRackUri);
@@ -195,8 +193,7 @@ public class RackResourceIT extends AbstractJpaGeneratorIT
         assertEquals(204, response.getStatusCode());
     }
 
-    // FIXME: delete is now valid now
-    @Test(enabled = false)
+    @Test
     public void removeRackDoesntExist() throws ClientWebException
     {
         Resource resource = client.resource(invalidRack);
@@ -205,8 +202,7 @@ public class RackResourceIT extends AbstractJpaGeneratorIT
         assertEquals(404, response.getStatusCode());
     }
 
-    // FIXME: delete is now valid now
-    @Test(enabled = false)
+    @Test
     public void removeRackWrongDatacenter() throws ClientWebException
     {
         Resource resource = client.resource(rackInvalidDatacenter);
@@ -223,7 +219,8 @@ public class RackResourceIT extends AbstractJpaGeneratorIT
         assertNotNull(rack);
     }
 
-    protected ClientResponse createRack(String name, String shortDescription, String longDescription)
+    protected ClientResponse createRack(final String name, final String shortDescription,
+        final String longDescription)
     {
         Resource resource = client.resource(resolveRacksURI(validRack.getDatacenter().getId()));
 

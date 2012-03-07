@@ -182,7 +182,7 @@
                 remoteService.domainName = virtualFactoryInput.domainNameInput.text;
                 remoteService.port = Number(virtualFactoryInput.portInput.text);
                 remoteService.serviceMapping = virtualFactoryInput.serviceMappingInput.text;
-                remoteService.name = virtualFactoryInput.formedUri;
+                remoteService.name = virtualFactoryInput.formedUri;          
                 remoteServices.addItem(remoteService);
 
                 //VirtualSystemMonitor
@@ -304,6 +304,14 @@
 	            	validateAllIPs();            	            		            		
             	}            	
             }
+            
+            //Check all remote services
+            protected function onClickCheckAllButton():void
+            {
+            	virtualFactoryInput.onClickCheckButton();
+                virtualSystemMonitorInput.onClickCheckButton();
+                applianceManagerInput.onClickCheckButton();
+            }
         ]]>
     </mx:Script>
 
@@ -321,7 +329,7 @@
             required="true">
             <mx:TextInput id="nameInput"
                 width="100%" height="20"
-                maxChars="19"
+                maxChars="20"
                 change="validateForm()"/>
         </mx:FormItem>
 
@@ -338,7 +346,7 @@
         <mx:Spacer height="10"/>
 
         <mx:HBox
-        	verticalAlign="middle">
+        	verticalAlign="middle" width="100%">
 	        <mx:Label 
 	            styleName="DataCenterFormAddBaseLabel"
 	            text="@Resource(bundle='Infrastructure', key='LABEL_REMOTE_SERVICES')"/>
@@ -346,7 +354,12 @@
 	        	label="@Resource(bundle='Infrastructure', key='LABEL_REPLICATE_IP')"
 	        	labelPlacement="right"
 	        	paddingLeft="130"
-	        	change="enableFieldBinding(event)"/>        	
+	        	change="enableFieldBinding(event)"
+	        	width="100%"/>
+	        <mx:Button id="checkAllButton"
+	            height="18"
+	            label="@Resource(bundle='Infrastructure', key='LABEL_CHECK_ALL')"
+	            click="onClickCheckAllButton()"/>        	
         </mx:HBox>
 
         <datacenter:RemoteServiceFormItem id="virtualFactoryInput"

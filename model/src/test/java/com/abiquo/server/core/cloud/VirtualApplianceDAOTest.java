@@ -32,7 +32,8 @@ import com.abiquo.server.core.common.persistence.TestDataAccessManager;
 import com.softwarementors.bzngine.engines.jpa.test.configuration.EntityManagerFactoryForTesting;
 import com.softwarementors.bzngine.entities.test.PersistentInstanceTester;
 
-public class VirtualApplianceDAOTest extends DefaultDAOTestBase<VirtualApplianceDAO, VirtualAppliance>
+public class VirtualApplianceDAOTest extends
+    DefaultDAOTestBase<VirtualApplianceDAO, VirtualAppliance>
 {
 
     @BeforeMethod
@@ -65,5 +66,4 @@ public class VirtualApplianceDAOTest extends DefaultDAOTestBase<VirtualAppliance
         return (VirtualApplianceGenerator) super.eg();
     }
 
-    
 }

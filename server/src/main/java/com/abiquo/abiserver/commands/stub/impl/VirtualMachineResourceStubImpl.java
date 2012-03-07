@@ -24,232 +24,77 @@ package com.abiquo.abiserver.commands.stub.impl;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response.Status;
 
-import org.apache.wink.client.ClientConfig;
 import org.apache.wink.client.ClientResponse;
-import org.apache.wink.client.Resource;
-import org.apache.wink.client.RestClient;
-import org.apache.wink.common.internal.utils.UriHelper;
 
-import com.abiquo.abiserver.commands.BasicCommand;
+import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.StateEnum;
 import com.abiquo.abiserver.commands.stub.AbstractAPIStub;
 import com.abiquo.abiserver.commands.stub.VirtualMachineResourceStub;
-import com.abiquo.abiserver.exception.HardLimitExceededException;
-import com.abiquo.abiserver.exception.NotEnoughResourcesException;
-import com.abiquo.abiserver.exception.SchedulerException;
-import com.abiquo.abiserver.exception.SoftLimitExceededException;
-import com.abiquo.abiserver.pojo.authentication.UserSession;
+import com.abiquo.abiserver.pojo.infrastructure.State;
 import com.abiquo.abiserver.pojo.infrastructure.VirtualMachine;
 import com.abiquo.abiserver.pojo.result.BasicResult;
-import com.abiquo.model.transport.error.ErrorsDto;
+import com.abiquo.abiserver.pojo.result.DataResult;
 import com.abiquo.server.core.cloud.VirtualMachineDto;
-import com.abiquo.tracer.ComponentType;
-import com.abiquo.tracer.EventType;
-import com.abiquo.tracer.Platform;
-import com.abiquo.tracer.SeverityType;
-import com.abiquo.tracer.client.TracerFactory;
+import com.abiquo.server.core.cloud.VirtualMachineState;
+import com.abiquo.server.core.cloud.VirtualMachineStateDto;
 import com.abiquo.util.URIResolver;
 
 public class VirtualMachineResourceStubImpl extends AbstractAPIStub implements
     VirtualMachineResourceStub
 {
-
-    private final static Integer TIMEOUT = 3 * 60 * 1000; // 3 minutes
-
     public VirtualMachineResourceStubImpl()
     {
         super();
-
-        ClientConfig conf = new ClientConfig();
-        conf.readTimeout(TIMEOUT);
-
-        this.client = new RestClient(conf);
     }
 
     @Override
-    public BasicResult updateVirtualMachine(Integer virtualDatacenterId,
-        Integer virtualApplianceId, final VirtualMachine virtualMachine)
+    public BasicResult updateVirtualMachine(final Integer virtualDatacenterId,
+        final Integer virtualApplianceId, final VirtualMachine virtualMachine)
     {
+
         BasicResult result = new BasicResult();
-        String vmachineUrl =
-            resolveVirtualMachineUrl(virtualDatacenterId, virtualApplianceId,
-                virtualMachine.getId());
 
-        ClientResponse response = put(vmachineUrl, createTransferObject(virtualMachine));
-
-        if (response.getStatusCode() == 200)
+        try
         {
-            result.setSuccess(true);
+            // Retrieve the VirtualDatacenter to associate the new virtual appliance
+            org.jclouds.abiquo.domain.cloud.VirtualAppliance vapp =
+                getApiClient().getCloudService().getVirtualDatacenter(virtualDatacenterId)
+                    .getVirtualAppliance(virtualApplianceId);
+
+            org.jclouds.abiquo.domain.cloud.VirtualMachine vm =
+                vapp.getVirtualMachine(virtualMachine.getId());
+
+            if (!vm.getDescription().equals(virtualMachine.getDescription())
+                || vm.getCpu() != virtualMachine.getCpu() || vm.getRam() != virtualMachine.getRam()
+                || virtualMachine.getPassword() != null
+                && !virtualMachine.getPassword().equals(vm.getPassword()))
+            {
+                vm.setCpu(virtualMachine.getCpu());
+                vm.setRam(virtualMachine.getRam());
+                vm.setDescription(virtualMachine.getDescription());
+                vm.setPassword(virtualMachine.getPassword());
+
+                // Here we actually perform the request to create the virtual machine
+                vm.update();
+            }
+            // else all updated
+
+            result.setSuccess(Boolean.TRUE);
         }
-        else
+        catch (Exception e)
         {
-            populateErrors(response, result, "updateVirtualMachine");
+            populateErrors(e, result, "updateVirtualMachine");
+        }
+        finally
+        {
+            releaseApiClient();
         }
 
         return result;
     }
 
-    public void pause(UserSession userSession, Integer virtualDatacenterId,
-        Integer virtualApplianceId, Integer virtualMachineId, final int newcpu, final int newram)
-        throws HardLimitExceededException, SoftLimitExceededException, SchedulerException,
-        NotEnoughResourcesException
-    {
-
-
-        String vmachineUrl =
-            resolveVirtualMachineUrl(virtualDatacenterId, virtualApplianceId, virtualMachineId);
-
-        vmachineUrl = UriHelper.appendPathToBaseUri(vmachineUrl, "action/pause");
-
-        Resource vmachineResource = resource(vmachineUrl);
-
-        ClientResponse response =
-            vmachineResource.contentType(MediaType.APPLICATION_XML)
-                .accept(MediaType.APPLICATION_XML).post(null);
-
-        // ClientResponse response = put(vappUrl, String.valueOf(forceEnterpirseLimits));
-
-        if (response.getStatusCode() / 200 != 1)
-        {
-            onError(userSession, response);
-        }
-    }
-
-    @Override
-    public void checkEdit(final UserSession userSession, final Integer virtualDatacenterId,
-        final Integer virtualApplianceId, final Integer virtualMachineId, final int newcpu,
-        final int newram) throws HardLimitExceededException, SoftLimitExceededException,
-        SchedulerException, NotEnoughResourcesException
-    {
-
-        VirtualMachineDto newRequirements = new VirtualMachineDto();
-        newRequirements.setCpu(newcpu);
-        newRequirements.setRam(newram);
-
-        String vmachineUrl =
-            resolveVirtualMachineUrl(virtualDatacenterId, virtualApplianceId, virtualMachineId);
-
-        vmachineUrl = UriHelper.appendPathToBaseUri(vmachineUrl, "action/checkedit");
-
-        Resource vmachineResource = resource(vmachineUrl);
-
-        ClientResponse response =
-            vmachineResource.contentType(MediaType.APPLICATION_XML)
-                .accept(MediaType.APPLICATION_XML).put(newRequirements);
-
-        // ClientResponse response = put(vappUrl, String.valueOf(forceEnterpirseLimits));
-
-        if (response.getStatusCode() / 200 != 1)
-        {
-            onError(userSession, response);
-        }
-    }
-
-    @Override
-    public void allocate(final UserSession userSession, final Integer virtualDatacenterId,
-        final Integer virtualApplianceId, final Integer virtualMachineId,
-        final boolean forceEnterpirseLimits) throws HardLimitExceededException,
-        SoftLimitExceededException, SchedulerException, NotEnoughResourcesException
-    {
-
-        String vmachineUrl =
-            resolveVirtualMachineUrl(virtualDatacenterId, virtualApplianceId, virtualMachineId);
-
-        vmachineUrl = UriHelper.appendPathToBaseUri(vmachineUrl, "action/allocate");
-
-        Resource vmachineResource = resource(vmachineUrl);
-
-        ClientResponse response =
-            vmachineResource.contentType(MediaType.TEXT_PLAIN).accept(MediaType.APPLICATION_XML)
-                .put(String.valueOf(forceEnterpirseLimits));
-
-        // ClientResponse response = put(vappUrl, String.valueOf(forceEnterpirseLimits));
-
-        if (response.getStatusCode() / 200 != 1)
-        {
-            onError(userSession, response);
-        }
-
-        VirtualMachineDto vmachineDto = response.getEntity(VirtualMachineDto.class);
-
-        if (!vmachineDto.getId().equals(virtualMachineId))
-        {
-            throw new SchedulerException("Virtual machine changes its identifier");
-        }
-    }
-
-    @Override
-    public void deallocate(final UserSession userSession, final Integer virtualDatacenterId,
-        final Integer virtualApplianceId, final Integer virtualMachineId)
-        throws HardLimitExceededException, SoftLimitExceededException, SchedulerException,
-        NotEnoughResourcesException
-    {
-        String vmachineUrl =
-            resolveVirtualMachineUrl(virtualDatacenterId, virtualApplianceId, virtualMachineId);
-
-        vmachineUrl = UriHelper.appendPathToBaseUri(vmachineUrl, "action/deallocate");
-
-        ClientResponse response = resource(vmachineUrl).delete();
-
-        if (response.getStatusCode() / 200 != 1)
-        {
-            onError(userSession, response);
-        }
-    }
-
-    private void onError(final UserSession userSession, final ClientResponse response)
-        throws HardLimitExceededException, SoftLimitExceededException, SchedulerException,
-        NotEnoughResourcesException
-    {
-        ErrorsDto errors = response.getEntity(ErrorsDto.class);
-        String message = errors.toString();
-
-        /*
-         * LIMIT_EXCEEDED("LIMIT", "The required resources exceed the allowed limits"),
-         * NOT_ENOUGH_RESOURCES( "ALLOC-0",
-         * "There isn't enough resources to create the virtual machine"), //
-         * ALLOCATOR_ERROR("ALLOC-1", "Can not create virtual machine"), //
-         */
-
-        if (message.startsWith("LIMIT"))
-        {
-            if (message.contains("HARD_LIMIT"))
-            {
-                throw new HardLimitExceededException(message);
-            }
-            else if (message.contains("SOFT_LIMIT"))
-            {
-                throw new SoftLimitExceededException(message);
-            }
-            else
-            {
-                // Enterprise or datacenter hard limits exceeded
-                throw new NotEnoughResourcesException(message);
-            }
-        }
-        else if (message.startsWith("ALLOC-0"))
-        {
-            // trace to system with all the detailed cause.
-            TracerFactory.getTracer().log(SeverityType.NORMAL, ComponentType.VIRTUAL_APPLIANCE,
-                EventType.VAPP_POWERON, message, Platform.SYSTEM_PLATFORM);
-
-            // the user can't see the details of the detailed error cause.
-            throw new NotEnoughResourcesException("There are not enough resources to create the virtual machine.");
-        }
-        else
-        {
-
-            BasicCommand
-                .traceLog(SeverityType.CRITICAL, ComponentType.VIRTUAL_APPLIANCE,
-                    EventType.VAPP_CREATE, userSession, null, "", message, null, null, null, null,
-                    null);
-
-            throw new SchedulerException(message);
-        }
-    }
-
-    private String resolveVirtualMachineUrl(final Integer virtualDatacenterId,
+    protected String resolveVirtualMachineUrl(final Integer virtualDatacenterId,
         final Integer virtualApplianceId, final Integer virtualMachineId)
     {
         Map<String, String> params = new HashMap<String, String>();
@@ -264,20 +109,110 @@ public class VirtualMachineResourceStubImpl extends AbstractAPIStub implements
                 params);
     }
 
-    private VirtualMachineDto createTransferObject(final VirtualMachine virtualMachine)
+    protected VirtualMachineDto createTransferObject(final VirtualMachine virtualMachine)
     {
         VirtualMachineDto dto = new VirtualMachineDto();
 
         dto.setCpu(virtualMachine.getCpu());
         dto.setRam(virtualMachine.getRam());
         dto.setDescription(virtualMachine.getDescription());
-        dto.setHd(virtualMachine.getHd());
+        dto.setHdInBytes(virtualMachine.getHd());
         dto.setHighDisponibility(virtualMachine.getHighDisponibility() ? 1 : 0);
         dto.setPassword(virtualMachine.getPassword());
         dto.setName(virtualMachine.getName());
         dto.setVdrpIP(virtualMachine.getVdrpIP());
         dto.setVdrpPort(virtualMachine.getVdrpPort());
-
+        dto.setUuid(virtualMachine.getUUID());
         return dto;
     }
+
+    @Override
+    public BasicResult deleteVirtualMachine(final Integer virtualDatacenterId,
+        final Integer virtualApplianceId, final VirtualMachine virtualMachine)
+    {
+        BasicResult result = new BasicResult();
+        String vmachineUrl =
+            resolveVirtualMachineUrl(virtualDatacenterId, virtualApplianceId, virtualMachine
+                .getId());
+
+        ClientResponse response = delete(vmachineUrl);
+
+        if (response.getStatusCode() == Status.NO_CONTENT.getStatusCode())
+        {
+            result.setSuccess(true);
+        }
+        else
+        {
+            populateErrors(response, result, "deleteVirtualMachine");
+        }
+
+        return result;
+    }
+
+    @Override
+    public DataResult editVirtualMachineState(final Integer virtualDatacenterId,
+        final Integer virtualApplianceId, final VirtualMachine virtualMachine,
+        final VirtualMachineState virtualMachineState)
+    {
+        DataResult result = new DataResult();
+        String url =
+            createEditVirtualMachineStateUrl(virtualDatacenterId, virtualApplianceId,
+                virtualMachine.getId());
+        VirtualMachineStateDto dto = new VirtualMachineStateDto();
+        dto.setState(virtualMachineState);
+        ClientResponse response = put(url, dto);
+
+        if (response.getStatusCode() == Status.ACCEPTED.getStatusCode())
+        {
+            result.setSuccess(true);
+
+            // Retrieve the VirtualDatacenter to associate the new virtual appliance
+            org.jclouds.abiquo.domain.cloud.VirtualAppliance vapp =
+                getApiClient().getCloudService().getVirtualDatacenter(virtualDatacenterId)
+                    .getVirtualAppliance(virtualApplianceId);
+
+            org.jclouds.abiquo.domain.cloud.VirtualMachine vm =
+                vapp.getVirtualMachine(virtualMachine.getId());
+            result.setData(new State(StateEnum.valueOf(vm.getState().name())));
+        }
+        else
+        {
+            populateErrors(response, result, "editVirtualMachineState");
+        }
+
+        return result;
+    }
+
+    @Override
+    public DataResult rebootVirtualMachine(final Integer virtualDatacenterId,
+        final Integer virtualApplianceId, final VirtualMachine virtualMachine)
+    {
+        DataResult result = new DataResult();
+        String url =
+            createVirtualMachineResetUrl(virtualDatacenterId, virtualApplianceId, virtualMachine
+                .getId());
+
+        ClientResponse response = post(url, null);
+
+        if (response.getStatusCode() == Status.ACCEPTED.getStatusCode())
+        {
+            result.setSuccess(true);
+
+            // Retrieve the VirtualDatacenter to associate the new virtual appliance
+            org.jclouds.abiquo.domain.cloud.VirtualAppliance vapp =
+                getApiClient().getCloudService().getVirtualDatacenter(virtualDatacenterId)
+                    .getVirtualAppliance(virtualApplianceId);
+
+            org.jclouds.abiquo.domain.cloud.VirtualMachine vm =
+                vapp.getVirtualMachine(virtualMachine.getId());
+            result.setData(new State(StateEnum.valueOf(vm.getState().name())));
+        }
+        else
+        {
+            populateErrors(response, result, "rebootVirtualMachine");
+        }
+
+        return result;
+    }
+
 }

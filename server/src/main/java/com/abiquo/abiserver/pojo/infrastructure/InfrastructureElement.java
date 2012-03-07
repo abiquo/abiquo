@@ -22,8 +22,8 @@
 package com.abiquo.abiserver.pojo.infrastructure;
 
 /**
- * An Infrastructure Element can be: Rack, Physical Machine, HyperVisor Virtual Machine Relationships between
- * infrastructure element are set through attribute "assignedTo"
+ * An Infrastructure Element can be: Rack, Physical Machine, HyperVisor Virtual Machine
+ * Relationships between infrastructure element are set through attribute "assignedTo"
  * 
  * @author Oliver
  */

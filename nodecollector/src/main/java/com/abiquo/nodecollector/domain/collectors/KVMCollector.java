@@ -20,7 +20,7 @@
  */
 package com.abiquo.nodecollector.domain.collectors;
 
-import org.libvirt.Connect;
+import org.libvirt.Domain;
 import org.libvirt.LibvirtException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,6 +29,7 @@ import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.nodecollector.aim.impl.AimCollectorImpl;
 import com.abiquo.nodecollector.constants.MessageValues;
 import com.abiquo.nodecollector.domain.Collector;
+import com.abiquo.nodecollector.domain.collectors.libvirt.LeaksFreeConnect;
 import com.abiquo.nodecollector.exception.CollectorException;
 import com.abiquo.nodecollector.exception.ConnectionException;
 import com.abiquo.nodecollector.exception.LoginException;
@@ -51,11 +52,11 @@ public class KVMCollector extends AbstractLibvirtCollector
     {
         try
         {
-            setConn(new Connect("qemu+tcp://" + getIpAddress() + "/system?no_tty=1"));
+            setConnection(new LeaksFreeConnect("qemu+tcp://" + getIpAddress() + "/system?no_tty=1"));
+
             try
             {
                 aimcollector = new AimCollectorImpl(getIpAddress(), getAimPort());
-                // plugin call to see if we are authenticated
                 aimcollector.checkAIM();
             }
             catch (AimException e)
@@ -70,6 +71,7 @@ public class KVMCollector extends AbstractLibvirtCollector
                         e1);
                     return;
                 }
+
                 throw new ConnectionException(MessageValues.CONN_EXCP_IV, e);
             }
         }
@@ -81,7 +83,6 @@ public class KVMCollector extends AbstractLibvirtCollector
             }
             catch (CollectorException e1)
             {
-                // Do nothing.
                 LOGGER.error("Error freeing libvirt connection to address " + getIpAddress(), e1);
             }
 
@@ -89,7 +90,15 @@ public class KVMCollector extends AbstractLibvirtCollector
                 .getHypervisorType().name(), getIpAddress());
             throw new ConnectionException(MessageValues.CONN_EXCP_I, e);
         }
+    }
 
+    /**
+     * @see com.abiquo.nodecollector.domain.collectors.AbstractLibvirtCollector#isDomain0(org.libvirt.Domain)
+     */
+    @Override
+    protected boolean isDomain0(final Domain domain) throws LibvirtException
+    {
+        return false;
     }
 
 }

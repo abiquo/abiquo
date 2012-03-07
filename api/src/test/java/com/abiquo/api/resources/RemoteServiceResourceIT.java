@@ -34,7 +34,6 @@ import org.apache.wink.client.ClientResponse;
 import org.apache.wink.client.ClientWebException;
 import org.apache.wink.client.Resource;
 import org.apache.wink.client.RestClient;
-import org.testng.annotations.AfterMethod;
 import org.testng.annotations.Test;
 
 import com.abiquo.model.enumerator.RemoteServiceType;
@@ -102,7 +101,7 @@ public class RemoteServiceResourceIT extends AbstractJpaGeneratorIT
     @Test
     public void modifyRemoteService() throws ClientWebException
     {
-        RemoteService rs = remoteServiceGenerator.createInstance(RemoteServiceType.VIRTUAL_FACTORY);
+        RemoteService rs = remoteServiceGenerator.createInstance(RemoteServiceType.DHCP_SERVICE);
         setup(rs.getDatacenter(), rs);
 
         String uri = resolveRemoteServiceURI(rs.getDatacenter().getId(), rs.getType());
@@ -110,14 +109,14 @@ public class RemoteServiceResourceIT extends AbstractJpaGeneratorIT
         Resource resource = client.resource(uri).accept(MediaType.APPLICATION_XML);
 
         RemoteServiceDto remoteService = resource.get(RemoteServiceDto.class);
-        remoteService.setType(RemoteServiceType.DHCP_SERVICE);
+        remoteService.setUri("http://example.com:8080/nodecolector");
 
         ClientResponse response =
             resource.contentType(MediaType.APPLICATION_XML).put(remoteService);
         assertEquals(200, response.getStatusCode());
 
         RemoteServiceDto modified = response.getEntity(RemoteServiceDto.class);
-        assertEquals(RemoteServiceType.DHCP_SERVICE, modified.getType());
+        assertEquals("http://example.com:8080/nodecolector", modified.getUri());
     }
 
     @Test
@@ -139,8 +138,8 @@ public class RemoteServiceResourceIT extends AbstractJpaGeneratorIT
         resource = client.resource(invalidUri);
 
         ClientResponse response =
-            resource.accept(MediaType.APPLICATION_XML).contentType(MediaType.APPLICATION_XML).put(
-                remoteService);
+            resource.accept(MediaType.APPLICATION_XML).contentType(MediaType.APPLICATION_XML)
+                .put(remoteService);
 
         assertEquals(response.getStatusCode(), 404);
     }

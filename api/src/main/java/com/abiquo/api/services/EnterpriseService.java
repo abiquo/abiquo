@@ -33,7 +33,6 @@ import javax.ws.rs.core.MultivaluedMap;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.AccessDeniedException;
-import org.springframework.security.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,6 +40,8 @@ import org.springframework.transaction.annotation.Transactional;
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.resources.DatacenterResource;
 import com.abiquo.api.resources.DatacentersResource;
+import com.abiquo.api.resources.config.PricingTemplateResource;
+import com.abiquo.api.resources.config.PricingTemplatesResource;
 import com.abiquo.api.spring.security.SecurityService;
 import com.abiquo.api.util.URIResolver;
 import com.abiquo.model.enumerator.Privileges;
@@ -48,6 +49,8 @@ import com.abiquo.model.rest.RESTLink;
 import com.abiquo.model.transport.error.CommonError;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualDatacenterRep;
+import com.abiquo.server.core.cloud.VirtualMachine;
+import com.abiquo.server.core.cloud.VirtualMachineRep;
 import com.abiquo.server.core.common.Limit;
 import com.abiquo.server.core.enterprise.DatacenterLimits;
 import com.abiquo.server.core.enterprise.DatacenterLimitsDto;
@@ -59,30 +62,38 @@ import com.abiquo.server.core.enterprise.Role;
 import com.abiquo.server.core.enterprise.RoleLdap;
 import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.infrastructure.Datacenter;
+import com.abiquo.server.core.infrastructure.InfrastructureRep;
 import com.abiquo.server.core.infrastructure.Machine;
 import com.abiquo.server.core.infrastructure.MachineDto;
+import com.abiquo.server.core.pricing.PricingRep;
+import com.abiquo.server.core.pricing.PricingTemplate;
 
 @Service
-@Transactional(readOnly = true)
 public class EnterpriseService extends DefaultApiService
 {
     @Autowired
-    EnterpriseRep repo;
+    protected EnterpriseRep repo;
 
     @Autowired
-    VirtualDatacenterRep vdcRepo;
+    private VirtualDatacenterRep vdcRepo;
 
     @Autowired
-    MachineService machineService;
+    private InfrastructureRep infraRep;
 
     @Autowired
-    UserService userService;
+    PricingRep pricingRep;
 
     @Autowired
-    DatacenterService datacenterService;
+    private UserService userService;
 
     @Autowired
-    SecurityService securityService;
+    private DatacenterService datacenterService;
+
+    @Autowired
+    private SecurityService securityService;
+
+    @Autowired
+    protected VirtualMachineRep virtualMachineRep;
 
     public EnterpriseService()
     {
@@ -93,48 +104,56 @@ public class EnterpriseService extends DefaultApiService
     {
         repo = new EnterpriseRep(em);
         vdcRepo = new VirtualDatacenterRep(em);
-        machineService = new MachineService(em);
+        infraRep = new InfrastructureRep(em);
         userService = new UserService(em);
         datacenterService = new DatacenterService(em);
     }
 
-    /**
-     * Based on the spring authentication context.
-     * 
-     * @see SecurityContextHolder
-     */
-    // public Enterprise getCurrentEnterprise()
-    // {
-    // // AbiquoUserDetails currentUserInfo = (AbiquoUserDetails)
-    // SecurityContextHolder.getContext().getAuthentication();
-    //
-    // User user = userService.getCurrentUser();
-    //
-    // return user.getEnterprise();
-    //
-    // // Enterprise enterprise = repo.findById(id);
-    // // if (enterprise == null)
-    // // {
-    // // throw new NotFoundException(APIError.NON_EXISTENT_ENTERPRISE);
-    // // }
-    //
-    // }
-
+    @Transactional(readOnly = true)
     public Enterprise getCurrentEnterprise()
     {
         return userService.getCurrentUser().getEnterprise();
     }
 
-    public Collection<Enterprise> getEnterprises(final String filterName, final Integer offset,
-        final Integer numResults)
+    @Transactional(readOnly = true)
+    public Collection<Enterprise> getEnterprises(final Integer startwith, final int idPricingTempl,
+        final boolean included, final String filterName, final Integer numResults)
     {
         User user = userService.getCurrentUser();
+
+        PricingTemplate pt = null;
+
+        // id pricing -1
+        if (idPricingTempl != -1)
+        {
+            if (idPricingTempl != 0)
+            {
+                pt = findPricingTemplate(idPricingTempl);
+            }
+        }
+
         // if (user.getRole().getType() == Role.Type.ENTERPRISE_ADMIN)
         if (!securityService.hasPrivilege(Privileges.ENTERPRISE_ENUMERATE)
             && !securityService.hasPrivilege(Privileges.USERS_MANAGE_OTHER_ENTERPRISES)
             && !securityService.hasPrivilege(Privileges.ENTERPRISE_ADMINISTER_ALL))
         {
+            if (idPricingTempl != -1)
+            {
+                return repo.findByPricingTemplate(startwith, pt, included, filterName, numResults,
+                    user.getEnterprise().getId());
+            }
+
             return Collections.singletonList(user.getEnterprise());
+        }
+
+        if (idPricingTempl != -1)
+        {
+            if (idPricingTempl != 0)
+            {
+                pt = findPricingTemplate(idPricingTempl);
+            }
+            return repo
+                .findByPricingTemplate(startwith, pt, included, filterName, numResults, null);
         }
 
         if (!StringUtils.isEmpty(filterName))
@@ -142,7 +161,8 @@ public class EnterpriseService extends DefaultApiService
             return repo.findByNameAnywhere(filterName);
         }
 
-        return repo.findAll(offset, numResults);
+        return repo.findAll(startwith, numResults);
+
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
@@ -169,12 +189,44 @@ public class EnterpriseService extends DefaultApiService
         enterprise.setVlansLimits(new Limit(dto.getVlansSoft(), dto.getVlansHard()));
         enterprise.setPublicIPLimits(new Limit(dto.getPublicIpsSoft(), dto.getPublicIpsHard()));
 
+        // if we are in community the Pricingtemplate id is not informed, is null
+        // in this case we don't overwrite the old value.
+        if (securityService.hasPrivilege(Privileges.PRICING_MANAGE))
+        {
+            if (dto.searchLink(PricingTemplateResource.PRICING_TEMPLATE) != null)
+            {
+                int idPricing = getPricingTemplateId(dto);
+                if (idPricing == 0)
+                {
+                    enterprise.setPricingTemplate(null);
+                }
+                else
+                {
+
+                    PricingTemplate pricingTemplate = findPricingTemplate(idPricing);
+                    enterprise.setPricingTemplate(pricingTemplate);
+                }
+            }
+        }
         isValidEnterprise(enterprise);
 
         repo.insert(enterprise);
         return enterprise;
     }
 
+    @Transactional(readOnly = true)
+    public PricingTemplate getPricingTemplate(final Integer id)
+    {
+        PricingTemplate pt = pricingRep.findPricingTemplateById(id);
+        if (pt == null)
+        {
+            addNotFoundErrors(APIError.NON_EXISTENT_PRICING_TEMPLATE);
+            flushErrors();
+        }
+        return pt;
+    }
+
+    @Transactional(readOnly = true)
     public Enterprise getEnterprise(final Integer id)
     {
         Enterprise enterprise = repo.findById(id);
@@ -186,6 +238,25 @@ public class EnterpriseService extends DefaultApiService
 
         // userService.checkEnterpriseAdminCredentials(enterprise);
         userService.checkCurrentEnterprise(enterprise);
+        return enterprise;
+    }
+
+    /**
+     * This method does not enforce same enterprise. But does check for privs.
+     * 
+     * @param id
+     * @return Enterprise
+     */
+    @Transactional(readOnly = true)
+    public Enterprise getAnyEnterprise(final Integer id)
+    {
+        Enterprise enterprise = repo.findById(id);
+        if (enterprise == null)
+        {
+            addNotFoundErrors(APIError.NON_EXISTENT_ENTERPRISE);
+            flushErrors();
+        }
+
         return enterprise;
     }
 
@@ -219,6 +290,7 @@ public class EnterpriseService extends DefaultApiService
         }
 
         old.setName(dto.getName());
+        old.setIsReservationRestricted(dto.getIsReservationRestricted());
         old.setRamLimitsInMb(new Limit((long) dto.getRamSoftLimitInMb(), (long) dto
             .getRamHardLimitInMb()));
         old.setCpuCountLimits(new Limit((long) dto.getCpuCountSoftLimit(), (long) dto
@@ -228,9 +300,28 @@ public class EnterpriseService extends DefaultApiService
         old.setRepositoryLimits(new Limit(dto.getRepositorySoft(), dto.getRepositoryHard()));
         old.setVlansLimits(new Limit(dto.getVlansSoft(), dto.getVlansHard()));
         old.setPublicIPLimits(new Limit(dto.getPublicIpsSoft(), dto.getPublicIpsHard()));
-
         isValidEnterprise(old);
         isValidEnterpriseLimit(old);
+
+        // if we are in community the Pricingtemplate id is not informed, is null
+        // in this case we don't overwrite the old value.
+        if (securityService.hasPrivilege(Privileges.PRICING_MANAGE))
+        {
+            if (dto.searchLink(PricingTemplateResource.PRICING_TEMPLATE) != null)
+            {
+                int idPricing = getPricingTemplateId(dto);
+                if (idPricing == 0)
+                {
+                    old.setPricingTemplate(null);
+                }
+                else
+                {
+
+                    PricingTemplate pricingTemplate = findPricingTemplate(idPricing);
+                    old.setPricingTemplate(pricingTemplate);
+                }
+            }
+        }
 
         repo.update(old);
         return old;
@@ -295,6 +386,7 @@ public class EnterpriseService extends DefaultApiService
             }
         }
 
+        removeEnterpriseProperties(enterprise);
         repo.delete(enterprise);
     }
 
@@ -303,6 +395,7 @@ public class EnterpriseService extends DefaultApiService
         repo.deleteRole(role);
     }
 
+    @Transactional(readOnly = true)
     public List<Machine> findReservedMachines(final Integer enterpriseId)
     {
         return repo.findReservedMachines(getEnterprise(enterpriseId));
@@ -317,8 +410,27 @@ public class EnterpriseService extends DefaultApiService
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public Machine reserveMachine(final Integer machineId, final Integer enterpriseId)
     {
-        Machine machine = machineService.getMachine(machineId);
+        Machine machine = infraRep.findMachineById(machineId);
+        if (machine == null)
+        {
+            addNotFoundErrors(APIError.NON_EXISTENT_MACHINE);
+            flushErrors();
+        }
+
         Enterprise enterprise = getEnterprise(enterpriseId);
+
+        List<VirtualMachine> vms =
+            (List<VirtualMachine>) virtualMachineRep.findManagedByHypervisor(machine
+                .getHypervisor());
+        for (VirtualMachine vm : vms)
+        {
+            if (!vm.getEnterprise().equals(enterprise))
+            {
+                addConflictErrors(APIError.MACHINE_CANNOT_BE_RESERVED);
+                flushErrors();
+            }
+        }
+
         repo.reserveMachine(machine, enterprise);
 
         return machine;
@@ -338,6 +450,7 @@ public class EnterpriseService extends DefaultApiService
         repo.releaseMachine(machine);
     }
 
+    @Transactional(readOnly = true)
     public DatacenterLimits findLimitsByEnterpriseAndIdentifier(final Integer enterpriseId,
         final Integer limitId)
     {
@@ -346,6 +459,7 @@ public class EnterpriseService extends DefaultApiService
         return findLimitsByEnterpriseAndIdentifier(enterprise, limitId);
     }
 
+    @Transactional(readOnly = true)
     private DatacenterLimits findLimitsByEnterpriseAndIdentifier(final Enterprise enterprise,
         final Integer limitId)
     {
@@ -360,6 +474,7 @@ public class EnterpriseService extends DefaultApiService
         return limit;
     }
 
+    @Transactional(readOnly = true)
     public Collection<DatacenterLimits> findLimitsByEnterprise(final Integer enterpriseId)
     {
         Enterprise enterprise = getEnterprise(enterpriseId);
@@ -367,6 +482,11 @@ public class EnterpriseService extends DefaultApiService
         return repo.findLimitsByEnterprise(enterprise);
     }
 
+    /**
+     * Checks enterprise and datacenter exists and have a limits relation (datacenter allowed by
+     * enterprise).
+     */
+    @Transactional(readOnly = true)
     public DatacenterLimits findLimitsByEnterpriseAndDatacenter(final Integer enterpriseId,
         final Integer datacenterId)
     {
@@ -376,6 +496,21 @@ public class EnterpriseService extends DefaultApiService
         return repo.findLimitsByEnterpriseAndDatacenter(enterprise, datacenter);
     }
 
+    /**
+     * Checks enterprise and datacenter exists and have a limits relation (datacenter allowed by
+     * enterprise).
+     */
+    @Transactional(readOnly = true)
+    public DatacenterLimits findLimitsByEnterpriseVMTShared(final Integer enterpriseId,
+        final Integer datacenterId)
+    {
+        Enterprise enterprise = getAnyEnterprise(enterpriseId);
+        Datacenter datacenter = datacenterService.getDatacenter(datacenterId);
+
+        return repo.findLimitsByEnterpriseAndDatacenter(enterprise, datacenter);
+    }
+
+    @Transactional(readOnly = true)
     public Collection<DatacenterLimits> findLimitsByDatacenter(final Integer datacenterId)
     {
         Datacenter datacenter = datacenterService.getDatacenter(datacenterId);
@@ -477,7 +612,8 @@ public class EnterpriseService extends DefaultApiService
         DatacenterLimits limit = findLimitsByEnterpriseAndIdentifier(enterprise, limitId);
 
         Collection<VirtualDatacenter> vdcs =
-            vdcRepo.findByEnterpriseAndDatacenter(enterprise, limit.getDatacenter());
+            vdcRepo.findByEnterpriseAndDatacenter(enterprise, limit.getDatacenter(), 0, 0, "",
+                VirtualDatacenter.OrderByEnum.NAME, true);
 
         if (vdcs != null && !vdcs.isEmpty())
         {
@@ -488,6 +624,7 @@ public class EnterpriseService extends DefaultApiService
         repo.deleteLimit(limit);
     }
 
+    @Transactional(readOnly = true)
     private Datacenter getDatacenter(final DatacenterLimitsDto dto)
     {
         RESTLink datacenterLink = dto.searchLink("datacenter");
@@ -524,11 +661,13 @@ public class EnterpriseService extends DefaultApiService
         flushErrors();
     }
 
+    @Transactional(readOnly = true)
     public Collection<Privilege> findAllPrivileges()
     {
         return repo.findAllPrivileges();
     }
 
+    @Transactional(readOnly = true)
     public Privilege getPrivilege(final Integer id)
     {
         Privilege privilege = repo.findPrivilegeById(id);
@@ -541,14 +680,16 @@ public class EnterpriseService extends DefaultApiService
         return privilege;
     }
 
+    @Transactional(readOnly = true)
     public Collection<Privilege> getAllPrivileges()
     {
         return repo.findAllPrivileges();
     }
 
-    public RoleLdap getRoleLdap(final String role_ldap)
+    @Transactional(readOnly = true)
+    public RoleLdap getRoleLdap(final String roleLdap)
     {
-        List<RoleLdap> list = repo.findRoleLdapByRoleLdap(role_ldap);
+        List<RoleLdap> list = repo.findRoleLdapByRoleLdap(roleLdap);
         if (list == null || list.isEmpty())
         {
             addNotFoundErrors(APIError.NON_EXISTENT_ROLELDAP);
@@ -562,10 +703,77 @@ public class EnterpriseService extends DefaultApiService
         return list.get(0);
     }
 
+    @Transactional(readOnly = true)
+    public RoleLdap getRoleLdapOrNull(final String roleLdap)
+    {
+        List<RoleLdap> list = repo.findRoleLdapByRoleLdap(roleLdap);
+        if (list.size() > 1)
+        {
+            addConflictErrors(APIError.MULTIPLE_ENTRIES_ROLELDAP);
+            flushErrors();
+        }
+
+        return list == null || list.isEmpty() ? null : list.get(0);
+    }
+
+    @Transactional(readOnly = true)
+    public Role findRoleById(final Integer id)
+    {
+        return repo.findRoleById(id);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Privilege> findPrivilegesByRole(final Role role)
+    {
+        return repo.findPrivilegesByRole(role);
+    }
+
     protected void isValidEnterpriseLimit(final Enterprise old)
 
     {
         // community dummy impl (no limit check)
 
+    }
+
+    protected void removeEnterpriseProperties(final Enterprise enterprise)
+    {
+        // PREMIUM
+    }
+
+    private PricingTemplate findPricingTemplate(final Integer id)
+    {
+        PricingTemplate pt = pricingRep.findPricingTemplateById(id);
+        if (pt == null)
+        {
+            addNotFoundErrors(APIError.NON_EXISTENT_PRICING_TEMPLATE);
+            flushErrors();
+        }
+        return pt;
+    }
+
+    private Integer getPricingTemplateId(final EnterpriseDto dto)
+    {
+        RESTLink pt = dto.searchLink(PricingTemplateResource.PRICING_TEMPLATE);
+
+        if (pt == null)
+        {
+            addValidationErrors(APIError.MISSING_PRICING_TEMPLATE_LINK);
+            flushErrors();
+        }
+
+        String buildPath =
+            buildPath(PricingTemplatesResource.PRICING_TEMPLATES_PATH,
+                PricingTemplateResource.PRICING_TEMPLATE_PARAM);
+        MultivaluedMap<String, String> values = URIResolver.resolveFromURI(buildPath, pt.getHref());
+
+        if (values == null || !values.containsKey(PricingTemplateResource.PRICING_TEMPLATE))
+        {
+            addNotFoundErrors(APIError.PRICING_TEMPLATE_PARAM_NOT_FOUND);
+            flushErrors();
+        }
+
+        Integer pricingTemplateId =
+            Integer.valueOf(values.getFirst(PricingTemplateResource.PRICING_TEMPLATE));
+        return pricingTemplateId;
     }
 }

@@ -29,23 +29,18 @@
     paddingTop="0"
     verticalGap="0"
     initialize="onInitialize()"
+    creationComplete="onCreationComplete()"
     xmlns:mx="http://www.adobe.com/2006/mxml"
     xmlns:general="net.undf.abicloud.view.general.*">
 
-    <!-- editVirtualDataCenterButton's data provider -->
-    <mx:XMLList id="editVirtualDataCenterButtonDP">
-        <node id="editVDC"
-            label="@Resource(bundle='Common', key='BUTTON_EDIT')"/>
-        <node id="showDHCPInfo"
-            label="@Resource(bundle='VirtualAppliance', key='LABEL_SHOW_DHCP_INFO')"/>
-    </mx:XMLList>
-
     <mx:Metadata>
 		[Event(name="selectedVirtualDataCenterChange", type="flash.events.Event")]
+		[Event(name="requestVirtualDataCenters", type="flash.events.Event")]
 	</mx:Metadata>
 
     <mx:Script>
         <![CDATA[
+        	import net.undf.abicloud.vo.result.ListRequest;
         	import net.undf.abicloud.vo.user.PrivilegeType;
         	import net.undf.abicloud.utils.SecuredPrivilegeAccess;
         	import net.undf.abicloud.view.main.CommonAssets;
@@ -63,34 +58,40 @@
             import net.undf.abicloud.view.general.AbiCloudAlert;
             import net.undf.abicloud.vo.virtualappliance.VirtualDataCenter;
 
-            //PopUps
-            private var _virtualDatacenterFormEdit:VirtualDatacenterFormEdit;
-            
             private var  _virtualDatacenterAddFormManagement:VirtualDataCenterAddFormManagement;
+            
+            [Bindable]
+            private var VDC_RESULTS_PER_PAGE:int = AbiCloudModel.getInstance().configurationManager.config.client_user_numberUsersPerPage.value;
             
             private function onInitialize():void
             {
                 //Checking for privileges
                 SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.VDC_MANAGE,"removeChild",addVirtualDataCenterButton,securableVDCAccionsBox);
                 SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.VDC_MANAGE,"removeChild",deleteVirtualDataCenterButton,securableVDCAccionsBox);
+                SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.VDC_MANAGE,"removeChild",editVirtualDataCenterButton,securableVDCAccionsBox);
                 
                 //Listening for changes in model
                 AbiCloudModel.getInstance().virtualApplianceManager.addEventListener(VirtualApplianceEvent.VIRTUAL_DATACENTER_ADDED,
                                                                                      onVirtualDatacenterCRUD);				                                                                                    
                 AbiCloudModel.getInstance().virtualApplianceManager.addEventListener(VirtualApplianceEvent.VIRTUAL_DATACENTER_DELETED,
                                                                                      onVirtualDatacenterCRUD);
+                                                                                     
+                this._listRequest = new ListRequest();
+                this._listRequest.asc = true; 
+                this._listRequest.numberOfNodes = VDC_RESULTS_PER_PAGE;
+                this._listRequest.offset = 0 ;
+                this._listRequest.orderBy = "name";
+                
+            }
+            
+            private function onCreationComplete():void
+            {
+                //retrieveVirtualDatacenters();	
             }
 
             override protected function createChildren():void
             {
                 super.createChildren();
-
-                //Creating PopUps
-
-                _virtualDatacenterFormEdit = new VirtualDatacenterFormEdit();
-                _virtualDatacenterFormEdit.addEventListener("VirtualDatacenterFormEditClose",
-                                                            closeVirtualDatacenterFormEdit);
-                
             }
 
             [Bindable]
@@ -104,14 +105,25 @@
             {
                 return this._selectedVirtualDataCenter;
             }
+            
+            [Bindable]
+            private var _listRequest:ListRequest;
+            
+            public function get listRequest():ListRequest
+            {
+                return this._listRequest;
+            }
 
             public function init():void
             {
                 _virtualDataCenters = new ArrayCollection();
                 _selectedVirtualDataCenter = null;
                 virtualDataCenterFilter.text = "";
-                
-                
+            }
+            
+            public function cleanVirtualDatacenterList():void
+            {
+            	virtualDataCenterList.dataProvider = new ArrayCollection();
             }
 
             /**
@@ -128,9 +140,6 @@
             public function setVirtualDataCenters(value:ArrayCollection):void
             {
                 this._virtualDataCenters = value;
-
-                //Setting virtualDataCenterlists data provider (calling this function because maybe they are filtered)
-                onChangeVirtualDataCenterFilter();
 
                 //Trying to get again the VirtualDataCenter that we had selected
                 if (this._selectedVirtualDataCenter)
@@ -188,7 +197,7 @@
                 dispatchEvent(new Event("selectedVirtualDataCenterChange"));
 
                 virtualDataCenterFilter.text = "";
-                onChangeVirtualDataCenterFilter();
+                retrieveVirtualDatacenters();
             }
 
             /**
@@ -257,31 +266,6 @@
             }
 
             /**
-             * When user clicks on VirtualDataCenter edit button
-             */
-            private function onClickEditVirtualDataCenter(event:MenuEvent):void
-            {
-
-                if (this._selectedVirtualDataCenter)
-                {
-                    editVirtualDataCenterButton.dataProvider = editVirtualDataCenterButtonDP; //To avoid an annoying graphic problem...
-
-                    if (event.item.@id == "editVDC")
-                    {
-                        //Calling for VDC edition
-                        editVirtualDataCenter();
-                    }
-                    else if (event.item.@id == "showDHCPInfo")
-                    {
-                        //Asking for the DHCP information for the selected Virtual Data Center
-                        var virtualApplianceEvent:VirtualApplianceEvent = new VirtualApplianceEvent(VirtualApplianceEvent.GET_VIRTUAL_DATACENTER_DHCP_CONF);
-                        virtualApplianceEvent.virtualDataCenter = this._selectedVirtualDataCenter;
-                        dispatchEvent(virtualApplianceEvent);
-                    }
-                }
-            }
-
-            /**
              * Opens a VirtualDataCenterForm for edition
              */
             private function editVirtualDataCenter():void
@@ -293,41 +277,13 @@
                 }
             }
 
-            /**
-             * Closes an opened VirtualDataCenterForm
-             */
-            private function closeVirtualDatacenterFormEdit(event:Event):void
+            private function retrieveVirtualDatacenters():void
             {
-                PopUpManager.removePopUp(this._virtualDatacenterFormEdit);
-            }
-
-            /**
-             * To filter the VirtualDataCenter list
-             */
-            private function onChangeVirtualDataCenterFilter():void
-            {
-                var filterText:String = virtualDataCenterFilter.text;
-
-                if (filterText == null || filterText == "")
-                    virtualDataCenterList.dataProvider = this._virtualDataCenters;
-                else
-                {
-                    var filteredArray:ArrayCollection = new ArrayCollection();
-                    var length:int = this._virtualDataCenters.length;
-                    var i:int;
-                    var virtualDataCenter:VirtualDataCenter;
-
-                    for (i = 0; i < length; i++)
-                    {
-                        virtualDataCenter = this._virtualDataCenters.getItemAt(i) as VirtualDataCenter;
-                        if (virtualDataCenter.name.toLocaleLowerCase().indexOf(filterText.toLocaleLowerCase()) > -1)
-                            filteredArray.addItem(virtualDataCenter);
-                    }
-
-                    virtualDataCenterList.dataProvider = filteredArray;
-                }
-
-                virtualDataCenterList.selectedIndex = ArrayCollection(virtualDataCenterList.dataProvider).getItemIndex(this._selectedVirtualDataCenter);
+                this._listRequest.filterLike = virtualDataCenterFilter.text;
+                this._listRequest.numberOfNodes = VDC_RESULTS_PER_PAGE;
+                this._listRequest.offset = (virtualdatacentersPaginatorSlider.value - 1) * VDC_RESULTS_PER_PAGE ;
+                
+                dispatchEvent(new Event("requestVirtualDataCenters"));
             }
         ]]>
     </mx:Script>
@@ -340,12 +296,13 @@
         verticalAlign="middle"
         styleName="GeneralDataPanelTopSkin">
 
-        <mx:Image source="{CommonAssets.magnifier}"/>
+        <mx:Image source="{CommonAssets.magnifier}"
+        	click="retrieveVirtualDatacenters()"/>
 
         <mx:TextInput id="virtualDataCenterFilter"
             width="100%" height="20"
             toolTip="@Resource(bundle='Common', key='BUTTON_FILTER_TOOLTIP')"
-            change="onChangeVirtualDataCenterFilter()"/>
+            enter="retrieveVirtualDatacenters()"/>
     </mx:HBox>
 
     <mx:HBox 
@@ -369,14 +326,17 @@
     <mx:List id="virtualDataCenterList"
         width="100%" height="100%"
         borderStyle="none"
+        dataProvider="{this._virtualDataCenters}"
+        labelField="name"
         click="onClickVirtualDataCenterList()"
         itemRenderer="net.undf.abicloud.view.virtualappliance.components.virtualdatacenter.VirtualDataCenterListRenderer"/>
 
     <!-- VirtualDataCenter Tool Bar -->
-    <general:GeneralPanelToolBox>
+    <general:GeneralPanelToolBox width="100%" height="32"
+        bottom="0">
     	<mx:HBox 
     		id="securableVDCAccionsBox"
-		    width="100%" 
+		    width="100%" height="100%"
 		    verticalAlign="middle"
 		    horizontalScrollPolicy="off">
 	        <mx:Button id="addVirtualDataCenterButton"
@@ -389,17 +349,35 @@
 	            styleName="RemoveButton"
 	            toolTip="@Resource(bundle='Common', key='BUTTON_DEL_TOOLTIP')"
 	            click="askVirtualDataCenterDeletion()"/>
-	        <mx:Spacer 
-	            width="100%" height="10"/>
+	        
+	        <mx:Canvas 
+	            width="100%" height="100%"
+	            verticalScrollPolicy="off" horizontalScrollPolicy="off">
+	            <mx:Label 
+	                top="2"
+	                horizontalCenter="0"
+	                styleName="paginatorTextOnColor"
+	                text="{virtualdatacentersPaginatorSlider.value +
+	                      ' / ' + 
+	                      (int(Math.ceil(AbiCloudModel.getInstance().virtualApplianceManager.totalVirtualDatacenters / VDC_RESULTS_PER_PAGE)) > 0 ?
+	                      int(Math.ceil(AbiCloudModel.getInstance().virtualApplianceManager.totalVirtualDatacenters / VDC_RESULTS_PER_PAGE)) : '1')}"/>
 	
-	        <mx:PopUpMenuButton id="editVirtualDataCenterButton"
-	            width="40" height="22"
-	            styleName="ConfigurationButtonPlus"
-	            dataProvider="{editVirtualDataCenterButtonDP}" label=""
-	            labelField="@label"
-	            enabled="{this._selectedVirtualDataCenter != null}"
-	            itemClick="onClickEditVirtualDataCenter(event)"
-	            closeDuration="0"/>
+	            <mx:HSlider id="virtualdatacentersPaginatorSlider"
+	                width="75"
+	                bottom="3"
+	                horizontalCenter="0"
+	                minimum="1" snapInterval="1"
+	                maximum="{int(Math.ceil(AbiCloudModel.getInstance().virtualApplianceManager.totalVirtualDatacenters / VDC_RESULTS_PER_PAGE))}"
+	                liveDragging="true" showDataTip="false"
+	                change="retrieveVirtualDatacenters()"/>
+	        </mx:Canvas>
+	
+	        <mx:Button id="editVirtualDataCenterButton"
+                enabled="{this._selectedVirtualDataCenter != null}"
+                styleName="ConfigurationButton"
+                toolTip="@Resource(bundle='Common', key='BUTTON_EDIT_TOOLTIP')"
+                click="editVirtualDataCenter()"/>
+
 		</mx:HBox>
     </general:GeneralPanelToolBox>
 

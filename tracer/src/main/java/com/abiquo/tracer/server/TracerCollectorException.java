@@ -21,11 +21,12 @@
 
 package com.abiquo.tracer.server;
 
-public class TracerCollectorException extends Exception {
+public class TracerCollectorException extends Exception
+{
 
-	/**
+    /**
 	 * 
 	 */
-	private static final long serialVersionUID = -2733253630551200141L;
+    private static final long serialVersionUID = -2733253630551200141L;
 
 }

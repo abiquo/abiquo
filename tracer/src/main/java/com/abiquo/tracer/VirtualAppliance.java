@@ -23,71 +23,88 @@ package com.abiquo.tracer;
 
 import java.io.Serializable;
 
-public class VirtualAppliance implements Serializable {
+public class VirtualAppliance implements Serializable
+{
 
-	/**
+    /**
 	 * 
 	 */
-	private static final long serialVersionUID = 769479377070110089L;
+    private static final long serialVersionUID = 769479377070110089L;
 
-	private String name;
-	private VirtualMachine virtualMachine;
-	private Volume volume;
-	private Network network;
+    private String name;
 
-	private VirtualAppliance(String virtualAppliance) {
-		this.setName(virtualAppliance);
-	}
+    private VirtualMachine virtualMachine;
 
-	public static VirtualAppliance virtualAppliance(String virtualAppliance) {
-		return new VirtualAppliance(virtualAppliance);
-	}
+    private Volume volume;
 
-	public VirtualAppliance virtualMachine(VirtualMachine virtualMachine) {
-		this.setVirtualMachine(virtualMachine);
-		return this;
-	}
+    private Network network;
 
-	public VirtualAppliance volume(Volume volume) {
-		this.setVolume(volume);
-		return this;
-	}
+    private VirtualAppliance(String virtualAppliance)
+    {
+        this.setName(virtualAppliance);
+    }
 
-	public VirtualAppliance network(Network network) {
-		this.setNetwork(network);
-		return this;
-	}
+    public static VirtualAppliance virtualAppliance(String virtualAppliance)
+    {
+        return new VirtualAppliance(virtualAppliance);
+    }
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    public VirtualAppliance virtualMachine(VirtualMachine virtualMachine)
+    {
+        this.setVirtualMachine(virtualMachine);
+        return this;
+    }
 
-	public String getName() {
-		return name;
-	}
+    public VirtualAppliance volume(Volume volume)
+    {
+        this.setVolume(volume);
+        return this;
+    }
 
-	public void setVolume(Volume volume) {
-		this.volume = volume;
-	}
+    public VirtualAppliance network(Network network)
+    {
+        this.setNetwork(network);
+        return this;
+    }
 
-	public Volume getVolume() {
-		return volume;
-	}
+    public void setName(String name)
+    {
+        this.name = name;
+    }
 
-	public void setNetwork(Network network) {
-		this.network = network;
-	}
+    public String getName()
+    {
+        return name;
+    }
 
-	public Network getNetwork() {
-		return network;
-	}
+    public void setVolume(Volume volume)
+    {
+        this.volume = volume;
+    }
 
-	public void setVirtualMachine(VirtualMachine virtualMachine) {
-		this.virtualMachine = virtualMachine;
-	}
+    public Volume getVolume()
+    {
+        return volume;
+    }
 
-	public VirtualMachine getVirtualMachine() {
-		return virtualMachine;
-	}
+    public void setNetwork(Network network)
+    {
+        this.network = network;
+    }
+
+    public Network getNetwork()
+    {
+        return network;
+    }
+
+    public void setVirtualMachine(VirtualMachine virtualMachine)
+    {
+        this.virtualMachine = virtualMachine;
+    }
+
+    public VirtualMachine getVirtualMachine()
+    {
+        return virtualMachine;
+    }
 
 }

@@ -26,15 +26,17 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-public class Lists {
-    public static <T> List<T> createSortedList( Iterable<T> items, Comparator<? super T> comparator) {
-    	assert items != null;
-    	assert comparator != null;
-    	
-    	List<T> result = new ArrayList<T>();
-    	for( T item : items)
-    		result.add(item );
-    	Collections.sort(result, comparator);
-    	return result;
+public class Lists
+{
+    public static <T> List<T> createSortedList(Iterable<T> items, Comparator< ? super T> comparator)
+    {
+        assert items != null;
+        assert comparator != null;
+
+        List<T> result = new ArrayList<T>();
+        for (T item : items)
+            result.add(item);
+        Collections.sort(result, comparator);
+        return result;
     }
 }

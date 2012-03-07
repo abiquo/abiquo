@@ -28,6 +28,8 @@ import com.abiquo.model.transport.SingleResourceWithLimitsDto;
 @XmlRootElement(name = "enterprise")
 public class EnterpriseDto extends SingleResourceWithLimitsDto
 {
+    private static final long serialVersionUID = 1L;
+
     private Integer id;
 
     private String name;
@@ -36,7 +38,19 @@ public class EnterpriseDto extends SingleResourceWithLimitsDto
 
     private long repositoryHard;
 
+    private String chefURL;
+
+    private String chefClient;
+
+    private String chefValidator;
+
+    private String chefClientCertificate;
+
+    private String chefValidatorCertificate;
+
     private boolean isReservationRestricted;
+
+    private Integer idPricingTemplate;
 
     public Integer getId()
     {
@@ -84,13 +98,74 @@ public class EnterpriseDto extends SingleResourceWithLimitsDto
         this.repositoryHard = hard;
     }
 
+    public String getChefURL()
+    {
+        return chefURL;
+    }
+
+    public void setChefURL(final String chefURL)
+    {
+        this.chefURL = chefURL;
+    }
+
+    public String getChefClient()
+    {
+        return chefClient;
+    }
+
+    public void setChefClient(final String chefClient)
+    {
+        this.chefClient = chefClient;
+    }
+
+    public String getChefValidator()
+    {
+        return chefValidator;
+    }
+
+    public void setChefValidator(final String chefValidator)
+    {
+        this.chefValidator = chefValidator;
+    }
+
+    public String getChefClientCertificate()
+    {
+        return chefClientCertificate;
+    }
+
+    public void setChefClientCertificate(final String chefClientCertificate)
+    {
+        this.chefClientCertificate = chefClientCertificate;
+    }
+
+    public String getChefValidatorCertificate()
+    {
+        return chefValidatorCertificate;
+    }
+
+    public void setChefValidatorCertificate(final String chefValidatorCertificate)
+    {
+        this.chefValidatorCertificate = chefValidatorCertificate;
+    }
+
     public boolean getIsReservationRestricted()
     {
         return isReservationRestricted;
     }
 
-    public void setIsReservationRestricted(boolean isReservationRestricted)
+    public void setIsReservationRestricted(final boolean isReservationRestricted)
     {
         this.isReservationRestricted = isReservationRestricted;
     }
+
+    public Integer getIdPricingTemplate()
+    {
+        return idPricingTemplate;
+    }
+
+    public void setIdPricingTemplate(final Integer idPricingTemplate)
+    {
+        this.idPricingTemplate = idPricingTemplate;
+    }
+
 }

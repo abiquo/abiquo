@@ -33,6 +33,7 @@ public class DatacenterGenerator extends DefaultEntityGenerator<Datacenter>
 {
 
     private NetworkGenerator networkGenerator;
+
     private TierGenerator tierGenerator;
 
     public DatacenterGenerator(SeedGenerator seed)
@@ -68,7 +69,7 @@ public class DatacenterGenerator extends DefaultEntityGenerator<Datacenter>
 
         Datacenter dc = new Datacenter(name, situation);
         dc.setNetwork(networkGenerator.createUniqueInstance());
-        
+
         return dc;
     }
 

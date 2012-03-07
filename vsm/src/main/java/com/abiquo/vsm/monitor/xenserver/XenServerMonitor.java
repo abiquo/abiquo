@@ -20,14 +20,11 @@
  */
 package com.abiquo.vsm.monitor.xenserver;
 
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,16 +32,14 @@ import com.abiquo.vsm.events.VMEvent;
 import com.abiquo.vsm.events.VMEventType;
 import com.abiquo.vsm.exception.MonitorException;
 import com.abiquo.vsm.model.PhysicalMachine;
+import com.abiquo.vsm.model.VirtualMachinesCache;
 import com.abiquo.vsm.monitor.AbstractMonitor;
 import com.abiquo.vsm.monitor.Monitor;
 import com.abiquo.vsm.monitor.Monitor.Type;
-import com.xensource.xenapi.Connection;
-import com.xensource.xenapi.Event;
+import com.abiquo.vsm.monitor.executor.AbstractTask;
+import com.abiquo.vsm.monitor.executor.PeriodicalExecutor;
 import com.xensource.xenapi.Types;
 import com.xensource.xenapi.VM;
-import com.xensource.xenapi.Types.EventsLost;
-import com.xensource.xenapi.Types.VmOperations;
-import com.xensource.xenapi.Types.VmPowerState;
 
 /**
  * The XenServer monitor.
@@ -60,15 +55,25 @@ public class XenServerMonitor extends AbstractMonitor
     /** Maximum number of machines this monitor can manage. */
     public static final int MAX_MONITORED_MACHINES = 1;
 
-    /** The list of active pollers. */
-    private List<XenServerSubscriber> subscribers;
+    /** Manages connections to XenServer hypervisor. */
+    private XenServerConnector connector;
+
+    // Polling stuff
+
+    /** The executor */
+    private PeriodicalExecutor executor;
+
+    /** The poller */
+    private Poller poller;
 
     /**
      * Creates the <code>XenServerMonitor</code>.
      */
     public XenServerMonitor()
     {
-        subscribers = new LinkedList<XenServerSubscriber>();
+        poller = new Poller();
+        connector = new XenServerConnector();
+        executor = createExecutor(poller, Poller.POLLING_INTERVAL);
     }
 
     @Override
@@ -81,83 +86,40 @@ public class XenServerMonitor extends AbstractMonitor
     public void start()
     {
         LOGGER.debug("Starting XenServer monitor");
-        // Do nothing. The addPhysicalMachine does all the work.
+
+        executor.start();
     }
 
     @Override
     public void shutdown()
     {
-        LOGGER.debug("Shutting down XenServer monitor");
-        // Do nothing. The removePhysicalMachine does all the work.
+        String physicalmachines = StringUtils.join(monitoredMachines, ", ");
+        LOGGER.debug("Stopping XenServer monitor for: {}", physicalmachines);
+
+        executor.stop();
     }
 
     @Override
-    public void addPhysicalMachine(String physicalMachineAddress) throws MonitorException
-    {
-        super.addPhysicalMachine(physicalMachineAddress);
-
-        // Start monitoring the physical machine in a separate thread
-        XenServerSubscriber subscriber = new XenServerSubscriber(physicalMachineAddress);
-        subscriber.start();
-
-        // Save the poller in the list of pollers, to be able to stop it when needed
-        subscribers.add(subscriber);
-    }
-
-    @Override
-    public void removePhysicalMachine(String physicalMachineAddress) throws MonitorException
-    {
-        super.removePhysicalMachine(physicalMachineAddress);
-
-        // Set the stop flag, to make the poller thread terminate
-        for (XenServerSubscriber subscriber : subscribers)
-        {
-            if (subscriber.physicalMachineAddress.equals(physicalMachineAddress))
-            {
-                subscriber.mustUnsubscribe = true;
-            }
-        }
-    }
-
-    @Override
-    public void publishState(String physicalMachineAddress, String virtualMachineName)
+    public void publishState(final String physicalMachineAddress, final String virtualMachineName)
         throws MonitorException
     {
         super.publishState(physicalMachineAddress, virtualMachineName);
 
         Types.VmPowerState powerState = null;
-        Connection connection = null;
 
-        // Connect to the hypervisor
         PhysicalMachine pm = getPhysicalMachine(physicalMachineAddress);
+        connector.connect(pm.getAddress(), pm.getUsername(), pm.getPassword());
 
         try
         {
-            connection =
-                XenServerConnector.connect(pm.getAddress(), pm.getUsername(), pm.getPassword());
-
-            Iterator<VM> vmsIterator = VM.getByNameLabel(connection, virtualMachineName).iterator();
-            if (vmsIterator.hasNext())
-            {
-                powerState = vmsIterator.next().getPowerState(connection);
-            }
-            else
-            {
-                // VM Not found
-                powerState = Types.VmPowerState.UNRECOGNIZED;
-                LOGGER.error("Virtual machine {} was not found", virtualMachineName);
-            }
-        }
-        catch (Exception ex)
-        {
-            throw new MonitorException("Could not get the state of the virtual machine: "
-                + virtualMachineName + " on " + physicalMachineAddress, ex);
+            // Connect to the hypervisor
+            powerState = connector.getState(virtualMachineName);
         }
         finally
         {
-            if (connection != null)
+            if (connector.getConnection() != null)
             {
-                XenServerConnector.disconnect(connection);
+                connector.disconnect();
             }
         }
 
@@ -167,295 +129,156 @@ public class XenServerMonitor extends AbstractMonitor
     }
 
     /**
+     * Creates and initializes the {@link PeriodicalExecutor}.
+     * 
+     * @param poller The poller to be executed.
+     * @param pollInterval The polling execution interval.
+     * @return The PeriodicalExecutor.
+     */
+    private PeriodicalExecutor createExecutor(final Poller poller, final int pollInterval)
+    {
+        return new PeriodicalExecutor(poller, pollInterval)
+        {
+            @Override
+            public void executionFailure(final Throwable t)
+            {
+                LOGGER.trace("An unexpected error occured while performing monitor tasks", t);
+            }
+        };
+    }
+
+    /**
      * Performs synchronous polling calls to get the state of the monitored virtual machines.
      * 
-     * @author destevez
+     * @author ibarrera
      */
-    private class XenServerSubscriber extends Thread
+    private class Poller extends AbstractTask
     {
-        /** The address of the machine being monitored. */
-        private String physicalMachineAddress;
-
-        /** Boolean indicating if the thread must be stopped. */
-        private boolean mustUnsubscribe;
-
-        /** The type of the events to subscribe to. */
-        private Set<String> eventClasses;
-
-        /**
-         * Creates a new <code>XenServerPoller</code>
-         * 
-         * @param physicalMachineAddress The address of the machine to monitor.
-         */
-        public XenServerSubscriber(String physicalMachineAddress)
-        {
-            super();
-            this.physicalMachineAddress = physicalMachineAddress;
-            this.mustUnsubscribe = false;
-
-            // Capture only VM events
-            this.eventClasses = new HashSet<String>();
-            this.eventClasses.add("vm");
-        }
+        /** The polling interval. */
+        public static final int POLLING_INTERVAL = 5000;
 
         @Override
-        public void run()
+        public void execute() throws Exception
         {
-            Connection connection = connectAndSubscribe();
-
-            if (connection != null)
+            // It is important to synchronize the monitoredMachines list to avoid errors if a
+            // machine is added or removed while iterating the list
+            synchronized (monitoredMachines)
             {
-                // Start listening for events
-                LOGGER.trace("Listening to events at: {}", physicalMachineAddress);
+                for (String physicalMachineAddress : monitoredMachines)
+                {
+                    LOGGER.trace("Getting information from: {}", physicalMachineAddress);
 
-                watchEvents(connection);
+                    PhysicalMachine pm = getPhysicalMachine(physicalMachineAddress);
+                    VirtualMachinesCache cache = pm.getVirtualMachines();
+
+                    connector.connect(physicalMachineAddress, pm.getUsername(), pm.getPassword());
+
+                    // Current VMs in the hypervisor. Used to detect CREATE and DESTROY events
+                    Set<String> currentVMs = new HashSet<String>();
+
+                    try
+                    {
+                        LOGGER.trace("Getting information from the current VMS...");
+
+                        // Get states
+                        List<VM.Record> vms = connector.getAllVMs();
+
+                        for (VM.Record vm : vms)
+                        {
+                            // Save the VM in the list of current VMs
+                            String vmName = vm.nameLabel;
+                            currentVMs.add(vmName);
+
+                            if (connector.isBeingRebooted(vm))
+                            {
+                                // When XenServer reboots a VM, its state is always RUNNING
+                                // If we detect a reboot, just invalidate the last known state, so
+                                // we can notify the power on when reboot finishes
+                                LOGGER.trace(
+                                    "VM {} is being rebooted. Invalidating last known state",
+                                    vmName);
+                                invalidateLastKnownState(physicalMachineAddress, vmName);
+                            }
+                            else
+                            {
+                                // Get the new state of the VM
+                                VMEventType state = XenServerUtils.translateEvent(vm.powerState);
+                                LOGGER.trace("Found VM {} in state {}", vmName, state.name());
+
+                                VMEvent event = new VMEvent(state, physicalMachineAddress, vmName);
+
+                                // Propagate the event. RedisSubscriber will decide if it must be
+                                // notified, based on subscription information
+                                XenServerMonitor.this.notify(event);
+                            }
+                        }
+
+                        if (LOGGER.isTraceEnabled())
+                        {
+                            String cacheStr = StringUtils.join(cache.getCache(), ", ");
+                            LOGGER.trace(
+                                "Cache for Machine {} before generating CREATE/DESTROY is: {}",
+                                physicalMachineAddress, cacheStr);
+                        }
+
+                        // Propagate create and destroy events
+                        propagateCreateAndDestroyEvents(pm, currentVMs);
+
+                        // Update the physical machine with the current machines in the hypervisor
+                        cache.getCache().clear();
+                        cache.getCache().addAll(currentVMs);
+
+                        if (LOGGER.isTraceEnabled())
+                        {
+                            String cacheStr = StringUtils.join(cache.getCache(), ", ");
+                            LOGGER.trace(
+                                "Cache for Machine {} after generating CREATE/DESTROY is: {}",
+                                physicalMachineAddress, cacheStr);
+                        }
+                    }
+                    finally
+                    {
+                        connector.disconnect();
+                    }
+                }
             }
-
-            // Unregister the event listening
-            unsubscribeAndClose(connection);
-
-            // Remove the poller from the list of pollers to allow the garbage
-            // collector delete it from memory
-            subscribers.remove(this);
         }
 
         /**
-         * Subscribes to events in the physical machine.
+         * Propagates events for each created and destroyed virtual machine.
          * 
-         * @return The connection object to the physical machine.
+         * @param pm The physical machine being monitored.
+         * @param currentVMs The current virtual machines in the hypervisor.
          */
-        private Connection connectAndSubscribe()
+        private void propagateCreateAndDestroyEvents(final PhysicalMachine pm,
+            final Set<String> currentVMs)
         {
-            try
+            // Propagate DESTROY events
+            Set<String> removedVMs = pm.getVirtualMachines().getCache();
+            removedVMs.removeAll(currentVMs);
+
+            for (String removed : removedVMs)
             {
-                // Get the physical machine details
-                PhysicalMachine pm = getPhysicalMachine(physicalMachineAddress);
+                VMEvent event = new VMEvent(VMEventType.DESTROYED, pm.getAddress(), removed);
 
-                // Connect to the target physical machine
-                Connection connection =
-                    XenServerConnector.connect(physicalMachineAddress, pm.getUsername(), pm
-                        .getPassword());
+                LOGGER.trace("Removed VM {} from {}", removed, pm.getAddress());
 
-                // Subscribe to the events of the configured type
-                Event.register(connection, eventClasses);
-
-                return connection;
-            }
-            catch (Exception ex)
-            {
-                LOGGER.error("Could not subscribe to events at: " + physicalMachineAddress, ex);
+                XenServerMonitor.this.notify(event);
             }
 
-            return null;
-        }
+            // Propagate CREATE events
+            Set<String> createdVMs = new HashSet<String>(currentVMs);
+            createdVMs.removeAll(pm.getVirtualMachines().getCache());
 
-        /**
-         * Unsubscribes from events and closes the given connection.
-         * 
-         * @param connection The connection to free.
-         */
-        private void unsubscribeAndClose(Connection connection)
-        {
-            try
+            for (String created : createdVMs)
             {
-                // Unsubscribe from events
-                Event.unregister(connection, eventClasses);
-            }
-            catch (Exception ex)
-            {
-                LOGGER.error("Could unsubscribe from events at: " + physicalMachineAddress, ex);
-            }
+                VMEvent event = new VMEvent(VMEventType.CREATED, pm.getAddress(), created);
 
-            try
-            {
-                // Logout and close connection
-                XenServerConnector.disconnect(connection);
-            }
-            catch (Exception ex)
-            {
-                LOGGER.error("Could not disconnect from: " + physicalMachineAddress, ex);
-            }
-        }
+                LOGGER.trace("New VM {} at {}", created, pm.getAddress());
 
-        /**
-         * Notify the event only if the thread is not marked to be stopped.
-         * 
-         * @param vm The virtual machine where the event was fired.
-         * @param type The type of the event to notify.
-         */
-        private void notifyStateChange(VM.Record vm, VMEventType type)
-        {
-            String msg =
-                String.format("VM %s: nameLabel=%s, uuid=%s, state =%s", type.name(), vm.nameLabel,
-                    vm.uuid, vm.powerState);
-
-            LOGGER.trace(msg);
-
-            // Notify only if the poller is not marked to be stopped
-            if (!mustUnsubscribe)
-            {
-                VMEvent event = new VMEvent(type, physicalMachineAddress, vm.nameLabel);
                 XenServerMonitor.this.notify(event);
             }
         }
 
-        /**
-         * Listens for events at the target host and processes them.
-         * 
-         * @param connection The connection to the target host.
-         */
-        private void watchEvents(Connection connection)
-        {
-            // Machines we are watching at this execution to avoid sending repeated events
-            Map<String, VmPowerState> vmsChangingState = new HashMap<String, VmPowerState>();
-            Map<String, VmOperations> vmsOperationFiltered = new HashMap<String, VmOperations>();
-
-            while (!mustUnsubscribe)
-            {
-                try
-                {
-                    Set<Event.Record> events = Event.next(connection);
-
-                    LOGGER.trace("Received Events Package with {} events", events.size());
-
-                    for (Iterator<Event.Record> iterator = events.iterator(); iterator.hasNext();)
-                    {
-                        Event.Record record = iterator.next();
-                        VM.Record vm = (VM.Record) record.snapshot;
-
-                        if (vm.currentOperations.values().size() == 1)
-                        {
-                            // An Operation was made over this VM
-                            VmOperations currentOperation =
-                                vm.currentOperations.values().iterator().next();
-
-                            // Avoid sending repeated operation
-                            if (!vmsOperationFiltered.containsKey(vm.nameLabel)
-                                || !vmsOperationFiltered.get(vm.nameLabel).equals(currentOperation))
-                            {
-                                // We are ignoring repeated operations on the same VirtualMachine
-                                // New operation detected on VM
-                                if (currentOperation.equals(VmOperations.PROVISION))
-                                {
-                                    notifyStateChange(vm, VMEventType.CREATED);
-                                }
-                                else if (currentOperation.equals(VmOperations.DESTROY))
-                                {
-                                    notifyStateChange(vm, VMEventType.DESTROYED);
-                                }
-                            }
-
-                            vmsOperationFiltered.remove(vm.nameLabel);
-                            vmsOperationFiltered.put(vm.nameLabel, currentOperation);
-                        }
-
-                        // XenServerAPI sends repeated events, we keep a list with VMs current
-                        // states and check when a change is made
-                        if (vmsChangingState.containsKey(vm.nameLabel))
-                        {
-                            VmPowerState currentState = vmsChangingState.get(vm.nameLabel);
-
-                            // Checks for new state
-                            if (currentState != vm.powerState)
-                            {
-                                if (vm.powerState != Types.VmPowerState.UNRECOGNIZED)
-                                {
-                                    switch (currentState)
-                                    {
-                                        case HALTED:
-                                            if (vm.powerState == Types.VmPowerState.RUNNING)
-                                            {
-                                                notifyStateChange(vm, VMEventType.POWER_ON);
-                                            }
-                                            break;
-                                        case PAUSED:
-                                        case SUSPENDED:
-                                            if (vm.powerState == Types.VmPowerState.RUNNING)
-                                            {
-                                                notifyStateChange(vm, VMEventType.RESUMED);
-                                            }
-                                            break;
-                                        case RUNNING:
-                                            switch (vm.powerState)
-                                            {
-                                                case HALTED:
-                                                    notifyStateChange(vm, VMEventType.POWER_OFF);
-                                                    break;
-                                                case PAUSED:
-                                                case SUSPENDED:
-                                                    notifyStateChange(vm, VMEventType.PAUSED);
-                                                    break;
-                                                default:
-                                                    break;
-                                            }
-                                            break;
-
-                                        default:
-                                            LOGGER.trace(
-                                                "Ignoring state change for virtual machine: {}",
-                                                vm.nameLabel);
-                                            break;
-                                    }
-                                }
-                                else
-                                {
-                                    LOGGER.trace(
-                                        "Unrecognized or unknown state for virtual machine: {}",
-                                        vm.nameLabel);
-                                }
-
-                                // Remove from watch List
-                                vmsChangingState.remove(vm.nameLabel);
-                            }
-
-                            // Ignore if state has not changed
-                        }
-                        else
-                        {
-                            // New VM to watch for state changes
-                            if (vm.powerState != Types.VmPowerState.UNRECOGNIZED)
-                            {
-                                vmsChangingState.put(vm.nameLabel, vm.powerState);
-                            }
-                            else
-                            {
-                                LOGGER.trace(
-                                    "State unrecognized or unknown for virtual machine: {}",
-                                    vm.nameLabel);
-                            }
-                        }
-                    }
-                }
-                catch (EventsLost ex)
-                {
-                    LOGGER.trace("There were lost events for physical machine: {}. "
-                        + "This may be due to a slow event consumer. Trying to re-register...",
-                        physicalMachineAddress);
-
-                    try
-                    {
-                        // When an EventsLost exception occurs, client must re-register to
-                        // continue receiving events. See official documentation:
-                        // http://docs.vmd.citrix.com/XenServer/5.6.0fp1/1.0/en_gb/sdk.html#subscribing_to_and_listening_for_events
-                        Event.unregister(connection, eventClasses);
-                        Event.register(connection, eventClasses);
-                    }
-                    catch (Exception e)
-                    {
-                        LOGGER
-                            .error(
-                                "Could not re-register to events on physical machine: {}. Shutting down the monitor.",
-                                physicalMachineAddress);
-
-                        mustUnsubscribe = true;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    LOGGER.trace("Could not get the events for physical machine: {}",
-                        physicalMachineAddress);
-                }
-            }
-        }
     }
 }

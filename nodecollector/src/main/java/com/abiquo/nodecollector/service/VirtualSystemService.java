@@ -57,6 +57,21 @@ public interface VirtualSystemService
      * @param uuid
      * @return
      */
-    public VirtualSystemDto getVirtualSystem(String ip, HypervisorType hypervisorType,
-        String user, String password, final Integer port, String uuid) throws NodecollectorException;
+    public VirtualSystemDto getVirtualSystemByUUID(String ip, HypervisorType hypervisorType,
+        String user, String password, final Integer port, String uuid)
+        throws NodecollectorException;
+
+    /**
+     * Get a unique virtual system.
+     * 
+     * @param ip address of the virtual system
+     * @param hypervisorType
+     * @param user
+     * @param password
+     * @param uuid
+     * @return
+     */
+    public VirtualSystemDto getVirtualSystemByName(String ip, HypervisorType hypervisorType,
+        String user, String password, final Integer port, String name)
+        throws NodecollectorException;
 }

@@ -23,63 +23,83 @@ package com.abiquo.tracer;
 
 import java.io.Serializable;
 
-public class UserInfo implements Serializable {
+public class UserInfo implements Serializable
+{
 
-	/**
+    /**
 	 * 
 	 */
-	private static final long serialVersionUID = -27154623274629450L;
-	private long id;
-	private String username;
-	private String enterprise;
-	
-	public UserInfo() {
-		this.username = "";
-		this.id=0;
-		this.enterprise="";
-	}
+    private static final long serialVersionUID = -27154623274629450L;
 
-	public UserInfo(String username) {
-		this.username = username;
-		this.id=0;
-		this.enterprise="";
-	}
-	
-	public UserInfo(String username, Long id) {
-		this.username = username;
-		this.id=id;
-		this.enterprise="";
-	}
+    private long id;
 
-	public UserInfo(String username, Long id, String enterprise) {
-		this.username = username;
-		this.id=id;
-		this.enterprise=enterprise;
-	}
+    private String username;
 
-	public UserInfo(String username, String enterprise) {
-		this.username = username;
-		this.id=0;
-		this.enterprise=enterprise;
-	}
+    private String enterprise;
 
-	public long getId() {
-		return id;
-	}
-	public void setId(long id) {
-		this.id = id;
-	}
-	public String getUsername() {
-		return username;
-	}
-	public void setUsername(String username) {
-		this.username = username;
-	}
-	public String getEnterprise() {
-		return enterprise;
-	}
-	public void setEnterprise(String enterprise) {
-		this.enterprise = enterprise;
-	}
+    public UserInfo()
+    {
+        this.username = "";
+        this.id = 0;
+        this.enterprise = "";
+    }
+
+    public UserInfo(String username)
+    {
+        this.username = username;
+        this.id = 0;
+        this.enterprise = "";
+    }
+
+    public UserInfo(String username, Long id)
+    {
+        this.username = username;
+        this.id = id;
+        this.enterprise = "";
+    }
+
+    public UserInfo(String username, Long id, String enterprise)
+    {
+        this.username = username;
+        this.id = id;
+        this.enterprise = enterprise;
+    }
+
+    public UserInfo(String username, String enterprise)
+    {
+        this.username = username;
+        this.id = 0;
+        this.enterprise = enterprise;
+    }
+
+    public long getId()
+    {
+        return id;
+    }
+
+    public void setId(long id)
+    {
+        this.id = id;
+    }
+
+    public String getUsername()
+    {
+        return username;
+    }
+
+    public void setUsername(String username)
+    {
+        this.username = username;
+    }
+
+    public String getEnterprise()
+    {
+        return enterprise;
+    }
+
+    public void setEnterprise(String enterprise)
+    {
+        this.enterprise = enterprise;
+    }
 
 }

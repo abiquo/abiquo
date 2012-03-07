@@ -22,16 +22,19 @@
 package com.abiquo.server.core.infrastructure.storage;
 
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
 
 import com.abiquo.model.transport.SingleResourceTransportDto;
 
 @XmlRootElement(name = "initiatorMapping")
+@XmlType(propOrder = {"id", "initiatorIqn", "targetIqn", "targetLun"})
 public class InitiatorMappingDto extends SingleResourceTransportDto
 {
     /**
      * 
      */
     private static final long serialVersionUID = 1L;
+
     private Integer id;
 
     public Integer getId()
@@ -39,7 +42,7 @@ public class InitiatorMappingDto extends SingleResourceTransportDto
         return id;
     }
 
-    public void setId(Integer id)
+    public void setId(final Integer id)
     {
         this.id = id;
     }
@@ -51,7 +54,7 @@ public class InitiatorMappingDto extends SingleResourceTransportDto
         return targetLun;
     }
 
-    public void setTargetLun(Integer targetLun)
+    public void setTargetLun(final Integer targetLun)
     {
         this.targetLun = targetLun;
     }
@@ -63,7 +66,7 @@ public class InitiatorMappingDto extends SingleResourceTransportDto
         return targetIqn;
     }
 
-    public void setTargetIqn(String targetIqn)
+    public void setTargetIqn(final String targetIqn)
     {
         this.targetIqn = targetIqn;
     }
@@ -75,7 +78,7 @@ public class InitiatorMappingDto extends SingleResourceTransportDto
         return initiatorIqn;
     }
 
-    public void setInitiatorIqn(String initiatorIqn)
+    public void setInitiatorIqn(final String initiatorIqn)
     {
         this.initiatorIqn = initiatorIqn;
     }

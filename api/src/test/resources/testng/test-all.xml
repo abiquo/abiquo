@@ -8,6 +8,7 @@
             <run>
                 <include name="test-basic" />
                 <include name="test-network" />
+                <include name="test-storage" />
                 <include name="test-all" />
             </run>
         </groups>

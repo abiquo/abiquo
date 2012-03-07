@@ -120,13 +120,12 @@ public class HyperVisor extends InfrastructureElement implements IPojo<Hyperviso
     {
         this.password = password;
     }
-    
+
     public HypervisorHB toPojoHB()
     {
-    	PhysicalMachine physicalMachine = (PhysicalMachine) super.getAssignedTo();
-    	
-    	return toPojoHB(((physicalMachine) == null) ? null : physicalMachine
-                .toPojoHB());
+        PhysicalMachine physicalMachine = (PhysicalMachine) super.getAssignedTo();
+
+        return toPojoHB(((physicalMachine) == null) ? null : physicalMachine.toPojoHB());
     }
 
     public HypervisorHB toPojoHB(PhysicalmachineHB physicalMachine)

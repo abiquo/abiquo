@@ -29,29 +29,30 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.abiquo.model.enumerator.HypervisorType;
+import com.abiquo.server.core.appslibrary.AppsLibraryRep;
+import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
+import com.abiquo.server.core.appslibrary.VirtualMachineTemplateGenerator;
 import com.abiquo.server.core.cloud.NodeVirtualImage;
 import com.abiquo.server.core.cloud.NodeVirtualImageGenerator;
-import com.abiquo.server.core.cloud.State;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualApplianceGenerator;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualDatacenterGenerator;
 import com.abiquo.server.core.cloud.VirtualDatacenterRep;
-import com.abiquo.server.core.cloud.VirtualImage;
-import com.abiquo.server.core.cloud.VirtualImageDAO;
-import com.abiquo.server.core.cloud.VirtualImageGenerator;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineDAO;
 import com.abiquo.server.core.cloud.VirtualMachineGenerator;
+import com.abiquo.server.core.cloud.VirtualMachineState;
 import com.abiquo.server.core.enterprise.DatacenterLimits;
 import com.abiquo.server.core.enterprise.DatacenterLimitsDAO;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.EnterpriseGenerator;
 import com.abiquo.server.core.enterprise.EnterpriseRep;
+import com.abiquo.server.core.enterprise.Privilege;
+import com.abiquo.server.core.enterprise.PrivilegeDAO;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.InfrastructureRep;
 import com.abiquo.server.core.infrastructure.Rack;
-import com.abiquo.server.core.infrastructure.RemoteService;
 import com.abiquo.server.core.infrastructure.Repository;
 import com.abiquo.server.core.infrastructure.RepositoryDAO;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
@@ -81,10 +82,13 @@ public class PopulateVirtualInfrastructure extends PopulateConstants
     DatacenterLimitsDAO dcLimitsDao;
 
     @Autowired
+    PrivilegeDAO privilegeDao;
+
+    @Autowired
     RepositoryDAO repoDao;
 
     @Autowired
-    VirtualImageDAO vimageDao;
+    private AppsLibraryRep appslibraryRep;
 
     @Autowired
     VirtualMachineDAO vmachineDao;
@@ -108,7 +112,7 @@ public class PopulateVirtualInfrastructure extends PopulateConstants
 
     IpPoolManagementGenerator ipPoolGen = new IpPoolManagementGenerator(seed);
 
-    VirtualImageGenerator vimageGen = new VirtualImageGenerator(seed);
+    VirtualMachineTemplateGenerator vimageGen = new VirtualMachineTemplateGenerator(seed);
 
     public PopulateVirtualInfrastructure()
     {
@@ -125,7 +129,7 @@ public class PopulateVirtualInfrastructure extends PopulateConstants
      * <li>e1.vdc1.va1.vm1:vi1,vnic1,vlan1 (VirtualMachine)
      * <ul>
      */
-    public void createVirtualInfrastructure(String declar)
+    public void createVirtualInfrastructure(final String declar)
     {
         // also vlan assertTrue(declar.startsWith("e") );
 
@@ -216,7 +220,7 @@ public class PopulateVirtualInfrastructure extends PopulateConstants
      * @param enterprise, e1:1 (enterprise isReservationRestricted=1)
      * @return
      */
-    private Enterprise createEnterprise(String enter)
+    private Enterprise createEnterprise(final String enter)
     {
         Enterprise enterprise = enterRep.findByName(enter);
 
@@ -252,7 +256,7 @@ public class PopulateVirtualInfrastructure extends PopulateConstants
         return enterprise;
     }
 
-    public void allowAllDatacentersByDefault(Enterprise enterprise)
+    public void allowAllDatacentersByDefault(final Enterprise enterprise)
     {
         for (Datacenter dc : dcRep.findAll())
         {
@@ -265,7 +269,7 @@ public class PopulateVirtualInfrastructure extends PopulateConstants
     /**
      * @param vimageDec, vi1:d1,1,2,10 (VirtualImage)
      */
-    private VirtualImage createVirtualImage(String enterStr, String vimageDec)
+    private VirtualMachineTemplate createVirtualImage(final String enterStr, final String vimageDec)
     {
         Enterprise enterprise = enterRep.findByName(enterStr);
 
@@ -293,13 +297,14 @@ public class PopulateVirtualInfrastructure extends PopulateConstants
         {
             cpuRequired = Integer.parseInt(frg[1]);
             ramRequired = (int) (Integer.parseInt(frg[2]) * GB_TO_MB);
-            hdRequired = Integer.parseInt(frg[3]) * GB_TO_MB * (1014 * 1024); // bytes
+            hdRequired = Integer.parseInt(frg[3]) * GB_TO_MB * 1014 * 1024; // bytes
         }
 
-        VirtualImage vimage =
+        VirtualMachineTemplate vimage =
             vimageGen.createInstance(enterprise, repository, cpuRequired, ramRequired, hdRequired,
                 virtualimageName);
-        vimageDao.persist(vimage);
+        appslibraryRep.insertCategory(vimage.getCategory());
+        appslibraryRep.insertVirtualMachineTemplate(vimage);
 
         return vimage;
     }
@@ -307,7 +312,8 @@ public class PopulateVirtualInfrastructure extends PopulateConstants
     /**
      * @param vdcDeclaration, vdc1:d1,HTYPE (VirtualDatacenter)
      */
-    private VirtualDatacenter createVirtualDatacenter(String enter, String vdcDeclaration)
+    private VirtualDatacenter createVirtualDatacenter(final String enter,
+        final String vdcDeclaration)
     {
         Enterprise enterprise = enterRep.findByName(enter);
 
@@ -339,7 +345,8 @@ public class PopulateVirtualInfrastructure extends PopulateConstants
         return vdc;
     }
 
-    private VirtualAppliance createVirtualAppliance(String enterName, String vdcName, String vappDec)
+    private VirtualAppliance createVirtualAppliance(final String enterName, final String vdcName,
+        final String vappDec)
     {
 
         // XXX unused enterName to check vdc !!!
@@ -356,8 +363,8 @@ public class PopulateVirtualInfrastructure extends PopulateConstants
     /**
      * @param vmachineStr, vm1:vi1,vnic1,vlan1 (VirtualMachine)
      */
-    private VirtualMachine createVirtualMachine(String enterStr, String vdcStr, String vappStr,
-        String vmachineStr)
+    private VirtualMachine createVirtualMachine(final String enterStr, final String vdcStr,
+        final String vappStr, final String vmachineStr)
     {
         // TODO unused enterStr, vdcStr
         Enterprise enterprise = enterRep.findByName(enterStr);
@@ -389,10 +396,22 @@ public class PopulateVirtualInfrastructure extends PopulateConstants
             createIpMan(vnicName, vlanName, vdc);
         }
 
-        VirtualImage vimage = vimageDao.findByName(virtualimageName);
-        assertNotNull("vimage not found " + virtualimageName, vimage);
+        VirtualMachineTemplate vmtemplate =
+            appslibraryRep.findVirtualMachineTemplateByName(virtualimageName);
+        assertNotNull("vimage not found " + virtualimageName, vmtemplate);
 
-        VirtualMachine vmachine = vmGen.createInstance(vimage, enterprise, vmachineName);
+        VirtualMachine vmachine = vmGen.createInstance(vmtemplate, enterprise, vmachineName);
+
+        for (Privilege p : vmachine.getUser().getRole().getPrivileges())
+        {
+            privilegeDao.persist(p);
+        }
+
+        // set the default vmachine requirements based on the template
+        vmachine.setCpu(vmtemplate.getCpuRequired());
+        vmachine.setRam(vmtemplate.getRamRequired());
+        vmachine.setHdInBytes(vmtemplate.getHdRequiredInBytes());
+
         enterRep.insertRole(vmachine.getUser().getRole());
         enterRep.insertUser(vmachine.getUser());
         vdcRep.insertVirtualMachine(vmachine);
@@ -410,7 +429,7 @@ public class PopulateVirtualInfrastructure extends PopulateConstants
      * @param vlanNetworkName
      * @return
      */
-    private void createVlanNetwork(String declar)
+    private void createVlanNetwork(final String declar)
     {
         assertTrue("Expected vlan declaration " + declar, declar.startsWith(DEC_VLAN));
 
@@ -430,12 +449,12 @@ public class PopulateVirtualInfrastructure extends PopulateConstants
         Network network = vdc.getDatacenter().getNetwork();
 
         VLANNetwork vlan = vlanNetGen.createInstance(network, vlanNetworkName);
-
-        RemoteService rsDhcp = vlan.getConfiguration().getDhcp().getRemoteService();
-        // XXX save remote service on the current datacenter
-
-        rsDhcp.setDatacenter(vdc.getDatacenter());
-        dcRep.insertRemoteService(rsDhcp);
+        //
+        // RemoteService rsDhcp = vlan.getConfiguration().getDhcp().getRemoteService();
+        // // XXX save remote service on the current datacenter
+        //
+        // rsDhcp.setDatacenter(vdc.getDatacenter());
+        // dcRep.insertRemoteService(rsDhcp);
 
         if (fragments.length == 2)
         {
@@ -464,19 +483,19 @@ public class PopulateVirtualInfrastructure extends PopulateConstants
      * 
      * @param declar
      */
-    private void createIpMan(String vnicName, String vlanName, VirtualDatacenter vdc)
+    private void createIpMan(final String vnicName, final String vlanName,
+        final VirtualDatacenter vdc)
     {
         VLANNetwork vlanNetwork = vdcRep.findVlanByName(vlanName);
 
         IpPoolManagement ipPoolManagement = ipPoolGen.createInstance(vdc, vdc.getNetwork());
         ipPoolManagement.setVlanNetwork(vlanNetwork);
         ipPoolManagement.setName(vnicName);
-        ipPoolManagement.setDhcp(vlanNetwork.getConfiguration().getDhcp());
         vdcRep.insertIpManagement(ipPoolManagement);
 
     }
 
-    public void removeVirtualMachine(Integer virtualMachineId)
+    public void removeVirtualMachine(final Integer virtualMachineId)
     {
 
         VirtualMachine vm = vdcRep.findVirtualMachineById(virtualMachineId);
@@ -486,8 +505,18 @@ public class PopulateVirtualInfrastructure extends PopulateConstants
         // XXX can not update XXX vdcRep.deleteVirtualMachine(vm);
     }
 
-    public void runningVirtualMachine(Integer virtualMachineId)
+    public void runningVirtualMachine(final Integer virtualMachineId)
     {
-        vmachineDao.updateVirtualMachineState(virtualMachineId, State.RUNNING);
+        vmachineDao.updateVirtualMachineState(virtualMachineId, VirtualMachineState.ON);
+    }
+
+    public VirtualMachine getVirtualMachine(final Integer virtualMachineId)
+    {
+        return vmachineDao.findById(virtualMachineId);
+    }
+
+    public VirtualAppliance getVirtualAppliance(final Integer virtualAppId)
+    {
+        return vdcRep.findVirtualApplianceById(virtualAppId);
     }
 }

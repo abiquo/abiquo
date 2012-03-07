@@ -21,8 +21,6 @@
 
 package com.abiquo.server.core.infrastructure;
 
-import static org.testng.Assert.assertEquals;
-
 import java.util.List;
 import java.util.Random;
 
@@ -33,29 +31,30 @@ import com.softwarementors.commons.testng.AssertEx;
 public class UcsRackGenerator extends DefaultEntityGenerator<UcsRack>
 {
 
-    private DatacenterGenerator datacenterGenerator;
+    private final DatacenterGenerator datacenterGenerator;
 
-    public UcsRackGenerator(SeedGenerator seed)
+    public UcsRackGenerator(final SeedGenerator seed)
     {
         super(seed);
         this.datacenterGenerator = new DatacenterGenerator(seed);
     }
 
     @Override
-    public void assertAllPropertiesEqual(UcsRack obj1, UcsRack obj2)
+    public void assertAllPropertiesEqual(final UcsRack obj1, final UcsRack obj2)
     {
         AssertEx.assertPropertiesEqualSilent(obj1, obj2, UcsRack.PORT_PROPERTY,
-            UcsRack.IP_PROPERTY, UcsRack.PASSWORD_PROPERTY, UcsRack.USER_PROPERTY);
+            UcsRack.IP_PROPERTY, UcsRack.PASSWORD_PROPERTY, UcsRack.USER_PROPERTY,
+            UcsRack.DEFAULT_TEMPLATE_PROPERTY, UcsRack.MAX_MACHINES_ON_PROPERTY);
     }
 
     @Override
     public UcsRack createUniqueInstance()
     {
-        Datacenter datacenter = this.datacenterGenerator.createUniqueInstance();   
+        Datacenter datacenter = this.datacenterGenerator.createUniqueInstance();
         return createInstance(datacenter);
     }
-    
-    public UcsRack createInstance(Datacenter datacenter)
+
+    public UcsRack createInstance(final Datacenter datacenter)
     {
         int seed = nextSeed();
         final String shortDescription =
@@ -63,25 +62,29 @@ public class UcsRackGenerator extends DefaultEntityGenerator<UcsRack>
         final String longDescription =
             newString(seed, Rack.LONG_DESCRIPTION_LENGTH_MIN, Rack.LONG_DESCRIPTION_LENGTH_MAX);
 
-        Integer vlan_id_min = 2;
-        Integer vlan_id_max = 4096;
-        Integer nrsq = 80;
+        int vlan_id_min = 2;
+        int vlan_id_max = 4096;
+        int nrsq = 80;
         String vlans_id_avoided =
             newString(this.nextSeed(), Rack.VLANS_ID_AVOIDED_LENGTH_MIN,
                 Rack.VLANS_ID_AVOIDED_LENGTH_MAX);
-        Integer vlan_per_vdc_expected = 8;
-        
+        int vlan_per_vdc_expected = 8;
+        int vlan_per_vdc_reserved = 1024;
+
         UcsRack ucsRack =
             new UcsRack("rack" + new Random().nextInt(),
                 datacenter,
                 vlan_id_min,
                 vlan_id_max,
                 vlan_per_vdc_expected,
+                vlan_per_vdc_reserved,
                 nrsq,
                 "10.60.1.28",
                 80,
                 "user",
-                "password");
+                "password",
+                "org-root/ls-" + new Random().nextInt(),
+                0);
         ucsRack.setVlansIdAvoided(vlans_id_avoided);
         ucsRack.setShortDescription(shortDescription);
         ucsRack.setLongDescription(longDescription);
@@ -90,10 +93,11 @@ public class UcsRackGenerator extends DefaultEntityGenerator<UcsRack>
     }
 
     @Override
-    public void addAuxiliaryEntitiesToPersist(UcsRack entity, List<Object> entitiesToPersist)
+    public void addAuxiliaryEntitiesToPersist(final UcsRack entity,
+        final List<Object> entitiesToPersist)
     {
         super.addAuxiliaryEntitiesToPersist(entity, entitiesToPersist);
-        
+
         Datacenter datacenter = entity.getDatacenter();
 
         this.datacenterGenerator.addAuxiliaryEntitiesToPersist(datacenter, entitiesToPersist);

@@ -21,12 +21,14 @@
 
 package com.abiquo.abiserver.pojo.infrastructure;
 
+import org.springframework.util.StringUtils;
+
 import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.RackHB;
 import com.abiquo.abiserver.pojo.IPojo;
 import com.abiquo.abiserver.pojo.networking.VlanNetworkParameters;
 import com.abiquo.server.core.infrastructure.RackDto;
 
-public class Rack extends InfrastructureElement implements IPojo<RackHB>
+public class Rack extends InfrastructureElement implements IPojo<RackHB>, Comparable<Rack>
 {
 
     /* ------------- Public atributes ------------- */
@@ -37,10 +39,11 @@ public class Rack extends InfrastructureElement implements IPojo<RackHB>
     private DataCenter dataCenter;
 
     private VlanNetworkParameters vlanNetworkParameters;
-    
+
     private Boolean haEnabled;
 
     private final String type = "Standard Rack";
+
     /* ------------- Constructor ------------- */
     public Rack()
     {
@@ -56,7 +59,7 @@ public class Rack extends InfrastructureElement implements IPojo<RackHB>
         return shortDescription;
     }
 
-    public void setShortDescription(String shortDescription)
+    public void setShortDescription(final String shortDescription)
     {
         this.shortDescription = shortDescription;
     }
@@ -66,7 +69,7 @@ public class Rack extends InfrastructureElement implements IPojo<RackHB>
         return largeDescription;
     }
 
-    public void setLargeDescription(String largeDescription)
+    public void setLargeDescription(final String largeDescription)
     {
         this.largeDescription = largeDescription;
     }
@@ -76,12 +79,12 @@ public class Rack extends InfrastructureElement implements IPojo<RackHB>
         return dataCenter;
     }
 
-    public void setDataCenter(DataCenter dataCenter)
+    public void setDataCenter(final DataCenter dataCenter)
     {
         this.dataCenter = dataCenter;
     }
 
-    public void setVlanNetworkParameters(VlanNetworkParameters vlanNetworkParameters)
+    public void setVlanNetworkParameters(final VlanNetworkParameters vlanNetworkParameters)
     {
         this.vlanNetworkParameters = vlanNetworkParameters;
     }
@@ -91,6 +94,7 @@ public class Rack extends InfrastructureElement implements IPojo<RackHB>
         return vlanNetworkParameters;
     }
 
+    @Override
     public RackHB toPojoHB()
     {
         RackHB rackPojo = new RackHB();
@@ -110,8 +114,8 @@ public class Rack extends InfrastructureElement implements IPojo<RackHB>
         rackPojo.setHaEnabled(getHaEnabled());
         return rackPojo;
     }
-    
-    public void setHaEnabled(Boolean haEnabled)
+
+    public void setHaEnabled(final Boolean haEnabled)
     {
         this.haEnabled = haEnabled;
     }
@@ -121,7 +125,7 @@ public class Rack extends InfrastructureElement implements IPojo<RackHB>
         return haEnabled;
     }
 
-    public static Rack create(RackDto dto, DataCenter datacenter)
+    public static Rack create(final RackDto dto, final DataCenter datacenter)
     {
         Rack rack = new Rack();
         rack.setDataCenter(datacenter);
@@ -135,11 +139,31 @@ public class Rack extends InfrastructureElement implements IPojo<RackHB>
                 dto.getVlanIdMax(),
                 dto.getVlansIdAvoided(),
                 dto.getNrsq(),
-                dto.getVlanPerVdcExpected());
+                dto.getVlanPerVdcReserved());
         rack.setVlanNetworkParameters(vlanNetworkParameters);
 
         return rack;
     }
 
-    
+    @Override
+    public int compareTo(final Rack r2)
+    {
+        if (StringUtils.hasText(this.getName()) && StringUtils.hasText(r2.getName()))
+        {
+            return this.getName().compareTo(r2.getName());
+        }
+        else if (!StringUtils.hasText(this.getName()) && !StringUtils.hasText(r2.getName()))
+        {
+            return 0;
+        }
+        else if (!StringUtils.hasText(this.getName()) && StringUtils.hasText(r2.getName()))
+        {
+            return -1;
+        }
+        else
+        {
+            return 1;
+        }
+    }
+
 }

@@ -26,7 +26,6 @@
 // Generated on: 2010.12.24 at 11:14:06 AM CET 
 //
 
-
 package com.abiquo.server.core.infrastructure.nodecollector;
 
 import java.util.ArrayList;
@@ -36,11 +35,11 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 
-
 /**
- * <p>Java class for VirtualSystemCollectionDto complex type.
- * 
- * <p>The following schema fragment specifies the expected content contained within this class.
+ * <p>
+ * Java class for VirtualSystemCollectionDto complex type.
+ * <p>
+ * The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
  * &lt;complexType name="VirtualSystemCollectionDto">
@@ -53,42 +52,34 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "VirtualSystemCollectionDto", propOrder = {
-    "virtualSystems"
-})
-public class VirtualSystemCollectionDto {
+@XmlType(name = "VirtualSystemCollectionDto", propOrder = {"virtualSystems"})
+public class VirtualSystemCollectionDto
+{
 
     @XmlElement(nillable = true)
     protected List<VirtualSystemDto> virtualSystems;
 
     /**
      * Gets the value of the virtualSystems property.
-     * 
      * <p>
-     * This accessor method returns a reference to the live list,
-     * not a snapshot. Therefore any modification you make to the
-     * returned list will be present inside the JAXB object.
-     * This is why there is not a <CODE>set</CODE> method for the virtualSystems property.
-     * 
+     * This accessor method returns a reference to the live list, not a snapshot. Therefore any
+     * modification you make to the returned list will be present inside the JAXB object. This is
+     * why there is not a <CODE>set</CODE> method for the virtualSystems property.
      * <p>
      * For example, to add a new item, do as follows:
+     * 
      * <pre>
-     *    getVirtualSystems().add(newItem);
+     * getVirtualSystems().add(newItem);
      * </pre>
-     * 
-     * 
      * <p>
-     * Objects of the following type(s) are allowed in the list
-     * {@link VirtualSystemDto }
-     * 
-     * 
+     * Objects of the following type(s) are allowed in the list {@link VirtualSystemDto }
      */
-    public List<VirtualSystemDto> getVirtualSystems() {
-        if (virtualSystems == null) {
+    public List<VirtualSystemDto> getVirtualSystems()
+    {
+        if (virtualSystems == null)
+        {
             virtualSystems = new ArrayList<VirtualSystemDto>();
         }
         return this.virtualSystems;

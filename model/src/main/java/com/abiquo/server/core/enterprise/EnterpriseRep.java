@@ -29,18 +29,16 @@ import javax.persistence.EntityManager;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 
-import com.abiquo.server.core.cloud.VirtualImageDAO;
 import com.abiquo.server.core.common.DefaultEntityCurrentUsed;
 import com.abiquo.server.core.common.DefaultRepBase;
 import com.abiquo.server.core.enterprise.User.AuthType;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.Machine;
 import com.abiquo.server.core.infrastructure.MachineDAO;
+import com.abiquo.server.core.pricing.PricingTemplate;
 
 @Repository
-@Transactional
 public class EnterpriseRep extends DefaultRepBase
 {
 
@@ -52,9 +50,6 @@ public class EnterpriseRep extends DefaultRepBase
 
     @Autowired
     private EnterpriseDAO enterpriseDAO;
-
-    @Autowired
-    private VirtualImageDAO virtualImageDAO;
 
     @Autowired
     private PrivilegeDAO privilegeDAO;
@@ -72,7 +67,13 @@ public class EnterpriseRep extends DefaultRepBase
     private MachineDAO machineDAO;
 
     @Autowired
+    private EnterprisePropertiesDAO enterprisePropertiesDAO;
+
+    @Autowired
     private DatacenterLimitsDAO limitsDAO;
+
+    @Autowired
+    private OneTimeTokenSessionDAO ottSessionDAO;
 
     public EnterpriseRep()
     {
@@ -86,9 +87,9 @@ public class EnterpriseRep extends DefaultRepBase
 
         this.entityManager = entityManager;
         this.enterpriseDAO = new EnterpriseDAO(entityManager);
-        virtualImageDAO = new VirtualImageDAO(entityManager);
         userDAO = new UserDAO(entityManager);
         roleDAO = new RoleDAO(entityManager);
+        ottSessionDAO = new OneTimeTokenSessionDAO(entityManager);
         privilegeDAO = new PrivilegeDAO(entityManager);
         roleLdapDAO = new RoleLdapDAO(entityManager);
     }
@@ -112,6 +113,26 @@ public class EnterpriseRep extends DefaultRepBase
         enterpriseDAO.flush();
     }
 
+    public EnterpriseProperties findPropertiesByEnterprise(final Enterprise enterprise)
+    {
+        return enterprisePropertiesDAO.findByEnterprise(enterprise);
+    }
+
+    public void updateEnterpriseProperties(final EnterpriseProperties enterpriseProperties)
+    {
+        enterprisePropertiesDAO.flush();
+    }
+
+    public void removeEnterpriseProperties(final EnterpriseProperties ep)
+    {
+        enterprisePropertiesDAO.remove(ep);
+    }
+
+    public void createEnterpriseProperties(final Enterprise enterprise)
+    {
+        enterprisePropertiesDAO.persist(new EnterpriseProperties(enterprise));
+    }
+
     public RoleLdap findLdapRoleByType(final String type)
     {
         return roleLdapDAO.findByType(type);
@@ -129,9 +150,17 @@ public class EnterpriseRep extends DefaultRepBase
         return this.enterpriseDAO.findAll();
     }
 
-    public List<Enterprise> findAll(final Integer offset, final Integer numResults)
+    public List<Enterprise> findAll(final Integer startwith, final Integer numResults)
     {
-        return this.enterpriseDAO.findAll(offset, numResults);
+        return this.enterpriseDAO.findAll(startwith, numResults);
+    }
+
+    public List<Enterprise> findByPricingTemplate(final Integer firstElem,
+        final PricingTemplate pricingTempl, final boolean included, final String filterName,
+        final Integer numResults, final Integer idEnterprise)
+    {
+        return this.enterpriseDAO.findByPricingTemplate(firstElem, pricingTempl, included,
+            filterName, numResults, idEnterprise);
     }
 
     public List<Enterprise> findByNameAnywhere(final String name)
@@ -410,6 +439,28 @@ public class EnterpriseRep extends DefaultRepBase
     }
 
     /**
+     * Consumes the token. After a successful execution the token will be invalidated.
+     * 
+     * @param token token.
+     * @return boolean true if there was token. False otherwise.
+     */
+    public boolean existOneTimeToken(final String token)
+    {
+        return ottSessionDAO.consumeToken(token) > 0;
+    }
+
+    /**
+     * The uniqueness of users is granted by Login + AuthType.
+     * 
+     * @param token token to persist.
+     */
+    public void persistToken(final String token)
+    {
+        OneTimeTokenSession ottSession = new OneTimeTokenSession(token);
+        ottSessionDAO.persist(ottSession);
+    }
+
+    /**
      * {@see UserDAO#getAbiquoUserByLogin(String)}
      */
     public User getAbiquoUserByUserName(final String nick)
@@ -435,5 +486,10 @@ public class EnterpriseRep extends DefaultRepBase
     public boolean existAnyUserWithNickAndAuth(final String nick, final AuthType authType)
     {
         return userDAO.existAnyUserWithNickAndAuth(nick, authType);
+    }
+
+    public boolean existAnyEnterpriseWithPricingTemplate(final PricingTemplate pricingTemplate)
+    {
+        return enterpriseDAO.existAnyEnterpriseWithPricingTemplate(pricingTemplate);
     }
 }

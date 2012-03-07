@@ -21,6 +21,8 @@
 
 package net.undf.abicloud.vo.networking
 {
+	import mx.collections.ArrayCollection;
+	
 	import net.undf.abicloud.vo.virtualappliance.VirtualDataCenter;
 	
 
@@ -35,6 +37,8 @@ package net.undf.abicloud.vo.networking
         public static const EXTERNAL:String = "EXTERNAL";
         
         public static const PUBLIC:String = "PUBLIC";
+        
+        public static const UNMANAGED:String = "UNMANAGED";
         
         
         public var vlanNetworkId:int;
@@ -52,6 +56,8 @@ package net.undf.abicloud.vo.networking
         public var networkType:String;
         
         public var virtualDatacenter:VirtualDataCenter;
+        
+        public var dhcpOptions:ArrayCollection;
 
         public function VlanNetwork()
         {

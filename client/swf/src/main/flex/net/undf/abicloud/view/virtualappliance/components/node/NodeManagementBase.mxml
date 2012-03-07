@@ -60,13 +60,25 @@
             //The VirtualAppliance to which this Node belong
             private var _virtualAppliance:VirtualAppliance;
 
+            //Component to manage General Information of a Virtual Image
+            private var vmBasicInfo:NodeBasicInfo;
+            
             //Component to manage the Network of a VirtualMachine
             private var vmNetworkManagement:NetworkManagement;
 
             override protected function createChildren():void
             {
                 super.createChildren();
+                
+                //Listen to reconfigure event
+                AbiCloudModel.getInstance().virtualApplianceManager.addEventListener("reconfigureVirtualApplianceEvent",updateVirtualApplianceState);
 
+                //Creating components
+                vmBasicInfo = new NodeBasicInfo();
+                vmBasicInfo.percentWidth = 100;
+                vmBasicInfo.percentHeight = 100;
+	            toggledContainer.addContent(vmBasicInfo, ResourceManager.getInstance().getString("VirtualAppliance","LABEL_GENERAL_INFO"));                	
+                
                 //Creating components
                 vmNetworkManagement = new NetworkManagement();
                 
@@ -75,6 +87,23 @@
 	                toggledContainer.addContent(vmNetworkManagement, ResourceManager.getInstance().getString("Networking",
                                                                                                          "LABEL_NETWORK"));                	
                 }
+            }
+            
+            /**
+            * Set the virtual appliance into LOCKED state when a change is made
+            **/
+            protected function updateVirtualApplianceState(event:Event):void
+            {
+            	//reconfigure if the virtual appliance is running
+            	if(this._virtualAppliance.state.description == State.DEPLOYED.description
+            	|| this._virtualAppliance.state.description == State.NEEDS_SYNC.description)
+            	{
+            		if(this._node.virtualMachine.state.description != State.NOT_ALLOCATED.description)
+            		{
+		            	AbiCloudModel.getInstance().virtualApplianceManager.setVirtualApplianceInProgress(this._virtualAppliance);
+		            	onClickButtonClose();
+            		}
+            	}
             }
 
             /**
@@ -88,9 +117,11 @@
                 this._virtualAppliance = virtualAppliance;
                 this._node = node;
 
-                //For NodeVirtualImage, edition is only allowed when its VirtualMachine is NOT_DEPLOYED or POWERED_OFF
+                //For NodeVirtualImage, edition is only allowed when its VirtualMachine is NOT_ALLOCATED or OFF
                 var nodeVirtualImage:NodeVirtualImage = this._node as NodeVirtualImage;
-                if (nodeVirtualImage.virtualMachine && nodeVirtualImage.virtualMachine.state.id == State.NOT_DEPLOYED)
+                if (nodeVirtualImage.virtualMachine 
+                && (nodeVirtualImage.virtualMachine.state.description == State.NOT_ALLOCATED.description 
+                ||  nodeVirtualImage.virtualMachine.state.description == State.OFF.description))
                 {
                     this._isEditionAllowed = true
                 }
@@ -99,6 +130,8 @@
                     this._isEditionAllowed = false;
                 }
 
+                //Initializing the NodeBasicInfo component
+                vmBasicInfo.init(this._node, this._isEditionAllowed, virtualDataCenter, virtualAppliance);
                 //Initializing the NodeNetworkManagement component
                 vmNetworkManagement.init(this._node, this._isEditionAllowed, virtualDataCenter, virtualAppliance);
             }

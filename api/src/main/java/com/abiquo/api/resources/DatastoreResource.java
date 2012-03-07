@@ -114,11 +114,11 @@ public class DatastoreResource
             throw new NotFoundException(APIError.DATASTORE_NOT_ASSIGNED_TO_MACHINE);
         }
     }
-    
+
     // Create the persistence object.
     public static Datastore createPersistenceObject(DatastoreDto dto) throws Exception
     {
-        return ModelTransformer.persistenceFromTransport(Datastore.class, dto);        
+        return ModelTransformer.persistenceFromTransport(Datastore.class, dto);
     }
 
 }

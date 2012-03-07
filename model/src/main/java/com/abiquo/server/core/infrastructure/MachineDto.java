@@ -27,8 +27,8 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.abiquo.model.enumerator.HypervisorType;
+import com.abiquo.model.enumerator.MachineState;
 import com.abiquo.model.transport.SingleResourceTransportDto;
-import com.abiquo.server.core.infrastructure.Machine.State;
 
 @XmlRootElement(name = "machine")
 public class MachineDto extends SingleResourceTransportDto implements Serializable
@@ -39,13 +39,11 @@ public class MachineDto extends SingleResourceTransportDto implements Serializab
 
     private String name, description;
 
-    private Integer realRamInMb, virtualRamInMb, virtualRamUsedInMb;
+    private Integer virtualRamInMb, virtualRamUsedInMb;
 
-    private Integer realCpuCores, virtualCpuCores, virtualCpusUsed, virtualCpusPerCore;
+    private Integer virtualCpuCores, virtualCpusUsed;
 
-    private Long realHardDiskInMb, virtualHardDiskInMb, virtualHardDiskUsedInMb;
-
-    private State state;
+    private MachineState state;
 
     private String virtualSwitch;
 
@@ -63,13 +61,15 @@ public class MachineDto extends SingleResourceTransportDto implements Serializab
 
     private DatastoresDto datastores;
 
-    private String ipmiIp;
+    private String ipmiIP;
 
     private Integer ipmiPort;
 
     private String ipmiUser;
 
     private String ipmiPassword;
+
+    private String initiatorIQN;
 
     /**
      * @return the port
@@ -82,7 +82,7 @@ public class MachineDto extends SingleResourceTransportDto implements Serializab
     /**
      * @param port the port to set
      */
-    public void setPort(Integer port)
+    public void setPort(final Integer port)
     {
         this.port = port;
     }
@@ -98,7 +98,7 @@ public class MachineDto extends SingleResourceTransportDto implements Serializab
     /**
      * @param ip the ip to set
      */
-    public void setIp(String ip)
+    public void setIp(final String ip)
     {
         this.ip = ip;
     }
@@ -114,7 +114,7 @@ public class MachineDto extends SingleResourceTransportDto implements Serializab
     /**
      * @param ipService the ipService to set
      */
-    public void setIpService(String ipService)
+    public void setIpService(final String ipService)
     {
         this.ipService = ipService;
     }
@@ -130,7 +130,7 @@ public class MachineDto extends SingleResourceTransportDto implements Serializab
     /**
      * @param type the type to set
      */
-    public void setType(HypervisorType type)
+    public void setType(final HypervisorType type)
     {
         this.type = type;
     }
@@ -146,7 +146,7 @@ public class MachineDto extends SingleResourceTransportDto implements Serializab
     /**
      * @param user the user to set
      */
-    public void setUser(String user)
+    public void setUser(final String user)
     {
         this.user = user;
     }
@@ -162,7 +162,7 @@ public class MachineDto extends SingleResourceTransportDto implements Serializab
     /**
      * @param password the password to set
      */
-    public void setPassword(String password)
+    public void setPassword(final String password)
     {
         this.password = password;
     }
@@ -172,17 +172,17 @@ public class MachineDto extends SingleResourceTransportDto implements Serializab
         return id;
     }
 
-    public void setId(Integer id)
+    public void setId(final Integer id)
     {
         this.id = id;
     }
 
-    public State getState()
+    public MachineState getState()
     {
         return state;
     }
 
-    public void setState(State state)
+    public void setState(final MachineState state)
     {
         this.state = state;
     }
@@ -192,7 +192,7 @@ public class MachineDto extends SingleResourceTransportDto implements Serializab
         return name;
     }
 
-    public void setName(String name)
+    public void setName(final String name)
     {
         this.name = name;
     }
@@ -202,20 +202,9 @@ public class MachineDto extends SingleResourceTransportDto implements Serializab
         return description;
     }
 
-    public void setDescription(String description)
+    public void setDescription(final String description)
     {
         this.description = description;
-    }
-
-    @XmlElement(name = "realRam")
-    public Integer getRealRamInMb()
-    {
-        return getDefaultMb(realRamInMb).intValue();
-    }
-
-    public void setRealRamInMb(Integer realRamInMb)
-    {
-        this.realRamInMb = realRamInMb;
     }
 
     @XmlElement(name = "ram")
@@ -224,7 +213,7 @@ public class MachineDto extends SingleResourceTransportDto implements Serializab
         return getDefaultMb(virtualRamInMb).intValue();
     }
 
-    public void setVirtualRamInMb(Integer virtualRamInMb)
+    public void setVirtualRamInMb(final Integer virtualRamInMb)
     {
         this.virtualRamInMb = virtualRamInMb;
     }
@@ -235,20 +224,9 @@ public class MachineDto extends SingleResourceTransportDto implements Serializab
         return getDefaultMb(virtualRamUsedInMb).intValue();
     }
 
-    public void setVirtualRamUsedInMb(Integer virtualRamUsedInMb)
+    public void setVirtualRamUsedInMb(final Integer virtualRamUsedInMb)
     {
         this.virtualRamUsedInMb = virtualRamUsedInMb;
-    }
-
-    @XmlElement(name = "realCpu")
-    public Integer getRealCpuCores()
-    {
-        return (Integer) getDefaultMb(realCpuCores);
-    }
-
-    public void setRealCpuCores(Integer realCpuCores)
-    {
-        this.realCpuCores = realCpuCores;
     }
 
     @XmlElement(name = "cpu")
@@ -257,7 +235,7 @@ public class MachineDto extends SingleResourceTransportDto implements Serializab
         return (Integer) getDefaultMb(virtualCpuCores);
     }
 
-    public void setVirtualCpuCores(Integer virtualCpuCores)
+    public void setVirtualCpuCores(final Integer virtualCpuCores)
     {
         this.virtualCpuCores = virtualCpuCores;
     }
@@ -268,56 +246,12 @@ public class MachineDto extends SingleResourceTransportDto implements Serializab
         return (Integer) getDefaultMb(virtualCpusUsed);
     }
 
-    public void setVirtualCpusUsed(Integer virtualCpusUsed)
+    public void setVirtualCpusUsed(final Integer virtualCpusUsed)
     {
         this.virtualCpusUsed = virtualCpusUsed;
     }
 
-    @XmlElement(name = "cpuRatio")
-    public Integer getVirtualCpusPerCore()
-    {
-        return (Integer) getDefaultMb(virtualCpusPerCore);
-    }
-
-    public void setVirtualCpusPerCore(Integer virtualCpusPerCore)
-    {
-        this.virtualCpusPerCore = virtualCpusPerCore;
-    }
-
-    @XmlElement(name = "realHd")
-    public Long getRealHardDiskInMb()
-    {
-        return getDefaultMb(realHardDiskInMb).longValue();
-    }
-
-    public void setRealHardDiskInMb(Long realHardDiskInMb)
-    {
-        this.realHardDiskInMb = realHardDiskInMb;
-    }
-
-    @XmlElement(name = "hd")
-    public Long getVirtualHardDiskInMb()
-    {
-        return (Long) getDefaultMb(virtualHardDiskInMb);
-    }
-
-    public void setVirtualHardDiskInMb(Long virtualHardDiskInMb)
-    {
-        this.virtualHardDiskInMb = virtualHardDiskInMb;
-    }
-
-    @XmlElement(name = "hdUsed")
-    public Long getVirtualHardDiskUsedInMb()
-    {
-        return getDefaultMb(virtualHardDiskUsedInMb).longValue();
-    }
-
-    public void setVirtualHardDiskUsedInMb(Long virtualHardDiskUsedInMb)
-    {
-        this.virtualHardDiskUsedInMb = virtualHardDiskUsedInMb;
-    }
-
-    private Number getDefaultMb(Number mb)
+    private Number getDefaultMb(final Number mb)
     {
         return mb == null ? 1 : mb;
     }
@@ -327,7 +261,7 @@ public class MachineDto extends SingleResourceTransportDto implements Serializab
         return virtualSwitch;
     }
 
-    public void setVirtualSwitch(String virtualSwitch)
+    public void setVirtualSwitch(final String virtualSwitch)
     {
         this.virtualSwitch = virtualSwitch;
     }
@@ -335,7 +269,7 @@ public class MachineDto extends SingleResourceTransportDto implements Serializab
     /**
      * @param datastores the datastores to set
      */
-    public void setDatastores(DatastoresDto datastores)
+    public void setDatastores(final DatastoresDto datastores)
     {
         this.datastores = datastores;
     }
@@ -352,14 +286,14 @@ public class MachineDto extends SingleResourceTransportDto implements Serializab
         return datastores;
     }
 
-    public String getIpmiIp()
+    public String getIpmiIP()
     {
-        return ipmiIp;
+        return ipmiIP;
     }
 
-    public void setIpmiIp(String ipmiIp)
+    public void setIpmiIP(final String ipmiIP)
     {
-        this.ipmiIp = ipmiIp;
+        this.ipmiIP = ipmiIP;
     }
 
     public Integer getIpmiPort()
@@ -367,7 +301,7 @@ public class MachineDto extends SingleResourceTransportDto implements Serializab
         return ipmiPort;
     }
 
-    public void setIpmiPort(Integer ipmiPort)
+    public void setIpmiPort(final Integer ipmiPort)
     {
         this.ipmiPort = ipmiPort;
     }
@@ -377,7 +311,7 @@ public class MachineDto extends SingleResourceTransportDto implements Serializab
         return ipmiUser;
     }
 
-    public void setIpmiUser(String ipmiUser)
+    public void setIpmiUser(final String ipmiUser)
     {
         this.ipmiUser = ipmiUser;
     }
@@ -387,8 +321,18 @@ public class MachineDto extends SingleResourceTransportDto implements Serializab
         return ipmiPassword;
     }
 
-    public void setIpmiPassword(String ipmiPassword)
+    public void setIpmiPassword(final String ipmiPassword)
     {
         this.ipmiPassword = ipmiPassword;
+    }
+
+    public String getInitiatorIQN()
+    {
+        return initiatorIQN;
+    }
+
+    public void setInitiatorIQN(final String initiatorIQN)
+    {
+        this.initiatorIQN = initiatorIQN;
     }
 }

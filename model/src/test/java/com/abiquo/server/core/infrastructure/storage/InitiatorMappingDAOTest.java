@@ -83,7 +83,7 @@ public class InitiatorMappingDAOTest extends
         InitiatorMappingDAO dao = createDaoForRollbackTransaction();
         String initm = m.getInitiatorIqn();
         Integer idVm = m.getVolumeManagement().getId();
-        
+
         InitiatorMapping im1 = dao.findByVolumeAndInitiator(idVm, initm);
         assertNotNull(im1);
         eg().assertAllPropertiesEqual(m, im1);

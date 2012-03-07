@@ -36,6 +36,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.abiquo.api.exceptions.APIError;
+import com.abiquo.api.services.stub.NodecollectorServiceStubMock;
 import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.server.core.cloud.Hypervisor;
@@ -43,13 +44,12 @@ import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.DatastoreDto;
 import com.abiquo.server.core.infrastructure.DatastoresDto;
 import com.abiquo.server.core.infrastructure.Machine;
-import com.abiquo.server.core.infrastructure.Machine.State;
 import com.abiquo.server.core.infrastructure.MachineDto;
 import com.abiquo.server.core.infrastructure.MachinesDto;
+import com.abiquo.server.core.infrastructure.MachinesToCreateDto;
 import com.abiquo.server.core.infrastructure.Rack;
 import com.abiquo.server.core.infrastructure.RemoteService;
 import com.abiquo.server.core.infrastructure.UcsRack;
-import com.abiquo.server.core.util.network.IPAddress;
 
 public class MachinesResourceIT extends AbstractJpaGeneratorIT
 {
@@ -59,17 +59,24 @@ public class MachinesResourceIT extends AbstractJpaGeneratorIT
 
     private Machine machine;
 
+    private Hypervisor hypervisor;
+
     @Override
     @BeforeMethod
     public void setup()
     {
-        Hypervisor hypervisor = hypervisorGenerator.createUniqueInstance();
+        hypervisor = hypervisorGenerator.createUniqueInstance();
+        hypervisor.setIpService(NodecollectorServiceStubMock.IP_DISCOVER_FIRST);
+
         machine = hypervisor.getMachine();
 
-        RemoteService rs =
+        RemoteService vsm =
             machine.getDatacenter().createRemoteService(RemoteServiceType.VIRTUAL_SYSTEM_MONITOR,
                 "http://localhost:8080/fooo", 1);
-        setup(machine.getDatacenter(), machine.getRack(), machine, hypervisor, rs);
+        RemoteService nc =
+            machine.getDatacenter().createRemoteService(RemoteServiceType.NODE_COLLECTOR,
+                "http://localhost:8080/bar", 1);
+        setup(machine.getDatacenter(), machine.getRack(), machine, hypervisor, vsm, nc);
 
         machinesURI =
             resolveMachinesURI(machine.getDatacenter().getId(), machine.getRack().getId());
@@ -90,6 +97,23 @@ public class MachinesResourceIT extends AbstractJpaGeneratorIT
         assertNotNull(entity);
         assertNotNull(entity.getCollection());
         assertEquals(entity.getCollection().size(), 1);
+    }
+
+    @Test
+    public void getMachinesListFiltered() throws Exception
+    {
+        String filter = "?filter=notMatches";
+        Resource resource = client.resource(machinesURI + filter);
+
+        ClientResponse response = resource.accept(MediaType.APPLICATION_XML).get();
+
+        assertEquals(200, response.getStatusCode());
+
+        MachinesDto entity = response.getEntity(MachinesDto.class);
+
+        assertNotNull(entity);
+        assertNotNull(entity.getCollection());
+        assertEquals(entity.getCollection().size(), 0);
     }
 
     @Test
@@ -119,19 +143,9 @@ public class MachinesResourceIT extends AbstractJpaGeneratorIT
         assertNotNull(entityPost);
         assertEquals(m.getName(), entityPost.getName());
         assertEquals(m.getDescription(), entityPost.getDescription());
-        assertEquals(m.getVirtualCpuCores(), entityPost.getVirtualCpuCores());
-        assertEquals(m.getRealCpuCores(), entityPost.getRealCpuCores());
-        assertEquals(m.getVirtualRamUsedInMb(), entityPost.getVirtualRamUsedInMb());
-        assertEquals(m.getVirtualCpusUsed(), entityPost.getVirtualCpusUsed());
-        assertEquals(m.getVirtualCpusPerCore(), entityPost.getVirtualCpusPerCore());
         assertEquals(m.getType(), entityPost.getType());
         assertEquals(m.getIp(), entityPost.getIp());
         assertEquals(m.getIpService(), entityPost.getIpService());
-        assertEquals(m.getUser(), entityPost.getUser());
-        assertEquals(m.getPassword(), entityPost.getPassword());
-        assertEquals(entityPost.getRealCpuCores(), m.getRealCpuCores());
-        assertEquals(entityPost.getRealRamInMb(), m.getRealRamInMb());
-        assertEquals(entityPost.getState(), m.getState());
         assertEquals(entityPost.getVirtualSwitch(), m.getVirtualSwitch());
 
         // Check the datastore was correctly created.
@@ -189,8 +203,11 @@ public class MachinesResourceIT extends AbstractJpaGeneratorIT
     public void canNotCreateMachineVSMNotCreated() throws Exception
     {
         Rack rack = rackGenerator.createUniqueInstance();
+        RemoteService nc =
+            rack.getDatacenter().createRemoteService(RemoteServiceType.NODE_COLLECTOR,
+                "http://localhost:8080/bar", 1);
 
-        setup(rack.getDatacenter(), rack);
+        setup(rack.getDatacenter(), rack, nc);
 
         MachineDto machineDto = getValidMachine();
         DatastoreDto dto = new DatastoreDto();
@@ -216,32 +233,21 @@ public class MachinesResourceIT extends AbstractJpaGeneratorIT
      * 
      * @throws Exception
      */
-    @Test
-    void createMultipleMachines() throws Exception
+    @Test(enabled = false)
+    // TODO check directory "" in datastores
+    public void createMultipleMachines() throws Exception
     {
-        MachineDto m = getValidMachine();
-        DatastoreDto dto = new DatastoreDto();
-        dto.setName("datastoreName");
-        dto.setRootPath("/");
-        dto.setDirectory("var/lib/virt");
-        dto.setEnabled(Boolean.TRUE);
-        m.getDatastores().getCollection().add(dto);
+        MachinesToCreateDto machinesDto = new MachinesToCreateDto();
+        machinesDto.setIpFrom(NodecollectorServiceStubMock.IP_DISCOVER_FIRST);
+        machinesDto.setIpTo(NodecollectorServiceStubMock.IP_DISCOVER_LAST);
+        machinesDto.setHypervisor(hypervisor.getType().getValue()); // anyHypervisor
+        machinesDto.setPassword("anyPassword");
+        machinesDto.setPort(0); // anyPort
+        machinesDto.setUser("anyUsers");
+        machinesDto.setvSwitch("vSwitch0");
 
-        MachineDto m2 = getValidMachine();
-        IPAddress nextIP = IPAddress.newIPAddress(m2.getIp()).nextIPAddress();
-        m2.setName(m2.getName() + "-two");
-        m2.setIp(nextIP.toString());
-        m2.setIpService(nextIP.toString());
-        DatastoreDto dto2 = new DatastoreDto();
-        dto2.setName("datastoreNameTwo");
-        dto2.setRootPath("/another-root");
-        dto2.setDirectory("var/lib/virt2");
-        dto2.setEnabled(Boolean.TRUE);
-        m2.getDatastores().add(dto2);
-
-        MachinesDto machinesDto = new MachinesDto();
-        machinesDto.add(m);
-        machinesDto.add(m2);
+        machinesURI =
+            resolveMachinesURI(machine.getDatacenter().getId(), machine.getRack().getId());
 
         Resource resource = client.resource(machinesURI);
         ClientResponse response =
@@ -252,7 +258,7 @@ public class MachinesResourceIT extends AbstractJpaGeneratorIT
         assertEquals(response.getStatusCode(), 201);
         MachinesDto machines = response.getEntity(MachinesDto.class);
         assertNotNull(machines);
-        assertEquals(machines.getCollection().size(), 2);
+        assertEquals(machines.getCollection().size(), 2, machines.getErrors().toString());
 
     }
 
@@ -292,26 +298,11 @@ public class MachinesResourceIT extends AbstractJpaGeneratorIT
 
         m.setName("machine_test");
         m.setDescription("machine_test_description");
-
-        m.setRealRamInMb(200);
-        m.setVirtualRamInMb(2);
-        m.setVirtualRamUsedInMb(4);
-
-        m.setRealCpuCores(200);
-        m.setVirtualCpuCores(18);
-        m.setVirtualCpusPerCore(2);
-        m.setVirtualCpusUsed(0);
-
-        m.setRealHardDiskInMb(200L);
-        m.setVirtualHardDiskInMb(100L);
-        m.setVirtualHardDiskUsedInMb(10L);
-
-        m.setState(State.STOPPED);
         m.setVirtualSwitch("192.168.1.1");
 
         m.setType(HypervisorType.HYPERV_301);
-        m.setIp("10.0.0.1");
-        m.setIpService("10.0.0.1");
+        m.setIp(NodecollectorServiceStubMock.IP_DISCOVER_LAST);
+        m.setIpService(NodecollectorServiceStubMock.IP_DISCOVER_LAST);
         m.setPort(3556);
         m.setUser("foo");
         m.setPassword("bar");

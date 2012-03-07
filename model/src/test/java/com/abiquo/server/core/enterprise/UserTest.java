@@ -19,17 +19,17 @@
  * Boston, MA 02111-1307, USA.
  */
 
-  package com.abiquo.server.core.enterprise;
+package com.abiquo.server.core.enterprise;
 
-  import com.abiquo.server.core.common.DefaultEntityTestBase;
-  import com.softwarementors.bzngine.entities.test.InstanceTester;
+import com.abiquo.server.core.common.DefaultEntityTestBase;
+import com.softwarementors.bzngine.entities.test.InstanceTester;
 
-  public class UserTest extends DefaultEntityTestBase<User>
-  {
+public class UserTest extends DefaultEntityTestBase<User>
+{
 
-      @Override
-      protected InstanceTester<User> createEntityInstanceGenerator()
-      {
-          return new UserGenerator(getSeed());
-      }
-  }
+    @Override
+    protected InstanceTester<User> createEntityInstanceGenerator()
+    {
+        return new UserGenerator(getSeed());
+    }
+}

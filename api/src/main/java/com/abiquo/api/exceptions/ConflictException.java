@@ -25,7 +25,6 @@ import java.util.Set;
 
 import com.abiquo.model.transport.error.CommonError;
 
-
 public class ConflictException extends APIException
 {
     private static final long serialVersionUID = -4477286042443718135L;
@@ -34,12 +33,12 @@ public class ConflictException extends APIException
     {
         super(error);
     }
-    
+
     public ConflictException(CommonError error)
     {
         super(error);
     }
-    
+
     public ConflictException(Set<CommonError> errors)
     {
         super(errors);

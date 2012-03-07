@@ -30,13 +30,13 @@ import javax.persistence.PersistenceException;
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.Criteria;
 import org.hibernate.criterion.Criterion;
+import org.hibernate.criterion.Disjunction;
 import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-import com.abiquo.model.enumerator.VirtualMachineState;
 import com.abiquo.server.core.common.DefaultEntityCurrentUsed;
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
@@ -45,7 +45,9 @@ import com.abiquo.server.core.infrastructure.network.VLANNetwork;
 import com.abiquo.server.core.infrastructure.network.VLANNetworkDAO;
 import com.abiquo.server.core.infrastructure.storage.StorageRep;
 import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
+import com.abiquo.server.core.pricing.PricingTemplate;
 import com.abiquo.server.core.util.PagedList;
+import com.softwarementors.bzngine.entities.PersistentEntity;
 
 @Repository("jpaEnterpriseDAO")
 class EnterpriseDAO extends DefaultDAOBase<Integer, Enterprise>
@@ -79,18 +81,25 @@ class EnterpriseDAO extends DefaultDAOBase<Integer, Enterprise>
         return createCriteria().list();
     }
 
-    public List<Enterprise> findAll(final Integer offset, final Integer numResults)
+    public List<Enterprise> findAll(Integer firstElem, final Integer numResults)
     {
+
+        // Check if the page requested is bigger than the last one
         Criteria criteria = createCriteria();
         Long total = count();
 
-        criteria.setFirstResult(offset * numResults);
+        if (firstElem >= total.intValue())
+        {
+            firstElem = total.intValue() - numResults;
+        }
+
+        criteria.setFirstResult(firstElem);
         criteria.setMaxResults(numResults);
 
         List<Enterprise> result = getResultList(criteria);
 
         com.abiquo.server.core.util.PagedList<Enterprise> page = new PagedList<Enterprise>(result);
-        page.setCurrentElement(offset);
+        page.setCurrentElement(firstElem);
         page.setPageSize(numResults);
         page.setTotalResults(total.intValue());
 
@@ -105,6 +114,37 @@ class EnterpriseDAO extends DefaultDAOBase<Integer, Enterprise>
         criteria.addOrder(Order.asc(Enterprise.NAME_PROPERTY));
         List<Enterprise> result = getResultList(criteria);
         return result;
+    }
+
+    public List<Enterprise> findByPricingTemplate(Integer firstElem, final PricingTemplate pt,
+        final boolean included, final String filterName, final Integer numResults,
+        final Integer idEnterprise)
+    {
+        // Check if the page requested is bigger than the last one
+
+        Criteria criteria = createCriteria(pt, included, filterName, idEnterprise);
+
+        Long total = count(criteria);
+
+        if (firstElem >= total.intValue())
+        {
+            firstElem = total.intValue() - numResults;
+        }
+
+        criteria = createCriteria(pt, included, filterName, idEnterprise);
+        criteria.setFirstResult(firstElem);
+        criteria.setMaxResults(numResults);
+
+        List<Enterprise> result = getResultList(criteria);
+
+        PagedList<Enterprise> page = new PagedList<Enterprise>();
+        page.addAll(result);
+        page.setCurrentElement(firstElem);
+        page.setPageSize(numResults);
+        page.setTotalResults(total.intValue());
+
+        return page;
+
     }
 
     private static Criterion nameLikeAnywhere(final String name)
@@ -151,17 +191,67 @@ class EnterpriseDAO extends DefaultDAOBase<Integer, Enterprise>
         return existsAnyOtherByCriterions(enterprise, nameEqual(name));
     }
 
+    private Criterion differentPricingTemplateOrNull(final PricingTemplate pricingTemplate)
+    {
+        Disjunction filterDisjunction = Restrictions.disjunction();
+        filterDisjunction.add(Restrictions.ne(Enterprise.PRICING_PROPERTY, pricingTemplate));
+        filterDisjunction.add(Restrictions.isNull(Enterprise.PRICING_PROPERTY));
+        return filterDisjunction;
+        // return Restrictions.eq(Enterprise.PRICING_PROPERTY, pricingTemplate);
+
+    }
+
+    private Criterion samePricingTemplate(final PricingTemplate pricingTemplate)
+    {
+        Disjunction filterDisjunction = Restrictions.disjunction();
+        filterDisjunction.add(Restrictions.eq(Enterprise.PRICING_PROPERTY, pricingTemplate));
+
+        return filterDisjunction;
+        // return Restrictions.eq(Enterprise.PRICING_PROPERTY, pricingTemplate);
+
+    }
+
+    private Criterion withPricingTemplate()
+    {
+        Disjunction filterDisjunction = Restrictions.disjunction();
+        filterDisjunction.add(Restrictions.isNotNull(Enterprise.PRICING_PROPERTY));
+
+        return filterDisjunction;
+    }
+
+    private Criterion withoutPricingTemplate()
+    {
+        Disjunction filterDisjunction = Restrictions.disjunction();
+        filterDisjunction.add(Restrictions.isNull(Enterprise.PRICING_PROPERTY));
+
+        return filterDisjunction;
+    }
+
+    private Criterion filterBy(final String filter)
+    {
+        Disjunction filterDisjunction = Restrictions.disjunction();
+
+        filterDisjunction.add(Restrictions.like(Role.NAME_PROPERTY, '%' + filter + '%'));
+
+        return filterDisjunction;
+    }
+
     private static final String SUM_VM_RESOURCES =
         "select sum(vm.cpu), sum(vm.ram), sum(vm.hd) from virtualmachine vm, hypervisor hy, physicalmachine pm "
-            + " where hy.id = vm.idHypervisor and pm.idPhysicalMachine = hy.idPhysicalMachine "// and pm.idState != 7" // not HA_DISABLED
-            + " and vm.idEnterprise = :enterpriseId and STRCMP(vm.state, :not_deployed) != 0";
+            + " where hy.id = vm.idHypervisor and pm.idPhysicalMachine = hy.idPhysicalMachine "// and
+                                                                                               // pm.idState
+                                                                                               // !=
+                                                                                               // 7"
+                                                                                               // //
+                                                                                               // not
+                                                                                               // HA_DISABLED
+            + " and vm.idEnterprise = :enterpriseId and vm.state != 'NOT_ALLOCATED' and vm.idHypervisor is not null";
 
     public DefaultEntityCurrentUsed getEnterpriseResourceUsage(final int enterpriseId)
     {
         Object[] vmResources =
-            (Object[]) getSession().createSQLQuery(SUM_VM_RESOURCES).setParameter("enterpriseId",
-                enterpriseId).setParameter("not_deployed",
-                VirtualMachineState.NOT_DEPLOYED.toString()).uniqueResult();
+            (Object[]) getSession().createSQLQuery(SUM_VM_RESOURCES)
+                .setParameter("enterpriseId", enterpriseId).uniqueResult();
 
         Long cpu = vmResources[0] == null ? 0 : ((BigDecimal) vmResources[0]).longValue();
         Long ram = vmResources[1] == null ? 0 : ((BigDecimal) vmResources[1]).longValue();
@@ -276,5 +366,48 @@ class EnterpriseDAO extends DefaultDAOBase<Integer, Enterprise>
         // }
         //
         // return repoUsed;
+    }
+
+    public boolean existAnyEnterpriseWithPricingTemplate(final PricingTemplate pricingTemplate)
+    {
+        return existsAnyByCriterions(samePricingTemplate(pricingTemplate));
+    }
+
+    private Criteria createCriteria(final PricingTemplate pricingTemplate, final boolean included,
+        final String filter, final Integer enterpriseId)
+    {
+        Criteria criteria = createCriteria();
+
+        if (included && pricingTemplate != null)
+        {
+
+            criteria.add(samePricingTemplate(pricingTemplate));
+
+        }
+        else if (included && pricingTemplate == null)
+        {
+
+            criteria.add(withPricingTemplate());
+
+        }
+        else if (!included && pricingTemplate != null)
+        {
+            criteria.add(differentPricingTemplateOrNull(pricingTemplate));
+        }
+        else if (!included && pricingTemplate == null)
+        {
+            criteria.add(withoutPricingTemplate());
+        }
+        if (enterpriseId != null)
+        {
+            criteria.add(Restrictions.eq(PersistentEntity.ID_PROPERTY, enterpriseId));
+        }
+
+        if (!StringUtils.isEmpty(filter))
+        {
+            criteria.add(filterBy(filter));
+        }
+
+        return criteria;
     }
 }

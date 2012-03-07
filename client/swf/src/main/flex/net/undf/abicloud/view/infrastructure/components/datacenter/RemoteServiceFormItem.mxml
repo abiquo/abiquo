@@ -118,12 +118,12 @@
                 {
                     protocolInput.text = _remoteServiceType.protocol;
                     portInput.text = _remoteServiceType.port;
-                    serviceMappingInput.text = _remoteServiceType.serviceMapping;
+                    serviceMappingInput.text = _remoteServiceType.serviceMapping;                    
                 }
                 else
                 {
                     protocolInput.text = "http://";
-                    portInput.text = "8080";
+                    portInput.text = "80";
                     serviceMappingInput.text = "";
                 }
 
@@ -145,7 +145,7 @@
             	dispatchEvent(new Event('remoteServiceFormItemChange'));
             }
 
-            private function onClickCheckButton():void
+            public function onClickCheckButton():void
             {
                 //Checking the uri
                 var remoteService:RemoteService = new RemoteService();
@@ -154,6 +154,7 @@
                 remoteService.domainName = domainNameInput.text;
                 remoteService.port = Number(portInput.text);
                 remoteService.serviceMapping = serviceMappingInput.text;
+                
 
                 var event:InfrastructureEvent = new InfrastructureEvent(InfrastructureEvent.CHECK_REMOTE_SERVICE_BY_URI);
                 event.remoteService = remoteService;

@@ -26,18 +26,19 @@ import java.util.List;
 
 import javax.xml.xpath.XPathExpressionException;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.io.FilenameUtils;
-import org.libvirt.Connect;
 import org.libvirt.Domain;
 import org.libvirt.DomainInfo;
 import org.libvirt.LibvirtException;
 import org.libvirt.NodeInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 import com.abiquo.nodecollector.aim.AimCollector;
 import com.abiquo.nodecollector.constants.MessageValues;
+import com.abiquo.nodecollector.domain.collectors.libvirt.LeaksFreeConnect;
 import com.abiquo.nodecollector.exception.CollectorException;
 import com.abiquo.nodecollector.exception.NoManagedException;
 import com.abiquo.nodecollector.exception.libvirt.AimException;
@@ -59,33 +60,35 @@ import com.abiquo.server.core.infrastructure.nodecollector.VirtualSystemStatusEn
  */
 public abstract class AbstractLibvirtCollector extends AbstractCollector
 {
-
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractLibvirtCollector.class);
 
-    /**
-     * This object encapsulates all connection features.
-     */
-    private Connect conn;
+    private LeaksFreeConnect connection;
 
-    /**
-     * WsmanCollector
-     */
     protected AimCollector aimcollector;
 
-    private void freeDomain(Domain dom)
-    {
-        try
-        {
-            if (dom != null)
-            {
-                dom.free();
-            }
-        }
-        catch (LibvirtException e)
-        {
-            e.printStackTrace();
-        }
-    }
+    // private LeaksFreeConnect login() throws CollectorException
+    // {
+    // try
+    // {
+    // return new LeaksFreeConnect(getConnectionURL());
+    // }
+    // catch (LibvirtException e)
+    // {
+    // throw new CollectorException(MessageValues.CONN_EXCP_I, e);
+    // }
+    // }
+    //
+    // private void logout(LeaksFreeConnect conn)
+    // {
+    // try
+    // {
+    // conn.close();
+    // }
+    // catch (LibvirtException e)
+    // {
+    // e.printStackTrace();
+    // }
+    // }
 
     @Override
     public HostDto getHostInfo() throws CollectorException
@@ -93,20 +96,20 @@ public abstract class AbstractLibvirtCollector extends AbstractCollector
         final int KBYTE = 1024;
         final HostDto hostInfo = new HostDto();
 
+        // LeaksFreeConnect conn = login();
+
         try
         {
-            final NodeInfo nodeInfo = conn.nodeInfo();
-            hostInfo.setName(conn.getHostName());
+            final NodeInfo nodeInfo = connection.nodeInfo();
+            hostInfo.setName(connection.getHostName());
             hostInfo.setCpu(Long.valueOf(nodeInfo.cpus));
             hostInfo.setRam(nodeInfo.memory * KBYTE);
             hostInfo.setHypervisor(getHypervisorType().getValue());
-            hostInfo.setVersion(String.valueOf(conn.getVersion()));
+            hostInfo.setVersion(String.valueOf(connection.getVersion()));
 
-            List<ResourceType> datastores =
-                aimcollector.getDatastores();
+            List<ResourceType> datastores = aimcollector.getDatastores();
 
-            hostInfo.getResources().addAll(
-                aimcollector.getNetInterfaces());
+            hostInfo.getResources().addAll(aimcollector.getNetInterfaces());
             hostInfo.setInitiatorIQN(aimcollector.getInitiatorIQN());
 
             try
@@ -137,6 +140,10 @@ public abstract class AbstractLibvirtCollector extends AbstractCollector
             LOGGER.error("Unhandled exception :", e);
             throw new CollectorException(e.getMessage(), e);
         }
+        // finally
+        // {
+        // logout(conn);
+        // }
 
         return hostInfo;
     }
@@ -149,25 +156,27 @@ public abstract class AbstractLibvirtCollector extends AbstractCollector
 
         try
         {
-
             // Defined domains are the closed ones!
-            for (String domainValue : conn.listDefinedDomains())
+            for (String domainValue : connection.listDefinedDomains())
             {
                 if (domainValue != null) // Why null domains are returned?
                 {
-                    listOfDomains.add(conn.domainLookupByName(domainValue));
+                    listOfDomains.add(connection.domainLookupByName(domainValue));
                 }
             }
             // Domains are the started ones
-            for (int domainInt : conn.listDomains())
+            for (int domainInt : connection.listDomains())
             {
-                listOfDomains.add(conn.domainLookupByID(domainInt));
+                listOfDomains.add(connection.domainLookupByID(domainInt));
             }
 
             // Create the list of Virtual Systems from the recovered domains
             for (Domain domain : listOfDomains)
             {
-                vmc.getVirtualSystems().add(createVirtualSystemFromDomain(domain));
+                if (!isDomain0(domain))
+                {
+                    vmc.getVirtualSystems().add(createVirtualSystemFromDomain(domain));
+                }
             }
         }
         catch (LibvirtException e1)
@@ -180,16 +189,8 @@ public abstract class AbstractLibvirtCollector extends AbstractCollector
             LOGGER.error("Unhandled exception :", e);
             throw new CollectorException(e.getMessage(), e);
         }
-        finally
-        {
-            for (Domain dom : listOfDomains)
-            {
-                freeDomain(dom);
-            }
-        }
 
         return vmc;
-
     }
 
     protected void checkPhysicalState() throws NoManagedException
@@ -207,12 +208,11 @@ public abstract class AbstractLibvirtCollector extends AbstractCollector
     @Override
     public void disconnect() throws CollectorException
     {
-
         try
         {
-            if (conn != null)
+            if (getConnection() != null)
             {
-                conn.close();
+                getConnection().close();
             }
         }
         catch (LibvirtException e)
@@ -220,23 +220,6 @@ public abstract class AbstractLibvirtCollector extends AbstractCollector
             LOGGER.error("Unhandled exception when disconnect:", e);
             throw new CollectorException(MessageValues.CONN_EXCP_III, e);
         }
-
-    }
-
-    /**
-     * @return the conn
-     */
-    public Connect getConn()
-    {
-        return conn;
-    }
-
-    /**
-     * @param conn the conn to set
-     */
-    public void setConn(final Connect conn)
-    {
-        this.conn = conn;
     }
 
     /**
@@ -248,6 +231,7 @@ public abstract class AbstractLibvirtCollector extends AbstractCollector
     private VirtualSystemDto createVirtualSystemFromDomain(final Domain domain)
         throws LibvirtException, XPathExpressionException
     {
+
         final int KBYTE = 1024;
         final DomainInfo domainInfo = domain.getInfo();
         final String domainXML = domain.getXMLDesc(0);
@@ -282,11 +266,27 @@ public abstract class AbstractLibvirtCollector extends AbstractCollector
 
         // Evaluate the libvirt XML desc of the domain to get the image files
         // using the XPath features
-        final List<String> imageValues = XPathUtils.getValues("//disk/source/@file", domainXML);
 
-        for (String imageValue : imageValues)
+        // final List<String> imageValues = XPathUtils.getValues("//disk/source/@file",
+        // domainXML);
+        // for (String imageValue : imageValues)
+        // {
+        // vSys.getResources().add(createDiskFromImagePath(imageValue));
+        // }
+
+        NodeList systemdisk = XPathUtils.getNodes("//disk[target[@dev='hda']]/source", domainXML);
+        if (systemdisk.item(0) != null)
         {
-            vSys.getResources().add(createDiskFromImagePath(imageValue));
+            Node image = systemdisk.item(0).getAttributes().getNamedItem("file");
+            if (image != null)
+            {
+                vSys.getResources().add(createDiskFromImagePath(image.getNodeValue()));
+            }
+            else
+            {
+                image = systemdisk.item(0).getAttributes().getNamedItem("dev");
+                vSys.getResources().add(createDiskFromVolumePath(image.getNodeValue()));
+            }
         }
 
         // Homogenize the status
@@ -294,7 +294,7 @@ public abstract class AbstractLibvirtCollector extends AbstractCollector
         {
             case VIR_DOMAIN_RUNNING:
             case VIR_DOMAIN_BLOCKED:
-                vSys.setStatus(VirtualSystemStatusEnumType.RUNNING);
+                vSys.setStatus(VirtualSystemStatusEnumType.ON);
                 break;
 
             case VIR_DOMAIN_PAUSED:
@@ -302,7 +302,7 @@ public abstract class AbstractLibvirtCollector extends AbstractCollector
                 break;
 
             default:
-                vSys.setStatus(VirtualSystemStatusEnumType.POWERED_OFF);
+                vSys.setStatus(VirtualSystemStatusEnumType.OFF);
                 break;
         }
 
@@ -319,7 +319,7 @@ public abstract class AbstractLibvirtCollector extends AbstractCollector
     {
 
         final ResourceType currentHardDisk = new ResourceType();
-        currentHardDisk.setResourceType(ResourceEnumType.STORAGE_DISK);
+        currentHardDisk.setResourceType(ResourceEnumType.HARD_DISK);
         currentHardDisk.setAddress(imagePath);
         try
         {
@@ -338,4 +338,51 @@ public abstract class AbstractLibvirtCollector extends AbstractCollector
 
     }
 
+    /**
+     * Create a {@link Disk} objet from an image value.
+     * 
+     * @param imagePath image where the disk is stored
+     * @return a Disk object filled with the information
+     */
+    private ResourceType createDiskFromVolumePath(final String imagePath)
+    {
+
+        final ResourceType currentHardDisk = new ResourceType();
+        currentHardDisk.setResourceType(ResourceEnumType.VOLUME_DISK);
+        currentHardDisk.setAddress(""); // Datastore directory
+        try
+        {
+
+            long diskSize = aimcollector.getDiskFileSize(imagePath);
+            currentHardDisk.setUnits(diskSize);
+
+        }
+        catch (AimException e)
+        {
+            currentHardDisk.setUnits(0L);
+        }
+        currentHardDisk.setResourceSubType(VirtualDiskEnumType.STATEFUL.value());
+        currentHardDisk.setConnection(""); // Datastore root path
+        return currentHardDisk;
+
+    }
+
+    /**
+     * Returns true if given domain is "Domain-0"
+     * 
+     * @param domain to evaluate
+     * @return true if given domain is "Domain-0"
+     * @throws LibvirtException exception
+     */
+    protected abstract boolean isDomain0(Domain domain) throws LibvirtException;
+
+    public LeaksFreeConnect getConnection()
+    {
+        return connection;
+    }
+
+    public void setConnection(final LeaksFreeConnect conn)
+    {
+        this.connection = conn;
+    }
 }

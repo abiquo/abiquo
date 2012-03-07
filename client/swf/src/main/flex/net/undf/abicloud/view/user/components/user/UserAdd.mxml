@@ -142,7 +142,7 @@
                 newUser.locale = ResourceManager.getInstance().localeChain[0];
                 newUser.enterprise = this._enterprise;
                 
-                if(this._vdcAllowed){
+                if(!this._vdcAllowed){
 	                newUser.availableVirtualDatacenters = virtualDatacenterList.listOfSelectedVirtualDatacenter.toArray();                	
                 }else{
                 	newUser.availableVirtualDatacenters = new Array();
@@ -399,7 +399,6 @@
             required="true">
             <mx:TextInput id="passwordInput"
                 height="20"
-                maxChars="14"
                 change="validateForm()"
                 displayAsPassword="true"/>
         </mx:FormItem>
@@ -410,7 +409,6 @@
             required="true">
             <mx:TextInput id="passwordRepeatInput"
                 height="20"
-                maxChars="14"
                 change="validateForm()"
                 displayAsPassword="true"/>
 

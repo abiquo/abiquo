@@ -21,27 +21,41 @@
 
 package com.abiquo.server.core.scheduler;
 
+import java.lang.reflect.InvocationTargetException;
+
 import javax.persistence.EntityManager;
 
+import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 import com.abiquo.server.core.common.persistence.DefaultDAOTestBase;
 import com.abiquo.server.core.common.persistence.TestDataAccessManager;
+import com.abiquo.server.core.infrastructure.Datacenter;
+import com.abiquo.server.core.infrastructure.DatacenterGenerator;
+import com.abiquo.server.core.infrastructure.Machine;
+import com.abiquo.server.core.infrastructure.MachineGenerator;
+import com.abiquo.server.core.infrastructure.Rack;
 import com.softwarementors.bzngine.engines.jpa.test.configuration.EntityManagerFactoryForTesting;
 import com.softwarementors.bzngine.entities.test.PersistentInstanceTester;
 
 public class MachineLoadRuleDAOTest extends DefaultDAOTestBase<MachineLoadRuleDAO, MachineLoadRule>
 {
+    private DatacenterGenerator datacenterGenerator;
+
+    private MachineGenerator machineGenerator;
 
     @Override
     @BeforeMethod
     protected void methodSetUp()
     {
         super.methodSetUp();
+        datacenterGenerator = new DatacenterGenerator(getSeed());
+        machineGenerator = new MachineGenerator(getSeed());
     }
 
     @Override
-    protected MachineLoadRuleDAO createDao(EntityManager entityManager)
+    protected MachineLoadRuleDAO createDao(final EntityManager entityManager)
     {
         return new MachineLoadRuleDAO(entityManager);
     }
@@ -64,4 +78,33 @@ public class MachineLoadRuleDAOTest extends DefaultDAOTestBase<MachineLoadRuleDA
         return (MachineLoadRuleGenerator) super.eg();
     }
 
+    @Test
+    public void test_findMachineLoadRulesByRack() throws IllegalAccessException,
+        InvocationTargetException, NoSuchMethodException
+    {
+        Datacenter datacenter = datacenterGenerator.createUniqueInstance();
+        Rack rack = datacenter.createRack("bRack_1", 2, 4094, 2, 10);
+        Machine machine = machineGenerator.createMachine(datacenter, rack);
+        MachineLoadRule mclr1 = eg().createInstance(rack);
+        MachineLoadRule mclr2 = eg().createInstance(machine);
+        ds().persistAll(datacenter, rack, machine, mclr1, mclr2);
+
+        MachineLoadRuleDAO dao = createDaoForRollbackTransaction();
+        Assert.assertEquals(dao.findByRack(rack).size(), 1);
+    }
+
+    @Test
+    public void test_findMachineLoadRulesByRackIncludingMachineRules()
+        throws IllegalAccessException, InvocationTargetException, NoSuchMethodException
+    {
+        Datacenter datacenter = datacenterGenerator.createUniqueInstance();
+        Rack rack = datacenter.createRack("bRack_1", 2, 4094, 2, 10);
+        Machine machine = machineGenerator.createMachine(datacenter, rack);
+        MachineLoadRule mclr1 = eg().createInstance(rack);
+        MachineLoadRule mclr2 = eg().createInstance(machine);
+        ds().persistAll(datacenter, rack, machine, mclr1, mclr2);
+
+        MachineLoadRuleDAO dao = createDaoForRollbackTransaction();
+        Assert.assertEquals(dao.findByRack(rack, true).size(), 2);
+    }
 }

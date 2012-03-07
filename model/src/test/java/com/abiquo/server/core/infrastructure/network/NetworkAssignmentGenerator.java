@@ -66,7 +66,7 @@ public class NetworkAssignmentGenerator extends DefaultEntityGenerator<NetworkAs
 
         return networkAssignment;
     }
-    
+
     public NetworkAssignment createInstance(VirtualDatacenter vdc, Rack rack, VLANNetwork vlan)
     {
         NetworkAssignment networkAssignment = new NetworkAssignment(vdc, rack, vlan);

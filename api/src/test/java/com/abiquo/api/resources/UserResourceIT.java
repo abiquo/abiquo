@@ -21,6 +21,7 @@
 
 package com.abiquo.api.resources;
 
+import static com.abiquo.api.common.Assert.assertErrors;
 import static com.abiquo.api.common.Assert.assertLinkExist;
 import static com.abiquo.api.common.Assert.assertNonEmptyErrors;
 import static com.abiquo.api.common.UriTestResolver.resolveEnterpriseURI;
@@ -45,9 +46,11 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.abiquo.api.common.UriTestResolver;
+import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.resources.cloud.VirtualMachinesResource;
 import com.abiquo.model.rest.RESTLink;
 import com.abiquo.model.transport.error.ErrorsDto;
+import com.abiquo.server.core.cloud.NodeVirtualImage;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineDto;
 import com.abiquo.server.core.cloud.VirtualMachinesDto;
@@ -178,8 +181,10 @@ public class UserResourceIT extends AbstractJpaGeneratorIT
 
         assertLinkExist(dto, href, "edit");
         assertLinkExist(dto, enterpriseUri, "enterprise");
-        assertLinkExist(dto, resolveUserActionGetVirtualMachinesURI(user.getEnterprise().getId(),
-            user.getId()), "action", VirtualMachinesResource.VIRTUAL_MACHINES_PATH);
+        assertLinkExist(dto,
+            resolveUserActionGetVirtualMachinesURI(user.getEnterprise().getId(), user.getId()),
+            VirtualMachinesResource.VIRTUAL_MACHINES_PATH,
+            VirtualMachinesResource.VIRTUAL_MACHINES_PATH);
 
     }
 
@@ -211,6 +216,34 @@ public class UserResourceIT extends AbstractJpaGeneratorIT
 
         UserDto modified = response.getEntity(UserDto.class);
         assertEquals(modified.getName(), "name");
+    }
+
+    @Test
+    public void modifyUserNickRises409() throws ClientWebException
+    {
+        User user = userGenerator.createUniqueInstance();
+
+        List<Object> entitiesToSetup = new ArrayList<Object>();
+
+        for (Privilege p : user.getRole().getPrivileges())
+        {
+            entitiesToSetup.add(p);
+        }
+        entitiesToSetup.add(user.getRole());
+        entitiesToSetup.add(user.getEnterprise());
+        entitiesToSetup.add(user);
+
+        setup(entitiesToSetup.toArray());
+
+        String uri = resolveUserURI(user.getEnterprise().getId(), user.getId());
+        ClientResponse response = get(uri, "sysadmin", "sysadmin");
+
+        UserDto dto = response.getEntity(UserDto.class);
+        dto.setNick("newNick");
+
+        response = put(uri, dto, "sysadmin", "sysadmin");
+        assertErrors(response, 409, APIError.USER_NICK_CANNOT_BE_CHANGED);
+
     }
 
     @Test
@@ -434,6 +467,10 @@ public class UserResourceIT extends AbstractJpaGeneratorIT
     public void getVirtualMachinesByUser()
     {
         VirtualMachine vm = vmGenerator.createUniqueInstance();
+        NodeVirtualImage nvi = nodeVirtualImageGenerator.createInstance(vm);
+
+        vm.getVirtualMachineTemplate().getRepository()
+            .setDatacenter(vm.getHypervisor().getMachine().getDatacenter());
 
         List<Object> entitiesToSetup = new ArrayList<Object>();
 
@@ -448,9 +485,15 @@ public class UserResourceIT extends AbstractJpaGeneratorIT
         entitiesToSetup.add(vm.getHypervisor().getMachine().getRack());
         entitiesToSetup.add(vm.getHypervisor().getMachine());
         entitiesToSetup.add(vm.getHypervisor());
-        entitiesToSetup.add(vm.getVirtualImage().getEnterprise());
-        entitiesToSetup.add(vm.getVirtualImage());
+        entitiesToSetup.add(vm.getVirtualMachineTemplate().getRepository());
+        entitiesToSetup.add(vm.getVirtualMachineTemplate().getEnterprise());
+        entitiesToSetup.add(vm.getVirtualMachineTemplate().getCategory());
+        entitiesToSetup.add(vm.getVirtualMachineTemplate());
         entitiesToSetup.add(vm);
+        entitiesToSetup.add(nvi.getVirtualAppliance().getVirtualDatacenter().getNetwork());
+        entitiesToSetup.add(nvi.getVirtualAppliance().getVirtualDatacenter());
+        entitiesToSetup.add(nvi.getVirtualAppliance());
+        entitiesToSetup.add(nvi);
 
         setup(entitiesToSetup.toArray());
 
@@ -470,8 +513,8 @@ public class UserResourceIT extends AbstractJpaGeneratorIT
         VirtualMachineDto vmDto = vms.getCollection().get(0);
         assertLinkExist(vmDto, resolveEnterpriseURI(e.getId()), "enterprise");
         assertLinkExist(vmDto, resolveUserURI(e.getId(), u.getId()), "user");
-        assertLinkExist(vmDto, resolveMachineURI(m.getDatacenter().getId(), m.getRack().getId(), m
-            .getId()), "machine");
+        assertLinkExist(vmDto,
+            resolveMachineURI(m.getDatacenter().getId(), m.getRack().getId(), m.getId()), "machine");
     }
 
     @Test

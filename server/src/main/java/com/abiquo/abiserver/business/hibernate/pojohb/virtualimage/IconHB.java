@@ -42,7 +42,7 @@ public class IconHB implements java.io.Serializable, IPojoHB<Icon>
     private String path;
 
     private String name;
-    
+
     public Integer getIdIcon()
     {
         return idIcon;

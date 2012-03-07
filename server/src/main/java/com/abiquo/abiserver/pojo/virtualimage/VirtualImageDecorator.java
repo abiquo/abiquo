@@ -44,7 +44,6 @@ public class VirtualImageDecorator extends VirtualImage
 
         decorator.setCategory(virtualImage.getCategory());
         decorator.setCpuRequired(virtualImage.getCpuRequired());
-        decorator.setDeleted(virtualImage.getDeleted());
         decorator.setDescription(virtualImage.getDescription());
         decorator.setHdRequired(virtualImage.getHdRequired());
 
@@ -73,7 +72,7 @@ public class VirtualImageDecorator extends VirtualImage
         }
         decorator.setIdEnterprise(virtualImage.getIdEnterprise());
         decorator.setOvfId(virtualImage.getOvfId());
-        decorator.setStateful(virtualImage.getStateful());
+        decorator.setStateful(virtualImage.isStateful());
         decorator.setDiskFileSize(virtualImage.getDiskFileSize());
 
         return decorator;
@@ -140,7 +139,7 @@ public class VirtualImageDecorator extends VirtualImage
         String directoryPath = this.toPojoHB().getDirectoryPath();
 
         final String viPath = getBasePath();
-        final String viName = viPath.substring(viPath.lastIndexOf('/') + 1); 
+        final String viName = viPath.substring(viPath.lastIndexOf('/') + 1);
 
         if (this.getMaster() != null && !this.getMaster().isImageStateful())
         {

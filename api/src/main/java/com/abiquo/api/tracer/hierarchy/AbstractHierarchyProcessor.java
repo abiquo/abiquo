@@ -22,6 +22,8 @@ package com.abiquo.api.tracer.hierarchy;
 
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
+
 /**
  * Base class for all {@link HierarchyProcessor}.
  * 
@@ -36,9 +38,15 @@ public abstract class AbstractHierarchyProcessor<T> implements HierarchyProcesso
         String resourceId = getIdentifier(uri);
 
         // If the resource prefix is not found, ignore this processor
-        if (resourceId != null && !resourceId.isEmpty())
+        if (resourceId != null && !resourceId.isEmpty() && StringUtils.isNumeric(resourceId))
         {
             String resourceName = getResourceName(resourceId);
+
+            if (resourceName == null)
+            {
+                resourceName = StringUtils.EMPTY;
+            }
+
             resourceData.put(resourcePrefix, resourceId + "|" + resourceName);
         }
     }
@@ -52,27 +60,10 @@ public abstract class AbstractHierarchyProcessor<T> implements HierarchyProcesso
      */
     private String getIdentifier(final String uri)
     {
-        String prefix = getIdentifierPrefix();
-        int prefixPos = uri.indexOf('/'+prefix);
+        String id = uri.replaceAll(String.format(".*%s/?", getIdentifierPrefix()), "");
+        id = id.replaceAll("/.*", "");
 
-        if (prefixPos == -1)
-        {
-            // If the resource prefix is not found, ignore this processor, return null to ignore
-            // this processor
-            return null;
-        }
-
-        // Check if it is the global resource (without the identifier)
-        int pos = prefixPos + prefix.length() + 1;
-        if (pos > uri.length())
-        {
-            return null;
-        }
-
-        String partial = uri.substring(pos);
-        int idEnd = partial.indexOf('/');
-
-        return idEnd == -1 ? partial : partial.substring(0, idEnd);
+        return StringUtils.isBlank(id) ? null : id;
     }
 
     /**

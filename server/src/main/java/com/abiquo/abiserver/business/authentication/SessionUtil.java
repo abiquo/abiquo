@@ -52,8 +52,8 @@ public class SessionUtil
         transaction = session.beginTransaction();
 
         userHB =
-            (UserHB) HibernateUtil.getSession().createCriteria(UserHB.class).add(
-                Restrictions.eq("user", name)).uniqueResult();
+            (UserHB) HibernateUtil.getSession().createCriteria(UserHB.class)
+                .add(Restrictions.eq("user", name)).uniqueResult();
 
         transaction.commit();
 

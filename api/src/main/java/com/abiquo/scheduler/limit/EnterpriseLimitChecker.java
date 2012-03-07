@@ -41,14 +41,14 @@ public class EnterpriseLimitChecker extends EntityLimitChecker<Enterprise>
 
     public EnterpriseLimitChecker()
     {
-        
+
     }
-    
+
     public EnterpriseLimitChecker(final EntityManager entityManager)
     {
         enterpriseRep = new EnterpriseRep(entityManager);
     }
-    
+
     @Override
     protected String getEntityIdentifier(Enterprise entity)
     {

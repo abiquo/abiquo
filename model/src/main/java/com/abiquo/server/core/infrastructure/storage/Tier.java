@@ -64,13 +64,14 @@ public class Tier extends DefaultEntityBase
         this.setEnabled(Boolean.TRUE);
     }
 
-    private final static String ID_COLUMN = "id";
+    public final static String ID_COLUMN = "id";
 
     @Id
     @GeneratedValue
     @Column(name = ID_COLUMN, nullable = false)
     private Integer id;
 
+    @Override
     public Integer getId()
     {
         return this.id;

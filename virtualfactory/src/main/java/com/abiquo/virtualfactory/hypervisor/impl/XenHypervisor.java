@@ -23,7 +23,7 @@ package com.abiquo.virtualfactory.hypervisor.impl;
 
 import java.net.URL;
 
-import com.abiquo.virtualfactory.exception.HypervisorException;
+import com.abiquo.model.enumerator.HypervisorType;
 
 public class XenHypervisor extends AbsLibvirtHypervisor
 {
@@ -48,6 +48,6 @@ public class XenHypervisor extends AbsLibvirtHypervisor
     @Override
     public String getHypervisorType()
     {
-        return "xen-3";
+        return HypervisorType.XEN_3.getValue();
     }
 }

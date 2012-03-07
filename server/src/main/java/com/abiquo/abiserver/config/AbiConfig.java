@@ -30,7 +30,7 @@ import com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.ResourceAl
 public class AbiConfig
 {
 
-    public String getDefaultRepositorySpace()
+    public String getDefaultTemplateRepository()
     {
         return System.getProperty("abiquo.server.remoteSpace.default");
     }
@@ -56,11 +56,6 @@ public class AbiConfig
         limits.setHd(createLimit("repository"));
         limits.setHd(createLimit("publicIP"));
         return limits;
-    }
-
-    public int getVirtualCpuPerCore()
-    {
-        return Integer.valueOf(System.getProperty("abiquo.server.virtualCpuPerCore", "0"));
     }
 
     public long getTimeout()
@@ -108,7 +103,7 @@ public class AbiConfig
         return System.getProperty("abiquo.server.costCode");
     }
 
-    private LimitHB createLimit(String type)
+    private LimitHB createLimit(final String type)
     {
         long hard =
             Long.valueOf(System.getProperty("abiquo.server.resourcelimits." + type + ".hard", "0"));
@@ -123,7 +118,7 @@ public class AbiConfig
      * 
      * @return <ul>
      *         <li>abiquo: if DB login only</li>
-    *         <li>ldap: if LDAP and DB authentication</li>
+     *         <li>ldap: if LDAP and DB authentication</li>
      *         </ul>
      */
     public String getAbiquoSecurityMode()

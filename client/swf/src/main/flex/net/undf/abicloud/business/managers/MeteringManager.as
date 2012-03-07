@@ -23,8 +23,10 @@ package net.undf.abicloud.business.managers
 {
     import flash.events.Event;
     import flash.events.EventDispatcher;
-
+    
     import mx.collections.ArrayCollection;
+    
+    import net.undf.abicloud.events.MeteringEvent;
 
     [Bindable]
     public class MeteringManager extends EventDispatcher
@@ -84,6 +86,14 @@ package net.undf.abicloud.business.managers
         {
             this._severityTypes = value;
             dispatchEvent(new Event("severityTypesChange"));
+        }
+        
+        public function setInProgress(statistic:String, value:Boolean):void
+        {
+            var event:MeteringEvent = new MeteringEvent(MeteringEvent.LOAD_STATISTICS);
+            event.statistic_type = statistic;
+            event.inProgress = value;
+            dispatchEvent(event);
         }
 
     }

@@ -21,21 +21,16 @@
 
 package com.abiquo.server.core.infrastructure.network;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
-import org.hibernate.annotations.ForeignKey;
 import org.hibernate.validator.constraints.Length;
 
 import com.abiquo.model.validation.Ip;
@@ -301,32 +296,8 @@ public class NetworkConfiguration extends DefaultEntityBase
         this.fenceMode = fenceMode;
     }
 
-    // ****************************** Associations ******************************
-    // TODO: define associations
-
-    public final static String DHCP_PROPERTY = "dhcp";
-
-    private final static boolean DHCP_REQUIRED = false;
-
-    private final static String DHCP_ID_COLUMN = "dhcp_service_id";
-
-    @JoinColumn(name = DHCP_ID_COLUMN)
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @ForeignKey(name = "FK_" + TABLE_NAME + "_dhcp")
-    private Dhcp dhcp;
-
-    @Required(value = DHCP_REQUIRED)
-    public Dhcp getDhcp()
-    {
-        return this.dhcp;
-    }
-
-    public void setDhcp(final Dhcp dhcp)
-    {
-        this.dhcp = dhcp;
-    }
-
     // *************************** Mandatory constructors ***********************
+
     public NetworkConfiguration(final String address, final Integer mask, final String netmask,
         final String gateway, final String fenceMode)
     {

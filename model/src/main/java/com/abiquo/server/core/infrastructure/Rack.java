@@ -37,6 +37,7 @@ import org.apache.commons.lang.builder.ToStringStyle;
 import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.Range;
 
+import com.abiquo.model.validation.VlanIdRange;
 import com.abiquo.server.core.common.DefaultEntityBase;
 import com.softwarementors.validation.constraints.LeadingOrTrailingWhitespace;
 import com.softwarementors.validation.constraints.Required;
@@ -65,12 +66,13 @@ public class Rack extends DefaultEntityBase
     @Column(name = ID_COLUMN, nullable = false)
     private Integer id;
 
+    @Override
     public Integer getId()
     {
         return this.id;
     }
 
-    public void setId(Integer id)
+    public void setId(final Integer id)
     {
         this.id = id;
     }
@@ -99,7 +101,7 @@ public class Rack extends DefaultEntityBase
         return this.name;
     }
 
-    public void setName(String name)
+    public void setName(final String name)
     {
         this.name = name;
     }
@@ -127,7 +129,7 @@ public class Rack extends DefaultEntityBase
         return this.shortDescription;
     }
 
-    public void setShortDescription(String shortDescription)
+    public void setShortDescription(final String shortDescription)
     {
         this.shortDescription = shortDescription;
     }
@@ -155,7 +157,7 @@ public class Rack extends DefaultEntityBase
         return this.longDescription;
     }
 
-    public void setLongDescription(String longDescription)
+    public void setLongDescription(final String longDescription)
     {
         this.longDescription = longDescription;
     }
@@ -177,20 +179,20 @@ public class Rack extends DefaultEntityBase
         return this.datacenter;
     }
 
-    public void setDatacenter(Datacenter value)
+    public void setDatacenter(final Datacenter value)
     {
         this.datacenter = value;
     }
 
     // ************************** Mandatory constructors ***********************
-    /* package */Rack(String name, Datacenter datacenter, Integer vlanIdMin, Integer vlanIdMax,
-        Integer vlanPerVdcExpected, Integer nrsq)
+    /* package */Rack(final String name, final Datacenter datacenter, final Integer vlanIdMin,
+        final Integer vlanIdMax, final Integer vlanPerVdcReserved, final Integer nrsq)
     {
         setDatacenter(datacenter);
         setName(name);
         setVlanIdMin(vlanIdMin);
         setVlanIdMax(vlanIdMax);
-        setVlanPerVdcExpected(vlanPerVdcExpected);
+        setVlanPerVdcReserved(vlanPerVdcReserved);
         setNrsq(nrsq);
 
     }
@@ -201,9 +203,9 @@ public class Rack extends DefaultEntityBase
 
     private final static String VLAN_ID_MIN_COLUMN = "vlan_id_min";
 
-    private final static int VLAN_ID_MIN_MIN = Integer.MIN_VALUE;
+    /* package */final static int VLAN_ID_MIN_MIN = 2;
 
-    private final static int VLAN_ID_MIN_MAX = Integer.MAX_VALUE;
+    /* package */final static int VLAN_ID_MIN_MAX = 4096;
 
     @Column(name = VLAN_ID_MIN_COLUMN, nullable = true)
     @Range(min = VLAN_ID_MIN_MIN, max = VLAN_ID_MIN_MAX)
@@ -214,42 +216,42 @@ public class Rack extends DefaultEntityBase
         return this.vlanIdMin;
     }
 
-    public void setVlanIdMin(Integer vlanIdMin)
+    public void setVlanIdMin(final Integer vlanIdMin)
     {
         this.vlanIdMin = vlanIdMin;
     }
 
-    public final static String VLAN_PER_VDC_EXPECTED_PROPERTY = "vlanPerVdcExpected";
+    public final static String VLAN_PER_VDC_EXPECTED_PROPERTY = "vlanPerVdcReserved";
 
     private final static String VLAN_PER_VDC_EXPECTED_COLUMN = "vlan_per_vdc_expected";
 
     public final static int VLAN_PER_VDC_EXPECTED_DEFAULT_VALUE = 2;
 
-    private final static int VLAN_PER_VDC_EXPECTED_MIN = Integer.MIN_VALUE;
+    /* package */final static int VLAN_PER_VDC_EXPECTED_MIN = 1;
 
     private final static int VLAN_PER_VDC_EXPECTED_MAX = Integer.MAX_VALUE;
 
     @Column(name = VLAN_PER_VDC_EXPECTED_COLUMN, nullable = true)
     @Range(min = VLAN_PER_VDC_EXPECTED_MIN, max = VLAN_PER_VDC_EXPECTED_MAX)
-    private Integer vlanPerVdcExpected;
+    private Integer vlanPerVdcReserved;
 
-    public Integer getVlanPerVdcExpected()
+    public Integer getVlanPerVdcReserved()
     {
-        return this.vlanPerVdcExpected;
+        return this.vlanPerVdcReserved;
     }
 
-    public void setVlanPerVdcExpected(Integer vlanPerVdcExpected)
+    public void setVlanPerVdcReserved(final Integer vlanPerVdcReserved)
     {
-        this.vlanPerVdcExpected = vlanPerVdcExpected;
+        this.vlanPerVdcReserved = vlanPerVdcReserved;
     }
 
     public final static String NRSQ_PROPERTY = "nrsq";
 
     private final static String NRSQ_COLUMN = "nrsq";
 
-    private final static int NRSQ_MIN = Integer.MIN_VALUE;
+    private final static int NRSQ_MIN = 0;
 
-    private final static int NRSQ_MAX = Integer.MAX_VALUE;
+    /* package */final static int NRSQ_MAX = 100;
 
     public final static int NRSQ_DEFAULT_VALUE = 0;
 
@@ -262,7 +264,7 @@ public class Rack extends DefaultEntityBase
         return this.nrsq;
     }
 
-    public void setNrsq(Integer nrsq)
+    public void setNrsq(final Integer nrsq)
     {
         this.nrsq = nrsq;
     }
@@ -271,11 +273,11 @@ public class Rack extends DefaultEntityBase
 
     private final static String VLAN_ID_MAX_COLUMN = "vlan_id_max";
 
-    private final static int VLAN_ID_MAX_MIN = Integer.MIN_VALUE;
+    /* package */final static int VLAN_ID_MAX_MIN = 2;
 
-    private final static int VLAN_ID_MAX_MAX = Integer.MAX_VALUE;
+    /* package */final static int VLAN_ID_MAX_MAX = 4096;
 
-    public final static int VLAN_ID_MAX_DEFAULT_VALUE = 4094;
+    public final static int VLAN_ID_MAX_DEFAULT_VALUE = 4096;
 
     @Column(name = VLAN_ID_MAX_COLUMN, nullable = true)
     @Range(min = VLAN_ID_MAX_MIN, max = VLAN_ID_MAX_MAX)
@@ -286,9 +288,21 @@ public class Rack extends DefaultEntityBase
         return this.vlanIdMax;
     }
 
-    public void setVlanIdMax(Integer vlanIdMax)
+    public void setVlanIdMax(final Integer vlanIdMax)
     {
         this.vlanIdMax = vlanIdMax;
+    }
+
+    @VlanIdRange
+    public VlanRange getVlanIdRange()
+    {
+        return new VlanRange(vlanIdMin, vlanIdMax);
+    }
+
+    public void setVlanIdRange(final Integer vlanIdMin, final Integer vlanIdMax)
+    {
+        setVlanIdMin(vlanIdMin);
+        setVlanIdMax(vlanIdMax);
     }
 
     public final static String VLANS_ID_AVOIDED_PROPERTY = "vlansIdAvoided";
@@ -316,11 +330,11 @@ public class Rack extends DefaultEntityBase
         return this.vlansIdAvoided;
     }
 
-    public void setVlansIdAvoided(String vlansIdAvoided)
+    public void setVlansIdAvoided(final String vlansIdAvoided)
     {
         this.vlansIdAvoided = vlansIdAvoided;
     }
-    
+
     public final static String HAENABLED_PROPERTY = "haEnabled";
 
     private final static String HAENABLED_COLUMN = "haEnabled";
@@ -336,7 +350,7 @@ public class Rack extends DefaultEntityBase
         return this.haEnabled;
     }
 
-    public void setHaEnabled(boolean haEnabled)
+    public void setHaEnabled(final boolean haEnabled)
     {
         this.haEnabled = haEnabled;
     }
@@ -347,6 +361,20 @@ public class Rack extends DefaultEntityBase
     public String toString()
     {
         return ToStringBuilder.reflectionToString(this, ToStringStyle.MULTI_LINE_STYLE);
+    }
+
+    public static class VlanRange
+    {
+        public Integer vlanIdMin;
+
+        public Integer vlanIdMax;
+
+        public VlanRange(final Integer vlanIdMin, final Integer vlanIdMax)
+        {
+            super();
+            this.vlanIdMin = vlanIdMin;
+            this.vlanIdMax = vlanIdMax;
+        }
     }
 
 }

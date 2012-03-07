@@ -30,23 +30,25 @@ import com.abiquo.abiserver.persistence.dao.workload.MachineLoadRuleDAO;
 import com.abiquo.abiserver.persistence.dao.workload.hibernate.EnterpriseExclusionRuleDAOHibernate;
 import com.abiquo.abiserver.persistence.dao.workload.hibernate.MachineLoadRuleDAOHibernate;
 
-public class TestDAOHelper {
-	public static EnterpriseExclusionRuleDAO createEnterpriseExclusionRuleDAO(
-			Session session) {
-		assert session != null;
+public class TestDAOHelper
+{
+    public static EnterpriseExclusionRuleDAO createEnterpriseExclusionRuleDAO(Session session)
+    {
+        assert session != null;
 
-		EnterpriseExclusionRuleDAOHibernate dao = new EnterpriseExclusionRuleDAOHibernate();
-		dao.setSession(session);
-		dao.setPersistentClass(EnterpriseExclusionRuleHB.class);
-		return dao;
-	}
+        EnterpriseExclusionRuleDAOHibernate dao = new EnterpriseExclusionRuleDAOHibernate();
+        dao.setSession(session);
+        dao.setPersistentClass(EnterpriseExclusionRuleHB.class);
+        return dao;
+    }
 
-	public static MachineLoadRuleDAO createMachineLoadRuleDAO(Session session) {
-		assert session != null;
+    public static MachineLoadRuleDAO createMachineLoadRuleDAO(Session session)
+    {
+        assert session != null;
 
-		MachineLoadRuleDAOHibernate dao = new MachineLoadRuleDAOHibernate();
-		dao.setSession(session);
-		dao.setPersistentClass(MachineLoadRuleHB.class);
-		return dao;
-	}
+        MachineLoadRuleDAOHibernate dao = new MachineLoadRuleDAOHibernate();
+        dao.setSession(session);
+        dao.setPersistentClass(MachineLoadRuleHB.class);
+        return dao;
+    }
 }

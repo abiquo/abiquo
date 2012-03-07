@@ -21,8 +21,6 @@
 
 package net.undf.abicloud.controller.virtualappliance
 {
-    import flash.events.Event;
-    
     import mx.collections.ArrayCollection;
     import mx.controls.Alert;
     import mx.core.Application;
@@ -34,14 +32,15 @@ package net.undf.abicloud.controller.virtualappliance
     import net.undf.abicloud.events.VirtualApplianceEvent;
     import net.undf.abicloud.model.AbiCloudModel;
     import net.undf.abicloud.view.general.AbiCloudAlert;
-    import net.undf.abicloud.vo.infrastructure.State;
     import net.undf.abicloud.vo.networking.DHCP;
     import net.undf.abicloud.vo.networking.Host;
     import net.undf.abicloud.vo.result.BasicResult;
     import net.undf.abicloud.vo.result.DataResult;
     import net.undf.abicloud.vo.virtualappliance.Log;
     import net.undf.abicloud.vo.virtualappliance.VirtualAppliance;
+    import net.undf.abicloud.vo.virtualappliance.VirtualAppliancesListResult;
     import net.undf.abicloud.vo.virtualappliance.VirtualDataCenter;
+    import net.undf.abicloud.vo.virtualappliance.VirtualDatacentersListResult;
 
     /**
      * Class to handle server responses when calling virtual appliance remote services defined in VirtualApplianceEventMap
@@ -77,10 +76,13 @@ package net.undf.abicloud.controller.virtualappliance
         {
             if (result.success)
             {
-                //Adding the VirtualDataCenter list to the model
-                AbiCloudModel.getInstance().virtualApplianceManager.virtualDataCenters = DataResult(result).data as ArrayCollection;
+                var virtualDatacentersResult:VirtualDatacentersListResult = DataResult(result).data as VirtualDatacentersListResult;
                 
-                AbiCloudModel.getInstance().virtualApplianceManager.dispatchEvent(new Event("virtualDataCentersRetrieved"));
+                //Adding the VirtualDataCenter list to the model
+                AbiCloudModel.getInstance().virtualApplianceManager.virtualDataCenters = virtualDatacentersResult.virtualDatacentersList;
+                AbiCloudModel.getInstance().virtualApplianceManager.totalVirtualDatacenters = virtualDatacentersResult.totalVirtualDatacenters;
+                
+                AbiCloudModel.getInstance().virtualApplianceManager.dispatchEvent(new VirtualApplianceEvent(VirtualApplianceEvent.VIRTUAL_DATACENTER_RETRIEVED));
                 
             }
             else
@@ -89,7 +91,24 @@ package net.undf.abicloud.controller.virtualappliance
                 super.handleResult(result);
             }
         }
-
+        
+        public function handleGetVirtualDataCentersFasterByEnterprise(result:BasicResult):void
+        {
+            if (result.success)
+            {
+                //Adding the VirtualDataCenter list to the model
+                AbiCloudModel.getInstance().virtualApplianceManager.virtualDataCenters = DataResult(result).data as ArrayCollection;
+                
+                AbiCloudModel.getInstance().virtualApplianceManager.dispatchEvent(new VirtualApplianceEvent(VirtualApplianceEvent.VIRTUAL_DATACENTER_RETRIEVED));
+                
+            }
+            else
+            {
+                //There was a problem retrieving the VirtualDataCenter list
+                super.handleResult(result);
+            }
+        }
+        
         public function handleGetVirtualApplianceNodes(result:BasicResult, virtualAppliance:VirtualAppliance):void
         {
             if (result.success)
@@ -167,16 +186,37 @@ package net.undf.abicloud.controller.virtualappliance
         {
             if (result.success)
             {
-                //Adding to the model the list of virtual appliances
-                AbiCloudModel.getInstance().virtualApplianceManager.virtualAppliances = DataResult(result).data as ArrayCollection;
+                var virtualAppliancesResult:VirtualAppliancesListResult = DataResult(result).data as VirtualAppliancesListResult;
+                
+                //Adding the VirtualDataCenter list to the model
+                AbiCloudModel.getInstance().virtualApplianceManager.virtualAppliances = virtualAppliancesResult.virtualAppliancesList;
+                AbiCloudModel.getInstance().virtualApplianceManager.totalVirtualAppliances = virtualAppliancesResult.totalVirtualAppliances;
+                
+                AbiCloudModel.getInstance().virtualApplianceManager.dispatchEvent(new VirtualApplianceEvent(VirtualApplianceEvent.VIRTUAL_APPLIANCES_RETRIEVED));
+                
             }
             else
             {
-                //There was a problem retrieving the virtual appliances
+                //There was a problem retrieving the VirtualDataCenter list
                 super.handleResult(result);
             }
         }
-
+        
+        public function handleGetVirtualAppliancesByEnterpriseAndDatacenter(result:BasicResult, callback:Function):void
+        {
+            if (result.success)
+            {
+                var virtualAppliancesResult:VirtualAppliancesListResult = DataResult(result).data as VirtualAppliancesListResult;
+                
+                callback(virtualAppliancesResult.virtualAppliancesList);
+            }
+            else
+            {
+                //There was a problem retrieving the VirtualDataCenter list
+                super.handleResult(result);
+            }
+        }
+        
         public function handleGetVirtualApplianceUpdatedLogs(result:BasicResult,
                                                              virtualAppliance:VirtualAppliance):void
         {
@@ -272,8 +312,7 @@ package net.undf.abicloud.controller.virtualappliance
                 if (result.resultCode == BasicResult.SOFT_LIMT_EXCEEDED)
                 {
                     //Need to revert the virtual appliance state and subState
-                    _virtualAppliance.state = VirtualAppliance(DataResult(result).data).state;
-                    _virtualAppliance.subState = VirtualAppliance(DataResult(result).data).subState;
+                    //_virtualAppliance.state = VirtualAppliance(DataResult(result).data).state;
                     //Soft limits exceeded, but we can still force operation. Asking user...
                     AbiCloudAlert.showAlert(ResourceManager.getInstance().getString("Common",
                                                                                     "ALERT_ERROR_TITLE_LABEL"),
@@ -329,9 +368,9 @@ package net.undf.abicloud.controller.virtualappliance
                     else
                     {
                         //We try to make a local change to not block user
-                        if (_virtualAppliance.state.id == State.IN_PROGRESS)
+                        //if (_virtualAppliance.state.description == State.LOCKED.description)
                             //The VirtualAppliance was APPLY_CHANGES_NEEDED. We leave as it was
-                            AbiCloudModel.getInstance().virtualApplianceManager.setVirtualApplianceApplyChangesNeeded(_virtualAppliance);
+                            //AbiCloudModel.getInstance().virtualApplianceManager.setVirtualApplianceApplyChangesNeeded(_virtualAppliance);
                     }
 
                     super.handleResultInBackground(result);
@@ -391,8 +430,8 @@ package net.undf.abicloud.controller.virtualappliance
 
             if (result.success)
             {
-                //Announcing that the state of a Virtual Appliance has been changed
-                //AbiCloudModel.getInstance().virtualApplianceManager.changeVirtualApplianceState(this._virtualApplianceReturnedByServer);
+                //Do nothing
+                
             }
             else
             {
@@ -537,32 +576,6 @@ package net.undf.abicloud.controller.virtualappliance
             }
         }
 
-        public function handleCheckVirtualDatacentersAndAppliancesByEnterprise(result:BasicResult):void
-        {
-            if (result.success)
-            {
-                //VirtualDatacenters and Appliance's checked successfully
-                var virtualDatacentersAndAppliancesChecked:ArrayCollection = DataResult(result).data as ArrayCollection;
-
-                var virtualDatacentersChecked:ArrayCollection = virtualDatacentersAndAppliancesChecked.getItemAt(0) as ArrayCollection;
-                var virtualAppliancesChecked:ArrayCollection = virtualDatacentersAndAppliancesChecked.getItemAt(1) as ArrayCollection;
-                AbiCloudModel.getInstance().virtualApplianceManager.checkVirtualDatacentersAndAppliances(virtualDatacentersChecked,
-                                                                                                         virtualAppliancesChecked);
-            }
-            else
-            {
-                //There was a problem checking the virtual datacenters or appliance's state
-                //We check if it's a manual user interaction or a background process
-                if(AbiCloudModel.getInstance().virtualApplianceManager.serverCallType){
-                	super.handleResultInBackground(result);                	
-                }else{
-                	super.handleResult(result);
-                }
-                AbiCloudModel.getInstance().virtualApplianceManager.callProcessComplete = true;
-                
-            }
-        }
-
         public function handleCheckVirtualAppliance(result:BasicResult):void
         {
             if (result.success)
@@ -643,6 +656,49 @@ package net.undf.abicloud.controller.virtualappliance
                 //Returning the list of logs retrieved
                 var logs:ArrayCollection = DataResult(result).data as ArrayCollection;
                 callback(logs);
+            }
+            else
+            {
+                //There was a problem forcing the virtual appliance refresh
+                super.handleResult(result);
+            }
+        }
+        
+        public function getDisksByVirtualMachineHandler(result:BasicResult, callback:Function):void
+        {
+            if (result.success)
+            {
+                //Returning the list of hard disks retrieved
+                var hardDisks:ArrayCollection = DataResult(result).data as ArrayCollection;
+                callback(hardDisks);
+            }
+            else
+            {
+                //There was a problem forcing the virtual appliance refresh
+                super.handleResult(result);
+            }
+        }
+        
+        public function deleteDiskFromVirtualMachineHandler(result:BasicResult):void
+        {
+            if (result.success)
+            {
+                var event:VirtualApplianceEvent = new VirtualApplianceEvent(VirtualApplianceEvent.HARD_DISKS_UPDATED);
+                AbiCloudModel.getInstance().virtualApplianceManager.dispatchEvent(event);
+            }
+            else
+            {
+                //There was a problem forcing the virtual appliance refresh
+                super.handleResult(result);
+            }
+        }
+        
+        public function createDiskIntoVirtualMachineHandler(result:BasicResult):void
+        {
+            if (result.success)
+            {
+                var event:VirtualApplianceEvent = new VirtualApplianceEvent(VirtualApplianceEvent.HARD_DISKS_UPDATED);
+                AbiCloudModel.getInstance().virtualApplianceManager.dispatchEvent(event);
             }
             else
             {

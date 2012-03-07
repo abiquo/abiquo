@@ -33,12 +33,11 @@ public class Platform implements Serializable
 {
 
     private static final long serialVersionUID = -8729306234713999390L;
-    
-    public static final Platform DEFAULT_PLATFORM =
-        Platform.platform("abicloud");
 
-    public static final Platform SYSTEM_PLATFORM =
-        DEFAULT_PLATFORM.enterprise(Enterprise.SYSTEM_ENTERPRISE);
+    public static final Platform DEFAULT_PLATFORM = Platform.platform("abicloud");
+
+    public static final Platform SYSTEM_PLATFORM = DEFAULT_PLATFORM
+        .enterprise(Enterprise.SYSTEM_ENTERPRISE);
 
     private String name;
 

@@ -34,5 +34,5 @@ import com.abiquo.abiserver.persistence.DAO;
 public interface ResourceAllocationSettingDataDAO extends
     DAO<ResourceAllocationSettingData, String>
 {
-    
+
 }

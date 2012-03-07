@@ -26,19 +26,19 @@
 // Generated on: 2010.12.24 at 11:14:06 AM CET 
 //
 
-
 package com.abiquo.server.core.infrastructure.nodecollector;
 
 import javax.xml.bind.annotation.XmlEnum;
 import javax.xml.bind.annotation.XmlEnumValue;
 import javax.xml.bind.annotation.XmlType;
 
-
 /**
- * <p>Java class for VirtualDiskEnumType.
- * 
- * <p>The following schema fragment specifies the expected content contained within this class.
  * <p>
+ * Java class for VirtualDiskEnumType.
+ * <p>
+ * The following schema fragment specifies the expected content contained within this class.
+ * <p>
+ * 
  * <pre>
  * &lt;simpleType name="VirtualDiskEnumType">
  *   &lt;restriction base="{http://www.w3.org/2001/XMLSchema}string">
@@ -58,51 +58,47 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;/restriction>
  * &lt;/simpleType>
  * </pre>
- * 
  */
 @XmlType(name = "VirtualDiskEnumType")
 @XmlEnum
-public enum VirtualDiskEnumType {
+public enum VirtualDiskEnumType
+{
 
     @XmlEnumValue("http://unknown")
-    UNKNOWN("http://unknown"),
-    @XmlEnumValue("http://raw")
-    RAW("http://raw"),
-    @XmlEnumValue("http://incompatible")
-    INCOMPATIBLE("http://incompatible"),
-    @XmlEnumValue("http://stateful")
-    STATEFUL("http://stateful"),
-    @XmlEnumValue("http://www.vmware.com/technical-resources/interfaces/vmdk_access.html#streamOptimized")
-    VMDK_STREAM_OPTIMIZED("http://www.vmware.com/technical-resources/interfaces/vmdk_access.html#streamOptimized"),
-    @XmlEnumValue("http://www.vmware.com/technical-resources/interfaces/vmdk_access.html#monolithic_flat")
-    VMDK_FLAT("http://www.vmware.com/technical-resources/interfaces/vmdk_access.html#monolithic_flat"),
-    @XmlEnumValue("http://www.vmware.com/technical-resources/interfaces/vmdk_access.html#monolithic_sparse")
-    VMDK_MONOLITHIC_SPARSE("http://www.vmware.com/technical-resources/interfaces/vmdk_access.html#monolithic_sparse"),
-    @XmlEnumValue("http://technet.microsoft.com/en-us/virtualserver/bb676673.aspx#monolithic_flat")
-    VHD_FLAT("http://technet.microsoft.com/en-us/virtualserver/bb676673.aspx#monolithic_flat"),
-    @XmlEnumValue("http://technet.microsoft.com/en-us/virtualserver/bb676673.aspx#monolithic_sparse")
-    VHD_SPARSE("http://technet.microsoft.com/en-us/virtualserver/bb676673.aspx#monolithic_sparse"),
-    @XmlEnumValue("http://forums.virtualbox.org/viewtopic.php?t=8046#monolithic_flat")
-    VDI_FLAT("http://forums.virtualbox.org/viewtopic.php?t=8046#monolithic_flat"),
-    @XmlEnumValue("http://forums.virtualbox.org/viewtopic.php?t=8046#monolithic_sparse")
-    VDI_SPARSE("http://forums.virtualbox.org/viewtopic.php?t=8046#monolithic_sparse"),
-    @XmlEnumValue("http://people.gnome.org/~markmc/qcow-image-format.html#monolithic_flat")
-    QCOW2_FLAT("http://people.gnome.org/~markmc/qcow-image-format.html#monolithic_flat"),
-    @XmlEnumValue("http://people.gnome.org/~markmc/qcow-image-format.html#monolithic_sparse")
+    UNKNOWN("http://unknown"), @XmlEnumValue("http://raw")
+    RAW("http://raw"), @XmlEnumValue("http://incompatible")
+    INCOMPATIBLE("http://incompatible"), @XmlEnumValue("http://stateful")
+    STATEFUL("http://stateful"), @XmlEnumValue("http://www.vmware.com/technical-resources/interfaces/vmdk_access.html#streamOptimized")
+    VMDK_STREAM_OPTIMIZED(
+        "http://www.vmware.com/technical-resources/interfaces/vmdk_access.html#streamOptimized"), @XmlEnumValue("http://www.vmware.com/technical-resources/interfaces/vmdk_access.html#monolithic_flat")
+    VMDK_FLAT(
+        "http://www.vmware.com/technical-resources/interfaces/vmdk_access.html#monolithic_flat"), @XmlEnumValue("http://www.vmware.com/technical-resources/interfaces/vmdk_access.html#monolithic_sparse")
+    VMDK_MONOLITHIC_SPARSE(
+        "http://www.vmware.com/technical-resources/interfaces/vmdk_access.html#monolithic_sparse"), @XmlEnumValue("http://technet.microsoft.com/en-us/virtualserver/bb676673.aspx#monolithic_flat")
+    VHD_FLAT("http://technet.microsoft.com/en-us/virtualserver/bb676673.aspx#monolithic_flat"), @XmlEnumValue("http://technet.microsoft.com/en-us/virtualserver/bb676673.aspx#monolithic_sparse")
+    VHD_SPARSE("http://technet.microsoft.com/en-us/virtualserver/bb676673.aspx#monolithic_sparse"), @XmlEnumValue("http://forums.virtualbox.org/viewtopic.php?t=8046#monolithic_flat")
+    VDI_FLAT("http://forums.virtualbox.org/viewtopic.php?t=8046#monolithic_flat"), @XmlEnumValue("http://forums.virtualbox.org/viewtopic.php?t=8046#monolithic_sparse")
+    VDI_SPARSE("http://forums.virtualbox.org/viewtopic.php?t=8046#monolithic_sparse"), @XmlEnumValue("http://people.gnome.org/~markmc/qcow-image-format.html#monolithic_flat")
+    QCOW2_FLAT("http://people.gnome.org/~markmc/qcow-image-format.html#monolithic_flat"), @XmlEnumValue("http://people.gnome.org/~markmc/qcow-image-format.html#monolithic_sparse")
     QCOW2_SPARSE("http://people.gnome.org/~markmc/qcow-image-format.html#monolithic_sparse");
     private final String value;
 
-    VirtualDiskEnumType(String v) {
+    VirtualDiskEnumType(String v)
+    {
         value = v;
     }
 
-    public String value() {
+    public String value()
+    {
         return value;
     }
 
-    public static VirtualDiskEnumType fromValue(String v) {
-        for (VirtualDiskEnumType c: VirtualDiskEnumType.values()) {
-            if (c.value.equals(v)) {
+    public static VirtualDiskEnumType fromValue(String v)
+    {
+        for (VirtualDiskEnumType c : VirtualDiskEnumType.values())
+        {
+            if (c.value.equals(v))
+            {
                 return c;
             }
         }

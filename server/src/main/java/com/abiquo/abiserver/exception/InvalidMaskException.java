@@ -26,7 +26,6 @@ package com.abiquo.abiserver.exception;
 
 /**
  * @author jdevesa
- *
  */
 public class InvalidMaskException extends NetworkCommandException
 {
@@ -35,7 +34,7 @@ public class InvalidMaskException extends NetworkCommandException
      * Serial version.
      */
     private static final long serialVersionUID = 1L;
-    
+
     /**
      * Initialize the exception with a message. (Throwing a new exception)
      * 
@@ -48,6 +47,7 @@ public class InvalidMaskException extends NetworkCommandException
 
     /**
      * Initalize the exception with the message and an error code.
+     * 
      * @param message to provide more information to the exception.
      * @param abicloudErrorCode previously-defined abicloud network error.
      */
@@ -78,7 +78,7 @@ public class InvalidMaskException extends NetworkCommandException
     {
         super(message, e, abicloudErrorCode);
     }
-    
+
     /**
      * Create the exception only with the throwable argument. (Not recommended).
      * 
@@ -88,14 +88,14 @@ public class InvalidMaskException extends NetworkCommandException
     {
         super(e);
     }
-    
+
     /**
      * Create the exception with the throwable and the error code (Not recommended).
      * 
      * @param e The exception to be thrown
      * @param abicloudErrorCode code error
      */
-    public InvalidMaskException(Throwable e,  int abicloudErrorCode)
+    public InvalidMaskException(Throwable e, int abicloudErrorCode)
     {
         super(e, abicloudErrorCode);
     }

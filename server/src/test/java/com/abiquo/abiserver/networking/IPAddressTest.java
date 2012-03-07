@@ -41,14 +41,14 @@ public class IPAddressTest
     @Test
     public void testNextIPAddress() throws InvalidIPAddressException
     {
-        assertTrue(IPAddress.newIPAddress("0.0.0.0").nextIPAddress().toString().equalsIgnoreCase(
-            "0.0.0.1"));
-        assertTrue(IPAddress.newIPAddress("0.0.1.0").nextIPAddress().toString().equalsIgnoreCase(
-            "0.0.1.1"));
+        assertTrue(IPAddress.newIPAddress("0.0.0.0").nextIPAddress().toString()
+            .equalsIgnoreCase("0.0.0.1"));
+        assertTrue(IPAddress.newIPAddress("0.0.1.0").nextIPAddress().toString()
+            .equalsIgnoreCase("0.0.1.1"));
         assertTrue(IPAddress.newIPAddress("22.33.43.55").nextIPAddress().toString()
             .equalsIgnoreCase("22.33.43.56"));
-        assertTrue(IPAddress.newIPAddress("0.0.1.255").nextIPAddress().toString().equalsIgnoreCase(
-            "0.0.2.0"));
+        assertTrue(IPAddress.newIPAddress("0.0.1.255").nextIPAddress().toString()
+            .equalsIgnoreCase("0.0.2.0"));
         assertTrue(IPAddress.newIPAddress("0.0.255.255").nextIPAddress().toString()
             .equalsIgnoreCase("0.1.0.0"));
         assertTrue(IPAddress.newIPAddress("0.255.255.255").nextIPAddress().toString()

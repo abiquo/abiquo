@@ -70,7 +70,7 @@ package net.undf.abicloud.controller.configuration
             }
         }
 
-        public function handleSendRegistrationInfo(result:BasicResult, registration:Registration):void
+        public function handleSendRegistrationInfo(result:BasicResult):void
         {
             if (result.success)
             {
@@ -84,7 +84,7 @@ package net.undf.abicloud.controller.configuration
                                                Alert.OK);
 
                 //Updating registration info in model
-                AbiCloudModel.getInstance().configurationManager.registration = registration;
+                AbiCloudModel.getInstance().configurationManager.registration = DataResult(result).data as Registration;
             }
             else
             {

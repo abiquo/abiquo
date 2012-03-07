@@ -33,6 +33,7 @@ import javax.persistence.Table;
 
 import org.hibernate.annotations.ForeignKey;
 
+import com.abiquo.model.enumerator.FitPolicy;
 import com.abiquo.server.core.common.DefaultEntityBase;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.softwarementors.validation.constraints.Required;
@@ -44,7 +45,7 @@ public class FitPolicyRule extends DefaultEntityBase implements PersistentRule
 {
     public static final String TABLE_NAME = "workload_fit_policy_rule";
 
-    public FitPolicyRule(Datacenter datacenter, FitPolicy fitpolicy)
+    public FitPolicyRule(final Datacenter datacenter, final FitPolicy fitpolicy)
     {
         super();
         setDatacenter(datacenter);
@@ -52,7 +53,7 @@ public class FitPolicyRule extends DefaultEntityBase implements PersistentRule
     }
 
     // default, apply to all datacenters
-    public FitPolicyRule(FitPolicy fitpolicy)
+    public FitPolicyRule(final FitPolicy fitpolicy)
     {
         super();
         setFitPolicy(fitpolicy);
@@ -92,7 +93,7 @@ public class FitPolicyRule extends DefaultEntityBase implements PersistentRule
         return this.datacenter;
     }
 
-    public void setDatacenter(Datacenter datacenter)
+    public void setDatacenter(final Datacenter datacenter)
     {
         this.datacenter = datacenter;
     }
@@ -113,21 +114,8 @@ public class FitPolicyRule extends DefaultEntityBase implements PersistentRule
         return this.fitPolicy;
     }
 
-    private void setFitPolicy(FitPolicy fitPolicy)
+    private void setFitPolicy(final FitPolicy fitPolicy)
     {
         this.fitPolicy = fitPolicy;
     }
-
-    public enum FitPolicy
-    {
-        /**
-         * Choose the machine that is under greater load
-         */
-        PROGRESSIVE,
-        /**
-         * Choose the machine that is under lesser load
-         */
-        PERFORMANCE;
-    }
-
 }

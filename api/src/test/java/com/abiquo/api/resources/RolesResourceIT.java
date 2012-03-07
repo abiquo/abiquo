@@ -94,8 +94,9 @@ public class RolesResourceIT extends AbstractJpaGeneratorIT
         //
         String uri = rolesURI;
         uri =
-            UriHelper.appendQueryParamsToPath(uri, Collections.singletonMap("idEnterprise",
-                new String[] {Integer.toString(e1.getId())}), false);
+            UriHelper.appendQueryParamsToPath(uri, Collections
+                .singletonMap(EnterpriseResource.ENTERPRISE_AS_PARAM, new String[] {Integer
+                    .toString(e1.getId())}), false);
 
         response = get(uri, SYSADMIN, SYSADMIN);
 
@@ -125,12 +126,13 @@ public class RolesResourceIT extends AbstractJpaGeneratorIT
 
         String uri = rolesURI;
         uri =
-            UriHelper.appendQueryParamsToPath(uri,
-                Collections.singletonMap("desc", new String[] {"true"}), false);
+            UriHelper.appendQueryParamsToPath(uri, Collections.singletonMap("desc",
+                new String[] {"true"}), false);
 
         uri =
-            UriHelper.appendQueryParamsToPath(uri, Collections.singletonMap("idEnterprise",
-                new String[] {Integer.toString(e1.getId())}), false);
+            UriHelper.appendQueryParamsToPath(uri, Collections
+                .singletonMap(EnterpriseResource.ENTERPRISE_AS_PARAM, new String[] {Integer
+                    .toString(e1.getId())}), false);
 
         ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
 

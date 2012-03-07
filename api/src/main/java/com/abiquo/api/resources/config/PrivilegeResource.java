@@ -46,6 +46,8 @@ public class PrivilegeResource extends AbstractResource
 {
     public static final String PRIVILEGE = "privilege";
 
+    public static final String PRIVILEGES = "privileges";
+
     public static final String PRIVILEGE_PARAM = "{" + PRIVILEGE + "}";
 
     @Autowired
@@ -72,7 +74,9 @@ public class PrivilegeResource extends AbstractResource
                     if (p.getId().equals(privilegeId))
                     {
                         Privilege privilege = service.getPrivilege(privilegeId);
-                        return createTransferObject(privilege, restBuilder);
+                        PrivilegeDto pDto = createTransferObject(privilege, restBuilder);
+                        pDto.setLinks(restBuilder.buildPrivilegeLink(pDto));
+                        return pDto;
                     }
                 }
             }
@@ -85,8 +89,9 @@ public class PrivilegeResource extends AbstractResource
         }
 
         Privilege privilege = service.getPrivilege(privilegeId);
-
-        return createTransferObject(privilege, restBuilder);
+        PrivilegeDto pDto = createTransferObject(privilege, restBuilder);
+        pDto.setLinks(restBuilder.buildPrivilegeLink(pDto));
+        return pDto;
     }
 
     public static PrivilegeDto createTransferObject(final Privilege systemProperty,
@@ -96,6 +101,7 @@ public class PrivilegeResource extends AbstractResource
         dto.setName(systemProperty.getName());
         dto.setId(systemProperty.getId());
 
+        dto.setLinks(builder.buildPrivilegeLink(dto));
         return dto;
     }
 

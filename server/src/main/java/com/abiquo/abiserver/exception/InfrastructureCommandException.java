@@ -65,6 +65,7 @@ public class InfrastructureCommandException extends AbiCloudException
 
     /**
      * Create the exception with existing message and error code
+     * 
      * @param message indication the reason of the exception
      * @param e The exception to be thrown
      * @param abicloudErrorCode code error
@@ -73,22 +74,24 @@ public class InfrastructureCommandException extends AbiCloudException
     {
         super(message, e, abicloudErrorCode);
     }
-    
+
     /**
      * Create the exception only with the throwable argument
+     * 
      * @param e The exception to be thrown
      */
     public InfrastructureCommandException(Throwable e)
     {
         super(e);
     }
-    
+
     /**
      * Create the exception with the throwable and the error code
+     * 
      * @param e The exception to be thrown
      * @param abicloudErrorCode code error
      */
-    public InfrastructureCommandException(Throwable e,  int abicloudErrorCode)
+    public InfrastructureCommandException(Throwable e, int abicloudErrorCode)
     {
         super(e, abicloudErrorCode);
     }

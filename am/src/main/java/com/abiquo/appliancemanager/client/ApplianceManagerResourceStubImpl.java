@@ -20,28 +20,31 @@
  */
 package com.abiquo.appliancemanager.client;
 
-import java.io.File;
+import java.net.SocketTimeoutException;
 
 import javax.ws.rs.core.MediaType;
 
 import org.apache.wink.client.ClientResponse;
+import org.apache.wink.client.ClientRuntimeException;
 import org.apache.wink.client.Resource;
+import org.apache.wink.client.internal.ClientRuntimeContext;
 import org.dmtf.schemas.ovf.envelope._1.EnvelopeType;
 
-import com.abiquo.appliancemanager.transport.AMConfigurationDto;
 import com.abiquo.appliancemanager.transport.EnterpriseRepositoryDto;
-import com.abiquo.appliancemanager.transport.OVFPackageInstanceDto;
-import com.abiquo.appliancemanager.transport.OVFPackageInstanceStatusDto;
-import com.abiquo.appliancemanager.transport.OVFPackageInstanceStatusListDto;
-import com.abiquo.appliancemanager.transport.OVFPackageInstanceStatusType;
+import com.abiquo.appliancemanager.transport.RepositoryConfigurationDto;
+import com.abiquo.appliancemanager.transport.TemplateDto;
+import com.abiquo.appliancemanager.transport.TemplateStateDto;
+import com.abiquo.appliancemanager.transport.TemplateStatusEnumType;
+import com.abiquo.appliancemanager.transport.TemplatesStateDto;
+import com.abiquo.model.transport.error.ErrorsDto;
 
-//@Service
-// @Transactional
 public class ApplianceManagerResourceStubImpl extends ApplianceManagerResourceStub
 {
 
     public class ApplianceManagerStubException extends RuntimeException
     {
+        private static final long serialVersionUID = 8958140299476494818L;
+
         public ApplianceManagerStubException(final String statusMsg)
         {
             super(statusMsg);
@@ -57,109 +60,118 @@ public class ApplianceManagerResourceStubImpl extends ApplianceManagerResourceSt
         super(baseUrl);
     }
 
-    private void checkResponse(final ClientResponse response)
+    private void checkResponse(final ClientResponse response, final int expectedStatus)
     {
         final Integer httpStatus = response.getStatusCode();
-        if (httpStatus / 200 != 1)
+        if (httpStatus != expectedStatus)
         {
-            String cause = null;
+            String cause = response.getMessage();
             try
             {
-                cause = response.getEntity(String.class);
+                ErrorsDto errors = response.getEntity(ErrorsDto.class);
+                cause = errors.toString();
             }
             catch (Exception e)
             {
-                cause = response.getMessage();
+                throw new ApplianceManagerStubException(String.format("%d - %s\n %s", httpStatus,
+                    response.getMessage(), cause));
 
             }
-
-            throw new ApplianceManagerStubException(String.format("%d - %s\n %s", httpStatus,
-                response.getMessage(), cause));
+            throw new ApplianceManagerStubException(cause);
         }
     }
 
     // GET
-    public OVFPackageInstanceDto getOVFPackageInstance(final String idEnterprise, final String ovfId)
+    public TemplateDto getTemplate(final String idEnterprise, final String ovfId)
     {
-        Resource resource = ovfPackage(idEnterprise, ovfId);
+        Resource resource = template(idEnterprise, ovfId);
 
         ClientResponse response = resource.accept(MEDIA_TYPE).get();
         // default queryParam(FORAMT, "ovfpi")
 
-        checkResponse(response);
+        checkResponse(response, 200);
 
-        return response.getEntity(OVFPackageInstanceDto.class);
+        return response.getEntity(TemplateDto.class);
     }
 
-    public OVFPackageInstanceStatusDto getOVFPackageInstanceStatus(final String idEnterprise,
-        final String ovfId)
+    public EnvelopeType getTemplateOVFEnvelope(final String idEnterprise, final String ovfId)
     {
-        Resource resource = ovfPackage(idEnterprise, ovfId);
-
-        ClientResponse response = resource.accept(MEDIA_TYPE).queryParam(FORAMT, "status").get();
-
-        checkResponse(response);
-
-        return response.getEntity(OVFPackageInstanceStatusDto.class);
-    }
-
-    public EnvelopeType getOVFPackageInstanceEnvelope(final String idEnterprise, final String ovfId)
-    {
-        Resource resource = ovfPackage(idEnterprise, ovfId);
+        Resource resource = template(idEnterprise, ovfId);
 
         ClientResponse response = resource.accept(MEDIA_TYPE).queryParam(FORAMT, "envelope").get();
 
-        checkResponse(response);
+        checkResponse(response, 200);
 
         return response.getEntity(EnvelopeType.class);
     }
 
-    @Deprecated
-    File getOVFPackageInstanceDiskFie(final String idEnterprise, final String ovfId)
-        throws ApplianceManagerStubException
+    public TemplatesStateDto getTemplatesState(final String idEnterprise)
     {
-        Resource resource = ovfPackage(idEnterprise, ovfId);
+        Resource resource = templatesTimeout(idEnterprise);
 
-        ClientResponse response =
-            resource.accept(MediaType.APPLICATION_OCTET_STREAM).queryParam(FORAMT, "envelope")
-                .get();
+        try
+        {
+            ClientResponse response = resource.accept(MEDIA_TYPE).get();
 
-        checkResponse(response);
+            checkResponse(response, 200);
 
-        if (true)
-            throw new RuntimeException("wink client can get a file ??"); // ja ja
-        return response.getEntity(File.class);
+            return response.getEntity(TemplatesStateDto.class);
+        }
+        catch (ClientRuntimeException e)
+        {
+            checkTimeout(e);
+            return null;
+        }
     }
 
-    public OVFPackageInstanceStatusListDto getOVFPackagInstanceStatusList(final String idEnterprise)
+    public void refreshRepository(final String idEnterprise)
     {
-        Resource resource = ovfPackagesTimeout(idEnterprise);
+        Resource resource = repository(idEnterprise);
 
-        ClientResponse response = resource.accept(MEDIA_TYPE).get();
+        try
+        {
+            ClientResponse response = resource.accept(MEDIA_TYPE).post(null);
 
-        checkResponse(response);
-
-        return response.getEntity(OVFPackageInstanceStatusListDto.class);
+            checkResponse(response, 204);
+        }
+        catch (ClientRuntimeException e)
+        {
+            checkTimeout(e);
+        }
     }
 
-    public AMConfigurationDto getAMConfiguration()
+    public RepositoryConfigurationDto getRepositoryConfiguration()
     {
         Resource resource = repositories();
 
-        ClientResponse response = resource.accept(MEDIA_TYPE).get();
+        try
+        {
+            ClientResponse response = resource.accept(MEDIA_TYPE).get();
 
-        checkResponse(response);
+            checkResponse(response, 200);
 
-        return response.getEntity(AMConfigurationDto.class);
+            return response.getEntity(RepositoryConfigurationDto.class);
+        }
+        catch (ClientRuntimeException e)
+        {
+            checkTimeout(e);
+            return null;
+        }
     }
 
     public void checkService() throws ApplianceManagerStubException
     {
         Resource resource = check();
 
-        ClientResponse response = resource.accept(MEDIA_TYPE).get();
-
-        checkResponse(response);
+        try
+        {
+            ClientResponse response = resource.accept(MEDIA_TYPE).get();
+            checkResponse(response, 200);
+        }
+        catch (ClientRuntimeException e)
+        {
+            checkTimeout(e);
+        }
     }
 
     public EnterpriseRepositoryDto getRepository(final String idEnterprise)
@@ -174,45 +186,112 @@ public class ApplianceManagerResourceStubImpl extends ApplianceManagerResourceSt
     {
         Resource resource = repository(idEnterprise, checkCanWrite);
 
-        ClientResponse response = resource.accept(MEDIA_TYPE).get();
+        try
+        {
+            ClientResponse response = resource.accept(MEDIA_TYPE).get();
+            checkResponse(response, 200);
 
-        checkResponse(response);
+            return response.getEntity(EnterpriseRepositoryDto.class);
+        }
+        catch (ClientRuntimeException e)
+        {
+            checkTimeout(e);
+            return null;
+        }
+    }
 
-        return response.getEntity(EnterpriseRepositoryDto.class);
+    private void checkTimeout(final ClientRuntimeException re)
+    {
+        if (re.getCause() instanceof SocketTimeoutException || re.getCause().getCause() != null
+            && re.getCause().getCause() instanceof SocketTimeoutException)
+        {
+            throw new ApplianceManagerStubException("Appliance Manager timeout at : " + serviceUri);
+        }
+        else
+        {
+            throw new ApplianceManagerStubException("Unexpected error calling Appliance Manager at "
+                + serviceUri + "\n" + re.getCause().toString());
+        }
     }
 
     public void delete(final String idEnterprise, final String ovfId)
     {
-        Resource resource = ovfPackage(idEnterprise, ovfId);
+        Resource resource = template(idEnterprise, ovfId);
 
-        ClientResponse response = resource.accept(MEDIA_TYPE).delete();
-
-        checkResponse(response);
+        try
+        {
+            ClientResponse response = resource.accept(MEDIA_TYPE).delete();
+            checkResponse(response, 204);
+        }
+        catch (ClientRuntimeException e)
+        {
+            checkTimeout(e);
+        }
     }
 
     /**
      * start download
      */
-    public void createOVFPackageInstance(final String idEnterprise, final String ovfId)
+    public void installTemplateDefinition(final String idEnterprise, final String ovfId)
     {
-        Resource resource = ovfPackages(idEnterprise);
+        Resource resource = templates(idEnterprise);
 
-        // contentType(mediaType)
-        ClientResponse response =
-            resource.accept(MEDIA_TYPE).contentType(MediaType.TEXT_PLAIN).post(ovfId);
+        try
+        {
+            ClientResponse response =
+                resource.accept(MEDIA_TYPE).contentType(MediaType.TEXT_PLAIN).post(ovfId);
 
-        checkResponse(response);
+            checkResponse(response, 204);
+        }
+        catch (ClientRuntimeException e)
+        {
+            checkTimeout(e);
+        }
     }
 
-    public String preBundleOVFPackage(final String idEnterprise, final String name)
+    /**
+     * Current status, eval if uploading.
+     * 
+     * @param idsOvfpackageIn Name of the item to refresh.
+     * @param idEnterprise Id of Enterprise to which this {@link OVFPackage} belongs.
+     * @return OVFPackageInstanceStatusDto
+     */
+    public TemplateStateDto getTemplateStatus(final String idEnterprise, final String ovfId)
     {
-        Resource resource = ovfPackage(idEnterprise, "prebundle.ovf"); // FIXME
+        Resource resource = template(idEnterprise, ovfId);
+
+        try
+        {
+            ClientResponse response =
+                resource.accept(MEDIA_TYPE).queryParam(FORAMT, "status").get();
+
+            if (response.getStatusCode() == 404) // not found == not download
+            {
+                TemplateStateDto notFound = new TemplateStateDto();
+                notFound.setOvfId(ovfId);
+                notFound.setStatus(TemplateStatusEnumType.NOT_DOWNLOAD);
+                return notFound;
+            }
+
+            checkResponse(response, 200);
+            return response.getEntity(TemplateStateDto.class);
+        }
+        catch (ClientRuntimeException e)
+        {
+            checkTimeout(e);
+            return null;
+        }
+    }
+
+    public String preBundleTemplate(final String idEnterprise, final String name)
+    {
+        Resource resource = template(idEnterprise, "prebundle.ovf"); // FIXME
 
         // contentType(mediaType)
         ClientResponse response =
             resource.accept(MediaType.TEXT_PLAIN).contentType(MediaType.TEXT_PLAIN).post(name);
 
-        checkResponse(response);
+        checkResponse(response, 202);
 
         return response.getEntity(String.class);
     }
@@ -222,84 +301,56 @@ public class ApplianceManagerResourceStubImpl extends ApplianceManagerResourceSt
      * 
      * @throws ApplianceManagerStubException
      */
-    public String bundleOVFPackage(final String idEnterprise, final String snapshot,
-        final OVFPackageInstanceDto diskInfo)
+    public String bundleTemplate(final String idEnterprise, final String snapshot,
+        final TemplateDto diskInfo)
     {
 
-        Resource resource = ovfPackage(idEnterprise, snapshot);
+        Resource resource = template(idEnterprise, snapshot);
 
         // contentType(mediaType)
         ClientResponse response =
             resource.accept(MediaType.TEXT_PLAIN).contentType(MEDIA_TYPE).post(diskInfo);
 
-        checkResponse(response);
+        checkResponse(response, 200);
 
         return response.getEntity(String.class);
     }
 
-    /**
-     * Current status, eval if uploading.
-     * 
-     * @param idsOvfpackageIn Name of the item to refresh.
-     * @param idEnterprise Id of  Enterprise to which this {@link OVFPackage} belongs.
-     * @return OVFPackageInstanceStatusDto
-     */
-    public OVFPackageInstanceStatusDto getCurrentOVFPackageInstanceStatus(
-        final String idEnterprise, final String ovfId)
-    {
-        Resource resource = ovfPackage(idEnterprise, ovfId);
-
-        ClientResponse response = resource.accept(MEDIA_TYPE).queryParam(FORAMT, "status").get();
-
-        final int httpStatus = response.getStatusCode();
-        if (httpStatus == 200)
-        {
-            return response.getEntity(OVFPackageInstanceStatusDto.class);
-        }
-        if (httpStatus == 404)
-        {
-            return uploading(ovfId);
-        }
-
-        checkErrorStatusResponse(response, httpStatus);
-
-        return response.getEntity(OVFPackageInstanceStatusDto.class);
-    }
-
-    /**
-     * This {@link OVFPackage} is uploading.
-     * 
-     * @param ovfId id {@link OVFPackage}.
-     * @return OVFPackageInstanceStatusDto
-     */
-    private OVFPackageInstanceStatusDto uploading(final String ovfId)
-    {
-        OVFPackageInstanceStatusDto statusUploading = new OVFPackageInstanceStatusDto();
-        statusUploading.setOvfId(ovfId);
-        statusUploading.setProgress(0d);
-        statusUploading.setOvfPackageStatus(OVFPackageInstanceStatusType.DOWNLOAD);
-        return statusUploading;
-    }
-
-    /**
-     * Returns the proper error.
-     * @param response response.
-     * @param httpStatus code.
-     */
-    private void checkErrorStatusResponse(final ClientResponse response, Integer httpStatus)
-    {
-        String cause = null;
-        try
-        {
-            cause = response.getEntity(String.class);
-        }
-        catch (Exception e)
-        {
-            cause = response.getMessage();
-
-            }
-
-        throw new ApplianceManagerStubException(String.format("%d - %s\n %s", httpStatus,
-            response.getMessage(), cause));
-    }
+    // /**
+    // * This {@link TemplateDefinition} is uploading.
+    // *
+    // * @param ovfId id {@link TemplateDefinition}.
+    // */
+    // private TemplateStateDto uploading(final String ovfId)
+    // {
+    // TemplateStateDto statusUploading = new TemplateStateDto();
+    // statusUploading.setOvfId(ovfId);
+    // statusUploading.setDownloadingProgress(0d);
+    // statusUploading.setStatus(TemplateStatusEnumType.DOWNLOAD);
+    // return statusUploading;
+    // }
+    //
+    // /**
+    // * Returns the proper error.
+    // *
+    // * @param response response.
+    // * @param httpStatus code.
+    // */
+    // private void checkErrorStatusResponse(final ClientResponse response, final Integer
+    // httpStatus)
+    // {
+    // String cause = null;
+    // try
+    // {
+    // cause = response.getEntity(String.class);
+    // }
+    // catch (Exception e)
+    // {
+    // cause = response.getMessage();
+    //
+    // }
+    //
+    // throw new ApplianceManagerStubException(String.format("%d - %s\n %s", httpStatus,
+    // response.getMessage(), cause));
+    // }
 }

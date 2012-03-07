@@ -36,6 +36,7 @@ import com.abiquo.model.transport.WrapperDto;
 public class StoragePoolsDto extends WrapperDto<StoragePoolDto>
 {
     private static final long serialVersionUID = 1L;
+
     public static final String MEDIA_TYPE = "application/storagepoolsdto+xml";
 
     @Override

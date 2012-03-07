@@ -228,7 +228,8 @@
                     remoteServiceToEdit.protocol = remoteServiceFormItem.protocolInput.text;
                     remoteServiceToEdit.domainName = remoteServiceFormItem.domainNameInput.text;
                     remoteServiceToEdit.port = Number(remoteServiceFormItem.portInput.text);
-                    remoteServiceToEdit.serviceMapping = remoteServiceFormItem.serviceMappingInput.text;
+                    remoteServiceToEdit.uri = remoteServiceFormItem.formedUri;
+                    remoteServiceToEdit.serviceMapping = remoteServiceFormItem.serviceMappingInput.text;                    
                     remoteServiceToEdit.name = remoteServiceFormItem.formedUri;
                     remoteServiceToEdit.status = remoteServiceFormItem.remoteServiceStatus;
 
@@ -252,7 +253,8 @@
                     newRemoteService.domainName = remoteServiceFormItem.domainNameInput.text;
                     newRemoteService.port = Number(remoteServiceFormItem.portInput.text);
                     newRemoteService.serviceMapping = remoteServiceFormItem.serviceMappingInput.text;
-                    newRemoteService.name = remoteServiceFormItem.formedUri;
+                    newRemoteService.name = remoteServiceFormItem.formedUri;                    
+                    
                 }
 
                 return newRemoteService;

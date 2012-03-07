@@ -28,6 +28,8 @@ import com.abiquo.model.transport.SingleResourceTransportDto;
 @XmlRootElement(name = "icon")
 public class IconDto extends SingleResourceTransportDto
 {
+    private static final long serialVersionUID = 1L;
+
     private Integer id;
 
     public Integer getId()
@@ -35,7 +37,7 @@ public class IconDto extends SingleResourceTransportDto
         return id;
     }
 
-    public void setId(Integer id)
+    public void setId(final Integer id)
     {
         this.id = id;
     }
@@ -47,7 +49,7 @@ public class IconDto extends SingleResourceTransportDto
         return name;
     }
 
-    public void setName(String name)
+    public void setName(final String name)
     {
         this.name = name;
     }
@@ -59,7 +61,7 @@ public class IconDto extends SingleResourceTransportDto
         return path;
     }
 
-    public void setPath(String path)
+    public void setPath(final String path)
     {
         this.path = path;
     }
