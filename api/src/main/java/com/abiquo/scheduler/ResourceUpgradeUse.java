@@ -491,8 +491,8 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
                 vlanIdsOrdered.remove(vlanId);
             }
         }
-        
-        for (Integer i = rack.getVlanIdMin(); i <= rack.getVlanIdMax(); i ++)
+
+        for (Integer i = rack.getVlanIdMin(); i <= rack.getVlanIdMax(); i++)
         {
             if (!vlanIdsOrdered.contains(i))
             {

@@ -92,13 +92,18 @@ public class IpPoolManagementDAOTest extends
 
         IpPoolManagementDAO dao = createDaoForRollbackTransaction();
         IpPoolManagement available =
+<<<<<<< HEAD
             dao.findNextIpAvailable(ipPoolManagement.getVlanNetwork().getId(),
                 excludedIpPoolManagement.getIp());
+=======
+            dao.findNextIpAvailable(ipPoolManagement.getVlanNetwork().getId(), excludedIpPoolManagement.getIp());
+>>>>>>> ABICLOUDPREMIUM-2936
 
         assertFalse(excludedIpPoolManagement.equals(available));
     }
 
     @Test
+<<<<<<< HEAD
     public void findNextIpByPrivateVLANNotIpAvailable()
     {
         List<Object> entities = new ArrayList<Object>();
@@ -121,6 +126,8 @@ public class IpPoolManagementDAOTest extends
     }
 
     @Test
+=======
+>>>>>>> ABICLOUDPREMIUM-2936
     public void findNextIpByPrivateVLANExcludeMultiple()
     {
         List<Object> entities = new ArrayList<Object>();
@@ -282,7 +289,12 @@ public class IpPoolManagementDAOTest extends
 
         IpPoolManagementDAO dao = createDaoForRollbackTransaction();
         IpPoolManagement available =
+<<<<<<< HEAD
             dao.findNextIpAvailable(ipPoolManagement1.getVlanNetwork().getId());
+=======
+            dao.findNextIpAvailable(ipPoolManagement1.getVlanNetwork()
+                .getId());
+>>>>>>> ABICLOUDPREMIUM-2936
 
         Assert.assertNull(available);
     }
@@ -313,7 +325,12 @@ public class IpPoolManagementDAOTest extends
         persistAll(ds(), entities, vlan1, vlan2, ipPoolManagement1, ipPoolManagement2);
 
         IpPoolManagementDAO dao = createDaoForRollbackTransaction();
+<<<<<<< HEAD
         IpPoolManagement available = dao.findNextIpAvailable(vlan1.getId());
+=======
+        IpPoolManagement available =
+            dao.findNextIpAvailable(vlan1.getId());
+>>>>>>> ABICLOUDPREMIUM-2936
 
         Assert.assertNull(available);
     }
@@ -344,7 +361,12 @@ public class IpPoolManagementDAOTest extends
         persistAll(ds(), entities, vlan1, vlan2, ipPoolManagement1, ipPoolManagement2);
 
         IpPoolManagementDAO dao = createDaoForRollbackTransaction();
+<<<<<<< HEAD
         IpPoolManagement available = dao.findNextIpAvailable(vlan1.getId());
+=======
+        IpPoolManagement available =
+            dao.findNextIpAvailable(vlan1.getId());
+>>>>>>> ABICLOUDPREMIUM-2936
 
         Assert.assertNull(available);
     }
