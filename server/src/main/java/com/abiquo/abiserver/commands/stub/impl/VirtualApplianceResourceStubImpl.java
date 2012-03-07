@@ -127,7 +127,8 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
         VirtualMachineTaskDto options = new VirtualMachineTaskDto();
         options.setForceEnterpriseSoftLimits(forceEnterpriseSoftLimits);
 
-        ClientResponse response = post(link, options);
+        ClientResponse response =
+            post(link, AcceptedRequestDto.MEDIA_TYPE, VirtualMachineTaskDto.MEDIA_TYPE, options);
 
         if (response.getStatusCode() == 202)
         {
