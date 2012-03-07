@@ -66,8 +66,6 @@ public class TemplateFromOVFEnvelope
 {
     private final static Logger LOG = LoggerFactory.getLogger(TemplateFromOVFEnvelope.class);
 
-    private final static Logger LOG = LoggerFactory.getLogger(TemplateFromOVFEnvelope.class);
-
     public static VirtualDiskDescType getDisk(final EnvelopeType envelope)
     {
         DiskSectionType diskSection = null;
