@@ -72,7 +72,7 @@ package net.undf.abicloud.business.managers.virtualimage
 
         public function OVFPackageManager()
         {
-
+            _ovfPackageListNames = new ArrayCollection();
         }
 
         private var ovfPackagesByURL:Object;
@@ -99,11 +99,6 @@ package net.undf.abicloud.business.managers.virtualimage
         public function addOVFPackageList(ovfPackageList:OVFPackageList):void
         {
             //We only save its name
-            if(!_ovfPackageListNames)
-            {
-                this._ovfPackageListNames = new ArrayCollection
-            }
-           
             _ovfPackageListNames.addItem(ovfPackageList.name);
             dispatchEvent(new Event("ovfPackageListNamesChange"));
         }
