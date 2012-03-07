@@ -291,6 +291,15 @@ public class InfrastructureService extends DefaultApiService
             }
 
             validate(datastore);
+
+            // updates shared datastores
+            List<Datastore> datastoresShared = repo.findShares(datastore);
+            for (Datastore dstore : datastoresShared)
+            {
+                dstore.setSize(datastore.getSize());
+                dstore.setUsedSize(datastore.getUsedSize());
+            }
+
             repo.insertDatastore(datastore);
         }
 

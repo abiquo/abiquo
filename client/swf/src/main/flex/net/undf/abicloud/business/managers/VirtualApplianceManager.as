@@ -314,6 +314,9 @@ package net.undf.abicloud.business.managers
             if (virtualApplianceToUpdate)
             {
                 virtualApplianceToUpdate.nodes = nodes;
+                
+                //Force the nodes refresh
+                virtualAppliance.nodes = nodes;
 
                 //Announcing that this VirtualAppliance has ready its list of nodes
                 var virtualApplianceEvent:VirtualApplianceEvent = new VirtualApplianceEvent(VirtualApplianceEvent.VIRTUAL_APPLIANCE_NODES_RETRIEVED,
