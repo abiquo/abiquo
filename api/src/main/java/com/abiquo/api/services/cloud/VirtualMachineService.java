@@ -2194,6 +2194,15 @@ public class VirtualMachineService extends DefaultApiService
                         vdcRep.deleteRasd(ip.getRasd());
                         vdcRep.deleteIpPoolManagement(ip);
                     }
+                    else if (ip.getVlanNetwork().getType().equals(NetworkType.EXTERNAL))
+                    {
+                        ip.setMac(null);
+                        ip.setName(null);
+                        ip.setVirtualDatacenter(null);
+                        ip.detach();
+                        vdcRep.deleteRasd(ip.getRasd());
+                        vdcRep.updateIpManagement(ip);
+                    }
                     else
                     {
                         ip.detach();
@@ -2204,6 +2213,12 @@ public class VirtualMachineService extends DefaultApiService
                 else
                 {
                     ip.detach();
+                    if (ip.getVlanNetwork().getType().equals(NetworkType.EXTERNAL))
+                    {
+                        ip.setMac(null);
+                        ip.setName(null);
+                        ip.setVirtualDatacenter(null);
+                    }
                     vdcRep.updateIpManagement(ip);
                 }
 
@@ -2815,6 +2830,13 @@ public class VirtualMachineService extends DefaultApiService
                         {
                             rasdDao.remove(originalRasd);
                         }
+
+                        // external ips should remove its MAC and name
+                        if (originalRasd.isExternalIp())
+                        {
+                            originalRasd.setMac(null);
+                            originalRasd.setName(null);
+                        }
                     }
                 }
                 // DiskManagements always are deleted
@@ -2956,8 +2978,13 @@ public class VirtualMachineService extends DefaultApiService
                 // but for IPs it is.
                 if (originalRasd instanceof IpPoolManagement)
                 {
+                    IpPoolManagement ipman = (IpPoolManagement) originalRasd;
+                    IpPoolManagement ipRoll = (IpPoolManagement) rollbackRasd;
                     VirtualAppliance vapp = vdcRep.findVirtualApplianceByVirtualMachine(updatedVm);
-                    originalRasd.setVirtualAppliance(vapp);
+                    ipman.setVirtualAppliance(vapp);
+                    ipman.setVirtualDatacenter(rollbackRasd.getVirtualDatacenter());
+                    ipman.setIp(ipRoll.getIp());
+                    ipman.setMac(ipRoll.getMac());
                 }
             }
 
