@@ -64,6 +64,7 @@ import com.abiquo.ovfmanager.ovf.section.DiskFormat;
 
 public class TemplateFromOVFEnvelope
 {
+    private final static Logger LOG = LoggerFactory.getLogger(TemplateFromOVFEnvelope.class);
 
     private final static Logger LOG = LoggerFactory.getLogger(TemplateFromOVFEnvelope.class);
 

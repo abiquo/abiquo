@@ -68,13 +68,13 @@ import com.softwarementors.validation.constraints.LeadingOrTrailingWhitespace;
 import com.softwarementors.validation.constraints.Required;
 
 @Entity
-@FilterDefs( {@FilterDef(name = VirtualMachine.NOT_TEMP),
+@FilterDefs({@FilterDef(name = VirtualMachine.NOT_TEMP),
 @FilterDef(name = VirtualMachine.ONLY_TEMP)})
-@Filters( {@Filter(name = VirtualMachine.NOT_TEMP, condition = "temporal is null"),
+@Filters({@Filter(name = VirtualMachine.NOT_TEMP, condition = "temporal is null"),
 @Filter(name = VirtualMachine.ONLY_TEMP, condition = "temporal is not null")})
 @Table(name = VirtualMachine.TABLE_NAME)
 @org.hibernate.annotations.Table(appliesTo = VirtualMachine.TABLE_NAME)
-@NamedQueries( {@NamedQuery(name = "VIRTUAL_MACHINE.BY_VAPP", query = VirtualMachine.BY_VAPP),
+@NamedQueries({@NamedQuery(name = "VIRTUAL_MACHINE.BY_VAPP", query = VirtualMachine.BY_VAPP),
 @NamedQuery(name = "VIRTUAL_MACHINE.BY_DC", query = VirtualMachine.BY_DC),
 @NamedQuery(name = "VIRTUAL_MACHINE.BY_VMT", query = VirtualMachine.BY_VMT),
 @NamedQuery(name = "VIRTUAL_MACHINE.HAS_VMT", query = VirtualMachine.HAS_VMT)})
@@ -82,23 +82,20 @@ public class VirtualMachine extends DefaultEntityBase
 {
     public static final String TABLE_NAME = "virtualmachine";
 
-    public static final String BY_VAPP =
-        "SELECT nvi.virtualMachine " + "FROM NodeVirtualImage nvi "
-            + "WHERE nvi.virtualAppliance.id = :vapp_id "
-            + "AND ( nvi.virtualMachine.name like :filterLike )";
+    public static final String BY_VAPP = "SELECT nvi.virtualMachine "
+        + "FROM NodeVirtualImage nvi " + "WHERE nvi.virtualAppliance.id = :vapp_id "
+        + "AND ( nvi.virtualMachine.name like :filterLike )";
 
-    public static final String BY_DC =
-        "SELECT vm " + "FROM VirtualMachine vm, Hypervisor hy, Machine pm "
-            + " WHERE vm.hypervisor.id = hy.id and hy.machine = pm.id "
-            + " AND pm.datacenter.id = :datacenterId";
+    public static final String BY_DC = "SELECT vm "
+        + "FROM VirtualMachine vm, Hypervisor hy, Machine pm "
+        + " WHERE vm.hypervisor.id = hy.id and hy.machine = pm.id "
+        + " AND pm.datacenter.id = :datacenterId";
 
-    public static final String BY_VMT =
-        "SELECT vm " + "FROM VirtualMachine vm "
-            + "WHERE vm.virtualMachineTemplate.id = :virtualMachineTplId";
+    public static final String BY_VMT = "SELECT vm " + "FROM VirtualMachine vm "
+        + "WHERE vm.virtualMachineTemplate.id = :virtualMachineTplId";
 
-    public static final String HAS_VMT =
-        "SELECT COUNT(*) " + "FROM VirtualMachine vm "
-            + "WHERE vm.virtualMachineTemplate.id = :virtualMachineTplId";
+    public static final String HAS_VMT = "SELECT COUNT(*) " + "FROM VirtualMachine vm "
+        + "WHERE vm.virtualMachineTemplate.id = :virtualMachineTplId";
 
     public static final int MANAGED = 1;
 
@@ -704,6 +701,29 @@ public class VirtualMachine extends DefaultEntityBase
         this.rasdManagements = rasdManagements;
     }
 
+    public final static String ETHERNET_DRIVER_TYPE_PROPERTY = "ethernetDriverType";
+
+    private final static boolean ETHERNET_DRIVER_TYPE_REQUIRED = false;
+
+    private final static String ETHERNET_DRIVER_TYPE_COLUMN = "ethDriverType";
+
+    private final static int ETHERNET_DRIVER_TYPE_COLUMN_LENGTH = 16;
+
+    @Enumerated(value = javax.persistence.EnumType.STRING)
+    @Column(name = ETHERNET_DRIVER_TYPE_COLUMN, nullable = !ETHERNET_DRIVER_TYPE_REQUIRED, length = ETHERNET_DRIVER_TYPE_COLUMN_LENGTH)
+    private EthernetDriverType ethernetDriverType;
+
+    @Required(value = ETHERNET_DRIVER_TYPE_REQUIRED)
+    public EthernetDriverType getEthernetDriverType()
+    {
+        return this.ethernetDriverType;
+    }
+
+    public void setEthernetDriverType(final EthernetDriverType ethernetDriverType)
+    {
+        this.ethernetDriverType = ethernetDriverType;
+    }
+
     public static final String CHEF_RUNLIST_TABLE = "chef_runlist";
 
     public static final String CHEF_RUNLIST_PROPERTY = "runlist";
@@ -734,29 +754,6 @@ public class VirtualMachine extends DefaultEntityBase
     /* package */void removeRunlistElement(final RunlistElement element)
     {
         this.runlist.remove(element);
-    }
-
-    public final static String ETHERNET_DRIVER_TYPE_PROPERTY = "ethernetDriverType";
-
-    private final static boolean ETHERNET_DRIVER_TYPE_REQUIRED = false;
-
-    private final static String ETHERNET_DRIVER_TYPE_COLUMN = "ethDriverType";
-
-    private final static int ETHERNET_DRIVER_TYPE_COLUMN_LENGTH = 16;
-
-    @Enumerated(value = javax.persistence.EnumType.STRING)
-    @Column(name = ETHERNET_DRIVER_TYPE_COLUMN, nullable = !ETHERNET_DRIVER_TYPE_REQUIRED, length = ETHERNET_DRIVER_TYPE_COLUMN_LENGTH)
-    private EthernetDriverType ethernetDriverType;
-
-    @Required(value = ETHERNET_DRIVER_TYPE_REQUIRED)
-    public EthernetDriverType getEthernetDriverType()
-    {
-        return this.ethernetDriverType;
-    }
-
-    public void setEthernetDriverType(final EthernetDriverType ethernetDriverType)
-    {
-        this.ethernetDriverType = ethernetDriverType;
     }
 
     /* ******************* Helper methods ******************* */

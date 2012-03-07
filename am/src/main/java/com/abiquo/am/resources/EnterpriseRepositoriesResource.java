@@ -53,7 +53,6 @@ public class EnterpriseRepositoriesResource extends AbstractResource
     public RepositoryConfigurationDto getConfig()
     {
         RepositoryConfigurationDto configDto = new RepositoryConfigurationDto();
-        // configDto.setBrokerUrl(config.getBrokerUrl());
         configDto.setLocation(AMConfiguration.getRepositoryLocation());
         configDto.setCapacityMb(EnterpriseRepositoryFileSystem.getCapacityMb());
         configDto.setRemainingMb(EnterpriseRepositoryFileSystem.getFreeMb());

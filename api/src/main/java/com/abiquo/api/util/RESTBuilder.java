@@ -538,6 +538,17 @@ public class RESTBuilder implements IRESTBuilder
             .toString());
         links.add(builder.buildRestLink(TemplateDefinitionResource.class, REL_EDIT, params));
 
+<<<<<<< HEAD
+=======
+        if (icon != null)
+        {
+            params.put(IconResource.ICON, String.valueOf(icon.getId()));
+            links.add(builder.buildRestLink(IconResource.class, null, IconResource.ICON,
+                icon.getPath(), params));
+
+        }
+
+>>>>>>> appslib-icon-deleted
         return links;
     }
 

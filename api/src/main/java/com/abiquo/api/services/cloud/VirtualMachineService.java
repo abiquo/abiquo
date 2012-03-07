@@ -756,20 +756,18 @@ public class VirtualMachineService extends DefaultApiService
         updateNodeVirtualImage(old, vmnew.getVirtualMachineTemplate());
     }
 
-    private boolean differentNetworkConfiguration(VirtualMachine old, VirtualMachine vmnew)
+    private boolean differentNetworkConfiguration(final VirtualMachine old,
+        final VirtualMachine vmnew)
     {
-        if (old.getNetworkConfiguration() == null
-            && vmnew.getNetworkConfiguration() == null)
+        if (old.getNetworkConfiguration() == null && vmnew.getNetworkConfiguration() == null)
         {
             return false;
         }
-        else if (old.getNetworkConfiguration() == null
-            && vmnew.getNetworkConfiguration() != null)
+        else if (old.getNetworkConfiguration() == null && vmnew.getNetworkConfiguration() != null)
         {
             return true;
         }
-        else if (old.getNetworkConfiguration() != null
-            && vmnew.getNetworkConfiguration() == null)
+        else if (old.getNetworkConfiguration() != null && vmnew.getNetworkConfiguration() == null)
         {
             return true;
         }
@@ -787,13 +785,13 @@ public class VirtualMachineService extends DefaultApiService
      * @param vmnew
      * @return
      */
-    private boolean differentPassword(VirtualMachine old, VirtualMachine vmnew)
+    private boolean differentPassword(final VirtualMachine old, final VirtualMachine vmnew)
     {
         if (vmnew.getPassword() != null && vmnew.getPassword().isEmpty())
         {
             vmnew.setPassword(null);
         }
-        
+
         if (old.getPassword() == null && vmnew.getPassword() == null)
         {
             return false;
@@ -819,7 +817,7 @@ public class VirtualMachineService extends DefaultApiService
      * @param vmnew
      * @return
      */
-    private boolean differentDescription(VirtualMachine old, VirtualMachine vmnew)
+    private boolean differentDescription(final VirtualMachine old, final VirtualMachine vmnew)
     {
         if (old.getDescription() == null && vmnew.getDescription() == null)
         {
