@@ -32,6 +32,7 @@ import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.result.DataResult;
 import com.abiquo.abiserver.pojo.virtualhardware.Disk;
 import com.abiquo.model.rest.RESTLink;
+import com.abiquo.model.transport.AcceptedRequestDto;
 import com.abiquo.model.transport.LinksDto;
 import com.abiquo.server.core.infrastructure.storage.DiskManagementDto;
 import com.abiquo.server.core.infrastructure.storage.DisksManagementDto;
@@ -131,7 +132,7 @@ public class StorageResourceStubImpl extends AbstractAPIStub implements StorageR
             links.addLink(link);
 
             String vmUri = createVirtualMachineDisksLink(vdcId, vappId, vmId);
-            response = post(vmUri, links);
+            response = post(vmUri, AcceptedRequestDto.MEDIA_TYPE, LinksDto.MEDIA_TYPE, links);
 
             if (response.getStatusCode() == 202 || response.getStatusCode() == 204)
             {

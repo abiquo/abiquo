@@ -149,7 +149,7 @@ public class AbstractAPIStub
         }
     }
 
-    private UserHB getCurrentUserCredentials()
+    protected UserHB getCurrentUserCredentials()
     {
         DAOFactory factory = HibernateDAOFactory.instance();
         factory.beginConnection();
@@ -234,7 +234,17 @@ public class AbstractAPIStub
     protected ClientResponse put(final String uri, final SingleResourceTransportDto dto,
         final String user, final String password, final String accept, final String content)
     {
-        return resource(uri, user, password, accept).contentType(content).put(dto);
+        Resource resource = resource(uri, user, password); 
+        if (accept != null)
+        {
+            resource.accept(accept);
+        }
+        if (content != null)
+        {
+            resource.contentType(content);
+        }
+        
+        return resource.put(dto);
     }
 
     protected ClientResponse delete(final String uri)

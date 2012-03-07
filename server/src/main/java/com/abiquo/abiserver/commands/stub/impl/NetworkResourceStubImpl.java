@@ -53,6 +53,7 @@ import com.abiquo.abiserver.pojo.result.ListResponse;
 import com.abiquo.abiserver.pojo.user.Enterprise;
 import com.abiquo.abiserver.pojo.virtualappliance.VirtualDataCenter;
 import com.abiquo.model.rest.RESTLink;
+import com.abiquo.model.transport.AcceptedRequestDto;
 import com.abiquo.model.transport.LinksDto;
 import com.abiquo.server.core.cloud.VirtualDatacenterDto;
 import com.abiquo.server.core.enterprise.DatacenterLimitsDto;
@@ -1279,7 +1280,10 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
         StringBuilder uri =
             new StringBuilder(createVirtualDatacenterPublicPurchasedIPLink(vdcId, ipId));
 
-        ClientResponse response = put(uri.toString(), null);
+        UserHB user = getCurrentUserCredentials();
+        ClientResponse response =
+            put(uri.toString(), null, user.getUser(), user.getPassword(), IpPoolManagementDto.MEDIA_TYPE,
+                null);
 
         if (response.getStatusCode() == 200)
         {
@@ -1324,7 +1328,10 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
         StringBuilder uri =
             new StringBuilder(createVirtualDatacenterPublicToPurchaseIPLink(vdcId, ipId));
 
-        ClientResponse response = put(uri.toString(), null);
+        UserHB user = getCurrentUserCredentials();
+        ClientResponse response =
+            put(uri.toString(), null, user.getUser(), user.getPassword(), IpPoolManagementDto.MEDIA_TYPE,
+                null);
 
         if (response.getStatusCode() == 200)
         {
@@ -1411,7 +1418,8 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
                 LinksDto linkDto = new LinksDto();
                 linkDto.addLink(externalIPlink);
 
-                response = post(uriNIC, linkDto);
+                response =
+                    post(uriNIC, AcceptedRequestDto.MEDIA_TYPE, LinksDto.MEDIA_TYPE, linkDto);
                 if (response.getStatusCode() == 204 || response.getStatusCode() == 202)
                 {
                     result.setSuccess(Boolean.TRUE);
@@ -1445,7 +1453,8 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
         ipLink.setRel("privateip");
         links.addLink(ipLink);
 
-        ClientResponse response = post(uri, links);
+        ClientResponse response =
+            post(uri, AcceptedRequestDto.MEDIA_TYPE, LinksDto.MEDIA_TYPE, links);
 
         if (response.getStatusCode() == 204 || response.getStatusCode() == 202)
         {
@@ -1473,7 +1482,8 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
         ipLink.setRel("publicip");
         links.addLink(ipLink);
 
-        ClientResponse response = post(uri, links);
+        ClientResponse response =
+            post(uri, AcceptedRequestDto.MEDIA_TYPE, LinksDto.MEDIA_TYPE, links);
 
         if (response.getStatusCode() == 204 || response.getStatusCode() == 202)
         {
