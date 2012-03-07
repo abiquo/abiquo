@@ -103,16 +103,19 @@ public class MonitorManager
         {
             pm = dao.findPhysicalMachineByAddress(physicalMachineAddress);
 
-            if (pm == null)
+            if (pm != null)
             {
-                VirtualMachinesCache cache = new VirtualMachinesCache();
-                dao.save(cache);
-
-                pm = new PhysicalMachine();
-                pm.setAddress(physicalMachineAddress);
-                pm.setVirtualMachines(cache);
+                LOGGER.debug("The physical machine at " + physicalMachineAddress
+                    + " is already monitored.");
+                return pm;
             }
 
+            VirtualMachinesCache cache = new VirtualMachinesCache();
+            dao.save(cache);
+
+            pm = new PhysicalMachine();
+            pm.setAddress(physicalMachineAddress);
+            pm.setVirtualMachines(cache);
             pm.setUsername(username);
             pm.setPassword(password);
             pm.setType(type.name());
@@ -127,7 +130,6 @@ public class MonitorManager
 
         try
         {
-            // Create and start the monitor
             createAndStartMonitor(physicalMachineAddress, type, username, password);
         }
         catch (MonitorException e)
