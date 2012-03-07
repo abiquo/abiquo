@@ -1403,7 +1403,7 @@ CREATE TRIGGER kinton.delete_nodevirtualimage_update_stats AFTER DELETE ON kinto
            WHERE idVirtualDataCenter = idVirtualDataCenterObj;                 
       END IF;
       --
-      IF previousState != "NOT_ALLOCATED" AND previousState != "UNKNOWN" THEN      	
+      IF previousState != "NOT_ALLOCATED" OR previousState != "UNKNOWN" THEN      	
         UPDATE IGNORE cloud_usage_stats SET vMachinesTotal = vMachinesTotal-1
           WHERE idDataCenter = idDataCenterObj;
         UPDATE IGNORE vapp_enterprise_stats SET vmCreated = vmCreated-1
