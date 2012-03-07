@@ -180,12 +180,6 @@ public class AbstractAPIStub
         return resource(uri, user, password, mediaType, handlers).get();
     }
 
-    // protected ClientResponse get(final String uri, final String user, final String password,
-    // final ClientHandler... handlers)
-    // {
-    // return resource(uri, user, password, handlers).get();
-    // }
-
     protected ClientResponse post(final String uri, final SingleResourceTransportDto dto)
     {
         UserHB user = getCurrentUserCredentials();
@@ -205,8 +199,8 @@ public class AbstractAPIStub
         return resource(uri, user.getUser(), user.getPassword(), mediaType).post(dto);
     }
 
-    protected ClientResponse post(final String uri, final String contentType,
-        final String acceptType, final SingleResourceTransportDto dto)
+    protected ClientResponse post(final String uri, final String acceptType,
+        final String contentType, final SingleResourceTransportDto dto)
     {
         UserHB user = getCurrentUserCredentials();
         return resource(uri, user.getUser(), user.getPassword(), acceptType).contentType(
@@ -237,14 +231,6 @@ public class AbstractAPIStub
         return resource.put(dto);
     }
 
-    // protected ClientResponse put(final String uri, final SingleResourceTransportDto dto,
-    // final String accept, final String content)
-    // {
-    // UserHB user = getCurrentUserCredentials();
-    // return resource(uri, user.getUser(), user.getPassword(), accept).contentType(content).put(
-    // dto);
-    // }
-
     protected ClientResponse put(final String uri, final SingleResourceTransportDto dto,
         final String user, final String password, final String accept, final String content)
     {
@@ -257,26 +243,6 @@ public class AbstractAPIStub
         return resource(uri, user.getUser(), user.getPassword(), MediaType.APPLICATION_XML)
             .delete();
     }
-
-    // protected ClientResponse delete(final String uri, final String user, final String password)
-    // {
-    // return resource(uri, user, password).delete();
-    // }
-
-    // no se utiliza
-    // protected ClientResponse delete(final String uri, final String user, final String password,
-    // final String mediaType)
-    // {
-    // return resource(uri, user, password, mediaType).delete();
-    // }
-
-    // no se utiliza
-    // protected ClientResponse delete(final String uri, final String mediaType)
-    // {
-    // UserHB user = getCurrentUserCredentials();
-    // return resource(uri, user.getUser(), user.getPassword()).accept(mediaType)
-    // .contentType(mediaType).delete();
-    // }
 
     protected String createLoginLink()
     {
