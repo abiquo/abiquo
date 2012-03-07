@@ -27,6 +27,8 @@ import static com.abiquo.api.common.UriTestResolver.resolveMachinesURI;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
+import java.util.UUID;
+
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response.Status;
 
@@ -126,6 +128,7 @@ public class MachinesResourceIT extends AbstractJpaGeneratorIT
         dto.setName("datastoreName");
         dto.setRootPath("/");
         dto.setDirectory("var/lib/virt");
+        dto.setDatastoreUUID(UUID.randomUUID().toString());
         dto.setEnabled(Boolean.TRUE);
         m.getDatastores().getCollection().add(dto);
 
@@ -214,6 +217,7 @@ public class MachinesResourceIT extends AbstractJpaGeneratorIT
         dto.setName("datastoreName");
         dto.setRootPath("/");
         dto.setDirectory("var/lib/virt");
+        dto.setDatastoreUUID(UUID.randomUUID().toString());
         dto.setEnabled(Boolean.TRUE);
         machineDto.getDatastores().getCollection().add(dto);
 
@@ -278,6 +282,7 @@ public class MachinesResourceIT extends AbstractJpaGeneratorIT
         dto.setName("datastoreName");
         dto.setRootPath("/");
         dto.setDirectory("var/lib/virt");
+        dto.setDatastoreUUID(UUID.randomUUID().toString());
         dto.setEnabled(Boolean.TRUE);
         m.getDatastores().getCollection().add(dto);
 

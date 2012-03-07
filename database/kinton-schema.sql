@@ -2325,8 +2325,6 @@ CREATE TRIGGER `kinton`.`enterprise_deleted` AFTER DELETE ON `kinton`.`enterpris
 |
 CREATE TRIGGER `kinton`.`create_physicalmachine_update_stats` AFTER INSERT ON `kinton`.`physicalmachine`
 FOR EACH ROW BEGIN
-DECLARE datastoreUsedSize BIGINT UNSIGNED;
-DECLARE datastoreSize BIGINT UNSIGNED;
 IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN
     IF NEW.idState = 3 THEN
         UPDATE IGNORE cloud_usage_stats SET serversRunning = serversRunning+1,
@@ -2348,19 +2346,25 @@ DECLARE idDatacenter INT UNSIGNED;
 DECLARE enabled INT UNSIGNED;
 DECLARE usedSize BIGINT UNSIGNED;
 DECLARE size BIGINT UNSIGNED;
+DECLARE datastoreuuid VARCHAR(255);
 SELECT pm.idState, pm.idDatacenter INTO machineState, idDatacenter FROM physicalmachine pm WHERE pm.idPhysicalMachine = NEW.idPhysicalmachine;
-SELECT d.enabled, d.usedSize, d.size INTO enabled, usedSize, size FROM datastore d WHERE d.idDatastore = NEW.idDatastore;
+SELECT d.enabled, d.usedSize, d.size, d.datastoreUUID INTO enabled, usedSize, size, datastoreuuid FROM datastore d WHERE d.idDatastore = NEW.idDatastore;
 IF (@DISABLED_STATS_TRIGGERS IS NULL) THEN
-    IF machineState = 3 THEN
-        IF enabled = 1 THEN
-            UPDATE IGNORE cloud_usage_stats cus SET cus.vStorageUsed = cus.vStorageUsed + usedSize
-            WHERE cus.idDataCenter = idDatacenter;
+    IF (SELECT count(*) FROM datastore d LEFT OUTER JOIN datastore_assignment da ON d.idDatastore = da.idDatastore
+        LEFT OUTER JOIN physicalmachine pm ON da.idPhysicalMachine = pm.idPhysicalMachine
+        WHERE pm.idDatacenter = idDatacenter AND d.datastoreUUID = datastoreuuid AND d.idDatastore != NEW.idDatastore
+        AND d.enabled = 1) = 0 THEN
+        IF machineState = 3 THEN
+            IF enabled = 1 THEN
+                UPDATE IGNORE cloud_usage_stats cus SET cus.vStorageUsed = cus.vStorageUsed + usedSize
+                WHERE cus.idDataCenter = idDatacenter;
+            END IF;
         END IF;
-    END IF;
-    IF machineState != 2 THEN
-        IF enabled = 1 THEN
-            UPDATE IGNORE cloud_usage_stats cus SET cus.vStorageTotal = cus.vStorageTotal + size
-            WHERE cus.idDataCenter = idDatacenter;
+        IF machineState != 2 THEN
+            IF enabled = 1 THEN
+                UPDATE IGNORE cloud_usage_stats cus SET cus.vStorageTotal = cus.vStorageTotal + size
+                WHERE cus.idDataCenter = idDatacenter;
+            END IF;
         END IF;
     END IF;
 END IF;
@@ -2378,8 +2382,6 @@ END
 |
 CREATE TRIGGER `kinton`.`delete_physicalmachine_update_stats` AFTER DELETE ON `kinton`.`physicalmachine`
 FOR EACH ROW BEGIN
-DECLARE datastoreUsedSize BIGINT UNSIGNED;
-DECLARE datastoreSize BIGINT UNSIGNED;
 IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN
     IF OLD.idState = 3 THEN
         UPDATE IGNORE cloud_usage_stats SET serversRunning = serversRunning-1,
@@ -2401,16 +2403,21 @@ DECLARE idDatacenter INT UNSIGNED;
 SELECT pm.idState, pm.idDatacenter INTO machineState, idDatacenter FROM physicalmachine pm LEFT OUTER JOIN datastore_assignment da ON pm.idPhysicalMachine = da.idPhysicalMachine
 WHERE da.idDatastore = OLD.idDatastore;
 IF (@DISABLED_STATS_TRIGGERS IS NULL) THEN
-    IF machineState = 3 THEN
-        IF OLD.enabled = 1 THEN
-            UPDATE IGNORE cloud_usage_stats cus SET cus.vStorageUsed = cus.vStorageUsed - OLD.usedSize
-            WHERE cus.idDataCenter = idDatacenter;
+    IF (SELECT count(*) FROM datastore d LEFT OUTER JOIN datastore_assignment da ON d.idDatastore = da.idDatastore
+        LEFT OUTER JOIN physicalmachine pm ON da.idPhysicalMachine = pm.idPhysicalMachine
+        WHERE pm.idDatacenter = idDatacenter AND d.datastoreUUID = OLD.datastoreuuid AND d.idDatastore != OLD.idDatastore
+        AND d.enabled = 1) = 0 THEN
+        IF machineState = 3 THEN
+            IF OLD.enabled = 1 THEN
+                UPDATE IGNORE cloud_usage_stats cus SET cus.vStorageUsed = cus.vStorageUsed - OLD.usedSize
+                WHERE cus.idDataCenter = idDatacenter;
+            END IF;
         END IF;
-    END IF;
-    IF machineState NOT IN (2, 6, 7) THEN
-        IF OLD.enabled = 1 THEN
-            UPDATE IGNORE cloud_usage_stats cus SET cus.vStorageTotal = cus.vStorageTotal - OLD.size
-            WHERE cus.idDataCenter = idDatacenter;
+        IF machineState NOT IN (2, 6, 7) THEN
+            IF OLD.enabled = 1 THEN
+                UPDATE IGNORE cloud_usage_stats cus SET cus.vStorageTotal = cus.vStorageTotal - OLD.size
+                WHERE cus.idDataCenter = idDatacenter;
+            END IF;
         END IF;
     END IF;
 END IF;
@@ -3621,36 +3628,75 @@ CREATE TRIGGER `kinton`.`update_datastore_update_stats` AFTER UPDATE ON `kinton`
 	SELECT pm.idDatacenter, pm.idState INTO idDatacenter, machineState FROM physicalmachine pm LEFT OUTER JOIN datastore_assignment da ON pm.idPhysicalMachine = da.idPhysicalMachine
 	WHERE da.idDatastore = NEW.idDatastore;
 	IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN
-	    IF OLD.enabled = 1 THEN
-		IF NEW.enabled = 1 THEN
-		    IF machineState IN (2, 6, 7) THEN
-		        UPDATE IGNORE cloud_usage_stats cus SET cus.vStorageTotal = cus.vStorageTotal - OLD.size + NEW.size
-		        WHERE cus.idDatacenter = idDatacenter;
-		    ELSE
-		        UPDATE IGNORE cloud_usage_stats cus SET cus.vStorageTotal = cus.vStorageTotal - OLD.size + NEW.size,
-		        cus.vStorageUsed = cus.vStorageUsed - OLD.usedSize + NEW.usedSize WHERE cus.idDatacenter = idDatacenter;
+            IF (SELECT count(*) FROM datastore d LEFT OUTER JOIN datastore_assignment da ON d.idDatastore = da.idDatastore
+                LEFT OUTER JOIN physicalmachine pm ON da.idPhysicalMachine = pm.idPhysicalMachine
+                WHERE pm.idDatacenter = idDatacenter AND d.datastoreUUID = NEW.datastoreUUID AND d.idDatastore != NEW.idDatastore 
+                AND d.enabled = 1) = 0 THEN
+	        IF OLD.enabled = 1 THEN
+		    IF NEW.enabled = 1 THEN
+		        IF machineState IN (2, 6, 7) THEN
+		            UPDATE IGNORE cloud_usage_stats cus SET cus.vStorageTotal = cus.vStorageTotal - OLD.size + NEW.size
+		            WHERE cus.idDatacenter = idDatacenter;
+		        ELSE
+		            UPDATE IGNORE cloud_usage_stats cus SET cus.vStorageTotal = cus.vStorageTotal - OLD.size + NEW.size,
+		            cus.vStorageUsed = cus.vStorageUsed - OLD.usedSize + NEW.usedSize WHERE cus.idDatacenter = idDatacenter;
+		        END IF;
+	            ELSEIF NEW.enabled = 0 THEN
+		        IF machineState IN (2, 6, 7) THEN
+		            UPDATE IGNORE cloud_usage_stats cus SET cus.vStorageTotal = cus.vStorageTotal - OLD.size
+		            WHERE cus.idDatacenter = idDatacenter;
+		        ELSE
+		            UPDATE IGNORE cloud_usage_stats cus SET cus.vStorageTotal = cus.vStorageTotal - OLD.size,
+		            cus.vStorageUsed = cus.vStorageUsed - OLD.usedSize WHERE cus.idDatacenter = idDatacenter;
+		        END IF;
 		    END IF;
-		ELSEIF NEW.enabled = 0 THEN
-		    IF machineState IN (2, 6, 7) THEN
-		        UPDATE IGNORE cloud_usage_stats cus SET cus.vStorageTotal = cus.vStorageTotal - OLD.size
-		        WHERE cus.idDatacenter = idDatacenter;
-		    ELSE
-		        UPDATE IGNORE cloud_usage_stats cus SET cus.vStorageTotal = cus.vStorageTotal - OLD.size,
-		        cus.vStorageUsed = cus.vStorageUsed - OLD.usedSize WHERE cus.idDatacenter = idDatacenter;
+	        ELSE
+		    IF NEW.enabled = 1 THEN
+		        IF machineState IN (2, 6, 7) THEN
+		            UPDATE IGNORE cloud_usage_stats cus SET cus.vStorageTotal = cus.vStorageTotal + NEW.size
+		            WHERE cus.idDatacenter = idDatacenter;
+		        ELSE
+		            UPDATE IGNORE cloud_usage_stats cus SET cus.vStorageTotal = cus.vStorageTotal + NEW.size,
+		            cus.vStorageUsed = cus.vStorageUsed + NEW.usedSize WHERE cus.idDatacenter = idDatacenter;
+		        END IF;
 		    END IF;
-		END IF;
-	    ELSE
-		IF NEW.enabled = 1 THEN
-		    IF machineState IN (2, 6, 7) THEN
-		        UPDATE IGNORE cloud_usage_stats cus SET cus.vStorageTotal = cus.vStorageTotal + NEW.size
-		        WHERE cus.idDatacenter = idDatacenter;
-		    ELSE
-		        UPDATE IGNORE cloud_usage_stats cus SET cus.vStorageTotal = cus.vStorageTotal + NEW.size,
-		        cus.vStorageUsed = cus.vStorageUsed + NEW.usedSize WHERE cus.idDatacenter = idDatacenter;
+	        END IF;
+            ELSEIF NEW.usedSize NOT IN (SELECT d.usedSize FROM datastore d LEFT OUTER JOIN datastore_assignment da ON d.idDatastore = da.idDatastore
+                LEFT OUTER JOIN physicalmachine pm ON da.idPhysicalMachine = pm.idPhysicalMachine
+                WHERE pm.idDatacenter = idDatacenter AND d.datastoreUUID = NEW.datastoreUUID AND d.idDatastore != NEW.idDatastore 
+                AND d.enabled = 1) THEN
+                -- repeated code to update only the first shared datastore
+	        IF OLD.enabled = 1 THEN
+		    IF NEW.enabled = 1 THEN
+		        IF machineState IN (2, 6, 7) THEN
+		            UPDATE IGNORE cloud_usage_stats cus SET cus.vStorageTotal = cus.vStorageTotal - OLD.size + NEW.size
+		            WHERE cus.idDatacenter = idDatacenter;
+		        ELSE
+		            UPDATE IGNORE cloud_usage_stats cus SET cus.vStorageTotal = cus.vStorageTotal - OLD.size + NEW.size,
+		            cus.vStorageUsed = cus.vStorageUsed - OLD.usedSize + NEW.usedSize WHERE cus.idDatacenter = idDatacenter;
+		        END IF;
+	            ELSEIF NEW.enabled = 0 THEN
+		        IF machineState IN (2, 6, 7) THEN
+		            UPDATE IGNORE cloud_usage_stats cus SET cus.vStorageTotal = cus.vStorageTotal - OLD.size
+		            WHERE cus.idDatacenter = idDatacenter;
+		        ELSE
+		            UPDATE IGNORE cloud_usage_stats cus SET cus.vStorageTotal = cus.vStorageTotal - OLD.size,
+		            cus.vStorageUsed = cus.vStorageUsed - OLD.usedSize WHERE cus.idDatacenter = idDatacenter;
+		        END IF;
 		    END IF;
-		END IF;
+	        ELSE
+		    IF NEW.enabled = 1 THEN
+		        IF machineState IN (2, 6, 7) THEN
+		            UPDATE IGNORE cloud_usage_stats cus SET cus.vStorageTotal = cus.vStorageTotal + NEW.size
+		            WHERE cus.idDatacenter = idDatacenter;
+		        ELSE
+		            UPDATE IGNORE cloud_usage_stats cus SET cus.vStorageTotal = cus.vStorageTotal + NEW.size,
+		            cus.vStorageUsed = cus.vStorageUsed + NEW.usedSize WHERE cus.idDatacenter = idDatacenter;
+		        END IF;
+		    END IF;
+	        END IF;
 	    END IF;
-	END IF;
+        END IF;
     END;
 |
 -- ******************************************************************************************
@@ -4314,20 +4360,20 @@ DELIMITER |
 --
 CREATE PROCEDURE `kinton`.`get_datastore_size_by_dc`(IN idDC INT, OUT size BIGINT UNSIGNED)
 BEGIN
-    SELECT IF (SUM(d.size) IS NULL,0,SUM(d.size)) INTO size
-    FROM datastore d LEFT OUTER JOIN datastore_assignment da ON d.idDatastore = da.idDatastore 
+    SELECT IF (SUM(ds_view.size) IS NULL,0,SUM(ds_view.size)) INTO size
+    FROM (SELECT d.size as size FROM datastore d LEFT OUTER JOIN datastore_assignment da ON d.idDatastore = da.idDatastore 
     LEFT OUTER JOIN physicalmachine pm ON da.idPhysicalMachine = pm.idPhysicialMachine
-    WHERE pm.idDataCenter = idDC AND d.enabled = 1;
+    WHERE pm.idDataCenter = idDC AND d.enabled = 1 GROUP BY d.datastoreUuid) ds_view;
 END
 --
 |
 --
 CREATE PROCEDURE `kinton`.`get_datastore_used_size_by_dc`(IN idDC INT, OUT usedSize BIGINT UNSIGNED)
 BEGIN
-    SELECT IF (SUM(d.usedSize) IS NULL,0,SUM(d.usedSize)) INTO usedSize
-    FROM datastore d LEFT OUTER JOIN datastore_assignment da ON d.idDatastore = da.idDatastore
+    SELECT IF (SUM(ds_view.usedSize) IS NULL,0,SUM(ds_view.usedSize)) INTO usedSize
+    FROM (SELECT d.usedSize as usedSize FROM datastore d LEFT OUTER JOIN datastore_assignment da ON d.idDatastore = da.idDatastore
     LEFT OUTER JOIN physicalmachine pm ON da.idPhysicalMachine = pm.idPhysicialMachine
-    WHERE pm.idDataCenter = idDC AND d.enabled = 1;
+    WHERE pm.idDataCenter = idDC AND d.enabled = 1 GROUP BY d.datastoreUuid) ds_view;
 END
 --
 |
