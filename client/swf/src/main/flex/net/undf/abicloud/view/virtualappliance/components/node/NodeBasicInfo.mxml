@@ -93,7 +93,6 @@
             private function onCreationComplete():void
             {
                 SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.VAPP_CUSTOMISE_SETTINGS,"removeChild",saveButton,saveBox);
-                
             }
 
             /**
