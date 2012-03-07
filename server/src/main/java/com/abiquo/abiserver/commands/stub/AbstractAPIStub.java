@@ -189,13 +189,12 @@ public class AbstractAPIStub
     protected ClientResponse post(final String uri, final SingleResourceTransportDto dto)
     {
         UserHB user = getCurrentUserCredentials();
-        Resource resource = null;
+        Resource resource = resource(uri, user.getUser(), user.getPassword());
         if (dto != null)
         {
-            resource = resource(uri, user.getUser(), user.getPassword(), dto.getMediaType());
             resource.contentType(dto.getMediaType());
+            resource.accept(dto.getMediaType());
         }
-
         return resource.post(dto);
     }
 
@@ -209,12 +208,11 @@ public class AbstractAPIStub
     protected ClientResponse post(final String uri, final SingleResourceTransportDto dto,
         final String user, final String password)
     {
-        Resource resource = null;
+        Resource resource = resource(uri, user, password);
         if (dto != null)
         {
-            resource = resource(uri, user, password, dto.getMediaType());
             resource.contentType(dto.getMediaType());
-            // resource.accept(dto.getMediaType());
+            resource.accept(dto.getMediaType());
         }
         return resource.post(dto);
     }
@@ -222,12 +220,11 @@ public class AbstractAPIStub
     protected ClientResponse put(final String uri, final SingleResourceTransportDto dto)
     {
         UserHB user = getCurrentUserCredentials();
-        Resource resource = null;
+        Resource resource = resource(uri, user.getUser(), user.getPassword());
         if (dto != null)
         {
-            resource = resource(uri, user.getUser(), user.getPassword(), dto.getMediaType());
             resource.contentType(dto.getMediaType());
-            // resource.accept(dto.getMediaType());
+            resource.accept(dto.getMediaType());
         }
         return resource.put(dto);
     }
@@ -284,13 +281,12 @@ public class AbstractAPIStub
         return resource(uri, user.getUser(), user.getPassword(), mediaType);
     }
 
-    // private Resource resource(final String uri, final String user, final String password)
-    // {
-    //
-    // Resource resource = client.resource(uri).accept(MediaType.APPLICATION_XML);
-    // String cookieValue = generateToken(user, password);
-    // return resource.cookie(new Cookie("auth", cookieValue));
-    // }
+    private Resource resource(final String uri, final String user, final String password)
+    {
+        Resource resource = client.resource(uri).accept(MediaType.APPLICATION_XML);
+        String cookieValue = generateToken(user, password);
+        return resource.cookie(new Cookie("auth", cookieValue));
+    }
 
     private Resource resource(final String uri, final String user, final String password,
         final String mediaType)
