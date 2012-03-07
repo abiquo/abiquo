@@ -198,6 +198,11 @@ public class TemplateFactory
         vmtemplate.setOvfid(disk.getUrl());
         vmtemplate.setRepository(repository);
 
+        if (disk.getEthernetDriverType() != null)
+        {
+            vmtemplate.setEthernetDriverType(disk.getEthernetDriverType());
+        }
+
         if (master != null)
         {
             vmtemplate.setMaster(master);

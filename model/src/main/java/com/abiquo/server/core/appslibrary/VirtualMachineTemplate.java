@@ -43,6 +43,7 @@ import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.Range;
 
 import com.abiquo.model.enumerator.DiskFormatType;
+import com.abiquo.model.enumerator.EthernetDriverType;
 import com.abiquo.server.core.common.DefaultEntityBase;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.infrastructure.Repository;
@@ -595,6 +596,29 @@ public class VirtualMachineTemplate extends DefaultEntityBase
     public void setCreationUser(final String creationUser)
     {
         this.creationUser = creationUser;
+    }
+
+    public final static String ETHERNET_DRIVER_TYPE_PROPERTY = "ethernetDriverType";
+
+    private final static boolean ETHERNET_DRIVER_TYPE_REQUIRED = false;
+
+    private final static String ETHERNET_DRIVER_TYPE_COLUMN = "ethDriverType";
+
+    private final static int ETHERNET_DRIVER_TYPE_COLUMN_LENGTH = 16;
+
+    @Enumerated(value = javax.persistence.EnumType.STRING)
+    @Column(name = ETHERNET_DRIVER_TYPE_COLUMN, nullable = !ETHERNET_DRIVER_TYPE_REQUIRED, length = ETHERNET_DRIVER_TYPE_COLUMN_LENGTH)
+    private EthernetDriverType ethernetDriverType;
+
+    @Required(value = ETHERNET_DRIVER_TYPE_REQUIRED)
+    public EthernetDriverType getEthernetDriverType()
+    {
+        return this.ethernetDriverType;
+    }
+
+    public void setEthernetDriverType(final EthernetDriverType ethernetDriverType)
+    {
+        this.ethernetDriverType = ethernetDriverType;
     }
 
     // Creation date does not have a setter, since it will be auto generated.

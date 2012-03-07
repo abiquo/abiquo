@@ -126,6 +126,12 @@ public class UriTestResolver
             + EnterpriseResource.ENTERPRISE_ACTION_GET_VIRTUALMACHINES_PATH;
     }
 
+    public static String resolveEnterpriseActionGetVirtualAppliancesURI(final Integer entId)
+    {
+        return resolveEnterpriseURI(entId) + "/"
+            + EnterpriseResource.ENTERPRISE_ACTION_GET_VIRTUALAPPLIANCES_PATH;
+    }
+
     public static String resolveEnterprisesByDatacenterURI(final Integer datacenterId)
     {
         return resolveDatacenterURI(datacenterId) + "/" + DatacenterResource.ENTERPRISES_PATH;

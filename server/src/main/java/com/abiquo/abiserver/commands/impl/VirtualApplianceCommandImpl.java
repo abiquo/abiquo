@@ -73,12 +73,14 @@ import com.abiquo.abiserver.pojo.infrastructure.State;
 import com.abiquo.abiserver.pojo.infrastructure.VirtualMachine;
 import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.result.DataResult;
+import com.abiquo.abiserver.pojo.result.ListRequest;
 import com.abiquo.abiserver.pojo.user.Enterprise;
 import com.abiquo.abiserver.pojo.virtualappliance.Log;
 import com.abiquo.abiserver.pojo.virtualappliance.Node;
 import com.abiquo.abiserver.pojo.virtualappliance.NodeVirtualImage;
 import com.abiquo.abiserver.pojo.virtualappliance.VirtualAppliance;
 import com.abiquo.abiserver.pojo.virtualappliance.VirtualDataCenter;
+import com.abiquo.abiserver.pojo.virtualappliance.VirtualDatacentersListResult;
 import com.abiquo.abiserver.pojo.virtualimage.VirtualImageConversions;
 import com.abiquo.commons.amqp.impl.vsm.VSMProducer;
 import com.abiquo.commons.amqp.impl.vsm.domain.VirtualSystemEvent;
@@ -161,98 +163,6 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
     }
 
     /*
-     * (non-Javadoc)
-     * @seecom.abiquo.abiserver.commands.VirtualApplianceCommand#
-     * checkVirtualDatacentersAndAppliancesByEnterprise(com.abiquo.abiserver.pojo.user.Enterprise)
-     */
-    @Override
-    @SuppressWarnings("unchecked")
-    public DataResult<ArrayList<Collection>> checkVirtualDatacentersAndAppliancesByEnterprise(
-        final UserSession userSession, final Enterprise enterprise)
-    {
-        DataResult<ArrayList<Collection>> dataResult = new DataResult<ArrayList<Collection>>();
-
-        ArrayList<Collection> updatedVirtualDatacentersAndAppliances = new ArrayList<Collection>();
-
-        // Retrieving the updated VirtualDatacenters list
-        DataResult<Collection<VirtualDataCenter>> updatedVirtualDatacenters =
-            getVirtualDataCentersByEnterprise(userSession, enterprise);
-
-        // Retrieving the updated VirtualAppliances list
-        DataResult<Collection<VirtualAppliance>> updatedVirtualAppliances =
-            getVirtualAppliancesByEnterprise(userSession, enterprise);
-
-        // If both were successful
-        if (updatedVirtualDatacenters.getSuccess() && updatedVirtualAppliances.getSuccess())
-        {
-            // Creating the result to return
-            updatedVirtualDatacentersAndAppliances.add(updatedVirtualDatacenters.getData());
-            updatedVirtualDatacentersAndAppliances.add(updatedVirtualAppliances.getData());
-
-            dataResult.setSuccess(true);
-            dataResult.setData(updatedVirtualDatacentersAndAppliances);
-            dataResult.setMessage(resourceManager
-                .getMessage("checkVirtualDatacentersAndAppliancesByEnterprise.success"));
-        }
-        else
-        {
-            // Creating the error result to return
-            dataResult.setSuccess(false);
-            dataResult.setMessage(resourceManager
-                .getMessage("checkVirtualDatacentersAndAppliancesByEnterprise.error"));
-        }
-
-        return dataResult;
-    }
-
-    /*
-     * (non-Javadoc)
-     * @seecom.abiquo.abiserver.commands.VirtualApplianceCommand#
-     * checkVirtualDatacentersAndAppliancesByEnterpriseAndDatacenter
-     * (com.abiquo.abiserver.pojo.user.Enterprise,
-     * com.abiquo.abiserver.pojo.infrastructure.DataCenter)
-     */
-    @Override
-    @SuppressWarnings("unchecked")
-    public DataResult<ArrayList<Collection>> checkVirtualDatacentersAndAppliancesByEnterpriseAndDatacenter(
-        final UserSession userSession, final Enterprise enterprise, final DataCenter datacenter)
-    {
-        DataResult<ArrayList<Collection>> dataResult = new DataResult<ArrayList<Collection>>();
-
-        ArrayList<Collection> updatedVirtualDatacentersAndAppliances = new ArrayList<Collection>();
-
-        // Retrieving the updated VirtualDatacenters list
-        DataResult<Collection<VirtualDataCenter>> updatedVirtualDatacenters =
-            getVirtualDataCentersByEnterpriseAndDatacenter(userSession, enterprise, datacenter);
-
-        // Retrieving the updated VirtualAppliances list
-        DataResult<Collection<VirtualAppliance>> updatedVirtualAppliances =
-            getVirtualAppliancesByEnterpriseAndDatacenter(userSession, enterprise, datacenter);
-
-        // If both were successful
-        if (updatedVirtualDatacenters.getSuccess() && updatedVirtualAppliances.getSuccess())
-        {
-            // Creating the result to return
-            updatedVirtualDatacentersAndAppliances.add(updatedVirtualDatacenters.getData());
-            updatedVirtualDatacentersAndAppliances.add(updatedVirtualAppliances.getData());
-
-            dataResult.setSuccess(true);
-            dataResult.setData(updatedVirtualDatacentersAndAppliances);
-            dataResult.setMessage(resourceManager
-                .getMessage("checkVirtualDatacentersAndAppliancesByEnterprise.success"));
-        }
-        else
-        {
-            // Creating the error result to return
-            dataResult.setSuccess(false);
-            dataResult.setMessage(resourceManager
-                .getMessage("checkVirtualDatacentersAndAppliancesByEnterprise.error"));
-        }
-
-        return dataResult;
-    }
-
-    /*
      * (non-Javadoc)s
      * @see
      * com.abiquo.abiserver.commands.VirtualApplianceCommand#createVirtualAppliance(com.abiquo.abiserver
@@ -319,8 +229,8 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
                 virtualApplianceId);
 
             traceLog(SeverityType.CRITICAL, ComponentType.VIRTUAL_APPLIANCE, EventType.VAPP_CREATE,
-                userSession, null, virtualAppliance.getVirtualDataCenter().getName(),
-                e.getMessage(), null, null, null, null, null);
+                userSession, null, virtualAppliance.getVirtualDataCenter().getName(), e
+                    .getMessage(), null, null, null, null, null);
 
             return dataResult;
         }
@@ -354,8 +264,8 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
         if (!result.getSuccess())
         {
             BasicCommand.traceLog(SeverityType.CRITICAL, ComponentType.VIRTUAL_DATACENTER,
-                EventType.VDC_CREATE, userSession, null, virtualDataCenter.getName(),
-                result.getMessage(), null, null, null, null, null);
+                EventType.VDC_CREATE, userSession, null, virtualDataCenter.getName(), result
+                    .getMessage(), null, null, null, null, null);
         }
         else
         {
@@ -388,8 +298,8 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
         if (!result.getSuccess())
         {
             BasicCommand.traceLog(SeverityType.CRITICAL, ComponentType.VIRTUAL_DATACENTER,
-                EventType.VDC_DELETE, userSession, null, virtualDataCenter.getName(),
-                result.getMessage(), null, null, null, null, null);
+                EventType.VDC_DELETE, userSession, null, virtualDataCenter.getName(), result
+                    .getMessage(), null, null, null, null, null);
         }
         else
         {
@@ -445,8 +355,8 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
         if (!result.getSuccess())
         {
             BasicCommand.traceLog(SeverityType.CRITICAL, ComponentType.VIRTUAL_DATACENTER,
-                EventType.VDC_MODIFY, userSession, null, virtualDataCenter.getName(),
-                result.getMessage(), null, null, null, null, null);
+                EventType.VDC_MODIFY, userSession, null, virtualDataCenter.getName(), result
+                    .getMessage(), null, null, null, null, null);
         }
         else
         {
@@ -711,17 +621,23 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
         return basicResult;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see
-     * com.abiquo.abiserver.commands.VirtualApplianceCommand#getVirtualDataCentersByEnterprise(com
-     * .abiquo.abiserver.pojo.user.Enterprise)
-     */
     @Override
-    public DataResult<Collection<VirtualDataCenter>> getVirtualDataCentersByEnterprise(
-        final UserSession userSession, final Enterprise enterprise)
+    public DataResult<VirtualDatacentersListResult> getVirtualDataCentersByEnterprise(
+        final UserSession userSession, final Enterprise enterprise, final ListRequest listRequest)
     {
-        return getVirtualDataCentersByEnterpriseAndDatacenter(userSession, enterprise, null);
+        VirtualDatacenterResourceStub proxy =
+            APIStubFactory.getInstance(userSession, new VirtualDatacenterResourceStubImpl(),
+                VirtualDatacenterResourceStub.class);
+
+        DataResult<VirtualDatacentersListResult> dataResult =
+            proxy.getVirtualDatacentersByEnterprise(enterprise, listRequest);
+
+        if (dataResult.getSuccess())
+        {
+            dataResult.setMessage(resourceManager.getMessage("getVirtualDataCenters.success"));
+        }
+
+        return dataResult;
     }
 
     @Override
@@ -734,31 +650,6 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
 
         DataResult<Collection<VirtualDataCenter>> dataResult =
             proxy.getVirtualDatacentersByEnterprise(enterprise);
-
-        if (dataResult.getSuccess())
-        {
-            dataResult.setMessage(resourceManager.getMessage("getVirtualDataCenters.success"));
-        }
-
-        return dataResult;
-    }
-
-    /*
-     * (non-Javadoc)
-     * @seecom.abiquo.abiserver.commands.VirtualApplianceCommand#
-     * getVirtualDataCentersByEnterpriseAndDatacenter(com.abiquo.abiserver.pojo.user.Enterprise,
-     * com.abiquo.abiserver.pojo.infrastructure.DataCenter)
-     */
-    @Override
-    public DataResult<Collection<VirtualDataCenter>> getVirtualDataCentersByEnterpriseAndDatacenter(
-        final UserSession userSession, final Enterprise enterprise, final DataCenter datacenter)
-    {
-        VirtualDatacenterResourceStub proxy =
-            APIStubFactory.getInstance(userSession, new VirtualDatacenterResourceStubImpl(),
-                VirtualDatacenterResourceStub.class);
-
-        DataResult<Collection<VirtualDataCenter>> dataResult =
-            proxy.getVirtualDatacenters(enterprise, datacenter);
 
         if (dataResult.getSuccess())
         {
@@ -889,8 +780,8 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
                 .getVirtualDataCenter().getName(), message, vApp, null, null, null, null);
         }
 
-        errorManager.reportError(resourceManager, dataResult, reportErrorKey, exception,
-            vApp.getId());
+        errorManager.reportError(resourceManager, dataResult, reportErrorKey, exception, vApp
+            .getId());
 
         if (exception instanceof VirtualApplianceTimeoutException)
         {
@@ -999,8 +890,8 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
 
                     VirtualSystemEvent event = new VirtualSystemEvent();
                     event.setEventType(eventType.name());
-                    event.setVirtualSystemAddress(String.format("http://%s:%d/", hv.getIp(),
-                        hv.getPort()));
+                    event.setVirtualSystemAddress(String.format("http://%s:%d/", hv.getIp(), hv
+                        .getPort()));
                     event.setVirtualSystemId(vm.getName());
                     event.setVirtualSystemType(hv.getType().getName());
 
@@ -1225,8 +1116,8 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
             ResourceAllocationSettingData rasd = netMan.getRasd();
             session.delete(rasd);
 
-            if (resourceManagement.getVirtualDataCenter().getDefaultVlan().getNetworkType()
-                .equals(NetworkType.UNMANAGED.name()))
+            if (resourceManagement.getVirtualDataCenter().getDefaultVlan().getNetworkType().equals(
+                NetworkType.UNMANAGED.name()))
             {
                 session.delete(netMan);
             }

@@ -21,6 +21,7 @@
 
 package com.abiquo.api.resources.appslibrary;
 
+import java.net.SocketTimeoutException;
 import java.util.List;
 
 import javax.ws.rs.Consumes;
@@ -62,7 +63,7 @@ public class TemplateDefinitionListsResource extends AbstractResource
     @GET
     public TemplateDefinitionListsDto getTemplateDefinitionLists(
         @PathParam(EnterpriseResource.ENTERPRISE) final Integer idEnterprise,
-        @Context final IRESTBuilder restBuilder) throws Exception
+        @Context final IRESTBuilder restBuilder) throws Exception, SocketTimeoutException
     {
         List<TemplateDefinitionList> all =
             service.getTemplateDefinitionListsByEnterprise(idEnterprise);

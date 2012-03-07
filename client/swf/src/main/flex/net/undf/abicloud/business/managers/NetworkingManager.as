@@ -23,6 +23,8 @@ package net.undf.abicloud.business.managers
 {
     import flash.events.EventDispatcher;
     
+    import mx.collections.ArrayCollection;
+    
     import net.undf.abicloud.events.NetworkingEvent;
     import net.undf.abicloud.vo.networking.Network;
     import net.undf.abicloud.vo.networking.NetworkConfiguration;
@@ -32,6 +34,11 @@ package net.undf.abicloud.business.managers
     [Bindable]
     public class NetworkingManager extends EventDispatcher
     {
+    	
+    	public static const netmasks:ArrayCollection = new ArrayCollection([{mask:"255.255.252.0", length: 22}, {mask:"255.255.254.0", length: 23}, {mask:"255.255.255.0", length: 24}, {mask:"255.255.255.128", length: 25},
+                    {mask:"255.255.255.192", length: 26}, {mask:"255.255.255.224", length: 27}, {mask:"255.255.255.240", length: 28}, {mask:"255.255.255.248", length: 29}, {mask:"255.255.255.252", length: 30}, {mask:"255.255.255.254", length: 31},
+                    {mask:"255.255.255.255", length: 32}]);
+                    
         public function NetworkingManager()
         {
 

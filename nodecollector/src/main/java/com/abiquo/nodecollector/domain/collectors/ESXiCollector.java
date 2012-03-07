@@ -135,9 +135,9 @@ public class ESXiCollector extends AbstractCollector
 
     private static ManagedObjectReference siMoref;
 
-    private static final Integer THIRTEEN = 13;
+    private static final String NAME = "name";
 
-    private static final Integer TWELVE = 12;
+    private static final String HARDWARE = "hardware";
 
     private static PropertySpec[] virtualMachineSpec;
 
@@ -387,15 +387,22 @@ public class ESXiCollector extends AbstractCollector
         // Please check the following url to understand the DynamicProperty indexation in this code
         // http://www.vmware.com/support/developer/vc-sdk/visdk25pubs/ReferenceGuide/
         // The order of the properties in the web, are the same here.
-        hardwareInfo = (HostHardwareInfo) hostSystem.getPropSet()[TWELVE].getVal();
-
-        physicalInfo.setName((String) hostSystem.getPropSet()[THIRTEEN].getVal());
-        physicalInfo.setCpu(Long.valueOf(((Short) hardwareInfo.getCpuInfo().getNumCpuCores())
-            .toString()));
-        physicalInfo.setRam(hardwareInfo.getMemorySize());
-        physicalInfo.setHypervisor(getHypervisorType().getValue());
-        physicalInfo.setVersion(getApiVersion());
-        physicalInfo.getResources().addAll(getHostResources(hostSystem));
+        try
+        {
+            hardwareInfo = (HostHardwareInfo) getDynamicProperty(hostSystem, HARDWARE);
+            physicalInfo.setName((String) getDynamicProperty(hostSystem, NAME));
+            physicalInfo.setCpu(Long.valueOf(((Short) hardwareInfo.getCpuInfo().getNumCpuCores())
+                .toString()));
+            physicalInfo.setRam(hardwareInfo.getMemorySize());
+            physicalInfo.setHypervisor(getHypervisorType().getValue());
+            physicalInfo.setVersion(getApiVersion());
+            physicalInfo.getResources().addAll(getHostResources(hostSystem));
+        }
+        catch (Exception e1)
+        {
+            LOGGER.error(MessageValues.UNP_EXCP);
+            throw new CollectorException(MessageValues.UNP_EXCP);
+        }
 
         try
         {

@@ -45,6 +45,7 @@ import org.dmtf.schemas.wbem.wscim._1.cim_schema._2.cim_resourceallocationsettin
 import com.abiquo.am.exceptions.AMError;
 import com.abiquo.appliancemanager.exceptions.AMException;
 import com.abiquo.appliancemanager.transport.TemplateDto;
+import com.abiquo.model.enumerator.EthernetDriverType;
 import com.abiquo.ovfmanager.cim.CIMResourceAllocationSettingDataUtils;
 import com.abiquo.ovfmanager.cim.CIMTypesUtils;
 import com.abiquo.ovfmanager.cim.CIMTypesUtils.CIMResourceTypeEnum;
@@ -204,6 +205,27 @@ public class TemplateToOVFEnvelope
         OVFVirtualHadwareSectionUtils.addRASD(vhsection, rasdRam);
         OVFVirtualHadwareSectionUtils.addRASD(vhsection, rasdHd);
 
+        vhsection = configureCustomEthernetDriver(vhsection, disk);
+
+        return vhsection;
+    }
+
+    private static VirtualHardwareSectionType configureCustomEthernetDriver(
+        final VirtualHardwareSectionType vhsection, final TemplateDto disk)
+        throws RequiredAttributeException
+    {
+        final EthernetDriverType ethDriverType = disk.getEthernetDriverType();
+        if (ethDriverType != null)
+        {
+            CIMResourceAllocationSettingDataType ethDriver =
+                CIMResourceAllocationSettingDataUtils.createResourceAllocationSettingData(
+                    "ethernetDriver", "1", CIMResourceTypeEnum.Ethernet_Adapter, 0, null);
+            ethDriver.setResourceSubType(CIMTypesUtils.createString(ethDriverType.name()));
+
+            final RASDType rasdEthDriver =
+                CIMResourceAllocationSettingDataUtils.createRASDTypeFromCIMRASD(ethDriver);
+            OVFVirtualHadwareSectionUtils.addRASD(vhsection, rasdEthDriver);
+        }
         return vhsection;
     }
 

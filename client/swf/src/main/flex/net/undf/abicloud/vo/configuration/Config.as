@@ -85,6 +85,15 @@ package net.undf.abicloud.vo.configuration
 		public var client_main_disableChangePassword:SystemProperty;
 		public var client_main_allowLogout:SystemProperty;
 		
+		//network
+		public var client_network_defaultName:SystemProperty;
+        public var client_network_defaultNetmask:SystemProperty;
+        public var client_network_defaultAddress:SystemProperty;
+        public var client_network_defaultGateway:SystemProperty;
+        public var client_network_defaultPrimaryDNS:SystemProperty;
+        public var client_network_defaultSecondaryDNS:SystemProperty;
+        public var client_network_defaultSufixDNS:SystemProperty;
+		
 		//wiki links
 		public var client_wiki_showHelp:SystemProperty;
 		public var client_wiki_showDefaultHelp:SystemProperty;

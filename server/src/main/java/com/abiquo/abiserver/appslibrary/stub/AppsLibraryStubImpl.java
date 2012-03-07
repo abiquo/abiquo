@@ -20,7 +20,9 @@
  */
 package com.abiquo.abiserver.appslibrary.stub;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -33,6 +35,8 @@ import javax.ws.rs.core.Response.Status.Family;
 import org.apache.commons.lang.StringUtils;
 import org.apache.wink.client.ClientResponse;
 import org.apache.wink.client.Resource;
+import org.jclouds.abiquo.domain.DomainWrapper;
+import org.jclouds.abiquo.domain.enterprise.TemplateDefinitionList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -379,9 +383,9 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
     private Integer getTemplateDefinitionListIdFromName(final Integer idEnterprise,
         final String templateDefinitionListName)
     {
-        TemplateDefinitionListsDto packageLists = getTemplateDefinitionLists(idEnterprise);
+        Collection<TemplateDefinitionList> packageLists = getTemplateDefinitionLists(idEnterprise);
 
-        for (TemplateDefinitionListDto list : packageLists.getCollection())
+        for (TemplateDefinitionList list : packageLists)
         {
             final String listName = list.getName();
             if (templateDefinitionListName.equalsIgnoreCase(listName))
@@ -404,19 +408,24 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
 
         List<String> templateDefListNames = new LinkedList<String>();
 
-        TemplateDefinitionListsDto listsDto = new TemplateDefinitionListsDto();
+        Collection<TemplateDefinitionList> listsDto = new ArrayList<TemplateDefinitionList>();
         try
         {
-            listsDto = getTemplateDefinitionLists(idEnterprise);
+            listsDto =
+                getApiClient().getAdministrationService().getEnterprise(idEnterprise)
+                    .listTemplateDefinitionLists();
         }
-        catch (WebApplicationException e)
+        catch (Exception ex)
         {
-            result.setSuccess(Boolean.FALSE);
-            result.setMessage(e.getMessage());
+            populateErrors(ex, result, "getTemplateDefinitionListNames");
             return result;
         }
+        finally
+        {
+            releaseApiClient();
+        }
 
-        if (listsDto == null || listsDto.getCollection().size() == 0)
+        if (listsDto == null || listsDto.size() == 0)
         {
             DataResult<OVFPackageList> defaultList = addDefaultTemplateDefinitionList(idEnterprise);
             if (defaultList == null || !defaultList.getSuccess())
@@ -434,7 +443,7 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
             }
             templateDefListNames.add(defaultList.getData().getName());
         }
-        for (TemplateDefinitionListDto list : listsDto.getCollection())
+        for (TemplateDefinitionList list : listsDto)
         {
             templateDefListNames.add(list.getName());
         }
@@ -465,18 +474,28 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
     }
 
     // XXX not used on the AppsLibraryCommand
-    private TemplateDefinitionListsDto getTemplateDefinitionLists(final Integer idEnterprise)
+    private List<TemplateDefinitionList> getTemplateDefinitionLists(final Integer idEnterprise)
     {
 
-        String uri = createTemplateDefinitionListsLink(idEnterprise.toString());
-        ClientResponse response = get(uri);
+        // String uri = createTemplateDefinitionListsLink(idEnterprise.toString());
+        List<TemplateDefinitionList> templateList = null;
 
-        if (response.getStatusType().getFamily() != Family.SUCCESSFUL)
+        try
         {
-            throw new WebApplicationException(response(response));
+            templateList =
+                getApiClient().getAdministrationService().getEnterprise(idEnterprise)
+                    .listTemplateDefinitionLists();
+        }
+        catch (Exception ex)
+        {
+            populateErrors(ex, new BasicResult(), "getTemplateDefinitionLists");
+        }
+        finally
+        {
+            releaseApiClient();
         }
 
-        return response.getEntity(TemplateDefinitionListsDto.class);
+        return templateList;
     }
 
     @Override

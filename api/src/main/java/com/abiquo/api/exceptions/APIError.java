@@ -183,10 +183,20 @@ public enum APIError
     // VIRTUAL APPLIANCE
     NON_EXISTENT_VIRTUALAPPLIANCE("VAPP-0", "The requested virtual appliance does not exist"), VIRTUALAPPLIANCE_NOT_DEPLOYED(
         "VAPP-1", "The virtual appliance is not deployed"), VIRTUALAPPLIANCE_NOT_RUNNING("VAPP-2",
-        "The virtual appliance is not running"), VIRTUALAPPLIANCE_DEPLOYED("VAPP-1",
+        "The virtual appliance is not running"), VIRTUALAPPLIANCE_DEPLOYED("VAPP-3",
         "The virtual appliance is deployed"), VIRTUALAPPLIANCE_NON_MANAGED_IMAGES("VAPP-4",
         "The virtual appliance has non-managed VM templates"), VIRTUALAPPLIANCE_INVALID_STATE_DELETE(
-        "VAPP-4", "The virtual appliance has non-managed VM templates"),
+        "VAPP-5", "The virtual appliance has non-managed VM templates"), VIRTUALAPPLIANCE_MOVE_MISSING_VDC(
+        "VAPP-6", "The virtual appliance has not the virtual datacenter link"), VIRTUALAPPLIANCE_INVALID_STATE_MOVE_COPY(
+        "VAPP-8", "The virtual appliance cannot be moved since the state is not NOT_DEPLOYED"), VIRTUALAPPLIANCE_INVALID_DC_MOVE_COPY(
+        "VAPP-7",
+        "The virtual appliance cannot be moved or copied since target virtual datacenter is not in the same datacenter"), VIRTUALAPPLIANCE_MOVE_COPY_CAPTURED_VM(
+        "VAPP-9",
+        "The virtual appliance cannot be moved nor copied since it contains captured virtual machines"), VIRTUALAPPLIANCE_MOVE_COPY_INCOMPATIBLE_VM(
+        "VAPP-10",
+        "The virtual appliance cannot be moved nor copied since it contains incompatible virtual machines templates with the hypervisor to be moved"), VIRTUALAPPLIANCE_COPY_PERSISTENT_VM(
+        "VAPP-11",
+        "The virtual appliance cannot be copied since it contains persistent virtual machines templates with the hypervisor to be moved"),
 
     // VIRTUAL CONVERSION
     NON_EXISTENT_VIRTUALAPPLIANCE_STATEFULCONVERSION("VASC-0",
@@ -291,7 +301,8 @@ public enum APIError
         "The persistent virtual machine template supplied for reconfigure is already attached to a virtual machine"), VIRTUAL_MACHINE_RECONFIGURE_TEMPLATE_IN_THE_HYPERVISOR(
         "VM-32",
         "Cannot reconfigure the virual machine template once the virtual machine is present in the hypervisor"), VIRTUAL_MACHINE_IMPORTED_CAN_NOT_RECONFIGURE(
-        "VM-33", "We do not currently allow imported virtual machines to be reconfigured"), VIRTUAL_MACHINE_IMPORTED_WILL_BE_DELETED(
+        "VM-33", "We do not currently allow imported virtual machines to be reconfigured"), VIRTUAL_MACHINE_IMPORTED_CAN_NOT_RECONFIGURE_FULLY(
+            "VM-33", "Only 'cpu' and 'ram' can be reconfigured in imported virtual machines"), VIRTUAL_MACHINE_IMPORTED_WILL_BE_DELETED(
         "VM-44",
         "You are trying to undeploy an imported virtual machine. If you undeploy it, the virtual machine template cannot be recovered. If you are confident of this action, please call this functionality again with the 'forceUndeploy=true' option"),
 
@@ -341,7 +352,7 @@ public enum APIError
         "This datacenter already has a storage pool assigned"), REMOTE_SERVICE_TYPE_EXISTS("RS-6",
         "This datacenter already has a remote service of that type"), REMOTE_SERVICE_CONNECTION_FAILED(
         "RS-7", "Failed connection to the remote service"), REMOTE_SERVICE_CANNOT_BE_CHECKED(
-        "RS-8", "This remote service is not avilable to be checked"), APPLIANCE_MANAGER_REPOSITORY_ALREADY_DEFINED(
+        "RS-8", "This remote service is not available to be checked"), APPLIANCE_MANAGER_REPOSITORY_ALREADY_DEFINED(
         "AM-0",
         "The repository exported by the current appliance manager is being used in another datacenter"), APPLIANCE_MANAGER_REPOSITORY_IN_USE(
         "AM-1",
@@ -354,9 +365,12 @@ public enum APIError
         "The remote service does not have the *abiquo.datacenter.id* property set"), REMOTE_SERVICE_DATACENTER_UUID_INCONSISTENT(
         "RS-14",
         "The remote service is configured with a different datacenter UUID, please adjust the *abiquo.datacenter.id* property in the remote service."), REMOTE_SERVICE_UNDEFINED_PORT(
-        "RS-15", "A port must be defined in the uri"), APPLIANCE_MANAGER_CALL("AM-1",
-        "Failed Appliance Manager communication"),
-    //
+        "RS-15", "A port must be defined in the uri"), REMOTE_SERVICE_NON_POOLABLE("RS-16",
+        "The provided remote service can not be used in for a remote service client pool"), REMOTE_SERVICE_ERROR_BORROWING(
+        "RS-17",
+        "An unexpected error occured while getting the remote service client from the client pool"), APPLIANCE_MANAGER_CALL(
+        "AM-1", "Failed Appliance Manager communication"),
+            //
     AM_CLIENT("AM-0", "Failed Appliance Manager communication"), AM_TIMEOUT("AM-1",
         "Timeout during Appliance Manager communication"), AM_UNAVAILABE("AM-2",
         "AM service unavailable, check the URL service."), AM_FAILED_REQUEST("AM-3",
@@ -457,10 +471,9 @@ public enum APIError
         "VSM-1", "An error occurred when shutting down the monitored physical machine"), SUBSCRIPTION_PROBLEM(
         "VSM-2", "An error occurred when subscribing the virtual machine"), UNSUBSCRIPTION_PROBLEM(
         "VSM-3", "An error occurred when unsubscribing the virtual machine"), REFRESH_STATE_PROBLEM(
-        "VSM-4", "An error occurred when refreshing the virtual machine state"), VSMCLIENTFROMPOOL_PROBLEM(
-        "VSM-5", "A VSMClient instance cannot be returned from connection pool."), INVALIDATE_STATE_PROBLEM(
-        "VSM-6", "An error occurred when resetting the last known state of the virtual machine"), VSM_UNAVAILABE(
-        "VSM-7", "VSM service unavailable, check the URL service."),
+        "VSM-4", "An error occurred when refreshing the virtual machine state"), INVALIDATE_STATE_PROBLEM(
+        "VSM-5", "An error occurred when resetting the last known state of the virtual machine"), VSM_UNAVAILABE(
+        "VSM-6", "VSM service unavailable, check the URL service."),
 
     // LICENSE
     LICENSE_UNEXISTING("LICENSE-0", "The requested license does not exist"), LICENSE_INVALID(
@@ -531,6 +544,17 @@ public enum APIError
         "An unexpected error occurred while detaching the volume. Please contact the Administrator"), VOLUME_RECONFIGURE_ERROR(
         "VOL-29", "An unexpected error occurred while reconfiguring storage"), VOLUME_WRONG_NEW_VIRTUALDATACENTER(
         "VOL-39", "The volume can only be moved between Virtual Datacenters of the same Datacenter"),
+
+    // SSM
+    SSM_GET_POOLS_ERROR("SSM-1", "Could not get the storage pools in the target storage device"), SSM_GET_POOL_ERROR(
+        "SSM-2", "Could not get the given storage pool in the target storage device"), SSM_GET_VOLUMES_ERROR(
+        "SSM-3", "Could not get the volumes in the given storage pool"), SSM_GET_VOLUME_ERROR(
+        "SSM-4", "Could not get the given volume in the given storage pool"), SSM_CREATE_VOLUME_ERROR(
+        "SSM-5", "Could not create the volume in the target storage device"), SSM_DELETE_VOLUME_ERROR(
+        "SSM-6", "Could not delete the volume from the target storage device"), SSM_UPDATE_ERROR(
+        "SSM-7", "Could not update the volume in the target storage devide"), SSM_ADD_INITIATOR_ERROR(
+        "SSM-8", "Could not add the given iscsi initiator in the target storage device"), SSM_REMOVE_INITIATOR_ERROR(
+        "SSM-9", "Could not remove the given iscsi initiator from the target storage device"),
 
     // RULES
     NON_EXISTENT_EER("RULE-1", "The requested restrict shared server rule does not exist"), NON_EXISTENT_FPR(

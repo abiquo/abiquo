@@ -27,8 +27,10 @@ import java.util.List;
 
 import javax.persistence.EntityManager;
 
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.Criteria;
+import org.hibernate.criterion.CriteriaSpecification;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Disjunction;
 import org.hibernate.criterion.Order;
@@ -39,6 +41,7 @@ import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
 import com.abiquo.server.core.enterprise.User.AuthType;
 import com.abiquo.server.core.util.PagedList;
+import com.softwarementors.bzngine.entities.PersistentEntity;
 
 @Repository("jpaUserDAO")
 public class UserDAO extends DefaultDAOBase<Integer, User>
@@ -60,7 +63,7 @@ public class UserDAO extends DefaultDAOBase<Integer, User>
 
     public static Criterion sameId(final Integer userId)
     {
-        return Restrictions.eq(User.ID_PROPERTY, userId);
+        return Restrictions.eq(PersistentEntity.ID_PROPERTY, userId);
     }
 
     public static Criterion sameNick(final String nick)
@@ -87,7 +90,7 @@ public class UserDAO extends DefaultDAOBase<Integer, User>
 
     public Collection<User> findByRole(final Role role)
     {
-        return find(null, role, null, User.ID_PROPERTY, false, false, 0, 25);
+        return find(null, role, null, PersistentEntity.ID_PROPERTY, false, false, 0, 25);
     }
 
     public Collection<User> findByEnterprise(final Enterprise enterprise)
@@ -113,11 +116,15 @@ public class UserDAO extends DefaultDAOBase<Integer, User>
         final String orderBy, final boolean desc, final boolean connected, final Integer offset,
         final Integer numResults)
     {
-        Criteria criteria = createCriteria(enterprise, role, filter, orderBy, desc, connected);
+        String[] filters = new String[] {};
 
+        if (filter != null)
+        {
+            filters = filter.split("\\s+");
+        }
+        Criteria criteria = createCriteria(enterprise, role, filters, orderBy, desc, connected);
         Long total = count(criteria);
-
-        criteria = createCriteria(enterprise, role, filter, orderBy, desc, connected);
+        criteria = createCriteria(enterprise, role, filters, orderBy, desc, connected);
 
         criteria.setFirstResult(offset * numResults);
         criteria.setMaxResults(numResults);
@@ -134,7 +141,7 @@ public class UserDAO extends DefaultDAOBase<Integer, User>
     }
 
     private Criteria createCriteria(final Enterprise enterprise, final Role role,
-        final String filter, final String orderBy, final boolean desc, final boolean connected)
+        final String[] filters, final String orderBy, final boolean desc, final boolean connected)
     {
         Criteria criteria = createCriteria();
 
@@ -147,10 +154,15 @@ public class UserDAO extends DefaultDAOBase<Integer, User>
         {
             criteria.add(sameRole(role));
         }
-
-        if (!StringUtils.isEmpty(filter))
+        if (!ArrayUtils.isEmpty(filters))
         {
-            criteria.add(filterBy(filter));
+            for (String filter : filters)
+            {
+                if (!StringUtils.isEmpty(filter))
+                {
+                    criteria.add(filterBy(filter));
+                }
+            }
         }
 
         if (!StringUtils.isEmpty(orderBy))
@@ -166,7 +178,7 @@ public class UserDAO extends DefaultDAOBase<Integer, User>
         if (connected)
         {
             criteria.createCriteria("sessions").add(Restrictions.gt("expireDate", new Date()));
-            criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
+            criteria.setResultTransformer(CriteriaSpecification.DISTINCT_ROOT_ENTITY);
         }
         return criteria;
     }

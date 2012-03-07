@@ -325,13 +325,10 @@ public class VirtualAppliance extends DefaultEntityBase
         // value.removeFromDatastores(this);
     }
 
-    // ********************************** Others ********************************
-    /**
-     * Ways to order this element in the queries.
-     */
     public static enum OrderByEnum
     {
-        NAME("name", "vapp.name"), ID("id", "vapp.id");
+        NAME("name", "vapp.name"), STATE("state", "vapp.state"), ID("id", "vapp.id"), ERROR(
+            "error", "vapp.error");
 
         public static OrderByEnum fromValue(final String orderBy)
         {
@@ -367,4 +364,25 @@ public class VirtualAppliance extends DefaultEntityBase
         }
     }
 
+    /**
+     * Clones this virtual appliance. But references to objects still the same. Same enterpirse,
+     * same nodes, same virtual datacenter.
+     * 
+     * @see java.lang.Object#clone()
+     */
+    @Override
+    public VirtualAppliance clone()
+    {
+        VirtualAppliance virtualAppliance = new VirtualAppliance();
+
+        virtualAppliance.setEnterprise(enterprise);
+        virtualAppliance.setHighDisponibility(highDisponibility);
+        virtualAppliance.setName(name);
+        virtualAppliance.setNodeconnections(nodeconnections);
+        virtualAppliance.setPublicApp(publicApp);
+        virtualAppliance.setVirtualDatacenter(virtualDatacenter);
+
+        virtualAppliance.nodesVirtualImage.addAll(this.getNodes());
+        return virtualAppliance;
+    }
 }

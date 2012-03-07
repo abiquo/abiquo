@@ -41,6 +41,7 @@ import org.springframework.stereotype.Component;
 
 import com.abiquo.api.services.InfrastructureService;
 import com.abiquo.model.enumerator.FitPolicy;
+import com.abiquo.model.enumerator.NetworkType;
 import com.abiquo.scheduler.workload.NotEnoughResourcesException;
 import com.abiquo.scheduler.workload.VirtualimageAllocationService;
 import com.abiquo.server.core.cloud.HypervisorDAO;
@@ -113,6 +114,7 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
         this.ipPoolManDao = new IpPoolManagementDAO(em);
         this.vlanNetworkDao = new VLANNetworkDAO(em);
         this.hypervisorDao = new HypervisorDAO(em);
+        this.fitPolicyDao = new FitPolicyRuleDAO(em);
     }
 
     /**
@@ -204,7 +206,7 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
         {
             updateUsageDatastore(virtualMachine, true);
             updateUsagePhysicalMachine(physicalMachine, virtualMachine, true);
-            rollbackNetworkingResources(physicalMachine, virtualMachine);
+            // rollbackNetworkingResources(physicalMachine, virtualMachine);
 
             virtualMachine.setState(VirtualMachineState.UNKNOWN);
         }
@@ -355,7 +357,7 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
 
             if (!assigned)
             {
-                if (!vlanNetworkDao.isPublic(vlanNetwork))
+                if (vlanNetwork.getType().equals(NetworkType.INTERNAL))
                 {
                     vlanNetwork.setTag(null);
                 }
@@ -489,8 +491,8 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
                 vlanIdsOrdered.remove(vlanId);
             }
         }
-        
-        for (Integer i = rack.getVlanIdMin(); i <= rack.getVlanIdMax(); i ++)
+
+        for (Integer i = rack.getVlanIdMin(); i <= rack.getVlanIdMax(); i++)
         {
             if (!vlanIdsOrdered.contains(i))
             {
