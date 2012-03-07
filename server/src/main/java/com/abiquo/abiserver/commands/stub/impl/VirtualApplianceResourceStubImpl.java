@@ -877,7 +877,9 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
 
         VirtualMachineTaskDto virtualMachineTaskDto = new VirtualMachineTaskDto();
         virtualMachineTaskDto.setForceUndeploy(force);
-        ClientResponse response = post(link, virtualMachineTaskDto);
+        ClientResponse response =
+            post(link, AcceptedRequestDto.MEDIA_TYPE, VirtualMachineTaskDto.MEDIA_TYPE,
+                virtualMachineTaskDto);
 
         if (response.getStatusCode() == 202)
         {

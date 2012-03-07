@@ -232,6 +232,19 @@ public class AbstractAPIStub
     }
 
     protected ClientResponse put(final String uri, final SingleResourceTransportDto dto,
+        final String accept, final String content)
+    {
+        UserHB user = getCurrentUserCredentials();
+        Resource resource = resource(uri, user.getUser(), user.getPassword());
+        if (dto != null)
+        {
+            resource.contentType(content);
+            resource.accept(accept);
+        }
+        return resource.put(dto);
+    }
+
+    protected ClientResponse put(final String uri, final SingleResourceTransportDto dto,
         final String user, final String password, final String accept, final String content)
     {
         return resource(uri, user, password, accept).contentType(content).put(dto);
