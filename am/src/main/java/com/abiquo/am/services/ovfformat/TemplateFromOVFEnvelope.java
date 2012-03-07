@@ -64,7 +64,6 @@ import com.abiquo.ovfmanager.ovf.section.DiskFormat;
 
 public class TemplateFromOVFEnvelope
 {
-
     private final static Logger LOG = LoggerFactory.getLogger(TemplateFromOVFEnvelope.class);
 
     public static VirtualDiskDescType getDisk(final EnvelopeType envelope)
