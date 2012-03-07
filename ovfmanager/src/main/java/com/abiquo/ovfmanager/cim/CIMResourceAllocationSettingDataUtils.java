@@ -43,8 +43,9 @@ public class CIMResourceAllocationSettingDataUtils
 {
 
     // TODO todo optional
-    public static RASDType createRASDTypeFromCIMRASD(CIMResourceAllocationSettingDataType rasd,
-        Boolean required, String configuration, String bound)
+    public static RASDType createRASDTypeFromCIMRASD(
+        final CIMResourceAllocationSettingDataType rasd, final Boolean required,
+        final String configuration, final String bound)
     {
         RASDType rasdT;
 
@@ -57,7 +58,7 @@ public class CIMResourceAllocationSettingDataUtils
         return rasdT;
     }
 
-    public static RASDType createRASDTypeFromCIMRASD(CIMResourceAllocationSettingDataType rasd)
+    public static RASDType createRASDTypeFromCIMRASD(final CIMResourceAllocationSettingDataType rasd)
     {
         RASDType rasdT = new RASDType();
 
@@ -91,9 +92,10 @@ public class CIMResourceAllocationSettingDataUtils
     }
 
     public static CIMResourceAllocationSettingDataType createResourceAllocationSettingData(
-        String elementName, String instanceID, CIMResourceTypeEnum resourceType,
-        String resourceSubType, String otherResourceType, String parent, String description,
-        String caption, Long generation) throws RequiredAttributeException
+        final String elementName, final String instanceID, final CIMResourceTypeEnum resourceType,
+        final String resourceSubType, final String otherResourceType, final String parent,
+        final String description, final String caption, final Long generation)
+        throws RequiredAttributeException
     {
         CIMResourceAllocationSettingDataType rasd = new CIMResourceAllocationSettingDataType();
 
@@ -121,7 +123,7 @@ public class CIMResourceAllocationSettingDataUtils
     }
 
     public static CIMResourceAllocationSettingDataType createResourceAllocationSettingData(
-        String elementName, String instanceID, CIMResourceTypeEnum resourceType)
+        final String elementName, final String instanceID, final CIMResourceTypeEnum resourceType)
         throws RequiredAttributeException
     {
         CIMResourceAllocationSettingDataType rasd = new CIMResourceAllocationSettingDataType();
@@ -143,38 +145,40 @@ public class CIMResourceAllocationSettingDataUtils
         return rasd;
     }
 
-    
     public static CIMResourceAllocationSettingDataType createResourceAllocationSettingData(
-        String elementName, String instanceID, CIMResourceTypeEnum resourceType, long virtualQuantity, String units)
-        throws RequiredAttributeException
+        final String elementName, final String instanceID, final CIMResourceTypeEnum resourceType,
+        final long virtualQuantity, final String units) throws RequiredAttributeException
     {
-        CIMResourceAllocationSettingDataType rasd = createResourceAllocationSettingData(elementName, instanceID, resourceType);
-        rasd.setVirtualQuantity(CIMTypesUtils.createUnsignedLong(virtualQuantity));
-        
-        if(units != null)
+        CIMResourceAllocationSettingDataType rasd =
+            createResourceAllocationSettingData(elementName, instanceID, resourceType);
+        if (virtualQuantity != 0)
         {
-            rasd.setAllocationUnits(CIMTypesUtils.createString(units));            
+            rasd.setVirtualQuantity(CIMTypesUtils.createUnsignedLong(virtualQuantity));
         }
-        
+        if (units != null)
+        {
+            rasd.setAllocationUnits(CIMTypesUtils.createString(units));
+        }
+
         return rasd;
     }
-    
-    
-    public static void setAddressToRASD(CIMResourceAllocationSettingDataType rasd, String address,
-        String addressOnParen)
+
+    public static void setAddressToRASD(final CIMResourceAllocationSettingDataType rasd,
+        final String address, final String addressOnParen)
     {
         rasd.setAddress(CIMTypesUtils.createString(address));
         rasd.setAddressOnParent(CIMTypesUtils.createString(addressOnParen));
     }
 
-    public static void setPoolPropertiesToRASD(CIMResourceAllocationSettingDataType rasd,
-        String poolID, int weight, List<String> hostResource, String mappingBehavior)
+    public static void setPoolPropertiesToRASD(final CIMResourceAllocationSettingDataType rasd,
+        final String poolID, final int weight, final List<String> hostResource,
+        final String mappingBehavior)
     {
         // TODO assert weight is positive
         // TODO almost poolId is not null
 
         rasd.setPoolID(CIMTypesUtils.createString(poolID));
-        rasd.setWeight(CIMTypesUtils.createUnsignedInt((long)weight));
+        rasd.setWeight(CIMTypesUtils.createUnsignedInt((long) weight));
 
         MappingBehavior mapi = new MappingBehavior();
         mapi.setValue(mappingBehavior);
@@ -189,10 +193,10 @@ public class CIMResourceAllocationSettingDataUtils
         }
     }
 
-    public static void setAllocationToRASD(CIMResourceAllocationSettingDataType rasd,
-        Long virtualQuantity, String allocationUnits, Long reservation, Long limit,
-        Boolean automaticAllocation, Boolean automaticDeallocation,
-        ChangeableTypeEnum changeableType)
+    public static void setAllocationToRASD(final CIMResourceAllocationSettingDataType rasd,
+        final Long virtualQuantity, final String allocationUnits, final Long reservation,
+        final Long limit, final Boolean automaticAllocation, final Boolean automaticDeallocation,
+        final ChangeableTypeEnum changeableType)
     {
         rasd.setVirtualQuantity(CIMTypesUtils.createUnsignedLong(virtualQuantity));
         rasd.setAllocationUnits(CIMTypesUtils.createString(allocationUnits));
@@ -203,26 +207,26 @@ public class CIMResourceAllocationSettingDataUtils
         rasd.setChangeableType(CIMTypesUtils.createChangeableTypeRASD(changeableType));
     }
 
-    public static void setAllocationToRASD(CIMResourceAllocationSettingDataType rasd,
-        Long virtualQuantity)
+    public static void setAllocationToRASD(final CIMResourceAllocationSettingDataType rasd,
+        final Long virtualQuantity)
     {
         rasd.setVirtualQuantity(CIMTypesUtils.createUnsignedLong(virtualQuantity));
     }
-    
-    public static void addHostResourceToRASD(CIMResourceAllocationSettingDataType rasd,
-            String hostResource)
-        {
-            rasd.getHostResource().add(CIMTypesUtils.createString(hostResource));
-        }
-    
-    public static void setAddressToRASD(CIMResourceAllocationSettingDataType rasd,
-            String address)
-        {
-            rasd.setAddress(CIMTypesUtils.createString(address));
-        }
 
-    public static void setConfigurationIdToRASD(RASDType rasd, String configurationName,
-        ConsumerVisibilityEnum consumerVisisbility)
+    public static void addHostResourceToRASD(final CIMResourceAllocationSettingDataType rasd,
+        final String hostResource)
+    {
+        rasd.getHostResource().add(CIMTypesUtils.createString(hostResource));
+    }
+
+    public static void setAddressToRASD(final CIMResourceAllocationSettingDataType rasd,
+        final String address)
+    {
+        rasd.setAddress(CIMTypesUtils.createString(address));
+    }
+
+    public static void setConfigurationIdToRASD(final RASDType rasd,
+        final String configurationName, final ConsumerVisibilityEnum consumerVisisbility)
     {
         rasd.setConfigurationName(CIMTypesUtils.createString(configurationName));
 
@@ -232,11 +236,10 @@ public class CIMResourceAllocationSettingDataUtils
         rasd.setConsumerVisibility(visio);
     }
 
-    public static void addConnectionToRASD(CIMResourceAllocationSettingDataType rasd,
-        String newConnection)
+    public static void addConnectionToRASD(final CIMResourceAllocationSettingDataType rasd,
+        final String newConnection)
     {
         rasd.getConnection().add(CIMTypesUtils.createString(newConnection));
     }
 
-    
 }
