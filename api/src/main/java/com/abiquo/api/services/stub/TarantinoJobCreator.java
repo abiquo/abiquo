@@ -64,6 +64,7 @@ import com.abiquo.commons.amqp.impl.tarantino.domain.DhcpOptionCom;
 import com.abiquo.commons.amqp.impl.tarantino.domain.DiskDescription;
 import com.abiquo.commons.amqp.impl.tarantino.domain.DiskDescription.DiskControllerType;
 import com.abiquo.commons.amqp.impl.tarantino.domain.HypervisorConnection;
+import com.abiquo.commons.amqp.impl.tarantino.domain.VirtualMachineDefinition.EthernetDriver;
 import com.abiquo.commons.amqp.impl.tarantino.domain.VirtualMachineDefinition.PrimaryDisk;
 import com.abiquo.commons.amqp.impl.tarantino.domain.builder.VirtualMachineDescriptionBuilder;
 import com.abiquo.commons.amqp.impl.tarantino.domain.dto.DatacenterTasks;
@@ -173,7 +174,8 @@ public class TarantinoJobCreator extends DefaultApiService
     }
 
     public VirtualMachineDescriptionBuilder toTarantinoDto(final VirtualMachine virtualMachine,
-        final VirtualAppliance virtualAppliance){
+        final VirtualAppliance virtualAppliance)
+    {
         return toTarantinoDto(virtualMachine, virtualAppliance, false);
     }
 
@@ -444,6 +446,10 @@ public class TarantinoJobCreator extends DefaultApiService
     private void vnicDefinitionConfiguration(final VirtualMachine virtualMachine,
         final VirtualMachineDescriptionBuilder vmDesc)
     {
+        final EthernetDriver driver =
+            virtualMachine.getEthernetDriverType() != null ? EthernetDriver.valueOf(virtualMachine
+                .getEthernetDriverType().name()) : null;
+
         Boolean defaultConfigurationFound = Boolean.FALSE;
         for (IpPoolManagement i : virtualMachine.getIps())
         {
@@ -462,7 +468,7 @@ public class TarantinoJobCreator extends DefaultApiService
                     .getFenceMode(), configuration.getAddress(), configuration.getGateway(),
                     configuration.getNetMask(), configuration.getPrimaryDNS(), configuration
                         .getSecondaryDNS(), configuration.getSufixDNS(), i.getSequence(),
-                    toDchpOptionCom(dhcplist), Boolean.TRUE, i.isUnmanagedIp());
+                    toDchpOptionCom(dhcplist), Boolean.TRUE, i.isUnmanagedIp(), driver);
 
                 defaultConfigurationFound = Boolean.TRUE;
 
@@ -475,7 +481,7 @@ public class TarantinoJobCreator extends DefaultApiService
             vmDesc.addNetwork(i.getMac(), i.getIp(), virtualMachine.getHypervisor().getMachine()
                 .getVirtualSwitch(), i.getNetworkName(), tag, i.getName(), null, null, null,
                 configuration.getNetMask(), null, null, null, i.getSequence(),
-                toDchpOptionCom(dhcplist), Boolean.FALSE, i.isUnmanagedIp());
+                toDchpOptionCom(dhcplist), Boolean.FALSE, i.isUnmanagedIp(), driver);
 
         }
     }
