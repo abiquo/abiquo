@@ -116,7 +116,8 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
         // resource.queryParam("ovfindexURL", ovfpackageListURL);
 
         ClientResponse response =
-            resource(uri, TemplateDefinitionListDto.MEDIA_TYPE).post(ovfindexURL);
+            resource(uri, TemplateDefinitionListDto.MEDIA_TYPE).contentType(MediaType.TEXT_PLAIN)
+                .post(ovfindexURL);
 
         if (response.getStatusType().getFamily() != Family.SUCCESSFUL)
         {
