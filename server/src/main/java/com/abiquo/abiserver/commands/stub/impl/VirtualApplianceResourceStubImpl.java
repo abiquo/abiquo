@@ -207,7 +207,9 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
                             virtualImageNodeToDto(virtualAppliance, machine, n,
                                 virtualDatacenterId, virtualAppliance.getVirtualDataCenter()
                                     .getIdDataCenter());
-                        ClientResponse post = post(linkVirtualMachines, virtualMachineDto);
+                        ClientResponse post =
+                            post(linkVirtualMachines, VirtualMachineDto.MEDIA_TYPE,
+                                VirtualMachineWithNodeDto.MEDIA_TYPE, virtualMachineDto);
                         if (post.getStatusCode() != Status.CREATED.getStatusCode())
                         {
                             errors.append(n.getVirtualImage().getName());
