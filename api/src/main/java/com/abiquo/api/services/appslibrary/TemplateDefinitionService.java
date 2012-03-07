@@ -106,7 +106,7 @@ public class TemplateDefinitionService extends DefaultApiService
         return ovfpackage;
     }
 
-    @Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public TemplateDefinition addTemplateDefinition(final TemplateDefinition templateDef,
         final Integer idEnterprise)
     {

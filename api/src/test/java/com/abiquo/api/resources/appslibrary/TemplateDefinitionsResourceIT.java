@@ -122,6 +122,9 @@ public class TemplateDefinitionsResourceIT extends AbstractJpaGeneratorIT
     {
         TemplateDefinitionDto p = new TemplateDefinitionDto();
         p.setDescription("test_created_desc");
+        p.setProductName("created_dec");
+        p.setDiskFileSize(100l);
+
         p.setUrl("http://www.abiquo.com");
         p.setDiskFormatType(String.valueOf(DiskFormatType.UNKNOWN.name())); // test this is a
         // necessary

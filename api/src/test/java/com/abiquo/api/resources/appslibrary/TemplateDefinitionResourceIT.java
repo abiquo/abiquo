@@ -122,6 +122,7 @@ public class TemplateDefinitionResourceIT extends AbstractJpaGeneratorIT
     public void modifyTemplateDefinition() throws ClientWebException
     {
         templateDef = templateDefGenerator.createInstance(appsLibrary, category);
+        templateDef.setUrl("http://some.com/url");
         setup(templateDef);
 
         ClientResponse response =

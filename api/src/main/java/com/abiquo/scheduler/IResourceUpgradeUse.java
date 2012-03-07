@@ -23,6 +23,7 @@ package com.abiquo.scheduler;
 
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualMachine;
+import com.abiquo.server.core.infrastructure.Datastore;
 import com.abiquo.server.core.infrastructure.Machine;
 import com.abiquo.server.core.scheduler.VirtualMachineRequirements;
 
@@ -68,10 +69,11 @@ public interface IResourceUpgradeUse
     public void rollbackUseHA(VirtualMachine virtualMachine);
 
     /**
-     * Increase the ram and cpu resources on the provided machine.
+     * Increase the ram, cpu and storage used resources on the provided machine and datastore.
      * 
-     * @param requirements, the increased resources (now only used for CPU and RAM)
+     * @param requirements, the increased resources (now only used for CPU, RAM and HD)
      */
-    public void updateUsed(final Machine machine, final VirtualMachineRequirements requirements);
+    public void updateUsed(final Machine machine, final Datastore datastore,
+        final VirtualMachineRequirements requirements);
 
 }
