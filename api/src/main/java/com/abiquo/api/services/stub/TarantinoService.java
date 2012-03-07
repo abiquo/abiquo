@@ -237,7 +237,6 @@ public class TarantinoService extends DefaultApiService
         return tarantinoTask.getId();
     }
 
-
     private TarantinoRequestProducer getTarantinoProducer(final Datacenter datacenter)
     {
         final String datacenterQueueId = datacenter.getUuid();
@@ -450,8 +449,9 @@ public class TarantinoService extends DefaultApiService
                         .buildTarantinoTask();
             }
 
-            enqueueTask(datacenter, builder.buildAsyncTask(String.valueOf(virtualMachine.getId()),
-                TaskType.HIGH_AVAILABILITY), deployTask, EventType.VM_MOVING_BY_HA);
+            enqueueTask(datacenter,
+                builder.buildAsyncTask(String.valueOf(virtualMachine.getId()), TaskType.HA_DEPLOY),
+                deployTask, EventType.VM_MOVING_BY_HA);
 
             return deployTask.getId();
         }
@@ -489,7 +489,6 @@ public class TarantinoService extends DefaultApiService
         return null;
     }
 
-
     /**
      * Undeploys VM after a Re-enable HA operation
      * 
@@ -506,15 +505,14 @@ public class TarantinoService extends DefaultApiService
     {
 
         Map<String, String> extraData = new HashMap<String, String>();
-        extraData.put("isHA", Boolean.TRUE.toString());        
+        extraData.put("isHA", Boolean.TRUE.toString());
         try
         {
             // VM is undeployed from this hypervisor, not the one we have in DB
             HypervisorConnection conn =
                 jobCreator.hypervisorConnectionConfiguration(originalHypervisor);
             DatacenterTaskBuilder builder =
-                new DatacenterTaskBuilder(virtualMachineDesciptionBuilder.build(),
-                    conn,
+                new DatacenterTaskBuilder(virtualMachineDesciptionBuilder.build(), conn,
                 /* userService.getCurrentUser().getNick() */"admin");
             // XXX: This should be system user
 
@@ -528,7 +526,8 @@ public class TarantinoService extends DefaultApiService
                     .buildTarantinoTask();
 
             Task redisTask =
-                builder.buildAsyncTask(String.valueOf(virtualMachine.getId()), TaskType.UNDEPLOY);
+                builder
+                    .buildAsyncTask(String.valueOf(virtualMachine.getId()), TaskType.HA_UNDEPLOY);
 
             Datacenter datacenter = virtualMachine.getHypervisor().getMachine().getDatacenter();
 
@@ -561,7 +560,7 @@ public class TarantinoService extends DefaultApiService
             flushErrors();
         }
         return null;
-        
+
     }
 
     /**
@@ -593,8 +592,7 @@ public class TarantinoService extends DefaultApiService
             }
 
             DatacenterTasks tarantinoTask =
-                builder.add(VirtualMachineStateTransition.DECONFIGURE)
-                    .buildTarantinoTask();
+                builder.add(VirtualMachineStateTransition.DECONFIGURE).buildTarantinoTask();
 
             Task redisTask =
                 builder.buildAsyncTask(String.valueOf(virtualMachine.getId()), TaskType.UNDEPLOY);
