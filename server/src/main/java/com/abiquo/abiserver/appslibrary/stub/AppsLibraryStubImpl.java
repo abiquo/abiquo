@@ -251,7 +251,7 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
                 String.valueOf(templateDefinitionId));
 
         ClientResponse response =
-            resource(uri, TemplatesStateDto.MEDIA_TYPE).queryParam("datacenterId", datacenterId)
+            resource(uri, TemplateStateDto.MEDIA_TYPE).queryParam("datacenterId", datacenterId)
                 .get();
 
         if (response.getStatusType().getFamily() == Family.SUCCESSFUL)
