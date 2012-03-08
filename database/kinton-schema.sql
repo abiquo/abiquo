@@ -2643,7 +2643,7 @@ CREATE TRIGGER kinton.update_virtualmachine_update_stats AFTER UPDATE ON kinton.
         WHERE NEW.idVM = nvi.idVM
         AND nvi.idNode = n.idNode
         AND vapp.idVirtualApp = n.idVirtualApp;   
- -- INSERT INTO debug_msg (msg) VALUES (CONCAT('update values ', IFNULL(idDataCenterObj,'NULL'), ' - ',IFNULL(idVirtualAppObj,'NULL'), ' - ',IFNULL(idVirtualDataCenterObj,'NULL'), ' - ',IFNULL(previousState,'NULL')));
+-- -- INSERT INTO debug_msg (msg) VALUES (CONCAT('update values ', IFNULL(idDataCenterObj,'NULL'), ' - ',IFNULL(idVirtualAppObj,'NULL'), ' - ',IFNULL(idVirtualDataCenterObj,'NULL'), ' - ',IFNULL(previousState,'NULL')));
 	--
 	-- Imported VMs will be updated on create_node_virtual_image
 	-- Used Stats (vCpuUsed, vMemoryUsed, vStorageUsed) are updated from delete_nodevirtualimage_update_stats ON DELETE nodevirtualimage when updating the VApp
@@ -2657,7 +2657,7 @@ CREATE TRIGGER kinton.update_virtualmachine_update_stats AFTER UPDATE ON kinton.
                 WHERE idVirtualDataCenter = idVirtualDataCenterObj;
                 UPDATE IGNORE cloud_usage_stats SET vMachinesRunning = vMachinesRunning+1
                 WHERE idDataCenter = idDataCenterObj;       
-		SELECT IFNULL(SUM(limitResource),0) INTO extraHDSize 
+		SELECT IFNULL(SUM(limitResource),0) * 1048576 INTO extraHDSize 
 		FROM rasd_management rm, rasd r 
 		WHERE rm.idResource = r.instanceID AND rm.idVM = NEW.idVM AND rm.idResourceType=17;    
 		-- INSERT INTO debug_msg (msg) VALUES (CONCAT('NEW ExtraHDs added ', extraHDSize));
@@ -2684,7 +2684,7 @@ CREATE TRIGGER kinton.update_virtualmachine_update_stats AFTER UPDATE ON kinton.
                 WHERE idVirtualDataCenter = idVirtualDataCenterObj;
                 UPDATE IGNORE cloud_usage_stats SET vMachinesRunning = vMachinesRunning-1
                 WHERE idDataCenter = idDataCenterObj;
-		SELECT SUM(limitResource) INTO extraHDSize 
+		SELECT IFNULL(SUM(limitResource),0) * 1048576 INTO extraHDSize 
 		FROM rasd_management rm, rasd r 
 		WHERE rm.idResource = r.instanceID AND rm.idVM = NEW.idVM AND rm.idResourceType=17;    
 		-- INSERT INTO debug_msg (msg) VALUES (CONCAT('NEW ExtraHDs removed ', extraHDSize));
@@ -2734,6 +2734,7 @@ CREATE TRIGGER kinton.update_virtualmachine_update_stats AFTER UPDATE ON kinton.
 	    END IF;
       END IF;
     END;
+
 --
 -- ******************************************************************************************
 -- Description:
@@ -2875,7 +2876,7 @@ CREATE TRIGGER kinton.delete_nodevirtualimage_update_stats AFTER DELETE ON kinto
            WHERE idVirtualDataCenter = idVirtualDataCenterObj;                 
       END IF;
       --
-      IF previousState != "NOT_ALLOCATED" AND previousState != "UNKNOWN" THEN      	
+      IF previousState != "NOT_ALLOCATED" OR previousState != "UNKNOWN" THEN      	
         UPDATE IGNORE cloud_usage_stats SET vMachinesTotal = vMachinesTotal-1
           WHERE idDataCenter = idDataCenterObj;
         UPDATE IGNORE vapp_enterprise_stats SET vmCreated = vmCreated-1
@@ -2971,6 +2972,7 @@ CREATE TRIGGER kinton.delete_rasd_management_update_stats AFTER DELETE ON kinton
         DECLARE resourceName VARCHAR(255);  
 	DECLARE currentState VARCHAR(50);
 	DECLARE previousState VARCHAR(50);
+	DECLARE extraHDSize BIGINT DEFAULT 0;
 	SELECT vdc.idDataCenter, vdc.idEnterprise INTO idDataCenterObj, idThisEnterprise
         FROM virtualdatacenter vdc
         WHERE vdc.idVirtualDataCenter = OLD.idVirtualDataCenter;
@@ -2993,18 +2995,19 @@ CREATE TRIGGER kinton.delete_rasd_management_update_stats AFTER DELETE ON kinton
             END IF;
             IF OLD.idResourceType='17' AND previousState = 'ON' THEN
 		-- INSERT INTO debug_msg (msg) VALUES (CONCAT('Removed ExtraHDs ', limitResourceObj, ' for idVM ', OLD.idVM, ' with state ', previousState));  
+		SELECT limitResourceObj * 1048576 INTO extraHDSize;
 		UPDATE IGNORE enterprise_resources_stats 
-                SET localStorageUsed = localStorageUsed - limitResourceObj
+                SET localStorageUsed = localStorageUsed - extraHDSize 
                 WHERE idEnterprise = idThisEnterprise;
                 UPDATE IGNORE dc_enterprise_stats 
-                SET localStorageUsed = localStorageUsed - limitResourceObj
+                SET localStorageUsed = localStorageUsed - extraHDSize
                 WHERE idEnterprise = idThisEnterprise AND idDataCenter = idDataCenterObj;
                 UPDATE IGNORE vdc_enterprise_stats 
-                SET localStorageUsed = localStorageUsed - limitResourceObj
+                SET localStorageUsed = localStorageUsed - extraHDSize
                 WHERE idVirtualDataCenter = OLD.idVirtualDataCenter; 		
 	    END IF;
         END IF;
-    END;  
+    END;      
 --
 -- Triggers on virtualdatacenter
 -- ******************************************************************************************
@@ -3390,7 +3393,7 @@ CREATE TRIGGER kinton.update_rasd_management_update_stats AFTER UPDATE ON kinton
 		SELECT vm.state, vm.idType INTO currentVMState, type
 		FROM virtualmachine vm
 		WHERE vm.idVM = NEW.idVM;
-		SELECT r.limitResource INTO extraHDSize
+		SELECT IFNULL(r.limitResource,0) * 1048576 INTO extraHDSize
 		FROM rasd r
 		WHERE NEW.idResourceType=17 AND r.instanceID = NEW.idResource;
 		-- INSERT INTO debug_msg (msg) VALUES (CONCAT('Added ExtraHDs UpdateRASDMana ', IFNULL(extraHDSize,'NULL'), ' for idVM ', IFNULL(NEW.idVM,'NULL'), ' with state ', IFNULL(currentVMState,'NULL'), ' type ', IFNULL(type,'NULL')));  

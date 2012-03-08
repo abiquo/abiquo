@@ -120,7 +120,6 @@ public class VirtualMachineFactory
             final Datastore datastore = selectDatastore(machine, datastoreRequ);
             virtualMachine.setDatastore(datastore);
 
-            virtualMachine.setVdrpIP(hypervisor.getIpService());
             virtualMachine.setVdrpPort(isRemoteAccessEnabled() ? selectVrdpPort(machine)
                 : DISABLED_VRDPORT);
         }
@@ -135,6 +134,8 @@ public class VirtualMachineFactory
 
             virtualMachine.setDatastore(datastore);
         }
+
+        virtualMachine.setVdrpIP(hypervisor.getIpService());
 
         return virtualMachine;
     }
