@@ -118,7 +118,7 @@ public class PrivateNetworkResourceIT extends AbstractJpaGeneratorIT
     public void getPrivateNetworkDoesntExist() throws Exception
     {
         String invalidNetworkURI =
-            resolvePrivateNetworkURI(vdc.getId(), new Random().nextInt(1000));
+            resolvePrivateNetworkURI(vdc.getId(), vlan.getId() + 1);
         Resource resource = client.resource(invalidNetworkURI);
 
         ClientResponse response = resource.accept(VLANNetworkDto.MEDIA_TYPE).get();
@@ -128,7 +128,7 @@ public class PrivateNetworkResourceIT extends AbstractJpaGeneratorIT
     @Test
     public void getPrivateNetworkWithWrongVirtualDatacenter() throws ClientWebException
     {
-        String invalidVDCURI = resolvePrivateNetworkURI(new Random().nextInt(1000), vlan.getId());
+        String invalidVDCURI = resolvePrivateNetworkURI(vdc.getId() + 1, vlan.getId());
         Resource resource = client.resource(invalidVDCURI);
 
         ClientResponse response = resource.accept(VLANNetworkDto.MEDIA_TYPE).get();

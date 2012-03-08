@@ -25,7 +25,6 @@ import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
-import javax.ws.rs.QueryParam;
 
 import org.apache.wink.common.annotations.Parent;
 import org.springframework.stereotype.Controller;
@@ -33,7 +32,7 @@ import org.springframework.stereotype.Controller;
 import com.abiquo.am.services.ErepoFactory;
 import com.abiquo.am.services.filesystem.EnterpriseRepositoryFileSystem;
 import com.abiquo.api.resource.AbstractResource;
-import com.abiquo.appliancemanager.config.AMConfigurationManager;
+import com.abiquo.appliancemanager.config.AMConfiguration;
 import com.abiquo.appliancemanager.transport.EnterpriseRepositoryDto;
 
 @Parent(EnterpriseRepositoriesResource.class)
@@ -45,8 +44,7 @@ public class EnterpriseRepositoryResource extends AbstractResource
 
     public static final String ENTERPRISE_REPOSITORY_PARAM = "{" + ENTERPRISE_REPOSITORY + "}";
 
-    private static final String REPOSITORY_LOCATION = AMConfigurationManager.getInstance()
-        .getAMConfiguration().getRepositoryLocation();
+    private static final String REPOSITORY_LOCATION = AMConfiguration.getRepositoryLocation();
 
     @POST
     public void refreshEnterpriseRepository(
@@ -57,11 +55,8 @@ public class EnterpriseRepositoryResource extends AbstractResource
 
     @GET
     public EnterpriseRepositoryDto getEnterpriseRepository(
-        @PathParam(EnterpriseRepositoryResource.ENTERPRISE_REPOSITORY) final String erId,
-        @QueryParam("checkCanWrite") final boolean checkCanWrite)
+        @PathParam(EnterpriseRepositoryResource.ENTERPRISE_REPOSITORY) final String erId)
     {
-        CheckResource.validate();
-
         EnterpriseRepositoryDto repo = new EnterpriseRepositoryDto();
 
         repo.setId(Integer.valueOf(erId));
@@ -71,7 +66,6 @@ public class EnterpriseRepositoryResource extends AbstractResource
         repo.setLocation(REPOSITORY_LOCATION);
         repo.setCapacityMb(EnterpriseRepositoryFileSystem.getCapacityMb());
         repo.setRemainingMb(EnterpriseRepositoryFileSystem.getFreeMb());
-
 
         return repo;
     }

@@ -151,4 +151,9 @@ public abstract class DefaultDAOBase<I extends Serializable, T extends GenericEn
 
         return (Long) criteria.uniqueResult();
     }
+
+    public void detach(final T entity)
+    {
+        this.getEntityManager().detach(entity);
+    }
 }

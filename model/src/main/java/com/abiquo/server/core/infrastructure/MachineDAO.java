@@ -109,16 +109,6 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
         return result;
     }
 
-    public boolean isMachineInAllocator(final Integer machineId)
-    {
-        // The way to define the virtual machines in the allocator is:
-        // All the virtual machines with an hypervisor associated and with state=NOT_DEPLOYED
-        Query query = getSession().createQuery(QUERY_IS_MACHINE_IN_ALLOCATOR);
-        query.setParameter("machineId", machineId);
-
-        return !query.list().isEmpty();
-    }
-
     public List<Machine> findRackMachines(final Rack rack)
     {
         return findRackMachines(rack, null);
@@ -341,8 +331,10 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
         else
         {
             final String msg =
-                String.format("Enterprise work in restricted reserved machines "
-                    + "and any machine is reserver current enterprise : %s", enterprise.getName());
+                String
+                    .format(
+                        "Enterprise works in restricted reserved machines mode but no machine is reserved. Current enterprise: %s",
+                        enterprise.getName());
 
             throw new PersistenceException(msg);
         }
@@ -386,8 +378,10 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
         else
         {
             final String msg =
-                String.format("Enterprise work in restricted reserved machines "
-                    + "and any machine is reserver current enterprise : %s", enterprise.getName());
+                String
+                    .format(
+                        "Enterprise works in restricted reserved machines mode but no machine is reserved. Current enterprise: %s",
+                        enterprise.getName());
 
             throw new PersistenceException(msg);
         }

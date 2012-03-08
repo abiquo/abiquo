@@ -19,19 +19,16 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package com.abiquo.abiserver.persistence.dao.virtualimage.hibernate;
+package com.abiquo.appliancemanager.web.servlet;
 
-import com.abiquo.abiserver.business.hibernate.pojohb.virtualimage.IconHB;
-import com.abiquo.abiserver.persistence.dao.virtualimage.IconDAO;
-import com.abiquo.abiserver.persistence.hibernate.HibernateDAO;
-
-/**
- * Class that implements the extra DAO functions for the
- * {@link com.abiquo.abiserver.persistence.dao.virtualimage.IconDAO} interface
- * 
- * @author jdevesa@abiquo.com
- */
-public class IconDAOHibernate extends HibernateDAO<IconHB, Integer> implements IconDAO
+public class CheckServletTest extends CheckServlet
 {
-    // implement extra functionality
+
+    private static final long serialVersionUID = -6251633108210372629L;
+
+    @Override
+    public boolean checkRepositoryMounted()
+    {
+        return true;
+    }
 }

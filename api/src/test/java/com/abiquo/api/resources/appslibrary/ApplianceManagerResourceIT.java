@@ -55,7 +55,8 @@ import com.abiquo.api.resources.AbstractJpaGeneratorIT;
 import com.abiquo.api.resources.DatacenterResource;
 import com.abiquo.api.resources.EnterpriseResource;
 import com.abiquo.api.services.InfrastructureService;
-import com.abiquo.appliancemanager.client.ApplianceManagerResourceStubImpl;
+import com.abiquo.appliancemanager.client.AMClient;
+import com.abiquo.appliancemanager.client.AMClientException;
 import com.abiquo.appliancemanager.transport.EnterpriseRepositoryDto;
 import com.abiquo.appliancemanager.transport.TemplateStateDto;
 import com.abiquo.appliancemanager.transport.TemplateStatusEnumType;
@@ -83,7 +84,7 @@ public class ApplianceManagerResourceIT extends AbstractJpaGeneratorIT
     @Autowired
     private InfrastructureService service;
 
-    private ApplianceManagerResourceStubImpl amclient;
+    private AMClient amclient;
 
     private static final String SYSADMIN = "sysadmin";
 
@@ -118,7 +119,7 @@ public class ApplianceManagerResourceIT extends AbstractJpaGeneratorIT
 
         setup(ent, datacenter, limits);
 
-        amclient = new ApplianceManagerResourceStubImpl(TestServerAndAMListener.AM_URI);
+        amclient = new AMClient().initialize(TestServerAndAMListener.AM_URI,false);
 
         setUpUser();
         setUpApplianceManagerInDatacenter();
@@ -174,16 +175,16 @@ public class ApplianceManagerResourceIT extends AbstractJpaGeneratorIT
     }
 
     @Test(groups = {AM_INTEGRATION_TESTS})
-    public void deleteVirtualMachineTemplate()
+    public void deleteVirtualMachineTemplate() throws AMClientException
     {
 
-        amclient.installTemplateDefinition(ent.getId().toString(), DEFAULT_OVF);
+        amclient.installTemplateDefinition(ent.getId(), DEFAULT_OVF);
 
         boolean isdownloaded = false;
         while (!isdownloaded)
         {
             TemplateStateDto status =
-                amclient.getTemplateStatus(ent.getId().toString(), DEFAULT_OVF);
+                amclient.getTemplateStatus(ent.getId(), DEFAULT_OVF);
 
             if (status.getStatus() == TemplateStatusEnumType.ERROR)
             {
@@ -246,15 +247,15 @@ public class ApplianceManagerResourceIT extends AbstractJpaGeneratorIT
     }
 
     @Test(groups = {AM_INTEGRATION_TESTS})
-    public void deleteSharedVMTemplate()
+    public void deleteSharedVMTemplate() throws AMClientException
     {
-        amclient.installTemplateDefinition(ent.getId().toString(), DEFAULT_OVF);
+        amclient.installTemplateDefinition(ent.getId(), DEFAULT_OVF);
 
         boolean isdownloaded = false;
         while (!isdownloaded)
         {
             TemplateStateDto status =
-                amclient.getTemplateStatus(ent.getId().toString(), DEFAULT_OVF);
+                amclient.getTemplateStatus(ent.getId(), DEFAULT_OVF);
 
             if (status.getStatus() == TemplateStatusEnumType.ERROR)
             {
@@ -357,16 +358,16 @@ public class ApplianceManagerResourceIT extends AbstractJpaGeneratorIT
     }
 
     @Test
-    public void createOVFandWaitUntilVirtualMachineTemplateCreated()
+    public void createOVFandWaitUntilVirtualMachineTemplateCreated() throws AMClientException
     {
         final Integer enterpriseId = ent.getId();
-        amclient.installTemplateDefinition(enterpriseId.toString(), DEFAULT_OVF);
+        amclient.installTemplateDefinition(enterpriseId, DEFAULT_OVF);
 
         boolean isdown = false;
         while (!isdown)
         {
             TemplateStateDto status =
-                amclient.getTemplateStatus(enterpriseId.toString(), DEFAULT_OVF);
+                amclient.getTemplateStatus(enterpriseId, DEFAULT_OVF);
 
             if (status.getStatus() == TemplateStatusEnumType.ERROR)
             {

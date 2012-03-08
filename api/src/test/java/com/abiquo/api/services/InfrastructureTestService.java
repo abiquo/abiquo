@@ -38,7 +38,7 @@ public class InfrastructureTestService extends InfrastructureService
 
     @Override
     public ErrorsDto checkRemoteServiceStatus(final Datacenter datancenter,
-        final RemoteServiceType type, final String url)
+        final RemoteServiceType type, final String url, final boolean flushErrors)
     {
         // During tests the target remote service may not be up and running
         // Do not return errors to simulate a normal behavior

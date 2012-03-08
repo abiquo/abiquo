@@ -27,7 +27,7 @@ package net.undf.abicloud.vo.service
     public class RemoteServiceType
     {
         /* ------------- Constants ------------- */
-        public static const TARANTINO:String = "TARANTINO";
+        public static const VIRTUAL_FACTORY:String = "VIRTUAL_FACTORY";
 
         public static const VIRTUAL_STORAGE_SYSTEM:String = "STORAGE_SYSTEM_MONITOR";
 

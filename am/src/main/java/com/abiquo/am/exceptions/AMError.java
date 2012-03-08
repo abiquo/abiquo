@@ -50,9 +50,11 @@ public enum AMError
     REPO_NO_SPACE("REPO-NO-SPACE", "No space left on the NFS Repository file system"), //
     TEMPLATE_BOUNDLE("TEMPLATE-BOUNDLE", "Cannot create the Template Instance"), //
     TEMPLATE_UPLOAD("TEMPLATE-UPLOAD", "Cannot upload the Template"), //
-    REPO_NOT_ACCESSIBLE("REPO-NOT-ACCESSIBLE",
-        "Repository is not accessible. Check the exported location (NFS is probably down "
-            + "or no write permission"), //
+    REPO_NOT_ACCESSIBLE(
+        "REPO-NOT-ACCESSIBLE",
+        "Repository is not accessible. "
+            + "Check the repositoryLocation property and that the NFS Server is up and Abiquo has write permission."), //
+
     REPO_TIMEOUT_REFRESH("REPO-TIMEOUT-REFRESH",
         "Timeout during NFS Repository file system refresh."), //
     TEMPLATE_DELETE("OVFPI-DELETE", "Cannot delete Template folder"), //
@@ -75,7 +77,20 @@ public enum AMError
         "An error occurred during copy of disk from NFS Repository to XenServer folder for deployment"), //
     DISK_FILE_ALREADY_EXIST(
         "DISK-ALREADY-EXIST",
-        "The destination path of the copy already exists in the XenServer folder on the NFS Repository file system");
+        "The destination path of the copy already exists in the XenServer folder on the NFS Repository file system"), //
+
+    MOUNT_FILE_NOT_FOUND("MOUNT-0", "Can't find ''/etc/mtab'' to find mounted repositories."), //
+    MOUNT_FILE_READ_ERROR("MOUNT-1", "Can't read ''/etc/mtab'' to find mounted repositories."), //
+    MOUNT_INVALID_REPOSITORY("MOUNT-2",
+        "The ''abiquo.appliancemanager.repositoryLocation'' (NFS export location) "
+            + "isn't mounted in ''abiquo.appliancemanager.localRepositoryPath''"), //
+    CONFIG_REPOSITORY_LOCATION("CONF-0",
+        "Invalid ''abiquo.appliancemanager.repositoryLocation'' configuration elemente"), //
+    CONFIG_REPOSITORY_PATH("CONF-1",
+        "Invalid ''abiquo.appliancemanager.localRepositoryPath'' configuration elemente"), //
+    CONFIG_REPOSITORY_MARK("CONF-2", "Repository is mounted on the expected mount point, "
+        + "but the ''.abiquo_repository'' is not found and can't be created")//
+    ;
 
     /**
      * Internal error code
@@ -126,8 +141,8 @@ public enum AMError
         // Outputs all errors in wiki table format
         for (AMError error : errors)
         {
-            System.out.println(String.format("| %s | %s | %s |", error.code, error.message, error
-                .name()));
+            System.out.println(String.format("| %s | %s | %s |", error.code, error.message,
+                error.name()));
         }
     }
 

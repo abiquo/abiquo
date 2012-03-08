@@ -49,43 +49,44 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.abiquo.appliancemanager.client.ApplianceManagerResourceStubImpl;
+import com.abiquo.appliancemanager.client.AMClient;
+import com.abiquo.appliancemanager.client.AMClientException;
 import com.abiquo.appliancemanager.transport.EnterpriseRepositoryDto;
+import com.abiquo.appliancemanager.transport.RepositoryConfigurationDto;
 import com.abiquo.appliancemanager.transport.TemplateDto;
 import com.abiquo.appliancemanager.transport.TemplateStatusEnumType;
-import com.abiquo.appliancemanager.transport.RepositoryConfigurationDto;
 
 @Test(groups = {AM_INTEGRATION_TESTS})
 public class ApplianceManagerIT
 {
-    final static String idEnterprise = "1";
+    final static Integer idEnterprise =  1;
 
-    protected ApplianceManagerResourceStubImpl client;
+    protected AMClient client;
 
     protected ApplianceManagerAsserts asserts;
 
     @BeforeClass
     public void setUp() throws IOException
     {
-        client = new ApplianceManagerResourceStubImpl(BASE_URI);
+        client = new AMClient().initialize(BASE_URI, false);
         asserts = new ApplianceManagerAsserts(client);
     }
 
     @BeforeMethod
-    public void assertCleanPre()
+    public void assertCleanPre() throws AMClientException
     {
         asserts.ovfInstanceNoExist(ovfId);
         assertEventsEmpty();
     }
 
     @AfterMethod
-    public void assertCleanPost()
+    public void assertCleanPost()throws AMClientException
     {
         asserts.ovfInstanceNoExist(ovfId);
         assertEventsEmpty();
     }
 
-    public void test_RepositoryConfig()
+    public void test_RepositoryConfig()throws AMClientException
     {
         client.checkService();
 
@@ -93,9 +94,9 @@ public class ApplianceManagerIT
         Assert.assertFalse(StringUtils.isEmpty(config.getLocation()));
     }
 
-    public void test_EnterpriseRepository()
+    public void test_EnterpriseRepository() throws AMClientException
     {
-        EnterpriseRepositoryDto erepo = client.getRepository(idEnterprise, true);
+        EnterpriseRepositoryDto erepo = client.getRepository(idEnterprise);
 
         Assert.assertFalse(StringUtils.isEmpty(erepo.getLocation()));
         Assert.assertTrue((erepo.getCapacityMb() > 0));
@@ -104,8 +105,7 @@ public class ApplianceManagerIT
 
         // TODO check size after a create
 
-        Assert
-            .assertTrue((erepo.getEnterpriseUsedMb() < erepo.getCapacityMb()));
+        Assert.assertTrue((erepo.getEnterpriseUsedMb() < erepo.getCapacityMb()));
         Assert.assertTrue((erepo.getCapacityMb() >= erepo.getEnterpriseUsedMb()
             + erepo.getRemainingMb()));
     }
@@ -122,7 +122,7 @@ public class ApplianceManagerIT
 
     public void test_DeleteNotfound() throws Exception
     {
-        client.delete(idEnterprise, ovfId);
+        client.deleteTemplate(idEnterprise, ovfId);
 
         assertEventsEmpty();
     }
@@ -131,7 +131,7 @@ public class ApplianceManagerIT
     // public void test_CreateCancel() throws Exception
     // {
     // client.createOVFPackageInstance(idEnterprise, ovfId);
-    // client.delete(idEnterprise, ovfId);
+    // client.deleteTemplate(idEnterprise, ovfId);
     //
     // expectedEvents(DOWNLOADING, NOT_DOWNLOAD);
     // }
@@ -159,12 +159,12 @@ public class ApplianceManagerIT
     }
 
     @Test(enabled = false)
-    public void test_ErrorCreateInvalidOvfUrl()
+    public void test_ErrorCreateInvalidOvfUrl() throws AMClientException
     {
         client.installTemplateDefinition(idEnterprise, ovf_invalidUrl);
         asserts.ovfStatus(ovf_invalidUrl, TemplateStatusEnumType.ERROR);
 
-        // client.delete(idEnterprise, ovf_invalidUrl);
+        // client.deleteTemplate(idEnterprise, ovf_invalidUrl);
 
         assertEventsEmpty();
     }
@@ -176,7 +176,7 @@ public class ApplianceManagerIT
 
         asserts.waitUnitlExpected(ovf_notFound, ERROR);
 
-        client.delete(idEnterprise, ovf_notFound);
+        client.deleteTemplate(idEnterprise, ovf_notFound);
 
         // no DOWNLOADING, nothing to put into the repository
         expectedEvents(ERROR, NOT_DOWNLOAD);
@@ -190,7 +190,7 @@ public class ApplianceManagerIT
 
         asserts.waitUnitlExpected(ovf_fileNotFound, ERROR);
 
-        client.delete(idEnterprise, ovf_fileNotFound);
+        client.deleteTemplate(idEnterprise, ovf_fileNotFound);
 
         expectedEvents(DOWNLOADING, ERROR, NOT_DOWNLOAD);
     }
@@ -202,7 +202,7 @@ public class ApplianceManagerIT
 
         asserts.waitUnitlExpected(ovf_invalidDiskFormat, ERROR);
 
-        client.delete(idEnterprise, ovf_invalidDiskFormat);
+        client.deleteTemplate(idEnterprise, ovf_invalidDiskFormat);
 
         expectedEvents(DOWNLOADING, ERROR, NOT_DOWNLOAD);
     }
@@ -214,7 +214,7 @@ public class ApplianceManagerIT
 
         asserts.waitUnitlExpected(ovf_malformed, ERROR);
 
-        client.delete(idEnterprise, ovf_malformed);
+        client.deleteTemplate(idEnterprise, ovf_malformed);
 
         // no DOWNLOADING, nothing to put into the repository
         expectedEvents(ERROR, NOT_DOWNLOAD);
@@ -227,7 +227,7 @@ public class ApplianceManagerIT
 
         asserts.waitUnitlExpected(ovf_multiDisk, ERROR);
 
-        client.delete(idEnterprise, ovf_multiDisk);
+        client.deleteTemplate(idEnterprise, ovf_multiDisk);
 
         // no DOWNLOADING, nothing to put into the repository
         expectedEvents(ERROR, NOT_DOWNLOAD);

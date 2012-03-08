@@ -23,6 +23,8 @@ package com.abiquo.api.services.appslibrary;
 
 import static com.abiquo.api.util.URIResolver.buildPath;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -44,26 +46,22 @@ import com.abiquo.api.resources.appslibrary.CategoriesResource;
 import com.abiquo.api.resources.appslibrary.CategoryResource;
 import com.abiquo.api.resources.appslibrary.DatacenterRepositoriesResource;
 import com.abiquo.api.resources.appslibrary.DatacenterRepositoryResource;
-import com.abiquo.api.resources.appslibrary.IconResource;
-import com.abiquo.api.resources.appslibrary.IconsResource;
 import com.abiquo.api.resources.appslibrary.VirtualMachineTemplateResource;
 import com.abiquo.api.resources.appslibrary.VirtualMachineTemplatesResource;
+import com.abiquo.api.services.DefaultApiService;
 import com.abiquo.api.services.EnterpriseService;
 import com.abiquo.api.services.InfrastructureService;
 import com.abiquo.api.services.UserService;
+import com.abiquo.api.services.stub.AMServiceStub;
 import com.abiquo.api.spring.security.SecurityService;
 import com.abiquo.api.util.URIResolver;
-import com.abiquo.appliancemanager.client.ApplianceManagerResourceStubImpl;
-import com.abiquo.appliancemanager.client.ApplianceManagerResourceStubImpl.ApplianceManagerStubException;
 import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.model.enumerator.Privileges;
 import com.abiquo.model.enumerator.StatefulInclusion;
 import com.abiquo.model.rest.RESTLink;
-import com.abiquo.model.transport.error.CommonError;
 import com.abiquo.server.core.appslibrary.AppsLibraryRep;
 import com.abiquo.server.core.appslibrary.Category;
-import com.abiquo.server.core.appslibrary.Icon;
 import com.abiquo.server.core.appslibrary.VirtualImageConversionDAO;
 import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
 import com.abiquo.server.core.appslibrary.VirtualMachineTemplateDto;
@@ -72,8 +70,6 @@ import com.abiquo.server.core.cloud.VirtualDatacenterRep;
 import com.abiquo.server.core.cloud.VirtualMachineRep;
 import com.abiquo.server.core.enterprise.DatacenterLimits;
 import com.abiquo.server.core.enterprise.Enterprise;
-import com.abiquo.server.core.enterprise.Privilege;
-import com.abiquo.server.core.enterprise.Role;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.Repository;
 import com.abiquo.server.core.infrastructure.RepositoryDAO;
@@ -82,11 +78,11 @@ import com.abiquo.tracer.EventType;
 import com.abiquo.tracer.SeverityType;
 
 @Service
-public class VirtualMachineTemplateService extends DefaultApiServiceWithApplianceManagerClient
+public class VirtualMachineTemplateService extends DefaultApiService
 {
 
-    final private static Logger logger =
-        LoggerFactory.getLogger(VirtualMachineTemplateService.class);
+    final private static Logger logger = LoggerFactory
+        .getLogger(VirtualMachineTemplateService.class);
 
     @Autowired
     private RepositoryDAO repositoryDao;
@@ -114,6 +110,9 @@ public class VirtualMachineTemplateService extends DefaultApiServiceWithApplianc
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private AMServiceStub am;
 
     public VirtualMachineTemplateService()
     {
@@ -277,6 +276,16 @@ public class VirtualMachineTemplateService extends DefaultApiServiceWithApplianc
             addConflictErrors(APIError.VMTEMPLATE_TEMPLATE_USED_BY_VIRTUAL_MACHINES_CANNOT_BE_UNSHARED);
             flushErrors();
         }
+
+        if (!virtualMachineTemplate.getIconUrl().isEmpty()
+            && virtualMachineTemplate.getIconUrl() != null
+            && !validURI(virtualMachineTemplate.getIconUrl()))
+        {
+            addConflictErrors(APIError.VIMAGE_MALFORMED_ICON_URI);
+            flushErrors();
+
+        }
+
         old.setCostCode(virtualMachineTemplate.getCostCode());
         old.setCpuRequired(virtualMachineTemplate.getCpuRequired());
         old.setDescription(virtualMachineTemplate.getDescription());
@@ -291,13 +300,13 @@ public class VirtualMachineTemplateService extends DefaultApiServiceWithApplianc
         old.setRamRequired(virtualMachineTemplate.getRamRequired());
         old.setShared(virtualMachineTemplate.isShared());
         old.setChefEnabled(virtualMachineTemplate.isChefEnabled());
+        old.setIconUrl(virtualMachineTemplate.getIconUrl());
 
         // retrieve the links
         RESTLink categoryLink = virtualMachineTemplate.searchLink(CategoryResource.CATEGORY);
         RESTLink enterpriseLink = virtualMachineTemplate.searchLink(EnterpriseResource.ENTERPRISE);
         RESTLink datacenterRepositoryLink =
             virtualMachineTemplate.searchLink(DatacenterRepositoryResource.DATACENTER_REPOSITORY);
-        RESTLink iconLink = virtualMachineTemplate.searchLink(IconResource.ICON);
         RESTLink masterLink = virtualMachineTemplate.searchLink("master");
 
         // check the links
@@ -368,30 +377,6 @@ public class VirtualMachineTemplateService extends DefaultApiServiceWithApplianc
                     flushErrors();
                 }
                 old.setCategory(category);
-            }
-        }
-
-        if (iconLink != null)
-        {
-            String buildPath = buildPath(IconsResource.ICONS_PATH, IconResource.ICON_PARAM);
-            MultivaluedMap<String, String> map =
-                URIResolver.resolveFromURI(buildPath, iconLink.getHref());
-
-            if (map == null || !map.containsKey(IconResource.ICON))
-            {
-                addValidationErrors(APIError.INVALID_ICON_LINK);
-                flushErrors();
-            }
-            Integer iconId = Integer.parseInt(map.getFirst(IconResource.ICON));
-            if (old.getIcon() == null || !iconId.equals(old.getIcon().getId()))
-            {
-                Icon icon = appsLibraryRep.findIconById(iconId);
-                if (icon == null)
-                {
-                    addConflictErrors(APIError.NON_EXISTENT_ICON);
-                    flushErrors();
-                }
-                old.setIcon(icon);
             }
         }
 
@@ -486,8 +471,8 @@ public class VirtualMachineTemplateService extends DefaultApiServiceWithApplianc
             // moreover check if the current user doesn't have the privelige to impersonate between
             // enterprises
             if (!vmtemplateToDelete.getEnterprise().getId().equals(ent.getId())
-                && !securityService.hasPrivilege(Privileges.ENTERPRISE_ADMINISTER_ALL, userService
-                    .getCurrentUser()))
+                && !securityService.hasPrivilege(Privileges.ENTERPRISE_ADMINISTER_ALL,
+                    userService.getCurrentUser()))
             {
                 addConflictErrors(APIError.VMTEMPLATE_SHARED_TEMPLATE_FROM_OTHER_ENTERPRISE);
                 flushErrors();
@@ -504,25 +489,8 @@ public class VirtualMachineTemplateService extends DefaultApiServiceWithApplianc
             viOvf = codifyBundleImportedOVFid(vmtemplateToDelete.getPath());
         }
 
-        final ApplianceManagerResourceStubImpl amClient = getApplianceManagerClient(datacenterId);
-        try
-        {
-            amClient.delete(vmtemplateToDelete.getEnterprise().getId().toString(), viOvf);
-        }
-        catch (ApplianceManagerStubException e)
-        {
-            CommonError error;
-            try
-            {
-                error = new CommonError("409", e.getCause().toString());
-            }
-            catch (Exception ex)
-            {
-                error = new CommonError("409", e.getMessage());
-            }
-            addConflictErrors(error);
-            flushErrors();
-        }
+        am.delete(datacenterId, enterpriseId, viOvf);
+
         // delete
         appsLibraryRep.deleteVirtualMachineTemplate(vmtemplateToDelete);
 
@@ -545,6 +513,12 @@ public class VirtualMachineTemplateService extends DefaultApiServiceWithApplianc
     {
         return findStatefulVirtualMachineTemplatesByDatacenter(enterpriseId, datacenterId, null,
             stateful);
+    }
+
+    @Transactional(readOnly = true)
+    public List<String> findIconsByEnterprise(final Integer enterpriseId)
+    {
+        return appsLibraryRep.findIconsByEnterprise(enterpriseId);
     }
 
     @Transactional(readOnly = true)
@@ -641,6 +615,19 @@ public class VirtualMachineTemplateService extends DefaultApiServiceWithApplianc
         {
             addConflictErrors(APIError.ENTERPRISE_NOT_ALLOWED_DATACENTER);
             flushErrors();
+        }
+    }
+
+    private boolean validURI(final String uri)
+    {
+        try
+        {
+            new URL(uri);
+            return true;
+        }
+        catch (MalformedURLException e)
+        {
+            return false;
         }
     }
 }

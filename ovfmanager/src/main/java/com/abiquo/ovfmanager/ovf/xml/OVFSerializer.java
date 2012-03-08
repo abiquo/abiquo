@@ -196,15 +196,6 @@ public class OVFSerializer
         return jaxbEnvelope.getValue();
     }
 
-    /**
-     * Configure the ''formatOutput'' property. Determines if the marshalling process to format the
-     * XML document.
-     */
-    public void setFormatOutput(final boolean formatOutput)
-    {
-        this.formatOutput = formatOutput;
-    }
-
     /** Wrap into an JAXBElement the provided OVF envelope. **/
     public JAXBElement<EnvelopeType> toJAXBElement(final EnvelopeType envelope)
     {

@@ -35,7 +35,6 @@ import com.abiquo.am.services.filesystem.EnterpriseRepositoryFileSystem;
 import com.abiquo.am.services.ovfformat.TemplateFromOVFEnvelope;
 import com.abiquo.api.resource.AbstractResource;
 import com.abiquo.appliancemanager.config.AMConfiguration;
-import com.abiquo.appliancemanager.config.AMConfigurationManager;
 import com.abiquo.appliancemanager.transport.RepositoryConfigurationDto;
 import com.abiquo.appliancemanager.transport.TemplateDto;
 
@@ -53,13 +52,8 @@ public class EnterpriseRepositoriesResource extends AbstractResource
     @GET
     public RepositoryConfigurationDto getConfig()
     {
-        CheckResource.validate();
-
-        AMConfiguration config = AMConfigurationManager.getInstance().getAMConfiguration();
-
         RepositoryConfigurationDto configDto = new RepositoryConfigurationDto();
-        // configDto.setBrokerUrl(config.getBrokerUrl());
-        configDto.setLocation(config.getRepositoryLocation());
+        configDto.setLocation(AMConfiguration.getRepositoryLocation());
         configDto.setCapacityMb(EnterpriseRepositoryFileSystem.getCapacityMb());
         configDto.setRemainingMb(EnterpriseRepositoryFileSystem.getFreeMb());
 

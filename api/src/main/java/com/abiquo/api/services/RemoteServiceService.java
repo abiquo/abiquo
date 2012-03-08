@@ -44,8 +44,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import com.abiquo.api.exceptions.APIError;
-import com.abiquo.appliancemanager.client.ApplianceManagerResourceStubImpl;
-import com.abiquo.appliancemanager.client.ApplianceManagerResourceStubImpl.ApplianceManagerStubException;
+import com.abiquo.appliancemanager.client.AMClient;
+import com.abiquo.appliancemanager.client.AMClientException;
 import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.model.transport.SingleResourceTransportDto;
 import com.abiquo.model.transport.error.ErrorDto;
@@ -191,22 +191,20 @@ public class RemoteServiceService extends DefaultApiService
 
             try
             {
-                ApplianceManagerResourceStubImpl amStub =
-                    new ApplianceManagerResourceStubImpl(remoteService.getUri());
 
                 try
                 {
-                    repositoryLocation = amStub.getRepositoryConfiguration().getLocation();
+                    repositoryLocation = getAMConfiguredRepositoryLocation(remoteService.getUri());
                 }
-                catch (ApplianceManagerStubException amEx)
+                catch (AMClientException amEx)
                 {
                     remoteService.setStatus(STATUS_ERROR);
                     APIError error = APIError.REMOTE_SERVICE_CONNECTION_FAILED;
                     configurationErrors.add(new ErrorDto(error.getCode(), remoteService.getType()
-                        .getName() + ", " + amEx.getMessage()));
+                        .getName()
+                        + ", " + amEx.getMessage()));
 
                     return configurationErrors;
-
                 }
 
                 if (infrastructureRepo.existRepositoryInOtherDatacenter(datacenter,
@@ -230,13 +228,21 @@ public class RemoteServiceService extends DefaultApiService
                 remoteService.setStatus(STATUS_ERROR);
                 APIError error = APIError.REMOTE_SERVICE_CONNECTION_FAILED;
                 configurationErrors.add(new ErrorDto(error.getCode(), remoteService.getType()
-                    .getName() + ", " + error.getMessage()));
+                    .getName()
+                    + ", " + error.getMessage()));
                 return configurationErrors;
             }
         }
 
         // we don't want to serialize the errors if they are empty
         return configurationErrors;
+    }
+
+    private String getAMConfiguredRepositoryLocation(final String serviceUri)
+        throws AMClientException
+    {
+        return new AMClient().initialize(serviceUri, false).getRepositoryConfiguration()
+            .getLocation();
     }
 
     public RemoteService getRemoteService(final Integer id)
@@ -294,10 +300,26 @@ public class RemoteServiceService extends DefaultApiService
             flushErrors();
         }
 
+        // if it's the same uri, we must check the rs to update the state
+        // (it can change [stop, redis,rabbit,...])
         if (old.getUri().equals(dto.getUri()))
         {
-            // no other checks to determine if its of the same type etc
-            dto.setStatus(old.getStatus());
+            final ErrorsDto checkError =
+                checkRemoteServiceStatus(old.getDatacenter(), dto.getType(), dto.getUri());
+            if (checkError.isEmpty())
+            {
+                old.setStatus(STATUS_SUCCESS);
+                dto.setStatus(STATUS_SUCCESS);
+            }
+            else
+            {
+                old.setStatus(STATUS_ERROR);
+                dto.setStatus(STATUS_ERROR);
+            }
+            infrastructureRepo.updateRemoteService(old);
+            tracer
+                .log(SeverityType.INFO, ComponentType.DATACENTER, EventType.REMOTE_SERVICES_UPDATE,
+                    "remoteServices.updated", dto.getType().getName());
             return dto;
         }
 
@@ -366,18 +388,14 @@ public class RemoteServiceService extends DefaultApiService
      */
     private void checkModifyApplianceManager(final RemoteService old, final RemoteServiceDto dto)
     {
-        ApplianceManagerResourceStubImpl amStub =
-            new ApplianceManagerResourceStubImpl(dto.getUri());
-
         if (infrastructureRepo.isRepositoryBeingUsed(old.getDatacenter()))
         {
             if (dto.getStatus() == STATUS_SUCCESS)
             {
                 try
                 {
-                    String newRepositoryLocation =
-                        amStub.getRepositoryConfiguration().getLocation();
-
+                    String newRepositoryLocation = getAMConfiguredRepositoryLocation(dto.getUri());
+                    
                     Repository oldRepository =
                         infrastructureRepo.findRepositoryByDatacenter(old.getDatacenter());
 
@@ -392,6 +410,10 @@ public class RemoteServiceService extends DefaultApiService
                 {
                     addConflictErrors(APIError.APPLIANCE_MANAGER_REPOSITORY_IN_USE);
                 }
+                catch (AMClientException e)
+                {
+                    addConflictErrors(APIError.REMOTE_SERVICE_CONNECTION_FAILED);
+                }
             }
             else
             // STATUES_ERROR
@@ -401,23 +423,22 @@ public class RemoteServiceService extends DefaultApiService
         }
         else if (dto.getStatus() == STATUS_SUCCESS)
         {
-            String repositoryLocation;
+            String repositoryLocation = null;
             try
             {
-                repositoryLocation = amStub.getRepositoryConfiguration().getLocation();
+                repositoryLocation =  getAMConfiguredRepositoryLocation(dto.getUri());
             }
-            catch (ApplianceManagerStubException amEx)
+            catch (AMClientException amEx)
             {
                 addConflictErrors(APIError.REMOTE_SERVICE_CONNECTION_FAILED);
-                return;
             }
 
-            if (infrastructureRepo.existRepositoryInOtherDatacenter(old.getDatacenter(),
+            if (repositoryLocation != null && infrastructureRepo.existRepositoryInOtherDatacenter(old.getDatacenter(),
                 repositoryLocation))
             {
                 addConflictErrors(APIError.APPLIANCE_MANAGER_REPOSITORY_ALREADY_DEFINED);
             }
-            else
+            else if (repositoryLocation != null)
             {
                 infrastructureRepo
                     .updateRepositoryLocation(old.getDatacenter(), repositoryLocation);
@@ -628,8 +649,8 @@ public class RemoteServiceService extends DefaultApiService
     {
         ErrorsDto configurationErrors = new ErrorsDto();
 
-        if (infrastructureRepo.existAnyRemoteServiceWithTypeInDatacenter(datacenter,
-            remoteService.getType()))
+        if (infrastructureRepo.existAnyRemoteServiceWithTypeInDatacenter(datacenter, remoteService
+            .getType()))
         {
             APIError error = APIError.REMOTE_SERVICE_TYPE_EXISTS;
             configurationErrors.add(new ErrorDto(error.getCode(), remoteService.getType().getName()
@@ -648,7 +669,8 @@ public class RemoteServiceService extends DefaultApiService
             {
                 APIError error = APIError.REMOTE_SERVICE_UNDEFINED_PORT;
                 configurationErrors.add(new ErrorDto(error.getCode(), remoteService.getType()
-                    .getName() + " : " + error.getMessage()));
+                    .getName()
+                    + " : " + error.getMessage()));
                 if (flushErrors)
                 {
                     addConflictErrors(error);
@@ -662,7 +684,8 @@ public class RemoteServiceService extends DefaultApiService
                     {
                         APIError error = APIError.REMOTE_SERVICE_URL_ALREADY_EXISTS;
                         configurationErrors.add(new ErrorDto(error.getCode(), remoteService
-                            .getType().getName() + " : " + error.getMessage()));
+                            .getType().getName()
+                            + " : " + error.getMessage()));
                         if (flushErrors)
                         {
                             addConflictErrors(error);

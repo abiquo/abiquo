@@ -21,6 +21,7 @@
 
 package com.abiquo.api.resources.appslibrary;
 
+import java.net.SocketTimeoutException;
 import java.util.List;
 
 import javax.ws.rs.Consumes;
@@ -36,6 +37,8 @@ import org.apache.wink.common.annotations.Parent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
+import com.abiquo.api.exceptions.APIError;
+import com.abiquo.api.exceptions.BadRequestException;
 import com.abiquo.api.resources.AbstractResource;
 import com.abiquo.api.resources.EnterpriseResource;
 import com.abiquo.api.services.appslibrary.TemplateDefinitionListService;
@@ -62,9 +65,10 @@ public class TemplateDefinitionListsResource extends AbstractResource
     @Produces(TemplateDefinitionListsDto.MEDIA_TYPE)
     public TemplateDefinitionListsDto getTemplateDefinitionLists(
         @PathParam(EnterpriseResource.ENTERPRISE) final Integer idEnterprise,
-        @Context final IRESTBuilder restBuilder) throws Exception
+        @Context final IRESTBuilder restBuilder) throws Exception, SocketTimeoutException
     {
-        List<TemplateDefinitionList> all = service.getTemplateDefinitionListsByEnterprise(idEnterprise);
+        List<TemplateDefinitionList> all =
+            service.getTemplateDefinitionListsByEnterprise(idEnterprise);
 
         TemplateDefinitionListsDto templateDefListsDto = new TemplateDefinitionListsDto();
 
@@ -84,7 +88,8 @@ public class TemplateDefinitionListsResource extends AbstractResource
     }
 
     /**
-     * if TEMPLATE_DEFINITION_POST_QUERY_PARM is set do not use the content body {@link TemplateDefinitionListDto}.
+     * if TEMPLATE_DEFINITION_POST_QUERY_PARM is set do not use the content body
+     * {@link TemplateDefinitionListDto}.
      */
     @POST
     @Consumes(TemplateDefinitionListDto.MEDIA_TYPE)
@@ -94,6 +99,11 @@ public class TemplateDefinitionListsResource extends AbstractResource
         final TemplateDefinitionListDto templateDefList, @Context final IRESTBuilder restBuilder)
         throws Exception
     {
+        // Validate template definition list name
+        if (templateDefList.getName() == null || templateDefList.getName().isEmpty())
+        {
+            throw new BadRequestException(APIError.TEMPLATE_DEFINITION_LIST_NAME_NOT_FOUND);
+        }
 
         TemplateDefinitionList opl = transformer.createPersistenceObject(templateDefList);
         opl = service.addTemplateDefinitionList(opl, idEnterprise);
@@ -102,7 +112,8 @@ public class TemplateDefinitionListsResource extends AbstractResource
     }
 
     /**
-     * if TEMPLATE_DEFINITION_POST_QUERY_PARM is set do not use the content body {@link TemplateDefinitionListDto}.
+     * if TEMPLATE_DEFINITION_POST_QUERY_PARM is set do not use the content body
+     * {@link TemplateDefinitionListDto}.
      */
     @POST
     @Produces(TemplateDefinitionListDto.MEDIA_TYPE)

@@ -41,6 +41,7 @@ import org.springframework.stereotype.Component;
 
 import com.abiquo.api.services.InfrastructureService;
 import com.abiquo.model.enumerator.FitPolicy;
+import com.abiquo.model.enumerator.NetworkType;
 import com.abiquo.scheduler.workload.NotEnoughResourcesException;
 import com.abiquo.scheduler.workload.VirtualimageAllocationService;
 import com.abiquo.server.core.cloud.HypervisorDAO;
@@ -59,6 +60,7 @@ import com.abiquo.server.core.infrastructure.network.NetworkAssignment;
 import com.abiquo.server.core.infrastructure.network.NetworkAssignmentDAO;
 import com.abiquo.server.core.infrastructure.network.VLANNetwork;
 import com.abiquo.server.core.infrastructure.network.VLANNetworkDAO;
+import com.abiquo.server.core.infrastructure.storage.DiskManagement;
 import com.abiquo.server.core.scheduler.FitPolicyRule;
 import com.abiquo.server.core.scheduler.FitPolicyRuleDAO;
 import com.abiquo.server.core.scheduler.VirtualMachineRequirements;
@@ -113,6 +115,7 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
         this.ipPoolManDao = new IpPoolManagementDAO(em);
         this.vlanNetworkDao = new VLANNetworkDAO(em);
         this.hypervisorDao = new HypervisorDAO(em);
+        this.fitPolicyDao = new FitPolicyRuleDAO(em);
     }
 
     /**
@@ -204,7 +207,7 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
         {
             updateUsageDatastore(virtualMachine, true);
             updateUsagePhysicalMachine(physicalMachine, virtualMachine, true);
-            rollbackNetworkingResources(physicalMachine, virtualMachine);
+            // rollbackNetworkingResources(physicalMachine, virtualMachine);
 
             virtualMachine.setState(VirtualMachineState.UNKNOWN);
         }
@@ -318,8 +321,8 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
                 vlanTagsUsed.addAll(getPublicVLANTagsFROMVLANNetworkList(publicVLANs));
 
                 Integer freeTag = getFreeVLANFromUsedList(vlanTagsUsed, rack);
-                log.debug("The VLAN tag chosen for the vlan network: {} is : {}", vlanNetwork
-                    .getId(), freeTag);
+                log.debug("The VLAN tag chosen for the vlan network: {} is : {}",
+                    vlanNetwork.getId(), freeTag);
                 vlanNetwork.setTag(freeTag);
             }
 
@@ -355,7 +358,7 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
 
             if (!assigned)
             {
-                if (!vlanNetworkDao.isPublic(vlanNetwork))
+                if (vlanNetwork.getType().equals(NetworkType.INTERNAL))
                 {
                     vlanNetwork.setTag(null);
                 }
@@ -386,13 +389,11 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
 
         final int newCpu =
             isRollback ? machine.getVirtualCpusUsed() - used.getCpu() : machine
-                .getVirtualCpusUsed()
-                + used.getCpu();
+                .getVirtualCpusUsed() + used.getCpu();
 
         final int newRam =
             isRollback ? machine.getVirtualRamUsedInMb() - used.getRam() : machine
-                .getVirtualRamUsedInMb()
-                + used.getRam();
+                .getVirtualRamUsedInMb() + used.getRam();
 
         if (used.getVirtualMachineTemplate().isStateful())
         {
@@ -405,11 +406,13 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
     }
 
     @Override
-    public void updateUsed(final Machine machine, final VirtualMachineRequirements requirements)
+    public void updateUsed(final Machine machine, final Datastore datastore,
+        final VirtualMachineRequirements requirements)
     {
         machine.setVirtualCpusUsed((int) (machine.getVirtualCpusUsed() + requirements.getCpu()));
         machine.setVirtualRamUsedInMb((int) (machine.getVirtualRamUsedInMb() + requirements
             .getRam()));
+        datastore.setUsedSize(datastore.getUsedSize() + requirements.getHd());
     }
 
     /**
@@ -421,11 +424,22 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
      */
     private void updateUsageDatastore(final VirtualMachine virtual, final boolean isRollback)
     {
+        Long requestedSize;
 
-        if (virtual.getVirtualMachineTemplate().isStateful())
+        if (!virtual.getVirtualMachineTemplate().isStateful())
         {
-            // Stateful vmtemplates doesn't update the datastore utilization.
-            return;
+            requestedSize = virtual.getHdInBytes();
+            requestedSize += getDisksSizeInBytes(virtual);
+        }
+        else
+        {
+            // Stateful vmtemplate doesn't update the datastore utilization, except it has got hard
+            // disk.
+            requestedSize = getDisksSizeInBytes(virtual);
+            if (requestedSize.equals(0))
+            {
+                return;
+            }
         }
 
         Datastore datastore = virtual.getDatastore();
@@ -435,7 +449,7 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
 
         for (Datastore dstore : datastoresShared)
         {
-            updateDatastore(dstore, virtual.getHdInBytes(), isRollback);
+            updateDatastore(dstore, requestedSize, isRollback);
         }
     }
 
@@ -449,8 +463,8 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
         if (newUsed > datastore.getSize())
         {
 
-            log.error("Target datastore usage is over capacity !!!!! datastore : %s", datastore
-                .getName());
+            log.error("Target datastore usage is over capacity !!!!! datastore : %s",
+                datastore.getName());
         }
 
         datastore.setUsedSize(newUsed >= 0 ? newUsed : 0); // prevent negative usage
@@ -489,8 +503,8 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
                 vlanIdsOrdered.remove(vlanId);
             }
         }
-        
-        for (Integer i = rack.getVlanIdMin(); i <= rack.getVlanIdMax(); i ++)
+
+        for (Integer i = rack.getVlanIdMin(); i <= rack.getVlanIdMax(); i++)
         {
             if (!vlanIdsOrdered.contains(i))
             {
@@ -582,5 +596,19 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
         FitPolicyRule fit = fitPolicyDao.getFitPolicyForDatacenter(idDatacenter);
 
         return fit != null ? fit.getFitPolicy() : fitPolicyDao.getGlobalFitPolicy().getFitPolicy();
+    }
+
+    private long getDisksSizeInBytes(final VirtualMachine vm)
+    {
+        long size = 0;
+        if (vm.getDisks() != null && !vm.getDisks().isEmpty())
+        {
+            for (DiskManagement disk : vm.getDisks())
+            {
+                // bytes
+                size += disk.getSizeInMb() * 1024 * 1024;
+            }
+        }
+        return size;
     }
 }

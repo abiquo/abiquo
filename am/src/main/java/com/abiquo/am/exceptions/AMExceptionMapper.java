@@ -31,7 +31,6 @@ import org.apache.wink.common.internal.ResponseImpl.ResponseBuilderImpl;
 
 import com.abiquo.appliancemanager.exceptions.AMException;
 import com.abiquo.model.transport.error.ErrorDto;
-import com.abiquo.model.transport.error.ErrorsDto;
 
 @Provider
 public class AMExceptionMapper implements ExceptionMapper<AMException>
@@ -40,16 +39,13 @@ public class AMExceptionMapper implements ExceptionMapper<AMException>
     @Override
     public Response toResponse(final AMException exception)
     {
-        ErrorsDto errors = new ErrorsDto();
-        errors.add(createError(exception));
-
         ResponseBuilder builder = new ResponseBuilderImpl();
-        builder.entity(errors);
+        builder.entity(createError(exception));
         builder.status(Status.INTERNAL_SERVER_ERROR);
         return builder.build();
     }
 
-    private ErrorDto createError(final AMException error)
+    public static ErrorDto createError(final AMException error)
     {
         ErrorDto errorDto = new ErrorDto();
         errorDto.setCode(error.getError().getCode());

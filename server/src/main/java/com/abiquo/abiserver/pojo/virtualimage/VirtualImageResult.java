@@ -35,8 +35,6 @@ public class VirtualImageResult
 
     private ArrayList<Repository> repositories;
 
-    private ArrayList<Icon> icons;
-
     private ArrayList<DiskFormatType> virtualImageTypes;
 
     public VirtualImageResult()
@@ -50,7 +48,7 @@ public class VirtualImageResult
         return categories;
     }
 
-    public void setCategories(ArrayList<Category> categories)
+    public void setCategories(final ArrayList<Category> categories)
     {
         this.categories = categories;
     }
@@ -60,19 +58,9 @@ public class VirtualImageResult
         return repositories;
     }
 
-    public void setRepositories(ArrayList<Repository> repositories)
+    public void setRepositories(final ArrayList<Repository> repositories)
     {
         this.repositories = repositories;
-    }
-
-    public ArrayList<Icon> getIcons()
-    {
-        return icons;
-    }
-
-    public void setIcons(ArrayList<Icon> icons)
-    {
-        this.icons = icons;
     }
 
     public ArrayList<DiskFormatType> getVirtualImageTypes()
@@ -80,7 +68,7 @@ public class VirtualImageResult
         return virtualImageTypes;
     }
 
-    public void setVirtualImageTypes(ArrayList<DiskFormatType> virtualImageTypes)
+    public void setVirtualImageTypes(final ArrayList<DiskFormatType> virtualImageTypes)
     {
         this.virtualImageTypes = virtualImageTypes;
     }

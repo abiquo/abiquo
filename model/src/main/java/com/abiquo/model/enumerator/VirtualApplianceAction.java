@@ -18,40 +18,38 @@
  * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
  * Boston, MA 02111-1307, USA.
  */
+package com.abiquo.model.enumerator;
 
-package com.abiquo.server.core.appslibrary;
+import com.abiquo.server.core.cloud.VirtualAppliance;
 
-import java.util.List;
-
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-
-import com.abiquo.model.transport.WrapperDto;
-
-@XmlRootElement(name = "icons")
-public class IconsDto extends WrapperDto<IconDto>
+/**
+ * Actions that can be performed on a {@link VirtualAppliance}
+ * 
+ * @author <a href="mailto:serafin.sedano@abiquo.com">Serafin Sedano</a>
+ */
+public enum VirtualApplianceAction
 {
-    private static final long serialVersionUID = 1L;
-    
-    public static final String BASE_MEDIA_TYPE = "application/vnd.abiquo.icons+xml";
-    public static final String MEDIA_TYPE = BASE_MEDIA_TYPE + "; version=" + API_VERSION;
+    /** MOVE (Moving) */
+    MOVE("Moving"),
 
-    @Override
-    @XmlElement(name = "icon")
-    public List<IconDto> getCollection()
+    /** COPY (Copying) */
+    COPY("Copying");
+
+    private String action;
+
+    private VirtualApplianceAction(final String action)
     {
-        return collection;
-    }
-    
-    @Override
-    public String getMediaType()
-    {
-        return IconsDto.MEDIA_TYPE;
+        this.action = action;
     }
 
-    @Override
-    public String getBaseMediaType()
+    public String getAction()
     {
-        return BASE_MEDIA_TYPE;
+        return action;
+    }
+
+    @Override
+    public String toString()
+    {
+        return this.action;
     }
 }

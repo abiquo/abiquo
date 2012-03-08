@@ -26,10 +26,8 @@ import static com.abiquo.api.util.URIResolver.buildPath;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 import javax.persistence.EntityManager;
@@ -72,12 +70,12 @@ import com.abiquo.api.services.NetworkService;
 import com.abiquo.api.services.RemoteServiceService;
 import com.abiquo.api.services.UserService;
 import com.abiquo.api.services.VirtualMachineAllocatorService;
+import com.abiquo.api.services.stub.AMServiceStub;
 import com.abiquo.api.services.stub.TarantinoJobCreator;
 import com.abiquo.api.services.stub.TarantinoService;
 import com.abiquo.api.tracer.TracerLogger;
 import com.abiquo.api.util.URIResolver;
 import com.abiquo.api.util.snapshot.SnapshotUtils.SnapshotType;
-import com.abiquo.appliancemanager.client.ApplianceManagerResourceStubImpl;
 import com.abiquo.commons.amqp.impl.tarantino.domain.builder.VirtualMachineDescriptionBuilder;
 import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.model.enumerator.NetworkType;
@@ -98,12 +96,12 @@ import com.abiquo.server.core.cloud.VirtualApplianceRep;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualDatacenterRep;
 import com.abiquo.server.core.cloud.VirtualMachine;
+import com.abiquo.server.core.cloud.VirtualMachine.OrderByEnum;
 import com.abiquo.server.core.cloud.VirtualMachineDto;
 import com.abiquo.server.core.cloud.VirtualMachineRep;
 import com.abiquo.server.core.cloud.VirtualMachineState;
 import com.abiquo.server.core.cloud.VirtualMachineStateTransition;
 import com.abiquo.server.core.cloud.VirtualMachineWithNodeDto;
-import com.abiquo.server.core.cloud.VirtualMachine.OrderByEnum;
 import com.abiquo.server.core.enterprise.DatacenterLimits;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.EnterpriseRep;
@@ -186,6 +184,9 @@ public class VirtualMachineService extends DefaultApiService
     @Autowired
     private NetworkService ipService;
 
+    @Autowired
+    private AMServiceStub amService;
+    
     public VirtualMachineService()
     {
 
@@ -287,8 +288,8 @@ public class VirtualMachineService extends DefaultApiService
             {
                 // needed for REST links.
                 DatacenterLimits dl =
-                    infRep.findDatacenterLimits(ip.getVlanNetwork().getEnterprise(), vdc
-                        .getDatacenter());
+                    infRep.findDatacenterLimits(ip.getVlanNetwork().getEnterprise(),
+                        vdc.getDatacenter());
                 ip.getVlanNetwork().setLimitId(dl.getId());
             }
         }
@@ -359,13 +360,6 @@ public class VirtualMachineService extends DefaultApiService
         VirtualAppliance virtualAppliance =
             getVirtualApplianceAndCheckVirtualDatacenter(vdcId, vappId);
 
-        // we currently don't allow to reconfigure imported virtual machines
-        if (virtualMachine.isCaptured())
-        {
-            addConflictErrors(APIError.VIRTUAL_MACHINE_IMPORTED_CAN_NOT_RECONFIGURE);
-            flushErrors();
-        }
-
         VirtualMachine newvm = buildVirtualMachineFromDto(vdc, virtualAppliance, dto);
         newvm.setTemporal(virtualMachine.getId()); // we set the id to temporal since we are trying
 
@@ -433,9 +427,17 @@ public class VirtualMachineService extends DefaultApiService
         final VirtualAppliance vapp, final VirtualMachine vm, final VirtualMachine newValues,
         final VirtualMachineState originalState)
     {
-        if (checkReconfigureTemplate(vm.getVirtualMachineTemplate(), newValues
-            .getVirtualMachineTemplate()))
+
+        if (checkReconfigureTemplate(vm.getVirtualMachineTemplate(),
+            newValues.getVirtualMachineTemplate()))
         {
+            if (vm.isCaptured())
+            {
+                // don't allow to change the template if the machine is capture
+                addConflictErrors(APIError.VIRTUAL_MACHINE_IMPORTED_CAN_NOT_RECONFIGURE);
+                flushErrors();
+            }
+
             LOGGER.debug("Will reconfigure the vm template");
 
             if (originalState.existsInHypervisor())
@@ -637,21 +639,111 @@ public class VirtualMachineService extends DefaultApiService
     private void updateVirtualMachineToNewValues(final VirtualAppliance vapp,
         final VirtualMachine old, final VirtualMachine vmnew)
     {
-        // update the new values of the virtual machine
+        // if client changes cpu or ram, can be changed in captured machines
+        // only if hypervisor is ESXi
+        if (old.getCpu() != vmnew.getCpu() || old.getRam() != vmnew.getRam())
+        {
+            if (old.isCaptured()
+                && !vapp.getVirtualDatacenter().getHypervisorType().equals(HypervisorType.VMX_04))
+            {
+                addConflictErrors(APIError.VIRTUAL_MACHINE_IMPORTED_CAN_NOT_RECONFIGURE);
+                flushErrors();
+
+            }
+        }
+
+        // the rest of values never can be changed when reconfigure.
+        if (differentDescription(old, vmnew) || differentNetworkConfiguration(old, vmnew)
+            || differentPassword(old, vmnew))
+        {
+            if (old.isCaptured()
+                && !vapp.getVirtualDatacenter().getHypervisorType().equals(HypervisorType.VMX_04))
+            {
+                addConflictErrors(APIError.VIRTUAL_MACHINE_IMPORTED_CAN_NOT_RECONFIGURE);
+                flushErrors();
+            }
+            else if (old.isCaptured()
+                && vapp.getVirtualDatacenter().getHypervisorType().equals(HypervisorType.VMX_04))
+            {
+                addConflictErrors(APIError.VIRTUAL_MACHINE_IMPORTED_CAN_NOT_RECONFIGURE_FULLY);
+                flushErrors();
+            }
+        }
+
         old.setCpu(vmnew.getCpu());
         old.setDescription(vmnew.getDescription());
         old.setRam(vmnew.getRam());
         old.setNetworkConfiguration(vmnew.getNetworkConfiguration());
-
         old.setPassword(vmnew.getPassword());
         old.setVirtualMachineTemplate(vmnew.getVirtualMachineTemplate());
 
         List<Integer> usedNICslots = dellocateOldNICs(old, vmnew);
+        // if the number of old nics still used is different from
+        // the number of usedNICslots, OR the number of old nics is different
+        // from the new ones, it means some NICs has changed.
+        if (usedNICslots.size() != old.getIps().size()
+            || old.getIps().size() != vmnew.getIps().size())
+        {
+            if (old.isCaptured()
+                && !vapp.getVirtualDatacenter().getHypervisorType().equals(HypervisorType.VMX_04))
+            {
+                addConflictErrors(APIError.VIRTUAL_MACHINE_IMPORTED_CAN_NOT_RECONFIGURE);
+                flushErrors();
+            }
+            else if (old.isCaptured()
+                && vapp.getVirtualDatacenter().getHypervisorType().equals(HypervisorType.VMX_04))
+            {
+                addConflictErrors(APIError.VIRTUAL_MACHINE_IMPORTED_CAN_NOT_RECONFIGURE_FULLY);
+                flushErrors();
+            }
+        }
         allocateNewNICs(vapp, old, vmnew.getIps(), usedNICslots);
 
-        // never use the slot 0 for storage since it is the virtual image.
+        List<Integer> usedVolumeSlots = dellocateOldVolumes(old, vmnew);
+        // if the number of old volumes still used is different from
+        // the number of usedvolume Slots, OR the number of old volumes is different
+        // from the new ones, it means some Volumes has changed.
+        if (usedVolumeSlots.size() != old.getVolumes().size()
+            || old.getVolumes().size() != vmnew.getVolumes().size())
+        {
+            if (old.isCaptured()
+                && !vapp.getVirtualDatacenter().getHypervisorType().equals(HypervisorType.VMX_04))
+            {
+                addConflictErrors(APIError.VIRTUAL_MACHINE_IMPORTED_CAN_NOT_RECONFIGURE);
+                flushErrors();
+            }
+            else if (old.isCaptured()
+                && vapp.getVirtualDatacenter().getHypervisorType().equals(HypervisorType.VMX_04))
+            {
+                addConflictErrors(APIError.VIRTUAL_MACHINE_IMPORTED_CAN_NOT_RECONFIGURE_FULLY);
+                flushErrors();
+            }
+        }
+
+        // never use the slot 0 for storage since it is the virtual image
         List<Integer> usedStorageSlots = dellocateOldDisks(old, vmnew);
-        usedStorageSlots.addAll(dellocateOldVolumes(old, vmnew));
+
+        // if the number of old hard disks still used is different from
+        // the number of usedhard Slots, OR the number of old storage is different
+        // from the new ones, it means some hard disk has changed.
+        if (usedStorageSlots.size() != old.getDisks().size()
+            || old.getDisks().size() != vmnew.getDisks().size())
+        {
+            if (old.isCaptured()
+                && !vapp.getVirtualDatacenter().getHypervisorType().equals(HypervisorType.VMX_04))
+            {
+                addConflictErrors(APIError.VIRTUAL_MACHINE_IMPORTED_CAN_NOT_RECONFIGURE);
+                flushErrors();
+            }
+            else if (old.isCaptured()
+                && vapp.getVirtualDatacenter().getHypervisorType().equals(HypervisorType.VMX_04))
+            {
+                addConflictErrors(APIError.VIRTUAL_MACHINE_IMPORTED_CAN_NOT_RECONFIGURE_FULLY);
+                flushErrors();
+            }
+        }
+
+        usedStorageSlots.addAll(usedVolumeSlots);
 
         List<RasdManagement> storageResources = new ArrayList<RasdManagement>();
         storageResources.addAll(vmnew.getDisks());
@@ -662,6 +754,87 @@ public class VirtualMachineService extends DefaultApiService
 
         // FIXME: improvement related ABICLOUDPREMIUM-2925
         updateNodeVirtualImage(old, vmnew.getVirtualMachineTemplate());
+    }
+
+    private boolean differentNetworkConfiguration(final VirtualMachine old,
+        final VirtualMachine vmnew)
+    {
+        if (old.getNetworkConfiguration() == null && vmnew.getNetworkConfiguration() == null)
+        {
+            return false;
+        }
+        else if (old.getNetworkConfiguration() == null && vmnew.getNetworkConfiguration() != null)
+        {
+            return true;
+        }
+        else if (old.getNetworkConfiguration() != null && vmnew.getNetworkConfiguration() == null)
+        {
+            return true;
+        }
+        else
+        {
+            return !old.getNetworkConfiguration().getId()
+                .equals(vmnew.getNetworkConfiguration().getId());
+        }
+    }
+
+    /**
+     * Check if the password has changed.
+     * 
+     * @param old
+     * @param vmnew
+     * @return
+     */
+    private boolean differentPassword(final VirtualMachine old, final VirtualMachine vmnew)
+    {
+        if (vmnew.getPassword() != null && vmnew.getPassword().isEmpty())
+        {
+            vmnew.setPassword(null);
+        }
+
+        if (old.getPassword() == null && vmnew.getPassword() == null)
+        {
+            return false;
+        }
+        else if (old.getPassword() == null && vmnew.getPassword() != null)
+        {
+            return true;
+        }
+        else if (old.getPassword() != null && vmnew.getPassword() == null)
+        {
+            return true;
+        }
+        else
+        {
+            return !vmnew.getPassword().equals(old.getPassword());
+        }
+    }
+
+    /**
+     * Check if the description has changed.
+     * 
+     * @param old
+     * @param vmnew
+     * @return
+     */
+    private boolean differentDescription(final VirtualMachine old, final VirtualMachine vmnew)
+    {
+        if (old.getDescription() == null && vmnew.getDescription() == null)
+        {
+            return false;
+        }
+        else if (old.getDescription() == null && vmnew.getDescription() != null)
+        {
+            return true;
+        }
+        else if (old.getDescription() != null && vmnew.getDescription() == null)
+        {
+            return true;
+        }
+        else
+        {
+            return !old.getDescription().equals(vmnew.getDescription());
+        }
     }
 
     /**
@@ -810,8 +983,8 @@ public class VirtualMachineService extends DefaultApiService
 
         // Does it has volumes? PREMIUM
         detachVolumesFromVirtualMachine(virtualMachine);
-        LOGGER.debug("Detached the virtual machine's volumes with UUID {}", virtualMachine
-            .getUuid());
+        LOGGER.debug("Detached the virtual machine's volumes with UUID {}",
+            virtualMachine.getUuid());
 
         detachVirtualMachineIPs(virtualMachine);
 
@@ -839,8 +1012,8 @@ public class VirtualMachineService extends DefaultApiService
 
         // Does it has volumes? PREMIUM
         detachVolumesFromVirtualMachine(virtualMachine);
-        LOGGER.debug("Detached the virtual machine's volumes with UUID {}", virtualMachine
-            .getUuid());
+        LOGGER.debug("Detached the virtual machine's volumes with UUID {}",
+            virtualMachine.getUuid());
 
         detachVirtualMachineIPs(virtualMachine);
 
@@ -853,7 +1026,7 @@ public class VirtualMachineService extends DefaultApiService
      * 
      * @param virtualMachine void
      */
-    private void detachVirtualMachineIPs(final VirtualMachine virtualMachine)
+    public void detachVirtualMachineIPs(final VirtualMachine virtualMachine)
     {
         for (IpPoolManagement ip : virtualMachine.getIps())
         {
@@ -923,10 +1096,10 @@ public class VirtualMachineService extends DefaultApiService
         if (virtualMachine.getVirtualMachineTemplate().isStateful())
         {
             LOGGER.debug("Attaching virtual machine template volume");
-            virtualMachine.getVirtualMachineTemplate().getVolume().attach(0, virtualMachine,
-                virtualAppliance);
-            virtualMachine.getVirtualMachineTemplate().getVolume().setVirtualAppliance(
-                virtualAppliance);
+            virtualMachine.getVirtualMachineTemplate().getVolume()
+                .attach(0, virtualMachine, virtualAppliance);
+            virtualMachine.getVirtualMachineTemplate().getVolume()
+                .setVirtualAppliance(virtualAppliance);
             virtualMachine.getVirtualMachineTemplate().getVolume()
                 .setVirtualMachine(virtualMachine);
         }
@@ -975,6 +1148,14 @@ public class VirtualMachineService extends DefaultApiService
     protected void setVirtualMachineTemplateRequirementsIfNotAlreadyDefined(
         final VirtualMachine vmachine, final VirtualMachineTemplate vmtemplate)
     {
+        if (vmtemplate.getEthernetDriverType() != null)
+        {
+            vmachine.setEthernetDriverType(vmtemplate.getEthernetDriverType());
+
+            LOGGER.debug("VirtualMachine {} will use specific EthernetDriver {}",
+                vmachine.getName(), vmtemplate.getEthernetDriverType().name());
+        }
+
         if (vmachine.getCpu() == 0)
         {
             vmachine.setCpu(vmtemplate.getCpuRequired());
@@ -1042,11 +1223,11 @@ public class VirtualMachineService extends DefaultApiService
      *            contain the virtual machine template.
      * @param virtualAppliance void where the virtual machine exists.
      */
-    private void createNodeVirtualImage(final VirtualMachine virtualMachine,
+    protected void createNodeVirtualImage(final VirtualMachine virtualMachine,
         final VirtualAppliance virtualAppliance, final String name)
     {
-        LOGGER.debug("Create node virtual image with name virtual machine: {}", virtualMachine
-            .getName());
+        LOGGER.debug("Create node virtual image with name virtual machine: {}",
+            virtualMachine.getName());
         NodeVirtualImage nodeVirtualImage =
             new NodeVirtualImage(name,
                 virtualAppliance,
@@ -1359,7 +1540,7 @@ public class VirtualMachineService extends DefaultApiService
 
             // Tasks needs the definition of the virtual machine
             VirtualMachineDescriptionBuilder vmDesc =
-                jobCreator.toTarantinoDto(virtualMachine, virtualAppliance);
+                jobCreator.toTarantinoDto(virtualMachine, virtualAppliance, true);
 
             String idAsyncTask =
                 tarantino.undeployVirtualMachineHA(virtualMachine, vmDesc, originalState,
@@ -1431,15 +1612,9 @@ public class VirtualMachineService extends DefaultApiService
 
         try
         {
-            LOGGER.debug("Check remote services");
-            // The remote services must be up for this Datacenter if we are to deploy
-            checkRemoteServicesByVirtualDatacenter(vdcId);
-            LOGGER.debug("Remote services are ok!");
-
             // Tasks needs the definition of the virtual machine
             VirtualMachineDescriptionBuilder vmDesc =
                 jobCreator.toTarantinoDto(virtualMachine, virtualAppliance);
-
 
             String idAsyncTask =
                 tarantino.undeployVirtualMachine(virtualMachine, vmDesc, originalState);
@@ -1462,8 +1637,8 @@ public class VirtualMachineService extends DefaultApiService
 
             // For the Admin to know all errors
             tracer.systemLog(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
-                EventType.VM_UNDEPLOY, "virtualMachine.undeployError", e.toString(), virtualMachine
-                    .getName(), e.getMessage());
+                EventType.VM_UNDEPLOY, "virtualMachine.undeployError", e.toString(),
+                virtualMachine.getName(), e.getMessage());
             LOGGER
                 .error(
                     "Error undeploying setting the virtual machine to UNKNOWN virtual machine name {}: {}",
@@ -1495,10 +1670,6 @@ public class VirtualMachineService extends DefaultApiService
 
         try
         {
-            LOGGER.debug("Check remote services");
-            // The remote services must be up for this Datacenter if we are to deploy
-            checkRemoteServicesByVirtualDatacenter(vdcId);
-            LOGGER.debug("Remote services are ok!");
 
             // Tasks needs the definition of the virtual machine
             VirtualMachineDescriptionBuilder vmDesc =
@@ -1525,8 +1696,8 @@ public class VirtualMachineService extends DefaultApiService
 
             // For the Admin to know all errors
             tracer.systemLog(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
-                EventType.VM_UNDEPLOY, "virtualMachine.undeployError", e.toString(), virtualMachine
-                    .getName(), e.getMessage());
+                EventType.VM_UNDEPLOY, "virtualMachine.undeployError", e.toString(),
+                virtualMachine.getName(), e.getMessage());
             LOGGER
                 .error(
                     "Error undeploying setting the virtual machine to UNKNOWN virtual machine name {}: {}",
@@ -1606,8 +1777,8 @@ public class VirtualMachineService extends DefaultApiService
 
             tracer
                 .systemError(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
-                    EventType.VM_INSTANCE, e, "virtualMachine.instanceFailed", virtualMachine
-                        .getName());
+                    EventType.VM_INSTANCE, e, "virtualMachine.instanceFailed",
+                    virtualMachine.getName());
 
             throw e;
         }
@@ -1618,8 +1789,8 @@ public class VirtualMachineService extends DefaultApiService
 
             tracer
                 .systemError(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
-                    EventType.VM_INSTANCE, e, "virtualMachine.instanceFailed", virtualMachine
-                        .getName());
+                    EventType.VM_INSTANCE, e, "virtualMachine.instanceFailed",
+                    virtualMachine.getName());
 
             addUnexpectedErrors(APIError.STATUS_INTERNAL_SERVER_ERROR);
             flushErrors();
@@ -1643,16 +1814,11 @@ public class VirtualMachineService extends DefaultApiService
         final String instanceName)
     {
         Datacenter datacenter = virtualMachine.getHypervisor().getMachine().getDatacenter();
-        RemoteService service = remoteServiceService.getAMRemoteService(datacenter);
 
         // Create the folder structure in the destination repository
-        ApplianceManagerResourceStubImpl am =
-            new ApplianceManagerResourceStubImpl(service.getUri());
-
-        String ovfPath =
-            am.preBundleTemplate(String.valueOf(virtualAppliance.getEnterprise().getId()),
-                instanceName);
-
+        String ovfPath = amService.preBundleTemplate(datacenter.getId(), virtualAppliance.getEnterprise().getId(),
+            instanceName);
+        
         // Do the instance
         String snapshotPath = FilenameUtils.getFullPath(ovfPath);
         String snapshotFilename =
@@ -1762,8 +1928,8 @@ public class VirtualMachineService extends DefaultApiService
                 "virtualMachine.resetVirtualMachineError", virtualMachine.getName());
 
             tracer.systemError(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
-                EventType.VM_DEPLOY, ex, "virtualMachine.resetVirtualMachineError", virtualMachine
-                    .getName());
+                EventType.VM_DEPLOY, ex, "virtualMachine.resetVirtualMachineError",
+                virtualMachine.getName());
 
             addUnexpectedErrors(APIError.STATUS_INTERNAL_SERVER_ERROR);
             flushErrors();
@@ -1788,8 +1954,8 @@ public class VirtualMachineService extends DefaultApiService
         for (RemoteService r : remoteServicesByDatacenter)
         {
             ErrorsDto checkRemoteServiceStatus =
-                remoteServiceService.checkRemoteServiceStatus(r.getDatacenter(), r.getType(), r
-                    .getUri());
+                remoteServiceService.checkRemoteServiceStatus(r.getDatacenter(), r.getType(),
+                    r.getUri());
             errors.addAll(checkRemoteServiceStatus);
         }
 
@@ -1829,8 +1995,8 @@ public class VirtualMachineService extends DefaultApiService
             {
                 // needed for REST links.
                 DatacenterLimits dl =
-                    infRep.findDatacenterLimits(ip.getVlanNetwork().getEnterprise(), vdc
-                        .getDatacenter());
+                    infRep.findDatacenterLimits(ip.getVlanNetwork().getEnterprise(),
+                        vdc.getDatacenter());
                 ip.getVlanNetwork().setLimitId(dl.getId());
             }
         }
@@ -2032,6 +2198,15 @@ public class VirtualMachineService extends DefaultApiService
                         vdcRep.deleteRasd(ip.getRasd());
                         vdcRep.deleteIpPoolManagement(ip);
                     }
+                    else if (ip.getVlanNetwork().getType().equals(NetworkType.EXTERNAL))
+                    {
+                        ip.setMac(null);
+                        ip.setName(null);
+                        ip.setVirtualDatacenter(null);
+                        ip.detach();
+                        vdcRep.deleteRasd(ip.getRasd());
+                        vdcRep.updateIpManagement(ip);
+                    }
                     else
                     {
                         ip.detach();
@@ -2042,6 +2217,12 @@ public class VirtualMachineService extends DefaultApiService
                 else
                 {
                     ip.detach();
+                    if (ip.getVlanNetwork().getType().equals(NetworkType.EXTERNAL))
+                    {
+                        ip.setMac(null);
+                        ip.setName(null);
+                        ip.setVirtualDatacenter(null);
+                    }
                     vdcRep.updateIpManagement(ip);
                 }
 
@@ -2653,6 +2834,13 @@ public class VirtualMachineService extends DefaultApiService
                         {
                             rasdDao.remove(originalRasd);
                         }
+
+                        // external ips should remove its MAC and name
+                        if (originalRasd.isExternalIp())
+                        {
+                            originalRasd.setMac(null);
+                            originalRasd.setName(null);
+                        }
                     }
                 }
                 // DiskManagements always are deleted
@@ -2794,8 +2982,13 @@ public class VirtualMachineService extends DefaultApiService
                 // but for IPs it is.
                 if (originalRasd instanceof IpPoolManagement)
                 {
+                    IpPoolManagement ipman = (IpPoolManagement) originalRasd;
+                    IpPoolManagement ipRoll = (IpPoolManagement) rollbackRasd;
                     VirtualAppliance vapp = vdcRep.findVirtualApplianceByVirtualMachine(updatedVm);
-                    originalRasd.setVirtualAppliance(vapp);
+                    ipman.setVirtualAppliance(vapp);
+                    ipman.setVirtualDatacenter(rollbackRasd.getVirtualDatacenter());
+                    ipman.setIp(ipRoll.getIp());
+                    ipman.setMac(ipRoll.getMac());
                 }
             }
 
@@ -2950,4 +3143,25 @@ public class VirtualMachineService extends DefaultApiService
         repo.update(vm);
     }
 
+    /**
+     * This method writes without care for permissions.
+     * 
+     * @param vm void
+     */
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void insertNodeVirtualImage(final NodeVirtualImage node)
+    {
+        repo.insertNodeVirtualImage(node);
+    }
+
+    /**
+     * This method writes without care for permissions.
+     * 
+     * @param vm void
+     */
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void insertVirtualMachine(final VirtualMachine virtualMachine)
+    {
+        repo.insert(virtualMachine);
+    }
 }

@@ -16,10 +16,7 @@
 	<listener>
 		<listener-class>com.abiquo.appliancemanager.web.listener.LicenseContextListener</listener-class>
 	</listener>
-	<listener>
-		<listener-class>com.abiquo.appliancemanager.web.listener.ContextListener</listener-class>
-	</listener>
-
+	
 	<servlet>
 		<servlet-name>amdefault</servlet-name>
 		<servlet-class>com.abiquo.appliancemanager.web.servlet.StaticRepositoryServlet</servlet-class>

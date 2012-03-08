@@ -19,19 +19,24 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package com.abiquo.abiserver.persistence.dao.virtualimage;
+package com.abiquo.appliancemanager.transport;
 
-import com.abiquo.abiserver.business.hibernate.pojohb.virtualimage.IconHB;
-import com.abiquo.abiserver.persistence.DAO;
+import javax.xml.bind.annotation.XmlRootElement;
 
-/**
- * Specific interface to work with the
- * {@link com.abiquo.abiserver.business.hibernate.pojohb.virtualimage.IconHB} Exposes all the
- * methods that this entity will need to interact with the data source
- * 
- * @author jdevesa@abiquo.com
- */
-public interface IconDAO extends DAO<IconHB, Integer>
+import com.abiquo.model.transport.SingleResourceTransportDto;
+
+@XmlRootElement(name = "idTemplate")
+public class TemplateIdDto extends SingleResourceTransportDto
 {
-    // add extra functionality
+    private String ovfId;
+
+    public String getOvfId()
+    {
+        return ovfId;
+    }
+
+    public void setOvfId(final String ovfId)
+    {
+        this.ovfId = ovfId;
+    }
 }

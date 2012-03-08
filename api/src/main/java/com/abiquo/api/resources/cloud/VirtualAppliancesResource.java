@@ -26,6 +26,7 @@ import static com.abiquo.api.resources.cloud.VirtualApplianceResource.createTran
 import java.util.List;
 
 import javax.validation.constraints.Min;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -35,17 +36,25 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.UriInfo;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.wink.common.annotations.Parent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
 import com.abiquo.api.resources.AbstractResource;
+import com.abiquo.api.resources.TaskResourceUtils;
 import com.abiquo.api.services.cloud.VirtualApplianceService;
 import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualApplianceDto;
 import com.abiquo.server.core.cloud.VirtualAppliancesDto;
+import com.abiquo.server.core.task.Task;
+import com.abiquo.server.core.task.TasksDto;
+import com.abiquo.server.core.util.FilterOptions;
+import com.abiquo.server.core.util.PagedList;
 
 @Parent(VirtualDatacenterResource.class)
 @Path(VirtualAppliancesResource.VIRTUAL_APPLIANCES_PATH)
@@ -62,26 +71,58 @@ public class VirtualAppliancesResource extends AbstractResource
     public VirtualAppliancesDto getVirtualAppliances(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
         @QueryParam(START_WITH) @DefaultValue("0") @Min(0) final Integer startwith,
+        @QueryParam(LIMIT) @DefaultValue(DEFAULT_PAGE_LENGTH_STRING) @Min(1) final Integer limit,
         @QueryParam(BY) @DefaultValue("name") final String orderBy,
         @QueryParam(FILTER) @DefaultValue("") final String filter,
-        @QueryParam(LIMIT) @Min(1) @DefaultValue(DEFAULT_PAGE_LENGTH_STRING) final Integer limit,
-        @QueryParam(ASC) @DefaultValue("true") final Boolean descOrAsc,
+        @QueryParam(ASC) @DefaultValue("true") final Boolean asc,
+        @QueryParam("expand") final String expand, @Context final UriInfo uriInfo,
         @Context final IRESTBuilder restBuilder) throws Exception
     {
+        FilterOptions filterOptions = new FilterOptions(startwith, limit, filter, orderBy, asc);
+
         List<VirtualAppliance> all =
-            service.getVirtualAppliancesByVirtualDatacenter(vdcId, startwith, orderBy, filter,
-                limit, descOrAsc);
+            service.getVirtualAppliancesByVirtualDatacenter(vdcId, filterOptions);
         VirtualAppliancesDto vappsDto = new VirtualAppliancesDto();
 
         if (all != null && !all.isEmpty())
         {
             for (VirtualAppliance v : all)
             {
-                vappsDto.add(createTransferObject(v, restBuilder));
+                VirtualApplianceDto dto = createTransferObject(v, restBuilder);
+                expandNodes(vdcId, v.getId(), expand, uriInfo, dto);
+                vappsDto.getCollection().add(dto);
             }
         }
 
+        if (all.isEmpty() == false)
+        {
+            vappsDto.setTotalSize(((PagedList< ? >) all).getTotalResults());
+            vappsDto.addLinks(restBuilder.buildPaggingLinks(uriInfo.getAbsolutePath().toString(),
+                (PagedList< ? >) all));
+        }
+
         return vappsDto;
+    }
+
+    private void expandNodes(final Integer vdcId, final Integer vappId, final String expand,
+        final UriInfo uriInfo, final VirtualApplianceDto dto)
+    {
+        String[] expands = StringUtils.split(expand, ",");
+        if (expands != null)
+        {
+            for (String e : expands)
+            {
+                if ("last_task".equalsIgnoreCase(e))
+                {
+                    List<Task> lastTasks = service.getAllNodesLastTask(vdcId, vappId);
+                    if (lastTasks != null && !lastTasks.isEmpty())
+                    {
+                        TasksDto dtos = TaskResourceUtils.transform(lastTasks, uriInfo);
+                        dto.setLastTasks(dtos);
+                    }
+                }
+            }
+        }
     }
 
     @POST

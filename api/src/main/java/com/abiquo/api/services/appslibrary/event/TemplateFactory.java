@@ -39,7 +39,6 @@ import com.abiquo.appliancemanager.transport.TemplateDto;
 import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.server.core.appslibrary.AppsLibraryRep;
 import com.abiquo.server.core.appslibrary.Category;
-import com.abiquo.server.core.appslibrary.Icon;
 import com.abiquo.server.core.appslibrary.TemplateDefinition;
 import com.abiquo.server.core.appslibrary.TemplateDefinitionDAO;
 import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
@@ -191,7 +190,7 @@ public class TemplateFactory
                 category,
                 User.SYSTEM_USER.getName()); // TODO
 
-        vmtemplate.setIcon(getIcon(disk));
+        vmtemplate.setIconUrl(getIcon(disk));
         vmtemplate.setDescription(getDescription(disk));
         vmtemplate.setCpuRequired(disk.getCpu());
         vmtemplate.setRamRequired(getRamInMb(disk).intValue());
@@ -199,12 +198,37 @@ public class TemplateFactory
         vmtemplate.setOvfid(disk.getUrl());
         vmtemplate.setRepository(repository);
 
+        if (disk.getEthernetDriverType() != null)
+        {
+            vmtemplate.setEthernetDriverType(disk.getEthernetDriverType());
+        }
+
         if (master != null)
         {
             vmtemplate.setMaster(master);
         }
 
         return vmtemplate;
+    }
+
+    /**
+     * If the icon is not found in the OVF document then look in the {@link TemplateDefinition}
+     * table (from the ovfindex.xml)
+     */
+    private String getIcon(final TemplateDto template)
+    {
+        if (!StringUtils.isEmpty(template.getIconPath()))
+        {
+            return template.getIconPath();
+        }
+
+        TemplateDefinition tdef = templateDefDao.findByUrl(template.getUrl());
+        if (tdef != null)
+        {
+            logger.warn("Missing icon url in the OVF document, reading from ovfindex");
+            return tdef.getIconUrl();
+        }
+        return null;
     }
 
     private Category getCategory(final TemplateDto disk)
@@ -220,18 +244,6 @@ public class TemplateFactory
         TemplateDefinition templateDef = templateDefDao.findByUrl(disk.getUrl());
         return templateDef != null ? templateDef.getCategory() : appslibraryRep
             .getDefaultCategory();
-    }
-
-    private Icon getIcon(final TemplateDto disk)
-    {
-        if (!StringUtils.isEmpty(disk.getIconPath()))
-        {
-            return appslibraryRep.findByIconPathOrCreateNew(disk.getIconPath());
-        }
-
-        // try to find in the TemplateDefinition
-        TemplateDefinition templateDef = templateDefDao.findByUrl(disk.getUrl());
-        return templateDef != null ? templateDef.getIcon() : null;
     }
 
     /*

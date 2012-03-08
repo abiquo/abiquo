@@ -27,8 +27,6 @@ import java.net.URL;
 import org.apache.commons.io.FilenameUtils;
 import org.dmtf.schemas.ovf.envelope._1.FileType;
 
-import com.abiquo.am.exceptions.AMError;
-import com.abiquo.appliancemanager.exceptions.AMException;
 import com.abiquo.appliancemanager.exceptions.DownloadException;
 
 public class TemplateConventions
@@ -112,26 +110,26 @@ public class TemplateConventions
             .concat(packageName);
     }
 
-//    public static String cleanOVFurlOnOldRepo(String ovfid)
-//    {
-//        ovfid = ovfid.replaceFirst("http://http", "http://");
-//        ovfid = ovfid.replaceFirst(".coms3direct", ".com/s3direct");
-//
-//        return ovfid;
-//    }
-//
-//    public static String cleanOVFurlForOldRepo(String ovfid)
-//    {
-//        if (ovfid.startsWith("http://http"))
-//        {
-//            return ovfid;
-//        }
-//
-//        ovfid = ovfid.replaceFirst("http://", "http://http");
-//        ovfid = ovfid.replaceFirst(".com/s3direct", ".coms3direct");
-//
-//        return ovfid;
-//    }
+    // public static String cleanOVFurlOnOldRepo(String ovfid)
+    // {
+    // ovfid = ovfid.replaceFirst("http://http", "http://");
+    // ovfid = ovfid.replaceFirst(".coms3direct", ".com/s3direct");
+    //
+    // return ovfid;
+    // }
+    //
+    // public static String cleanOVFurlForOldRepo(String ovfid)
+    // {
+    // if (ovfid.startsWith("http://http"))
+    // {
+    // return ovfid;
+    // }
+    //
+    // ovfid = ovfid.replaceFirst("http://", "http://http");
+    // ovfid = ovfid.replaceFirst(".com/s3direct", ".coms3direct");
+    //
+    // return ovfid;
+    // }
 
     public static String getRelativePackagePath(final String ovfid)
     {
@@ -206,7 +204,6 @@ public class TemplateConventions
         return masterOvf;
     }
 
- 
     /**
      * Gets an URL from the hRef attribute on a File's (References section). Try to interpret the
      * hRef attribute as an absolute URL (like http://some.where.com/file.vmdk), and if it fails try
@@ -305,23 +302,7 @@ public class TemplateConventions
     {
         if (filehref.startsWith("http://"))
         {
-            try
-            {
-                URL fileurl = new URL(filehref);
-
-                String file = fileurl.getFile();
-
-                if (file == null || file.isEmpty())
-                {
-                    throw new MalformedURLException("Expected file in " + fileurl.toString());
-                }
-
-                return file;
-            }
-            catch (MalformedURLException e)
-            {
-                throw new AMException(AMError.TEMPLATE_INVALID_LOCATION, filehref);
-            }
+            return FilenameUtils.getName(filehref);
         }
         else
         // already relative to package
@@ -329,7 +310,5 @@ public class TemplateConventions
             return filehref;
         }
     }
-    
-    
-   
+
 }

@@ -84,6 +84,10 @@ public class VirtualBoxCollector extends AbstractCollector
 
     Integer vboxPort = 18083;
 
+    String IDECONTROLLER = "IDESController";
+
+    String SATACONTROLLER = "SATASController";
+
     /**
      * WsmanCollector
      */
@@ -233,9 +237,9 @@ public class VirtualBoxCollector extends AbstractCollector
                     if (medium.getDeviceType().compareTo(DeviceType.HardDisk) == 0)
                     {
                         String formatName = medium.getFormat();
-                        newResource.setResourceType(ResourceEnumType.HARD_DISK);
                         if (!"iSCSI".equals(formatName))
                         {
+                            newResource.setResourceType(ResourceEnumType.HARD_DISK);
                             newResource.setAddress(medium.getLocation());
                             newResource.setUnits(medium.getSize().longValue());
                             newResource.setConnection(getDatastoreFromFile(medium.getLocation()));
@@ -246,9 +250,20 @@ public class VirtualBoxCollector extends AbstractCollector
                         else
                         {
                             newResource.setAddress("unknown");
-                            newResource.setUnits(new Long(0));
-                            newResource.setResourceSubType(VirtualDiskEnumType.STATEFUL.value());
                             newResource.setConnection("unknown");
+                            if (iMediumAttachment.getController().contains(IDECONTROLLER))
+                            {
+                                newResource.setResourceType(ResourceEnumType.HARD_DISK);
+                                newResource.setUnits(new Long(0));
+                                newResource
+                                    .setResourceSubType(VirtualDiskEnumType.STATEFUL.value());
+                            }
+                            else if (iMediumAttachment.getController().contains(SATACONTROLLER))
+                            {
+                                newResource.setResourceType(ResourceEnumType.VOLUME_DISK);
+                                newResource.setUnits(medium.getSize().longValue());
+                                newResource.setResourceSubType(VirtualDiskEnumType.UNKNOWN.value());
+                            }
                         }
                     }
 

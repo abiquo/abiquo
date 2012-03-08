@@ -35,6 +35,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
@@ -59,6 +60,9 @@ import com.abiquo.am.services.notify.AMNotifier;
 import com.abiquo.appliancemanager.exceptions.AMException;
 import com.abiquo.appliancemanager.exceptions.EventException;
 import com.abiquo.appliancemanager.transport.TemplateDto;
+import com.abiquo.appliancemanager.transport.TemplateIdDto;
+import com.abiquo.appliancemanager.transport.TemplateIdsDto;
+import com.abiquo.appliancemanager.transport.TemplateStateDto;
 import com.abiquo.appliancemanager.transport.TemplateStatusEnumType;
 import com.abiquo.appliancemanager.transport.TemplatesStateDto;
 
@@ -71,11 +75,15 @@ public class TemplatesResource
 
     public static final String OVFPI_PATH = ApplianceManagerPaths.TEMPLATE_PATH;
 
-    @Autowired
-    AMNotifier notifier;
+    // public static final String GET_IDS_ACTION = "action/getstates";
+
+    public static final String QUERY_PRAM_STATE = "state";
 
     @Autowired
-    TemplateService templateService;
+    private AMNotifier notifier;
+
+    @Autowired
+    private TemplateService templateService;
 
     /**
      * include bundles <br>
@@ -83,20 +91,62 @@ public class TemplatesResource
      */
     @GET
     public TemplatesStateDto getTemplateStatus(
-        @PathParam(EnterpriseRepositoryResource.ENTERPRISE_REPOSITORY) final String idEnterprise)
+        @PathParam(EnterpriseRepositoryResource.ENTERPRISE_REPOSITORY) final String idEnterprise,
+        @QueryParam(QUERY_PRAM_STATE) final TemplateStatusEnumType state)
     {
-        // TODO add only DOWNLOADED
-
         TemplatesStateDto list = new TemplatesStateDto();
-        list.getCollection().addAll(ErepoFactory.getRepo(idEnterprise).getTemplateStates());
+        for (TemplateStateDto stt : ErepoFactory.getRepo(idEnterprise).getTemplateStates())
+        {
+            if (state != null || stt.getStatus().equals(state))
+            {
+                list.getCollection().add(stt);
+            }
+        }
 
         return list;
+    }
+
+    @POST
+    @Consumes(MediaType.APPLICATION_XML)
+    public TemplatesStateDto getTemplatesStatus(
+        @PathParam(EnterpriseRepositoryResource.ENTERPRISE_REPOSITORY) final String idEnterprise,
+        final TemplateIdsDto ids)
+    {
+        TemplatesStateDto list = new TemplatesStateDto();
+
+        for (TemplateIdDto templateId : ids.getCollection())
+        {
+            try
+            {
+                list.getCollection().add(
+                    templateService.getTemplateStatusIncludeProgress(templateId.getOvfId(),
+                        idEnterprise));
+            }
+            catch (Exception e)
+            {
+                list.getCollection().add(errorRetrievingState(e, templateId.getOvfId()));
+            }
+        }
+
+        return list;
+    }
+
+    private TemplateStateDto errorRetrievingState(final Exception error, final String ovfid)
+    {
+        LOG.error("Can't get state of {}", ovfid, error);
+
+        TemplateStateDto state = new TemplateStateDto();
+        state.setOvfId(ovfid);
+        state.setStatus(TemplateStatusEnumType.ERROR);
+        state.setErrorCause(error.getMessage());
+        return state;
     }
 
     /**
      * Never return error. Use GET_STATUS to see errors
      */
     @POST
+    @Consumes(MediaType.TEXT_PLAIN)
     public void downloadTemplate(
         @PathParam(EnterpriseRepositoryResource.ENTERPRISE_REPOSITORY) final String erId,
         final String ovfId)

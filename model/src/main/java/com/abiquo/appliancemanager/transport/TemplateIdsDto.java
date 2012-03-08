@@ -19,63 +19,36 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package com.abiquo.server.core.appslibrary;
+package com.abiquo.appliancemanager.transport;
 
+import java.util.List;
+
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import com.abiquo.model.transport.SingleResourceTransportDto;
-import com.abiquo.server.core.infrastructure.DatacenterDto;
+import com.abiquo.model.transport.WrapperDto;
 
-@XmlRootElement(name = "icon")
-public class IconDto extends SingleResourceTransportDto
+@XmlRootElement(name = "idTemplates")
+public class TemplateIdsDto extends WrapperDto<TemplateIdDto>
 {
     private static final long serialVersionUID = 1L;
     
-    public static final String BASE_MEDIA_TYPE = "application/vnd.abiquo.icon+xml";
+    public static final String BASE_MEDIA_TYPE = "application/vnd.abiquo.icons+xml";
     public static final String MEDIA_TYPE = BASE_MEDIA_TYPE + "; version=" + API_VERSION;
 
-    private Integer id;
-
-    public Integer getId()
+    @Override
+    @XmlElement(name = "idTemplate")
+    public List<TemplateIdDto> getCollection()
     {
-        return id;
-    }
-
-    public void setId(final Integer id)
-    {
-        this.id = id;
-    }
-
-    private String name;
-
-    public String getName()
-    {
-        return name;
-    }
-
-    public void setName(final String name)
-    {
-        this.name = name;
-    }
-
-    private String path;
-
-    public String getPath()
-    {
-        return path;
-    }
-
-    public void setPath(final String path)
-    {
-        this.path = path;
+        return collection;
     }
     
     @Override
     public String getMediaType()
     {
-        return IconDto.MEDIA_TYPE;
+        return IconsDto.MEDIA_TYPE;
     }
-    
+
     @Override
     public String getBaseMediaType()
     {

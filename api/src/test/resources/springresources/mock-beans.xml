@@ -3,7 +3,7 @@
     <bean id="beanReplacementsTest" class="com.abiquo.api.spring.BeanReplacementProcessor">
         <property name="replacements">
             <map>
-                <entry key="vsmServiceStub" value="vsmServiceStubMock" />
+                <entry key="remoteServiceClientPool" value="remoteServiceClientPoolMock" />
                 <entry key="remoteServiceService" value="remoteServiceTestService" />
                 <entry key="infrastructureService" value="infrastructureTestService" />
                 <entry key="nodecollectorServiceStub" value="nodecollectorServiceStubMock" />

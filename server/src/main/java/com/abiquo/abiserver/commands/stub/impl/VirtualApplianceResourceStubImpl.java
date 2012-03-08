@@ -29,6 +29,8 @@ import java.util.Map;
 
 import javax.ws.rs.core.Response.Status;
 
+import org.apache.commons.httpclient.URIException;
+import org.apache.commons.httpclient.util.URIUtil;
 import org.apache.commons.lang.StringUtils;
 import org.apache.wink.client.ClientResponse;
 import org.apache.wink.common.http.HttpStatus;
@@ -47,6 +49,7 @@ import com.abiquo.abiserver.commands.stub.AbstractAPIStub;
 import com.abiquo.abiserver.commands.stub.VirtualApplianceResourceStub;
 import com.abiquo.abiserver.exception.VirtualApplianceCommandException;
 import com.abiquo.abiserver.pojo.authentication.UserSession;
+import com.abiquo.abiserver.pojo.infrastructure.DataCenter;
 import com.abiquo.abiserver.pojo.infrastructure.HyperVisor;
 import com.abiquo.abiserver.pojo.infrastructure.HyperVisorType;
 import com.abiquo.abiserver.pojo.infrastructure.State;
@@ -54,16 +57,17 @@ import com.abiquo.abiserver.pojo.infrastructure.VirtualMachine;
 import com.abiquo.abiserver.pojo.networking.Network;
 import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.result.DataResult;
+import com.abiquo.abiserver.pojo.result.ListRequest;
 import com.abiquo.abiserver.pojo.user.Enterprise;
 import com.abiquo.abiserver.pojo.user.User;
 import com.abiquo.abiserver.pojo.virtualappliance.Node;
 import com.abiquo.abiserver.pojo.virtualappliance.NodeVirtualImage;
 import com.abiquo.abiserver.pojo.virtualappliance.TaskStatus;
 import com.abiquo.abiserver.pojo.virtualappliance.VirtualAppliance;
+import com.abiquo.abiserver.pojo.virtualappliance.VirtualAppliancesListResult;
 import com.abiquo.abiserver.pojo.virtualappliance.VirtualDataCenter;
 import com.abiquo.abiserver.pojo.virtualhardware.ResourceAllocationLimit;
 import com.abiquo.abiserver.pojo.virtualimage.Category;
-import com.abiquo.abiserver.pojo.virtualimage.Icon;
 import com.abiquo.abiserver.pojo.virtualimage.VirtualImage;
 import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.model.enumerator.HypervisorType;
@@ -83,9 +87,11 @@ import com.abiquo.server.core.cloud.VirtualMachineTaskDto;
 import com.abiquo.server.core.cloud.VirtualMachineWithNodeDto;
 import com.abiquo.server.core.cloud.VirtualMachineWithNodeExtendedDto;
 import com.abiquo.server.core.cloud.VirtualMachinesWithNodeExtendedDto;
+import com.abiquo.server.core.enterprise.DatacenterLimitsDto;
+import com.abiquo.server.core.enterprise.DatacentersLimitsDto;
 import com.abiquo.server.core.enterprise.EnterpriseDto;
-import com.abiquo.server.core.enterprise.User.AuthType;
 import com.abiquo.server.core.enterprise.UserDto;
+import com.abiquo.server.core.enterprise.User.AuthType;
 import com.abiquo.server.core.infrastructure.network.VLANNetworkDto;
 import com.abiquo.server.core.task.Job;
 import com.abiquo.server.core.task.JobDto;
@@ -93,6 +99,7 @@ import com.abiquo.server.core.task.JobsDto;
 import com.abiquo.server.core.task.Task;
 import com.abiquo.server.core.task.TaskDto;
 import com.abiquo.server.core.task.TasksDto;
+import com.abiquo.server.core.task.enums.TaskState;
 import com.abiquo.util.ErrorManager;
 import com.abiquo.util.URIResolver;
 import com.abiquo.util.resources.ResourceManager;
@@ -141,6 +148,12 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
         }
         else
         {
+            ErrorsDto errors = response.getEntity(ErrorsDto.class);
+            if (errors.getCollection().get(0).getCode().equals("VAPP-12"))
+            {
+                result.setResultCode(BasicResult.ZERO_NODES);
+            }
+
             populateErrors(response, result, "deployVirtualAppliance");
         }
 
@@ -384,6 +397,41 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
         return app;
     }
 
+    private VirtualAppliance dtoToVirtualApplianceFaster(
+        final VirtualApplianceDto virtualApplianceDto, final int virtualDatacenterId,
+        final DataResult result)
+    {
+        VirtualAppliance app = new VirtualAppliance();
+
+        app.setError(virtualApplianceDto.getError() == 1 ? Boolean.TRUE : Boolean.FALSE);
+        app.setHighDisponibility(virtualApplianceDto.getHighDisponibility() == 1 ? Boolean.TRUE
+            : Boolean.FALSE);
+        app.setId(virtualApplianceDto.getId());
+        app.setIsPublic(virtualApplianceDto.getPublicApp() == 1 ? Boolean.TRUE : Boolean.FALSE);
+        app.setName(virtualApplianceDto.getName());
+
+        StringBuilder nodeconnections = new StringBuilder();
+        nodeconnections.append(StringUtils.isBlank(virtualApplianceDto.getNodeconnections())
+            ? "<connections></connections>" : virtualApplianceDto.getNodeconnections());
+        app.setNodeConnections(nodeconnections.toString());
+        app.setState(new State(StateEnum.valueOf(virtualApplianceDto.getState().name())));
+        Integer vdcId = virtualApplianceDto.getIdFromLink("virtualdatacenter");
+        String link = createVirtualDatacenterLink(vdcId);
+        ClientResponse vdcResponse = get(link);
+        if (vdcResponse.getStatusCode() == Status.OK.getStatusCode())
+        {
+            VirtualDatacenterDto dto = vdcResponse.getEntity(VirtualDatacenterDto.class);
+            VirtualDataCenter virtualDataCenter =
+                dtoToVirtualDatacenterFaster(dto, app.getEnterprise());
+            app.setVirtualDataCenter(virtualDataCenter);
+        }
+        else
+        {
+            populateErrors(vdcResponse, result, "getVirtualDatacenter");
+        }
+        return app;
+    }
+
     private VirtualAppliance dtoToVirtualAppliance(final VirtualApplianceDto virtualApplianceDto,
         final VirtualDataCenter virtualDatacenter, final DataResult result)
     {
@@ -419,6 +467,17 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
         }
         app.setVirtualDataCenter(virtualDatacenter);
 
+        if (virtualApplianceDto.getLastTasks() != null
+            && !virtualApplianceDto.getLastTasks().isEmpty())
+        {
+            for (TaskDto t : virtualApplianceDto.getLastTasks().getCollection())
+            {
+                if (t.getState() == TaskState.FINISHED_UNSUCCESSFULLY)
+                {
+                    app.setError(Boolean.TRUE);
+                }
+            }
+        }
         return app;
     }
 
@@ -444,6 +503,21 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
         ResourceAllocationLimit limits = new ResourceAllocationLimit();
 
         vdc.setLimits(limits);
+        return vdc;
+    }
+
+    private VirtualDataCenter dtoToVirtualDatacenterFaster(final VirtualDatacenterDto dto,
+        final Enterprise enterprise)
+    {
+        VirtualDataCenter vdc = new VirtualDataCenter();
+        vdc.setId(dto.getId());
+        vdc.setIdDataCenter(dto.getIdFromLink("datacenter"));
+        vdc.setName(dto.getName());
+        vdc
+            .setHyperType(HyperVisorType
+                .create(dto.getHypervisorType(),
+                    new com.abiquo.abiserver.pojo.virtualimage.DiskFormatType(dto
+                        .getHypervisorType().baseFormat)));
         return vdc;
     }
 
@@ -743,6 +817,7 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
         image.setPath(virtualImageDto.getPath());
         image.setRamRequired(virtualImageDto.getRamRequired());
         image.setShared(virtualImageDto.isShared());
+        image.setIconUrl(virtualImageDto.getIconUrl());
 
         // Image is stateful if it is linked to a volume
         image.setStateful(virtualImageDto.searchLink("volume") != null);
@@ -755,15 +830,6 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
             category.setId(Integer.parseInt(getIdFromLink(categoryLink)));
             category.setName(categoryLink.getTitle());
             image.setCategory(category);
-        }
-
-        // Captured images may not have an icon
-        RESTLink iconlLink = virtualImageDto.searchLink("icon");
-        if (iconlLink != null)
-        {
-            Icon icon = new Icon();
-            icon.setPath(iconlLink.getTitle());
-            image.setIcon(icon);
         }
 
         image.setIdEnterprise(virtualImageDto.getIdFromLink("enterprise"));
@@ -965,7 +1031,9 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
             {
                 VirtualDataCenter virtualDatacenter = dtoToVirtualDatacenter(dto, enterprise);
                 RESTLink app = dto.searchLink("virtualappliances");
-                ClientResponse response = get(app.getHref(), VirtualAppliancesDto.MEDIA_TYPE);
+                // We want to expand the last task to know if there is any error
+                ClientResponse response = get(app.getHref() + "?expand=last_task",
+                        VirtualAppliancesDto.MEDIA_TYPE);
                 VirtualAppliancesDto virtualAppliancesDto =
                     response.getEntity(VirtualAppliancesDto.class);
                 list.addAll(dtosToVirtualAppliance(virtualAppliancesDto, virtualDatacenter, result));
@@ -976,6 +1044,185 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
         {
             populateErrors(eResponse, result, "getVirtualAppliancesByEnterprise");
         }
+
+        return result;
+    }
+
+    @Override
+    public DataResult<VirtualAppliancesListResult> getVirtualAppliancesByEnterprise(
+        final UserSession userSession, final Enterprise enterprise, final ListRequest listRequest)
+    {
+        DataResult<VirtualAppliancesListResult> result =
+            new DataResult<VirtualAppliancesListResult>();
+
+        StringBuilder buildRequest =
+            new StringBuilder(createVirtualAppliancesByEnterpriseLink(enterprise.getId()));
+        VirtualAppliancesListResult listResult = new VirtualAppliancesListResult();
+
+        if (listRequest != null)
+        {
+            buildRequest.append("?startwith=" + listRequest.getOffset());
+            buildRequest.append("&limit=" + listRequest.getNumberOfNodes());
+            if (listRequest.getOrderBy() != null && !listRequest.getOrderBy().isEmpty())
+            {
+                buildRequest.append("&by=" + listRequest.getOrderBy());
+            }
+            buildRequest.append("&asc=" + (listRequest.getAsc() == true ? "true" : "false"));
+            if (listRequest.getFilterLike() != null && !listRequest.getFilterLike().isEmpty())
+            {
+                try
+                {
+                    buildRequest.append("&has=" + URIUtil.encodeQuery(listRequest.getFilterLike()));
+                }
+                catch (URIException e)
+                {
+                }
+            }
+        }
+
+        ClientResponse response = get(buildRequest.toString());
+
+        if (response.getStatusCode() == 200)
+        {
+            VirtualAppliancesDto dto = response.getEntity(VirtualAppliancesDto.class);
+            List<VirtualAppliance> collection = dtosToVirtualAppliance(dto, result);
+
+            Integer total =
+                dto.getTotalSize() != null ? dto.getTotalSize() : dto.getCollection().size();
+
+            listResult.setTotalVirtualAppliances(total);
+            listResult.setVirtualAppliancesList(collection);
+
+            result.setSuccess(true);
+            result.setData(listResult);
+        }
+        else
+        {
+            populateErrors(response, result, "getVirtualAppliancesByEnterprise");
+        }
+
+        return result;
+    }
+
+    @Override
+    public DataResult<VirtualAppliancesListResult> getVirtualAppliancesByVirtualDatacenter(
+        final UserSession userSession, final VirtualDataCenter vdc, final ListRequest listRequest)
+    {
+        DataResult<VirtualAppliancesListResult> result =
+            new DataResult<VirtualAppliancesListResult>();
+
+        StringBuilder buildRequest =
+            new StringBuilder(createVirtualAppliancesByVirtualDatacenterLink(vdc.getId()));
+        VirtualAppliancesListResult listResult = new VirtualAppliancesListResult();
+
+        if (listRequest != null)
+        {
+            buildRequest.append("?startwith=" + listRequest.getOffset());
+            buildRequest.append("&limit=" + listRequest.getNumberOfNodes());
+            if (listRequest.getOrderBy() != null && !listRequest.getOrderBy().isEmpty())
+            {
+                buildRequest.append("&by=" + listRequest.getOrderBy());
+            }
+            buildRequest.append("&asc=" + (listRequest.getAsc() == true ? "true" : "false"));
+            if (listRequest.getFilterLike() != null && !listRequest.getFilterLike().isEmpty())
+            {
+                try
+                {
+                    buildRequest.append("&has=" + URIUtil.encodeQuery(listRequest.getFilterLike()));
+                }
+                catch (URIException e)
+                {
+                }
+            }
+        }
+
+        ClientResponse response = get(buildRequest.toString());
+
+        if (response.getStatusCode() == 200)
+        {
+            VirtualAppliancesDto dto = response.getEntity(VirtualAppliancesDto.class);
+            List<VirtualAppliance> collection = dtosToVirtualAppliance(dto, result);
+
+            Integer total =
+                dto.getTotalSize() != null ? dto.getTotalSize() : dto.getCollection().size();
+
+            listResult.setTotalVirtualAppliances(total);
+            listResult.setVirtualAppliancesList(collection);
+
+            result.setSuccess(true);
+            result.setData(listResult);
+        }
+        else
+        {
+            populateErrors(response, result, "getVirtualAppliancesByVirtualDatacenter");
+        }
+
+        return result;
+    }
+
+    @Override
+    public DataResult<VirtualAppliancesListResult> getVirtualAppliancesByEnterpriseAndDatacenter(
+        final UserSession userSession, final Enterprise enterprise, final DataCenter datacenter)
+    {
+        DataResult<VirtualAppliancesListResult> result =
+            new DataResult<VirtualAppliancesListResult>();
+
+        String uri = createEnterpriseLimitsByDatacenterLink(enterprise.getId());
+        ClientResponse response = get(uri);
+        VirtualAppliancesListResult listResult = new VirtualAppliancesListResult();
+
+        if (response.getStatusCode() == Status.NOT_FOUND.getStatusCode())
+        {
+            result.setData(listResult);
+            result.setSuccess(Boolean.TRUE);
+
+            return result;
+        }
+
+        DatacentersLimitsDto limits = response.getEntity(DatacentersLimitsDto.class);
+        for (DatacenterLimitsDto limitDto : limits.getCollection())
+        {
+            RESTLink dcLink = limitDto.searchLink("datacenter");
+            Integer dcId =
+                Integer.valueOf(dcLink.getHref().substring(dcLink.getHref().lastIndexOf("/") + 1));
+            if (dcId.equals(datacenter.getId()))
+            {
+                response = get(limitDto.searchLink("action", "virtualappliances").getHref());
+                if (response.getStatusCode() == 200)
+                {
+                    VirtualAppliancesDto dtos = response.getEntity(VirtualAppliancesDto.class);
+                    // List<VirtualAppliance> collection = dtosToVirtualAppliance(dtos, result);
+
+                    List<VirtualAppliance> collection = new ArrayList<VirtualAppliance>();
+                    for (VirtualApplianceDto dto : dtos.getCollection())
+                    {
+                        Integer virtualDatacenterId = dto.getIdFromLink("virtualdatacenter");
+                        VirtualAppliance virtualAppliance =
+                            dtoToVirtualApplianceFaster(dto, virtualDatacenterId, result);
+                        collection.add(virtualAppliance);
+                    }
+
+                    Integer total =
+                        dtos.getTotalSize() != null ? dtos.getTotalSize() : dtos.getCollection()
+                            .size();
+
+                    listResult.setTotalVirtualAppliances(total);
+                    listResult.setVirtualAppliancesList(collection);
+
+                    result.setSuccess(true);
+                    result.setData(listResult);
+                }
+                else
+                {
+                    populateErrors(response, result, "getExternalVlansByVirtualDatacenter");
+                }
+
+                return result;
+            }
+        }
+
+        result.setSuccess(Boolean.FALSE);
+        result.setMessage("Unknown exception. External networks not found.");
 
         return result;
     }

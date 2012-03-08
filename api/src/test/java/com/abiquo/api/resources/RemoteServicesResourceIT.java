@@ -46,7 +46,7 @@ public class RemoteServicesResourceIT extends AbstractJpaGeneratorIT
     @Test
     public void getRemoteServicesList() throws Exception
     {
-        RemoteService rs = remoteServiceGenerator.createInstance(RemoteServiceType.TARANTINO);
+        RemoteService rs = remoteServiceGenerator.createInstance(RemoteServiceType.VIRTUAL_FACTORY);
         setup(rs.getDatacenter(), rs);
 
         String uri = resolveRemoteServicesURI(rs.getDatacenter().getId());
@@ -86,7 +86,7 @@ public class RemoteServicesResourceIT extends AbstractJpaGeneratorIT
     @Test
     public void createRemoteServiceDuplicatedURL()
     {
-        RemoteService rs = remoteServiceGenerator.createInstance(RemoteServiceType.TARANTINO);
+        RemoteService rs = remoteServiceGenerator.createInstance(RemoteServiceType.VIRTUAL_FACTORY);
         rs.setUri("http://localhost:8080/ssm");
 
         setup(rs.getDatacenter(), rs);

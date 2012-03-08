@@ -50,7 +50,7 @@ package net.undf.abicloud.vo.virtualimage
 
         public var repository:Repository;
 
-        public var icon:Icon;
+        public var iconUrl:String;
 
         public var deleted:Boolean;
 
@@ -88,7 +88,7 @@ package net.undf.abicloud.vo.virtualimage
             cpuRequired = 0;
             category = new Category();
             repository = new Repository();
-            icon = new Icon();
+            iconUrl = "";
             deleted = false;
             diskFormatType = new DiskFormatType();
             master = null;

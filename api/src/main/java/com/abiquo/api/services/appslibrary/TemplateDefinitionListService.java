@@ -23,11 +23,14 @@ package com.abiquo.api.services.appslibrary;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import javax.persistence.EntityManager;
 
+import org.apache.commons.lang.StringUtils;
 import org.hibernate.Hibernate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,13 +40,14 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.abiquo.api.exceptions.APIError;
+import com.abiquo.api.services.DefaultApiService;
 import com.abiquo.api.services.EnterpriseService;
-import com.abiquo.appliancemanager.client.ApplianceManagerResourceStubImpl;
+import com.abiquo.api.services.stub.AMServiceStub;
+import com.abiquo.api.tracer.TracerLogger;
 import com.abiquo.appliancemanager.repositoryspace.OVFDescription;
 import com.abiquo.appliancemanager.repositoryspace.RepositorySpace;
-import com.abiquo.appliancemanager.transport.TemplateStateDto;
-import com.abiquo.appliancemanager.transport.TemplateStatusEnumType;
 import com.abiquo.appliancemanager.transport.TemplatesStateDto;
+import com.abiquo.model.transport.error.CommonError;
 import com.abiquo.ovfmanager.ovf.exceptions.XMLException;
 import com.abiquo.server.core.appslibrary.AppsLibrary;
 import com.abiquo.server.core.appslibrary.AppsLibraryDAO;
@@ -56,7 +60,7 @@ import com.abiquo.tracer.EventType;
 import com.abiquo.tracer.SeverityType;
 
 @Service
-public class TemplateDefinitionListService extends DefaultApiServiceWithApplianceManagerClient
+public class TemplateDefinitionListService extends DefaultApiService
 {
 
     private final static Logger LOGGER = LoggerFactory
@@ -71,6 +75,15 @@ public class TemplateDefinitionListService extends DefaultApiServiceWithApplianc
     @Autowired
     protected TemplateDefinitionService templateDefinitionService;
 
+    @Autowired
+    private EnterpriseService enterpriseService;
+
+    @Autowired
+    private AMServiceStub amService;
+
+    @Autowired
+    protected TracerLogger tracer;
+
     public TemplateDefinitionListService()
     {
     }
@@ -78,9 +91,11 @@ public class TemplateDefinitionListService extends DefaultApiServiceWithApplianc
     public TemplateDefinitionListService(final EntityManager em)
     {
         repo = new TemplateDefinitionRep(em);
-        entService = new EnterpriseService(em);
+        enterpriseService = new EnterpriseService(em);
         appsLibraryDao = new AppsLibraryDAO(em);
         templateDefinitionService = new TemplateDefinitionService(em);
+        tracer = new TracerLogger();
+        amService = new AMServiceStub();
     }
 
     @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
@@ -95,37 +110,74 @@ public class TemplateDefinitionListService extends DefaultApiServiceWithApplianc
     {
         final String name = templateDefList.getName();
 
+        Enterprise ent = enterpriseService.getEnterprise(idEnterprise);
+        AppsLibrary appsLib = appsLibraryDao.findByEnterpriseOrInitialize(ent);
+
+        templateDefList.setAppsLibrary(appsLib);
+
+        validate(templateDefList);
+
+        for (TemplateDefinition templateDef : templateDefList.getTemplateDefinitions())
+        {
+            templateDef.setAppsLibrary(appsLib);
+            // validate(templateDef);
+        }
+
         TemplateDefinitionList prevlist = null;
-        Enterprise ent = entService.getEnterprise(idEnterprise);
         prevlist = repo.findTemplateDefinitionListByNameAndEnterprise(name, ent);
 
-        if (prevlist != null) // TODO name unique on BBDD
+        if (prevlist != null)
         {
             addConflictErrors(APIError.TEMPLATE_DEFINITION_LIST_NAME_ALREADY_EXIST);
             flushErrors();
         }
 
-        templateDefList.setAppsLibrary(appsLibraryDao.findByEnterpriseOrInitialize(ent));
-
         repo.persistTemplateDefinitionList(templateDefList);
 
-        for (TemplateDefinition templateDefs : templateDefList.getTemplateDefinitions())
+        for (TemplateDefinition templateDef : templateDefList.getTemplateDefinitions())
         {
-            templateDefs.addToTemplateDefinitionLists(templateDefList);
-            templateDefinitionService.addTemplateDefinition(templateDefs, idEnterprise);
+            if (templateDef.isValid())
+            {// TemplateDefinition tDef =
+                templateDefinitionService.addTemplateDefinition(templateDef, idEnterprise);
+
+                templateDef.addToTemplateDefinitionLists(templateDefList);
+            }
+            else
+            {
+                templateDef.getTemplateDefinitionLists().clear();
+
+                if (tracer != null)
+                {
+                    tracer.log(SeverityType.WARNING, ComponentType.APPLIANCE_MANAGER,
+                        EventType.TEMPLATE_DEFINITION_LIST_MODIFIED,
+                        "templateDefinition.createError", templateDef.getName(),
+                        validationErrors(templateDef.getValidationErrors()));
+                }
+            }
         }
 
+        // templateDefList.setTemplateDefinitions(correctTemplates);
         repo.updateTemplateDefinitionList(templateDefList);
 
         return templateDefList;
+    }
+
+    private String validationErrors(final Set<CommonError> errors)
+    {
+        StringBuilder sbuilder = new StringBuilder();
+        for (CommonError error : errors)
+        {
+            sbuilder.append(String.format("%s - %s\n", error.getCode(), error.getMessage()));
+        }
+
+        return sbuilder.toString();
+
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public TemplateDefinitionList addTemplateDefinitionList(final String ovfindexURL,
         final Integer idEnterprise)
     {
-        // Enterprise ent = entRepo.findById(idEnterprise);
-        // AppsLibrary appsLib = appsLibraryDao.findByEnterprise(ent);
         TemplateDefinitionList ovfPackageList =
             obtainTemplateDefinitionListFromOVFIndexUrl(ovfindexURL);
 
@@ -133,8 +185,11 @@ public class TemplateDefinitionListService extends DefaultApiServiceWithApplianc
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public TemplateDefinitionList getTemplateDefinitionList(final Integer id)
+    public TemplateDefinitionList getTemplateDefinitionList(final Integer id,
+        final Integer idEnterprise)
     {
+        enterpriseService.getEnterprise(idEnterprise); // check can view
+
         TemplateDefinitionList templateDefinitionList = repo.getTemplateDefinitionList(id);
         if (templateDefinitionList == null)
         {
@@ -149,39 +204,29 @@ public class TemplateDefinitionListService extends DefaultApiServiceWithApplianc
     public TemplatesStateDto getTemplateListStatus(final Integer id, final Integer datacenterId,
         final Integer enterpriseId)
     {
-        checkEnterpriseAndDatacenter(enterpriseId, datacenterId);
+        final TemplateDefinitionList templateDefinitionList =
+            getTemplateDefinitionList(id, enterpriseId);
 
-        final TemplateDefinitionList templateDefinitionList = getTemplateDefinitionList(id);
-        final ApplianceManagerResourceStubImpl amClient = getApplianceManagerClient(datacenterId);
-        final TemplatesStateDto stateList = new TemplatesStateDto();
+        return amService.getTemplatesState(datacenterId, enterpriseId,
+            getListIds(templateDefinitionList));
+    }
 
-        for (TemplateDefinition templateDef : templateDefinitionList.getTemplateDefinitions())
+    private String[] getListIds(final TemplateDefinitionList list)
+    {
+        ArrayList<String> ids = new ArrayList<String>();
+        for (TemplateDefinition tdef : list.getTemplateDefinitions())
         {
-            try
-            {
-                stateList.add(amClient.getTemplateStatus(String.valueOf(enterpriseId),
-                    templateDef.getUrl()));
-            }
-            catch (Exception e)
-            {
-                TemplateStateDto error = new TemplateStateDto();
-                error.setOvfId(templateDef.getUrl());
-                error.setStatus(TemplateStatusEnumType.ERROR);
-                error.setErrorCause(e.toString());
-
-                stateList.add(error);
-
-                LOGGER.error("Can not obtain the status of the list.{}", e);
-            }
+            ids.add(tdef.getUrl());
         }
-
-        return stateList;
+        return ids.toArray(new String[ids.size()]);
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public TemplateDefinitionList refreshTemplateDefinitionList(final Integer idEnterprise,
         final Integer idList)
     {
+        enterpriseService.getEnterprise(idEnterprise); // check can view
+
         TemplateDefinitionList oldList = repo.getTemplateDefinitionList(idList);
 
         if (oldList == null)
@@ -189,24 +234,24 @@ public class TemplateDefinitionListService extends DefaultApiServiceWithApplianc
             addNotFoundErrors(APIError.NON_EXISTENT_TEMPLATE_DEFINITION_LIST);
             flushErrors();
         }
+
         final String listUrl = oldList.getUrl();
+        if (StringUtils.isEmpty(listUrl))
+        {
+            addConflictErrors(APIError.TEMPLATE_DEFINITION_LIST_REFRESH_NO_URL);
+            flushErrors();
+        }
 
         TemplateDefinitionList newList = obtainTemplateDefinitionListFromOVFIndexUrl(listUrl);
-        removeTemplateDefinitionList(idList, true);
+        removeTemplateDefinitionList(idList, true, idEnterprise);
         return addTemplateDefinitionList(newList, idEnterprise);
     }
 
     @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
     public List<TemplateDefinitionList> getTemplateDefinitionListsByEnterprise(
-        final Integer idEnterprise)
+        final Integer idEnterprise) throws SocketTimeoutException
     {
-
-        Enterprise ent = entService.getEnterprise(idEnterprise);
-        if (ent == null)
-        {
-            addNotFoundErrors(APIError.NON_EXISTENT_ENTERPRISE);
-            flushErrors();
-        }
+        enterpriseService.getEnterprise(idEnterprise);
 
         List<TemplateDefinitionList> ovfPackageList = new ArrayList<TemplateDefinitionList>();
         ovfPackageList = repo.getTemplateDefinitionListsByEnterprise(idEnterprise);
@@ -217,6 +262,7 @@ public class TemplateDefinitionListService extends DefaultApiServiceWithApplianc
     public TemplateDefinitionList updateTemplateDefinitionList(final Integer templateDefListId,
         final TemplateDefinitionList templateDefList, final Integer idEnterprise)
     {
+        Enterprise ent = enterpriseService.getEnterprise(idEnterprise);
         TemplateDefinitionList old = repo.getTemplateDefinitionList(templateDefListId);
 
         if (old == null)
@@ -225,13 +271,19 @@ public class TemplateDefinitionListService extends DefaultApiServiceWithApplianc
             flushErrors();
         }
 
-        // TODO - Apply changes and compare etags
         old.setName(templateDefList.getName());
         old.setTemplateDefinitions(templateDefList.getTemplateDefinitions());
 
-        Enterprise ent = entService.getEnterprise(idEnterprise);
         AppsLibrary appsLib = appsLibraryDao.findByEnterprise(ent);
         old.setAppsLibrary(appsLib);
+
+        validate(old);
+
+        for (TemplateDefinition templateDef : old.getTemplateDefinitions())
+        {
+            validate(templateDef);
+        }
+
         repo.updateTemplateDefinitionList(old);
 
         tracer.log(SeverityType.INFO, ComponentType.WORKLOAD,
@@ -241,8 +293,11 @@ public class TemplateDefinitionListService extends DefaultApiServiceWithApplianc
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public void removeTemplateDefinitionList(final Integer id, final boolean refresh)
+    public void removeTemplateDefinitionList(final Integer id, final boolean refresh,
+        final Integer idEnterprise)
     {
+        enterpriseService.getEnterprise(idEnterprise);
+
         TemplateDefinitionList templateDefList = repo.getTemplateDefinitionList(id);
 
         if (templateDefList == null)
@@ -258,7 +313,6 @@ public class TemplateDefinitionListService extends DefaultApiServiceWithApplianc
                 templateDefList.getName());
         }
         repo.removeTemplateDefinitionList(templateDefList);
-
     }
 
     private TemplateDefinitionList obtainTemplateDefinitionListFromOVFIndexUrl(String ovfindexUrl)
@@ -302,7 +356,6 @@ public class TemplateDefinitionListService extends DefaultApiServiceWithApplianc
             addNotFoundErrors(APIError.NON_EXISTENT_REPOSITORY_SPACE);
             flushErrors();
         }
-
         catch (IOException e)
         {
             final String cause = String.format("Can not open a connection to : [%s]", ovfindexUrl);

@@ -119,6 +119,9 @@ public class VirtualMachineFactory
             final long datastoreRequ = virtualMachine.getVirtualMachineTemplate().getDiskFileSize();
             final Datastore datastore = selectDatastore(machine, datastoreRequ);
             virtualMachine.setDatastore(datastore);
+
+            virtualMachine.setVdrpPort(isRemoteAccessEnabled() ? selectVrdpPort(machine)
+                : DISABLED_VRDPORT);
         }
         else
         // its an HA reallocation, the datastore was already
@@ -133,8 +136,6 @@ public class VirtualMachineFactory
         }
 
         virtualMachine.setVdrpIP(hypervisor.getIpService());
-        virtualMachine.setVdrpPort(isRemoteAccessEnabled() ? selectVrdpPort(machine)
-            : DISABLED_VRDPORT);
 
         return virtualMachine;
     }

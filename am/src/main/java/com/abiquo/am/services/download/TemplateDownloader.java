@@ -22,14 +22,9 @@
 package com.abiquo.am.services.download;
 
 import static com.abiquo.am.services.TemplateConventions.getFileUrl;
-import static com.abiquo.appliancemanager.config.AMConfiguration.HTTP_CONNECTION_TIMEOUT;
-import static com.abiquo.appliancemanager.config.AMConfiguration.HTTP_IDLE_TIMEOUT;
-import static com.abiquo.appliancemanager.config.AMConfiguration.HTTP_MAX_CONNECTIONS;
-import static com.abiquo.appliancemanager.config.AMConfiguration.HTTP_REQUEST_TIMEOUT;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -47,8 +42,7 @@ import com.abiquo.am.services.ErepoFactory;
 import com.abiquo.am.services.TemplateConventions;
 import com.abiquo.am.services.notify.AMNotifier;
 import com.abiquo.am.services.ovfformat.TemplateToOVFEnvelope;
-import com.abiquo.appliancemanager.config.AMConfiguration;
-import com.abiquo.appliancemanager.config.AMConfigurationManager;
+import com.abiquo.appliancemanager.client.ExternalHttpConnection;
 import com.abiquo.appliancemanager.exceptions.AMException;
 import com.abiquo.appliancemanager.exceptions.DownloadException;
 import com.abiquo.appliancemanager.transport.TemplateDto;
@@ -58,8 +52,6 @@ import com.abiquo.ovfmanager.ovf.OVFEnvelopeUtils;
 import com.abiquo.ovfmanager.ovf.exceptions.InvalidSectionException;
 import com.abiquo.ovfmanager.ovf.exceptions.SectionNotPresentException;
 import com.ning.http.client.AsyncHttpClient;
-import com.ning.http.client.AsyncHttpClientConfig;
-import com.ning.http.client.ProxyServer;
 
 /**
  * Take an OVF-Envelope document and download all its references into the internal repository
@@ -77,9 +69,8 @@ public class TemplateDownloader
     @Autowired
     private AMNotifier notifier;
 
-    private static AsyncHttpClientConfig clientConf = createHttpClientConf();
-
-    private final AsyncHttpClient httpClient = new AsyncHttpClient(clientConf);
+    private final AsyncHttpClient httpClient =
+        new AsyncHttpClient(ExternalHttpConnection.createHttpClientConf());
 
     private final Map<String, DownloadingFile> inprogress =
         new ConcurrentHashMap<String, DownloadingFile>();
@@ -97,7 +88,7 @@ public class TemplateDownloader
      * @throws DownloadException, content is not a valid OVF envelope document or any error during
      *             the download of some file on the package.
      */
-    public void deployTemplate(final String enterpriseId, final String ovfId,
+    public synchronized void deployTemplate(final String enterpriseId, final String ovfId,
         final EnvelopeType envelope)
     {
         LOG.debug("Deploy request [{}]", ovfId);
@@ -165,7 +156,7 @@ public class TemplateDownloader
             // note the expected bytes are from the OVF document, but for progress we use the
             // content-length header
             throw new AMException(AMError.REPO_NO_SPACE, String.format("Requested %s MB",
-                String.valueOf((expectedBytes / 1048576))));
+                String.valueOf(expectedBytes / 1048576)));
         }
 
         final String destinationPath =
@@ -250,27 +241,4 @@ public class TemplateDownloader
         }
     }
 
-    private static AsyncHttpClientConfig createHttpClientConf()
-    {
-        AMConfiguration amconf = AMConfigurationManager.getInstance().getAMConfiguration();
-
-        AsyncHttpClientConfig.Builder builder = new AsyncHttpClientConfig.Builder(). //
-            setFollowRedirects(true).//
-            setCompressionEnabled(true).//
-            setIdleConnectionInPoolTimeoutInMs(HTTP_IDLE_TIMEOUT).//
-            setConnectionTimeoutInMs(HTTP_CONNECTION_TIMEOUT).//
-            setRequestTimeoutInMs(HTTP_REQUEST_TIMEOUT).//
-            setMaximumConnectionsTotal(HTTP_MAX_CONNECTIONS);
-
-        if (amconf.getProxyHost() != null && amconf.getProxyPort() != null)
-        {
-            LOG.info("Configure HTTP connections to use the proxy [{}] [{}]",
-                amconf.getProxyHost(), amconf.getProxyPort());
-
-            ProxyServer proxy = new ProxyServer(amconf.getProxyHost(), amconf.getProxyPort());
-            builder = builder.setProxyServer(proxy);
-        }
-
-        return builder.build();
-    }
 }

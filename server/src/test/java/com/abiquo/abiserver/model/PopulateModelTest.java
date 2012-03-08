@@ -56,7 +56,6 @@ import com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.Virtualma
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.ResourceAllocationSettingData;
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.ResourceManagementHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualimage.CategoryHB;
-import com.abiquo.abiserver.business.hibernate.pojohb.virtualimage.IconHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualimage.RepositoryHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualimage.VirtualimageHB;
 import com.abiquo.abiserver.exception.PersistenceException;
@@ -78,7 +77,6 @@ import com.abiquo.abiserver.persistence.dao.virtualappliance.VirtualMachineDAO;
 import com.abiquo.abiserver.persistence.dao.virtualhardware.ResourceAllocationSettingDataDAO;
 import com.abiquo.abiserver.persistence.dao.virtualhardware.ResourceManagementDAO;
 import com.abiquo.abiserver.persistence.dao.virtualimage.CategoryDAO;
-import com.abiquo.abiserver.persistence.dao.virtualimage.IconDAO;
 import com.abiquo.abiserver.persistence.dao.virtualimage.RepositoryDAO;
 import com.abiquo.abiserver.persistence.dao.virtualimage.VirtualImageDAO;
 import com.abiquo.abiserver.persistence.hibernate.HibernateDAOFactory;
@@ -131,9 +129,6 @@ public class PopulateModelTest
     /** Virtual appliance requiring the virtual images. */
     private final VirtualappHB vApp;
 
-    /** All added VirtualImage's icon. */
-    private final IconHB icon;
-
     /** All added VirtualImage's image type */
     private final DiskFormatType imageType;
 
@@ -176,8 +171,6 @@ public class PopulateModelTest
         enterprise = getDefaultEnterprise();
 
         hypervisor = getDefaultHypervisor();
-
-        icon = createIcon();
         imageType = getDefaultImageType();
         repository = getDefaultRepository();
 
@@ -327,7 +320,6 @@ public class PopulateModelTest
 
         vImage.setPathName("test");
 
-        vImage.setIcon(icon);
         vImage.setCategory(category);
         vImage.setType(imageType);
         vImage.setRepository(repository);
@@ -663,7 +655,6 @@ public class PopulateModelTest
         factorytest = HibernateDAOFactory.instance();
         DataCenterDAO daoDc = factorytest.getDataCenterDAO();
         VirtualDataCenterDAO daoVdc = factorytest.getVirtualDataCenterDAO();
-        IconDAO daoIco = factorytest.getIconDAO();
         VirtualImageDAO daoVi = factorytest.getVirtualImageDAO();
 
         factorytest.beginConnection();
@@ -672,8 +663,6 @@ public class PopulateModelTest
 
         daoDc.makeTransient(dc);
         daoVdc.makeTransient(vdc);
-
-        daoIco.makeTransient(icon);
 
         // TODO: create the speciphic method by description??
         // Criterion descriptionTest = Restrictions.eq("description", "test");
@@ -684,23 +673,6 @@ public class PopulateModelTest
 
         factorytest.endConnection();
 
-    }
-
-    private IconHB createIcon() throws PersistenceException
-    {
-        factorytest = HibernateDAOFactory.instance();
-        IconDAO daoIcon = factorytest.getIconDAO();
-
-        factorytest.beginConnection();
-
-        IconHB icon = new IconHB();
-        icon.setName("test");
-        icon.setPath("test");
-        daoIcon.makePersistent(icon);
-
-        factorytest.endConnection();
-
-        return icon;
     }
 
     /**
@@ -994,8 +966,8 @@ public class PopulateModelTest
         disjunction.add(Restrictions.eq("resourceType", resourceType));
 
         ArrayList<ResourceAllocationSettingData> rasds =
-            (ArrayList<ResourceAllocationSettingData>) session
-                .createCriteria(ResourceAllocationSettingData.class).add(disjunction).list();
+            (ArrayList<ResourceAllocationSettingData>) session.createCriteria(
+                ResourceAllocationSettingData.class).add(disjunction).list();
 
         if (rasds == null)
         {

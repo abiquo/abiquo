@@ -83,13 +83,10 @@ public class VirtualDatacenterServiceTest extends AbstractUnitTest
             new VirtualDatacenterService(getEntityManagerWithAnActiveTransaction());
 
         Collection<VirtualDatacenter> vdcs =
-            service.getVirtualDatacenters(enterprise, null, null, 0, 0, "",
-                VirtualDatacenter.OrderByEnum.NAME, true);
+            service.getVirtualDatacenters(enterprise, null, null, null);
         Assert.assertSize(vdcs, 3);
 
-        vdcs =
-            service.getVirtualDatacenters(enterprise, null, user, 0, 0, "",
-                VirtualDatacenter.OrderByEnum.NAME, true);
+        vdcs = service.getVirtualDatacenters(enterprise, null, user, null);
         Assert.assertSize(vdcs, 2);
     }
 
@@ -112,14 +109,10 @@ public class VirtualDatacenterServiceTest extends AbstractUnitTest
         VirtualDatacenterService service =
             new VirtualDatacenterService(getEntityManagerWithAnActiveTransaction());
 
-        Collection<VirtualDatacenter> vdcs =
-            service.getVirtualDatacenters(null, null, null, 0, 0, "",
-                VirtualDatacenter.OrderByEnum.NAME, true);
+        Collection<VirtualDatacenter> vdcs = service.getVirtualDatacenters(null, null, null, null);
         Assert.assertSize(vdcs, 3);
 
-        vdcs =
-            service.getVirtualDatacenters(null, null, user, 0, 0, "",
-                VirtualDatacenter.OrderByEnum.NAME, true);
+        vdcs = service.getVirtualDatacenters(null, null, user, null);
         Assert.assertSize(vdcs, 2);
     }
 

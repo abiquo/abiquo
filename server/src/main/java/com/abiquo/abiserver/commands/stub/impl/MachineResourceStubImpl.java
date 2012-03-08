@@ -47,7 +47,6 @@ import com.abiquo.abiserver.pojo.ucs.LogicServer;
 import com.abiquo.abiserver.pojo.user.Enterprise;
 import com.abiquo.abiserver.pojo.user.User;
 import com.abiquo.abiserver.pojo.virtualimage.Category;
-import com.abiquo.abiserver.pojo.virtualimage.Icon;
 import com.abiquo.abiserver.pojo.virtualimage.VirtualImage;
 import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.model.enumerator.HypervisorType;
@@ -338,6 +337,7 @@ public class MachineResourceStubImpl extends AbstractAPIStub implements MachineR
         image.setPath(virtualImageDto.getPath());
         image.setRamRequired(virtualImageDto.getRamRequired());
         image.setShared(virtualImageDto.isShared());
+        image.setIconUrl(virtualImageDto.getIconUrl());
 
         // Image is stateful if it is linked to a volume
         image.setStateful(virtualImageDto.searchLink("volume") != null);
@@ -350,15 +350,6 @@ public class MachineResourceStubImpl extends AbstractAPIStub implements MachineR
             category.setId(Integer.parseInt(getIdFromLink(categoryLink)));
             category.setName(categoryLink.getTitle());
             image.setCategory(category);
-        }
-
-        // Captured images may not have an icon
-        RESTLink iconlLink = virtualImageDto.searchLink("icon");
-        if (iconlLink != null)
-        {
-            Icon icon = new Icon();
-            icon.setPath(iconlLink.getTitle());
-            image.setIcon(icon);
         }
 
         // Captured images may not have a template definition

@@ -287,7 +287,7 @@ public class UsersResourceStubImpl extends AbstractAPIStub implements UsersResou
             createUsersLink(enterpriseWildcard, userListOptions.getOffset(),
                 userListOptions.getLength());
 
-        uri = UriHelper.appendQueryParamsToPath(uri, queryParams, false);
+        uri = UriHelper.appendQueryParamsToPath(uri, queryParams, true);
 
         ClientResponse response = get(uri, UsersWithRolesDto.MEDIA_TYPE);
         if (response.getStatusCode() == 200)

@@ -52,7 +52,6 @@ import com.abiquo.api.resources.UsersResource;
 import com.abiquo.api.resources.VirtualMachinesInfrastructureResource;
 import com.abiquo.api.resources.appslibrary.CategoryResource;
 import com.abiquo.api.resources.appslibrary.DatacenterRepositoryResource;
-import com.abiquo.api.resources.appslibrary.IconResource;
 import com.abiquo.api.resources.appslibrary.TemplateDefinitionListResource;
 import com.abiquo.api.resources.appslibrary.TemplateDefinitionListsResource;
 import com.abiquo.api.resources.appslibrary.TemplateDefinitionResource;
@@ -80,10 +79,7 @@ import com.abiquo.model.transport.AcceptedRequestDto;
 import com.abiquo.model.transport.LinksDto;
 import com.abiquo.server.core.appslibrary.Category;
 import com.abiquo.server.core.appslibrary.CategoryDto;
-import com.abiquo.server.core.appslibrary.DatacenterRepositoriesDto;
 import com.abiquo.server.core.appslibrary.DatacenterRepositoryDto;
-import com.abiquo.server.core.appslibrary.Icon;
-import com.abiquo.server.core.appslibrary.IconDto;
 import com.abiquo.server.core.appslibrary.TemplateDefinitionDto;
 import com.abiquo.server.core.appslibrary.TemplateDefinitionListDto;
 import com.abiquo.server.core.appslibrary.TemplateDefinitionListsDto;
@@ -313,14 +309,16 @@ public class RESTBuilder implements IRESTBuilder
 
     @Override
     public List<RESTLink> buildMachineLinks(final Integer datacenterId, final Integer rackId,
-        final Boolean managedRack, final MachineDto machine)
+        final Boolean managedRack, final Enterprise enterprise, final MachineDto machine)
     {
         AbiquoLinkBuilder builder = AbiquoLinkBuilder.createBuilder(linkProcessor);
-        return this.buildMachineLinks(datacenterId, rackId, managedRack, machine, builder);
+        return this.buildMachineLinks(datacenterId, rackId, managedRack, enterprise, machine,
+            builder);
     }
 
     public List<RESTLink> buildMachineLinks(final Integer datacenterId, final Integer rackId,
-        final Boolean managedRack, final MachineDto machine, final AbiquoLinkBuilder builder)
+        final Boolean managedRack, final Enterprise enterprise, final MachineDto machine,
+        final AbiquoLinkBuilder builder)
     {
         List<RESTLink> links = new ArrayList<RESTLink>();
 
@@ -341,6 +339,13 @@ public class RESTBuilder implements IRESTBuilder
         links.add(builder.buildRestLink(MachineResource.class,
             MachineResource.MACHINE_ACTION_CHECK, MachineResource.MACHINE_CHECK, params,
             MachineStateDto.BASE_MEDIA_TYPE));
+
+        if (enterprise != null)
+        {
+            params.put(EnterpriseResource.ENTERPRISE, enterprise.getId().toString());
+            links.add(builder.buildRestLink(EnterpriseResource.class,
+                EnterpriseResource.ENTERPRISE, params));
+        }
 
         return links;
     }
@@ -569,7 +574,7 @@ public class RESTBuilder implements IRESTBuilder
 
     @Override
     public List<RESTLink> buildTemplateDefinitionLinks(final Integer enterpriseId,
-        final TemplateDefinitionDto templateDefinition, final Category category, final Icon icon)
+        final TemplateDefinitionDto templateDefinition, final Category category)
     {
         List<RESTLink> links = new ArrayList<RESTLink>();
 
@@ -594,16 +599,6 @@ public class RESTBuilder implements IRESTBuilder
             .toString());
         links.add(builder.buildRestLink(TemplateDefinitionResource.class, REL_EDIT, params,
             TemplateDefinitionDto.BASE_MEDIA_TYPE));
-
-        if (icon != null)
-        {
-            params.put(IconResource.ICON, String.valueOf(icon.getId()));
-            links.add(builder.buildRestLink(IconResource.class, null, IconResource.ICON,
-                icon.getPath(), params, IconDto.BASE_MEDIA_TYPE));
-            links.add(builder.buildRestLink(IconResource.class, null, IconResource.ICON, icon
-                .getPath(), params));
-
-        }
 
         return links;
     }
@@ -825,20 +820,6 @@ public class RESTBuilder implements IRESTBuilder
     }
 
     @Override
-    public List<RESTLink> buildIconLinks(final IconDto icon)
-    {
-        List<RESTLink> links = new ArrayList<RESTLink>();
-        Map<String, String> params = new HashMap<String, String>();
-        params.put(IconResource.ICON, icon.getId().toString());
-
-        AbiquoLinkBuilder builder = AbiquoLinkBuilder.createBuilder(linkProcessor);
-        links.add(builder.buildRestLink(IconResource.class, REL_EDIT, params,
-            IconDto.BASE_MEDIA_TYPE));
-
-        return links;
-    }
-
-    @Override
     public List<RESTLink> buildVirtualMachineCloudLinks(final Integer vdcId, final Integer vappId,
         final VirtualMachine vm, final boolean chefEnabled, final Integer[] volumeIds,
         final Integer[] diskIds, final List<IpPoolManagement> ips)
@@ -1012,16 +993,6 @@ public class RESTBuilder implements IRESTBuilder
         vmtemplateLink.setTitle(vmtemplate.getName());
         links.add(vmtemplateLink);
 
-        if (vmtemplate.getIcon() != null)
-        {
-            params.put(IconResource.ICON, vmtemplate.getIcon().getId().toString());
-            RESTLink iconLink =
-                builder.buildRestLink(IconResource.class, IconResource.ICON, params,
-                    IconDto.BASE_MEDIA_TYPE);
-            iconLink.setTitle(vmtemplate.getIcon().getPath()); // TODO do not use title (altRef)
-            links.add(iconLink);
-        }
-
         // TODO: How to build a link for an imported one??
 
         if (master != null)
@@ -1185,8 +1156,10 @@ public class RESTBuilder implements IRESTBuilder
             builder.buildRestLink(PrivateNetworkResource.class,
                 PrivateNetworkResource.PRIVATE_NETWORK, params);
         link.setTitle(ip.getVlanNetwork().getName());
-        
-        RESTLink ipLink = builder.buildRestLink(IpAddressesResource.class, IpAddressesResource.IP_ADDRESS_PARAM, REL_SELF, params);
+
+        RESTLink ipLink =
+            builder.buildRestLink(IpAddressesResource.class, IpAddressesResource.IP_ADDRESS_PARAM,
+                REL_SELF, params);
         ipLink.setTitle(VirtualMachineNetworkConfigurationResource.PRIVATE_IP);
 
         links.add(link);

@@ -434,15 +434,27 @@ public class XenServerCollector extends AbstractCollector
                     VDI vdi = vbd.getVDI(connection);
                     VDI.Record vdiRecord = vdi.getRecord(connection);
                     ResourceType disk = new ResourceType();
-
                     disk.setUnits(vdiRecord.virtualSize);
-                    disk.setAddress(vdiRecord.location);
-                    disk.setResourceType(ResourceEnumType.HARD_DISK);
-                    disk.setConnection(vdiRecord.SR.getUuid(connection));
-                    disk.setElementName(vdiRecord.nameLabel);
 
-                    // TODO: How to determine if it is sparse or flat ?
-                    disk.setResourceSubType(VirtualDiskEnumType.VHD_SPARSE.value());
+                    SRType srType = SRType.fromValue(vdiRecord.SR.getType(connection));
+                    disk.setResourceType(srType == SRType.CSLG ? ResourceEnumType.VOLUME_DISK
+                        : ResourceEnumType.HARD_DISK);
+
+                    // Datastore information
+                    disk.setConnection(vdiRecord.SR.getUuid(connection)); // Datastore root path
+                    disk.setAddress(""); // Datastore directory
+                    disk.setElementName(vdiRecord.SR.getNameLabel(connection)); // Datastore name
+
+                    // User device is the attachment number
+                    if (srType == SRType.CSLG && vbd.getUserdevice(connection).equals("0"))
+                    {
+                        disk.setResourceSubType(VirtualDiskEnumType.STATEFUL.value());
+                    }
+                    else
+                    {
+                        // TODO: How to determine if it is sparse or flat ?
+                        disk.setResourceSubType(VirtualDiskEnumType.VHD_SPARSE.value());
+                    }
 
                     diskList.add(disk);
                 }

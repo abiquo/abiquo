@@ -54,6 +54,7 @@ import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.model.enumerator.MachineState;
 import com.abiquo.model.util.ModelTransformer;
 import com.abiquo.server.core.cloud.Hypervisor;
+import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.infrastructure.Datastore;
 import com.abiquo.server.core.infrastructure.DatastoreDto;
 import com.abiquo.server.core.infrastructure.Machine;
@@ -254,9 +255,10 @@ public class MachineResource extends AbstractResource
 
     protected static MachineDto addLinks(final IRESTBuilder restBuilder,
         final Integer datacenterId, final Integer rackId, final Boolean managedRack,
-        final MachineDto machine)
+        final Enterprise enterprise, final MachineDto machine)
     {
-        machine.setLinks(restBuilder.buildMachineLinks(datacenterId, rackId, managedRack, machine));
+        machine.setLinks(restBuilder.buildMachineLinks(datacenterId, rackId, managedRack,
+            enterprise, machine));
 
         return machine;
     }
@@ -316,7 +318,7 @@ public class MachineResource extends AbstractResource
         {
             dto =
                 addLinks(restBuilder, machine.getDatacenter().getId(), machine.getRack().getId(),
-                    machine.getBelongsToManagedRack(), dto);
+                    machine.getBelongsToManagedRack(), machine.getEnterprise(), dto);
         }
 
         return dto;
@@ -389,6 +391,10 @@ public class MachineResource extends AbstractResource
      */
     protected APIException translateException(final Exception e)
     {
+        if (e instanceof APIException)
+        {
+            return (APIException) e;
+        }
         return new ConflictException(APIError.NODECOLLECTOR_ERROR);
     }
 }

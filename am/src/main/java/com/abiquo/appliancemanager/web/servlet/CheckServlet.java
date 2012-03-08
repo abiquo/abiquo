@@ -21,11 +21,23 @@
 package com.abiquo.appliancemanager.web.servlet;
 
 import static com.abiquo.am.data.AMRedisDao.REDIS_POOL;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+
+import org.apache.commons.io.FilenameUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.exceptions.JedisConnectionException;
 
 import com.abiquo.am.exceptions.AMError;
-import com.abiquo.appliancemanager.config.AMConfigurationManager;
+import com.abiquo.am.resources.handler.CheckRepositoryHandler;
+import com.abiquo.appliancemanager.config.AMConfiguration;
 import com.abiquo.appliancemanager.exceptions.AMException;
 
 /** Performs specific Appliance Manager checks. */
@@ -33,20 +45,29 @@ public class CheckServlet extends AbstractCheckServlet
 {
     private static final long serialVersionUID = -4320236147538190023L;
 
+    private final static Logger LOGGER = LoggerFactory.getLogger(CheckServlet.class);
+
+    /** File where check the repository mount point. */
+    private final static String MOUNT_FILE = "/etc/mtab";
+
+    /** The expected file mark in the repositoryl. */
+    private final static String REPO_MARK = AMConfiguration.getRepositoryPath()
+        + ".abiquo_repository";
+
     @Override
     protected boolean check() throws Exception
     {
-
-        if (!AMConfigurationManager.getInstance().validateAMConfiguration())
-        {
-            throw new AMException(AMError.AM_CHECK, AMConfigurationManager.getInstance()
-                .getConfigurationError());
-        }
-
         if (!checkRedis())
         {
             throw new AMException(AMError.AM_CHECK, "No connection to Redis server");
         }
+
+        if (!checkRepositoryMounted())
+        {
+            throw new AMException(AMError.MOUNT_INVALID_REPOSITORY, AMConfiguration.printConfig());
+        }
+
+        checkRepositoryMarkExistOrCreate();
 
         return true;
     }
@@ -70,5 +91,104 @@ public class CheckServlet extends AbstractCheckServlet
                 REDIS_POOL.returnResource(redis);
             }
         }
+    }
+
+    public synchronized boolean checkRepositoryMounted()
+    {
+
+        final String repositoryLocatino =
+            FilenameUtils.normalizeNoEndSeparator(AMConfiguration.getRepositoryLocation());
+        final String repositoryMountPoint =
+            FilenameUtils.normalizeNoEndSeparator(AMConfiguration.getRepositoryPath());
+
+        if (repositoryLocatino.startsWith("localhost")
+            || repositoryLocatino.startsWith("127.0.0.1"))
+        {
+            LOGGER.warn("Can't validate ''abiquo.appliancemanager.repositoryLocation'' {}."
+                + " Its a local repository", repositoryLocatino);
+            return true;
+        }
+
+        final File mountFile = new File(MOUNT_FILE);
+        BufferedReader mountReader = null;
+        try
+        {
+            mountReader = new BufferedReader(new FileReader(mountFile));
+
+            for (String line = mountReader.readLine(); line != null; line = mountReader.readLine())
+            {
+                if (line.contains(repositoryLocatino))
+                {
+                    final String[] parts = line.split(" ");
+                    if (repositoryLocatino.equals(FilenameUtils.normalizeNoEndSeparator(parts[0]))
+                        && repositoryMountPoint.equalsIgnoreCase(FilenameUtils
+                            .normalizeNoEndSeparator(parts[1])))
+                    {
+                        return true;
+                    }
+                    else
+                    {
+                        LOGGER.warn(
+                            "Repository location {} present but not mounted on the expected path {} \n"
+                                + line, repositoryLocatino, repositoryMountPoint);
+                    }
+                }
+            }
+
+            return false;
+        }
+        catch (final FileNotFoundException e)
+        {
+            throw new AMException(AMError.MOUNT_FILE_NOT_FOUND, e);
+        }
+        catch (final IOException e)
+        {
+            throw new AMException(AMError.MOUNT_FILE_READ_ERROR, e);
+        }
+        finally
+        {
+            if (mountReader != null)
+            {
+                try
+                {
+                    mountReader.close();
+                }
+                catch (final IOException e)
+                {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    public synchronized void checkRepositoryMarkExistOrCreate()
+    {
+        final CheckRepositoryHandler check = new CheckRepositoryHandler();
+        try
+        {
+            check.canUseRepository();
+        }
+        catch (final AMException e)
+        {
+            LOGGER.warn("Repository file mark ''.abiquo_repository'' not found. Try to create it.");
+            try
+            {
+                if (!new File(REPO_MARK).createNewFile())
+                {
+                    throw new AMException(AMError.CONFIG_REPOSITORY_MARK, REPO_MARK);
+                }
+                else
+                {
+                    LOGGER.info(
+                        "Repository file mark ''.abiquo_repository'' created for ''{}'' in ''{}''",
+                        AMConfiguration.getRepositoryLocation(), REPO_MARK);
+                }
+            }
+            catch (final IOException eC)
+            {
+                throw new AMException(AMError.CONFIG_REPOSITORY_MARK, REPO_MARK, eC);
+            }
+        }
+
     }
 }

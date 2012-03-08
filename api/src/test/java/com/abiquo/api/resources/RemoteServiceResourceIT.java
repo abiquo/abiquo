@@ -48,7 +48,7 @@ public class RemoteServiceResourceIT extends AbstractJpaGeneratorIT
     @Test
     public void getRemoteService() throws Exception
     {
-        RemoteService rs = remoteServiceGenerator.createInstance(RemoteServiceType.TARANTINO);
+        RemoteService rs = remoteServiceGenerator.createInstance(RemoteServiceType.VIRTUAL_FACTORY);
         setup(rs.getDatacenter(), rs);
 
         String uri = resolveRemoteServiceURI(rs.getDatacenter().getId(), rs.getType());
@@ -67,7 +67,7 @@ public class RemoteServiceResourceIT extends AbstractJpaGeneratorIT
     @Test
     public void getRemoteServiceDoesntExist() throws Exception
     {
-        RemoteService rs = remoteServiceGenerator.createInstance(RemoteServiceType.TARANTINO);
+        RemoteService rs = remoteServiceGenerator.createInstance(RemoteServiceType.VIRTUAL_FACTORY);
         setup(rs.getDatacenter(), rs);
 
         String uri =
@@ -83,7 +83,7 @@ public class RemoteServiceResourceIT extends AbstractJpaGeneratorIT
     @Test
     public void getRemoteServiceWithWrongDatacenter() throws ClientWebException
     {
-        RemoteService rs = remoteServiceGenerator.createInstance(RemoteServiceType.TARANTINO);
+        RemoteService rs = remoteServiceGenerator.createInstance(RemoteServiceType.VIRTUAL_FACTORY);
         setup(rs.getDatacenter(), rs);
 
         String uri = resolveRemoteServiceURI(1234, rs.getType());
@@ -116,7 +116,7 @@ public class RemoteServiceResourceIT extends AbstractJpaGeneratorIT
     @Test
     public void modifyRemoteServiceDoesntExist() throws ClientWebException
     {
-        RemoteService rs = remoteServiceGenerator.createInstance(RemoteServiceType.TARANTINO);
+        RemoteService rs = remoteServiceGenerator.createInstance(RemoteServiceType.VIRTUAL_FACTORY);
         setup(rs.getDatacenter(), rs);
 
         String validUri = resolveRemoteServiceURI(rs.getDatacenter().getId(), rs.getType());
@@ -136,7 +136,7 @@ public class RemoteServiceResourceIT extends AbstractJpaGeneratorIT
     @Test
     public void modifyRemoteServiceWrongDatacenter() throws ClientWebException
     {
-        RemoteService rs = remoteServiceGenerator.createInstance(RemoteServiceType.TARANTINO);
+        RemoteService rs = remoteServiceGenerator.createInstance(RemoteServiceType.VIRTUAL_FACTORY);
         setup(rs.getDatacenter(), rs);
 
         String validUri = resolveRemoteServiceURI(rs.getDatacenter().getId(), rs.getType());
@@ -163,7 +163,7 @@ public class RemoteServiceResourceIT extends AbstractJpaGeneratorIT
     @Test
     public void removeRemoteService() throws ClientWebException
     {
-        RemoteService rs = remoteServiceGenerator.createInstance(RemoteServiceType.TARANTINO);
+        RemoteService rs = remoteServiceGenerator.createInstance(RemoteServiceType.VIRTUAL_FACTORY);
         setup(rs.getDatacenter(), rs);
 
         String uri = resolveRemoteServiceURI(rs.getDatacenter().getId(), rs.getType());
@@ -175,7 +175,7 @@ public class RemoteServiceResourceIT extends AbstractJpaGeneratorIT
     @Test
     public void removeRemoteServiceDoesntExist() throws ClientWebException
     {
-        RemoteService rs = remoteServiceGenerator.createInstance(RemoteServiceType.TARANTINO);
+        RemoteService rs = remoteServiceGenerator.createInstance(RemoteServiceType.VIRTUAL_FACTORY);
         setup(rs.getDatacenter(), rs);
 
         String uri =
@@ -189,7 +189,7 @@ public class RemoteServiceResourceIT extends AbstractJpaGeneratorIT
     @Test
     public void removeRemoteServiceWrongDatacenter() throws ClientWebException
     {
-        RemoteService rs = remoteServiceGenerator.createInstance(RemoteServiceType.TARANTINO);
+        RemoteService rs = remoteServiceGenerator.createInstance(RemoteServiceType.VIRTUAL_FACTORY);
         setup(rs.getDatacenter(), rs);
 
         String uri = resolveRemoteServiceURI(1234, rs.getType());

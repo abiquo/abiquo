@@ -847,7 +847,7 @@ public class VirtualMachineResourceIT extends AbstractJpaGeneratorIT
         NodeVirtualImage nvi = nodeVirtualImageGenerator.createInstance(vapp, vm);
 
         RemoteService rs =
-            remoteServiceGenerator.createInstance(RemoteServiceType.TARANTINO, datacenter);
+            remoteServiceGenerator.createInstance(RemoteServiceType.VIRTUAL_FACTORY, datacenter);
 
         List<Object> entitiesToSetup = new ArrayList<Object>();
         entitiesToSetup.add(datacenter);

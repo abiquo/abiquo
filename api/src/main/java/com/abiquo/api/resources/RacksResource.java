@@ -42,6 +42,8 @@ import org.apache.wink.common.annotations.Parent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
+import com.abiquo.api.exceptions.APIError;
+import com.abiquo.api.exceptions.BadRequestException;
 import com.abiquo.api.services.InfrastructureService;
 import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.server.core.infrastructure.Rack;
@@ -87,6 +89,12 @@ public class RacksResource extends AbstractResource
     public  RackDto postRack(@PathParam(DatacenterResource.DATACENTER) final Integer datacenterId,
         final RackDto rackDto, @Context final IRESTBuilder restBuilder) throws Exception
     {
+        // The rack must not exists
+        if (rackDto.getId() != null)
+        {
+            throw new BadRequestException(APIError.STATUS_BAD_REQUEST);
+        }
+
         Rack rack = createPersistenceObject(rackDto);
         Rack r = infrastructureService.addRack(rack, datacenterId);
         return createTransferObject(r, restBuilder);
