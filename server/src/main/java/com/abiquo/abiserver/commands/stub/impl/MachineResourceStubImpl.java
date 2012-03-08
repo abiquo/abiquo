@@ -55,8 +55,8 @@ import com.abiquo.server.core.appslibrary.VirtualMachineTemplateDto;
 import com.abiquo.server.core.cloud.VirtualMachineDto;
 import com.abiquo.server.core.cloud.VirtualMachinesDto;
 import com.abiquo.server.core.enterprise.EnterpriseDto;
-import com.abiquo.server.core.enterprise.User.AuthType;
 import com.abiquo.server.core.enterprise.UserDto;
+import com.abiquo.server.core.enterprise.User.AuthType;
 import com.abiquo.server.core.infrastructure.MachineDto;
 
 public class MachineResourceStubImpl extends AbstractAPIStub implements MachineResourceStub
@@ -222,12 +222,15 @@ public class MachineResourceStubImpl extends AbstractAPIStub implements MachineR
         RESTLink userLink = virtualMachineDto.searchLink("user");
         if (userLink != null)
         {
-            ClientResponse userResponse = get(userLink.getHref(), UserDto.MEDIA_TYPE);
+            ClientResponse userResponse =
+                get(userLink.getHref() + "?name=true", UserDto.MEDIA_TYPE);
             if (userResponse.getStatusCode() == Status.OK.getStatusCode())
             {
 
                 UserDto userDto = userResponse.getEntity(UserDto.class);
-                User user = dtoToUser(userDto);
+                User user = new User(); // dtoToUser(userDto);
+                user.setName(userDto.getName());
+                user.setSurname(userDto.getSurname());
                 vm.setUser(user);
             }
             else

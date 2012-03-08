@@ -26,11 +26,13 @@ import java.util.List;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 
 import org.apache.wink.common.annotations.Parent;
@@ -63,6 +65,8 @@ public class UserResource extends AbstractResource
 {
     public static final String USER = "user";
 
+    public static final String NAME = "name";
+
     public static final String USER_PARAM = "{" + USER + "}";
 
     public static final String USER_ACTION_GET_VIRTUALMACHINES_PATH = "action/virtualmachines";
@@ -83,9 +87,24 @@ public class UserResource extends AbstractResource
     @Produces(UserDto.MEDIA_TYPE)
     public UserDto getUser(
         @PathParam(EnterpriseResource.ENTERPRISE) final String enterpriseIdOrWildcard,
-        @PathParam(USER) final Integer userId, @Context final IRESTBuilder restBuilder)
-        throws Exception
+        @PathParam(USER) final Integer userId,
+        @QueryParam(NAME) @DefaultValue("false") final Boolean userName,
+        @Context final IRESTBuilder restBuilder) throws Exception
     {
+
+        // ABICLOUDPREMIUM-3179
+        // We just need the user name. In case user has just the
+        // PHYS_DC_RETRIEVE_DETAILS privilege, we don't return too much information
+        if (userName && securityService.hasPrivilege(Privileges.PHYS_DC_RETRIEVE_DETAILS))
+        {
+            User user = service.getUser(userId, true);
+            UserDto u = new UserDto();
+            u.setName(user.getName());
+            u.setSurname(user.getSurname());
+
+            return u;
+        }
+
         if (!securityService.hasPrivilege(Privileges.USERS_VIEW))
         {
             User currentUser = service.getCurrentUser();
@@ -177,12 +196,12 @@ public class UserResource extends AbstractResource
         final IRESTBuilder restBuilder) throws Exception
     {
         UserWithRoleDto u = createTransferObjectWithRole(user);
-    
+
         u = addLinks(restBuilder, u, user.getEnterprise().getId(), user.getRole().getId());
 
         return u;
     }
-    
+
     public static UserWithRoleDto createUsersTransferObjectWithRole(final User user,
         final IRESTBuilder restBuilder) throws Exception
     {
