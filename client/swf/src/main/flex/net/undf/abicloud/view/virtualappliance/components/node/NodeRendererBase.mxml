@@ -461,7 +461,7 @@
             /**
              * Announces that user wants to delete this node
              **/
-            private function onClickEraseNodeButton(closeEvent:CloseEvent = null):void
+            public function onClickEraseNodeButton(closeEvent:CloseEvent = null):void
             {
                 if (!closeEvent || closeEvent.detail == Alert.YES )
                 {

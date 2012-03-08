@@ -54,6 +54,7 @@
             //Retrieve the list of private networks when the tab is shown
             private function retrieveNetworks():void{
             	privateNetworkManagement.isShown = true;
+            	networkManagementVS.selectedIndex = 0;
             	if(_virtualDatacenter){
             		privateNetworkManagement.virtualDatacenter = _virtualDatacenter;
             	}
@@ -82,6 +83,7 @@
 
             private function onShowPrivateNetworkManagement():void
             {
+               privateNetworkManagement.isShown = true;
                privateNetworkManagement.virtualDatacenter = _virtualDatacenter;
             }
             
