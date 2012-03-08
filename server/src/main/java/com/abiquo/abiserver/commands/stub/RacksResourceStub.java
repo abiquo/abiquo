@@ -35,6 +35,7 @@ import com.abiquo.abiserver.pojo.ucs.Fsm;
 import com.abiquo.abiserver.pojo.ucs.LogicServer;
 import com.abiquo.abiserver.pojo.ucs.LogicServerListResult;
 import com.abiquo.abiserver.pojo.ucs.Organization;
+import com.abiquo.abiserver.pojo.ucs.OrganizationListResult;
 import com.abiquo.model.enumerator.HypervisorType;
 
 public interface RacksResourceStub
@@ -92,7 +93,7 @@ public interface RacksResourceStub
      * @return wrapper which contains the list of {@link Organization} in the {@link UcsRack}. Or in
      *         case of error the appropiate object.
      */
-    public DataResult<List<Organization>> getOrganizations(UcsRack ucsRack,
+    public DataResult<OrganizationListResult> getOrganizations(UcsRack ucsRack,
         final ListRequest listRequest);
 
     /**
