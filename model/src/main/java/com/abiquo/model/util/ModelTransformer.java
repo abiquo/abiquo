@@ -28,14 +28,10 @@ import java.lang.reflect.Modifier;
 
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @SuppressWarnings("unchecked")
 public class ModelTransformer
 {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ModelTransformer.class);
-
     public static <T> T transportFromPersistence(final Class<T> clazz, final Object persistent)
         throws Exception
     {
@@ -93,9 +89,7 @@ public class ModelTransformer
                 }
                 catch (InvocationTargetException e)
                 {
-                    LOGGER.debug("Unsupporterd Operation get or set on " + name + " at class "
-                        + source.getClass().getSimpleName() + " or "
-                        + target.getClass().getSimpleName());
+                    // Ignore invalid field
                 }
             }
         }
