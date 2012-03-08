@@ -22,6 +22,7 @@ package com.abiquo.server.core.infrastructure.storage;
 
 import java.util.List;
 
+import javax.ws.rs.core.MediaType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -99,5 +100,16 @@ public class StorageSystemInfoDto extends SingleResourceTransportDto
     {
         this.pools = pools;
     }
+    
+    @Override
+    public String getMediaType()
+    {
+        return MediaType.APPLICATION_XML;
+    }
 
+    @Override
+    public String getBaseMediaType()
+    {
+        return MediaType.APPLICATION_XML;
+    }
 }

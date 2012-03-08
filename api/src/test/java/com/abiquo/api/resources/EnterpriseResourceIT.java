@@ -41,12 +41,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response.Status;
 
 import org.apache.wink.client.ClientResponse;
 import org.apache.wink.client.ClientWebException;
-import org.apache.wink.client.Resource;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -106,8 +104,8 @@ public class EnterpriseResourceIT extends AbstractJpaGeneratorIT
     public void getEnterpriseDoesntExist() throws ClientWebException
     {
         ClientResponse response =
-            get(resolveEnterpriseURI(12345), "sysadmin", "sysadmin", MediaType.APPLICATION_XML);
-        assertEquals(response.getStatusCode(), 404);
+            get(resolveEnterpriseURI(12345), "sysadmin", "sysadmin", EnterpriseDto.MEDIA_TYPE);
+        assertEquals(response.getStatusCode(), Status.NOT_FOUND.getStatusCode());
     }
 
     @Test(enabled = true)
@@ -118,7 +116,7 @@ public class EnterpriseResourceIT extends AbstractJpaGeneratorIT
 
         String uri = resolveEnterpriseURI(enterprise.getId());
 
-        ClientResponse response = get(uri, "sysadmin", "sysadmin");
+        ClientResponse response = get(uri, "sysadmin", "sysadmin", EnterpriseDto.MEDIA_TYPE);
 
         EnterpriseDto dto = response.getEntity(EnterpriseDto.class);
 
@@ -133,7 +131,7 @@ public class EnterpriseResourceIT extends AbstractJpaGeneratorIT
 
         String href = resolveEnterpriseURI(enterprise.getId());
 
-        ClientResponse response = get(href, "sysadmin", "sysadmin");
+        ClientResponse response = get(href, "sysadmin", "sysadmin", EnterpriseDto.MEDIA_TYPE);
 
         EnterpriseDto dto = response.getEntity(EnterpriseDto.class);
 
@@ -145,7 +143,6 @@ public class EnterpriseResourceIT extends AbstractJpaGeneratorIT
         assertLinkExist(dto, resolveEnterpriseActionGetIPsURI(enterprise.getId()),
             IpAddressesResource.IP_ADDRESSES, IpAddressesResource.IP_ADDRESSES);
         assertLinkExist(dto, resolveEnterpriseActionGetVirtualMachinesURI(enterprise.getId()),
-            VirtualMachinesResource.VIRTUAL_MACHINES_PATH,
             VirtualMachinesResource.VIRTUAL_MACHINES_PATH);
     }
 
@@ -157,13 +154,13 @@ public class EnterpriseResourceIT extends AbstractJpaGeneratorIT
 
         String href = resolveEnterpriseURI(enterprise.getId());
 
-        ClientResponse response = get(href, "sysadmin", "sysadmin");
+        ClientResponse response = get(href, "sysadmin", "sysadmin", EnterpriseDto.MEDIA_TYPE);
 
         EnterpriseDto dto = response.getEntity(EnterpriseDto.class);
         dto.setName("enterprise_changed");
 
         response = put(href, dto, "sysadmin", "sysadmin");
-        assertEquals(response.getStatusCode(), 200);
+        assertEquals(response.getStatusCode(), Status.OK.getStatusCode());
 
         EnterpriseDto modified = response.getEntity(EnterpriseDto.class);
         assertEquals("enterprise_changed", modified.getName());
@@ -179,8 +176,8 @@ public class EnterpriseResourceIT extends AbstractJpaGeneratorIT
         String uri1 = resolveEnterpriseURI(enterprise.getId());
         String uri2 = resolveEnterpriseURI(enterprise2.getId());
 
-        ClientResponse response1 = get(uri1, "sysadmin", "sysadmin");
-        ClientResponse response2 = get(uri2, "sysadmin", "sysadmin");
+        ClientResponse response1 = get(uri1, "sysadmin", "sysadmin", EnterpriseDto.MEDIA_TYPE);
+        ClientResponse response2 = get(uri2, "sysadmin", "sysadmin", EnterpriseDto.MEDIA_TYPE);
 
         EnterpriseDto dto1 = response1.getEntity(EnterpriseDto.class);
         EnterpriseDto dto2 = response2.getEntity(EnterpriseDto.class);
@@ -189,7 +186,8 @@ public class EnterpriseResourceIT extends AbstractJpaGeneratorIT
 
         ClientResponse response = put(uri2, dto2, "sysadmin", "sysadmin");
 
-        assertErrors(response, 409, APIError.ENTERPRISE_DUPLICATED_NAME.getCode());
+        assertErrors(response, Status.CONFLICT.getStatusCode(),
+            APIError.ENTERPRISE_DUPLICATED_NAME.getCode());
     }
 
     // TESTS refered to the action of GET IPs by Enterprise
@@ -207,9 +205,9 @@ public class EnterpriseResourceIT extends AbstractJpaGeneratorIT
 
         IPAddress ip = IPAddress.newIPAddress(vlan.getConfiguration().getAddress()).nextIPAddress();
         IPAddress lastIP =
-            IPNetworkRang.lastIPAddressWithNumNodes(IPAddress.newIPAddress(vlan.getConfiguration()
-                .getAddress()), IPNetworkRang
-                .masktoNumberOfNodes(vlan.getConfiguration().getMask()));
+            IPNetworkRang.lastIPAddressWithNumNodes(
+                IPAddress.newIPAddress(vlan.getConfiguration().getAddress()),
+                IPNetworkRang.masktoNumberOfNodes(vlan.getConfiguration().getMask()));
 
         List<Object> ips = new ArrayList<Object>();
         while (!ip.equals(lastIP))
@@ -222,10 +220,9 @@ public class EnterpriseResourceIT extends AbstractJpaGeneratorIT
         setup(ips.toArray());
 
         String validURI = resolveEnterpriseActionGetIPsURI(vdc.getEnterprise().getId());
-        Resource resource = client.resource(validURI);
 
-        ClientResponse response = resource.accept(MediaType.APPLICATION_XML).get();
-        assertEquals(200, response.getStatusCode());
+        ClientResponse response = get(validURI, IpsPoolManagementDto.MEDIA_TYPE);
+        assertEquals(response.getStatusCode(), Status.OK.getStatusCode());
 
         IpsPoolManagementDto entity = response.getEntity(IpsPoolManagementDto.class);
         assertNotNull(entity);
@@ -234,8 +231,9 @@ public class EnterpriseResourceIT extends AbstractJpaGeneratorIT
 
         // Get the first object and ensure it have at least the links of virtualdatacenter
         // and the link of private network that belongs to
-        assertLinkExist(entity.getCollection().get(0), resolvePrivateNetworkURI(vdc.getId(), vlan
-            .getId()), PrivateNetworkResource.PRIVATE_NETWORK);
+        assertLinkExist(entity.getCollection().get(0),
+            resolvePrivateNetworkURI(vdc.getId(), vlan.getId()),
+            PrivateNetworkResource.PRIVATE_NETWORK);
         assertLinkExist(entity.getCollection().get(0), resolveVirtualDatacenterURI(vdc.getId()),
             "virtualdatacenter");
 
@@ -252,10 +250,9 @@ public class EnterpriseResourceIT extends AbstractJpaGeneratorIT
         String validURI = resolveEnterpriseActionGetIPsURI(vdc.getEnterprise().getId());
 
         validURI = validURI + "?by=ip";
-        Resource resource = client.resource(validURI);
 
-        ClientResponse response = resource.accept(MediaType.APPLICATION_XML).get();
-        assertEquals(200, response.getStatusCode());
+        ClientResponse response = get(validURI, IpsPoolManagementDto.MEDIA_TYPE);
+        assertEquals(response.getStatusCode(), Status.OK.getStatusCode());
     }
 
     /**
@@ -270,10 +267,9 @@ public class EnterpriseResourceIT extends AbstractJpaGeneratorIT
         String validURI = resolveEnterpriseActionGetIPsURI(vdc.getEnterprise().getId());
 
         validURI = validURI + "?by=quarantine";
-        Resource resource = client.resource(validURI);
 
-        ClientResponse response = resource.accept(MediaType.APPLICATION_XML).get();
-        assertEquals(200, response.getStatusCode());
+        ClientResponse response = get(validURI, IpsPoolManagementDto.MEDIA_TYPE);
+        assertEquals(response.getStatusCode(), Status.OK.getStatusCode());
     }
 
     /**
@@ -287,10 +283,9 @@ public class EnterpriseResourceIT extends AbstractJpaGeneratorIT
         String validURI = resolveEnterpriseActionGetIPsURI(vdc.getEnterprise().getId());
 
         validURI = validURI + "?by=mac";
-        Resource resource = client.resource(validURI);
 
-        ClientResponse response = resource.accept(MediaType.APPLICATION_XML).get();
-        assertEquals(200, response.getStatusCode());
+        ClientResponse response = get(validURI, IpsPoolManagementDto.MEDIA_TYPE);
+        assertEquals(response.getStatusCode(), Status.OK.getStatusCode());
     }
 
     /**
@@ -305,10 +300,8 @@ public class EnterpriseResourceIT extends AbstractJpaGeneratorIT
         String validURI = resolveEnterpriseActionGetIPsURI(vdc.getEnterprise().getId());
 
         validURI = validURI + "?by=lease";
-        Resource resource = client.resource(validURI);
-
-        ClientResponse response = resource.accept(MediaType.APPLICATION_XML).get();
-        assertEquals(200, response.getStatusCode());
+        ClientResponse response = get(validURI, IpsPoolManagementDto.MEDIA_TYPE);
+        assertEquals(response.getStatusCode(), Status.OK.getStatusCode());
     }
 
     /**
@@ -322,10 +315,9 @@ public class EnterpriseResourceIT extends AbstractJpaGeneratorIT
         String validURI = resolveEnterpriseActionGetIPsURI(vdc.getEnterprise().getId());
 
         validURI = validURI + "?by=vlan";
-        Resource resource = client.resource(validURI);
 
-        ClientResponse response = resource.accept(MediaType.APPLICATION_XML).get();
-        assertEquals(200, response.getStatusCode());
+        ClientResponse response = get(validURI, IpsPoolManagementDto.MEDIA_TYPE);
+        assertEquals(response.getStatusCode(), Status.OK.getStatusCode());
     }
 
     /**
@@ -340,10 +332,9 @@ public class EnterpriseResourceIT extends AbstractJpaGeneratorIT
         String validURI = resolveEnterpriseActionGetIPsURI(vdc.getEnterprise().getId());
 
         validURI = validURI + "?by=virtualdatacenter";
-        Resource resource = client.resource(validURI);
 
-        ClientResponse response = resource.accept(MediaType.APPLICATION_XML).get();
-        assertEquals(200, response.getStatusCode());
+        ClientResponse response = get(validURI, IpsPoolManagementDto.MEDIA_TYPE);
+        assertEquals(response.getStatusCode(), Status.OK.getStatusCode());
     }
 
     /**
@@ -358,10 +349,9 @@ public class EnterpriseResourceIT extends AbstractJpaGeneratorIT
         String validURI = resolveEnterpriseActionGetIPsURI(vdc.getEnterprise().getId());
 
         validURI = validURI + "?by=" + Integer.valueOf(new Random().nextInt());
-        Resource resource = client.resource(validURI);
 
-        ClientResponse response = resource.accept(MediaType.APPLICATION_XML).get();
-        assertEquals(400, response.getStatusCode());
+        ClientResponse response = get(validURI, IpsPoolManagementDto.MEDIA_TYPE);
+        assertEquals(response.getStatusCode(), Status.BAD_REQUEST.getStatusCode());
     }
 
     /**
@@ -376,10 +366,9 @@ public class EnterpriseResourceIT extends AbstractJpaGeneratorIT
         String validURI = resolveEnterpriseActionGetIPsURI(vdc.getEnterprise().getId());
 
         validURI = validURI + "?by=virtualmachine";
-        Resource resource = client.resource(validURI);
 
-        ClientResponse response = resource.accept(MediaType.APPLICATION_XML).get();
-        assertEquals(200, response.getStatusCode());
+        ClientResponse response = get(validURI, IpsPoolManagementDto.MEDIA_TYPE);
+        assertEquals(response.getStatusCode(), Status.OK.getStatusCode());
     }
 
     /**
@@ -394,10 +383,9 @@ public class EnterpriseResourceIT extends AbstractJpaGeneratorIT
         String validURI = resolveEnterpriseActionGetIPsURI(vdc.getEnterprise().getId());
 
         validURI = validURI + "?by=virtualappliance";
-        Resource resource = client.resource(validURI);
 
-        ClientResponse response = resource.accept(MediaType.APPLICATION_XML).get();
-        assertEquals(200, response.getStatusCode());
+        ClientResponse response = get(validURI, IpsPoolManagementDto.MEDIA_TYPE);
+        assertEquals(response.getStatusCode(), Status.OK.getStatusCode());
     }
 
     /**
@@ -409,7 +397,9 @@ public class EnterpriseResourceIT extends AbstractJpaGeneratorIT
         Enterprise enterprise = enterpriseGenerator.createUniqueInstance();
         setup(enterprise);
 
-        ClientResponse response = get(resolveEnterpriseActionGetIPsURI(enterprise.getId()));
+        ClientResponse response =
+            get(resolveEnterpriseActionGetIPsURI(enterprise.getId()),
+                IpsPoolManagementDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), Status.OK.getStatusCode());
         IpsPoolManagementDto ips = response.getEntity(IpsPoolManagementDto.class);
         assertNotNull(ips);
@@ -422,12 +412,12 @@ public class EnterpriseResourceIT extends AbstractJpaGeneratorIT
         VirtualMachine vm = vmGenerator.createUniqueInstance();
 
         VirtualDatacenter vdc =
-            vdcGenerator.createInstance(vm.getHypervisor().getMachine().getDatacenter(), vm
-                .getEnterprise());
+            vdcGenerator.createInstance(vm.getHypervisor().getMachine().getDatacenter(),
+                vm.getEnterprise());
         VirtualAppliance vapp = vappGenerator.createInstance(vdc);
         NodeVirtualImage nvi = nodeVirtualImageGenerator.createInstance(vapp, vm);
-        vm.getVirtualMachineTemplate().getRepository().setDatacenter(
-            vm.getHypervisor().getMachine().getDatacenter());
+        vm.getVirtualMachineTemplate().getRepository()
+            .setDatacenter(vm.getHypervisor().getMachine().getDatacenter());
         List<Object> entitiesToSetup = new ArrayList<Object>();
 
         entitiesToSetup.add(vm.getEnterprise());
@@ -460,8 +450,8 @@ public class EnterpriseResourceIT extends AbstractJpaGeneratorIT
         Enterprise e = vm.getEnterprise();
         User u = vm.getUser();
 
-        ClientResponse response = get(uri, "sysadmin", "sysadmin");
-        Assert.assertEquals(response.getStatusCode(), 200);
+        ClientResponse response = get(uri, "sysadmin", "sysadmin", VirtualMachinesDto.MEDIA_TYPE);
+        Assert.assertEquals(response.getStatusCode(), Status.OK.getStatusCode());
 
         VirtualMachinesDto vms = response.getEntity(VirtualMachinesDto.class);
 
@@ -471,8 +461,8 @@ public class EnterpriseResourceIT extends AbstractJpaGeneratorIT
 
         assertLinkExist(vmDto, resolveEnterpriseURI(e.getId()), "enterprise");
         assertLinkExist(vmDto, resolveUserURI(e.getId(), u.getId()), "user");
-        assertLinkExist(vmDto, resolveMachineURI(m.getDatacenter().getId(), m.getRack().getId(), m
-            .getId()), "machine");
+        assertLinkExist(vmDto,
+            resolveMachineURI(m.getDatacenter().getId(), m.getRack().getId(), m.getId()), "machine");
     }
 
     @Test(enabled = true)
@@ -483,13 +473,13 @@ public class EnterpriseResourceIT extends AbstractJpaGeneratorIT
         VirtualAppliance vapp1 = vappGenerator.createInstance(vdc1);
         VirtualAppliance vapp2 = vappGenerator.createInstance(vdc1);
 
-        setup(vdc1.getEnterprise(), vdc2.getEnterprise(), vdc1.getDatacenter(), vdc2
-            .getDatacenter(), vdc1, vdc2, vapp1, vapp2);
+        setup(vdc1.getEnterprise(), vdc2.getEnterprise(), vdc1.getDatacenter(),
+            vdc2.getDatacenter(), vdc1, vdc2, vapp1, vapp2);
 
         // Check for vdc1
         ClientResponse response =
             get(resolveEnterpriseActionGetVirtualAppliancesURI(vdc1.getEnterprise().getId()),
-                "sysadmin", "sysadmin");
+                "sysadmin", "sysadmin", VirtualAppliancesDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), Status.OK.getStatusCode());
         VirtualAppliancesDto vapps = response.getEntity(VirtualAppliancesDto.class);
         assertNotNull(vapps);
@@ -497,7 +487,9 @@ public class EnterpriseResourceIT extends AbstractJpaGeneratorIT
         assertEquals(vapps.getCollection().size(), 2);
 
         // Check for vdc2
-        response = get(resolveVirtualAppliancesURI(vdc2.getId()), "sysadmin", "sysadmin");
+        response =
+            get(resolveVirtualAppliancesURI(vdc2.getId()), "sysadmin", "sysadmin",
+                VirtualAppliancesDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), Status.OK.getStatusCode());
         vapps = response.getEntity(VirtualAppliancesDto.class);
         assertNotNull(vapps);
@@ -519,13 +511,13 @@ public class EnterpriseResourceIT extends AbstractJpaGeneratorIT
         vapp1.setName(nameVapp1);
         vapp2.setName(nameVapp2);
 
-        setup(vdc1.getEnterprise(), vdc2.getEnterprise(), vdc1.getDatacenter(), vdc2
-            .getDatacenter(), vdc1, vdc2, vapp1, vapp2);
+        setup(vdc1.getEnterprise(), vdc2.getEnterprise(), vdc1.getDatacenter(),
+            vdc2.getDatacenter(), vdc1, vdc2, vapp1, vapp2);
 
         // Check for vdc1
         ClientResponse response =
             get(resolveEnterpriseActionGetVirtualAppliancesURI(vdc1.getEnterprise().getId())
-                + "?by=name&asc=false", "sysadmin", "sysadmin");
+                + "?by=name&asc=false", "sysadmin", "sysadmin", VirtualAppliancesDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), Status.OK.getStatusCode());
         VirtualAppliancesDto vapps = response.getEntity(VirtualAppliancesDto.class);
         assertNotNull(vapps);
@@ -535,7 +527,9 @@ public class EnterpriseResourceIT extends AbstractJpaGeneratorIT
         assertEquals(vapps.getCollection().get(1).getName(), nameVapp1);
 
         // Check for vdc2
-        response = get(resolveVirtualAppliancesURI(vdc2.getId()), "sysadmin", "sysadmin");
+        response =
+            get(resolveVirtualAppliancesURI(vdc2.getId()), "sysadmin", "sysadmin",
+                VirtualAppliancesDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), Status.OK.getStatusCode());
         vapps = response.getEntity(VirtualAppliancesDto.class);
         assertNotNull(vapps);

@@ -90,8 +90,8 @@ import com.abiquo.server.core.cloud.VirtualMachinesWithNodeExtendedDto;
 import com.abiquo.server.core.enterprise.DatacenterLimitsDto;
 import com.abiquo.server.core.enterprise.DatacentersLimitsDto;
 import com.abiquo.server.core.enterprise.EnterpriseDto;
-import com.abiquo.server.core.enterprise.UserDto;
 import com.abiquo.server.core.enterprise.User.AuthType;
+import com.abiquo.server.core.enterprise.UserDto;
 import com.abiquo.server.core.infrastructure.network.VLANNetworkDto;
 import com.abiquo.server.core.task.Job;
 import com.abiquo.server.core.task.JobDto;
@@ -134,7 +134,8 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
         VirtualMachineTaskDto options = new VirtualMachineTaskDto();
         options.setForceEnterpriseSoftLimits(forceEnterpriseSoftLimits);
 
-        ClientResponse response = post(link, options);
+        ClientResponse response =
+            post(link, AcceptedRequestDto.MEDIA_TYPE, VirtualMachineTaskDto.MEDIA_TYPE, options);
 
         if (response.getStatusCode() == 202)
         {
@@ -221,7 +222,8 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
                                 virtualDatacenterId, virtualAppliance.getVirtualDataCenter()
                                     .getIdDataCenter());
                         ClientResponse post =
-                            post(linkVirtualMachines, virtualMachineDto, VM_NODE_MEDIA_TYPE);
+                            post(linkVirtualMachines, VirtualMachineDto.MEDIA_TYPE,
+                                VirtualMachineWithNodeDto.MEDIA_TYPE, virtualMachineDto);
                         if (post.getStatusCode() != Status.CREATED.getStatusCode())
                         {
                             errors.append(n.getVirtualImage().getName());
@@ -244,8 +246,7 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
                             createVirtualMachineUrl(virtualDatacenterId, virtualAppliance.getId(),
                                 n.getVirtualMachine().getId());
 
-                        ClientResponse put =
-                            put(linkVirtualMachine, virtualMachineDto, VM_NODE_MEDIA_TYPE);
+                        ClientResponse put = put(linkVirtualMachine, virtualMachineDto);
                         if (put.getStatusCode() != Status.OK.getStatusCode()
                             && put.getStatusCode() != Status.NO_CONTENT.getStatusCode()
                             && put.getStatusCode() != Status.ACCEPTED.getStatusCode())
@@ -267,21 +268,28 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
         }
         String linkApp = createVirtualApplianceUrl(virtualDatacenterId, virtualAppliance.getId());
 
-        ClientResponse response = get(linkApp);
+        VirtualApplianceDto appDto = virtualApplianceToDto(virtualAppliance);
+        ClientResponse put = put(linkApp, appDto);
+        if (put.getStatusCode() != Status.OK.getStatusCode())
+        {
+            addErrors(result, errors, put, "updateVirtualApplianceNodes");
+        }
+
+        ClientResponse response = get(linkApp, VirtualApplianceDto.MEDIA_TYPE);
         if (response.getStatusCode() == Status.OK.getStatusCode())
         {
             VirtualApplianceDto entity = response.getEntity(VirtualApplianceDto.class);
             try
             {
-                VirtualApplianceDto appDto = virtualApplianceToDto(virtualAppliance);
+                appDto = virtualApplianceToDto(virtualAppliance);
                 if (!appDto.getName().equals(entity.getName())
                     || appDto.getNodeconnections() != null
                     && !appDto.getNodeconnections().equals(entity.getNodeconnections()))
                 {
-                    ClientResponse put = put(linkApp, appDto);
-                    if (put.getStatusCode() != Status.OK.getStatusCode())
+                    ClientResponse put1 = put(linkApp, appDto);
+                    if (put1.getStatusCode() != Status.OK.getStatusCode())
                     {
-                        addErrors(result, errors, put, "updateVirtualApplianceNodes");
+                        addErrors(result, errors, put1, "updateVirtualApplianceNodes");
                     }
                     else
                     {
@@ -362,7 +370,7 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
         app.setId(virtualApplianceDto.getId());
         Integer enterpriseId = virtualApplianceDto.getIdFromLink("enterprise");
         String eLink = createEnterpriseLink(enterpriseId);
-        ClientResponse enterpriseResponse = get(eLink);
+        ClientResponse enterpriseResponse = get(eLink, EnterpriseDto.MEDIA_TYPE);
         if (enterpriseResponse.getStatusCode() == Status.OK.getStatusCode())
         {
             EnterpriseDto enterpriseDto = enterpriseResponse.getEntity(EnterpriseDto.class);
@@ -375,7 +383,7 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
         }
         Integer vdcId = virtualApplianceDto.getIdFromLink("virtualdatacenter");
         String link = createVirtualDatacenterLink(vdcId);
-        ClientResponse vdcResponse = get(link);
+        ClientResponse vdcResponse = get(link, VirtualDatacenterDto.MEDIA_TYPE);
         if (vdcResponse.getStatusCode() == Status.OK.getStatusCode())
         {
             VirtualDatacenterDto dto = vdcResponse.getEntity(VirtualDatacenterDto.class);
@@ -409,7 +417,7 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
         app.setState(new State(StateEnum.valueOf(virtualApplianceDto.getState().name())));
         Integer vdcId = virtualApplianceDto.getIdFromLink("virtualdatacenter");
         String link = createVirtualDatacenterLink(vdcId);
-        ClientResponse vdcResponse = get(link);
+        ClientResponse vdcResponse = get(link, VirtualDatacenterDto.MEDIA_TYPE);
         if (vdcResponse.getStatusCode() == Status.OK.getStatusCode())
         {
             VirtualDatacenterDto dto = vdcResponse.getEntity(VirtualDatacenterDto.class);
@@ -446,7 +454,7 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
         app.setId(virtualApplianceDto.getId());
         Integer enterpriseId = virtualApplianceDto.getIdFromLink("enterprise");
         String eLink = createEnterpriseLink(enterpriseId);
-        ClientResponse enterpriseResponse = get(eLink);
+        ClientResponse enterpriseResponse = get(eLink, EnterpriseDto.MEDIA_TYPE);
         if (enterpriseResponse.getStatusCode() == Status.OK.getStatusCode())
         {
             EnterpriseDto enterpriseDto = enterpriseResponse.getEntity(EnterpriseDto.class);
@@ -482,11 +490,9 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
 
         vdc.setDefaultVlan(NetworkResourceStubImpl.createFlexObject(vlanDto));
 
-        vdc
-            .setHyperType(HyperVisorType
-                .create(dto.getHypervisorType(),
-                    new com.abiquo.abiserver.pojo.virtualimage.DiskFormatType(dto
-                        .getHypervisorType().baseFormat)));
+        vdc.setHyperType(HyperVisorType.create(
+            dto.getHypervisorType(),
+            new com.abiquo.abiserver.pojo.virtualimage.DiskFormatType(dto.getHypervisorType().baseFormat)));
         vdc.setEnterprise(enterprise);
         vdc.setId(dto.getId());
         vdc.setIdDataCenter(dto.getIdFromLink("datacenter"));
@@ -507,11 +513,9 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
         vdc.setId(dto.getId());
         vdc.setIdDataCenter(dto.getIdFromLink("datacenter"));
         vdc.setName(dto.getName());
-        vdc
-            .setHyperType(HyperVisorType
-                .create(dto.getHypervisorType(),
-                    new com.abiquo.abiserver.pojo.virtualimage.DiskFormatType(dto
-                        .getHypervisorType().baseFormat)));
+        vdc.setHyperType(HyperVisorType.create(
+            dto.getHypervisorType(),
+            new com.abiquo.abiserver.pojo.virtualimage.DiskFormatType(dto.getHypervisorType().baseFormat)));
         return vdc;
     }
 
@@ -626,7 +630,7 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
         DataResult result = new DataResult();
         String link = createVirtualApplianceUrl(virtualDatacenterId, virtualApplianceId);
 
-        ClientResponse response = get(link);
+        ClientResponse response = get(link, VirtualApplianceDto.MEDIA_TYPE);
 
         if (response.getStatusCode() == Status.OK.getStatusCode())
         {
@@ -667,7 +671,7 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
         final DataResult<List<Node>> result = new DataResult<List<Node>>();
         result.setSuccess(Boolean.TRUE);
         ClientResponse machinesResponse =
-            get(virtualMachinesLink, "application/vnd.vm-node-extended+xml"); // application/vnd.vm-node+xml
+            get(virtualMachinesLink, VirtualMachinesWithNodeExtendedDto.MEDIA_TYPE);
         if (machinesResponse.getStatusCode() == Status.OK.getStatusCode())
         {
             VirtualMachinesWithNodeExtendedDto virtualMachinesWithNodeDto =
@@ -719,7 +723,8 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
             RESTLink virtualImage = dto.searchLink("virtualmachinetemplate");
             if (virtualImage != null)
             {
-                ClientResponse imageResponse = get(virtualImage.getHref());
+                ClientResponse imageResponse =
+                    get(virtualImage.getHref(), VirtualMachineTemplateDto.MEDIA_TYPE);
                 if (imageResponse.getStatusCode() == Status.OK.getStatusCode())
                 {
 
@@ -865,7 +870,7 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
         RESTLink entLink = virtualMachineDto.searchLink("enterprise");
         if (entLink != null)
         {
-            ClientResponse entResponse = get(entLink.getHref());
+            ClientResponse entResponse = get(entLink.getHref(), EnterpriseDto.MEDIA_TYPE);
             if (entResponse.getStatusCode() == Status.OK.getStatusCode())
             {
 
@@ -936,7 +941,9 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
 
         VirtualMachineTaskDto virtualMachineTaskDto = new VirtualMachineTaskDto();
         virtualMachineTaskDto.setForceUndeploy(force);
-        ClientResponse response = post(link, virtualMachineTaskDto);
+        ClientResponse response =
+            post(link, AcceptedRequestDto.MEDIA_TYPE, VirtualMachineTaskDto.MEDIA_TYPE,
+                virtualMachineTaskDto);
 
         if (response.getStatusCode() == 202)
         {
@@ -1014,7 +1021,7 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
         String link = createVirtualDatacentersFromEnterpriseLink(enterprise.getId());
         result.setSuccess(Boolean.TRUE);
         List<VirtualAppliance> list = new ArrayList<VirtualAppliance>();
-        ClientResponse eResponse = get(link);
+        ClientResponse eResponse = get(link, VirtualDatacentersDto.MEDIA_TYPE);
         try
         {
             VirtualDatacentersDto dtos = eResponse.getEntity(VirtualDatacentersDto.class);
@@ -1023,11 +1030,11 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
                 VirtualDataCenter virtualDatacenter = dtoToVirtualDatacenter(dto, enterprise);
                 RESTLink app = dto.searchLink("virtualappliances");
                 // We want to expand the last task to know if there is any error
-                ClientResponse response = get(app.getHref() + "?expand=last_task");
+                ClientResponse response =
+                    get(app.getHref() + "?expand=last_task", VirtualAppliancesDto.MEDIA_TYPE);
                 VirtualAppliancesDto virtualAppliancesDto =
                     response.getEntity(VirtualAppliancesDto.class);
-                list
-                    .addAll(dtosToVirtualAppliance(virtualAppliancesDto, virtualDatacenter, result));
+                list.addAll(dtosToVirtualAppliance(virtualAppliancesDto, virtualDatacenter, result));
             }
             result.setData(list);
         }
@@ -1071,7 +1078,7 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
             }
         }
 
-        ClientResponse response = get(buildRequest.toString());
+        ClientResponse response = get(buildRequest.toString(), VirtualAppliancesDto.MEDIA_TYPE);
 
         if (response.getStatusCode() == 200)
         {
@@ -1127,7 +1134,7 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
             }
         }
 
-        ClientResponse response = get(buildRequest.toString());
+        ClientResponse response = get(buildRequest.toString(), VirtualAppliancesDto.MEDIA_TYPE);
 
         if (response.getStatusCode() == 200)
         {
@@ -1159,7 +1166,7 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
             new DataResult<VirtualAppliancesListResult>();
 
         String uri = createEnterpriseLimitsByDatacenterLink(enterprise.getId());
-        ClientResponse response = get(uri);
+        ClientResponse response = get(uri, DatacentersLimitsDto.MEDIA_TYPE);
         VirtualAppliancesListResult listResult = new VirtualAppliancesListResult();
 
         if (response.getStatusCode() == Status.NOT_FOUND.getStatusCode())
@@ -1178,7 +1185,9 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
                 Integer.valueOf(dcLink.getHref().substring(dcLink.getHref().lastIndexOf("/") + 1));
             if (dcId.equals(datacenter.getId()))
             {
-                response = get(limitDto.searchLink("action", "virtualappliances").getHref());
+                response =
+                    get(limitDto.searchLink("action", "virtualappliances").getHref(),
+                        VirtualAppliancesDto.MEDIA_TYPE);
                 if (response.getStatusCode() == 200)
                 {
                     VirtualAppliancesDto dtos = response.getEntity(VirtualAppliancesDto.class);
@@ -1385,13 +1394,13 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
 
             // The only data a virtual appliance has is the name
             org.jclouds.abiquo.domain.cloud.VirtualAppliance vapp =
-                org.jclouds.abiquo.domain.cloud.VirtualAppliance.builder(getApiClient(), vdc).name(
-                    virtualAppliance.getName()).build();
+                org.jclouds.abiquo.domain.cloud.VirtualAppliance.builder(getApiClient(), vdc)
+                    .name(virtualAppliance.getName()).build();
             // Here we actually perform the request to create the virtual appliance
             vapp.save();
 
-            result.setData(dtoToVirtualAppliance(vapp.unwrap(), virtualAppliance
-                .getVirtualDataCenter(), result));
+            result.setData(dtoToVirtualAppliance(vapp.unwrap(),
+                virtualAppliance.getVirtualDataCenter(), result));
             result.setSuccess(Boolean.TRUE);
         }
         catch (Exception e)
@@ -1418,8 +1427,8 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
                 getApiClient().getCloudService().getVirtualDatacenter(
                     virtualAppliance.getVirtualDataCenter().getId());
             VirtualApplianceDto dto =
-                getApiClient().getApi().getCloudClient().getVirtualAppliance(vdc.unwrap(),
-                    virtualAppliance.getId());
+                getApiClient().getApi().getCloudClient()
+                    .getVirtualAppliance(vdc.unwrap(), virtualAppliance.getId());
 
             org.jclouds.abiquo.domain.cloud.VirtualAppliance vapp =
                 DomainWrapper.wrap(getApiClient(),
@@ -1437,7 +1446,9 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
                         org.jclouds.abiquo.domain.cloud.VirtualAppliance.class, dto);
 
                 // Blocking
-                getApiClient().getMonitoringService().getVirtualMachineMonitor()
+                getApiClient()
+                    .getMonitoringService()
+                    .getVirtualMachineMonitor()
                     .awaitCompletionUndeploy(
                         virtualMachines
                             .toArray(new org.jclouds.abiquo.domain.cloud.VirtualMachine[0]));
@@ -1554,8 +1565,8 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
             }
             else
             {
-                errors.append(abiquoException.getMessage()).append("\n").append(
-                    abiquoException.getErrors().get(0).getCode());
+                errors.append(abiquoException.getMessage()).append("\n")
+                    .append(abiquoException.getErrors().get(0).getCode());
             }
         }
         else
@@ -1624,7 +1635,7 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
         List<TaskStatus> tasks = new ArrayList<TaskStatus>();
         for (String link : task.getUris())
         {
-            ClientResponse clientResponse = get(link);
+            ClientResponse clientResponse = get(link, TaskDto.MEDIA_TYPE);
             if (clientResponse.getStatusCode() == Status.OK.getStatusCode()
                 || clientResponse.getStatusCode() == Status.SEE_OTHER.getStatusCode())
             {

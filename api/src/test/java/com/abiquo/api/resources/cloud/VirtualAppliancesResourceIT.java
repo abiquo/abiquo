@@ -97,7 +97,8 @@ public class VirtualAppliancesResourceIT extends AbstractJpaGeneratorIT
 
         // Check for vdc1
         ClientResponse response =
-            get(resolveVirtualAppliancesURI(vdc1.getId()), SYSADMIN, SYSADMIN);
+            get(resolveVirtualAppliancesURI(vdc1.getId()), SYSADMIN, SYSADMIN,
+                VirtualAppliancesDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), Status.OK.getStatusCode());
         VirtualAppliancesDto vapps = response.getEntity(VirtualAppliancesDto.class);
         assertNotNull(vapps);
@@ -105,7 +106,9 @@ public class VirtualAppliancesResourceIT extends AbstractJpaGeneratorIT
         assertEquals(vapps.getCollection().size(), 2);
 
         // Check for vdc2
-        response = get(resolveVirtualAppliancesURI(vdc2.getId()), SYSADMIN, SYSADMIN);
+        response =
+            get(resolveVirtualAppliancesURI(vdc2.getId()), SYSADMIN, SYSADMIN,
+                VirtualAppliancesDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), Status.OK.getStatusCode());
         vapps = response.getEntity(VirtualAppliancesDto.class);
         assertNotNull(vapps);
@@ -132,7 +135,7 @@ public class VirtualAppliancesResourceIT extends AbstractJpaGeneratorIT
         // Check for vdc1
         ClientResponse response =
             get(resolveVirtualAppliancesURI(vdc1.getId()) + "?by=name&asc=false", SYSADMIN,
-                SYSADMIN);
+                SYSADMIN, VirtualAppliancesDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), Status.OK.getStatusCode());
         VirtualAppliancesDto vapps = response.getEntity(VirtualAppliancesDto.class);
         assertNotNull(vapps);
@@ -142,7 +145,9 @@ public class VirtualAppliancesResourceIT extends AbstractJpaGeneratorIT
         assertEquals(vapps.getCollection().get(1).getName(), nameVapp1);
 
         // Check for vdc2
-        response = get(resolveVirtualAppliancesURI(vdc2.getId()), SYSADMIN, SYSADMIN);
+        response =
+            get(resolveVirtualAppliancesURI(vdc2.getId()), SYSADMIN, SYSADMIN,
+                VirtualAppliancesDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), Status.OK.getStatusCode());
         vapps = response.getEntity(VirtualAppliancesDto.class);
         assertNotNull(vapps);

@@ -31,6 +31,9 @@ import com.abiquo.model.transport.WrapperDto;
 @XmlRootElement(name = "currencies")
 public class CurrenciesDto extends WrapperDto<CurrencyDto>
 {
+    public static final String BASE_MEDIA_TYPE = "application/vnd.abiquo.currencies+xml";
+    public static final String MEDIA_TYPE = BASE_MEDIA_TYPE + "; version=" + API_VERSION;
+    
     @Override
     @XmlElement(name = "currency")
     public List<CurrencyDto> getCollection()
@@ -43,4 +46,15 @@ public class CurrenciesDto extends WrapperDto<CurrencyDto>
         collection = currencies;
     }
 
+    @Override
+    public String getMediaType()
+    {
+        return CurrenciesDto.MEDIA_TYPE;
+    }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
+    }
 }

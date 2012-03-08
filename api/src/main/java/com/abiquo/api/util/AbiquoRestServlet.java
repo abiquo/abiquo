@@ -21,10 +21,18 @@
 
 package com.abiquo.api.util;
 
+import java.io.IOException;
+
 import javax.servlet.ServletException;
 
+import org.apache.wink.common.internal.i18n.Messages;
+import org.apache.wink.common.internal.utils.ClassUtils;
 import org.apache.wink.server.internal.DeploymentConfiguration;
 import org.apache.wink.server.internal.servlet.RestServlet;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.abiquo.api.wink.AbiquoDeploymentConfiguration;
 
 /**
  * Workaround until WINK 1.1.1 will be released with the fix for WINK-290.
@@ -33,13 +41,28 @@ import org.apache.wink.server.internal.servlet.RestServlet;
  */
 public class AbiquoRestServlet extends RestServlet
 {
+    private static final Logger logger = LoggerFactory.getLogger(AbiquoRestServlet.class);
 
     @Override
     public void init() throws ServletException
     {
+        logger.info("Initializing AbiquoRestServlet...");
         super.init();
         DeploymentConfiguration configuration = getRequestProcessor().getConfiguration();
         configuration.setServletConfig(getServletConfig());
         configuration.setServletContext(getServletContext());
     }
+
+//    @Override
+//    protected DeploymentConfiguration getDeploymentConfiguration() throws ClassNotFoundException,
+//        InstantiationException, IllegalAccessException, IOException
+//    {
+//        logger.info("Initializing Abiquo's own DeploymentConfiguration entity");
+//        AbiquoDeploymentConfiguration deploymentConfiguration = new AbiquoDeploymentConfiguration();
+//        deploymentConfiguration.setServletConfig(getServletConfig());
+//        deploymentConfiguration.setServletContext(getServletContext());
+//        deploymentConfiguration.setProperties(getProperties());
+//        deploymentConfiguration.init();
+//        return deploymentConfiguration;
+//    }
 }

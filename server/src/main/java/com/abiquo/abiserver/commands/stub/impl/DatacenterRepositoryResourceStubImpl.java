@@ -53,7 +53,7 @@ public class DatacenterRepositoryResourceStubImpl extends AbstractAPIStub implem
 
         String uri = createDatacenterRepositoryLink(idEnterprise, idDatacenter);
 
-        Resource repositoryResource = resource(uri).//
+        Resource repositoryResource = resource(uri, DatacenterRepositoryDto.MEDIA_TYPE).//
             queryParam(DATACENTER_REPOSITORY_GET_REFRESH_QUERY_PARAM, String.valueOf(refresh)).//
             queryParam(DATACENTER_REPOSITORY_GET_USAGE_QUERY_PARAM, String.valueOf(includeUsage));
 
@@ -83,7 +83,7 @@ public class DatacenterRepositoryResourceStubImpl extends AbstractAPIStub implem
         // String uri = createDatacenterRepositoriesLink(idEnterprise);
         String uri = createEnterpriseLimitsByDatacenterLink(idEnterprise);
 
-        ClientResponse response = resource(uri).get();
+        ClientResponse response = resource(uri, DatacentersLimitsDto.MEDIA_TYPE).get();
 
         if (response.getStatusCode() / 200 == 1)
         {
@@ -126,8 +126,7 @@ public class DatacenterRepositoryResourceStubImpl extends AbstractAPIStub implem
             com.abiquo.abiserver.pojo.service.RemoteService am =
                 new com.abiquo.abiserver.pojo.service.RemoteService();
             am.setIdDataCenter(idDataCenter);
-            am
-                .setRemoteServiceType(new RemoteServiceType(com.abiquo.model.enumerator.RemoteServiceType.APPLIANCE_MANAGER));
+            am.setRemoteServiceType(new RemoteServiceType(com.abiquo.model.enumerator.RemoteServiceType.APPLIANCE_MANAGER));
             am.setUri(amLink.toASCIIString());
             am.setDomainName(amLink.getHost());
             am.setPort(amLink.getPort());

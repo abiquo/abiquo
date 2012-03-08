@@ -31,7 +31,8 @@ public class StoragePoolDto extends SingleResourceTransportDto
 
     private static final long serialVersionUID = 1L;
 
-    public static final String MEDIA_TYPE = "application/storagepooldto+xml";
+    public static final String BASE_MEDIA_TYPE = "application/vnd.abiquo.storagepool+xml";
+    public static final String MEDIA_TYPE = BASE_MEDIA_TYPE + "; version=" + API_VERSION;
 
     protected String idStorage;
 
@@ -103,6 +104,18 @@ public class StoragePoolDto extends SingleResourceTransportDto
     public void setEnabled(boolean enabled)
     {
         this.enabled = enabled;
+    }
+    
+    @Override
+    public String getMediaType()
+    {
+        return StoragePoolDto.MEDIA_TYPE;
+    }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
     }
 
 }

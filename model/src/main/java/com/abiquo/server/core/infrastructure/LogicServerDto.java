@@ -45,6 +45,9 @@ public class LogicServerDto extends SingleResourceTransportDto
 {
     private static final long serialVersionUID = -3508955420063569772L;
 
+    public static final String BASE_MEDIA_TYPE = "application/vnd.abiquo.logicserver+xml";
+    public static final String MEDIA_TYPE = BASE_MEDIA_TYPE + "; version=" + API_VERSION;
+    
     protected String name;
 
     // It can be template (update or initial) or instance
@@ -182,5 +185,17 @@ public class LogicServerDto extends SingleResourceTransportDto
             policies = new ArrayList<LogicServerPolicyDto>();
         }
         return this.policies;
+    }
+    
+    @Override
+    public String getMediaType()
+    {
+        return LogicServerDto.MEDIA_TYPE;
+    }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
     }
 }

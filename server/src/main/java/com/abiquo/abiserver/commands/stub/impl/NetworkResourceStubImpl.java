@@ -31,6 +31,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response.Status;
 
 import org.apache.wink.client.ClientResponse;
@@ -52,6 +53,7 @@ import com.abiquo.abiserver.pojo.result.ListResponse;
 import com.abiquo.abiserver.pojo.user.Enterprise;
 import com.abiquo.abiserver.pojo.virtualappliance.VirtualDataCenter;
 import com.abiquo.model.rest.RESTLink;
+import com.abiquo.model.transport.AcceptedRequestDto;
 import com.abiquo.model.transport.LinksDto;
 import com.abiquo.server.core.cloud.VirtualDatacenterDto;
 import com.abiquo.server.core.enterprise.DatacenterLimitsDto;
@@ -114,8 +116,8 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
         String uri = createDatacenterPublicTagCheck(datacenterId);
         UserHB user = getCurrentUser();
         ClientResponse response =
-            resource(uri, user.getUser(), user.getPassword()).queryParam("tag", proposedVLANTag)
-                .get();
+            resource(uri, user.getUser(), user.getPassword(),
+                VlanTagAvailabilityDto.BASE_MEDIA_TYPE).queryParam("tag", proposedVLANTag).get();
 
         if (response.getStatusCode() == 200)
         {
@@ -420,7 +422,7 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
         BasicResult result = new BasicResult();
         result.setSuccess(Boolean.FALSE);
         String uri = createEnterpriseLimitsByDatacenterLink(enterpriseId);
-        ClientResponse response = get(uri);
+        ClientResponse response = get(uri, DatacentersLimitsDto.BASE_MEDIA_TYPE);
 
         DatacentersLimitsDto limits = response.getEntity(DatacentersLimitsDto.class);
         for (DatacenterLimitsDto limitDto : limits.getCollection())
@@ -458,14 +460,14 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
         DataResult<Enterprise> dr = new DataResult<Enterprise>();
         String uri = createPublicNetworkLink(datacenterId, vlanId);
 
-        ClientResponse response = get(uri);
+        ClientResponse response = get(uri, VLANNetworkDto.MEDIA_TYPE);
         if (response.getStatusCode() == 200)
         {
             VLANNetworkDto vlandto = response.getEntity(VLANNetworkDto.class);
             RESTLink entLink = vlandto.searchLink("enterprise");
             if (entLink != null)
             {
-                response = get(entLink.getHref());
+                response = get(entLink.getHref(), EnterpriseDto.MEDIA_TYPE);
                 if (response.getStatusCode() == 200)
                 {
                     EnterpriseDto entDto = response.getEntity(EnterpriseDto.class);
@@ -511,7 +513,7 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
         buildRequest.append("&startwith=" + offset);
         buildRequest.append("&limit=" + numElem);
 
-        ClientResponse response = get(buildRequest.toString());
+        ClientResponse response = get(buildRequest.toString(), EnterprisesDto.MEDIA_TYPE);
 
         if (response.getStatusCode() == 200)
         {
@@ -544,7 +546,7 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
 
         DataResult<VlanNetwork> result = new DataResult<VlanNetwork>();
         String uri = createEnterpriseLimitsByDatacenterLink(id);
-        ClientResponse response = get(uri);
+        ClientResponse response = get(uri, DatacentersLimitsDto.MEDIA_TYPE);
         DatacentersLimitsDto limits = response.getEntity(DatacentersLimitsDto.class);
         for (DatacenterLimitsDto limitDto : limits.getCollection())
         {
@@ -554,7 +556,7 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
             if (dcId.equals(datacenterId))
             {
                 uri = limitDto.searchLink("externalnetworks").getHref() + "/action/default";
-                response = get(uri);
+                response = get(uri, VLANNetworkDto.MEDIA_TYPE);
                 if (response.getStatusCode() == 200)
                 {
                     VLANNetworkDto vlanDto = response.getEntity(VLANNetworkDto.class);
@@ -590,7 +592,7 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
     {
         DataResult<List<VlanNetwork>> result = new DataResult<List<VlanNetwork>>();
         String uri = createEnterpriseLimitsByDatacenterLink(enterpriseId);
-        ClientResponse response = get(uri);
+        ClientResponse response = get(uri, DatacentersLimitsDto.MEDIA_TYPE);
         List<VlanNetwork> listOfNetworks = new ArrayList<VlanNetwork>();
         if (response.getStatusCode() == Status.NOT_FOUND.getStatusCode())
         {
@@ -606,7 +608,9 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
                 Integer.valueOf(dcLink.getHref().substring(dcLink.getHref().lastIndexOf("/") + 1));
             if (dcId.equals(datacenterId))
             {
-                response = get(limitDto.searchLink("externalnetworks").getHref());
+                response =
+                    get(limitDto.searchLink("externalnetworks").getHref(),
+                        VLANNetworksDto.MEDIA_TYPE);
                 if (response.getStatusCode() == 200)
                 {
                     VLANNetworksDto dtos = response.getEntity(VLANNetworksDto.class);
@@ -651,7 +655,7 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
         DataResult<IPAddress> result = new DataResult<IPAddress>();
         String uri = createVirtualMachineConfigurationsLink(vdcId, vappId, vmId);
 
-        ClientResponse response = get(uri);
+        ClientResponse response = get(uri, VMNetworkConfigurationsDto.MEDIA_TYPE);
         if (response.getStatusCode() == 200)
         {
             VMNetworkConfigurationsDto dtos = response.getEntity(VMNetworkConfigurationsDto.class);
@@ -689,7 +693,7 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
         List<IPAddress> gateways = new ArrayList<IPAddress>();
         String uri = createVirtualMachineConfigurationsLink(vdcId, vappId, vmId);
 
-        ClientResponse response = get(uri);
+        ClientResponse response = get(uri, VMNetworkConfigurationsDto.MEDIA_TYPE);
         if (response.getStatusCode() == 200)
         {
             VMNetworkConfigurationsDto dtos = response.getEntity(VMNetworkConfigurationsDto.class);
@@ -716,7 +720,7 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
         buildRequest.append("/" + vdcId.toString());
         buildRequest.append("/action/dhcpinfo");
 
-        ClientResponse response = get(buildRequest.toString());
+        ClientResponse response = get(buildRequest.toString(), MediaType.TEXT_PLAIN);
         if (response.getStatusCode() == 200)
         {
             String dhcpinfo = response.getEntity(String.class);
@@ -759,7 +763,7 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
         }
         String request = buildRequest.toString();
 
-        ClientResponse response = get(request);
+        ClientResponse response = get(request, IpsPoolManagementDto.MEDIA_TYPE);
 
         if (response.getStatusCode() == 200)
         {
@@ -808,7 +812,7 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
             buildRequest.append("&has=" + filterLike);
         }
 
-        ClientResponse response = get(buildRequest.toString());
+        ClientResponse response = get(buildRequest.toString(), IpsPoolManagementDto.MEDIA_TYPE);
 
         if (response.getStatusCode() == 200)
         {
@@ -863,7 +867,7 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
             buildRequest.append("&has=" + filterLike);
         }
 
-        ClientResponse response = get(buildRequest.toString());
+        ClientResponse response = get(buildRequest.toString(), IpsPoolManagementDto.MEDIA_TYPE);
 
         if (response.getStatusCode() == 200)
         {
@@ -914,7 +918,7 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
             buildRequest.append("&has=" + filterLike);
         }
 
-        ClientResponse response = get(buildRequest.toString());
+        ClientResponse response = get(buildRequest.toString(), IpsPoolManagementDto.MEDIA_TYPE);
 
         if (response.getStatusCode() == 200)
         {
@@ -962,7 +966,7 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
             buildRequest.append("&has=" + filterLike);
         }
 
-        ClientResponse response = get(buildRequest.toString());
+        ClientResponse response = get(buildRequest.toString(), IpsPoolManagementDto.MEDIA_TYPE);
 
         if (response.getStatusCode() == 200)
         {
@@ -1011,7 +1015,7 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
             buildRequest.append("&has=" + filterLike);
         }
 
-        ClientResponse response = get(buildRequest.toString());
+        ClientResponse response = get(buildRequest.toString(), IpsPoolManagementDto.MEDIA_TYPE);
 
         if (response.getStatusCode() == 200)
         {
@@ -1057,7 +1061,7 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
             buildRequest.append("&has=" + filterLike);
         }
 
-        ClientResponse response = get(buildRequest.toString());
+        ClientResponse response = get(buildRequest.toString(), IpsPoolManagementDto.MEDIA_TYPE);
 
         if (response.getStatusCode() == 200)
         {
@@ -1092,7 +1096,7 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
         DataResult<ListResponse<IpPoolManagement>> result =
             new DataResult<ListResponse<IpPoolManagement>>();
         String uri = createEnterpriseLimitsByDatacenterLink(vdc.getEnterprise().getId());
-        ClientResponse response = get(uri);
+        ClientResponse response = get(uri, DatacentersLimitsDto.MEDIA_TYPE);
         DatacentersLimitsDto limits = response.getEntity(DatacentersLimitsDto.class);
         for (DatacenterLimitsDto limitDto : limits.getCollection())
         {
@@ -1115,7 +1119,7 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
                     uriIps.append("&has=" + filterLike);
                 }
 
-                response = get(uriIps.toString());
+                response = get(uriIps.toString(), IpsPoolManagementDto.MEDIA_TYPE);
                 if (response.getStatusCode() == 200)
                 {
                     ListResponse<IpPoolManagement> listResponse =
@@ -1156,7 +1160,7 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
         DataResult<List<IpPoolManagement>> result = new DataResult<List<IpPoolManagement>>();
 
         String uri = createVirtualMachineNICsLink(vdcId, vappId, vmId);
-        ClientResponse response = get(uri);
+        ClientResponse response = get(uri, NicsDto.MEDIA_TYPE);
 
         if (response.getStatusCode() == 200)
         {
@@ -1185,7 +1189,7 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
         DataResult<List<VlanNetwork>> result = new DataResult<List<VlanNetwork>>();
 
         String uri = createPrivateNetworksLink(vdcId);
-        ClientResponse response = get(uri);
+        ClientResponse response = get(uri, VLANNetworksDto.MEDIA_TYPE);
 
         if (response.getStatusCode() == 200)
         {
@@ -1216,7 +1220,7 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
         DataResult<VlanNetwork> result = new DataResult<VlanNetwork>();
 
         String uri = createPublicNetworkLink(datacenterId, vlanId);
-        ClientResponse response = get(uri);
+        ClientResponse response = get(uri, VLANNetworkDto.MEDIA_TYPE);
 
         if (response.getStatusCode() == 200)
         {
@@ -1245,7 +1249,7 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
         }
         buildRequest.append("?type=" + type);
 
-        ClientResponse response = get(buildRequest.toString());
+        ClientResponse response = get(buildRequest.toString(), VLANNetworksDto.MEDIA_TYPE);
 
         if (response.getStatusCode() == 200)
         {
@@ -1276,7 +1280,10 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
         StringBuilder uri =
             new StringBuilder(createVirtualDatacenterPublicPurchasedIPLink(vdcId, ipId));
 
-        ClientResponse response = put(uri.toString());
+        UserHB user = getCurrentUserCredentials();
+        ClientResponse response =
+            put(uri.toString(), null, user.getUser(), user.getPassword(),
+                IpPoolManagementDto.MEDIA_TYPE, null);
 
         if (response.getStatusCode() == 200)
         {
@@ -1321,7 +1328,10 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
         StringBuilder uri =
             new StringBuilder(createVirtualDatacenterPublicToPurchaseIPLink(vdcId, ipId));
 
-        ClientResponse response = put(uri.toString());
+        UserHB user = getCurrentUserCredentials();
+        ClientResponse response =
+            put(uri.toString(), null, user.getUser(), user.getPassword(),
+                IpPoolManagementDto.MEDIA_TYPE, null);
 
         if (response.getStatusCode() == 200)
         {
@@ -1371,14 +1381,15 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
 
         // First get the virtual datacenter
         VirtualDatacenterDto vdcDto =
-            get(createVirtualDatacenterLink(vdcId)).getEntity(VirtualDatacenterDto.class);
+            get(createVirtualDatacenterLink(vdcId), VirtualDatacenterDto.MEDIA_TYPE).getEntity(
+                VirtualDatacenterDto.class);
         RESTLink dcLink = vdcDto.searchLink("datacenter");
         Integer datacenterId =
             Integer.valueOf(dcLink.getHref().substring(dcLink.getHref().lastIndexOf("/") + 1));
 
         BasicResult result = new BasicResult();
         String uri = createEnterpriseLimitsByDatacenterLink(enterpriseId);
-        ClientResponse response = get(uri);
+        ClientResponse response = get(uri, DatacentersLimitsDto.MEDIA_TYPE);
         DatacentersLimitsDto limits = response.getEntity(DatacentersLimitsDto.class);
         for (DatacenterLimitsDto limitDto : limits.getCollection())
         {
@@ -1407,7 +1418,8 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
                 LinksDto linkDto = new LinksDto();
                 linkDto.addLink(externalIPlink);
 
-                response = post(uriNIC, linkDto);
+                response =
+                    post(uriNIC, AcceptedRequestDto.MEDIA_TYPE, LinksDto.MEDIA_TYPE, linkDto);
                 if (response.getStatusCode() == 204 || response.getStatusCode() == 202)
                 {
                     result.setSuccess(Boolean.TRUE);
@@ -1441,7 +1453,8 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
         ipLink.setRel("privateip");
         links.addLink(ipLink);
 
-        ClientResponse response = post(uri, links);
+        ClientResponse response =
+            post(uri, AcceptedRequestDto.MEDIA_TYPE, LinksDto.MEDIA_TYPE, links);
 
         if (response.getStatusCode() == 204 || response.getStatusCode() == 202)
         {
@@ -1469,7 +1482,8 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
         ipLink.setRel("publicip");
         links.addLink(ipLink);
 
-        ClientResponse response = post(uri, links);
+        ClientResponse response =
+            post(uri, AcceptedRequestDto.MEDIA_TYPE, LinksDto.MEDIA_TYPE, links);
 
         if (response.getStatusCode() == 204 || response.getStatusCode() == 202)
         {
@@ -1489,7 +1503,7 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
     {
         BasicResult result = new BasicResult();
         String uri = createEnterpriseLimitsByDatacenterLink(id);
-        ClientResponse response = get(uri);
+        ClientResponse response = get(uri, DatacentersLimitsDto.MEDIA_TYPE);
         DatacentersLimitsDto limits = response.getEntity(DatacentersLimitsDto.class);
         for (DatacenterLimitsDto limitDto : limits.getCollection())
         {
@@ -1501,7 +1515,7 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
                 uri =
                     limitDto.searchLink("externalnetworks").getHref() + "/" + vlanId
                         + "/action/default";
-                response = put(uri);
+                response = put(uri, limitDto);
                 if (response.getStatusCode() == 204)
                 {
                     result.setSuccess(Boolean.TRUE);
@@ -1528,7 +1542,7 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
     {
         BasicResult result = new BasicResult();
         String uri = createEnterpriseLimitsByDatacenterLink(vdc.getEnterprise().getId());
-        ClientResponse response = get(uri);
+        ClientResponse response = get(uri, DatacentersLimitsDto.MEDIA_TYPE);
         DatacentersLimitsDto limits = response.getEntity(DatacentersLimitsDto.class);
         for (DatacenterLimitsDto limitDto : limits.getCollection())
         {
@@ -1571,7 +1585,7 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
         BasicResult result = new BasicResult();
         String uri = createVirtualMachineConfigurationsLink(vdcId, vappId, vmId);
 
-        ClientResponse response = get(uri);
+        ClientResponse response = get(uri, VMNetworkConfigurationsDto.MEDIA_TYPE);
         if (response.getStatusCode() == 200)
         {
             VMNetworkConfigurationsDto dtos = response.getEntity(VMNetworkConfigurationsDto.class);
@@ -1618,8 +1632,11 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
 
                     LinksDto linksDto = new LinksDto();
                     linksDto.addLink(linkGateway);
-                    response = put(gatewaysUri, linksDto);
-                    if (response.getStatusCode() == 202 || response.getStatusCode() == 204)
+                    response =
+                        put(gatewaysUri, linksDto, AcceptedRequestDto.MEDIA_TYPE,
+                            LinksDto.MEDIA_TYPE);
+                    if (response.getStatusCode() == 200 || response.getStatusCode() == 202
+                        || response.getStatusCode() == 204)
                     {
                         result.setSuccess(Boolean.TRUE);
                     }
@@ -1678,7 +1695,7 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
     {
         BasicResult result = new BasicResult();
         String uri = createEnterpriseLimitsByDatacenterLink(id);
-        ClientResponse response = get(uri);
+        ClientResponse response = get(uri, DatacentersLimitsDto.MEDIA_TYPE);
         DatacentersLimitsDto limits = response.getEntity(DatacentersLimitsDto.class);
         for (DatacenterLimitsDto limitDto : limits.getCollection())
         {
@@ -1688,7 +1705,7 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
             if (dcId.equals(datacenterId))
             {
                 uri = limitDto.searchLink("externalnetworks").getHref() + "/action/default";
-                response = put(uri);
+                response = put(uri, limitDto);
                 if (response.getStatusCode() == 204)
                 {
                     result.setSuccess(Boolean.TRUE);
@@ -1843,13 +1860,15 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
     }
 
     @Override
-    public BasicResult getInfrastructureNICsByVirtualMachine(Integer datacenterId, Integer rackId,
-        Integer machineId, Integer virtualMachineId)
+    public BasicResult getInfrastructureNICsByVirtualMachine(final Integer datacenterId,
+        final Integer rackId, final Integer machineId, final Integer virtualMachineId)
     {
         DataResult<List<IpPoolManagement>> result = new DataResult<List<IpPoolManagement>>();
 
-        String uri = createInfrastructureVirtualMachineNICsLink(datacenterId, rackId, machineId, virtualMachineId);
-        ClientResponse response = get(uri);
+        String uri =
+            createInfrastructureVirtualMachineNICsLink(datacenterId, rackId, machineId,
+                virtualMachineId);
+        ClientResponse response = get(uri, NicsDto.MEDIA_TYPE);
 
         if (response.getStatusCode() == 200)
         {
@@ -1871,7 +1890,5 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
 
         return result;
     }
-
-
 
 }

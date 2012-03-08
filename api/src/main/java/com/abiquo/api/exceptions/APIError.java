@@ -40,7 +40,11 @@ public enum APIError
         "403-FORBIDDEN", "Access is denied"), STATUS_NOT_FOUND("404-NOT FOUND",
         "The requested resource does not exist"), STATUS_METHOD_NOT_ALLOWED(
         "405-METHOD NOT ALLOWED", "The resource does not expose this method"), STATUS_CONFLICT(
-        "409-CONFLICT", "Conflict"), STATUS_UNSUPPORTED_MEDIA_TYPE("415-UNSUPPORTED MEDIA TYPE",
+        "409-CONFLICT", "Conflict"), STATUS_HEADER_VERSION_MANDATORY("412-PRECONDITION FAILED",
+        "Header 'X-abiquo-version' is mandatory"), STATUS_NOT_ACCEPTABLE_VERSION(
+        "406-NOT ACCEPTABLE", "Invalid version parameter for 'Accept' header"), STATUS_UNSUPPORTED_MEDIA_TYPE_VERSION(
+        "415-UNSUPPORTED MEDIA TYPE", "Invalid version 'Content-type' "), STATUS_UNSUPPORTED_MEDIA_TYPE(
+        "415-UNSUPPORTED MEDIA TYPE",
         "The Abiquo API currently only supports application/XML Media Type"), STATUS_INTERNAL_SERVER_ERROR(
         "500-INTERNAL SERVER ERROR", "Unexpected exception"), STATUS_UNPROVISIONED(
         "412 - Unprovisioned", "Error releasing resources on the hypervisor"), SERVICE_UNAVAILABLE_ERROR(
@@ -105,12 +109,12 @@ public enum APIError
 
     // VIRTUAL DATACENTER
     NON_EXISTENT_VIRTUAL_DATACENTER("VDC-0", "The requested virtual datacenter does not exist"), VIRTUAL_DATACENTER_INVALID_HYPERVISOR_TYPE(
-        "VDC-1", "Invalid hypervisor type for this datacenter"), VIRTUAL_DATACENTER_CONTAINS_VIRTUAL_APPLIANCES(
+        "VDC-1", "Invalid hypervisor type for this virtual datacenter"), VIRTUAL_DATACENTER_CONTAINS_VIRTUAL_APPLIANCES(
         "VDC-2",
-        "This datacenter contains virtual appliances and cannot be deleted without removing them first"), VIRTUAL_DATACENTER_CONTAINS_RESOURCES(
+        "This virtual datacenter contains virtual appliances and cannot be deleted without removing them first"), VIRTUAL_DATACENTER_CONTAINS_RESOURCES(
         "VDC-3",
-        "This datacenter has volumes attached and cannot be deleted without removing them first"), VIRTUAL_DATACENTER_INVALID_NETWORKS(
-        "VDC-4", "This datacenter has networks without IP addresses"), VIRTUAL_DATACENTER_LIMIT_EDIT_ARE_SURPRASED(
+        "This virtual datacenter has volumes attached and cannot be deleted without removing them first"), VIRTUAL_DATACENTER_INVALID_NETWORKS(
+        "VDC-4", "This virtual datacenter has networks without IP addresses"), VIRTUAL_DATACENTER_LIMIT_EDIT_ARE_SURPRASED(
         "VDC-5",
         "Cannot edit resource limits; current virtual datacenter allocation exceeds the new specified limits "
             + "(see SYSTEM traces in order to determine which resources are at HARD limit)"), VIRTUAL_DATACENTER_MUST_HAVE_NETWORK(

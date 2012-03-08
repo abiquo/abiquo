@@ -131,7 +131,7 @@ public class TemplateDefinitionListResourceIT extends AbstractJpaGeneratorIT
         {
             ClientResponse response =
                 get(UriTestResolver.resolveTemplateDefinitionListURI(enterprise.getId(), o.getId()),
-                    SYSADMIN, SYSADMIN);
+                    SYSADMIN, SYSADMIN, TemplateDefinitionListDto.MEDIA_TYPE);
 
             TemplateDefinitionListDto result = response.getEntity(TemplateDefinitionListDto.class);
             assertNotNull(result);
@@ -144,7 +144,7 @@ public class TemplateDefinitionListResourceIT extends AbstractJpaGeneratorIT
 
         ClientResponse response =
             get(UriTestResolver.resolveTemplateDefinitionListsURI(enterprise.getId()), SYSADMIN,
-                SYSADMIN);
+                SYSADMIN, TemplateDefinitionListsDto.MEDIA_TYPE);
 
         assertEquals(response.getStatusCode(), 200);
         TemplateDefinitionListsDto lists = response.getEntity(TemplateDefinitionListsDto.class);
@@ -159,7 +159,7 @@ public class TemplateDefinitionListResourceIT extends AbstractJpaGeneratorIT
         TemplateDefinitionListDto list = new TemplateDefinitionListDto();
         ClientResponse response =
             put(UriTestResolver.resolveTemplateDefinitionListURI(enterprise.getId(), 2), list,
-                SYSADMIN, SYSADMIN);
+                SYSADMIN, SYSADMIN, TemplateDefinitionListDto.MEDIA_TYPE);
 
         assertError(response, 404, APIError.NON_EXISTENT_TEMPLATE_DEFINITION_LIST);
     }
@@ -174,8 +174,7 @@ public class TemplateDefinitionListResourceIT extends AbstractJpaGeneratorIT
             ClientResponse response =
                 delete(
                     UriTestResolver.resolveTemplateDefinitionListURI(enterprise.getId(), o.getId()),
-                    SYSADMIN, SYSADMIN);
-
+                    SYSADMIN, SYSADMIN, TemplateDefinitionListDto.MEDIA_TYPE);
             assertEquals(response.getStatusCode(), 204);
         }
     }
@@ -187,7 +186,7 @@ public class TemplateDefinitionListResourceIT extends AbstractJpaGeneratorIT
 
         ClientResponse response =
             delete(resolveTemplateDefinitionURI(enterprise.getId(), templateDef0.getId()),
-                SYSADMIN, SYSADMIN);
+                SYSADMIN, SYSADMIN, TemplateDefinitionListsDto.MEDIA_TYPE);
 
         assertEquals(response.getStatusCode(), 204);
 
@@ -195,7 +194,7 @@ public class TemplateDefinitionListResourceIT extends AbstractJpaGeneratorIT
         {
             response =
                 get(UriTestResolver.resolveTemplateDefinitionListURI(enterprise.getId(), o.getId()),
-                    SYSADMIN, SYSADMIN);
+                    SYSADMIN, SYSADMIN, TemplateDefinitionListDto.MEDIA_TYPE);
             assertEquals(response.getStatusCode(), 200);
             TemplateDefinitionListDto result = response.getEntity(TemplateDefinitionListDto.class);
             assertNotNull(result);

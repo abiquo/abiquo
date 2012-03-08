@@ -53,6 +53,7 @@ import com.abiquo.server.core.cloud.VirtualDatacentersDto;
 import com.abiquo.server.core.enterprise.DatacenterLimitsDto;
 import com.abiquo.server.core.enterprise.EnterpriseDto;
 import com.abiquo.server.core.enterprise.EnterprisesDto;
+import com.abiquo.server.core.infrastructure.DatacenterDto;
 import com.abiquo.server.core.infrastructure.MachineDto;
 import com.abiquo.util.URIResolver;
 
@@ -207,7 +208,7 @@ public class EnterprisesResourceStubImpl extends AbstractAPIStub implements Ente
             String datacenterUri = createDatacenterLink(limit.getDatacenter().getId());
             dto.addLink(new RESTLink("datacenter", datacenterUri));
 
-            Resource resource = resource(uri);
+            Resource resource = resource(uri, DatacenterDto.MEDIA_TYPE);
             resource = resource.queryParam("datacenter", limit.getDatacenter().getId());
             ClientResponse response = resource.post(dto);
             // ClientResponse response = post(uri, dto);
@@ -308,7 +309,7 @@ public class EnterprisesResourceStubImpl extends AbstractAPIStub implements Ente
             createEnterprisesLink(enterpriseListOptions.getFilterLike(),
                 enterpriseListOptions.getOffset(), enterpriseListOptions.getNumberOfNodes());
 
-        ClientResponse response = get(uri);
+        ClientResponse response = get(uri, EnterprisesDto.MEDIA_TYPE);
         if (response.getStatusCode() == 200)
         {
             result.setSuccess(true);
@@ -344,7 +345,7 @@ public class EnterprisesResourceStubImpl extends AbstractAPIStub implements Ente
 
         String uri = createEnterpriseLink(enterpriseId);
 
-        ClientResponse response = get(uri);
+        ClientResponse response = get(uri, EnterpriseDto.MEDIA_TYPE);
 
         if (response.getStatusCode() == 200)
         {
@@ -371,7 +372,7 @@ public class EnterprisesResourceStubImpl extends AbstractAPIStub implements Ente
 
         String uri = createVirtualDatacentersFromEnterpriseLink(enterprise.getId());
 
-        ClientResponse response = get(uri);
+        ClientResponse response = get(uri, VirtualDatacentersDto.MEDIA_TYPE);
         if (response.getStatusCode() == 200)
         {
             result.setSuccess(true);
@@ -438,7 +439,7 @@ public class EnterprisesResourceStubImpl extends AbstractAPIStub implements Ente
 
         uri = UriHelper.appendQueryParamsToPath(uri, queryParams, false);
 
-        ClientResponse response = get(uri);
+        ClientResponse response = get(uri, EnterprisesDto.MEDIA_TYPE);
         if (response.getStatusCode() == 200)
         {
             result.setSuccess(true);
@@ -476,7 +477,7 @@ public class EnterprisesResourceStubImpl extends AbstractAPIStub implements Ente
 
         String uri = createEnterpriseLink(idEnterprise);
 
-        ClientResponse response = get(uri);
+        ClientResponse response = get(uri, EnterpriseDto.MEDIA_TYPE);
 
         if (response.getStatusCode() == 200)
         {

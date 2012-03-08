@@ -25,11 +25,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.validation.constraints.NotNull;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 
 import org.apache.wink.common.annotations.Parent;
@@ -66,6 +68,7 @@ public class RemoteServiceResource extends AbstractResource
      */
 
     @GET
+    @Produces(RemoteServiceDto.MEDIA_TYPE)
     public RemoteServiceDto getRemoteService(
         @PathParam(DatacenterResource.DATACENTER) final Integer datacenterId,
         @PathParam(REMOTE_SERVICE) @com.abiquo.model.validation.RemoteService @NotNull final String serviceType,
@@ -93,6 +96,8 @@ public class RemoteServiceResource extends AbstractResource
     }
 
     @PUT
+    @Consumes(RemoteServiceDto.MEDIA_TYPE)
+    @Produces(RemoteServiceDto.MEDIA_TYPE)
     public RemoteServiceDto modifyRemoteService(
         @PathParam(DatacenterResource.DATACENTER) final Integer datacenterId,
         @PathParam(REMOTE_SERVICE) @com.abiquo.model.validation.RemoteService @NotNull final String serviceType,

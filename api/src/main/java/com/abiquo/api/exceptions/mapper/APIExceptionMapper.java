@@ -84,6 +84,7 @@ public class APIExceptionMapper implements ExceptionMapper<APIException>
         ResponseBuilder builder = new ResponseBuilderImpl();
         builder.entity(errors);
         builder.status(defineStatus(exception, errors));
+        builder.type(ErrorsDto.MEDIA_TYPE);
         return builder.build();
     }
 

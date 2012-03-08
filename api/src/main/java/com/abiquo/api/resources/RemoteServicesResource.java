@@ -27,10 +27,12 @@ import static com.abiquo.api.resources.RemoteServiceResource.createTransferObjec
 import java.util.List;
 
 import javax.annotation.Resource;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 
 import org.apache.wink.common.annotations.Parent;
@@ -54,6 +56,7 @@ public class RemoteServicesResource extends AbstractResource
     private InfrastructureService service;
 
     @GET
+    @Produces(RemoteServicesDto.MEDIA_TYPE)
     public RemoteServicesDto getRemoteServices(
         @PathParam(DatacenterResource.DATACENTER) final Integer datacenterId,
         @Context final IRESTBuilder restBuilder) throws Exception
@@ -73,6 +76,8 @@ public class RemoteServicesResource extends AbstractResource
     }
 
     @POST
+    @Consumes(RemoteServiceDto.MEDIA_TYPE)
+    @Produces(RemoteServiceDto.MEDIA_TYPE)
     public RemoteServiceDto postRemoteService(
         @PathParam(DatacenterResource.DATACENTER) final Integer datacenterId,
         final RemoteServiceDto remoteService, @Context final IRESTBuilder restBuilder)

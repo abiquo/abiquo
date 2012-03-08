@@ -24,12 +24,16 @@ package com.abiquo.server.core.appslibrary;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.abiquo.model.transport.SingleResourceTransportDto;
+import com.abiquo.server.core.infrastructure.DatacenterDto;
 
 @XmlRootElement(name = "templateDefinitionList")
 public class TemplateDefinitionListDto extends SingleResourceTransportDto
 {
     private static final long serialVersionUID = -394035712365582338L;
-
+    
+    public static final String BASE_MEDIA_TYPE = "application/vnd.abiquo.templatedefinitionlist+xml";
+    public static final String MEDIA_TYPE = BASE_MEDIA_TYPE + "; version=" + API_VERSION;
+    
     private Integer id;
 
     private String name;
@@ -77,5 +81,16 @@ public class TemplateDefinitionListDto extends SingleResourceTransportDto
     {
         this.templateDefinitions = ovfPackages;
     }
+    
+    @Override
+    public String getMediaType()
+    {
+        return TemplateDefinitionListDto.MEDIA_TYPE;
+    }
 
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
+    }
 }

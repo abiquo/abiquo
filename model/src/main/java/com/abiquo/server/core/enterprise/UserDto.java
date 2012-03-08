@@ -24,6 +24,7 @@ package com.abiquo.server.core.enterprise;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.abiquo.model.transport.SingleResourceTransportDto;
+import com.abiquo.server.core.infrastructure.DatacenterDto;
 
 @XmlRootElement(name = "user")
 public class UserDto extends SingleResourceTransportDto
@@ -32,7 +33,9 @@ public class UserDto extends SingleResourceTransportDto
      * UID.
      */
     private static final long serialVersionUID = -3233121860012587479L;
-
+    public static final String BASE_MEDIA_TYPE = "application/vnd.abiquo.user+xml";
+    public static final String MEDIA_TYPE = BASE_MEDIA_TYPE + "; version=" + API_VERSION;
+    
     private Integer id;
 
     public UserDto()
@@ -239,5 +242,17 @@ public class UserDto extends SingleResourceTransportDto
     public void setAuthType(final String authType)
     {
         this.authType = authType;
+    }
+    
+    @Override
+    public String getMediaType()
+    {
+        return UserDto.MEDIA_TYPE;
+    }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
     }
 }

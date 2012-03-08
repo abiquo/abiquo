@@ -31,6 +31,7 @@ package com.abiquo.server.core.infrastructure.nodecollector;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.ws.rs.core.MediaType;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -93,4 +94,15 @@ public class OrganizationsDto extends WrapperDto<OrganizationDto>
         return this.collection;
     }
 
+    @Override
+    public String getMediaType()
+    {
+        return MediaType.APPLICATION_XML;
+    }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return MediaType.APPLICATION_XML;
+    }
 }

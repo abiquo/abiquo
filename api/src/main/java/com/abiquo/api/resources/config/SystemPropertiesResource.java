@@ -27,10 +27,12 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
+import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 
@@ -60,9 +62,10 @@ public class SystemPropertiesResource extends AbstractResource
     private SystemPropertyService service;
 
     @GET
-    public SystemPropertiesDto getSystemProperties(@QueryParam(NAME_QUERY_PARAM) String name,
-        @QueryParam(COMPONENT_QUERY_PARAM) String component, @Context IRESTBuilder restBuilder)
-        throws Exception
+    @Produces(SystemPropertiesDto.MEDIA_TYPE)
+    public SystemPropertiesDto getSystemProperties(@QueryParam(NAME_QUERY_PARAM) final String name,
+        @QueryParam(COMPONENT_QUERY_PARAM) final String component,
+        @Context final IRESTBuilder restBuilder) throws Exception
     {
         Collection<SystemProperty> all = null;
 
@@ -95,8 +98,10 @@ public class SystemPropertiesResource extends AbstractResource
     }
 
     @POST
-    public SystemPropertyDto postSystemProperty(SystemPropertyDto systemProperty,
-        @Context IRESTBuilder restBuilder) throws Exception
+    @Consumes(SystemPropertyDto.MEDIA_TYPE)
+    @Produces(SystemPropertyDto.MEDIA_TYPE)
+    public SystemPropertyDto postSystemProperty(final SystemPropertyDto systemProperty,
+        @Context final IRESTBuilder restBuilder) throws Exception
     {
         SystemProperty prop = service.addSystemProperty(systemProperty);
 
@@ -104,9 +109,11 @@ public class SystemPropertiesResource extends AbstractResource
     }
 
     @PUT
-    public SystemPropertiesDto modifySystemProperties(SystemPropertiesDto systemProperties,
-        @QueryParam(COMPONENT_QUERY_PARAM) String component, @Context IRESTBuilder restBuilder)
-        throws Exception
+    @Consumes(SystemPropertiesDto.MEDIA_TYPE)
+    @Produces(SystemPropertiesDto.MEDIA_TYPE)
+    public SystemPropertiesDto modifySystemProperties(final SystemPropertiesDto systemProperties,
+        @QueryParam(COMPONENT_QUERY_PARAM) final String component,
+        @Context final IRESTBuilder restBuilder) throws Exception
     {
         List<SystemProperty> propertiesToPersist = new LinkedList<SystemProperty>();
         for (SystemPropertyDto inputProperty : systemProperties.getCollection())

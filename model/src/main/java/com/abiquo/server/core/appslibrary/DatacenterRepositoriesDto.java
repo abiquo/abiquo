@@ -32,10 +32,24 @@ import com.abiquo.model.transport.WrapperDto;
 public class DatacenterRepositoriesDto extends WrapperDto<DatacenterRepositoryDto>
 {
     private static final long serialVersionUID = 1810037128474030040L;
+    public static final String BASE_MEDIA_TYPE = "application/vnd.abiquo.datacenterrepositories+xml";
+    public static final String MEDIA_TYPE = BASE_MEDIA_TYPE + "; version=" + API_VERSION;
 
     @XmlElement(name = "datacenterRepository")
     public List<DatacenterRepositoryDto> getCollection()
     {
         return collection;
+    }
+    
+    @Override
+    public String getMediaType()
+    {
+        return DatacenterRepositoriesDto.MEDIA_TYPE;
+    }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
     }
 }

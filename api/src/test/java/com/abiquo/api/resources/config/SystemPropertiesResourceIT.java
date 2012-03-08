@@ -25,7 +25,6 @@ import static com.abiquo.api.common.Assert.assertSize;
 import static com.abiquo.api.common.UriTestResolver.resolveSystemPropertiesURI;
 import static com.abiquo.api.common.UriTestResolver.resolveSystemPropertiesURIByComponent;
 import static com.abiquo.api.common.UriTestResolver.resolveSystemPropertiesURIByName;
-import static com.abiquo.testng.TestConfig.BASIC_INTEGRATION_TESTS;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
@@ -55,7 +54,7 @@ public class SystemPropertiesResourceIT extends AbstractJpaGeneratorIT
 
         setup(property0, property1);
 
-        ClientResponse response = get(resolveSystemPropertiesURI());
+        ClientResponse response = get(resolveSystemPropertiesURI(), SystemPropertiesDto.MEDIA_TYPE);
 
         assertEquals(response.getStatusCode(), 200);
         assertNotEmpty(response.getEntity(SystemPropertiesDto.class).getCollection());
@@ -70,7 +69,8 @@ public class SystemPropertiesResourceIT extends AbstractJpaGeneratorIT
 
         setup(property);
 
-        ClientResponse response = get(resolveSystemPropertiesURIByName("test.property"));
+        ClientResponse response =
+            get(resolveSystemPropertiesURIByName("test.property"), SystemPropertiesDto.MEDIA_TYPE);
 
         assertEquals(response.getStatusCode(), 200);
 
@@ -89,7 +89,8 @@ public class SystemPropertiesResourceIT extends AbstractJpaGeneratorIT
 
         setup(property);
 
-        ClientResponse response = get(resolveSystemPropertiesURIByComponent("test"));
+        ClientResponse response =
+            get(resolveSystemPropertiesURIByComponent("test"), SystemPropertiesDto.MEDIA_TYPE);
 
         assertEquals(response.getStatusCode(), 200);
 
@@ -141,7 +142,7 @@ public class SystemPropertiesResourceIT extends AbstractJpaGeneratorIT
         assertEquals(response.getStatusCode(), 200);
 
         // Perform a get operation and verify the returned list size
-        response = get(resolveSystemPropertiesURI());
+        response = get(resolveSystemPropertiesURI(), SystemPropertiesDto.MEDIA_TYPE);
 
         assertEquals(response.getStatusCode(), 200);
         assertNotEmpty(response.getEntity(SystemPropertiesDto.class).getCollection());
@@ -171,7 +172,8 @@ public class SystemPropertiesResourceIT extends AbstractJpaGeneratorIT
         assertEquals(response.getStatusCode(), 200);
 
         // Perform a get operation and verify the returned list size
-        response = get(resolveSystemPropertiesURIByComponent("server"));
+        response =
+            get(resolveSystemPropertiesURIByComponent("server"), SystemPropertiesDto.MEDIA_TYPE);
 
         assertEquals(response.getStatusCode(), 200);
         assertNotEmpty(response.getEntity(SystemPropertiesDto.class).getCollection());

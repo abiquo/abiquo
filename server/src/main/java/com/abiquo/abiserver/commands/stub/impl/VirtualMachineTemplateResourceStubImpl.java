@@ -84,7 +84,7 @@ public class VirtualMachineTemplateResourceStubImpl extends AbstractAPIStub impl
         final DataResult<List<VirtualImage>> result = new DataResult<List<VirtualImage>>();
 
         final String uri = createVirtualMachineTemplatesLink(idEnterprise, datacenterId);
-        Resource vmtemplatesResource = resource(uri);
+        Resource vmtemplatesResource = resource(uri, VirtualMachineTemplatesDto.MEDIA_TYPE);
 
         if (StringUtils.isNotEmpty(hypervisorTypeName))
         {
@@ -202,7 +202,8 @@ public class VirtualMachineTemplateResourceStubImpl extends AbstractAPIStub impl
         RESTLink masterLink = getLink("master", vi.getLinks());
         if (masterLink != null)
         {
-            ClientResponse masterResponse = get(masterLink.getHref());
+            ClientResponse masterResponse =
+                get(masterLink.getHref(), VirtualMachineTemplateDto.MEDIA_TYPE);
             if (masterResponse.getStatusCode() == Status.OK.getStatusCode())
             {
                 VirtualMachineTemplateDto vmtDto =

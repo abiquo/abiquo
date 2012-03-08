@@ -24,11 +24,15 @@ package com.abiquo.server.core.enterprise;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.abiquo.model.transport.SingleResourceWithLimitsDto;
+import com.abiquo.server.core.infrastructure.network.DhcpOptionDto;
 
 @XmlRootElement(name = "enterprise")
 public class EnterpriseDto extends SingleResourceWithLimitsDto
 {
     private static final long serialVersionUID = 1L;
+    
+    public static final String BASE_MEDIA_TYPE = "application/vnd.abiquo.enterprise+xml";
+    public static final String MEDIA_TYPE = BASE_MEDIA_TYPE + "; version=" + API_VERSION;
 
     private Integer id;
 
@@ -166,6 +170,18 @@ public class EnterpriseDto extends SingleResourceWithLimitsDto
     public void setIdPricingTemplate(final Integer idPricingTemplate)
     {
         this.idPricingTemplate = idPricingTemplate;
+    }
+    
+    @Override
+    public String getMediaType()
+    {
+        return EnterpriseDto.MEDIA_TYPE;
+    }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
     }
 
 }

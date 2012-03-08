@@ -26,11 +26,13 @@ import java.util.List;
 
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 
 import org.apache.wink.common.annotations.Parent;
@@ -55,7 +57,7 @@ import com.abiquo.server.core.util.network.IPNetworkRang;
 public class PrivateNetworkResource extends AbstractResource
 {
     public static final String PRIVATE_NETWORK = "privatenetwork";
-    
+
     public static final String PRIVATE_IP = "privateip";
 
     public static final String PRIVATE_NETWORK_PARAM = "{" + PRIVATE_NETWORK + "}";
@@ -64,6 +66,7 @@ public class PrivateNetworkResource extends AbstractResource
     NetworkService service;
 
     @GET
+    @Produces(VLANNetworkDto.MEDIA_TYPE)
     public VLANNetworkDto getPrivateNetwork(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) @NotNull @Min(1) final Integer virtualDatacenterId,
         @PathParam(PRIVATE_NETWORK) @NotNull @Min(1) final Integer vlanId,
@@ -84,6 +87,8 @@ public class PrivateNetworkResource extends AbstractResource
      * @throws Exception for any exception.
      */
     @PUT
+    @Consumes(VLANNetworkDto.MEDIA_TYPE)
+    @Produces(VLANNetworkDto.MEDIA_TYPE)
     public VLANNetworkDto updatePrivateNetwork(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) @NotNull @Min(1) final Integer vdcId,
         @PathParam(PRIVATE_NETWORK) @NotNull @Min(1) final Integer vlanId,

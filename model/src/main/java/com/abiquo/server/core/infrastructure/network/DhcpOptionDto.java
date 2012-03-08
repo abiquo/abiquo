@@ -24,11 +24,14 @@ package com.abiquo.server.core.infrastructure.network;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.abiquo.model.transport.SingleResourceTransportDto;
+import com.abiquo.server.core.infrastructure.MachineDto;
 
 @XmlRootElement(name = "dhcpoption")
 public class DhcpOptionDto extends SingleResourceTransportDto
 {
-
+    public static final String BASE_MEDIA_TYPE = "application/vnd.abiquo.dhcpoption+xml";
+    public static final String MEDIA_TYPE = BASE_MEDIA_TYPE + "; version=" + API_VERSION;
+    
     public DhcpOptionDto(final Integer id, final int option, final String gateway,
         final String networkAddress, final Integer mask, final String netmask)
     {
@@ -130,4 +133,15 @@ public class DhcpOptionDto extends SingleResourceTransportDto
         this.option = option;
     }
 
+    @Override
+    public String getMediaType()
+    {
+        return DhcpOptionDto.MEDIA_TYPE;
+    }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
+    }
 }

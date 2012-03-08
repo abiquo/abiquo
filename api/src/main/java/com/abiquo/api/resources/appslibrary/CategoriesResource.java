@@ -26,9 +26,11 @@ import static com.abiquo.api.resources.appslibrary.CategoryResource.createTransf
 
 import java.util.Collection;
 
+import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 
 import org.apache.wink.common.annotations.Workspace;
@@ -60,6 +62,7 @@ public class CategoriesResource extends AbstractResource
     private CategoryService service;
 
     @GET
+    @Produces(CategoriesDto.MEDIA_TYPE)
     public CategoriesDto getCategory(@Context final IRESTBuilder restBuilder) throws Exception
     {
         Collection<Category> all = service.getCategories();
@@ -74,6 +77,8 @@ public class CategoriesResource extends AbstractResource
     }
 
     @POST
+    @Consumes(CategoryDto.MEDIA_TYPE)
+    @Produces(CategoryDto.MEDIA_TYPE)
     public CategoryDto postCategory(final CategoryDto categoryDto,
         @Context final IRESTBuilder builder) throws Exception
     {

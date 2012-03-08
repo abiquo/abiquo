@@ -60,6 +60,7 @@ import com.abiquo.abiserver.pojo.infrastructure.Rack;
 import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.user.Enterprise;
 import com.abiquo.model.rest.RESTLink;
+import com.abiquo.model.transport.SingleResourceTransportDto;
 import com.abiquo.model.transport.error.ErrorsDto;
 import com.abiquo.server.core.enterprise.User.AuthType;
 import com.abiquo.util.ErrorManager;
@@ -73,9 +74,6 @@ import edu.emory.mathcs.backport.java.util.Collections;
 @SuppressWarnings("unchecked")
 public class AbstractAPIStub
 {
-    public static final String FLAT_MEDIA_TYPE = "application/flat+xml";
-
-    public static final String LINK_MEDIA_TYPE = "application/link+xml";
 
     protected RestClient client;
 
@@ -135,8 +133,8 @@ public class AbstractAPIStub
             // props.put("jclouds.timeouts.CloudClient.deployVirtualMachine", "90000");
 
             context =
-                new AbiquoContextFactory().createContext(token, ImmutableSet
-                    .<Module> of(new NullLoggingModule()), props);
+                new AbiquoContextFactory().createContext(token,
+                    ImmutableSet.<Module> of(new NullLoggingModule()), props);
         }
 
         return context;
@@ -151,7 +149,7 @@ public class AbstractAPIStub
         }
     }
 
-    private UserHB getCurrentUserCredentials()
+    protected UserHB getCurrentUserCredentials()
     {
         DAOFactory factory = HibernateDAOFactory.instance();
         factory.beginConnection();
@@ -170,142 +168,103 @@ public class AbstractAPIStub
         return user;
     }
 
-    protected ClientResponse get(final String uri, final String user, final String password)
-    {
-        return resource(uri, user, password).get();
-    }
-
-    /**
-     * Adds the content-type and accept headers with appropiate {@link MediaType}.
-     * 
-     * @param uri remote location.
-     * @param user login.
-     * @param password password.
-     * @return ClientResponse
-     */
-    protected ClientResponse get(final String uri, final MediaType mediaType)
-    {
-        UserHB user = getCurrentUser();
-        return resource(uri, user.getUser(), user.getPassword(), mediaType).accept(mediaType).get();
-    }
-
-    protected ClientResponse getWithMediaType(final String uri, final String accept,
-        final String contentType)
-    {
-        UserHB user = getCurrentUserCredentials();
-        return resource(uri, user.getUser(), user.getPassword(), accept).contentType(contentType)
-            .get();
-    }
-
-    protected ClientResponse post(final String uri, final Object dto, final String user,
-        final String password)
-    {
-        Resource resource = resource(uri, user, password);
-        if (dto != null)
-        {
-            // Only add the headers if the request has a body
-            resource.contentType(MediaType.APPLICATION_XML);
-        }
-        return resource.post(dto);
-    }
-
-    protected ClientResponse put(final String uri, final Object dto, final String user,
-        final String password)
-    {
-        Resource resource = resource(uri, user, password);
-        if (dto != null)
-        {
-            // Only add the headers if the request has a body
-            resource.contentType(MediaType.APPLICATION_XML);
-        }
-        return resource.put(dto);
-    }
-
-    protected ClientResponse put(final String uri, final Object dto, final String user,
-        final String password, final String mediaType)
-    {
-        return resource(uri, user, password, mediaType).contentType(mediaType).put(dto);
-    }
-
-    protected ClientResponse delete(final String uri, final String user, final String password)
-    {
-        return resource(uri, user, password).delete();
-    }
-
-    protected ClientResponse delete(final String uri, final String user, final String password,
-        final String mediaType)
-    {
-        return resource(uri, user, password, mediaType).delete();
-    }
-
-    protected ClientResponse get(final String uri)
-    {
-        UserHB user = getCurrentUserCredentials();
-        return resource(uri, user.getUser(), user.getPassword()).get();
-    }
-
     protected ClientResponse get(final String uri, final String mediaType)
     {
         UserHB user = getCurrentUserCredentials();
         return resource(uri, user.getUser(), user.getPassword(), mediaType).get();
     }
 
-    protected ClientResponse post(final String uri, final Object dto)
+    protected ClientResponse get(final String uri, final String user, final String password,
+        final String mediaType, final ClientHandler... handlers)
+    {
+        return resource(uri, user, password, mediaType, handlers).get();
+    }
+
+    protected ClientResponse post(final String uri, final SingleResourceTransportDto dto)
     {
         UserHB user = getCurrentUserCredentials();
         Resource resource = resource(uri, user.getUser(), user.getPassword());
         if (dto != null)
         {
-            // Only add the headers if the request has a body
-            resource.contentType(MediaType.APPLICATION_XML);
+            resource.contentType(dto.getMediaType());
+            resource.accept(dto.getMediaType());
         }
         return resource.post(dto);
     }
 
-    protected ClientResponse post(final String uri, final Object dto, final String mediaType)
+    protected ClientResponse post(final String uri, final SingleResourceTransportDto dto,
+        final String mediaType)
     {
         UserHB user = getCurrentUserCredentials();
-        return resource(uri, user.getUser(), user.getPassword()).contentType(mediaType).accept(
-            mediaType).post(dto);
+        return resource(uri, user.getUser(), user.getPassword(), mediaType).post(dto);
     }
 
-    protected Resource resource(final String uri)
+    protected ClientResponse post(final String uri, final String acceptType,
+        final String contentType, final SingleResourceTransportDto dto)
     {
         UserHB user = getCurrentUserCredentials();
-        return resource(uri, user.getUser(), user.getPassword()).contentType(
-            MediaType.APPLICATION_XML);
+        return resource(uri, user.getUser(), user.getPassword(), acceptType).contentType(
+            contentType).post(dto);
     }
 
-    protected ClientResponse put(final String uri)
+    protected ClientResponse post(final String uri, final SingleResourceTransportDto dto,
+        final String user, final String password)
     {
-        UserHB user = getCurrentUser();
-        return resource(uri, user.getUser(), user.getPassword()).contentType(
-            MediaType.APPLICATION_XML).put(null);
+        Resource resource = resource(uri, user, password);
+        if (dto != null)
+        {
+            resource.contentType(dto.getMediaType());
+            resource.accept(dto.getMediaType());
+        }
+        return resource.post(dto);
     }
 
-    protected ClientResponse put(final String uri, final Object dto)
+    protected ClientResponse put(final String uri, final SingleResourceTransportDto dto)
     {
         UserHB user = getCurrentUserCredentials();
         Resource resource = resource(uri, user.getUser(), user.getPassword());
         if (dto != null)
         {
-            // Only add the headers if the request has a body
-            resource.contentType(MediaType.APPLICATION_XML);
+            resource.contentType(dto.getMediaType());
+            resource.accept(dto.getMediaType());
         }
         return resource.put(dto);
     }
 
-    protected ClientResponse put(final String uri, final Object dto, final String mediaType)
+    protected ClientResponse put(final String uri, final SingleResourceTransportDto dto,
+        final String accept, final String content)
     {
         UserHB user = getCurrentUserCredentials();
-        return resource(uri, user.getUser(), user.getPassword(), mediaType).contentType(mediaType)
-            .put(dto);
+        Resource resource = resource(uri, user.getUser(), user.getPassword());
+        if (dto != null)
+        {
+            resource.contentType(content);
+            resource.accept(accept);
+        }
+        return resource.put(dto);
+    }
+
+    protected ClientResponse put(final String uri, final SingleResourceTransportDto dto,
+        final String user, final String password, final String accept, final String content)
+    {
+        Resource resource = resource(uri, user, password); 
+        if (accept != null)
+        {
+            resource.accept(accept);
+        }
+        if (content != null)
+        {
+            resource.contentType(content);
+        }
+        
+        return resource.put(dto);
     }
 
     protected ClientResponse delete(final String uri)
     {
         UserHB user = getCurrentUserCredentials();
-        return resource(uri, user.getUser(), user.getPassword()).delete();
+        return resource(uri, user.getUser(), user.getPassword(), MediaType.APPLICATION_XML)
+            .delete();
     }
 
     protected String createLoginLink()
@@ -313,16 +272,14 @@ public class AbstractAPIStub
         return URIResolver.resolveURI(apiUri, "/login", Collections.emptyMap());
     }
 
-    protected ClientResponse delete(final String uri, final String mediaType)
+    protected Resource resource(final String uri, final String mediaType)
     {
         UserHB user = getCurrentUserCredentials();
-        return resource(uri, user.getUser(), user.getPassword()).accept(mediaType).contentType(
-            mediaType).delete();
+        return resource(uri, user.getUser(), user.getPassword(), mediaType);
     }
 
     private Resource resource(final String uri, final String user, final String password)
     {
-
         Resource resource = client.resource(uri).accept(MediaType.APPLICATION_XML);
         String cookieValue = generateToken(user, password);
         return resource.cookie(new Cookie("auth", cookieValue));
@@ -332,24 +289,6 @@ public class AbstractAPIStub
         final String mediaType)
     {
         Resource resource = client.resource(uri).accept(mediaType);
-        String cookieValue = generateToken(user, password);
-        return resource.cookie(new Cookie("auth", cookieValue));
-    }
-
-    /**
-     * Instantiate the {@link Resource} and not add the {@link MediaType.APPLICATION_XML} to the
-     * request.
-     * 
-     * @param uri remote location.
-     * @param user login.
-     * @param password password.
-     * @param mediaType content negotiation.
-     * @return Resource
-     */
-    private Resource resource(final String uri, final String user, final String password,
-        final MediaType mediaType)
-    {
-        Resource resource = client.resource(uri).contentType(mediaType);
         String cookieValue = generateToken(user, password);
         return resource.cookie(new Cookie("auth", cookieValue));
     }
@@ -531,8 +470,8 @@ public class AbstractAPIStub
 
     protected String createEnterpriseLink(final int enterpriseId)
     {
-        return URIResolver.resolveURI(apiUri, "admin/enterprises/{enterprise}", Collections
-            .singletonMap("enterprise", valueOf(enterpriseId)));
+        return URIResolver.resolveURI(apiUri, "admin/enterprises/{enterprise}",
+            Collections.singletonMap("enterprise", valueOf(enterpriseId)));
     }
 
     protected String createEnterpriseIPsLink(final int enterpriseId)
@@ -650,8 +589,8 @@ public class AbstractAPIStub
 
     protected String createRoleLink(final int roleId)
     {
-        return URIResolver.resolveURI(apiUri, "admin/roles/{role}", Collections.singletonMap(
-            "role", valueOf(roleId)));
+        return URIResolver.resolveURI(apiUri, "admin/roles/{role}",
+            Collections.singletonMap("role", valueOf(roleId)));
     }
 
     protected String createRolesLink()
@@ -678,8 +617,8 @@ public class AbstractAPIStub
 
     protected String createPrivilegeLink(final int privilegeId)
     {
-        return URIResolver.resolveURI(apiUri, "config/privileges/{privilege}", Collections
-            .singletonMap("privilege", valueOf(privilegeId)));
+        return URIResolver.resolveURI(apiUri, "config/privileges/{privilege}",
+            Collections.singletonMap("privilege", valueOf(privilegeId)));
     }
 
     protected String createRoleActionGetPrivilegesURI(final Integer entId)
@@ -711,8 +650,8 @@ public class AbstractAPIStub
 
     protected String createRoleLdapLink(final int roleLdapId)
     {
-        return URIResolver.resolveURI(apiUri, "admin/rolesldap/{roleldap}", Collections
-            .singletonMap("roleldap", valueOf(roleLdapId)));
+        return URIResolver.resolveURI(apiUri, "admin/rolesldap/{roleldap}",
+            Collections.singletonMap("roleldap", valueOf(roleLdapId)));
     }
 
     protected String createUsersLink(final String enterpriseId)
@@ -724,8 +663,8 @@ public class AbstractAPIStub
         final Integer numResults)
     {
         String uri =
-            URIResolver.resolveURI(apiUri, "admin/enterprises/{enterprise}/users", Collections
-                .singletonMap("enterprise", enterpriseId));
+            URIResolver.resolveURI(apiUri, "admin/enterprises/{enterprise}/users",
+                Collections.singletonMap("enterprise", enterpriseId));
 
         Map<String, String[]> queryParams = new HashMap<String, String[]>();
         if (offset != null && numResults != null)
@@ -802,8 +741,8 @@ public class AbstractAPIStub
     {
         String uri =
             URIResolver.resolveURI(apiUri,
-                "admin/enterprises/{enterprise}/appslib/templateDefinitions", Collections
-                    .singletonMap("enterprise", enterpriseId));
+                "admin/enterprises/{enterprise}/appslib/templateDefinitions",
+                Collections.singletonMap("enterprise", enterpriseId));
         return uri;
     }
 
@@ -1508,17 +1447,23 @@ public class AbstractAPIStub
         return resolveURI(apiUri, "admin/datacenters/{dc}/network/{network}/ips/{ip}", params);
     }
 
+    // protected Resource resource(final String uri, final String user, final String password,
+    // final ClientHandler... handlers)
+    // {
+    // return resource(uri, user, password, MediaType.APPLICATION_XML, handlers);
+    // }
+
     protected Resource resource(final String uri, final String user, final String password,
-        final ClientHandler... handlers)
+        final String mediaType, final ClientHandler... handlers)
     {
         if (handlers == null || handlers.length == 0)
         {
-            return resource(uri, user, password);
+            return resource(uri, user, password, mediaType);
         }
         ClientConfig config = new ClientConfig();
         config.handlers(handlers);
 
-        Resource resource = new RestClient(config).resource(uri).accept(MediaType.APPLICATION_XML);
+        Resource resource = new RestClient(config).resource(uri).accept(mediaType);
         long tokenExpiration = System.currentTimeMillis() + 1000L * 1800;
 
         String signature = TokenUtils.makeTokenSignature(tokenExpiration, user, password);
@@ -1540,12 +1485,6 @@ public class AbstractAPIStub
         cookieValue = new String(Base64.encodeBase64(cookieValue.getBytes()));
 
         return resource.cookie(new Cookie("auth", cookieValue));
-    }
-
-    protected ClientResponse get(final String uri, final String user, final String password,
-        final ClientHandler... handlers)
-    {
-        return resource(uri, user, password, handlers).get();
     }
 
     protected String createRacksLink(final Integer datacenterId)
@@ -1748,8 +1687,8 @@ public class AbstractAPIStub
 
     protected String createCurrencyLink(final int currencyId)
     {
-        return URIResolver.resolveURI(apiUri, "config/currencies/{currency}", Collections
-            .singletonMap("currency", valueOf(currencyId)));
+        return URIResolver.resolveURI(apiUri, "config/currencies/{currency}",
+            Collections.singletonMap("currency", valueOf(currencyId)));
     }
 
     protected String createPricingTemplateLink(final int templateId)
@@ -1823,16 +1762,16 @@ public class AbstractAPIStub
 
     protected String createCostCodeLink(final int costCodeId)
     {
-        return URIResolver.resolveURI(apiUri, "config/costcodes/{costcode}", Collections
-            .singletonMap("costcode", valueOf(costCodeId)));
+        return URIResolver.resolveURI(apiUri, "config/costcodes/{costcode}",
+            Collections.singletonMap("costcode", valueOf(costCodeId)));
     }
 
     protected String createCostCodeCurrenciesLink(final String costCodeId, Integer offset,
         final Integer numResults)
     {
         String uri =
-            URIResolver.resolveURI(apiUri, "config/costcodes/{costcode}/currencies", Collections
-                .singletonMap("costcode", valueOf(costCodeId)));
+            URIResolver.resolveURI(apiUri, "config/costcodes/{costcode}/currencies",
+                Collections.singletonMap("costcode", valueOf(costCodeId)));
 
         Map<String, String[]> queryParams = new HashMap<String, String[]>();
         if (offset != null && numResults != null)

@@ -23,6 +23,7 @@ package com.abiquo.appliancemanager.transport;
 
 import java.util.List;
 
+import javax.ws.rs.core.MediaType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
@@ -32,12 +33,26 @@ import com.abiquo.model.transport.WrapperDto;
 public class TemplatesStateDto extends WrapperDto<TemplateStateDto>
 {
     private static final long serialVersionUID = -5521047055700500865L;
+    public static final String BASE_MEDIA_TYPE = "application/vnd.abiquo.templatestates+xml";
+    public static final String MEDIA_TYPE = BASE_MEDIA_TYPE + "; version=" + API_VERSION;
 
     @Override
     @XmlElement(name = "ovfInstanceState")
     public List<TemplateStateDto> getCollection()
     {
         return collection;
+    }
+    
+    @Override
+    public String getMediaType()
+    {
+        return MEDIA_TYPE;
+    }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
     }
 
 }

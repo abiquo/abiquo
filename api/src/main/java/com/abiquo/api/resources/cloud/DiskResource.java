@@ -26,6 +26,7 @@ import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 
 import org.apache.wink.common.annotations.Parent;
@@ -66,7 +67,7 @@ public class DiskResource extends AbstractResource
     /** Autowired business logic service. */
     @Autowired
     protected StorageService service;
-    
+
     /**
      * Exposes the method to query the extra disks generated into a virtual datacenter.
      * 
@@ -79,6 +80,7 @@ public class DiskResource extends AbstractResource
      *             {@link APIExceptionMapper} exception mapper.
      */
     @GET
+    @Produces(DiskManagementDto.MEDIA_TYPE)
     public DiskManagementDto getHardDisk(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) @NotNull @Min(1) final Integer vdcId,
         @PathParam(DiskResource.DISK) @NotNull @Min(1) final Integer diskId,
@@ -107,7 +109,7 @@ public class DiskResource extends AbstractResource
     {
         service.deleteHardDisk(vdcId, diskId);
     }
-    
+
     /**
      * Creates the DTO {@link DiskManagementDto} from the pojo object {@link DiskManagement} and
      * sets its related links.

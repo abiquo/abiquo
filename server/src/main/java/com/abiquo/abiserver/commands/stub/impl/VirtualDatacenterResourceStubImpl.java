@@ -97,8 +97,8 @@ public class VirtualDatacenterResourceStubImpl extends AbstractAPIStub implement
         vlanDto.setSufixDNS(netConfig.getSufixDNS());
 
         String datacenterLink =
-            URIResolver.resolveURI(apiUri, "admin/datacenters/{datacenter}", Collections
-                .singletonMap("datacenter", String.valueOf(vdc.getIdDataCenter())));
+            URIResolver.resolveURI(apiUri, "admin/datacenters/{datacenter}",
+                Collections.singletonMap("datacenter", String.valueOf(vdc.getIdDataCenter())));
 
         String enterpriseLink = createEnterpriseLink(vdc.getEnterprise().getId());
         URIResolver.resolveURI(apiUri, "cloud/virtualdatacenters", new HashMap<String, String>());
@@ -246,9 +246,7 @@ public class VirtualDatacenterResourceStubImpl extends AbstractAPIStub implement
             URIResolver.resolveURI(apiUri, "cloud/virtualdatacenters", Collections.emptyMap(),
                 Collections.singletonMap("enterprise", new String[] {valueOf(enterprise.getId())}));
 
-        // Request virtual datacenters
-        ClientResponse response = get(uri);
-
+        ClientResponse response = get(uri, VirtualDatacentersDto.MEDIA_TYPE);
         if (response.getStatusCode() == 200)
         {
             VirtualDatacentersDto dto = response.getEntity(VirtualDatacentersDto.class);
@@ -315,7 +313,7 @@ public class VirtualDatacenterResourceStubImpl extends AbstractAPIStub implement
             }
         }
 
-        ClientResponse response = get(buildRequest.toString());
+        ClientResponse response = get(buildRequest.toString(), VirtualDatacentersDto.MEDIA_TYPE);
 
         if (response.getStatusCode() == 200)
         {
@@ -334,7 +332,7 @@ public class VirtualDatacenterResourceStubImpl extends AbstractAPIStub implement
 
                 // Get the default network of the vdc.
                 RESTLink link = vdc.searchLink("defaultnetwork");
-                response = get(link.getHref());
+                response = get(link.getHref(), VLANNetworkDto.MEDIA_TYPE);
                 VLANNetworkDto vlanDto = response.getEntity(VLANNetworkDto.class);
 
                 vdctoadd.setDefaultVlan(NetworkResourceStubImpl.createFlexObject(vlanDto));

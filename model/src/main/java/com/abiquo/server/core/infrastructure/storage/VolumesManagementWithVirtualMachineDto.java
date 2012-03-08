@@ -34,6 +34,8 @@ public class VolumesManagementWithVirtualMachineDto extends
     WrapperDto<VolumeManagementWithVirtualMachineDto>
 {
     private static final long serialVersionUID = 1L;
+    public static final String BASE_MEDIA_TYPE = "application/vnd.abiquo.iscsivolumeswithvirtualmachine+xml";
+    public static final String MEDIA_TYPE = BASE_MEDIA_TYPE + "; version=" + API_VERSION;
 
     @Override
     @XmlElement(name = "volume")
@@ -45,5 +47,16 @@ public class VolumesManagementWithVirtualMachineDto extends
         }
         return collection;
     }
-
+    
+    @Override
+    public String getMediaType()
+    {
+        return VolumesManagementWithVirtualMachineDto.MEDIA_TYPE;
+    }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
+    }
 }

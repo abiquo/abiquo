@@ -25,10 +25,14 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.abiquo.model.transport.SingleResourceWithLimitsDto;
+import com.abiquo.server.core.infrastructure.DatacenterDto;
 
 @XmlRootElement(name = "limit")
 public class DatacenterLimitsDto extends SingleResourceWithLimitsDto
 {
+    public static final String BASE_MEDIA_TYPE = "application/vnd.abiquo.limit+xml";
+    public static final String MEDIA_TYPE = BASE_MEDIA_TYPE + "; version=" + API_VERSION;
+    
     private Integer id;
 
     public Integer getId()
@@ -65,6 +69,18 @@ public class DatacenterLimitsDto extends SingleResourceWithLimitsDto
     public void setRepositoryHardLimitsInMb(final long repositoryHardLimitsInMb)
     {
         this.repositoryHardLimitsInMb = repositoryHardLimitsInMb;
+    }
+    
+    @Override
+    public String getMediaType()
+    {
+        return DatacenterLimitsDto.MEDIA_TYPE;
+    }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
     }
 
 }

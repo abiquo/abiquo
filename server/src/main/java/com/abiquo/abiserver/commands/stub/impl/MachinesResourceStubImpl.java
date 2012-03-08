@@ -52,7 +52,6 @@ import com.abiquo.server.core.infrastructure.RackDto;
 
 public class MachinesResourceStubImpl extends AbstractAPIStub implements MachinesResourceStub
 {
-    public static final String MULTIPLE_MACHINES_MIME_TYPE = "application/machinesdto+xml";
 
     /**
      * @see com.abiquo.abiserver.commands.stub.MachinesResourceStub#getMachines(com.abiquo.server.core.infrastructure.UcsRack)
@@ -81,7 +80,7 @@ public class MachinesResourceStubImpl extends AbstractAPIStub implements Machine
         DataResult<List<PhysicalMachine>> result = new DataResult<List<PhysicalMachine>>();
 
         DataResult<Rack> rackResult = new DataResult<Rack>();
-        ClientResponse rackResponse = get(createRackLink(datacenterId, rackId));
+        ClientResponse rackResponse = get(createRackLink(datacenterId, rackId), RackDto.MEDIA_TYPE);
 
         if (rackResponse.getStatusCode() == 200)
         {
@@ -101,7 +100,7 @@ public class MachinesResourceStubImpl extends AbstractAPIStub implements Machine
                 uri += '?' + filters;
             }
 
-            ClientResponse response = get(uri);
+            ClientResponse response = get(uri, MachinesDto.MEDIA_TYPE);
 
             if (response.getStatusCode() == 200)
             {
@@ -138,7 +137,7 @@ public class MachinesResourceStubImpl extends AbstractAPIStub implements Machine
         DatacenterDto dto = null;
         if (!cache.containsKey(dcUri))
         {
-            dto = get(dcUri).getEntity(DatacenterDto.class);
+            dto = get(dcUri, DatacenterDto.MEDIA_TYPE).getEntity(DatacenterDto.class);
             cache.put(dcUri, dto);
         }
         else
@@ -211,7 +210,7 @@ public class MachinesResourceStubImpl extends AbstractAPIStub implements Machine
 
         // getting rack
         DataResult<Rack> rackResult = new DataResult<Rack>();
-        ClientResponse rackResponse = get(createRackLink(datacenterId, rackId));
+        ClientResponse rackResponse = get(createRackLink(datacenterId, rackId), RackDto.MEDIA_TYPE);
 
         if (rackResponse.getStatusCode() == 200)
         {
@@ -231,8 +230,7 @@ public class MachinesResourceStubImpl extends AbstractAPIStub implements Machine
                 new MachinesToCreateDto(ipFrom.toString(), ipTo.toString(), HypervisorType.fromId(
                     hypervisorType).getValue(), user, password, port, vSwitch);
 
-            ClientResponse response =
-                post(uri, dto, MachinesResourceStubImpl.MULTIPLE_MACHINES_MIME_TYPE);
+            ClientResponse response = post(uri, dto);
 
             if (response.getStatusCode() == 201)
             {

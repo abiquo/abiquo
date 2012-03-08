@@ -21,15 +21,11 @@
 
 package com.abiquo.api.resources;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
 
 import org.apache.wink.common.annotations.Parent;
 import org.slf4j.Logger;
@@ -46,11 +42,10 @@ import com.abiquo.api.services.UserService;
 import com.abiquo.api.spring.security.SecurityService;
 import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.model.enumerator.Privileges;
-import com.abiquo.model.rest.RESTLink;
+import com.abiquo.model.transport.LinksDto;
 import com.abiquo.model.util.ModelTransformer;
 import com.abiquo.server.core.enterprise.EnterpriseDto;
 import com.abiquo.server.core.enterprise.Privilege;
-import com.abiquo.server.core.enterprise.PrivilegeDto;
 import com.abiquo.server.core.enterprise.PrivilegesDto;
 import com.abiquo.server.core.enterprise.Role;
 import com.abiquo.server.core.enterprise.RoleDto;
@@ -88,7 +83,7 @@ public class RoleResource extends AbstractResource
     SecurityService securityService;
 
     @GET
-    @Produces(AbstractResource.LINK_MEDIA_TYPE)
+    @Produces(RoleDto.MEDIA_TYPE)
     public RoleDto getRole(@PathParam(ROLE) final Integer roleId,
         @Context final IRESTBuilder restBuilder) throws Exception
     {
@@ -112,8 +107,8 @@ public class RoleResource extends AbstractResource
         else
         {
             role = service.getRole(roleId);
-            service.checkHasSameOrLessPrivileges(currentUser.getRole().getPrivileges(), role
-                .getPrivileges());
+            service.checkHasSameOrLessPrivileges(currentUser.getRole().getPrivileges(),
+                role.getPrivileges());
         }
 
         return createTransferObject(role, restBuilder);
@@ -129,8 +124,8 @@ public class RoleResource extends AbstractResource
      */
     @GET
     @Path(RoleResource.ROLE_ACTION_GET_PRIVILEGES_PATH)
-    @Produces(AbstractResource.LINK_MEDIA_TYPE)
-    public PrivilegesDto getPrivileges(@PathParam(RoleResource.ROLE) final Integer roleId,
+    @Produces(LinksDto.MEDIA_TYPE)
+    public LinksDto getPrivileges(@PathParam(RoleResource.ROLE) final Integer roleId,
         @Context final IRESTBuilder restBuilder) throws Exception
     {
         LOGGER.info("Getting links list of privileges from role with id " + roleId);
@@ -144,11 +139,11 @@ public class RoleResource extends AbstractResource
         else
         {
             User currentUser = userService.getCurrentUser();
-            service.checkHasSameOrLessPrivileges(currentUser.getRole().getPrivileges(), role
-                .getPrivileges());
+            service.checkHasSameOrLessPrivileges(currentUser.getRole().getPrivileges(),
+                role.getPrivileges());
         }
 
-        return PrivilegesResource.addPrivilegesLinks(restBuilder, role.getPrivileges());
+        return PrivilegesResource.getPrivilegesLinks(restBuilder, role.getPrivileges());
     }
 
     /**
@@ -161,7 +156,7 @@ public class RoleResource extends AbstractResource
      */
     @GET
     @Path(RoleResource.ROLE_ACTION_GET_PRIVILEGES_PATH)
-    @Produces(AbstractResource.FLAT_MEDIA_TYPE)
+    @Produces(PrivilegesDto.MEDIA_TYPE)
     public PrivilegesDto getFlatPrivileges(@PathParam(RoleResource.ROLE) final Integer roleId,
         @Context final IRESTBuilder restBuilder) throws Exception
     {
@@ -176,26 +171,12 @@ public class RoleResource extends AbstractResource
         else
         {
             User currentUser = userService.getCurrentUser();
-            service.checkHasSameOrLessPrivileges(currentUser.getRole().getPrivileges(), role
-                .getPrivileges());
+            service.checkHasSameOrLessPrivileges(currentUser.getRole().getPrivileges(),
+                role.getPrivileges());
         }
 
         return PrivilegesResource.createAdminTransferObjects(role.getPrivileges(), restBuilder);
 
-    }
-
-    private static PrivilegesDto addPrivilegeLinks(final IRESTBuilder restBuilder,
-        final List<Privilege> privileges)
-    {
-        PrivilegesDto ps = new PrivilegesDto();
-        List<RESTLink> links = new ArrayList<RESTLink>();
-        for (Privilege p : privileges)
-        {
-            PrivilegeDto pDto = new PrivilegeDto(p.getId(), p.getName());
-            links.addAll(restBuilder.buildPrivilegeLink(pDto));
-        }
-        ps.setLinks(links);
-        return ps;
     }
 
     private static RoleDto addLinks(final IRESTBuilder restBuilder, final RoleDto role,

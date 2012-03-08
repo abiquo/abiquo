@@ -26,6 +26,7 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response.Status;
 
 import org.apache.wink.client.ClientResponse;
 import org.apache.wink.client.Resource;
@@ -55,11 +56,8 @@ public class RacksResourceIT extends AbstractJpaGeneratorIT
     @Test
     public void getRacksList() throws Exception
     {
-        Resource resource = client.resource(validRacksUri);
-
-        ClientResponse response = resource.accept(MediaType.APPLICATION_XML).get();
-
-        assertEquals(response.getStatusCode(), 200);
+        ClientResponse response = get(validRacksUri, RacksDto.MEDIA_TYPE);
+        assertEquals(response.getStatusCode(), Status.OK.getStatusCode());
 
         RacksDto entity = response.getEntity(RacksDto.class);
         assertNotNull(entity);
@@ -73,7 +71,7 @@ public class RacksResourceIT extends AbstractJpaGeneratorIT
         ClientResponse response =
             createRack("rack_test", "rack_description", "large_rack_description");
 
-        assertEquals(response.getStatusCode(), 201);
+        assertEquals(response.getStatusCode(), Status.CREATED.getStatusCode());
 
         RackDto entityPost = response.getEntity(RackDto.class);
         assertNotNull(entityPost);
@@ -88,10 +86,10 @@ public class RacksResourceIT extends AbstractJpaGeneratorIT
         ClientResponse response =
             createRack("rack_test", "rack_description", "large_rack_description");
 
-        assertEquals(response.getStatusCode(), 201);
+        assertEquals(response.getStatusCode(), Status.CREATED.getStatusCode());
 
         response = createRack("rack_test", "rack_description", "large_rack_description");
-        assertEquals(response.getStatusCode(), 409);
+        assertEquals(response.getStatusCode(), Status.CONFLICT.getStatusCode());
 
         ErrorsDto errors = response.getEntity(ErrorsDto.class);
         assertEquals(errors.getCollection().get(0).getCode(),
@@ -100,14 +98,11 @@ public class RacksResourceIT extends AbstractJpaGeneratorIT
 
     protected ClientResponse createRack(String name, String shortDescription, String longDescription)
     {
-        Resource resource = client.resource(validRacksUri);
-
         RackDto r = new RackDto();
         r.setName(name);
         r.setShortDescription(shortDescription);
         r.setLongDescription(longDescription);
 
-        return resource.contentType(MediaType.APPLICATION_XML).accept(MediaType.APPLICATION_XML)
-            .post(r);
+        return post(validRacksUri, r);
     }
 }

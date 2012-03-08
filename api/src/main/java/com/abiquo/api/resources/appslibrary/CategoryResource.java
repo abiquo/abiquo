@@ -62,6 +62,7 @@ public class CategoryResource extends AbstractResource
     private CategoryService service;
 
     @GET
+    @Produces(CategoryDto.MEDIA_TYPE)
     public CategoryDto getCategory(@PathParam(CATEGORY) @NotNull @Min(1) final Integer categoryId,
         @Context final IRESTBuilder restBuilder) throws Exception
     {
@@ -70,8 +71,8 @@ public class CategoryResource extends AbstractResource
     }
 
     @PUT
-    @Consumes(MediaType.APPLICATION_XML)
-    @Produces(MediaType.APPLICATION_XML)
+    @Consumes(CategoryDto.MEDIA_TYPE)
+    @Produces(CategoryDto.MEDIA_TYPE)
     public CategoryDto modifyCategory(
         @PathParam(CATEGORY) @NotNull @Min(1) final Integer categoryId,
         final CategoryDto categoryDto, @Context final IRESTBuilder restBuilder) throws Exception

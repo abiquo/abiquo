@@ -19,39 +19,25 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package com.abiquo.server.core.cloud.stateful;
-
-import javax.xml.bind.annotation.XmlRootElement;
-
-import com.abiquo.model.transport.SingleResourceTransportDto;
-
-@XmlRootElement(name = "nodeVirtualImageStatefulConversion")
-public class NodeVirtualImageStatefulConversionDto extends SingleResourceTransportDto
+package net.undf.abicloud.vo.infrastructure
 {
-    private static final long serialVersionUID = -7925016301617309142L;
+    import mx.collections.ArrayCollection;
 
-    private Integer id;
-
-    public Integer getId()
+    [Bindable]
+    [RemoteClass(alias="com.abiquo.abiserver.pojo.ucs.OrganizationListResult")]
+    public class OrganizationListResult
     {
-        return id;
+        //The total number of organization
+        public var totalLogicOrganization:int;
+
+        //The List of organization
+        public var logicOrganizationList:ArrayCollection;
+
+        public function OrganizationListResult()
+        {
+            totalLogicOrganization = 0;
+            logicOrganizationList = new ArrayCollection();
+        }
+
     }
-
-    public void setId(final Integer id)
-    {
-        this.id = id;
-    }
-
-    private String newName;
-
-    public String getNewName()
-    {
-        return newName;
-    }
-
-    public void setNewName(final String newName)
-    {
-        this.newName = newName;
-    }
-
 }

@@ -19,49 +19,28 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package com.abiquo.server.core.cloud;
+/**
+ * 
+ */
+package com.abiquo.api.wink;
 
-import javax.xml.bind.annotation.XmlRootElement;
+import org.apache.wink.server.internal.DeploymentConfiguration;
+import org.apache.wink.server.internal.RequestProcessor;
 
-import com.abiquo.model.transport.SingleResourceTransportDto;
-
-@XmlRootElement(name = "")
-public class NodeVirtualImageDto extends SingleResourceTransportDto
+/**
+ * @author jaume
+ *
+ */
+public class AbiquoRequestProcessor extends RequestProcessor
 {
-    private Integer id;
-
-    public Integer getId()
-    {
-        return id;
+    private AbiquoDeploymentConfiguration configuration;
+    
+    public AbiquoRequestProcessor(AbiquoDeploymentConfiguration configuration) {
+        super(configuration);
     }
-
-    public void setId(Integer id)
-    {
-        this.id = id;
-    }
-
-    private int modified;
-
-    public int getModified()
-    {
-        return modified;
-    }
-
-    public void setModified(int modified)
-    {
-        this.modified = modified;
-    }
-
-    private String name;
-
-    public String getName()
-    {
-        return name;
-    }
-
-    public void setName(String name)
-    {
-        this.name = name;
+    
+    public DeploymentConfiguration getConfiguration() {
+        return configuration;
     }
 
 }

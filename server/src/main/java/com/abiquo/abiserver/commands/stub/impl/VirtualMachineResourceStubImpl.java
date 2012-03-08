@@ -35,6 +35,7 @@ import com.abiquo.abiserver.pojo.infrastructure.State;
 import com.abiquo.abiserver.pojo.infrastructure.VirtualMachine;
 import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.result.DataResult;
+import com.abiquo.model.transport.AcceptedRequestDto;
 import com.abiquo.server.core.cloud.VirtualMachineDto;
 import com.abiquo.server.core.cloud.VirtualMachineState;
 import com.abiquo.server.core.cloud.VirtualMachineStateDto;
@@ -132,8 +133,8 @@ public class VirtualMachineResourceStubImpl extends AbstractAPIStub implements
     {
         BasicResult result = new BasicResult();
         String vmachineUrl =
-            resolveVirtualMachineUrl(virtualDatacenterId, virtualApplianceId, virtualMachine
-                .getId());
+            resolveVirtualMachineUrl(virtualDatacenterId, virtualApplianceId,
+                virtualMachine.getId());
 
         ClientResponse response = delete(vmachineUrl);
 
@@ -160,7 +161,8 @@ public class VirtualMachineResourceStubImpl extends AbstractAPIStub implements
                 virtualMachine.getId());
         VirtualMachineStateDto dto = new VirtualMachineStateDto();
         dto.setState(virtualMachineState);
-        ClientResponse response = put(url, dto);
+        ClientResponse response =
+            put(url, dto, AcceptedRequestDto.MEDIA_TYPE, VirtualMachineStateDto.MEDIA_TYPE);
 
         if (response.getStatusCode() == Status.ACCEPTED.getStatusCode())
         {
@@ -189,8 +191,8 @@ public class VirtualMachineResourceStubImpl extends AbstractAPIStub implements
     {
         DataResult result = new DataResult();
         String url =
-            createVirtualMachineResetUrl(virtualDatacenterId, virtualApplianceId, virtualMachine
-                .getId());
+            createVirtualMachineResetUrl(virtualDatacenterId, virtualApplianceId,
+                virtualMachine.getId());
 
         ClientResponse response = post(url, null);
 

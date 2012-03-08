@@ -23,6 +23,7 @@ package com.abiquo.model.transport;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 import javax.xml.bind.annotation.XmlElement;
@@ -31,6 +32,10 @@ import com.abiquo.model.rest.RESTLink;
 
 public abstract class SingleResourceTransportDto implements Serializable
 {
+    public static final String API_VERSION = "2.0";
+
+    public static final String APPLICATION = "application";
+
     private static final long serialVersionUID = 1L;
 
     protected RESTLink editLink;
@@ -182,4 +187,7 @@ public abstract class SingleResourceTransportDto implements Serializable
         return Integer.valueOf(id);
     }
 
+    public abstract String getMediaType();
+    
+    public abstract String getBaseMediaType();
 }
