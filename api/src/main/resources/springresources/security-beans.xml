@@ -6,6 +6,7 @@
         <!-- / -->
         <security:intercept-url pattern="/" access="ROLE_AUTHENTICATED" />
         <security:intercept-url pattern="/console**" access="ROLE_AUTHENTICATED" />
+        <security:intercept-url pattern="/metrics/*" access="ROLE_AUTHENTICATED" />
         <!--=================================== -->
         <!--============== ADMIN ============== -->
         <!--=================================== -->
