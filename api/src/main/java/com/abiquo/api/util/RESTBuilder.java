@@ -429,6 +429,12 @@ public class RESTBuilder implements IRESTBuilder
             VirtualMachinesResource.VIRTUAL_MACHINES_PATH, params,
             VirtualMachinesResource.VIRTUAL_MACHINES_PATH));
 
+        // action get virtual appliances by enterprise
+        links.add(builder.buildRelLink(EnterpriseResource.class,
+            EnterpriseResource.ENTERPRISE_ACTION_GET_VIRTUALAPPLIANCES_PATH,
+            VirtualAppliancesResource.VIRTUAL_APPLIANCES_PATH, params,
+            VirtualAppliancesResource.VIRTUAL_APPLIANCES_PATH));
+
         // action get ips by enterprise
         links.add(builder.buildRelLink(EnterpriseResource.class,
             EnterpriseResource.ENTERPRISE_ACTION_GET_IPS_PATH, IpAddressesResource.IP_ADDRESSES,
