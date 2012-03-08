@@ -20,7 +20,6 @@
  */
 package com.abiquo.abiserver.appslibrary.stub;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
@@ -35,7 +34,6 @@ import javax.ws.rs.core.Response.Status.Family;
 import org.apache.commons.lang.StringUtils;
 import org.apache.wink.client.ClientResponse;
 import org.apache.wink.client.Resource;
-import org.jclouds.abiquo.domain.DomainWrapper;
 import org.jclouds.abiquo.domain.enterprise.TemplateDefinitionList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,7 +62,6 @@ import com.abiquo.server.core.appslibrary.DiskFormatTypeDto;
 import com.abiquo.server.core.appslibrary.DiskFormatTypesDto;
 import com.abiquo.server.core.appslibrary.TemplateDefinitionDto;
 import com.abiquo.server.core.appslibrary.TemplateDefinitionListDto;
-import com.abiquo.server.core.appslibrary.TemplateDefinitionListsDto;
 import com.abiquo.server.core.appslibrary.TemplateDefinitionsDto;
 
 public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryStub
@@ -536,9 +533,7 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
     {
 
         String uri = createTemplateDefinitionListLink(idEnterprise.toString(), idList.toString());
-        ClientResponse response =
-            resource(uri).accept(MediaType.APPLICATION_XML).contentType(MediaType.TEXT_PLAIN)
-                .put(null);
+        ClientResponse response = put(uri, null, MediaType.APPLICATION_XML, MediaType.TEXT_PLAIN);
 
         if (response.getStatusType().getFamily() != Family.SUCCESSFUL)
         {

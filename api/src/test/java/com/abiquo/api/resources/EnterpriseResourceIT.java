@@ -41,12 +41,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response.Status;
 
 import org.apache.wink.client.ClientResponse;
 import org.apache.wink.client.ClientWebException;
-import org.apache.wink.client.Resource;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -71,7 +69,6 @@ import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.infrastructure.Machine;
 import com.abiquo.server.core.infrastructure.RemoteService;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
-import com.abiquo.server.core.infrastructure.network.IpPoolManagementDto;
 import com.abiquo.server.core.infrastructure.network.IpsPoolManagementDto;
 import com.abiquo.server.core.infrastructure.network.VLANNetwork;
 import com.abiquo.server.core.util.network.IPAddress;
@@ -189,7 +186,8 @@ public class EnterpriseResourceIT extends AbstractJpaGeneratorIT
 
         ClientResponse response = put(uri2, dto2, "sysadmin", "sysadmin");
 
-        assertErrors(response, Status.CONFLICT.getStatusCode(), APIError.ENTERPRISE_DUPLICATED_NAME.getCode());
+        assertErrors(response, Status.CONFLICT.getStatusCode(),
+            APIError.ENTERPRISE_DUPLICATED_NAME.getCode());
     }
 
     // TESTS refered to the action of GET IPs by Enterprise
@@ -207,9 +205,9 @@ public class EnterpriseResourceIT extends AbstractJpaGeneratorIT
 
         IPAddress ip = IPAddress.newIPAddress(vlan.getConfiguration().getAddress()).nextIPAddress();
         IPAddress lastIP =
-            IPNetworkRang.lastIPAddressWithNumNodes(IPAddress.newIPAddress(vlan.getConfiguration()
-                .getAddress()), IPNetworkRang
-                .masktoNumberOfNodes(vlan.getConfiguration().getMask()));
+            IPNetworkRang.lastIPAddressWithNumNodes(
+                IPAddress.newIPAddress(vlan.getConfiguration().getAddress()),
+                IPNetworkRang.masktoNumberOfNodes(vlan.getConfiguration().getMask()));
 
         List<Object> ips = new ArrayList<Object>();
         while (!ip.equals(lastIP))
@@ -233,8 +231,9 @@ public class EnterpriseResourceIT extends AbstractJpaGeneratorIT
 
         // Get the first object and ensure it have at least the links of virtualdatacenter
         // and the link of private network that belongs to
-        assertLinkExist(entity.getCollection().get(0), resolvePrivateNetworkURI(vdc.getId(), vlan
-            .getId()), PrivateNetworkResource.PRIVATE_NETWORK);
+        assertLinkExist(entity.getCollection().get(0),
+            resolvePrivateNetworkURI(vdc.getId(), vlan.getId()),
+            PrivateNetworkResource.PRIVATE_NETWORK);
         assertLinkExist(entity.getCollection().get(0), resolveVirtualDatacenterURI(vdc.getId()),
             "virtualdatacenter");
 
@@ -398,7 +397,9 @@ public class EnterpriseResourceIT extends AbstractJpaGeneratorIT
         Enterprise enterprise = enterpriseGenerator.createUniqueInstance();
         setup(enterprise);
 
-        ClientResponse response = get(resolveEnterpriseActionGetIPsURI(enterprise.getId()), IpsPoolManagementDto.MEDIA_TYPE);
+        ClientResponse response =
+            get(resolveEnterpriseActionGetIPsURI(enterprise.getId()),
+                IpsPoolManagementDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), Status.OK.getStatusCode());
         IpsPoolManagementDto ips = response.getEntity(IpsPoolManagementDto.class);
         assertNotNull(ips);
@@ -411,12 +412,12 @@ public class EnterpriseResourceIT extends AbstractJpaGeneratorIT
         VirtualMachine vm = vmGenerator.createUniqueInstance();
 
         VirtualDatacenter vdc =
-            vdcGenerator.createInstance(vm.getHypervisor().getMachine().getDatacenter(), vm
-                .getEnterprise());
+            vdcGenerator.createInstance(vm.getHypervisor().getMachine().getDatacenter(),
+                vm.getEnterprise());
         VirtualAppliance vapp = vappGenerator.createInstance(vdc);
         NodeVirtualImage nvi = nodeVirtualImageGenerator.createInstance(vapp, vm);
-        vm.getVirtualMachineTemplate().getRepository().setDatacenter(
-            vm.getHypervisor().getMachine().getDatacenter());
+        vm.getVirtualMachineTemplate().getRepository()
+            .setDatacenter(vm.getHypervisor().getMachine().getDatacenter());
         List<Object> entitiesToSetup = new ArrayList<Object>();
 
         entitiesToSetup.add(vm.getEnterprise());
@@ -460,8 +461,8 @@ public class EnterpriseResourceIT extends AbstractJpaGeneratorIT
 
         assertLinkExist(vmDto, resolveEnterpriseURI(e.getId()), "enterprise");
         assertLinkExist(vmDto, resolveUserURI(e.getId(), u.getId()), "user");
-        assertLinkExist(vmDto, resolveMachineURI(m.getDatacenter().getId(), m.getRack().getId(), m
-            .getId()), "machine");
+        assertLinkExist(vmDto,
+            resolveMachineURI(m.getDatacenter().getId(), m.getRack().getId(), m.getId()), "machine");
     }
 
     @Test(enabled = true)
@@ -472,13 +473,13 @@ public class EnterpriseResourceIT extends AbstractJpaGeneratorIT
         VirtualAppliance vapp1 = vappGenerator.createInstance(vdc1);
         VirtualAppliance vapp2 = vappGenerator.createInstance(vdc1);
 
-        setup(vdc1.getEnterprise(), vdc2.getEnterprise(), vdc1.getDatacenter(), vdc2
-            .getDatacenter(), vdc1, vdc2, vapp1, vapp2);
+        setup(vdc1.getEnterprise(), vdc2.getEnterprise(), vdc1.getDatacenter(),
+            vdc2.getDatacenter(), vdc1, vdc2, vapp1, vapp2);
 
         // Check for vdc1
         ClientResponse response =
             get(resolveEnterpriseActionGetVirtualAppliancesURI(vdc1.getEnterprise().getId()),
-                "sysadmin", "sysadmin");
+                "sysadmin", "sysadmin", VirtualAppliancesDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), Status.OK.getStatusCode());
         VirtualAppliancesDto vapps = response.getEntity(VirtualAppliancesDto.class);
         assertNotNull(vapps);
@@ -486,7 +487,9 @@ public class EnterpriseResourceIT extends AbstractJpaGeneratorIT
         assertEquals(vapps.getCollection().size(), 2);
 
         // Check for vdc2
-        response = get(resolveVirtualAppliancesURI(vdc2.getId()), "sysadmin", "sysadmin");
+        response =
+            get(resolveVirtualAppliancesURI(vdc2.getId()), "sysadmin", "sysadmin",
+                VirtualAppliancesDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), Status.OK.getStatusCode());
         vapps = response.getEntity(VirtualAppliancesDto.class);
         assertNotNull(vapps);
@@ -508,13 +511,13 @@ public class EnterpriseResourceIT extends AbstractJpaGeneratorIT
         vapp1.setName(nameVapp1);
         vapp2.setName(nameVapp2);
 
-        setup(vdc1.getEnterprise(), vdc2.getEnterprise(), vdc1.getDatacenter(), vdc2
-            .getDatacenter(), vdc1, vdc2, vapp1, vapp2);
+        setup(vdc1.getEnterprise(), vdc2.getEnterprise(), vdc1.getDatacenter(),
+            vdc2.getDatacenter(), vdc1, vdc2, vapp1, vapp2);
 
         // Check for vdc1
         ClientResponse response =
             get(resolveEnterpriseActionGetVirtualAppliancesURI(vdc1.getEnterprise().getId())
-                + "?by=name&asc=false", "sysadmin", "sysadmin");
+                + "?by=name&asc=false", "sysadmin", "sysadmin", VirtualAppliancesDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), Status.OK.getStatusCode());
         VirtualAppliancesDto vapps = response.getEntity(VirtualAppliancesDto.class);
         assertNotNull(vapps);
@@ -524,7 +527,9 @@ public class EnterpriseResourceIT extends AbstractJpaGeneratorIT
         assertEquals(vapps.getCollection().get(1).getName(), nameVapp1);
 
         // Check for vdc2
-        response = get(resolveVirtualAppliancesURI(vdc2.getId()), "sysadmin", "sysadmin");
+        response =
+            get(resolveVirtualAppliancesURI(vdc2.getId()), "sysadmin", "sysadmin",
+                VirtualAppliancesDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), Status.OK.getStatusCode());
         vapps = response.getEntity(VirtualAppliancesDto.class);
         assertNotNull(vapps);

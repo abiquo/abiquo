@@ -22,7 +22,6 @@
 package com.abiquo.api.resources;
 
 import java.net.URLDecoder;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -324,6 +323,7 @@ public class EnterpriseResource extends AbstractResource
      * @throws Exception
      */
     @GET
+    @Produces(VirtualAppliancesDto.MEDIA_TYPE)
     @Path(EnterpriseResource.ENTERPRISE_ACTION_GET_VIRTUALAPPLIANCES_PATH)
     public VirtualAppliancesDto getVirtualAppliances(
         @PathParam(EnterpriseResource.ENTERPRISE) final Integer enterpriseId,

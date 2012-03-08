@@ -30,6 +30,8 @@ import static org.testng.Assert.assertNotNull;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.ws.rs.core.MediaType;
+
 import org.apache.wink.client.ClientResponse;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -132,7 +134,8 @@ public class TemplateDefinitionListsResourceIT extends AbstractJpaGeneratorIT
 
         validURI = resolveTemplateDefinitionListsURI(enterprise.getId());
 
-        ClientResponse response = get(validURI, SYSADMIN, SYSADMIN, TemplateDefinitionListsDto.MEDIA_TYPE);
+        ClientResponse response =
+            get(validURI, SYSADMIN, SYSADMIN, TemplateDefinitionListsDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), 200);
 
         TemplateDefinitionListsDto entity = response.getEntity(TemplateDefinitionListsDto.class);
@@ -201,7 +204,6 @@ public class TemplateDefinitionListsResourceIT extends AbstractJpaGeneratorIT
             client.resource(validURI).accept(TemplateDefinitionListDto.MEDIA_TYPE)
                 .contentType(MediaType.TEXT_PLAIN).header("Authorization", "Basic " + basicAuth)
                 .post(xmlindexURI);
-        
 
         assertEquals(response.getStatusCode(), 201);
 

@@ -132,7 +132,7 @@ public class TemplateDefinitionListResourceIT extends AbstractJpaGeneratorIT
             ClientResponse response =
                 get(UriTestResolver.resolveTemplateDefinitionListURI(enterprise.getId(), o.getId()),
                     SYSADMIN, SYSADMIN, TemplateDefinitionListDto.MEDIA_TYPE);
-            
+
             TemplateDefinitionListDto result = response.getEntity(TemplateDefinitionListDto.class);
             assertNotNull(result);
             assertEquals(result.getName(), "templateDefinitionList_1");
@@ -194,7 +194,7 @@ public class TemplateDefinitionListResourceIT extends AbstractJpaGeneratorIT
         {
             response =
                 get(UriTestResolver.resolveTemplateDefinitionListURI(enterprise.getId(), o.getId()),
-                    SYSADMIN, SYSADMIN, TemplateDefinitionListsDto.MEDIA_TYPE);
+                    SYSADMIN, SYSADMIN, TemplateDefinitionListDto.MEDIA_TYPE);
             assertEquals(response.getStatusCode(), 200);
             TemplateDefinitionListDto result = response.getEntity(TemplateDefinitionListDto.class);
             assertNotNull(result);

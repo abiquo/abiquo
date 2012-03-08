@@ -32,8 +32,9 @@ import com.abiquo.model.transport.WrapperDto;
 public class TemplateIdsDto extends WrapperDto<TemplateIdDto>
 {
     private static final long serialVersionUID = 1L;
-    
-    public static final String BASE_MEDIA_TYPE = "application/vnd.abiquo.icons+xml";
+
+    public static final String BASE_MEDIA_TYPE = "application/vnd.abiquo.templateids+xml";
+
     public static final String MEDIA_TYPE = BASE_MEDIA_TYPE + "; version=" + API_VERSION;
 
     @Override
@@ -42,11 +43,11 @@ public class TemplateIdsDto extends WrapperDto<TemplateIdDto>
     {
         return collection;
     }
-    
+
     @Override
     public String getMediaType()
     {
-        return IconsDto.MEDIA_TYPE;
+        return MEDIA_TYPE;
     }
 
     @Override

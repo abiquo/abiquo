@@ -332,7 +332,7 @@ public class VirtualDatacenterResourceStubImpl extends AbstractAPIStub implement
 
                 // Get the default network of the vdc.
                 RESTLink link = vdc.searchLink("defaultnetwork");
-                response = get(link.getHref());
+                response = get(link.getHref(), VLANNetworkDto.MEDIA_TYPE);
                 VLANNetworkDto vlanDto = response.getEntity(VLANNetworkDto.class);
 
                 vdctoadd.setDefaultVlan(NetworkResourceStubImpl.createFlexObject(vlanDto));

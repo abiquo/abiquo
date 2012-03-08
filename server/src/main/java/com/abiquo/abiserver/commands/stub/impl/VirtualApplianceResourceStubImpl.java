@@ -90,8 +90,8 @@ import com.abiquo.server.core.cloud.VirtualMachinesWithNodeExtendedDto;
 import com.abiquo.server.core.enterprise.DatacenterLimitsDto;
 import com.abiquo.server.core.enterprise.DatacentersLimitsDto;
 import com.abiquo.server.core.enterprise.EnterpriseDto;
-import com.abiquo.server.core.enterprise.UserDto;
 import com.abiquo.server.core.enterprise.User.AuthType;
+import com.abiquo.server.core.enterprise.UserDto;
 import com.abiquo.server.core.infrastructure.network.VLANNetworkDto;
 import com.abiquo.server.core.task.Job;
 import com.abiquo.server.core.task.JobDto;
@@ -417,7 +417,7 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
         app.setState(new State(StateEnum.valueOf(virtualApplianceDto.getState().name())));
         Integer vdcId = virtualApplianceDto.getIdFromLink("virtualdatacenter");
         String link = createVirtualDatacenterLink(vdcId);
-        ClientResponse vdcResponse = get(link);
+        ClientResponse vdcResponse = get(link, VirtualDatacenterDto.MEDIA_TYPE);
         if (vdcResponse.getStatusCode() == Status.OK.getStatusCode())
         {
             VirtualDatacenterDto dto = vdcResponse.getEntity(VirtualDatacenterDto.class);
@@ -513,11 +513,9 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
         vdc.setId(dto.getId());
         vdc.setIdDataCenter(dto.getIdFromLink("datacenter"));
         vdc.setName(dto.getName());
-        vdc
-            .setHyperType(HyperVisorType
-                .create(dto.getHypervisorType(),
-                    new com.abiquo.abiserver.pojo.virtualimage.DiskFormatType(dto
-                        .getHypervisorType().baseFormat)));
+        vdc.setHyperType(HyperVisorType.create(
+            dto.getHypervisorType(),
+            new com.abiquo.abiserver.pojo.virtualimage.DiskFormatType(dto.getHypervisorType().baseFormat)));
         return vdc;
     }
 
@@ -1032,8 +1030,8 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
                 VirtualDataCenter virtualDatacenter = dtoToVirtualDatacenter(dto, enterprise);
                 RESTLink app = dto.searchLink("virtualappliances");
                 // We want to expand the last task to know if there is any error
-                ClientResponse response = get(app.getHref() + "?expand=last_task",
-                        VirtualAppliancesDto.MEDIA_TYPE);
+                ClientResponse response =
+                    get(app.getHref() + "?expand=last_task", VirtualAppliancesDto.MEDIA_TYPE);
                 VirtualAppliancesDto virtualAppliancesDto =
                     response.getEntity(VirtualAppliancesDto.class);
                 list.addAll(dtosToVirtualAppliance(virtualAppliancesDto, virtualDatacenter, result));
@@ -1080,7 +1078,7 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
             }
         }
 
-        ClientResponse response = get(buildRequest.toString());
+        ClientResponse response = get(buildRequest.toString(), VirtualAppliancesDto.MEDIA_TYPE);
 
         if (response.getStatusCode() == 200)
         {
@@ -1136,7 +1134,7 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
             }
         }
 
-        ClientResponse response = get(buildRequest.toString());
+        ClientResponse response = get(buildRequest.toString(), VirtualAppliancesDto.MEDIA_TYPE);
 
         if (response.getStatusCode() == 200)
         {
@@ -1168,7 +1166,7 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
             new DataResult<VirtualAppliancesListResult>();
 
         String uri = createEnterpriseLimitsByDatacenterLink(enterprise.getId());
-        ClientResponse response = get(uri);
+        ClientResponse response = get(uri, DatacentersLimitsDto.MEDIA_TYPE);
         VirtualAppliancesListResult listResult = new VirtualAppliancesListResult();
 
         if (response.getStatusCode() == Status.NOT_FOUND.getStatusCode())
@@ -1187,7 +1185,9 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
                 Integer.valueOf(dcLink.getHref().substring(dcLink.getHref().lastIndexOf("/") + 1));
             if (dcId.equals(datacenter.getId()))
             {
-                response = get(limitDto.searchLink("action", "virtualappliances").getHref());
+                response =
+                    get(limitDto.searchLink("action", "virtualappliances").getHref(),
+                        VirtualAppliancesDto.MEDIA_TYPE);
                 if (response.getStatusCode() == 200)
                 {
                     VirtualAppliancesDto dtos = response.getEntity(VirtualAppliancesDto.class);

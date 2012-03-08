@@ -490,6 +490,12 @@ public class RESTBuilder implements IRESTBuilder
             VirtualMachinesResource.VIRTUAL_MACHINES_PATH, params,
             VirtualMachinesDto.BASE_MEDIA_TYPE));
 
+        // action get virtual appliances by enterprise
+        links.add(builder.buildRestLink(EnterpriseResource.class,
+            EnterpriseResource.ENTERPRISE_ACTION_GET_VIRTUALAPPLIANCES_PATH,
+            VirtualAppliancesResource.VIRTUAL_APPLIANCES_PATH, params,
+            VirtualAppliancesDto.MEDIA_TYPE));
+
         // action get ips by enterprise
         links.add(builder.buildRelLink(EnterpriseResource.class,
             EnterpriseResource.ENTERPRISE_ACTION_GET_IPS_PATH, IpAddressesResource.IP_ADDRESSES,
@@ -591,8 +597,9 @@ public class RESTBuilder implements IRESTBuilder
             params, EnterpriseDto.BASE_MEDIA_TYPE));
         if (category != null)
         {
-            links.add(builder.buildRestLink(CategoryResource.class, null, CategoryResource.CATEGORY,
-                category.getName(), params, CategoryDto.BASE_MEDIA_TYPE));
+            links
+                .add(builder.buildRestLink(CategoryResource.class, null, CategoryResource.CATEGORY,
+                    category.getName(), params, CategoryDto.BASE_MEDIA_TYPE));
         }
 
         params.put(TemplateDefinitionResource.TEMPLATE_DEFINITION, templateDefinition.getId()
