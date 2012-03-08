@@ -42,6 +42,8 @@ import com.abiquo.abiserver.pojo.infrastructure.State;
 import com.abiquo.abiserver.pojo.infrastructure.VirtualMachine;
 import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.result.DataResult;
+import com.abiquo.abiserver.pojo.ucs.BladeLocatorLed;
+import com.abiquo.abiserver.pojo.ucs.LogicServer;
 import com.abiquo.abiserver.pojo.user.Enterprise;
 import com.abiquo.abiserver.pojo.user.User;
 import com.abiquo.abiserver.pojo.virtualimage.Category;
@@ -56,8 +58,6 @@ import com.abiquo.server.core.cloud.VirtualMachinesDto;
 import com.abiquo.server.core.enterprise.EnterpriseDto;
 import com.abiquo.server.core.enterprise.UserDto;
 import com.abiquo.server.core.enterprise.User.AuthType;
-import com.abiquo.abiserver.pojo.ucs.BladeLocatorLed;
-import com.abiquo.abiserver.pojo.ucs.LogicServer;
 import com.abiquo.server.core.infrastructure.MachineDto;
 
 public class MachineResourceStubImpl extends AbstractAPIStub implements MachineResourceStub
@@ -158,6 +158,7 @@ public class MachineResourceStubImpl extends AbstractAPIStub implements MachineR
         // PREMIUM
         return null;
     }
+
     /**
      * @see com.abiquo.abiserver.commands.stub.MachineResourceStub#bladeLocatorLED(PhysicalMachine)
      */
@@ -223,12 +224,14 @@ public class MachineResourceStubImpl extends AbstractAPIStub implements MachineR
         RESTLink userLink = virtualMachineDto.searchLink("user");
         if (userLink != null)
         {
-            ClientResponse userResponse = get(userLink.getHref());
+            ClientResponse userResponse = get(userLink.getHref() + "?name=true");
             if (userResponse.getStatusCode() == Status.OK.getStatusCode())
             {
 
                 UserDto userDto = userResponse.getEntity(UserDto.class);
-                User user = dtoToUser(userDto);
+                User user = new User(); // dtoToUser(userDto);
+                user.setName(userDto.getName());
+                user.setSurname(userDto.getSurname());
                 vm.setUser(user);
             }
             else
