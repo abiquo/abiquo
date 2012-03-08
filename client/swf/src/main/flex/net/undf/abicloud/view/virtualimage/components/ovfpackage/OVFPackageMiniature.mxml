@@ -67,8 +67,11 @@
             {
                 super.data = value;
 
-                if (value is OVFPackage)
+                if (value is OVFPackage){
                     ovfPackage = value as OVFPackage;
+                    //Optimize Flex Monkey
+                    this.id = this._ovfPackage.name;
+                }
             }
 
             public function set ovfPackage(value:OVFPackage):void

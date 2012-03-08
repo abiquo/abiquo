@@ -117,6 +117,7 @@
                 customAlert = new AbiCloudAlert();
                 customAlert._titleText = title;
                 customAlert._headerText = header;
+                customAlert.id = header;
                 customAlert._mainText = main;
                 customAlert._responseHandler = responseHandler;
                 customAlert._flags = flags;
@@ -135,6 +136,7 @@
 
                 customAlert._titleText = title;
                 customAlert._headerText = header;
+                customAlert.id = header;
                 customAlert._mainText = main;
                 customAlert._responseHandler = responseHandler;
                 customAlert._flags = flags;
@@ -155,9 +157,10 @@
                                              additionalObject:Object = null):void
             {
                 customAlert = new AbiCloudAlert();
-
+                
                 customAlert._titleText = title;
                 customAlert._headerText = header;
+                customAlert.id = header;
                 customAlert._mainText = main;
                 customAlert._responseHandler = responseHandler;
                 customAlert._flags = flags;
@@ -182,7 +185,7 @@
 
                 PopUpManager.addPopUp(this, Application.application as DisplayObject,
                                       true);
-                                      
+                                  
                 //for specific case, we build a custom message
                 //affected alerts:
                 //- soft limit

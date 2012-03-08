@@ -148,6 +148,7 @@
 
                     //Creating the node renderer for the new node
                     nodeRenderer = new NodeRenderer();
+                    nodeRenderer.id = "node_container_" + i;
                     nodeRenderer.node = node;
                     nodeRenderer.virtualAppliance = this._virtualAppliance;
                     var bounds:Rectangle = new Rectangle(nodesArea.x, nodesArea.y,
@@ -465,6 +466,7 @@
                     {
                         node = nodeListCopy.getItemAt(i) as Node;
                         nodeRenderer = new NodeRenderer();
+                        nodeRenderer.id = "node_container_" + i;
                         nodeRenderer.node = node;
                         nodeRenderer.virtualAppliance = this._virtualAppliance;
                         nodeRenderer.bounds = bounds
@@ -627,6 +629,7 @@
 
                     //Creating the node renderer for the new node
                     nodeRenderer = new NodeRenderer();
+                    nodeRenderer.id = "node_container_" + (this._virtualAppliance.nodes.length + 1);
                     nodeRenderer.node = node;
                     nodeRenderer.virtualAppliance = this._virtualAppliance;
                     var bounds:Rectangle = new Rectangle(nodesArea.x, nodesArea.y,
