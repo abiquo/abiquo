@@ -1282,8 +1282,8 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
 
         UserHB user = getCurrentUserCredentials();
         ClientResponse response =
-            put(uri.toString(), null, user.getUser(), user.getPassword(), IpPoolManagementDto.MEDIA_TYPE,
-                null);
+            put(uri.toString(), null, user.getUser(), user.getPassword(),
+                IpPoolManagementDto.MEDIA_TYPE, null);
 
         if (response.getStatusCode() == 200)
         {
@@ -1330,8 +1330,8 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
 
         UserHB user = getCurrentUserCredentials();
         ClientResponse response =
-            put(uri.toString(), null, user.getUser(), user.getPassword(), IpPoolManagementDto.MEDIA_TYPE,
-                null);
+            put(uri.toString(), null, user.getUser(), user.getPassword(),
+                IpPoolManagementDto.MEDIA_TYPE, null);
 
         if (response.getStatusCode() == 200)
         {
@@ -1632,8 +1632,11 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
 
                     LinksDto linksDto = new LinksDto();
                     linksDto.addLink(linkGateway);
-                    response = put(gatewaysUri, linksDto);
-                    if (response.getStatusCode() == 202 || response.getStatusCode() == 204)
+                    response =
+                        put(gatewaysUri, linksDto, AcceptedRequestDto.MEDIA_TYPE,
+                            LinksDto.MEDIA_TYPE);
+                    if (response.getStatusCode() == 200 || response.getStatusCode() == 202
+                        || response.getStatusCode() == 204)
                     {
                         result.setSuccess(Boolean.TRUE);
                     }
