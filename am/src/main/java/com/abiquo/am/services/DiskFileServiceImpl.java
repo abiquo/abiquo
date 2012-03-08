@@ -70,11 +70,16 @@ public class DiskFileServiceImpl implements DiskFileService
         LOGGER.info("Copying disk file from [{}] to [{}]", source, destination);
 
         final File sourceFile = getFile(source);
-        final File destinationFile = new File(repositoryPath + destination);
+        final File destinationFile = new File(FilenameUtils.concat(repositoryPath, destination));
 
         if (destinationFile.exists())
         {
             throw new AMException(AMError.DISK_FILE_ALREADY_EXIST, destination);
+        }
+
+        if (!sourceFile.exists())
+        {
+            throw new AMException(AMError.DISK_FILE_NOT_FOUND, source);
         }
 
         try
