@@ -231,8 +231,8 @@ public class RESTBuilder implements IRESTBuilder
         links.add(builder.buildRestLink(DatacenterResource.class,
             DatacenterResource.UPDATE_RESOURCES_PATH, DatacenterResource.UPDATE_RESOURCES, params));
         links.add(builder.buildRestLink(DatacenterResource.class,
-            DatacenterResource.ACTION_DISCOVER_SINGLE_PATH, DatacenterResource.ACTION_DISCOVER_REL,
-            params, MachineDto.BASE_MEDIA_TYPE));
+            DatacenterResource.ACTION_DISCOVER_SINGLE_PATH,
+            DatacenterResource.ACTION_DISCOVER_SINGLE_REL, params, MachineDto.BASE_MEDIA_TYPE));
         links.add(builder.buildRestLink(DatacenterResource.class,
             DatacenterResource.ACTION_DISCOVER_MULTIPLE_PATH,
             DatacenterResource.ACTION_DISCOVER_MULTIPLE_REL, params, MachinesDto.BASE_MEDIA_TYPE));

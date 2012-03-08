@@ -23,7 +23,6 @@ package com.abiquo.api.exceptions.mapper;
 
 import java.net.SocketTimeoutException;
 
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
@@ -42,8 +41,8 @@ import com.abiquo.model.transport.error.ErrorsDto;
 public class SocketTimeoutExceptionMapper implements ExceptionMapper<SocketTimeoutException>
 {
 
-    private static final Logger LOGGER =
-        LoggerFactory.getLogger(SocketTimeoutExceptionMapper.class);
+    private static final Logger LOGGER = LoggerFactory
+        .getLogger(SocketTimeoutExceptionMapper.class);
 
     @Override
     public Response toResponse(final SocketTimeoutException exception)
@@ -64,7 +63,7 @@ public class SocketTimeoutExceptionMapper implements ExceptionMapper<SocketTimeo
 
         builder.status(status);
         builder.entity(errorsDto);
-        builder.type(MediaType.APPLICATION_XML);
+        builder.type(ErrorsDto.MEDIA_TYPE);
         LOGGER.debug("SocketTimeoutException: " + errorDto.toString());
         LOGGER.info("Connection with API closed, caused by SocketTimeout");
 
