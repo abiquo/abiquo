@@ -105,12 +105,12 @@ public enum APIError
 
     // VIRTUAL DATACENTER
     NON_EXISTENT_VIRTUAL_DATACENTER("VDC-0", "The requested virtual datacenter does not exist"), VIRTUAL_DATACENTER_INVALID_HYPERVISOR_TYPE(
-        "VDC-1", "Invalid hypervisor type for this datacenter"), VIRTUAL_DATACENTER_CONTAINS_VIRTUAL_APPLIANCES(
+        "VDC-1", "Invalid hypervisor type for this virtual datacenter"), VIRTUAL_DATACENTER_CONTAINS_VIRTUAL_APPLIANCES(
         "VDC-2",
-        "This datacenter contains virtual appliances and cannot be deleted without removing them first"), VIRTUAL_DATACENTER_CONTAINS_RESOURCES(
+        "This virtual datacenter contains virtual appliances and cannot be deleted without removing them first"), VIRTUAL_DATACENTER_CONTAINS_RESOURCES(
         "VDC-3",
-        "This datacenter has volumes attached and cannot be deleted without removing them first"), VIRTUAL_DATACENTER_INVALID_NETWORKS(
-        "VDC-4", "This datacenter has networks without IP addresses"), VIRTUAL_DATACENTER_LIMIT_EDIT_ARE_SURPRASED(
+        "This virtual datacenter has volumes attached and cannot be deleted without removing them first"), VIRTUAL_DATACENTER_INVALID_NETWORKS(
+        "VDC-4", "This virtual datacenter has networks without IP addresses"), VIRTUAL_DATACENTER_LIMIT_EDIT_ARE_SURPRASED(
         "VDC-5",
         "Cannot edit resource limits; current virtual datacenter allocation exceeds the new specified limits "
             + "(see SYSTEM traces in order to determine which resources are at HARD limit)"), VIRTUAL_DATACENTER_MUST_HAVE_NETWORK(
