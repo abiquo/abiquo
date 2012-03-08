@@ -52,6 +52,7 @@ import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineState;
 import com.abiquo.server.core.common.EnvironmentGenerator;
+import com.abiquo.server.core.infrastructure.Datastore;
 import com.abiquo.server.core.infrastructure.storage.DiskManagement;
 import com.abiquo.server.core.infrastructure.storage.DiskManagementDto;
 import com.abiquo.server.core.infrastructure.storage.DisksManagementDto;
@@ -73,6 +74,8 @@ public class VirtualMachineStorageConfigurationResourceIT extends AbstractJpaGen
 
     private DiskManagement disk;
 
+    private Datastore datastore;
+
     @BeforeMethod(groups = {EDIT_VM_INTEGRATION_TESTS, STORAGE_INTEGRATION_TESTS})
     public void setupEnvironment()
     {
@@ -91,6 +94,7 @@ public class VirtualMachineStorageConfigurationResourceIT extends AbstractJpaGen
         vapp = environment.get(VirtualAppliance.class);
         vm = environment.get(VirtualMachine.class);
         disk = environment.get(DiskManagement.class);
+        datastore = environment.get(Datastore.class);
     }
 
     @Override
@@ -279,7 +283,8 @@ public class VirtualMachineStorageConfigurationResourceIT extends AbstractJpaGen
     public void testDetachVolumesInDeployedVM()
     {
         disk.attach(1, vm);
-        update(disk.getRasd(), disk);
+        datastore.setUsedSize(datastore.getUsedSize() + disk.getSizeInMb() * 1024 * 1024);
+        update(disk.getRasd(), disk, datastore);
 
         String uri = resolveVirtualMachineDisksUri(vdc.getId(), vapp.getId(), vm.getId());
         ClientResponse response = delete(uri, SYSADMIN, SYSADMIN);
@@ -325,7 +330,10 @@ public class VirtualMachineStorageConfigurationResourceIT extends AbstractJpaGen
         // Create a second disk and attach it
         DiskManagement disk2 = diskGenerator.createInstance(vdc);
         disk2.attach(1, vm);
+        datastore.setUsedSize(datastore.getUsedSize() + (disk.getSizeInMb() + disk2.getSizeInMb())
+            * 1024 * 1024);
         setup(disk2.getRasd(), disk2);
+        update(datastore);
 
         // Create the the DTO to attach the first one and detach the currently attached one
         LinksDto request = new LinksDto();
@@ -371,7 +379,8 @@ public class VirtualMachineStorageConfigurationResourceIT extends AbstractJpaGen
     public void testDetachHardDiskInDeployedVM()
     {
         disk.attach(1, vm);
-        update(disk.getRasd(), disk);
+        datastore.setUsedSize(datastore.getUsedSize() + disk.getSizeInMb() * 1024 * 1024);
+        update(disk.getRasd(), disk, datastore);
 
         String uri =
             resolveVirtualMachineDiskUri(vdc.getId(), vapp.getId(), vm.getId(), disk.getId());
