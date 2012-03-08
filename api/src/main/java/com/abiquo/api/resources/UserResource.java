@@ -24,11 +24,13 @@ package com.abiquo.api.resources;
 import java.util.LinkedList;
 import java.util.List;
 
+import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 
 import org.apache.wink.common.annotations.Parent;
@@ -78,6 +80,7 @@ public class UserResource extends AbstractResource
     private SecurityService securityService;
 
     @GET
+    @Produces(UserDto.MEDIA_TYPE)
     public UserDto getUser(
         @PathParam(EnterpriseResource.ENTERPRISE) final String enterpriseIdOrWildcard,
         @PathParam(USER) final Integer userId, @Context final IRESTBuilder restBuilder)
@@ -109,6 +112,8 @@ public class UserResource extends AbstractResource
     }
 
     @PUT
+    @Consumes(UserDto.MEDIA_TYPE)
+    @Produces(UserDto.MEDIA_TYPE)
     public UserDto modifyUser(
         @PathParam(EnterpriseResource.ENTERPRISE) final String enterpriseIdOrWildcard,
         @PathParam(USER) final Integer userId, final UserDto user,
@@ -134,6 +139,7 @@ public class UserResource extends AbstractResource
 
     @GET
     @Path(UserResource.USER_ACTION_GET_VIRTUALMACHINES_PATH)
+    @Produces(VirtualMachinesDto.MEDIA_TYPE)
     public VirtualMachinesDto getVirtualMachines(
         @PathParam(EnterpriseResource.ENTERPRISE) final Integer enterpriseId,
         @PathParam(UserResource.USER) final Integer userId, @Context final IRESTBuilder restBuilder)

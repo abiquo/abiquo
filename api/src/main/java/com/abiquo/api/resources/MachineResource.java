@@ -24,12 +24,14 @@ package com.abiquo.api.resources;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
@@ -122,6 +124,7 @@ public class MachineResource extends AbstractResource
     VirtualApplianceService vappService;
 
     @GET
+    @Produces(MachineDto.MEDIA_TYPE)
     public MachineDto getMachine(
         @PathParam(DatacenterResource.DATACENTER) final Integer datacenterId,
         @PathParam(RackResource.RACK) final Integer rackId,
@@ -146,6 +149,8 @@ public class MachineResource extends AbstractResource
     }
 
     @PUT
+    @Consumes(MachineDto.MEDIA_TYPE)
+    @Produces(MachineDto.MEDIA_TYPE)
     public MachineDto modifyMachine(
         @PathParam(DatacenterResource.DATACENTER) final Integer datacenterId,
         @PathParam(RackResource.RACK) final Integer rackId,
@@ -196,6 +201,7 @@ public class MachineResource extends AbstractResource
      */
     @GET
     @Path(MACHINE_ACTION_CHECK)
+    @Produces(MachineStateDto.MEDIA_TYPE)
     public MachineStateDto checkMachineState(
         @PathParam(DatacenterResource.DATACENTER) final Integer datacenterId,
         @PathParam(RackResource.RACK) final Integer rackId,

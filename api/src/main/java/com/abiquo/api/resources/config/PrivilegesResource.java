@@ -20,12 +20,12 @@
  */
 package com.abiquo.api.resources.config;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 
 import org.apache.wink.common.annotations.Workspace;
@@ -35,7 +35,7 @@ import org.springframework.stereotype.Controller;
 import com.abiquo.api.resources.AbstractResource;
 import com.abiquo.api.services.EnterpriseService;
 import com.abiquo.api.util.IRESTBuilder;
-import com.abiquo.model.rest.RESTLink;
+import com.abiquo.model.transport.LinksDto;
 import com.abiquo.model.util.ModelTransformer;
 import com.abiquo.server.core.enterprise.Privilege;
 import com.abiquo.server.core.enterprise.PrivilegeDto;
@@ -52,6 +52,7 @@ public class PrivilegesResource extends AbstractResource
     private EnterpriseService service;
 
     @GET
+    @Produces(PrivilegesDto.MEDIA_TYPE)
     public PrivilegesDto getPrivileges(@Context final IRESTBuilder restBuilder) throws Exception
     {
         Collection<Privilege> ps = service.findAllPrivileges();
@@ -74,19 +75,15 @@ public class PrivilegesResource extends AbstractResource
         return privileges;
     }
 
-    public static PrivilegesDto addPrivilegesLinks(final IRESTBuilder restBuilder,
+    public static LinksDto getPrivilegesLinks(final IRESTBuilder restBuilder,
         final List<Privilege> privileges)
     {
-        PrivilegesDto ps = new PrivilegesDto();
-        List<RESTLink> links = new ArrayList<RESTLink>();
+        LinksDto links = new LinksDto();
         for (Privilege p : privileges)
         {
             PrivilegeDto pDto = new PrivilegeDto(p.getId(), p.getName());
-            pDto.setLinks(restBuilder.buildPrivilegeListLink(pDto));
-            links.addAll(pDto.getLinks());
+            links.addLinks(restBuilder.buildPrivilegeListLink(pDto));
         }
-        ps.setLinks(links);
-        return ps;
+        return links;
     }
-
 }

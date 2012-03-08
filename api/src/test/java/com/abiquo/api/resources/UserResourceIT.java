@@ -100,7 +100,7 @@ public class UserResourceIT extends AbstractJpaGeneratorIT
         setup(entitiesToSetup.toArray());
 
         ClientResponse response =
-            get(resolveUserURI(user.getEnterprise().getId(), user.getId()), "sysadmin", "sysadmin");
+            get(resolveUserURI(user.getEnterprise().getId(), user.getId()), "sysadmin", "sysadmin", UserDto.MEDIA_TYPE);
         UserDto dto = response.getEntity(UserDto.class);
 
         assertEquals(response.getStatusCode(), 200);
@@ -125,7 +125,7 @@ public class UserResourceIT extends AbstractJpaGeneratorIT
         setup(entitiesToSetup.toArray());
 
         ClientResponse response =
-            get(resolveUserURI(user.getEnterprise().getId(), 123), "sysadmin", "sysadmin");
+            get(resolveUserURI(user.getEnterprise().getId(), 123), "sysadmin", "sysadmin", UserDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), 404);
 
         assertNonEmptyErrors(response.getEntity(ErrorsDto.class));
@@ -148,7 +148,7 @@ public class UserResourceIT extends AbstractJpaGeneratorIT
 
         setup(entitiesToSetup.toArray());
 
-        ClientResponse response = get(resolveUserURI(1234, user.getId()), "sysadmin", "sysadmin");
+        ClientResponse response = get(resolveUserURI(1234, user.getId()), "sysadmin", "sysadmin", UserDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), 404);
 
         assertNonEmptyErrors(response.getEntity(ErrorsDto.class));
@@ -173,7 +173,7 @@ public class UserResourceIT extends AbstractJpaGeneratorIT
 
         String href = resolveUserURI(user.getEnterprise().getId(), user.getId());
         String enterpriseUri = resolveEnterpriseURI(user.getEnterprise().getId());
-        ClientResponse response = get(href, "sysadmin", "sysadmin");
+        ClientResponse response = get(href, "sysadmin", "sysadmin", UserDto.MEDIA_TYPE);
 
         UserDto dto = response.getEntity(UserDto.class);
 
@@ -183,7 +183,6 @@ public class UserResourceIT extends AbstractJpaGeneratorIT
         assertLinkExist(dto, enterpriseUri, "enterprise");
         assertLinkExist(dto,
             resolveUserActionGetVirtualMachinesURI(user.getEnterprise().getId(), user.getId()),
-            VirtualMachinesResource.VIRTUAL_MACHINES_PATH,
             VirtualMachinesResource.VIRTUAL_MACHINES_PATH);
 
     }
@@ -206,7 +205,7 @@ public class UserResourceIT extends AbstractJpaGeneratorIT
         setup(entitiesToSetup.toArray());
 
         String uri = resolveUserURI(user.getEnterprise().getId(), user.getId());
-        ClientResponse response = get(uri, "sysadmin", "sysadmin");
+        ClientResponse response = get(uri, "sysadmin", "sysadmin", UserDto.MEDIA_TYPE);
 
         UserDto dto = response.getEntity(UserDto.class);
         dto.setName("name");
@@ -236,7 +235,7 @@ public class UserResourceIT extends AbstractJpaGeneratorIT
         setup(entitiesToSetup.toArray());
 
         String uri = resolveUserURI(user.getEnterprise().getId(), user.getId());
-        ClientResponse response = get(uri, "sysadmin", "sysadmin");
+        ClientResponse response = get(uri, "sysadmin", "sysadmin", UserDto.MEDIA_TYPE);
 
         UserDto dto = response.getEntity(UserDto.class);
         dto.setNick("newNick");
@@ -264,7 +263,7 @@ public class UserResourceIT extends AbstractJpaGeneratorIT
         setup(entitiesToSetup.toArray());
 
         String uri = resolveUserURI(user.getEnterprise().getId(), user.getId());
-        ClientResponse response = get(uri, "sysadmin", "sysadmin");
+        ClientResponse response = get(uri, "sysadmin", "sysadmin", UserDto.MEDIA_TYPE);
 
         UserDto dto = response.getEntity(UserDto.class);
         dto.setPassword("unencryptedPass");
@@ -309,7 +308,7 @@ public class UserResourceIT extends AbstractJpaGeneratorIT
         setup(entitiesToSetup.toArray());
 
         String uri = resolveUserURI(user.getEnterprise().getId(), user.getId());
-        ClientResponse response = get(uri, "sysadmin", "sysadmin");
+        ClientResponse response = get(uri, "sysadmin", "sysadmin", UserDto.MEDIA_TYPE);
 
         UserDto dto = response.getEntity(UserDto.class);
         dto.setName("name");
@@ -339,7 +338,7 @@ public class UserResourceIT extends AbstractJpaGeneratorIT
         setup(entitiesToSetup.toArray());
 
         String uri = resolveUserURI(user.getEnterprise().getId(), user.getId());
-        ClientResponse response = get(uri, "sysadmin", "sysadmin");
+        ClientResponse response = get(uri, "sysadmin", "sysadmin", UserDto.MEDIA_TYPE);
 
         UserDto dto = response.getEntity(UserDto.class);
         dto.setName("name");
@@ -367,7 +366,7 @@ public class UserResourceIT extends AbstractJpaGeneratorIT
         setup(entitiesToSetup.toArray());
 
         String uri = resolveUserURI(user.getEnterprise().getId(), user.getId());
-        ClientResponse response = get(uri, "sysadmin", "sysadmin");
+        ClientResponse response = get(uri, "sysadmin", "sysadmin", UserDto.MEDIA_TYPE);
 
         UserDto dto = response.getEntity(UserDto.class);
         String old = dto.getName();
@@ -384,7 +383,7 @@ public class UserResourceIT extends AbstractJpaGeneratorIT
 
         uri = resolveUserURI(user.getEnterprise().getId(), user.getId());
 
-        dto = get(uri, "sysadmin", "sysadmin").getEntity(UserDto.class);
+        dto = get(uri, "sysadmin", "sysadmin", UserDto.MEDIA_TYPE).getEntity(UserDto.class);
 
         assertEquals(dto.getName(), old);
     }
@@ -456,7 +455,7 @@ public class UserResourceIT extends AbstractJpaGeneratorIT
         assertEquals(response.getStatusCode(), 404);
 
         response =
-            get(resolveUserURI(user.getEnterprise().getId(), user.getId()), "sysadmin", "sysadmin");
+            get(resolveUserURI(user.getEnterprise().getId(), user.getId()), "sysadmin", "sysadmin", UserDto.MEDIA_TYPE);
         UserDto dto = response.getEntity(UserDto.class);
 
         assertEquals(response.getStatusCode(), 200);
@@ -504,7 +503,7 @@ public class UserResourceIT extends AbstractJpaGeneratorIT
         Enterprise e = vm.getEnterprise();
         User u = vm.getUser();
 
-        ClientResponse response = get(uri, "sysadmin", "sysadmin");
+        ClientResponse response = get(uri, "sysadmin", "sysadmin", VirtualMachinesDto.MEDIA_TYPE);
         Assert.assertEquals(response.getStatusCode(), 200);
 
         VirtualMachinesDto vms = response.getEntity(VirtualMachinesDto.class);
@@ -545,7 +544,7 @@ public class UserResourceIT extends AbstractJpaGeneratorIT
         String userURI = resolveUserURI(user.getEnterprise().getId(), user.getId());
         String roleURI = resolveRoleURI(r2.getId());
 
-        ClientResponse response = get(userURI, "sysadmin", "sysadmin");
+        ClientResponse response = get(userURI, "sysadmin", "sysadmin", UserDto.MEDIA_TYPE);
         UserDto dto = response.getEntity(UserDto.class);
 
         dto.modifyLink("role", roleURI);

@@ -24,6 +24,7 @@ package com.abiquo.server.core.infrastructure.storage;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.abiquo.model.transport.MovedPermanentlyDto;
+import com.abiquo.model.transport.SingleResourceTransportDto;
 
 /**
  * This Entity is the response of 301 moved volume.
@@ -33,6 +34,11 @@ import com.abiquo.model.transport.MovedPermanentlyDto;
 @XmlRootElement(name = "moved")
 public class MovedVolumeDto extends MovedPermanentlyDto
 {
+    public static final String BASE_MEDIA_TYPE = "application/vnd.abiquo.moved-volume+xml";
+
+    public static final String MEDIA_TYPE = BASE_MEDIA_TYPE + "; version="
+        + SingleResourceTransportDto.API_VERSION;
+
     private VolumeManagementDto volume;
 
     public VolumeManagementDto getVolume()

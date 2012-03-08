@@ -26,6 +26,7 @@ import java.io.Serializable;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.abiquo.model.transport.SingleResourceTransportDto;
+import com.abiquo.server.core.infrastructure.DatacenterDto;
 
 /**
  * DTO to modify state parameters of the appliance.
@@ -40,7 +41,9 @@ public class VirtualApplianceStateDto extends SingleResourceTransportDto impleme
      * 
      */
     private static final long serialVersionUID = 7891496375111061310L;
-
+    public static final String BASE_MEDIA_TYPE = "application/vnd.abiquo.virtualappliancestate+xml";
+    public static final String MEDIA_TYPE = BASE_MEDIA_TYPE + "; version=" + API_VERSION;
+    
     /**
      * Machine power state. <br>
      * Values
@@ -85,5 +88,17 @@ public class VirtualApplianceStateDto extends SingleResourceTransportDto impleme
     public void setPower(final VirtualApplianceState power)
     {
         this.power = power;
+    }
+    
+    @Override
+    public String getMediaType()
+    {
+        return VirtualApplianceStateDto.MEDIA_TYPE;
+    }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
     }
 }

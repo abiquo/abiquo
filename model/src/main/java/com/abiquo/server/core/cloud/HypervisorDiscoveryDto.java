@@ -30,7 +30,8 @@ import com.abiquo.model.transport.SingleResourceTransportDto;
 public class HypervisorDiscoveryDto extends SingleResourceTransportDto
 {
 
-    public static final String MEDIA_TYPE = "application/discovery+xml";
+    public static final String BASE_MEDIA_TYPE = "application/vnd.abiquo.hypervisordiscovery+xml";
+    public static final String MEDIA_TYPE = BASE_MEDIA_TYPE + "; version=" + API_VERSION;
 
     private Integer port;
 
@@ -114,6 +115,18 @@ public class HypervisorDiscoveryDto extends SingleResourceTransportDto
     public void setvSwitch(String vSwitch)
     {
         this.vSwitch = vSwitch;
+    }
+
+    @Override
+    public String getMediaType()
+    {
+        return HypervisorDiscoveryDto.MEDIA_TYPE;
+    }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
     }
 
 }

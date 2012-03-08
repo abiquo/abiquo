@@ -34,12 +34,25 @@ import com.abiquo.model.transport.WrapperDto;
 @XmlRootElement(name = "fitPolicyRules")
 public class FitPolicyRulesDto extends WrapperDto<FitPolicyRuleDto>
 {
-
+    public static final String BASE_MEDIA_TYPE = "application/vnd.abiquo.fitpolicyrules+xml";
+    public static final String MEDIA_TYPE = BASE_MEDIA_TYPE + "; version=" + API_VERSION;
+    
     @Override
     @XmlElement(name = "fitPolicyRule")
     public List<FitPolicyRuleDto> getCollection()
     {
         return collection;
     }
-
+    
+    @Override
+    public String getMediaType()
+    {
+        return FitPolicyRulesDto.MEDIA_TYPE;
+    }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
+    }
 }

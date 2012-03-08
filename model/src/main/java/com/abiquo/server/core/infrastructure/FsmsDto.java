@@ -46,7 +46,9 @@ public class FsmsDto extends WrapperDto<FsmDto>
      * 
      */
     private static final long serialVersionUID = 5643469409057556537L;
-
+    public static final String BASE_MEDIA_TYPE = "application/vnd.abiquo.fsms+xml";
+    public static final String MEDIA_TYPE = BASE_MEDIA_TYPE + "; version=" + API_VERSION;
+    
     /**
      * Gets the value of the host property.
      * <p>
@@ -73,4 +75,15 @@ public class FsmsDto extends WrapperDto<FsmDto>
         return this.collection;
     }
 
+    @Override
+    public String getMediaType()
+    {
+        return FsmsDto.MEDIA_TYPE;
+    }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
+    }
 }

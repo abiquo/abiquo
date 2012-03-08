@@ -46,6 +46,8 @@ import static com.abiquo.api.common.Assert.assertError;
 import static com.abiquo.api.common.UriTestResolver.resolveDatastoreURI;
 import static org.testng.Assert.assertEquals;
 
+import javax.ws.rs.core.Response.Status;
+
 import org.apache.wink.client.ClientResponse;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -70,7 +72,7 @@ public class DatastoreResourceIT extends AbstractJpaGeneratorIT
             resolveDatastoreURI(machine.getDatacenter().getId(), machine.getRack().getId(),
                 machine.getId(), ds.getId());
 
-        ClientResponse response = get(uri);
+        ClientResponse response = get(uri, DatastoreDto.MEDIA_TYPE);
 
         DatastoreDto dto = response.getEntity(DatastoreDto.class);
         Assert.assertNotNull(dto);
@@ -88,7 +90,7 @@ public class DatastoreResourceIT extends AbstractJpaGeneratorIT
             resolveDatastoreURI(machine.getDatacenter().getId(), machine.getRack().getId(),
                 machine.getId(), ds.getId());
 
-        ClientResponse response = get(uri);
+        ClientResponse response = get(uri, DatastoreDto.MEDIA_TYPE);
         DatastoreDto dto = response.getEntity(DatastoreDto.class);
 
         dto.setName("updatedDatastoreName");
@@ -113,10 +115,10 @@ public class DatastoreResourceIT extends AbstractJpaGeneratorIT
             resolveDatastoreURI(machine.getDatacenter().getId(), machine.getRack().getId(),
                 machine.getId(), ds2.getId());
 
-        ClientResponse response = get(uri);
+        ClientResponse response = get(uri, DatastoreDto.MEDIA_TYPE);
         DatastoreDto dto1 = response.getEntity(DatastoreDto.class);
 
-        response = get(uri2);
+        response = get(uri2, DatastoreDto.MEDIA_TYPE);
         DatastoreDto dto2 = response.getEntity(DatastoreDto.class);
 
         dto2.setName(dto1.getName());
@@ -142,10 +144,10 @@ public class DatastoreResourceIT extends AbstractJpaGeneratorIT
             resolveDatastoreURI(machine.getDatacenter().getId(), machine.getRack().getId(),
                 machine.getId(), ds2.getId());
 
-        ClientResponse response = get(uri);
+        ClientResponse response = get(uri, DatastoreDto.MEDIA_TYPE);
         DatastoreDto dto1 = response.getEntity(DatastoreDto.class);
 
-        response = get(uri2);
+        response = get(uri2, DatastoreDto.MEDIA_TYPE);
         DatastoreDto dto2 = response.getEntity(DatastoreDto.class);
 
         dto2.setDirectory(dto1.getDirectory());
@@ -166,14 +168,14 @@ public class DatastoreResourceIT extends AbstractJpaGeneratorIT
         String uri =
             resolveDatastoreURI(machine.getDatacenter().getId(), machine.getRack().getId(),
                 machine.getId(), ds.getId());
-        ClientResponse response = get(uri);
+        ClientResponse response = get(uri, DatastoreDto.MEDIA_TYPE);
         DatastoreDto dto1 = response.getEntity(DatastoreDto.class);
 
         response =
             put(resolveDatastoreURI(machine.getDatacenter().getId(), machine.getRack().getId(),
                 machine.getId(), ds.getId() + 1234), dto1);
 
-        assertEquals(response.getStatusCode(), 404);
+        assertEquals(response.getStatusCode(), Status.NOT_FOUND.getStatusCode());
         assertError(response.getEntity(ErrorsDto.class),
             APIError.DATASTORE_NOT_ASSIGNED_TO_MACHINE.getCode());
     }

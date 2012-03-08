@@ -33,7 +33,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response.Status;
 
 import org.apache.wink.client.ClientResponse;
@@ -118,7 +117,7 @@ public class PrivateNetworksResourceIT extends AbstractJpaGeneratorIT
 
         setup(vlan.getConfiguration(), vlan, vlan2.getConfiguration(), vlan2);
 
-        ClientResponse response = resource.accept(MediaType.APPLICATION_XML).get();
+        ClientResponse response = resource.accept(VLANNetworksDto.MEDIA_TYPE).get();
         assertEquals(200, response.getStatusCode());
         VLANNetworksDto entity = response.getEntity(VLANNetworksDto.class);
         assertNotNull(entity);
@@ -131,7 +130,7 @@ public class PrivateNetworksResourceIT extends AbstractJpaGeneratorIT
     {
         Resource resource = client.resource(resolvePrivateNetworksURI(new Random().nextInt(1000)));
 
-        ClientResponse response = resource.accept(MediaType.APPLICATION_XML).get();
+        ClientResponse response = resource.accept(VLANNetworksDto.MEDIA_TYPE).get();
         assertEquals(response.getStatusCode(), Status.NOT_FOUND.getStatusCode());
     }
 
@@ -195,7 +194,7 @@ public class PrivateNetworksResourceIT extends AbstractJpaGeneratorIT
     {
         Resource res =
             client.resource(resolvePrivateNetworksURI(vdc.getId()))
-                .accept(MediaType.APPLICATION_XML).contentType(MediaType.APPLICATION_XML)
+                .accept(VLANNetworkDto.MEDIA_TYPE).contentType(VLANNetworkDto.MEDIA_TYPE)
                 .header("Authorization", "Basic " + basicAuth("sysadmin", "sysadmin"));
 
         // Name null

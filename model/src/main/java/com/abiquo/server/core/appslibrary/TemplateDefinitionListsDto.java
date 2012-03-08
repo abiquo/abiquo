@@ -35,11 +35,26 @@ import com.abiquo.model.transport.WrapperDto;
 public class TemplateDefinitionListsDto extends WrapperDto<TemplateDefinitionListDto>
 {
     private static final long serialVersionUID = 3611309393863764211L;
+    
+    public static final String BASE_MEDIA_TYPE = "application/vnd.abiquo.templatedefinitionlists+xml";
+    public static final String MEDIA_TYPE = BASE_MEDIA_TYPE + "; version=" + API_VERSION;
 
     @Override
     @XmlElement(name = "templateDefinitionList")
     public List<TemplateDefinitionListDto> getCollection()
     {
         return collection;
+    }
+    
+    @Override
+    public String getMediaType()
+    {
+        return TemplateDefinitionListsDto.MEDIA_TYPE;
+    }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
     }
 }

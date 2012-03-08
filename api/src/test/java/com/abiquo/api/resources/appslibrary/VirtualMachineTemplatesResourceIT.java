@@ -31,6 +31,8 @@ import static org.testng.Assert.assertEquals;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.ws.rs.core.Response.Status;
+
 import org.apache.wink.client.ClientResponse;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -115,7 +117,7 @@ public class VirtualMachineTemplatesResourceIT extends AbstractJpaGeneratorIT
     public void testGetVirtualMachineTemplatesRaises409WhenNoDatacenterLimits()
     {
         String uri = resolveVirtualMachineTemplatesURI(ent.getId(), datacenter.getId());
-        ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
+        ClientResponse response = get(uri, SYSADMIN, SYSADMIN, VirtualMachineTemplatesDto.MEDIA_TYPE);
         assertError(response, 409, APIError.ENTERPRISE_NOT_ALLOWED_DATACENTER);
     }
 
@@ -123,7 +125,7 @@ public class VirtualMachineTemplatesResourceIT extends AbstractJpaGeneratorIT
     public void testGetVirtualMachineTemplatesRaises404WhenInvalidEnterprise()
     {
         String uri = resolveVirtualMachineTemplatesURI(ent.getId() + 100, datacenter.getId());
-        ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
+        ClientResponse response = get(uri, SYSADMIN, SYSADMIN, VirtualMachineTemplatesDto.MEDIA_TYPE);
         assertError(response, 404, APIError.NON_EXISTENT_ENTERPRISE);
     }
 
@@ -141,7 +143,7 @@ public class VirtualMachineTemplatesResourceIT extends AbstractJpaGeneratorIT
 
         String uri = resolveVirtualMachineTemplatesURI(ent.getId(), datacenter.getId());
         uri += "?hypervisorTypeName=INVALID";
-        ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
+        ClientResponse response = get(uri, SYSADMIN, SYSADMIN, VirtualMachineTemplatesDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), 400);
 
         // TODO: Specific APiError
@@ -154,7 +156,7 @@ public class VirtualMachineTemplatesResourceIT extends AbstractJpaGeneratorIT
         String uri =
             resolveStatefulVirtualMachineTemplatesURI(ent.getId(), datacenter.getId() + 100,
                 StatefulInclusion.ALL);
-        ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
+        ClientResponse response = get(uri, SYSADMIN, SYSADMIN, VirtualMachineTemplatesDto.MEDIA_TYPE);
         assertError(response, 404, APIError.NON_EXISTENT_DATACENTER);
     }
 
@@ -164,7 +166,7 @@ public class VirtualMachineTemplatesResourceIT extends AbstractJpaGeneratorIT
         String uri =
             resolveStatefulVirtualMachineTemplatesURI(ent.getId() + 100, datacenter.getId(),
                 StatefulInclusion.ALL);
-        ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
+        ClientResponse response = get(uri, SYSADMIN, SYSADMIN, VirtualMachineTemplatesDto.MEDIA_TYPE);
         assertError(response, 404, APIError.NON_EXISTENT_ENTERPRISE);
     }
 
@@ -174,7 +176,7 @@ public class VirtualMachineTemplatesResourceIT extends AbstractJpaGeneratorIT
         String uri =
             resolveStatefulVirtualMachineTemplatesURI(ent.getId(), datacenter.getId(),
                 StatefulInclusion.ALL);
-        ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
+        ClientResponse response = get(uri, SYSADMIN, SYSADMIN, VirtualMachineTemplatesDto.MEDIA_TYPE);
         assertError(response, 409, APIError.ENTERPRISE_NOT_ALLOWED_DATACENTER);
     }
 
@@ -187,7 +189,7 @@ public class VirtualMachineTemplatesResourceIT extends AbstractJpaGeneratorIT
         String uri =
             resolveStatefulVirtualMachineTemplatesURIWithCategory(ent.getId(), datacenter.getId(),
                 "nonexisting", StatefulInclusion.ALL);
-        ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
+        ClientResponse response = get(uri, SYSADMIN, SYSADMIN, VirtualMachineTemplatesDto.MEDIA_TYPE);
         assertError(response, 404, APIError.NON_EXISTENT_CATEGORY);
     }
 
@@ -203,8 +205,8 @@ public class VirtualMachineTemplatesResourceIT extends AbstractJpaGeneratorIT
         setup(limits, vi1.getCategory(), vi2.getCategory(), vi1, vi2);
 
         String uri = resolveVirtualMachineTemplatesURI(ent.getId(), datacenter.getId());
-        ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
-        assertEquals(response.getStatusCode(), 200);
+        ClientResponse response = get(uri, SYSADMIN, SYSADMIN, VirtualMachineTemplatesDto.MEDIA_TYPE);
+        assertEquals(response.getStatusCode(), Status.OK.getStatusCode());
 
         VirtualMachineTemplatesDto dto = response.getEntity(VirtualMachineTemplatesDto.class);
         assertEquals(dto.getCollection().size(), 2);
@@ -222,7 +224,7 @@ public class VirtualMachineTemplatesResourceIT extends AbstractJpaGeneratorIT
         String uri =
             resolveStatefulVirtualMachineTemplatesURI(ent.getId(), datacenter.getId(),
                 StatefulInclusion.ALL);
-        ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
+        ClientResponse response = get(uri, SYSADMIN, SYSADMIN, VirtualMachineTemplatesDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), 200);
 
         VirtualMachineTemplatesDto dto = response.getEntity(VirtualMachineTemplatesDto.class);
@@ -243,7 +245,7 @@ public class VirtualMachineTemplatesResourceIT extends AbstractJpaGeneratorIT
         String uri =
             resolveStatefulVirtualMachineTemplatesURI(ent.getId(), datacenter.getId(),
                 StatefulInclusion.ALL);
-        ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
+        ClientResponse response = get(uri, SYSADMIN, SYSADMIN, VirtualMachineTemplatesDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), 200);
 
         VirtualMachineTemplatesDto dto = response.getEntity(VirtualMachineTemplatesDto.class);
@@ -265,7 +267,7 @@ public class VirtualMachineTemplatesResourceIT extends AbstractJpaGeneratorIT
         String uri =
             resolveStatefulVirtualMachineTemplatesURI(ent.getId(), datacenter.getId(),
                 StatefulInclusion.USED);
-        ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
+        ClientResponse response = get(uri, SYSADMIN, SYSADMIN, VirtualMachineTemplatesDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), 200);
 
         VirtualMachineTemplatesDto dto = response.getEntity(VirtualMachineTemplatesDto.class);
@@ -287,7 +289,7 @@ public class VirtualMachineTemplatesResourceIT extends AbstractJpaGeneratorIT
         String uri =
             resolveStatefulVirtualMachineTemplatesURI(ent.getId(), datacenter.getId(),
                 StatefulInclusion.NOTUSED);
-        ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
+        ClientResponse response = get(uri, SYSADMIN, SYSADMIN, VirtualMachineTemplatesDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), 200);
 
         VirtualMachineTemplatesDto dto = response.getEntity(VirtualMachineTemplatesDto.class);
@@ -308,7 +310,7 @@ public class VirtualMachineTemplatesResourceIT extends AbstractJpaGeneratorIT
         String uri =
             resolveStatefulVirtualMachineTemplatesURIWithCategory(ent.getId(), datacenter.getId(),
                 vmtemplate.getCategory().getName(), StatefulInclusion.ALL);
-        ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
+        ClientResponse response = get(uri, SYSADMIN, SYSADMIN, VirtualMachineTemplatesDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), 200);
 
         VirtualMachineTemplatesDto dto = response.getEntity(VirtualMachineTemplatesDto.class);
@@ -330,7 +332,7 @@ public class VirtualMachineTemplatesResourceIT extends AbstractJpaGeneratorIT
             resolveStatefulVirtualMachineTemplatesURIWithCategoryAndVirtualDatacenter(ent.getId(),
                 datacenter.getId(), vmtemplate.getCategory().getName(), volume
                     .getVirtualDatacenter().getId(), StatefulInclusion.ALL);
-        ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
+        ClientResponse response = get(uri, SYSADMIN, SYSADMIN, VirtualMachineTemplatesDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), 200);
 
         VirtualMachineTemplatesDto dto = response.getEntity(VirtualMachineTemplatesDto.class);
@@ -353,7 +355,7 @@ public class VirtualMachineTemplatesResourceIT extends AbstractJpaGeneratorIT
         String uri =
             resolveStatefulVirtualMachineTemplatesURIWithCategory(ent.getId(), datacenter.getId(),
                 anotherCategory.getName(), StatefulInclusion.ALL);
-        ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
+        ClientResponse response = get(uri, SYSADMIN, SYSADMIN, VirtualMachineTemplatesDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), 200);
 
         VirtualMachineTemplatesDto dto = response.getEntity(VirtualMachineTemplatesDto.class);
@@ -380,9 +382,9 @@ public class VirtualMachineTemplatesResourceIT extends AbstractJpaGeneratorIT
         String uri = resolveVirtualMachineTemplatesURI(ent.getId(), datacenter.getId());
         ClientResponse response =
             resource(uri, SYSADMIN, SYSADMIN).queryParam("hypervisorTypeName",
-                HypervisorType.VBOX.name()).get();
+                HypervisorType.VBOX.name()).accept(VirtualMachineTemplatesDto.MEDIA_TYPE).get();
 
-        assertEquals(response.getStatusCode(), 200);
+        assertEquals(response.getStatusCode(), 200, VirtualMachineTemplatesDto.MEDIA_TYPE);
 
         VirtualMachineTemplatesDto dto = response.getEntity(VirtualMachineTemplatesDto.class);
         assertEquals(dto.getCollection().size(), 1);
@@ -409,7 +411,7 @@ public class VirtualMachineTemplatesResourceIT extends AbstractJpaGeneratorIT
         String uri = resolveVirtualMachineTemplatesURI(ent.getId(), datacenter.getId());
         ClientResponse response =
             resource(uri, SYSADMIN, SYSADMIN).queryParam("hypervisorTypeName",
-                HypervisorType.VBOX.name()).get();
+                HypervisorType.VBOX.name()).accept(VirtualMachineTemplatesDto.MEDIA_TYPE).get();
 
         assertEquals(response.getStatusCode(), 200);
 

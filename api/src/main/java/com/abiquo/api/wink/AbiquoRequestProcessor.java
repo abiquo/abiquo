@@ -19,39 +19,28 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package com.abiquo.server.core.cloud.stateful;
+/**
+ * 
+ */
+package com.abiquo.api.wink;
 
-import javax.xml.bind.annotation.XmlRootElement;
+import org.apache.wink.server.internal.DeploymentConfiguration;
+import org.apache.wink.server.internal.RequestProcessor;
 
-import com.abiquo.model.transport.SingleResourceTransportDto;
-
-@XmlRootElement(name = "nodeVirtualImageStatefulConversion")
-public class NodeVirtualImageStatefulConversionDto extends SingleResourceTransportDto
+/**
+ * @author jaume
+ *
+ */
+public class AbiquoRequestProcessor extends RequestProcessor
 {
-    private static final long serialVersionUID = -7925016301617309142L;
-
-    private Integer id;
-
-    public Integer getId()
-    {
-        return id;
+    private AbiquoDeploymentConfiguration configuration;
+    
+    public AbiquoRequestProcessor(AbiquoDeploymentConfiguration configuration) {
+        super(configuration);
     }
-
-    public void setId(final Integer id)
-    {
-        this.id = id;
-    }
-
-    private String newName;
-
-    public String getNewName()
-    {
-        return newName;
-    }
-
-    public void setNewName(final String newName)
-    {
-        this.newName = newName;
+    
+    public DeploymentConfiguration getConfiguration() {
+        return configuration;
     }
 
 }

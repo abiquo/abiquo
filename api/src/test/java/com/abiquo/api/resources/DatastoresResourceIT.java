@@ -51,6 +51,7 @@ import java.util.Collection;
 import java.util.Iterator;
 
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response.Status;
 
 import org.apache.wink.client.ClientResponse;
 import org.apache.wink.client.Resource;
@@ -85,7 +86,7 @@ public class DatastoresResourceIT extends AbstractJpaGeneratorIT
     {
         ClientResponse response = createDatastore(dto);
 
-        assertEquals(response.getStatusCode(), 201);
+        assertEquals(response.getStatusCode(), Status.CREATED.getStatusCode());
 
         DatastoreDto entityPost = response.getEntity(DatastoreDto.class);
         assertNotNull(entityPost);
@@ -117,7 +118,7 @@ public class DatastoresResourceIT extends AbstractJpaGeneratorIT
         createDatastore(dto1);
         ClientResponse response = createDatastore(dto2);
 
-        assertEquals(response.getStatusCode(), 409);
+        assertEquals(response.getStatusCode(), Status.CONFLICT.getStatusCode());
 
         ErrorsDto errors = response.getEntity(ErrorsDto.class);
         Assert.assertError(errors, errorCode);
@@ -141,13 +142,7 @@ public class DatastoresResourceIT extends AbstractJpaGeneratorIT
             resolveDatastoresURI(machine.getDatacenter().getId(), machine.getRack().getId(),
                 machine.getId());
 
-        return createDatastore(uri, dto);
-    }
-
-    private ClientResponse createDatastore(final String datastoresUri, final DatastoreDto dto)
-    {
-        Resource resource = client.resource(datastoresUri).accept(MediaType.APPLICATION_XML);
-        return resource.contentType(MediaType.APPLICATION_XML).post(dto);
+        return post(uri, dto);
     }
 
     private DatastoreDto createDatastoreDto(final String name, final String rootPath,

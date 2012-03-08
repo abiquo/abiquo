@@ -42,6 +42,9 @@ import com.abiquo.model.transport.WrapperDto;
 public class LogicServersDto extends WrapperDto<LogicServerDto>
 {
 
+    public static final String BASE_MEDIA_TYPE = "application/vnd.abiquo.logicservers+xml";
+    public static final String MEDIA_TYPE = BASE_MEDIA_TYPE + "; version=" + API_VERSION;
+    
     /**
      * 
      */
@@ -72,5 +75,16 @@ public class LogicServersDto extends WrapperDto<LogicServerDto>
         }
         return this.collection;
     }
+    
+    @Override
+    public String getMediaType()
+    {
+        return LogicServersDto.MEDIA_TYPE;
+    }
 
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
+    }
 }

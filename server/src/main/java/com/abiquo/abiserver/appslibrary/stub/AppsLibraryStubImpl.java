@@ -93,7 +93,7 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
         // resource.queryParam("ovfindexURL", ovfpackageListURL);
 
         ClientResponse response =
-            resource(uri).accept(MediaType.APPLICATION_XML).contentType(MediaType.TEXT_PLAIN)
+            resource(uri, TemplateDefinitionListDto.MEDIA_TYPE).contentType(MediaType.TEXT_PLAIN)
                 .post(ovfindexURL);
 
         if (response.getStatusType().getFamily() != Family.SUCCESSFUL)
@@ -149,7 +149,9 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
         final String uri =
             createTemplateStateFromListLink(idEnterprise.toString(), String.valueOf(listId));
 
-        ClientResponse response = resource(uri).queryParam("datacenterId", datacenterId).get();
+        ClientResponse response =
+            resource(uri, TemplatesStateDto.MEDIA_TYPE).queryParam("datacenterId", datacenterId)
+                .get();
 
         if (response.getStatusType().getFamily() == Family.SUCCESSFUL)
         {
@@ -234,7 +236,9 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
             createTemplateStateLink(String.valueOf(idEnterprise),
                 String.valueOf(templateDefinitionId));
 
-        ClientResponse response = resource(uri).queryParam("datacenterId", datacenterId).get();
+        ClientResponse response =
+            resource(uri, TemplateStateDto.MEDIA_TYPE).queryParam("datacenterId", datacenterId)
+                .get();
 
         if (response.getStatusType().getFamily() == Family.SUCCESSFUL)
         {
@@ -291,7 +295,7 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
             createTemplateDefinitionInstallLink(String.valueOf(idEnterprise),
                 String.valueOf(templateDefinitionId));
 
-        Resource resource = resource(uri).contentType(MediaType.TEXT_PLAIN);
+        Resource resource = resource(uri, MediaType.TEXT_PLAIN);
         ClientResponse response = resource.post(String.valueOf(datacenterId));
         // TODO post use the the provided mediatype both for mediatype and accepttype
         // ClientResponse response = post(uri, String.valueOf(ovfPackageId), MediaType.TEXT_PLAIN);
@@ -328,7 +332,7 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
             createTemplateDefinitionUninstallLink(String.valueOf(idEnterprise),
                 String.valueOf(templateDefinitionId));
 
-        Resource resource = resource(uri).contentType(MediaType.TEXT_PLAIN);
+        Resource resource = resource(uri, MediaType.TEXT_PLAIN);
         ClientResponse response = resource.post(String.valueOf(datacenterId));
         // TODO post use the the provided mediatype both for mediatype and accepttype
         // ClientResponse response = post(uri, String.valueOf(ovfPackageId), MediaType.TEXT_PLAIN);
@@ -361,7 +365,7 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
         String uri =
             createTemplateDefinitionListLink(idEnterprise.toString(), templateDefListId.toString());
 
-        ClientResponse response = get(uri);
+        ClientResponse response = get(uri, TemplateDefinitionListDto.MEDIA_TYPE);
 
         if (response.getStatusType().getFamily() == Family.SUCCESSFUL)
         {
@@ -529,9 +533,7 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
     {
 
         String uri = createTemplateDefinitionListLink(idEnterprise.toString(), idList.toString());
-        ClientResponse response =
-            resource(uri).accept(MediaType.APPLICATION_XML).contentType(MediaType.TEXT_PLAIN)
-                .put(null);
+        ClientResponse response = put(uri, null, MediaType.APPLICATION_XML, MediaType.TEXT_PLAIN);
 
         if (response.getStatusType().getFamily() != Family.SUCCESSFUL)
         {
@@ -572,7 +574,7 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
         String uri =
             createTemplateDefinitionLink(idEnterprise.toString(),
                 templateDefinitionListId.toString());
-        ClientResponse response = get(uri);
+        ClientResponse response = get(uri, TemplateDefinitionsDto.MEDIA_TYPE);
 
         if (response.getStatusType().getFamily() != Family.SUCCESSFUL)
         {
@@ -601,7 +603,7 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
 
         final String uri = createDiskFormatTypesLink();
 
-        ClientResponse response = get(uri);
+        ClientResponse response = get(uri, DiskFormatTypesDto.MEDIA_TYPE);
 
         if (response.getStatusType().getFamily() == Family.SUCCESSFUL)
         {
@@ -730,7 +732,7 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
     private TemplateDefinitionsDto getTemplateDefinitions(final Integer idEnterprise)
     {
         String uri = createTemplateDefinitionsLink(idEnterprise.toString());
-        ClientResponse response = get(uri);
+        ClientResponse response = get(uri, TemplateDefinitionsDto.MEDIA_TYPE);
 
         if (response.getStatusType().getFamily() != Family.SUCCESSFUL)
         {
@@ -752,7 +754,7 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
 
         final String uri = createCategoriesLink();
 
-        ClientResponse response = get(uri);
+        ClientResponse response = get(uri, CategoriesDto.MEDIA_TYPE);
 
         if (response.getStatusType().getFamily() == Family.SUCCESSFUL)
         {

@@ -24,6 +24,7 @@ package com.abiquo.server.core.pricing;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.abiquo.model.transport.SingleResourceTransportDto;
+import com.abiquo.server.core.infrastructure.DatacenterDto;
 
 @XmlRootElement(name = "costCode")
 public class CostCodeDto extends SingleResourceTransportDto
@@ -32,6 +33,8 @@ public class CostCodeDto extends SingleResourceTransportDto
      * 
      */
     private static final long serialVersionUID = 1L;
+    public static final String BASE_MEDIA_TYPE = "application/vnd.abiquo.costcode+xml";
+    public static final String MEDIA_TYPE = BASE_MEDIA_TYPE + "; version=" + API_VERSION;
 
     public CostCodeDto()
     {
@@ -80,6 +83,18 @@ public class CostCodeDto extends SingleResourceTransportDto
     public void setDescription(final String description)
     {
         this.description = description;
+    }
+    
+    @Override
+    public String getMediaType()
+    {
+        return CostCodeDto.MEDIA_TYPE;
+    }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
     }
 
 }

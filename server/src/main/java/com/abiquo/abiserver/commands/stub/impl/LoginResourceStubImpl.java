@@ -36,10 +36,11 @@ public class LoginResourceStubImpl extends AbstractAPIStub implements LoginResou
      *      java.lang.String)
      */
     @Override
-    public DataResult<UserDto> getUserByName(String user, String password,
-        BasicAuthSecurityHandler basicAuthSecurityHandler)
+    public DataResult<UserDto> getUserByName(final String user, final String password,
+        final BasicAuthSecurityHandler basicAuthSecurityHandler)
     {
-        ClientResponse response = get(createLoginLink(), user, password, basicAuthSecurityHandler);
+        ClientResponse response =
+            get(createLoginLink(), user, password, UserDto.MEDIA_TYPE, basicAuthSecurityHandler);
 
         UserDto userDto = response.getEntity(UserDto.class);
 

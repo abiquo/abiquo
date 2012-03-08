@@ -29,6 +29,7 @@ import javax.validation.constraints.Min;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.UriInfo;
@@ -71,6 +72,7 @@ public class RolesResource extends AbstractResource
     UriInfo uriInfo;
 
     @GET
+    @Produces(RolesDto.MEDIA_TYPE)
     public RolesDto getRoles(
         @QueryParam(EnterpriseResource.ENTERPRISE_AS_PARAM) @DefaultValue("0") @Min(0) final Integer enterpriseId,
         @QueryParam(FILTER) @DefaultValue("") final String filter,

@@ -23,6 +23,7 @@ package com.abiquo.appliancemanager.transport;
 
 import java.util.List;
 
+import javax.ws.rs.core.MediaType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
@@ -40,5 +41,16 @@ public class EnterpriseRepositoriesDto extends WrapperDto<EnterpriseRepositoryDt
     {
         return collection;
     }
-
+    
+    @Override
+    public String getMediaType()
+    {
+        return MediaType.APPLICATION_XML;
+    }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return MediaType.APPLICATION_XML;
+    }
 }

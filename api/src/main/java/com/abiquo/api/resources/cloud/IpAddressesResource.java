@@ -31,6 +31,7 @@ import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.UriInfo;
@@ -46,6 +47,7 @@ import com.abiquo.model.util.ModelTransformer;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagementDto;
 import com.abiquo.server.core.infrastructure.network.IpsPoolManagementDto;
+import com.abiquo.server.core.infrastructure.network.VLANNetwork;
 import com.abiquo.server.core.util.PagedList;
 
 /**
@@ -74,6 +76,7 @@ public class IpAddressesResource extends AbstractResource
     UriInfo uriInfo;
 
     @GET
+    @Produces(IpsPoolManagementDto.MEDIA_TYPE)
     public IpsPoolManagementDto getIPAddresses(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) @Min(1) final Integer vdcId,
         @PathParam(PrivateNetworkResource.PRIVATE_NETWORK) @Min(1) final Integer vlanId,
@@ -104,7 +107,7 @@ public class IpAddressesResource extends AbstractResource
 
         return ips;
     }
-    
+
     /**
      * Returns a single IP based on its private network's hierarchy.
      * 
@@ -116,6 +119,7 @@ public class IpAddressesResource extends AbstractResource
      */
     @GET
     @Path(IpAddressesResource.IP_ADDRESS_PARAM)
+    @Produces(IpPoolManagementDto.MEDIA_TYPE)
     public IpPoolManagementDto getIPAddress(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) @Min(1) final Integer vdcId,
         @PathParam(PrivateNetworkResource.PRIVATE_NETWORK) @Min(1) final Integer vlanId,
@@ -123,10 +127,9 @@ public class IpAddressesResource extends AbstractResource
         @Context final IRESTBuilder restBuilder) throws Exception
     {
         IpPoolManagement ip = service.getIpPoolManagementByVlan(vdcId, vlanId, ipId);
-        
+
         return createTransferObject(ip, restBuilder);
     }
-        
 
     public static IpPoolManagementDto createTransferObject(final IpPoolManagement ip,
         final IRESTBuilder restBuilder) throws Exception

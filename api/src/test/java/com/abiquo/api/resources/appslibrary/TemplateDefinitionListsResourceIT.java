@@ -30,6 +30,8 @@ import static org.testng.Assert.assertNotNull;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.ws.rs.core.MediaType;
+
 import org.apache.wink.client.ClientResponse;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -132,7 +134,8 @@ public class TemplateDefinitionListsResourceIT extends AbstractJpaGeneratorIT
 
         validURI = resolveTemplateDefinitionListsURI(enterprise.getId());
 
-        ClientResponse response = get(validURI, SYSADMIN, SYSADMIN);
+        ClientResponse response =
+            get(validURI, SYSADMIN, SYSADMIN, TemplateDefinitionListsDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), 200);
 
         TemplateDefinitionListsDto entity = response.getEntity(TemplateDefinitionListsDto.class);
@@ -145,7 +148,7 @@ public class TemplateDefinitionListsResourceIT extends AbstractJpaGeneratorIT
     public void getTemplateDefinitionListsByNonExistentEnterpriseRises404() throws Exception
     {
         validURI = resolveTemplateDefinitionListsURI(2);
-        ClientResponse response = get(validURI);
+        ClientResponse response = get(validURI, TemplateDefinitionListsDto.MEDIA_TYPE);
         assertError(response, 404, APIError.NON_EXISTENT_ENTERPRISE);
     }
 
@@ -174,7 +177,12 @@ public class TemplateDefinitionListsResourceIT extends AbstractJpaGeneratorIT
 
         String xmlindexURI = "http://localhost:7979/testovf/ovfindex.xml";
 
-        ClientResponse response = post(validURI, xmlindexURI, SYSADMIN, SYSADMIN);
+        String basicAuth = basicAuth(SYSADMIN, SYSADMIN);
+
+        ClientResponse response =
+            client.resource(validURI).accept(TemplateDefinitionListDto.MEDIA_TYPE)
+                .contentType(MediaType.TEXT_PLAIN).header("Authorization", "Basic " + basicAuth)
+                .post(xmlindexURI);
 
         assertEquals(response.getStatusCode(), 201);
 
@@ -190,7 +198,12 @@ public class TemplateDefinitionListsResourceIT extends AbstractJpaGeneratorIT
 
         String xmlindexURI = "http://localhost:7979/testovf/anyother.xml";
 
-        ClientResponse response = post(validURI, xmlindexURI, SYSADMIN, SYSADMIN);
+        String basicAuth = basicAuth(SYSADMIN, SYSADMIN);
+
+        ClientResponse response =
+            client.resource(validURI).accept(TemplateDefinitionListDto.MEDIA_TYPE)
+                .contentType(MediaType.TEXT_PLAIN).header("Authorization", "Basic " + basicAuth)
+                .post(xmlindexURI);
 
         assertEquals(response.getStatusCode(), 201);
 
@@ -206,7 +219,12 @@ public class TemplateDefinitionListsResourceIT extends AbstractJpaGeneratorIT
 
         String badURL = "http://localhost:7979/testovf/nonexistent/ovfindex.xml";
 
-        ClientResponse response = post(validURI, badURL, SYSADMIN, SYSADMIN);
+        String basicAuth = basicAuth(SYSADMIN, SYSADMIN);
+
+        ClientResponse response =
+            client.resource(validURI).accept(TemplateDefinitionListDto.MEDIA_TYPE)
+                .contentType(MediaType.TEXT_PLAIN).header("Authorization", "Basic " + basicAuth)
+                .post(badURL);
 
         assertError(response, 404, APIError.NON_EXISTENT_REPOSITORY_SPACE);
     }
@@ -218,7 +236,9 @@ public class TemplateDefinitionListsResourceIT extends AbstractJpaGeneratorIT
 
         String xmlindexURI = "http://localhost:7979/testovf/invalidovfindex/ovfindex.xml";
 
-        ClientResponse response = post(validURI, xmlindexURI, SYSADMIN, SYSADMIN);
+        ClientResponse response =
+            client.resource(validURI).accept(TemplateDefinitionListDto.MEDIA_TYPE)
+                .contentType(MediaType.TEXT_PLAIN).post(xmlindexURI);
 
         assertError(response, 400, APIError.INVALID_OVF_INDEX_XML);
     }

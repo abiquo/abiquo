@@ -29,6 +29,8 @@ import static org.testng.Assert.assertNotNull;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.ws.rs.core.Response.Status;
+
 import org.apache.wink.client.ClientResponse;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -80,13 +82,13 @@ public class DatacentersResourceIT extends AbstractJpaGeneratorIT
 
         ClientResponse response = post(resolveDatacentersURI(), d, SYSADMIN, SYSADMIN);
 
-        assertEquals(response.getStatusCode(), 201);
+        assertEquals(response.getStatusCode(), Status.CREATED.getStatusCode());
 
         DatacenterDto entityPost = response.getEntity(DatacenterDto.class);
         assertNotNull(entityPost);
         assertEquals(d.getName(), entityPost.getName());
 
-        response = get(resolveDatacentersURI());
+        response = get(resolveDatacentersURI(), DatacentersDto.MEDIA_TYPE);
         assertEquals(200, response.getStatusCode());
 
         DatacentersDto entity = response.getEntity(DatacentersDto.class);
@@ -116,8 +118,8 @@ public class DatacentersResourceIT extends AbstractJpaGeneratorIT
         setup(entitiesToSetup.toArray());
 
         ClientResponse response =
-            get(resolveDatacentersURI() + "?idEnterprise=" + e1.getId(), SYSADMIN, SYSADMIN);
-        assertEquals(200, response.getStatusCode());
+            get(resolveDatacentersURI() + "?idEnterprise=" + e1.getId(), SYSADMIN, SYSADMIN, DatacentersDto.MEDIA_TYPE);
+        assertEquals(response.getStatusCode(), Status.OK.getStatusCode());
 
         DatacentersDto entity = response.getEntity(DatacentersDto.class);
         assertNotNull(entity);
@@ -154,10 +156,10 @@ public class DatacentersResourceIT extends AbstractJpaGeneratorIT
         // Assert creation
         ClientResponse response = post(resolveDatacentersURI(), d, SYSADMIN, SYSADMIN);
         // System.out.println(response.getStatusCode() + ' ' + response.getMessage());
-        assertEquals(response.getStatusCode(), 201);
+        assertEquals(response.getStatusCode(), Status.CREATED.getStatusCode());
 
         // Assert there is a Datacenter and it has two Remote Services
-        response = get(resolveDatacentersURI());
+        response = get(resolveDatacentersURI(), DatacentersDto.MEDIA_TYPE);
         assertEquals(200, response.getStatusCode());
 
         DatacentersDto entities = response.getEntity(DatacentersDto.class);
@@ -173,9 +175,9 @@ public class DatacentersResourceIT extends AbstractJpaGeneratorIT
 
         setup(datacenter0, datacenter1);
 
-        ClientResponse response = get(resolveDatacentersURI());
+        ClientResponse response = get(resolveDatacentersURI(), DatacentersDto.MEDIA_TYPE);
 
-        assertEquals(response.getStatusCode(), 200);
+        assertEquals(response.getStatusCode(), Status.OK.getStatusCode());
         assertEquals(response.getEntity(DatacentersDto.class).getCollection().isEmpty(), false);
     }
 }

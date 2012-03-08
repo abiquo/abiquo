@@ -23,6 +23,7 @@ package com.abiquo.api.resources.config;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 
 import org.apache.wink.common.annotations.Parent;
@@ -60,6 +61,7 @@ public class PrivilegeResource extends AbstractResource
     SecurityService securityService;
 
     @GET
+    @Produces(PrivilegeDto.MEDIA_TYPE)
     public PrivilegeDto getPrivilege(@PathParam(PRIVILEGE) final Integer privilegeId,
         @Context final IRESTBuilder restBuilder) throws Exception
     {

@@ -27,6 +27,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import com.abiquo.model.enumerator.StorageTechnologyType;
 import com.abiquo.model.transport.SingleResourceTransportDto;
+import com.abiquo.server.core.infrastructure.network.DhcpOptionDto;
 
 @XmlRootElement(name = "device")
 public class StorageDeviceDto extends SingleResourceTransportDto implements Serializable
@@ -35,6 +36,9 @@ public class StorageDeviceDto extends SingleResourceTransportDto implements Seri
      * Default serial version UID.
      */
     private static final long serialVersionUID = 1L;
+    
+    public static final String BASE_MEDIA_TYPE = "application/vnd.abiquo.storagedevice+xml";
+    public static final String MEDIA_TYPE = BASE_MEDIA_TYPE + "; version=" + API_VERSION;
 
     private Integer id;
 
@@ -143,5 +147,16 @@ public class StorageDeviceDto extends SingleResourceTransportDto implements Seri
     {
         return password;
     }
+    
+    @Override
+    public String getMediaType()
+    {
+        return StorageDeviceDto.MEDIA_TYPE;
+    }
 
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
+    }
 }

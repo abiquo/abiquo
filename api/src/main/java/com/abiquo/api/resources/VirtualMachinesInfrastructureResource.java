@@ -33,6 +33,7 @@ import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 
@@ -83,6 +84,7 @@ public class VirtualMachinesInfrastructureResource extends AbstractResource
      *             {@link APIExceptionMapper} exception mapper.
      */
     @GET
+    @Produces(VirtualMachinesDto.MEDIA_TYPE)
     public VirtualMachinesDto getInfrastructureVirtualMachines(
         @PathParam(DatacenterResource.DATACENTER) @NotNull @Min(1) final Integer datacenterId,
         @PathParam(RackResource.RACK) @NotNull @Min(1) final Integer rackId,

@@ -25,11 +25,13 @@ import static com.abiquo.api.resources.EnterpriseResource.createTransferObject;
 
 import java.util.Collection;
 
+import javax.ws.rs.Consumes;
 import javax.validation.constraints.Min;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.UriInfo;
@@ -63,6 +65,7 @@ public class EnterprisesResource extends AbstractResource
     UriInfo uriInfo;
 
     @GET
+    @Produces(EnterprisesDto.MEDIA_TYPE)
     public EnterprisesDto getEnterprises(
         @QueryParam(START_WITH) @DefaultValue("0") @Min(0) final Integer startwith,
         @QueryParam(FILTER) @DefaultValue("") final String filterName,
@@ -96,6 +99,8 @@ public class EnterprisesResource extends AbstractResource
     }
 
     @POST
+    @Consumes(EnterpriseDto.MEDIA_TYPE)
+    @Produces(EnterpriseDto.MEDIA_TYPE)
     public EnterpriseDto postEnterprise(final EnterpriseDto enterprise,
         @Context final IRESTBuilder restBuilder) throws Exception
     {

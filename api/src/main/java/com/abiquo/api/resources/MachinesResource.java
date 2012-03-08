@@ -38,7 +38,6 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
 
 import org.apache.wink.common.annotations.Parent;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,10 +62,6 @@ public class MachinesResource extends AbstractResource
 {
     public static final String MACHINES_PATH = "machines";
 
-    public static final String SINGLE_MACHINE_MIME_TYPE = "application/machinedto+xml";
-
-    public static final String MULTIPLE_MACHINES_MIME_TYPE = "application/machinesdto+xml";
-
     @Autowired
     protected MachineService machineService;
 
@@ -74,6 +69,7 @@ public class MachinesResource extends AbstractResource
     protected InfrastructureService infrastructureService;
 
     @GET
+    @Produces(MachinesDto.MEDIA_TYPE)
     public MachinesDto getMachines(
         @PathParam(DatacenterResource.DATACENTER) @Min(1) final Integer datacenterId,
         @PathParam(RackResource.RACK) @Min(1) final Integer rackId,
@@ -91,8 +87,8 @@ public class MachinesResource extends AbstractResource
     }
 
     @POST
-    @Consumes(SINGLE_MACHINE_MIME_TYPE + "," + MediaType.APPLICATION_XML)
-    @Produces(SINGLE_MACHINE_MIME_TYPE + "," + MediaType.APPLICATION_XML)
+    @Consumes(MachineDto.MEDIA_TYPE)
+    @Produces(MachineDto.MEDIA_TYPE)
     public MachineDto postMachine(
         @PathParam(DatacenterResource.DATACENTER) @NotNull @Min(0) final Integer datacenterId,
         @PathParam(RackResource.RACK) @Min(0) final Integer rackId, final MachineDto machine,
@@ -106,8 +102,8 @@ public class MachinesResource extends AbstractResource
     }
 
     @POST
-    @Consumes(MULTIPLE_MACHINES_MIME_TYPE)
-    @Produces(MULTIPLE_MACHINES_MIME_TYPE)
+    @Consumes(MachinesToCreateDto.MEDIA_TYPE)
+    @Produces(MachinesToCreateDto.MEDIA_TYPE)
     @SuppressWarnings("unchecked")
     public MachinesDto postMultipleMachines(
         @PathParam(DatacenterResource.DATACENTER) @NotNull @Min(0) final Integer datacenterId,

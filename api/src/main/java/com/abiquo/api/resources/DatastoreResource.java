@@ -44,10 +44,12 @@ package com.abiquo.api.resources;
 
 import static com.abiquo.api.resources.DatastoresResource.createTransferObject;
 
+import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 
 import org.apache.wink.common.annotations.Parent;
@@ -61,8 +63,6 @@ import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.model.util.ModelTransformer;
 import com.abiquo.server.core.infrastructure.Datastore;
 import com.abiquo.server.core.infrastructure.DatastoreDto;
-import com.abiquo.server.core.infrastructure.Machine;
-import com.abiquo.server.core.infrastructure.MachineDto;
 
 @Parent(DatastoresResource.class)
 @Controller
@@ -77,6 +77,7 @@ public class DatastoreResource
     DatastoreService service;
 
     @GET
+    @Produces(DatastoreDto.MEDIA_TYPE)
     public DatastoreDto getDatastore(
         @PathParam(DatacenterResource.DATACENTER) Integer datacenterId,
         @PathParam(RackResource.RACK) Integer rackId,
@@ -92,6 +93,8 @@ public class DatastoreResource
     }
 
     @PUT
+    @Consumes(DatastoreDto.MEDIA_TYPE)
+    @Produces(DatastoreDto.MEDIA_TYPE)
     public DatastoreDto updateDatastore(
         @PathParam(DatacenterResource.DATACENTER) Integer datacenterId,
         @PathParam(RackResource.RACK) Integer rackId,

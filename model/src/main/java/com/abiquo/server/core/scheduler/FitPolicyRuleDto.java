@@ -25,10 +25,14 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import com.abiquo.model.enumerator.FitPolicy;
 import com.abiquo.model.transport.SingleResourceTransportDto;
+import com.abiquo.server.core.infrastructure.DatacenterDto;
 
 @XmlRootElement(name = "fitPolicyRule")
 public class FitPolicyRuleDto extends SingleResourceTransportDto
 {
+    public static final String BASE_MEDIA_TYPE = "application/vnd.abiquo.fitpolicyrule+xml";
+    public static final String MEDIA_TYPE = BASE_MEDIA_TYPE + "; version=" + API_VERSION;
+    
     private Integer id;
 
     public Integer getId()
@@ -51,6 +55,18 @@ public class FitPolicyRuleDto extends SingleResourceTransportDto
     public void setFitPolicy(final FitPolicy fitPolicy)
     {
         this.fitPolicy = fitPolicy;
+    }
+    
+    @Override
+    public String getMediaType()
+    {
+        return FitPolicyRuleDto.MEDIA_TYPE;
+    }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
     }
 
 }

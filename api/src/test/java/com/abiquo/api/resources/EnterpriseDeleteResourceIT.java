@@ -28,6 +28,8 @@ import static org.testng.Assert.assertEquals;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.ws.rs.core.Response.Status;
+
 import org.apache.wink.client.ClientResponse;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -36,6 +38,7 @@ import com.abiquo.api.exceptions.APIError;
 import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.enterprise.Enterprise;
+import com.abiquo.server.core.enterprise.EnterpriseDto;
 import com.abiquo.server.core.enterprise.Privilege;
 import com.abiquo.server.core.enterprise.Role;
 import com.abiquo.server.core.enterprise.User;
@@ -72,10 +75,10 @@ public class EnterpriseDeleteResourceIT extends AbstractJpaGeneratorIT
         String uri = resolveEnterpriseURI(enterprise.getId());
 
         ClientResponse response = delete(uri, "sysadmin", "sysadmin");
-        assertEquals(response.getStatusCode(), 204);
+        assertEquals(response.getStatusCode(), Status.NO_CONTENT.getStatusCode());
 
-        response = get(uri, "sysadmin", "sysadmin");
-        assertEquals(response.getStatusCode(), 404);
+        response = get(uri, "sysadmin", "sysadmin", EnterpriseDto.MEDIA_TYPE);
+        assertEquals(response.getStatusCode(), Status.NOT_FOUND.getStatusCode());
 
     }
 

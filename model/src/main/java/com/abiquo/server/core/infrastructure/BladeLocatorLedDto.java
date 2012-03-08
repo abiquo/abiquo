@@ -30,6 +30,8 @@ package com.abiquo.server.core.infrastructure;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
+import com.abiquo.model.transport.SingleResourceTransportDto;
+
 /**
  * The object contains the current needed values of the blade locator led.
  * <p>
@@ -51,7 +53,7 @@ import javax.xml.bind.annotation.XmlRootElement;
  * </pre>
  */
 @XmlRootElement(name = "bladeLocatorLed")
-public class BladeLocatorLedDto
+public class BladeLocatorLedDto extends SingleResourceTransportDto
 {
     protected String dn;
 
@@ -62,6 +64,9 @@ public class BladeLocatorLedDto
     protected String color;
 
     protected String bladeDn;
+    
+    public static final String BASE_MEDIA_TYPE = "application/vnd.abiquo.bladelocatorled+xml";
+    public static final String MEDIA_TYPE = BASE_MEDIA_TYPE + "; version=" + API_VERSION;
 
     /**
      * Gets the value of the status property.
@@ -162,6 +167,18 @@ public class BladeLocatorLedDto
     public void setOperState(final String operState)
     {
         this.operState = operState;
+    }
+
+    @Override
+    public String getMediaType()
+    {
+        return MEDIA_TYPE;
+    }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
     }
 
 }

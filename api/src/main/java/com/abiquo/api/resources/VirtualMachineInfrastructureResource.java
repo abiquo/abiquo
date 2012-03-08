@@ -31,6 +31,7 @@ import javax.validation.constraints.NotNull;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 
 import org.apache.wink.common.annotations.Parent;
@@ -81,6 +82,7 @@ public class VirtualMachineInfrastructureResource extends AbstractResource
     private StorageService storageService;
 
     @GET
+    @Produces(VirtualMachineDto.MEDIA_TYPE)
     public VirtualMachineDto getInfrastructureVirtualMachine(
         @PathParam(DatacenterResource.DATACENTER) @NotNull @Min(1) final Integer datacenterId,
         @PathParam(RackResource.RACK) @NotNull @Min(1) final Integer rackId,
@@ -165,6 +167,7 @@ public class VirtualMachineInfrastructureResource extends AbstractResource
      */
     @GET
     @Path(DISKS_ACTION_PATH)
+    @Produces(DisksManagementDto.MEDIA_TYPE)
     public DisksManagementDto getListOfDisks(
         @PathParam(DatacenterResource.DATACENTER) @NotNull @Min(1) final Integer datacenterId,
         @PathParam(RackResource.RACK) @NotNull @Min(1) final Integer rackId,

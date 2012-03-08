@@ -26,6 +26,7 @@ import java.math.BigDecimal;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.abiquo.model.transport.SingleResourceTransportDto;
+import com.abiquo.server.core.infrastructure.DatacenterDto;
 
 @XmlRootElement(name = "costeCodeCurrency")
 public class CostCodeCurrencyDto extends SingleResourceTransportDto
@@ -34,6 +35,9 @@ public class CostCodeCurrencyDto extends SingleResourceTransportDto
      * 
      */
     private static final long serialVersionUID = -5240459003907673943L;
+    
+    public static final String BASE_MEDIA_TYPE = "application/vnd.abiquo.costcodecurrency+xml";
+    public static final String MEDIA_TYPE = BASE_MEDIA_TYPE + "; version=" + API_VERSION;
 
     public CostCodeCurrencyDto()
     {
@@ -91,6 +95,18 @@ public class CostCodeCurrencyDto extends SingleResourceTransportDto
     public void setIdCostCode(final Integer idCostCode)
     {
         this.idCostCode = idCostCode;
+    }
+    
+    @Override
+    public String getMediaType()
+    {
+        return CostCodeCurrencyDto.MEDIA_TYPE;
+    }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
     }
 
 }

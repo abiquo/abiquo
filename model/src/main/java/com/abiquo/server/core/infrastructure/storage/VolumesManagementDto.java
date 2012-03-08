@@ -41,6 +41,8 @@ import com.abiquo.model.transport.WrapperDto;
 public class VolumesManagementDto extends WrapperDto<VolumeManagementDto>
 {
     private static final long serialVersionUID = 1L;
+    public static final String BASE_MEDIA_TYPE = "application/vnd.abiquo.iscsivolumes+xml";
+    public static final String MEDIA_TYPE = BASE_MEDIA_TYPE + "; version=" + API_VERSION;
 
     @Override
     @XmlElement(name = "volume")
@@ -51,5 +53,17 @@ public class VolumesManagementDto extends WrapperDto<VolumeManagementDto>
             collection = new ArrayList<VolumeManagementDto>();
         }
         return collection;
+    }
+    
+    @Override
+    public String getMediaType()
+    {
+        return VolumesManagementDto.MEDIA_TYPE;
+    }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
     }
 }

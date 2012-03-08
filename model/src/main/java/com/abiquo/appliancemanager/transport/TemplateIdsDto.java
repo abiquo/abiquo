@@ -31,6 +31,12 @@ import com.abiquo.model.transport.WrapperDto;
 @XmlRootElement(name = "idTemplates")
 public class TemplateIdsDto extends WrapperDto<TemplateIdDto>
 {
+    private static final long serialVersionUID = 1L;
+
+    public static final String BASE_MEDIA_TYPE = "application/vnd.abiquo.templateids+xml";
+
+    public static final String MEDIA_TYPE = BASE_MEDIA_TYPE + "; version=" + API_VERSION;
+
     @Override
     @XmlElement(name = "idTemplate")
     public List<TemplateIdDto> getCollection()
@@ -38,4 +44,15 @@ public class TemplateIdsDto extends WrapperDto<TemplateIdDto>
         return collection;
     }
 
+    @Override
+    public String getMediaType()
+    {
+        return MEDIA_TYPE;
+    }
+
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
+    }
 }

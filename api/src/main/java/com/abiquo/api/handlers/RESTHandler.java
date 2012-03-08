@@ -35,6 +35,8 @@ import org.apache.wink.server.handlers.MessageContext;
 import org.apache.wink.server.internal.handlers.CheckLocationHeaderHandler;
 import org.apache.wink.server.internal.handlers.SearchResult;
 import org.apache.wink.server.utils.LinkBuilders;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
@@ -50,6 +52,8 @@ import com.google.common.collect.Iterables;
 public class RESTHandler extends CheckLocationHeaderHandler
 {
     protected Class<IRESTBuilder> REST_BUILDER_INTERFACE = IRESTBuilder.class;
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(RESTHandler.class);
 
     @Override
     public void handleRequest(final MessageContext context)
@@ -131,7 +135,15 @@ public class RESTHandler extends CheckLocationHeaderHandler
                 ResponseBuilder builder = new ResponseBuilderImpl();
                 if (!(entity instanceof WrapperDto))
                 {
-                    builder.location(new URI(resource.getEditLink().getHref()));
+                    if (resource.getEditLink() != null)
+                    {
+                        builder.location(new URI(resource.getEditLink().getHref()));
+                    }
+                    else
+                    {
+                        LOGGER.warn("The object returned by the POST "
+                            + "operation does not have an edit link");
+                    }
                 }
                 builder.entity(resource);
                 builder.status(HttpServletResponse.SC_CREATED);

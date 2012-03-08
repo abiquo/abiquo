@@ -27,14 +27,17 @@ import java.util.Set;
 
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 
 import org.apache.wink.common.annotations.Parent;
@@ -145,6 +148,7 @@ public class DatacenterResource extends AbstractResource
     UriInfo uriInfo;
 
     @GET
+    @Produces(DatacenterDto.MEDIA_TYPE)
     public DatacenterDto getDatacenter(@PathParam(DATACENTER) final Integer datacenterId,
         @Context final IRESTBuilder restBuilder) throws Exception
     {
@@ -154,6 +158,8 @@ public class DatacenterResource extends AbstractResource
     }
 
     @PUT
+    @Consumes(DatacenterDto.MEDIA_TYPE)
+    @Produces(DatacenterDto.MEDIA_TYPE)
     public DatacenterDto modifyDatacenter(final DatacenterDto datacenterDto,
         @PathParam(DATACENTER) final Integer datacenterId, @Context final IRESTBuilder restBuilder)
         throws Exception
@@ -166,6 +172,7 @@ public class DatacenterResource extends AbstractResource
 
     @GET
     @Path(ENTERPRISES_PATH)
+    @Produces(EnterprisesDto.MEDIA_TYPE)
     public EnterprisesDto getEnterprises(@PathParam(DATACENTER) final Integer datacenterId,
         @QueryParam(START_WITH) @Min(0) final Integer startwith,
         @QueryParam(NETWORK) Boolean network,
@@ -198,6 +205,7 @@ public class DatacenterResource extends AbstractResource
 
     @GET
     @Path(HYPERVISORS_PATH)
+    @Produces(HypervisorTypesDto.MEDIA_TYPE)
     public HypervisorTypesDto getAvailableHypervisors(
         @PathParam(DATACENTER) final Integer datacenterId, @Context final IRESTBuilder restBuilder)
         throws Exception
@@ -250,6 +258,7 @@ public class DatacenterResource extends AbstractResource
      */
     @GET
     @Path(ACTION_DISCOVER_HYPERVISOR_TYPE)
+    @Produces(MediaType.TEXT_PLAIN)
     public String getHypervisorType(
         @PathParam(DatacenterResource.DATACENTER) final Integer datacenterId,
         @QueryParam(IP) @NotNull final String ip)
@@ -276,6 +285,7 @@ public class DatacenterResource extends AbstractResource
      */
     @GET
     @Path(ACTION_DISCOVER_SINGLE_PATH)
+    @Produces(MachineDto.MEDIA_TYPE)
     public MachineDto discoverSingleMachine(
         @PathParam(DATACENTER) @NotNull @Min(1) final Integer datacenterId,
         @QueryParam(IP) @Ip final String ip,
@@ -310,6 +320,7 @@ public class DatacenterResource extends AbstractResource
      */
     @GET
     @Path(ACTION_DISCOVER_MULTIPLE_PATH)
+    @Produces(MachinesDto.MEDIA_TYPE)
     public MachinesDto discoverMultipleMachine(
         @PathParam(DATACENTER) @NotNull @Min(1) final Integer datacenterId,
         @QueryParam(IP_FROM) @Ip final String ipFrom, @QueryParam(IP_TO) @Ip final String ipTo,
@@ -340,6 +351,7 @@ public class DatacenterResource extends AbstractResource
      */
     @GET
     @Path(ACTION_MACHINES_CHECK)
+    @Produces(MachineStateDto.MEDIA_TYPE)
     public MachineStateDto checkMachineState(
         @PathParam(DatacenterResource.DATACENTER) final Integer datacenterId,
         @PathParam(RackResource.RACK) final Integer rackId,

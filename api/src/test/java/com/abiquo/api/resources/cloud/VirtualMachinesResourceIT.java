@@ -186,7 +186,8 @@ public class VirtualMachinesResourceIT extends AbstractJpaGeneratorIT
         setup(entitiesToSetup.toArray());
 
         // Check for vapp
-        ClientResponse response = get(resolveVirtualMachinesURI(vdc.getId(), vapp.getId()));
+        ClientResponse response =
+            get(resolveVirtualMachinesURI(vdc.getId(), vapp.getId()), VirtualMachinesDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), Status.OK.getStatusCode());
         VirtualMachinesDto vms = response.getEntity(VirtualMachinesDto.class);
         assertNotNull(vms);
@@ -194,7 +195,9 @@ public class VirtualMachinesResourceIT extends AbstractJpaGeneratorIT
         assertEquals(vms.getCollection().size(), 2);
 
         // Check for vapp2
-        response = get(resolveVirtualMachinesURI(vdc.getId(), vapp2.getId()));
+        response =
+            get(resolveVirtualMachinesURI(vdc.getId(), vapp2.getId()),
+                VirtualMachinesDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), Status.OK.getStatusCode());
         vms = response.getEntity(VirtualMachinesDto.class);
         assertNotNull(vms);
@@ -214,7 +217,8 @@ public class VirtualMachinesResourceIT extends AbstractJpaGeneratorIT
             vdc.getDefaultVlan().getConfiguration(), vdc.getDefaultVlan(), vdc, vapp);
 
         final ClientResponse response =
-            get(resolveVirtualMachinesURI(vdc.getId(), new Random().nextInt()));
+            get(resolveVirtualMachinesURI(vdc.getId(), new Random().nextInt()),
+                VirtualMachinesDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), Status.NOT_FOUND.getStatusCode());
     }
 
@@ -229,7 +233,8 @@ public class VirtualMachinesResourceIT extends AbstractJpaGeneratorIT
             vdc.getDefaultVlan().getConfiguration(), vdc.getDefaultVlan(), vdc, vapp);
 
         final ClientResponse response =
-            get(resolveVirtualMachinesURI(new Random().nextInt(), vapp.getId()));
+            get(resolveVirtualMachinesURI(new Random().nextInt(), vapp.getId()),
+                VirtualMachinesDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), Status.NOT_FOUND.getStatusCode());
     }
 
@@ -328,14 +333,14 @@ public class VirtualMachinesResourceIT extends AbstractJpaGeneratorIT
     {
         setup(ent, datacenter, dcallowed, vdc.getNetwork(),
             vdc.getDefaultVlan().getConfiguration(), vdc.getDefaultVlan(), vdc, vapp);
-        
+
         DatacenterLimits otherDcLimits = datacenterLimitsGenerator.createInstance(datacenter);
         Enterprise otherEnt = otherDcLimits.getEnterprise();
         VirtualMachineTemplate otherVmtemplate =
             virtualMachineTemplateGenerator.createInstance(otherEnt, datacenter);
         otherVmtemplate.setShared(true);
-        setup(otherEnt, otherDcLimits, otherVmtemplate.getRepository(), otherVmtemplate.getCategory(),
-            otherVmtemplate);
+        setup(otherEnt, otherDcLimits, otherVmtemplate.getRepository(),
+            otherVmtemplate.getCategory(), otherVmtemplate);
 
         IPAddress ip =
             IPAddress.newIPAddress(vdc.getDefaultVlan().getConfiguration().getAddress())

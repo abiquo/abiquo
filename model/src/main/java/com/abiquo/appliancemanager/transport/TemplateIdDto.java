@@ -28,6 +28,12 @@ import com.abiquo.model.transport.SingleResourceTransportDto;
 @XmlRootElement(name = "idTemplate")
 public class TemplateIdDto extends SingleResourceTransportDto
 {
+    private static final long serialVersionUID = 49443722038397180L;
+
+    public static final String BASE_MEDIA_TYPE = "application/vnd.abiquo.templateid+xml";
+
+    public static final String MEDIA_TYPE = BASE_MEDIA_TYPE + "; version=" + API_VERSION;
+
     private String ovfId;
 
     public String getOvfId()
@@ -38,5 +44,17 @@ public class TemplateIdDto extends SingleResourceTransportDto
     public void setOvfId(final String ovfId)
     {
         this.ovfId = ovfId;
+    }
+
+    @Override
+    public String getMediaType()
+    {
+        return MEDIA_TYPE;
+    }
+
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
     }
 }

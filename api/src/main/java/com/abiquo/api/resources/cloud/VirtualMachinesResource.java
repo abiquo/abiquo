@@ -33,7 +33,6 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
 
 import org.apache.wink.common.annotations.Parent;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,8 +69,8 @@ public class VirtualMachinesResource extends AbstractResource
     @Autowired
     protected VirtualDatacenterService vdcService;
 
-    @Produces(MediaType.APPLICATION_XML)
     @GET
+    @Produces(VirtualMachinesDto.MEDIA_TYPE)
     public VirtualMachinesDto getVirtualMachines(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
@@ -92,8 +91,8 @@ public class VirtualMachinesResource extends AbstractResource
         {
             for (final VirtualMachine v : all)
             {
-                vappsDto.add(VirtualMachineResource.createTransferObject(v, vapp
-                    .getVirtualDatacenter(), vapp.getId(), restBuilder, null, null, null));
+                vappsDto.add(VirtualMachineResource.createTransferObject(v,
+                    vapp.getVirtualDatacenter(), vapp.getId(), restBuilder, null, null, null));
             }
         }
 
@@ -111,7 +110,8 @@ public class VirtualMachinesResource extends AbstractResource
      * @throws Exception
      */
     @POST
-    @Consumes(MediaType.APPLICATION_XML)
+    @Consumes(VirtualMachineDto.MEDIA_TYPE)
+    @Produces(VirtualMachineDto.MEDIA_TYPE)
     public VirtualMachineDto createVirtualMachine(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
@@ -141,7 +141,8 @@ public class VirtualMachinesResource extends AbstractResource
      * @throws Exception
      */
     @POST
-    @Consumes(VirtualMachineResource.VM_NODE_MEDIA_TYPE)
+    @Consumes(VirtualMachineWithNodeDto.MEDIA_TYPE)
+    @Produces(VirtualMachineDto.MEDIA_TYPE)
     public VirtualMachineDto createVirtualMachineWithNode(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
@@ -160,7 +161,7 @@ public class VirtualMachinesResource extends AbstractResource
     }
 
     @GET
-    @Produces(VirtualMachineResource.VM_NODE_MEDIA_TYPE)
+    @Produces({VirtualMachinesWithNodeDto.MEDIA_TYPE})
     public VirtualMachinesWithNodeDto getVirtualMachinesWithNode(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
@@ -181,7 +182,7 @@ public class VirtualMachinesResource extends AbstractResource
     }
 
     @GET
-    @Produces(VirtualMachineResource.VM_NODE_EXTENDED_MEDIA_TYPE)
+    @Produces(VirtualMachinesWithNodeExtendedDto.MEDIA_TYPE)
     public VirtualMachinesWithNodeExtendedDto getVirtualMachinesWithNodeExtended(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,

@@ -25,12 +25,14 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
 import com.abiquo.model.transport.SingleResourceTransportDto;
+import com.abiquo.server.core.infrastructure.DatacenterDto;
 
 @XmlRootElement(name = "disk")
 @XmlType(propOrder = {"sequence", "sizeInMb"})
 public class DiskManagementDto extends SingleResourceTransportDto
 {
-    public static final String DISK_MEDIA_TYPE = "application/disk+xml";
+    public static final String BASE_MEDIA_TYPE = "application/vnd.abiquo.harddisk+xml";
+    public static final String MEDIA_TYPE = BASE_MEDIA_TYPE + "; version=" + API_VERSION;
 
     private static final long serialVersionUID = 1L;
 
@@ -56,5 +58,17 @@ public class DiskManagementDto extends SingleResourceTransportDto
     public Integer getSequence()
     {
         return sequence;
+    }
+    
+    @Override
+    public String getMediaType()
+    {
+        return DiskManagementDto.MEDIA_TYPE;
+    }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
     }
 }

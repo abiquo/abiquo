@@ -29,7 +29,9 @@ import com.abiquo.model.transport.SingleResourceTransportDto;
 public class DatacenterRepositoryDto extends SingleResourceTransportDto
 {
     private static final long serialVersionUID = 6344939071248048966L;
-
+    public static final String BASE_MEDIA_TYPE = "application/vnd.abiquo.datacenterrepository+xml";
+    public static final String MEDIA_TYPE = BASE_MEDIA_TYPE + "; version=" + API_VERSION;
+    
     private Integer id;
 
     private String name;
@@ -100,6 +102,18 @@ public class DatacenterRepositoryDto extends SingleResourceTransportDto
     public void setRepositoryCapacityMb(long repositoryCapacityMb)
     {
         this.repositoryCapacityMb = repositoryCapacityMb;
+    }
+    
+    @Override
+    public String getMediaType()
+    {
+        return DatacenterRepositoryDto.MEDIA_TYPE;
+    }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
     }
 
 }

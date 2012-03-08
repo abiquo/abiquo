@@ -21,6 +21,7 @@
 
 package com.abiquo.appliancemanager.transport;
 
+import javax.ws.rs.core.MediaType;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
@@ -28,6 +29,7 @@ import com.abiquo.model.transport.SingleResourceTransportDto;
 import com.abiquo.server.core.appslibrary.TemplateDefinition;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.infrastructure.Datacenter;
+import com.abiquo.server.core.infrastructure.DatacenterDto;
 
 /**
  * The materialization state of an {@link TemplateDefinition} of a given {@link Datacenter} and
@@ -38,6 +40,9 @@ import com.abiquo.server.core.infrastructure.Datacenter;
 public class TemplateStateDto extends SingleResourceTransportDto
 {
     private static final long serialVersionUID = -4115162963051770344L;
+
+    public static final String BASE_MEDIA_TYPE = "application/vnd.abiquo.templatestate+xml";
+    public static final String MEDIA_TYPE = BASE_MEDIA_TYPE + "; version=" + API_VERSION;
 
     /**
      * Original location of the {@link TemplateDefinition}. Identify the entity combined with the
@@ -112,6 +117,18 @@ public class TemplateStateDto extends SingleResourceTransportDto
     public void setMasterOvf(final String masterOvf)
     {
         this.masterOvf = masterOvf;
+    }
+    
+    @Override
+    public String getMediaType()
+    {
+        return MEDIA_TYPE;
+    }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
     }
 
 }

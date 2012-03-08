@@ -118,7 +118,9 @@ public class VirtualDatacentersResourceIT extends AbstractJpaGeneratorIT
         user.setAvailableVirtualDatacenters(ids);
         setup(user.getRole(), user);
 
-        ClientResponse response = get(resolveVirtualDatacentersURI(), user.getNick(), "foo");
+        ClientResponse response =
+            get(resolveVirtualDatacentersURI(), user.getNick(), "foo",
+                VirtualDatacentersDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), 200);
 
         VirtualDatacentersDto entity = response.getEntity(VirtualDatacentersDto.class);
@@ -140,7 +142,9 @@ public class VirtualDatacentersResourceIT extends AbstractJpaGeneratorIT
             .getConfiguration(), vlan, vdc,
             new DatacenterLimits(sysEnterprise, vdc.getDatacenter()));
 
-        ClientResponse response = get(resolveVirtualDatacentersURI(), "sysadmin", "sysadmin");
+        ClientResponse response =
+            get(resolveVirtualDatacentersURI(), "sysadmin", "sysadmin",
+                VirtualDatacentersDto.BASE_MEDIA_TYPE);
         assertEquals(response.getStatusCode(), 200);
 
         VirtualDatacentersDto entity = response.getEntity(VirtualDatacentersDto.class);
@@ -184,7 +188,8 @@ public class VirtualDatacentersResourceIT extends AbstractJpaGeneratorIT
                 EnterpriseResource.ENTERPRISE,
                 new String[] {vdc.getEnterprise().getId().toString()}), false);
 
-        ClientResponse response = get(uri, "sysadmin", "sysadmin");
+        ClientResponse response =
+            get(uri, "sysadmin", "sysadmin", VirtualDatacentersDto.MEDIA_TYPE);
         VirtualDatacentersDto entity = response.getEntity(VirtualDatacentersDto.class);
         assertNotNull(entity);
         assertNotNull(entity.getCollection());
@@ -225,7 +230,8 @@ public class VirtualDatacentersResourceIT extends AbstractJpaGeneratorIT
                 DatacenterResource.DATACENTER,
                 new String[] {vdc.getDatacenter().getId().toString()}), false);
 
-        ClientResponse response = get(uri, "sysadmin", "sysadmin");
+        ClientResponse response =
+            get(uri, "sysadmin", "sysadmin", VirtualDatacentersDto.MEDIA_TYPE);
         VirtualDatacentersDto entity = response.getEntity(VirtualDatacentersDto.class);
         assertNotNull(entity);
         assertNotNull(entity.getCollection());
@@ -270,7 +276,8 @@ public class VirtualDatacentersResourceIT extends AbstractJpaGeneratorIT
         String uri = resolveVirtualDatacentersURI();
         uri = UriHelper.appendQueryParamsToPath(uri, queryParams, false);
 
-        ClientResponse response = get(uri, "sysadmin", "sysadmin");
+        ClientResponse response =
+            get(uri, "sysadmin", "sysadmin", VirtualDatacentersDto.MEDIA_TYPE);
         VirtualDatacentersDto entity = response.getEntity(VirtualDatacentersDto.class);
         assertNotNull(entity);
         assertNotNull(entity.getCollection());
