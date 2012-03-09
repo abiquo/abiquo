@@ -37,7 +37,7 @@ public enum AMError
     TEMPLATE_INVALID_MULTIPLE_DISKS("TEMPLATE-INVALID-MULTIPLE-DISK",
         "OVF document contains no referenced disk or more than one."), TEMPLATE_INVALID_MULTIPLE_FILES(
         "TEMPLATE-INVALID-MULTIPLE-FILE",
-        "OVF document contains no referenced files or more than one."), TEMPLATE_INVALID_DISK_REFERENCE(
+        "OVF document contains no referenced file or more than one."), TEMPLATE_INVALID_DISK_REFERENCE(
         "TEMPLATE-INVALID-DISK-REFRENCE",
         "Virtual Hardware Section contains no reference to the disk."), TEMPLATE_NOT_FOUND(
         "TEMPLATE-NOT-FOUND", "OVF Document not found in the Template Repository"), //
