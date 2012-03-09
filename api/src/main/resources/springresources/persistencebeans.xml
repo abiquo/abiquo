@@ -35,6 +35,7 @@
                 <value>com.abiquo.api.exceptions.mapper.ConstraintViolationExceptionMapper</value>
                 <value>com.abiquo.api.exceptions.mapper.PersistenceExceptionMapper</value>
                 <value>com.abiquo.api.exceptions.mapper.SocketTimeoutExceptionMapper</value>
+                <value>com.abiquo.api.exceptions.mapper.RedisExceptionMapper</value>
             </set>
         </property>
         <!--
