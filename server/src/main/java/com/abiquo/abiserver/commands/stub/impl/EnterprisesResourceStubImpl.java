@@ -53,7 +53,6 @@ import com.abiquo.server.core.cloud.VirtualDatacentersDto;
 import com.abiquo.server.core.enterprise.DatacenterLimitsDto;
 import com.abiquo.server.core.enterprise.EnterpriseDto;
 import com.abiquo.server.core.enterprise.EnterprisesDto;
-import com.abiquo.server.core.infrastructure.DatacenterDto;
 import com.abiquo.server.core.infrastructure.MachineDto;
 import com.abiquo.util.URIResolver;
 
@@ -208,9 +207,10 @@ public class EnterprisesResourceStubImpl extends AbstractAPIStub implements Ente
             String datacenterUri = createDatacenterLink(limit.getDatacenter().getId());
             dto.addLink(new RESTLink("datacenter", datacenterUri));
 
-            Resource resource = resource(uri, DatacenterDto.MEDIA_TYPE);
+            Resource resource = resource(uri, DatacenterLimitsDto.MEDIA_TYPE);
             resource = resource.queryParam("datacenter", limit.getDatacenter().getId());
-            ClientResponse response = resource.post(dto);
+            ClientResponse response =
+                resource.contentType(DatacenterLimitsDto.MEDIA_TYPE).post(dto);
             // ClientResponse response = post(uri, dto);
 
             if (response.getStatusCode() == 201)
