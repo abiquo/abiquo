@@ -90,7 +90,7 @@ public class ExecutorBasedESXiPoller extends AbstractMonitor
     public void shutdown()
     {
         String physicalmachines = StringUtils.join(monitoredMachines, ", ");
-        LOGGER.debug("Stopping ESXi monitor for: {}", physicalmachines);
+        LOGGER.debug("Stopping ESXi monitor {} for: {}", uuid, physicalmachines);
 
         executor.stop();
     }
@@ -98,8 +98,7 @@ public class ExecutorBasedESXiPoller extends AbstractMonitor
     @Override
     public void start()
     {
-        LOGGER.debug("Starting ESXi monitor");
-
+        LOGGER.debug("Starting ESXi monitor {}", uuid);
         executor.start();
     }
 
@@ -186,7 +185,8 @@ public class ExecutorBasedESXiPoller extends AbstractMonitor
                         {
                             for (ObjectContent vm : vms)
                             {
-                                VirtualMachineConfigInfo vmConfig = esx.getVMConfigFromObjectContent(vm);
+                                VirtualMachineConfigInfo vmConfig =
+                                    esx.getVMConfigFromObjectContent(vm);
 
                                 if (vmConfig == null)
                                 {

@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.UUID;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,6 +58,8 @@ public abstract class AbstractMonitor
     /** The dao used to access stored data. */
     private RedisDao dao;
 
+    protected String uuid;
+
     /**
      * Creates the monitor.
      */
@@ -68,6 +71,9 @@ public abstract class AbstractMonitor
         redisPublisher = new RedisPublisher(redisHost, redisPort);
         monitoredMachines = Collections.synchronizedList(new LinkedList<String>());
         dao = RedisDaoFactory.getInstance();
+        uuid = UUID.randomUUID().toString();
+
+        LOGGER.debug("New monitor with UUID " + uuid + " created.");
     }
 
     /**
@@ -150,7 +156,8 @@ public abstract class AbstractMonitor
             monitoredMachines.add(physicalMachineAddress);
         }
 
-        LOGGER.debug("Added {} to the list of monitored machines", physicalMachineAddress);
+        LOGGER.debug("Added {} to the list of monitored machines of monitor {}",
+            physicalMachineAddress, uuid);
     }
 
     /**
@@ -166,11 +173,13 @@ public abstract class AbstractMonitor
         {
             monitoredMachines.remove(physicalMachineAddress);
 
-            LOGGER.debug("Removed {} from the list of monitored machines", physicalMachineAddress);
+            LOGGER.debug("Removed {} from the list of monitored machines of monitor {}",
+                physicalMachineAddress, uuid);
 
             if (monitoredMachines.isEmpty())
             {
-                LOGGER.info("There are no more machines to monitor. Shutting down.");
+                LOGGER.info("There are no more machines to monitor. Shutting down monitor {}.",
+                    uuid);
                 shutdown();
             }
         }
@@ -199,7 +208,7 @@ public abstract class AbstractMonitor
     {
         try
         {
-            LOGGER.trace("Received event: {}", event.toString());
+            LOGGER.trace("Received event from monitor {}: {}", uuid, event.toString());
             redisPublisher.publishEvent(event);
         }
         catch (IOException ex)
