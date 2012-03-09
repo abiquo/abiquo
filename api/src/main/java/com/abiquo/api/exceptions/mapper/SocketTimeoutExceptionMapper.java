@@ -47,7 +47,6 @@ public class SocketTimeoutExceptionMapper implements ExceptionMapper<SocketTimeo
     @Override
     public Response toResponse(final SocketTimeoutException exception)
     {
-        // TODO Auto-generated method stub
         return buildErrorResponse(Status.INTERNAL_SERVER_ERROR, APIError.INTERNAL_SERVER_ERROR);
     }
 
