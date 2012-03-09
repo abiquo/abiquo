@@ -54,7 +54,6 @@ import com.abiquo.server.core.cloud.VirtualApplianceDAO;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineDAO;
 import com.abiquo.server.core.cloud.VirtualMachineRep;
-import com.abiquo.server.core.cloud.VirtualMachineState;
 import com.abiquo.server.core.infrastructure.Machine;
 import com.abiquo.server.core.infrastructure.Rack;
 import com.abiquo.server.core.infrastructure.UcsRack;
@@ -343,10 +342,18 @@ public class VirtualMachineAllocatorService extends DefaultApiService
      */
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public VirtualMachine allocateHAVirtualMachine(final VirtualMachine vmId,
-        final VirtualMachineRequirements requirements, final VirtualMachineState targetState)
-        throws AllocatorException, ResourceAllocationException
+        final VirtualMachineRequirements requirements) throws AllocatorException,
+        ResourceAllocationException
     {
         LOG.error("community can't *allocateHAVirtualMachine*");
+        return null;
+    }
+
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    public VirtualMachine updateResourcesUsageOnTargetMachine(final VirtualMachine virtualMachine,
+        final Machine machine) throws ResourceAllocationException
+    {
+        LOG.error("community can't *updateResourcesUsageOnTargetMachine*");
         return null;
     }
 
@@ -397,8 +404,8 @@ public class VirtualMachineAllocatorService extends DefaultApiService
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public void deallocateVirtualMachineHA(final VirtualMachine vmachine)
-        throws AllocatorException, ResourceAllocationException
+    public void deallocateVirtualMachineOnSourceMachine(final VirtualMachine vmachine,
+        final Machine machine) throws AllocatorException, ResourceAllocationException
     {
         LOG.error("community can't *deallocateHAVirtualMachine*");
     }

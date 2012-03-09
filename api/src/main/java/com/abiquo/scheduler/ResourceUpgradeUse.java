@@ -132,14 +132,21 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
     }
 
     @Override
-    public void updateUseHa(final VirtualAppliance virtualAppliance,
-        final VirtualMachine virtualMachine, final Integer sourceHypervisorId)
+    public void updateUseHa(final VirtualMachine virtualMachine, final Machine machine)
     {
-        updateUse(virtualAppliance, virtualMachine, true); // upgrade resources on the target HA
-        // hypervisor
-        // free resources on the original hypervisor
-        // Machine sourceMachine = hypervisorDao.findById(sourceHypervisorId).getMachine();
-        // updateUsagePhysicalMachine(sourceMachine, virtualMachine, true);
+        try
+        {
+            updateUsagePhysicalMachine(machine, virtualMachine, false);
+            updateNewtorkingResourcesHA(machine, virtualMachine);
+        }
+        catch (final Exception e)
+        // HibernateException NotEnoughResourcesException NoSuchObjectException
+        {
+            e.printStackTrace(); // FIXME
+            throw new ResourceUpgradeUseException("Can not update resource utilization: "
+                + e.getMessage());
+        }
+
     }
 
     private void updateUse(final VirtualAppliance virtualAppliance,
@@ -199,28 +206,24 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
     }
 
     @Override
-    public void rollbackUseHA(final VirtualMachine virtualMachine)
+    public void rollbackUseHA(final VirtualMachine virtualMachine, final Machine machine)
     {
-        final Machine physicalMachine = virtualMachine.getHypervisor().getMachine();
-
         try
         {
-            updateUsageDatastore(virtualMachine, true);
-            updateUsagePhysicalMachine(physicalMachine, virtualMachine, true);
-            // rollbackNetworkingResources(physicalMachine, virtualMachine);
-
-            virtualMachine.setState(VirtualMachineState.UNKNOWN);
+            // Virtual Machines in HA are in shared datastores, so there is no need to update usage.
+            // The disk is still there no matter what the hypervisor is
+            updateUsagePhysicalMachine(machine, virtualMachine, true);
         }
         catch (final Exception e)
         {
             throw new ResourceUpgradeUseException("Can not update resource use" + e.getMessage());
         }
 
-        if (physicalMachine != null
-            && getAllocationFitPolicyOnDatacenter(physicalMachine.getDatacenter().getId()).equals(
+        if (machine != null
+            && getAllocationFitPolicyOnDatacenter(machine.getDatacenter().getId()).equals(
                 FitPolicy.PROGRESSIVE))
         {
-            infrastructureService.adjustPoweredMachinesInRack(physicalMachine.getRack());
+            infrastructureService.adjustPoweredMachinesInRack(machine.getRack());
         }
     }
 
