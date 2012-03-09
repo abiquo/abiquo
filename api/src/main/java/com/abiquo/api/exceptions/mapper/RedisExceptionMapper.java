@@ -1,7 +1,5 @@
 package com.abiquo.api.exceptions.mapper;
 
-import java.net.SocketTimeoutException;
-
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
@@ -12,24 +10,26 @@ import org.apache.wink.common.internal.ResponseImpl.ResponseBuilderImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import redis.clients.jedis.exceptions.JedisException;
+
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.model.transport.error.ErrorDto;
 import com.abiquo.model.transport.error.ErrorsDto;
 
 @Provider
-public class SocketTimeoutExceptionMapper implements ExceptionMapper<SocketTimeoutException>
+public class RedisExceptionMapper implements ExceptionMapper<JedisException>
 {
-
-    private static final Logger LOGGER = LoggerFactory
-        .getLogger(SocketTimeoutExceptionMapper.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(RedisExceptionMapper.class);
 
     @Override
-    public Response toResponse(final SocketTimeoutException exception)
+    public Response toResponse(final JedisException exception)
     {
-        return buildErrorResponse(Status.INTERNAL_SERVER_ERROR, APIError.INTERNAL_SERVER_ERROR);
+        return buildErrorResponse(Status.INTERNAL_SERVER_ERROR, APIError.INTERNAL_SERVER_ERROR,
+            exception);
     }
 
-    private Response buildErrorResponse(final Status status, final APIError error)
+    private Response buildErrorResponse(final Status status, final APIError error,
+        final JedisException exception)
     {
         ErrorsDto errorsDto = new ErrorsDto();
         ErrorDto errorDto = new ErrorDto();
@@ -42,8 +42,8 @@ public class SocketTimeoutExceptionMapper implements ExceptionMapper<SocketTimeo
         builder.status(status);
         builder.entity(errorsDto);
         builder.type(ErrorsDto.MEDIA_TYPE);
-        LOGGER.debug("SocketTimeoutException: " + errorDto.toString());
-        LOGGER.info("Connection with API closed, caused by SocketTimeout");
+
+        LOGGER.error("Unexpected Jedis exception", exception);
 
         return builder.build();
     }

@@ -32,6 +32,9 @@ import com.abiquo.api.exceptions.APIError;
 import com.abiquo.server.core.task.AsyncTaskRep;
 import com.abiquo.server.core.task.Task;
 import com.abiquo.server.core.task.enums.TaskOwnerType;
+import com.abiquo.tracer.ComponentType;
+import com.abiquo.tracer.EventType;
+import com.abiquo.tracer.SeverityType;
 
 @Component
 public class TaskService extends DefaultApiService
@@ -43,12 +46,46 @@ public class TaskService extends DefaultApiService
 
     public List<Task> findTasks(final TaskOwnerType type, final String ownerId)
     {
-        return repo.findTasksByOwnerId(type, ownerId);
+        List<Task> tasks = null;
+
+        try
+        {
+            tasks = repo.findTasksByOwnerId(type, ownerId);
+        }
+        catch (Exception e)
+        {
+            tracer.log(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE, EventType.VM_TASK,
+                "redis.error.user");
+
+            tracer.systemError(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
+                EventType.VM_TASK, e, "redis.persistTaskError", e.getMessage());
+
+            addServiceUnavailableErrors(APIError.REDIS_CONNECTION_FAILED);
+            flushErrors();
+        }
+
+        return tasks;
     }
 
     public Task findTask(final String taskId)
     {
-        Task task = repo.findTask(taskId);
+        Task task = null;
+
+        try
+        {
+            task = repo.findTask(taskId);
+        }
+        catch (Exception e)
+        {
+            tracer.log(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE, EventType.VM_TASK,
+                "redis.error.user");
+
+            tracer.systemError(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
+                EventType.VM_TASK, e, "redis.listTasksError", e.getMessage());
+
+            addServiceUnavailableErrors(APIError.REDIS_CONNECTION_FAILED);
+            flushErrors();
+        }
 
         if (task == null)
         {
@@ -62,7 +99,23 @@ public class TaskService extends DefaultApiService
 
     public Task findTask(final String ownerId, final String taskId)
     {
-        Task task = repo.findTask(taskId);
+        Task task = null;
+
+        try
+        {
+            task = repo.findTask(taskId);
+        }
+        catch (Exception e)
+        {
+            tracer.log(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE, EventType.VM_TASK,
+                "redis.error.user");
+
+            tracer.systemError(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
+                EventType.VM_TASK, e, "redis.listTasksError", e.getMessage());
+
+            addServiceUnavailableErrors(APIError.REDIS_CONNECTION_FAILED);
+            flushErrors();
+        }
 
         if (task == null)
         {

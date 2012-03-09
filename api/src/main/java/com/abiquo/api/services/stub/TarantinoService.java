@@ -137,7 +137,7 @@ public class TarantinoService extends DefaultApiService
         catch (RuntimeException e)
         {
             tracer.log(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE, eventType,
-                APIError.REDIS_CONNECTION_FAILED.getMessage());
+                "redis.error.user");
 
             tracer.systemError(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE, eventType, e,
                 "redis.persistTaskError", e.getMessage());
@@ -169,7 +169,7 @@ public class TarantinoService extends DefaultApiService
             catch (RuntimeException r)
             {
                 tracer.log(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE, eventType,
-                    APIError.GENERIC_OPERATION_ERROR.getMessage());
+                    "redis.error.user");
 
                 tracer.systemError(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE, eventType,
                     r, "redis.deleteTaskError", r.getMessage());
@@ -501,7 +501,7 @@ public class TarantinoService extends DefaultApiService
     @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
     public String undeployVirtualMachineHA(final VirtualMachine virtualMachine,
         final VirtualMachineDescriptionBuilder virtualMachineDesciptionBuilder,
-        final VirtualMachineState currentState, Hypervisor originalHypervisor)
+        final VirtualMachineState currentState, final Hypervisor originalHypervisor)
     {
 
         Map<String, String> extraData = new HashMap<String, String>();
@@ -697,7 +697,7 @@ public class TarantinoService extends DefaultApiService
         return null;
     }
 
-    protected boolean mustPowerOffToUndeploy(VirtualMachineState currentState)
+    protected boolean mustPowerOffToUndeploy(final VirtualMachineState currentState)
     {
         return VirtualMachineState.ON.equals(currentState)
             || VirtualMachineState.PAUSED.equals(currentState);
