@@ -58,7 +58,7 @@ public enum AMError
         "Timeout during NFS Repository file system refresh."), //
     TEMPLATE_DELETE("OVFPI-DELETE", "Cannot delete template folder"), //
     TEMPLATE_DELETE_INSTANCES("OVFPI-DELETE",
-        "Cannot delete template content because there are instances in the folder"), //
+        "Cannot delete template folder content because there are instances in the folder"), //
     TEMPLATE_SNAPSHOT_ALREADY_EXIST("TEMPLATE-SNAPSHOT-ALREADY-EXIST",
         "Cannot create template instance because another one with the same name already exists"), //
     TEMPLATE_SNAPSHOT_CREATE("TEMPLATE-SNAPSHOT-CREATE",
@@ -71,7 +71,7 @@ public enum AMError
     TEMPLATE_SNAPSHOT_IMPORT_NOT_EXIST("TEMPLATE-SNAPSHOT-IMPORT-NOT-EXIST",
         "Imported template instance not found. Should be an instance of an imported virtual machine."), //
     DISK_FILE_NOT_FOUND("DISK-NOT-FOUND",
-        "Disk requested for XenServer deployment does not exist in the current NFS Repository"), //
+        "Template disk file requested for XenServer deployment does not exist in the current NFS Repository"), //
     DISK_FILE_COPY_ERROR("DISK-FILE-COPY",
         "An error occurred during copy of disk from NFS Repository to XenServer folder for deployment"), //
     DISK_FILE_ALREADY_EXIST(
