@@ -236,18 +236,15 @@ public class AbstractAPIStub
     {
         UserHB user = getCurrentUserCredentials();
         Resource resource = resource(uri, user.getUser(), user.getPassword());
-        if (dto != null)
-        {
-            resource.contentType(content);
-            resource.accept(accept);
-        }
+        resource.contentType(content);
+        resource.accept(accept);
         return resource.put(dto);
     }
 
     protected ClientResponse put(final String uri, final SingleResourceTransportDto dto,
         final String user, final String password, final String accept, final String content)
     {
-        Resource resource = resource(uri, user, password); 
+        Resource resource = resource(uri, user, password);
         if (accept != null)
         {
             resource.accept(accept);
@@ -256,7 +253,7 @@ public class AbstractAPIStub
         {
             resource.contentType(content);
         }
-        
+
         return resource.put(dto);
     }
 
