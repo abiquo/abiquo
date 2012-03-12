@@ -294,7 +294,10 @@
                     virtualImageEvent.enterprise = AbiCloudModel.getInstance().loginManager.user.enterprise;
                     virtualImageEvent.datacenter = virtualApplianceDatacenter;
                     virtualImageEvent.refresh = false;
-                    dispatchEvent(virtualImageEvent);
+                    if(SecuredPrivilegeAccess.userHasPrivilege(PrivilegeType.VDC_MANAGE_VAPP))
+                    {
+	                    dispatchEvent(virtualImageEvent);
+                    }
                 }
                 else
                 {
