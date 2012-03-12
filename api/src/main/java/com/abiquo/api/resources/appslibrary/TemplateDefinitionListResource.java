@@ -100,6 +100,7 @@ public class TemplateDefinitionListResource extends AbstractResource
     }
 
     @PUT
+    @Consumes(MediaType.TEXT_PLAIN)
     @Produces(TemplateDefinitionListDto.MEDIA_TYPE)
     public TemplateDefinitionListDto refreshTemplateDefinitionListFromUrl(
         @PathParam(EnterpriseResource.ENTERPRISE) final Integer idEnterprise,
