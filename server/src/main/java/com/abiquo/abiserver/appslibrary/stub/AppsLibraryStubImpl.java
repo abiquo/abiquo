@@ -533,7 +533,8 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
     {
 
         String uri = createTemplateDefinitionListLink(idEnterprise.toString(), idList.toString());
-        ClientResponse response = put(uri, null, MediaType.APPLICATION_XML, MediaType.TEXT_PLAIN);
+        ClientResponse response =
+            put(uri, null, TemplateDefinitionListDto.MEDIA_TYPE, MediaType.TEXT_PLAIN);
 
         if (response.getStatusType().getFamily() != Family.SUCCESSFUL)
         {
