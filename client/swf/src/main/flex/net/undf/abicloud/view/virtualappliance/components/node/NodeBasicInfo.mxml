@@ -92,7 +92,13 @@
 
             private function onCreationComplete():void
             {
-                SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.VAPP_CUSTOMISE_SETTINGS,"removeChild",saveButton,saveBox);
+                //SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.VAPP_CUSTOMISE_SETTINGS,"removeChild",saveButton,saveBox);
+                SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.VAPP_CUSTOMISE_SETTINGS,"enabled",cpuInput);
+                SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.VAPP_CUSTOMISE_SETTINGS,"enabled",ramInput);
+                SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.VAPP_CUSTOMISE_SETTINGS,"enabled",ramUnitsSelector);
+                
+                SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.VAPP_PERFORM_ACTIONS,"enabled",passwordInput);
+                SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.VAPP_PERFORM_ACTIONS,"enabled",hidePassword);
             }
 
             /**
@@ -180,7 +186,8 @@
         ]]>
     </mx:Script>
 
-    <mx:Form paddingTop="3" width="100%">
+    <mx:Form paddingTop="3" width="100%"
+    	enabled="{this._isEditionAllowed}">
 
         <mx:FormItem 
             height="17"
@@ -193,7 +200,6 @@
         <mx:FormItem 
             label="@Resource(bundle='Common', key='TEXTINPUT_LABEL_NAME')">
             <mx:TextInput id="nameInput"
-            	enabled="{this._isEditionAllowed}"
             	maxChars="255"/>
         </mx:FormItem>
 
@@ -208,7 +214,6 @@
             direction="horizontal">
 
             <mx:NumericStepper id="cpuInput"
-            	enabled="{this._isEditionAllowed}"
                 width="75"
                 fontSize="10"
                 value="{this._virtualMachine.cpu}"
@@ -220,7 +225,6 @@
             direction="horizontal">
      
             <mx:NumericStepper id="ramInput"
-            	enabled="{this._isEditionAllowed}"
                 width="75" 
                 fontSize="10"
                 minimum="0"
@@ -229,7 +233,6 @@
                 value="{this._virtualMachine.ram / ramUnitsSelector.selectedItem.conversion}"/>
 
             <mx:ComboBox id="ramUnitsSelector"
-            	enabled="{this._isEditionAllowed}"
                 width="80" height="18"
                 labelField="label"
                 dataProvider="{AbiCloudModel.ramUnitsSelectorDP}"
@@ -269,13 +272,11 @@
         <mx:FormItem id="remoteServicePsw" 
         	label="@Resource(bundle='Infrastructure',key='LABEL_REMOTE_ACCESS_PASSWORD')" direction="horizontal">
 	        <mx:TextInput 
-	        	editable="{this._isEditionAllowed}"
 	            displayAsPassword="{!hidePassword.selected}" 
 	            id="passwordInput" 
 	            maxChars="32"
 	            text="{this._virtualMachine.password}"/>
 	        <mx:CheckBox 
-	        	enabled="{this._isEditionAllowed}"
 	            id="hidePassword" 
 	            labelPlacement="right" 
 	            label="@Resource(bundle='Infrastructure',key='LABEL_SHOW_PASSWORD')"/>
@@ -286,7 +287,6 @@
             direction="horizontal" width="100%">
 
             <mx:TextArea id="descriptionInput"
-            	editable="{this._isEditionAllowed}"
                 width="100%"
                 maxChars="255"
                 minHeight="100"
