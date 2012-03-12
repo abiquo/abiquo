@@ -1602,7 +1602,8 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
                 // send an empty list of gateways to enable it means to disable the network
                 // configuration.
                 LinksDto linksDto = new LinksDto();
-                response = put(gatewaysUri, linksDto);
+                response =
+                    put(gatewaysUri, linksDto, AcceptedRequestDto.MEDIA_TYPE, LinksDto.MEDIA_TYPE);
                 if (response.getStatusCode() == 202 || response.getStatusCode() == 204)
                 {
                     result.setSuccess(Boolean.TRUE);
