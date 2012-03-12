@@ -1216,15 +1216,13 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
                 }
                 else
                 {
-                    populateErrors(response, result, "getExternalVlansByVirtualDatacenter");
+                    populateErrors(response, result,
+                        "getVirtualAppliancesByEnterpriseAndDatacenter");
                 }
 
                 return result;
             }
         }
-
-        result.setSuccess(Boolean.FALSE);
-        result.setMessage("Unknown exception. External networks not found.");
 
         return result;
     }
