@@ -189,9 +189,12 @@ public enum APIError
         "The virtual appliance is not running"), VIRTUALAPPLIANCE_DEPLOYED("VAPP-3",
         "The virtual appliance is deployed"), VIRTUALAPPLIANCE_NON_MANAGED_IMAGES("VAPP-4",
         "The virtual appliance has non-managed VM templates"), VIRTUALAPPLIANCE_INVALID_STATE_DELETE(
-        "VAPP-5", "The virtual appliance cannot be deleted in this state. It should be NOT_DEPLOYED or UNKNOWN"), VIRTUALAPPLIANCE_MOVE_MISSING_VDC(
-        "VAPP-6", "The virtual appliance cannot be moved because it has no link to its virtual datacenter"), VIRTUALAPPLIANCE_INVALID_STATE_MOVE_COPY(
-        "VAPP-8", "The virtual appliance cannot be moved or copied in this state. It should be NOT_DEPLOYED"), VIRTUALAPPLIANCE_INVALID_DC_MOVE_COPY(
+        "VAPP-5",
+        "The virtual appliance cannot be deleted in this state. It should be NOT_DEPLOYED or UNKNOWN"), VIRTUALAPPLIANCE_MOVE_MISSING_VDC(
+        "VAPP-6",
+        "The virtual appliance cannot be moved because it has no link to its virtual datacenter"), VIRTUALAPPLIANCE_INVALID_STATE_MOVE_COPY(
+        "VAPP-8",
+        "The virtual appliance cannot be moved or copied in this state. It should be NOT_DEPLOYED"), VIRTUALAPPLIANCE_INVALID_DC_MOVE_COPY(
         "VAPP-7",
         "The virtual appliance cannot be moved or copied because the target virtual datacenter is not in the same datacenter"), VIRTUALAPPLIANCE_MOVE_COPY_CAPTURED_VM(
         "VAPP-9",
@@ -306,7 +309,7 @@ public enum APIError
         "VM-32",
         "Cannot reconfigure the virual machine template once the virtual machine is present in the hypervisor"), VIRTUAL_MACHINE_IMPORTED_CAN_NOT_RECONFIGURE(
         "VM-33", "We do not currently allow imported virtual machines to be reconfigured"), VIRTUAL_MACHINE_IMPORTED_CAN_NOT_RECONFIGURE_FULLY(
-            "VM-33", "Only 'cpu' and 'ram' can be reconfigured in imported virtual machines"), VIRTUAL_MACHINE_IMPORTED_WILL_BE_DELETED(
+        "VM-33", "Only 'cpu' and 'ram' can be reconfigured in imported virtual machines"), VIRTUAL_MACHINE_IMPORTED_WILL_BE_DELETED(
         "VM-44",
         "You are trying to undeploy an imported virtual machine. If you undeploy it, the virtual machine template cannot be recovered. If you are confident of this action, please call this functionality again with the 'forceUndeploy=true' option"),
 
@@ -434,7 +437,8 @@ public enum APIError
         "NC-5", "There is no machine running at the given IP"), NC_UNEXPECTED_EXCEPTION("NC-6",
         "Unexpected exception building the request to discovery manager"), NC_UNAVAILABLE_EXCEPTION(
         "NC-7", "The discovery manager is currently not available"), NC_VIRTUAL_MACHINE_NOT_FOUND(
-        "NC-8", "The requested virtual machine was not found on the remote hypervisor"),
+        "NC-8", "The requested virtual machine was not found on the remote hypervisor"), NC_NOT_MANAGED_HOST(
+        "NC-9", "The requested host is not managed"),
 
     // STORAGE POOL
     MISSING_REQUIRED_QUERY_PARAMETER_IQN("SP-1", "Missing IQN query parameter"), CONFLICT_STORAGE_POOL(

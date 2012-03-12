@@ -43,6 +43,7 @@ import com.abiquo.nodecollector.exception.CannotExecuteException;
 import com.abiquo.nodecollector.exception.CollectorException;
 import com.abiquo.nodecollector.exception.ConnectionException;
 import com.abiquo.nodecollector.exception.LoginException;
+import com.abiquo.nodecollector.exception.NoManagedException;
 import com.abiquo.nodecollector.exception.ServiceUnavailableException;
 import com.abiquo.nodecollector.exception.UnprovisionedException;
 import com.abiquo.server.core.infrastructure.nodecollector.HostDto;
@@ -191,10 +192,11 @@ public class NodeCollectorRESTClient
      * @throws CollectorException for unexpected exceptions.
      * @throws ServiceUnavailableException
      * @throws CannotExecuteException
+     * @throws NoManagedException
      */
     public HypervisorType getRemoteHypervisorType(final String hypervisorIP)
         throws BadRequestException, ConnectionException, UnprovisionedException,
-        CollectorException, ServiceUnavailableException, CannotExecuteException
+        CollectorException, ServiceUnavailableException, CannotExecuteException, NoManagedException
     {
         String uri = appendPathToBaseUri(remoteServiceURI, hypervisorIP, hypervisorPath);
 
@@ -256,18 +258,19 @@ public class NodeCollectorRESTClient
      * @throws CollectorException for unexpected exceptions.
      * @throws ServiceUnavailableException
      * @throws CannotExecuteException
+     * @throws NoManagedException
      */
     public HostDto getRemoteHostInfo(final String hypervisorIP,
         final HypervisorType hypervisorType, final String user, final String password,
         final Integer aimport) throws BadRequestException, LoginException, ConnectionException,
         UnprovisionedException, CollectorException, ServiceUnavailableException,
-        CannotExecuteException
+        CannotExecuteException, NoManagedException
     {
         String uri = appendPathToBaseUri(remoteServiceURI, hypervisorIP, hostPath);
 
         Resource resource =
-            client.resource(uri).queryParam(hypervisorKey, hypervisorType.getValue()).queryParam(
-                userKey, user).queryParam(passwordKey, password);
+            client.resource(uri).queryParam(hypervisorKey, hypervisorType.getValue())
+                .queryParam(userKey, user).queryParam(passwordKey, password);
 
         if (aimport != null)
         {
@@ -317,16 +320,17 @@ public class NodeCollectorRESTClient
      * @throws UnprovisionedException if the machine doesn't respond.
      * @throws CollectorException for unexpected exceptions.
      * @throws CannotExecuteException
+     * @throws NoManagedException
      */
     public VirtualSystemCollectionDto getRemoteVirtualSystemCollection(final String hypervisorIP,
         final HypervisorType hypervisorType, final String user, final String password,
         final Integer aimport) throws BadRequestException, LoginException, ConnectionException,
-        UnprovisionedException, CollectorException, CannotExecuteException
+        UnprovisionedException, CollectorException, CannotExecuteException, NoManagedException
     {
         String uri = appendPathToBaseUri(remoteServiceURI, hypervisorIP, virtualSystemPath);
         Resource resource =
-            client.resource(uri).queryParam(hypervisorKey, hypervisorType.getValue()).queryParam(
-                userKey, user).queryParam(passwordKey, password);
+            client.resource(uri).queryParam(hypervisorKey, hypervisorType.getValue())
+                .queryParam(userKey, user).queryParam(passwordKey, password);
 
         if (aimport != null)
         {
@@ -440,10 +444,11 @@ public class NodeCollectorRESTClient
      * @throws CollectorException is thrown if we get another exception, mostly the 500 Internal
      *             Server Error.
      * @throws CannotExecuteException
+     * @throws NoManagedException
      */
     protected void throwAppropiateException(final ClientResponse response)
         throws BadRequestException, LoginException, ConnectionException, UnprovisionedException,
-        CollectorException, CannotExecuteException
+        CollectorException, CannotExecuteException, NoManagedException
     {
         ErrorDto error;
 
@@ -481,6 +486,9 @@ public class NodeCollectorRESTClient
                 throw new CannotExecuteException(error.getMessage());
             case 412:
                 throw new ConnectionException(error.getMessage());
+            case 406:
+                throw new NoManagedException(error.getMessage());
+
             default:
                 throw new CollectorException(error.getMessage());
         }
@@ -526,17 +534,19 @@ public class NodeCollectorRESTClient
      * @throws UnprovisionedException if the machine doesn't respond.
      * @throws CollectorException for unexpected exceptions.
      * @throws CannotExecuteException
+     * @throws NoManagedException
      */
     public VirtualSystemDto getRemoteVirtualSystemByUUID(final String uuid,
         final String hypervisorIP, final HypervisorType hypervisorType, final String user,
         final String password, final Integer aimport) throws BadRequestException, LoginException,
-        ConnectionException, UnprovisionedException, CollectorException, CannotExecuteException
+        ConnectionException, UnprovisionedException, CollectorException, CannotExecuteException,
+        NoManagedException
     {
         String uri =
             appendPathToBaseUri(remoteServiceURI, hypervisorIP, virtualSystemPath, byUUIDPath, uuid);
         Resource resource =
-            client.resource(uri).queryParam(hypervisorKey, hypervisorType.getValue()).queryParam(
-                userKey, user).queryParam(passwordKey, password);
+            client.resource(uri).queryParam(hypervisorKey, hypervisorType.getValue())
+                .queryParam(userKey, user).queryParam(passwordKey, password);
 
         if (aimport != null)
         {
@@ -585,11 +595,13 @@ public class NodeCollectorRESTClient
      * @throws UnprovisionedException if the machine doesn't respond.
      * @throws CollectorException for unexpected exceptions.
      * @throws CannotExecuteException
+     * @throws NoManagedException
      */
     public VirtualSystemDto getRemoteVirtualSystemByName(final String name,
         final String hypervisorIP, final HypervisorType hypervisorType, final String user,
         final String password, final Integer aimport) throws BadRequestException, LoginException,
-        ConnectionException, UnprovisionedException, CollectorException, CannotExecuteException
+        ConnectionException, UnprovisionedException, CollectorException, CannotExecuteException,
+        NoManagedException
     {
         // Manage the case where the virtual machine's name contains spaces to avoid problems with
         // the URL
@@ -607,8 +619,8 @@ public class NodeCollectorRESTClient
             appendPathToBaseUri(remoteServiceURI, hypervisorIP, virtualSystemPath, byNamePath,
                 encodedName);
         Resource resource =
-            client.resource(uri).queryParam(hypervisorKey, hypervisorType.getValue()).queryParam(
-                userKey, user).queryParam(passwordKey, password);
+            client.resource(uri).queryParam(hypervisorKey, hypervisorType.getValue())
+                .queryParam(userKey, user).queryParam(passwordKey, password);
 
         if (aimport != null)
         {
