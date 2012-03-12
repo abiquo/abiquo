@@ -1375,11 +1375,6 @@ public class ESXiCollector extends AbstractCollector
      */
     private boolean isInMaintenanceMode(final ObjectContent hostSystem) throws CollectorException
     {
-        if (true)
-        {
-            return true;
-        }
-
         try
         {
             HostListSummary summary =
