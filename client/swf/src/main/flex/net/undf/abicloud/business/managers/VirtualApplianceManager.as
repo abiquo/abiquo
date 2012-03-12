@@ -391,6 +391,10 @@ package net.undf.abicloud.business.managers
 	                setTimestamp('virtualAppliance',vaToUpdate.id);
 	                vaToUpdate.nodes = updateNodesStatus(vaToUpdate);
 	                vaToUpdate.state = new State(10, State.LOCKED.description);
+	                //force refresh virtual appliance
+	                virtualAppliance.nodes = updateNodesStatus(virtualAppliance);
+	                virtualAppliance.state = new State(10, State.LOCKED.description);
+	                
 	                dispatchEvent(new Event("nodesUpdates")); 
 	            }            	
             }
@@ -403,6 +407,8 @@ package net.undf.abicloud.business.managers
             if (vaToUpdate)
             {
                 vaToUpdate.state = new State(8, State.OFF.description);
+                //force refresh virtual appliance
+                virtualAppliance.state = new State(8, State.OFF.description);
             }
         }
 
@@ -413,6 +419,8 @@ package net.undf.abicloud.business.managers
             if (vaToUpdate)
             {
                 vaToUpdate.state = new State(9, State.NEEDS_SYNC.description);
+                //force refresh virtual appliance
+                virtualAppliance.state = new State(9, State.NEEDS_SYNC.description);
             }
         }
 
