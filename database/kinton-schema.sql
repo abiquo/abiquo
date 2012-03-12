@@ -2108,7 +2108,7 @@ DROP TRIGGER IF EXISTS kinton.create_virtualmachine_update_stats;
 DROP TRIGGER IF EXISTS kinton.update_virtualmachine_update_stats;
 DROP TRIGGER IF EXISTS kinton.delete_virtualmachine_update_stats;
 DROP TRIGGER IF EXISTS kinton.create_nodevirtualimage_update_stats;
-DROP TRIGGER IF EXISTS `kinton`.`delete_nodevirtualimage_update_stats`;
+DROP TRIGGER IF EXISTS kinton.delete_nodevirtualimage_update_stats;
 DROP TRIGGER IF EXISTS `kinton`.`virtualdatacenter_created`;
 DROP TRIGGER IF EXISTS `kinton`.`virtualdatacenter_updated`;
 DROP TRIGGER IF EXISTS `kinton`.`virtualdatacenter_deleted`;
@@ -2650,7 +2650,7 @@ CREATE TRIGGER kinton.update_virtualmachine_update_stats AFTER UPDATE ON kinton.
 	-- Main case: an imported VM changes its state (from LOCKED to ...)
 	IF NEW.idType = 1 AND (NEW.state != OLD.state) THEN
             IF NEW.state = "ON" AND previousState != "ON" THEN 
-                -- New Active
+                -- New Active		
                 UPDATE IGNORE vapp_enterprise_stats SET vmActive = vmActive+1
                 WHERE idVirtualApp = idVirtualAppObj;
                 UPDATE IGNORE vdc_enterprise_stats SET vmActive = vmActive+1
@@ -2704,23 +2704,6 @@ CREATE TRIGGER kinton.update_virtualmachine_update_stats AFTER UPDATE ON kinton.
                     localStorageUsed = localStorageUsed - NEW.hd - extraHDSize
                 WHERE idVirtualDataCenter = idVirtualDataCenterObj; 		
             END IF;
-            IF NEW.state = "ON" AND previousState = "NOT_ALLOCATED" THEN 
-                -- VMachine Deployed
-                UPDATE IGNORE cloud_usage_stats SET vMachinesTotal = vMachinesTotal+1
-                WHERE idDataCenter = idDataCenterObj;
-                UPDATE IGNORE vapp_enterprise_stats SET vmCreated = vmCreated+1
-                WHERE idVirtualApp = idVirtualAppObj;
-                UPDATE IGNORE vdc_enterprise_stats SET vmCreated = vmCreated+1
-                WHERE idVirtualDataCenter = idVirtualDataCenterObj;
-            ELSEIF NEW.state = "NOT_ALLOCATED"  AND previousState IN ("ON","OFF") THEN 
-                -- VMachine was deconfigured (still allocated)
-                UPDATE IGNORE cloud_usage_stats SET vMachinesTotal = vMachinesTotal-1
-                WHERE idDataCenter = idDataCenterObj;
-                UPDATE IGNORE vapp_enterprise_stats SET vmCreated = vmCreated-1
-                WHERE idVirtualApp = idVirtualAppObj;
-                UPDATE IGNORE vdc_enterprise_stats SET vmCreated = vmCreated-1
-                WHERE idVirtualDataCenter = idVirtualDataCenterObj;
-            END IF;         
         END IF;
         --
         SELECT IF(vi.cost_code IS NULL, 0, vi.cost_code) INTO costCodeObj
@@ -2852,7 +2835,7 @@ CREATE TRIGGER kinton.delete_nodevirtualimage_update_stats AFTER DELETE ON kinto
 -- INSERT INTO debug_msg (msg) VALUES (CONCAT('deleteNVI values', IFNULL(cpu,'NULL'), ' - ',IFNULL(ram,'NULL'), ' - ',IFNULL(hd,'NULL')));						
     --
     IF type = 1 THEN
-      IF previousState != "NOT_ALLOCATED" AND previousState != "UNKNOWN" THEN      	
+      IF previousState != "NOT_ALLOCATED" OR previousState != "UNKNOWN" THEN      
         UPDATE IGNORE cloud_usage_stats SET vMachinesTotal = vMachinesTotal-1
           WHERE idDataCenter = idDataCenterObj;
         UPDATE IGNORE vapp_enterprise_stats SET vmCreated = vmCreated-1
@@ -2874,15 +2857,6 @@ CREATE TRIGGER kinton.delete_nodevirtualimage_update_stats AFTER DELETE ON kinto
                memoryUsed = memoryUsed - ram,
                localStorageUsed = localStorageUsed - hd
            WHERE idVirtualDataCenter = idVirtualDataCenterObj;                 
-      END IF;
-      --
-      IF previousState != "NOT_ALLOCATED" OR previousState != "UNKNOWN" THEN      	
-        UPDATE IGNORE cloud_usage_stats SET vMachinesTotal = vMachinesTotal-1
-          WHERE idDataCenter = idDataCenterObj;
-        UPDATE IGNORE vapp_enterprise_stats SET vmCreated = vmCreated-1
-          WHERE idVirtualApp = idVirtualAppObj;
-        UPDATE IGNORE vdc_enterprise_stats SET vmCreated = vmCreated-1
-          WHERE idVirtualDataCenter = idVirtualDataCenterObj;
       END IF;
       --
       IF previousState = "ON" THEN
