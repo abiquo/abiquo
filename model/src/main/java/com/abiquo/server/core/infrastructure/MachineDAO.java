@@ -92,6 +92,11 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
         return Restrictions.eq(Machine.ENTERPRISE_PROPERTY, enterprise);
     }
 
+    private static Criterion sameState(MachineState state)
+    {
+        return Restrictions.eq(Machine.STATE_PROPERTY, state);
+    }
+
     private Criterion filterBy(final String filter)
     {
         Disjunction filterDisjunction = Restrictions.disjunction();
@@ -167,6 +172,17 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
         // XenServer does not support HA
         criteria.add(Restrictions.ne("hypervisor." + Hypervisor.TYPE_PROPERTY,
             HypervisorType.XENSERVER));
+
+        // Order by name
+        criteria.addOrder(Order.asc(Machine.NAME_PROPERTY));
+
+        return getResultList(criteria);
+    }
+
+    public List<Machine> findMachinesWithHAInProgress()
+    {
+        Criteria criteria = createCriteria(sameState(MachineState.HA_IN_PROGRESS));
+        criteria.createAlias(Machine.HYPERVISOR_PROPERTY, "hypervisor");
 
         // Order by name
         criteria.addOrder(Order.asc(Machine.NAME_PROPERTY));

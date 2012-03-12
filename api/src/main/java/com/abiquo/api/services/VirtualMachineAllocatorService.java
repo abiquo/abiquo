@@ -340,7 +340,7 @@ public class VirtualMachineAllocatorService extends DefaultApiService
      * @param, vmachineId, an already allocated virtual machine (hypervisor and datastore are set)
      *         but we wants to move it.
      */
-    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
     public VirtualMachine allocateHAVirtualMachine(final VirtualMachine vmId,
         final VirtualMachineRequirements requirements) throws AllocatorException,
         ResourceAllocationException
@@ -350,11 +350,10 @@ public class VirtualMachineAllocatorService extends DefaultApiService
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public VirtualMachine updateResourcesUsageOnTargetMachine(final VirtualMachine virtualMachine,
+    public void updateResourcesUsageOnTargetMachine(final VirtualMachine virtualMachine,
         final Machine machine) throws ResourceAllocationException
     {
         LOG.error("community can't *updateResourcesUsageOnTargetMachine*");
-        return null;
     }
 
     protected CommonError createErrorWithExceptionDetails(final APIError apiError,
