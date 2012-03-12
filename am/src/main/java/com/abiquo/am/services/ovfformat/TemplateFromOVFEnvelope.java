@@ -29,6 +29,7 @@ import java.util.Map;
 
 import javax.xml.namespace.QName;
 
+import org.apache.commons.io.FilenameUtils;
 import org.dmtf.schemas.ovf.envelope._1.ContentType;
 import org.dmtf.schemas.ovf.envelope._1.DiskSectionType;
 import org.dmtf.schemas.ovf.envelope._1.EnvelopeType;
@@ -42,12 +43,15 @@ import org.dmtf.schemas.ovf.envelope._1.VirtualSystemCollectionType;
 import org.dmtf.schemas.ovf.envelope._1.VirtualSystemType;
 import org.dmtf.schemas.wbem.wscim._1.cim_schema._2.cim_resourceallocationsettingdata.ResourceType;
 import org.dmtf.schemas.wbem.wscim._1.common.CimString;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.abiquo.am.exceptions.AMError;
 import com.abiquo.appliancemanager.exceptions.AMException;
 import com.abiquo.appliancemanager.transport.MemorySizeUnit;
 import com.abiquo.appliancemanager.transport.TemplateDto;
 import com.abiquo.model.enumerator.DiskFormatType;
+import com.abiquo.model.enumerator.EthernetDriverType;
 import com.abiquo.ovfmanager.cim.CIMTypesUtils.CIMResourceTypeEnum;
 import com.abiquo.ovfmanager.ovf.OVFEnvelopeUtils;
 import com.abiquo.ovfmanager.ovf.exceptions.EmptyEnvelopeException;
@@ -60,8 +64,7 @@ import com.abiquo.ovfmanager.ovf.section.DiskFormat;
 
 public class TemplateFromOVFEnvelope
 {
-
-    
+    private final static Logger LOG = LoggerFactory.getLogger(TemplateFromOVFEnvelope.class);
 
     public static VirtualDiskDescType getDisk(final EnvelopeType envelope)
     {
@@ -85,7 +88,7 @@ public class TemplateFromOVFEnvelope
         return disks.get(0);
 
     }
-    
+
     /**
      * TODO re-DOC <br>
      * REQUIRE THE OVFID IS PLACED ON A REMOTE LOCATION (WARINING on generation)<BR>
@@ -110,8 +113,7 @@ public class TemplateFromOVFEnvelope
             new HashMap<String, VirtualDiskDescType>();
         Map<String, FileType> fileIdToFileType = new HashMap<String, FileType>();
         Map<String, List<String>> diskIdToVSs = new HashMap<String, List<String>>();
-        Map<String, TemplateDto> requiredByVSs =
-            new HashMap<String, TemplateDto>();
+        Map<String, TemplateDto> requiredByVSs = new HashMap<String, TemplateDto>();
         DiskSectionType diskSectionType;
 
         try
@@ -214,7 +216,15 @@ public class TemplateFromOVFEnvelope
 
                     // Note that getHRef() will now return the relative path
                     // of the file at the downloaded repository space
-                    diskInfo.setDiskFilePath(filePath);
+
+                    if (filePath.startsWith("http:"))
+                    {
+                        diskInfo.setDiskFilePath(FilenameUtils.getName(filePath));
+                    }
+                    else
+                    {
+                        diskInfo.setDiskFilePath(filePath);
+                    }
 
                     diskInfo.setIconPath(iconPath);
                     diskInfo.setDescription(description);
@@ -237,6 +247,8 @@ public class TemplateFromOVFEnvelope
 
                     diskInfo.setRamSizeUnit(requirement.getRamSizeUnit());
                     diskInfo.setHdSizeUnit(requirement.getHdSizeUnit());
+
+                    diskInfo.setEthernetDriverType(requirement.getEthernetDriverType());
 
                     // TODO diskInfo.setEnterpriseId(enterpriseId);
                     // diskInfo.setUserId(userId); TODO user ID
@@ -398,6 +410,31 @@ public class TemplateFromOVFEnvelope
 
                 dReq.setHdSizeUnit(hdSizeUnit);
                 // dReq.setImageSize(diskDescType.get);
+            }
+            else if (CIMResourceTypeEnum.Ethernet_Adapter.getNumericResourceType() == resTnumeric)
+            {
+                String ethDriver = null;
+                EthernetDriverType ethDriverType = null;
+                try
+                {
+                    ethDriver = rasdType.getResourceSubType().getValue();
+                    ethDriverType = EthernetDriverType.valueOf(ethDriver);
+                }
+                catch (Exception e)
+                {
+                    LOG.error("Invalid ethernet adapter type {}", ethDriver != null ? ethDriver
+                        : "-ResourceSubType- not found");
+                }
+
+                if (dReq.getEthernetDriverType() != null && ethDriverType != null)
+                {
+                    LOG.warn("Overwrite ethernet adapter type form {} to {}", dReq
+                        .getEthernetDriverType().name(), ethDriverType.name());
+                }
+                else if (ethDriverType != null)
+                {
+                    dReq.setEthernetDriverType(ethDriverType);
+                }
             }
         }// rasd
 

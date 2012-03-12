@@ -107,15 +107,17 @@
 
             private var _responseHandler:Function;
 
+            public static var customAlert:AbiCloudAlert;
+            
             public static function showConfirmation(title:String, header:String,
                                                     main:String, flags:uint = 0x4,
                                                     responseHandler:Function = null,
                                                     allowClipboard:Boolean = false):void
             {
-                var customAlert:AbiCloudAlert = new AbiCloudAlert;
-
+                customAlert = new AbiCloudAlert();
                 customAlert._titleText = title;
                 customAlert._headerText = header;
+                customAlert.id = header;
                 customAlert._mainText = main;
                 customAlert._responseHandler = responseHandler;
                 customAlert._flags = flags;
@@ -130,10 +132,11 @@
                                              allowClipboard:Boolean = false,
                                              additionalObject:Object = null):void
             {
-                var customAlert:AbiCloudAlert = new AbiCloudAlert;
+                customAlert = new AbiCloudAlert();
 
                 customAlert._titleText = title;
                 customAlert._headerText = header;
+                customAlert.id = header;
                 customAlert._mainText = main;
                 customAlert._responseHandler = responseHandler;
                 customAlert._flags = flags;
@@ -153,10 +156,11 @@
                                              allowClipboard:Boolean = true,
                                              additionalObject:Object = null):void
             {
-                var customAlert:AbiCloudAlert = new AbiCloudAlert();
-
+                customAlert = new AbiCloudAlert();
+                
                 customAlert._titleText = title;
                 customAlert._headerText = header;
+                customAlert.id = header;
                 customAlert._mainText = main;
                 customAlert._responseHandler = responseHandler;
                 customAlert._flags = flags;
@@ -181,7 +185,7 @@
 
                 PopUpManager.addPopUp(this, Application.application as DisplayObject,
                                       true);
-                                      
+                                  
                 //for specific case, we build a custom message
                 //affected alerts:
                 //- soft limit
@@ -356,6 +360,15 @@
                     keyboardEvent.target.dispatchEvent(new MouseEvent(MouseEvent.CLICK));
                 }
             }
+            
+            public static function externalClose():void
+            {
+            	if(customAlert)
+            	{
+            		customAlert.close(new MouseEvent(MouseEvent.CLICK));
+            	}
+            	
+            }
         ]]>
     </mx:Script>
 
@@ -431,6 +444,7 @@
 
         <mx:Button id="clipBoardButton"
             height="18"
+            styleName="AlternativeButton"
             includeInLayout="false"
             click="onClickClipboardButton()"
             visible="false"/>

@@ -22,7 +22,6 @@
 package com.abiquo.api.exceptions.mapper;
 
 import javax.persistence.PersistenceException;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
@@ -59,9 +58,9 @@ public class PersistenceExceptionMapper implements ExceptionMapper<PersistenceEx
         builder.status(Status.INTERNAL_SERVER_ERROR);
 
         errors.getCollection().add(error);
-        builder.entity(errors).type(MediaType.APPLICATION_XML_TYPE);
+        builder.entity(errors).type(ErrorsDto.MEDIA_TYPE);
 
-        LOGGER.error("Unexpexted persistence exception", exception);
+        LOGGER.error("Unexpected persistence exception", exception);
 
         return builder.build();
     }

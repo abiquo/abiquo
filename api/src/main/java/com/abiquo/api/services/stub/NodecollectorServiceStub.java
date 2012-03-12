@@ -502,7 +502,6 @@ public class NodecollectorServiceStub extends DefaultApiService
                 0,
                 cpus,
                 0,
-                0,
                 transfromToState(host.getStatus()),
                 "");
 
@@ -538,7 +537,9 @@ public class NodecollectorServiceStub extends DefaultApiService
 
         }
 
-        switches = switches.substring(0, switches.lastIndexOf('/'));
+        switches =
+            StringUtils.hasLength(switches) ? switches.substring(0, switches.lastIndexOf('/'))
+                : null;
         machine.setVirtualSwitch(switches);
         return machine;
     }
@@ -622,7 +623,7 @@ public class NodecollectorServiceStub extends DefaultApiService
                 long bytesHD = rt.getUnits();
                 vm.setHdInBytes(bytesHD);
 
-                if (StringUtils.hasText(rt.getAddress()) && StringUtils.hasText(rt.getConnection()))
+                if (StringUtils.hasText(rt.getConnection()))
                 {
                     Datastore ds = new Datastore();
                     ds.setDirectory(rt.getAddress());
@@ -631,7 +632,8 @@ public class NodecollectorServiceStub extends DefaultApiService
                     vm.setDatastore(ds);
                 }
 
-                VirtualMachineTemplate vi = new VirtualMachineTemplate(); // XXX this is not stored in the DDBB
+                VirtualMachineTemplate vi = new VirtualMachineTemplate(); // XXX this is not stored
+                                                                          // in the DDBB
                 VirtualDiskEnumType diskFormatType =
                     VirtualDiskEnumType.fromValue(rt.getResourceSubType().toString());
                 vi.setDiskFormatType(DiskFormatType.fromURI(diskFormatType.value()));
@@ -643,7 +645,7 @@ public class NodecollectorServiceStub extends DefaultApiService
                 vi.setDiskFileSize(rt.getUnits());
                 vm.setVirtualMachineTemplate(vi);
                 vm.setHdInBytes(rt.getUnits());
-                
+
                 if (rt.getLabel() == null)
                 {
                     break;

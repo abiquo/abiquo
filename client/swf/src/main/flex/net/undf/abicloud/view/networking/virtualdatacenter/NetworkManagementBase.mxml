@@ -31,6 +31,7 @@
     paddingTop="0"
     verticalGap="0"
     show="retrieveNetworks()"
+    hide="onHide()"
     xmlns:mx="http://www.adobe.com/2006/mxml"
     xmlns:privatenetwork="net.undf.abicloud.view.networking.virtualdatacenter.privatenetwork.*">
 
@@ -46,12 +47,14 @@
             public function set virtualDatacenter(value:VirtualDataCenter):void
             {
                 _virtualDatacenter = value;
-                if (privateNetworkManagement.visible)
+                if (privateNetworkManagement.isShown)
                     privateNetworkManagement.virtualDatacenter = _virtualDatacenter;
             }
             
             //Retrieve the list of private networks when the tab is shown
             private function retrieveNetworks():void{
+            	privateNetworkManagement.isShown = true;
+            	networkManagementVS.selectedIndex = 0;
             	if(_virtualDatacenter){
             		privateNetworkManagement.virtualDatacenter = _virtualDatacenter;
             	}
@@ -80,7 +83,13 @@
 
             private function onShowPrivateNetworkManagement():void
             {
+               privateNetworkManagement.isShown = true;
                privateNetworkManagement.virtualDatacenter = _virtualDatacenter;
+            }
+            
+            private function onHide():void
+            {
+            	privateNetworkManagement.isShown = false;
             }
         ]]>
     </mx:Script>

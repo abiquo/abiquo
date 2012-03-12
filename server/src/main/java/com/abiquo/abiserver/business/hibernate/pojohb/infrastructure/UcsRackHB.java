@@ -42,6 +42,8 @@ public class UcsRackHB extends RackHB
 
     private String defaultTemplate;
 
+    private Integer maxMachinesOn;
+
     /* ------------- Constructor ------------- */
     public UcsRackHB()
     {
@@ -102,6 +104,16 @@ public class UcsRackHB extends RackHB
         this.defaultTemplate = defaultTemplate;
     }
 
+    public Integer getMaxMachinesOn()
+    {
+        return maxMachinesOn;
+    }
+
+    public void setMaxMachinesOn(final Integer maxMachinesOn)
+    {
+        this.maxMachinesOn = maxMachinesOn;
+    }
+
     @Override
     public UcsRack toPojo()
     {
@@ -124,6 +136,7 @@ public class UcsRackHB extends RackHB
         vlanNetworkParameters.setVlans_id_avoided(getVlans_id_avoided());
         rackPojo.setVlanNetworkParameters(vlanNetworkParameters);
         rackPojo.setDefaultTemplate(getDefaultTemplate());
+        rackPojo.setMaxMachinesOn(maxMachinesOn);
         return rackPojo;
     }
 

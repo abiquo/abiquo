@@ -25,12 +25,15 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import org.apache.commons.lang.StringUtils;
 
+import com.abiquo.model.enumerator.EthernetDriverType;
 import com.abiquo.model.transport.SingleResourceTransportDto;
 
 @XmlRootElement(name = "templateDefinition")
 public class TemplateDefinitionDto extends SingleResourceTransportDto
 {
     private static final long serialVersionUID = -2655629613600887997L;
+    public static final String BASE_MEDIA_TYPE = "application/vnd.abiquo.templatedefinition+xml";
+    public static final String MEDIA_TYPE = BASE_MEDIA_TYPE + "; version=" + API_VERSION;
 
     private Integer id;
 
@@ -51,6 +54,10 @@ public class TemplateDefinitionDto extends SingleResourceTransportDto
     private String diskFormatType;
 
     private long diskFileSize;
+
+    private String iconUrl;
+
+    private EthernetDriverType ethernetDriverType;
 
     public Integer getId()
     {
@@ -150,5 +157,37 @@ public class TemplateDefinitionDto extends SingleResourceTransportDto
     public void setDescription(final String description)
     {
         this.description = StringUtils.strip(description);
+    }
+    
+    @Override
+    public String getMediaType()
+    {
+        return TemplateDefinitionDto.MEDIA_TYPE;
+    }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
+    }
+
+    public void setIconUrl(String iconUrl)
+    {
+        this.iconUrl = iconUrl;
+    }
+
+    public String getIconUrl()
+    {
+        return iconUrl;
+    }
+
+    public EthernetDriverType getEthernetDriverType()
+    {
+        return ethernetDriverType;
+    }
+
+    public void setEthernetDriverType(final EthernetDriverType ethernetDriverType)
+    {
+        this.ethernetDriverType = ethernetDriverType;
     }
 }

@@ -31,29 +31,31 @@ import org.apache.wink.common.internal.ResponseImpl.ResponseBuilderImpl;
 
 import com.abiquo.appliancemanager.exceptions.AMException;
 import com.abiquo.model.transport.error.ErrorDto;
-import com.abiquo.model.transport.error.ErrorsDto;
 
 @Provider
 public class AMExceptionMapper implements ExceptionMapper<AMException>
 {
 
     @Override
-    public Response toResponse(AMException exception)
+    public Response toResponse(final AMException exception)
     {
-        ErrorsDto errors = new ErrorsDto();
-        errors.add(createError(exception));
-
         ResponseBuilder builder = new ResponseBuilderImpl();
-        builder.entity(errors);
+        builder.entity(createError(exception));
         builder.status(Status.INTERNAL_SERVER_ERROR);
         return builder.build();
     }
 
-    private ErrorDto createError(AMException error)
+    public static ErrorDto createError(final AMException error)
     {
         ErrorDto errorDto = new ErrorDto();
         errorDto.setCode(error.getError().getCode());
         errorDto.setMessage(error.getMessage());
+        if (error.getCause() != null)
+        {
+            errorDto.setMessage(errorDto.getMessage() + "\nCaused by: "
+                + error.getCause().getLocalizedMessage());
+        }
+
         return errorDto;
     }
 

@@ -119,6 +119,9 @@ public class VirtualMachineFactory
             final long datastoreRequ = virtualMachine.getVirtualMachineTemplate().getDiskFileSize();
             final Datastore datastore = selectDatastore(machine, datastoreRequ);
             virtualMachine.setDatastore(datastore);
+
+            virtualMachine.setVdrpPort(isRemoteAccessEnabled() ? selectVrdpPort(machine)
+                : DISABLED_VRDPORT);
         }
         else
         // its an HA reallocation, the datastore was already
@@ -132,9 +135,7 @@ public class VirtualMachineFactory
             virtualMachine.setDatastore(datastore);
         }
 
-        final int vdrpPort = selectVrdpPort(machine);
         virtualMachine.setVdrpIP(hypervisor.getIpService());
-        virtualMachine.setVdrpPort(vdrpPort);
 
         return virtualMachine;
     }
@@ -150,7 +151,6 @@ public class VirtualMachineFactory
     private Datastore selectDatastore(final Machine machine, final Long hdDiskRequired)
         throws NotEnoughResourcesException
     {
-
         List<Datastore> datastores = datacenterRepo.findMachineDatastores(machine);
 
         if (datastores.isEmpty())
@@ -191,22 +191,12 @@ public class VirtualMachineFactory
 
     }
 
-    private int selectVrdpPort(final Machine machine) throws NotEnoughResourcesException
+    protected int selectVrdpPort(final Machine machine) throws NotEnoughResourcesException
     {
-        SystemProperty allowRdp = systemPropertyService.findByName(ALLOW_RDP_PROPERTY);
-
-        if (allowRdp != null && allowRdp.getValue().startsWith("0"))
-        {
-            return DISABLED_VRDPORT;
-        }
-
         final List<Integer> usedPorts =
             datacenterRepo.findUsedRemoteDesktopPortsInRack(machine.getRack());
-
         Integer candidatePort = getNextFreeRemoteDesktopPort(usedPorts);
-
-        log.debug("The VRDP assigned port is: " + candidatePort);
-
+        log.debug("The assigned remote desktop port is: {}", candidatePort);
         return candidatePort;
     }
 
@@ -236,5 +226,11 @@ public class VirtualMachineFactory
         }
 
         return allowedPorts.get(0);
+    }
+
+    private boolean isRemoteAccessEnabled()
+    {
+        SystemProperty allowRdp = systemPropertyService.findByName(ALLOW_RDP_PROPERTY);
+        return allowRdp == null || !allowRdp.getValue().startsWith("0");
     }
 }

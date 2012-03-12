@@ -23,14 +23,16 @@ package com.abiquo.api.resources.cloud;
 
 import java.util.List;
 
+import javax.validation.constraints.Min;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
 
 import org.apache.wink.common.annotations.Parent;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,16 +69,22 @@ public class VirtualMachinesResource extends AbstractResource
     @Autowired
     protected VirtualDatacenterService vdcService;
 
-    @Produces(MediaType.APPLICATION_XML)
     @GET
+    @Produces(VirtualMachinesDto.MEDIA_TYPE)
     public VirtualMachinesDto getVirtualMachines(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
+        @QueryParam(START_WITH) @DefaultValue("0") @Min(0) final Integer startwith,
+        @QueryParam(BY) @DefaultValue("name") final String orderBy,
+        @QueryParam(FILTER) @DefaultValue("") final String filter,
+        @QueryParam(LIMIT) @Min(1) @DefaultValue(DEFAULT_PAGE_LENGTH_STRING) final Integer limit,
+        @QueryParam(ASC) @DefaultValue("true") final Boolean descOrAsc,
         @Context final IRESTBuilder restBuilder) throws Exception
     {
         final VirtualAppliance vapp = vappService.getVirtualAppliance(vdcId, vappId);
 
-        final List<VirtualMachine> all = service.findByVirtualAppliance(vapp);
+        final List<VirtualMachine> all =
+            service.findByVirtualAppliance(vapp, startwith, orderBy, filter, limit, descOrAsc);
         final VirtualMachinesDto vappsDto = new VirtualMachinesDto();
 
         if (all != null && !all.isEmpty())
@@ -102,7 +110,8 @@ public class VirtualMachinesResource extends AbstractResource
      * @throws Exception
      */
     @POST
-    @Consumes(MediaType.APPLICATION_XML)
+    @Consumes(VirtualMachineDto.MEDIA_TYPE)
+    @Produces(VirtualMachineDto.MEDIA_TYPE)
     public VirtualMachineDto createVirtualMachine(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
@@ -132,7 +141,8 @@ public class VirtualMachinesResource extends AbstractResource
      * @throws Exception
      */
     @POST
-    @Consumes(VirtualMachineResource.VM_NODE_MEDIA_TYPE)
+    @Consumes(VirtualMachineWithNodeDto.MEDIA_TYPE)
+    @Produces(VirtualMachineDto.MEDIA_TYPE)
     public VirtualMachineDto createVirtualMachineWithNode(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
@@ -151,7 +161,7 @@ public class VirtualMachinesResource extends AbstractResource
     }
 
     @GET
-    @Produces(VirtualMachineResource.VM_NODE_MEDIA_TYPE)
+    @Produces({VirtualMachinesWithNodeDto.MEDIA_TYPE})
     public VirtualMachinesWithNodeDto getVirtualMachinesWithNode(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
@@ -172,7 +182,7 @@ public class VirtualMachinesResource extends AbstractResource
     }
 
     @GET
-    @Produces(VirtualMachineResource.VM_NODE_EXTENDED_MEDIA_TYPE)
+    @Produces(VirtualMachinesWithNodeExtendedDto.MEDIA_TYPE)
     public VirtualMachinesWithNodeExtendedDto getVirtualMachinesWithNodeExtended(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,

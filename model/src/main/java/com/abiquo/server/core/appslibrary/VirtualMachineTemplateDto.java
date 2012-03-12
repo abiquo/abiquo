@@ -27,14 +27,18 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
 import com.abiquo.model.transport.SingleResourceTransportDto;
+import com.abiquo.server.core.infrastructure.DatacenterDto;
 
 @XmlRootElement(name = "virtualMachineTemplate")
 @XmlType(propOrder = {"id", "name", "description", "path", "diskFormatType", "diskFileSize",
 "cpuRequired", "ramRequired", "hdRequired", "shared", "costCode", "creationDate", "creationUser",
-"chefEnabled"})
+"chefEnabled", "iconUrl"})
 public class VirtualMachineTemplateDto extends SingleResourceTransportDto
 {
     private static final long serialVersionUID = 1L;
+
+    public static final String BASE_MEDIA_TYPE = "application/vnd.abiquo.virtualmachinetemplate+xml";
+    public static final String MEDIA_TYPE = BASE_MEDIA_TYPE + "; version=" + API_VERSION;
 
     private Integer id;
 
@@ -63,6 +67,8 @@ public class VirtualMachineTemplateDto extends SingleResourceTransportDto
     private String creationUser;
 
     private boolean chefEnabled;
+
+    private String iconUrl;
 
     public boolean isChefEnabled()
     {
@@ -202,6 +208,28 @@ public class VirtualMachineTemplateDto extends SingleResourceTransportDto
     public void setCreationUser(final String creationUser)
     {
         this.creationUser = creationUser;
+    }
+
+    @Override
+    public String getMediaType()
+    {
+        return VirtualMachineTemplateDto.MEDIA_TYPE;
+    }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
+    }
+    
+    public void setIconUrl(final String iconUrl)
+    {
+        this.iconUrl = iconUrl;
+    }
+
+    public String getIconUrl()
+    {
+        return iconUrl;
     }
 
 }

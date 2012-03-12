@@ -25,13 +25,17 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
 import com.abiquo.model.transport.SingleResourceTransportDto;
+import com.abiquo.server.core.infrastructure.DatacenterDto;
 
 @XmlRootElement(name = "volume")
 @XmlType(propOrder = {"id", "uuid", "name", "description", "state", "sizeInMB",
 /* "availableSizeInMB", "usedSizeInMB", */"idScsi", "idImage"})
 public class VolumeManagementDto extends SingleResourceTransportDto
 {
-    public static final String ISCSI_VOLUME_MEDIA_TYPE = "application/iscsivolume+xml";
+    public static final String BASE_MEDIA_TYPE = "application/vnd.abiquo.volume+xml";
+    public static final String BASE_ISCSI_MEDIA_TYPE = "application/vnd.abiquo.iscsivolume+xml";
+    public static final String MEDIA_TYPE = BASE_MEDIA_TYPE + "; version=" + API_VERSION;
+    public static final String ISCSI_MEDIA_TYPE = BASE_ISCSI_MEDIA_TYPE + "; version=" + API_VERSION;
 
     private static final long serialVersionUID = 1L;
 
@@ -155,5 +159,17 @@ public class VolumeManagementDto extends SingleResourceTransportDto
     public void setIdImage(final Integer idImage)
     {
         this.idImage = idImage;
+    }
+    
+    @Override
+    public String getMediaType()
+    {
+        return VolumeManagementDto.MEDIA_TYPE;
+    }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
     }
 }

@@ -51,6 +51,7 @@ import org.hibernate.annotations.ForeignKey;
 import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.Range;
 
+import com.abiquo.model.enumerator.EthernetDriverType;
 import com.abiquo.server.core.appslibrary.VirtualImageConversion;
 import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
 import com.abiquo.server.core.cloud.chef.RunlistElement;
@@ -82,7 +83,8 @@ public class VirtualMachine extends DefaultEntityBase
     public static final String TABLE_NAME = "virtualmachine";
 
     public static final String BY_VAPP = "SELECT nvi.virtualMachine "
-        + "FROM NodeVirtualImage nvi " + "WHERE nvi.virtualAppliance.id = :vapp_id";
+        + "FROM NodeVirtualImage nvi " + "WHERE nvi.virtualAppliance.id = :vapp_id "
+        + "AND ( nvi.virtualMachine.name like :filterLike )";
 
     public static final String BY_DC = "SELECT vm "
         + "FROM VirtualMachine vm, Hypervisor hy, Machine pm "
@@ -699,6 +701,29 @@ public class VirtualMachine extends DefaultEntityBase
         this.rasdManagements = rasdManagements;
     }
 
+    public final static String ETHERNET_DRIVER_TYPE_PROPERTY = "ethernetDriverType";
+
+    private final static boolean ETHERNET_DRIVER_TYPE_REQUIRED = false;
+
+    private final static String ETHERNET_DRIVER_TYPE_COLUMN = "ethDriverType";
+
+    private final static int ETHERNET_DRIVER_TYPE_COLUMN_LENGTH = 16;
+
+    @Enumerated(value = javax.persistence.EnumType.STRING)
+    @Column(name = ETHERNET_DRIVER_TYPE_COLUMN, nullable = !ETHERNET_DRIVER_TYPE_REQUIRED, length = ETHERNET_DRIVER_TYPE_COLUMN_LENGTH)
+    private EthernetDriverType ethernetDriverType;
+
+    @Required(value = ETHERNET_DRIVER_TYPE_REQUIRED)
+    public EthernetDriverType getEthernetDriverType()
+    {
+        return this.ethernetDriverType;
+    }
+
+    public void setEthernetDriverType(final EthernetDriverType ethernetDriverType)
+    {
+        this.ethernetDriverType = ethernetDriverType;
+    }
+
     public static final String CHEF_RUNLIST_TABLE = "chef_runlist";
 
     public static final String CHEF_RUNLIST_PROPERTY = "runlist";
@@ -815,5 +840,47 @@ public class VirtualMachine extends DefaultEntityBase
         // Not editable
         virtualMachine.setVirtualMachineTemplate(virtualMachineTemplate);
         return virtualMachine;
+    }
+
+    /**
+     * Ways to order this element in the queries.
+     */
+    public static enum OrderByEnum
+    {
+        NAME("name", "nvi.virtualMachine.name"), STATE("state", "nvi.virtualMachine.state");
+
+        public static OrderByEnum fromValue(final String orderBy)
+        {
+            for (OrderByEnum currentOrder : OrderByEnum.values())
+            {
+                if (currentOrder.name().equalsIgnoreCase(orderBy))
+                {
+                    return currentOrder;
+                }
+            }
+
+            return null;
+        }
+
+        private String columnSQL;
+
+        private String columnHQL;
+
+        private OrderByEnum(final String columnSQL, final String columnHQL)
+        {
+            this.columnSQL = columnSQL;
+            this.columnHQL = columnHQL;
+        }
+
+        public String getColumnSQL()
+        {
+            return columnSQL;
+        }
+
+        public String getColumnHQL()
+        {
+            return columnHQL;
+        }
+
     }
 }

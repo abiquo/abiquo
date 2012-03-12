@@ -26,6 +26,7 @@ import javax.validation.constraints.NotNull;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 
 import org.apache.wink.common.annotations.Parent;
@@ -52,6 +53,7 @@ public class DiskFormatTypeResource extends AbstractResource
     private DiskFormatTypeService service;
 
     @GET
+    @Produces(DiskFormatTypeDto.MEDIA_TYPE)
     public DiskFormatTypeDto getDiskFormatType(
         @PathParam(DISK_FORMAT_TYPE) @NotNull @Min(1) final Integer diskFormatTypeId,
         @Context final IRESTBuilder restBuilder) throws Exception

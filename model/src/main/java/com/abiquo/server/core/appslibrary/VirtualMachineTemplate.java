@@ -43,8 +43,10 @@ import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.Range;
 
 import com.abiquo.model.enumerator.DiskFormatType;
+import com.abiquo.model.enumerator.EthernetDriverType;
 import com.abiquo.server.core.common.DefaultEntityBase;
 import com.abiquo.server.core.enterprise.Enterprise;
+import com.abiquo.server.core.infrastructure.DatacenterDto;
 import com.abiquo.server.core.infrastructure.Repository;
 import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
 import com.softwarementors.validation.constraints.LeadingOrTrailingWhitespace;
@@ -56,7 +58,7 @@ import com.softwarementors.validation.constraints.Required;
 public class VirtualMachineTemplate extends DefaultEntityBase
 {
     public static final String TABLE_NAME = "virtualimage";
-
+    
     // DO NOT ACCESS: present due to needs of infrastructure support. *NEVER* call from business
     // code
     public VirtualMachineTemplate()
@@ -460,26 +462,32 @@ public class VirtualMachineTemplate extends DefaultEntityBase
         this.description = description;
     }
 
-    public final static String ICON_PROPERTY = "icon";
+    public final static String ICON_URL_PROPERTY = "iconUrl";
 
-    private final static boolean ICON_REQUIRED = false;
+    private final static boolean ICON_URL_REQUIRED = false;
 
-    private final static String ICON_ID_COLUMN = "idIcon";
+    private final static int ICON_URL_LENGTH_MIN = 0;
 
-    @JoinColumn(name = ICON_ID_COLUMN)
-    @ManyToOne(fetch = FetchType.LAZY)
-    @ForeignKey(name = "FK_" + TABLE_NAME + "_icon")
-    private Icon icon;
+    private final static int ICON_URL_LENGTH_MAX = 255;
 
-    @Required(value = ICON_REQUIRED)
-    public Icon getIcon()
+    private final static boolean ICON_URL_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
+
+    private final static String ICON_URL_COLUMN = "iconUrl";
+
+    @Column(name = ICON_URL_COLUMN, nullable = !ICON_URL_REQUIRED, length = ICON_URL_LENGTH_MAX)
+    private String iconUrl;
+
+    @Required(value = ICON_URL_REQUIRED)
+    @Length(min = ICON_URL_LENGTH_MIN, max = ICON_URL_LENGTH_MAX)
+    @LeadingOrTrailingWhitespace(allowed = ICON_URL_LEADING_OR_TRAILING_WHITESPACES_ALLOWED)
+    public String getIconUrl()
     {
-        return icon;
+        return this.iconUrl;
     }
 
-    public void setIcon(final Icon icon)
+    public void setIconUrl(final String iconUrl)
     {
-        this.icon = icon;
+        this.iconUrl = iconUrl;
     }
 
     public final static String COST_CODE_PROPERTY = "costCode";
@@ -591,9 +599,32 @@ public class VirtualMachineTemplate extends DefaultEntityBase
         this.creationUser = creationUser;
     }
 
+    public final static String ETHERNET_DRIVER_TYPE_PROPERTY = "ethernetDriverType";
+
+    private final static boolean ETHERNET_DRIVER_TYPE_REQUIRED = false;
+
+    private final static String ETHERNET_DRIVER_TYPE_COLUMN = "ethDriverType";
+
+    private final static int ETHERNET_DRIVER_TYPE_COLUMN_LENGTH = 16;
+
+    @Enumerated(value = javax.persistence.EnumType.STRING)
+    @Column(name = ETHERNET_DRIVER_TYPE_COLUMN, nullable = !ETHERNET_DRIVER_TYPE_REQUIRED, length = ETHERNET_DRIVER_TYPE_COLUMN_LENGTH)
+    private EthernetDriverType ethernetDriverType;
+
+    @Required(value = ETHERNET_DRIVER_TYPE_REQUIRED)
+    public EthernetDriverType getEthernetDriverType()
+    {
+        return this.ethernetDriverType;
+    }
+
+    public void setEthernetDriverType(final EthernetDriverType ethernetDriverType)
+    {
+        this.ethernetDriverType = ethernetDriverType;
+    }
+
     // Creation date does not have a setter, since it will be auto generated.
 
-    /* *********************** Helper methods ************************* */
+    /*          *********************** Helper methods ************************* */
 
     public void setRequirements(final int cpu, final int ram, final long hd)
     {
@@ -652,4 +683,5 @@ public class VirtualMachineTemplate extends DefaultEntityBase
     {
         conversions.add(conversion);
     }
+
 }

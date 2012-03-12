@@ -305,6 +305,10 @@ public class RemoteService implements IPojo<RemoteServiceHB>
         {
             return true;
         }
+        catch (NullPointerException e)
+        {
+            return true;
+        }
     }
 
     public boolean checkUri()

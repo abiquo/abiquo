@@ -24,24 +24,31 @@
  */
 package com.abiquo.api.resources;
 
+import java.util.List;
+
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 
 import org.apache.wink.common.annotations.Parent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
+import com.abiquo.api.resources.cloud.DiskResource;
 import com.abiquo.api.services.InfrastructureService;
+import com.abiquo.api.services.StorageService;
 import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.model.rest.RESTLink;
 import com.abiquo.model.util.ModelTransformer;
 import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineDto;
+import com.abiquo.server.core.infrastructure.storage.DiskManagement;
+import com.abiquo.server.core.infrastructure.storage.DisksManagementDto;
 
 /**
  * <pre>
@@ -62,13 +69,20 @@ public class VirtualMachineInfrastructureResource extends AbstractResource
     public static final String VIRTUAL_MACHINE_INFRASTRUCTURE = "virtualmachine";
 
     /** Param to map the input values related to the virtual machine. */
-    public static final String VIRTUAL_MACHINE_INFRASTRUCTURE_PARAM =
-        "{" + VIRTUAL_MACHINE_INFRASTRUCTURE + "}";
+    public static final String VIRTUAL_MACHINE_INFRASTRUCTURE_PARAM = "{"
+        + VIRTUAL_MACHINE_INFRASTRUCTURE + "}";
+
+    /** Path to capture disks */
+    public static final String DISKS_ACTION_PATH = "action/disk";
 
     @Autowired
     private InfrastructureService service;
 
+    @Autowired
+    private StorageService storageService;
+
     @GET
+    @Produces(VirtualMachineDto.MEDIA_TYPE)
     public VirtualMachineDto getInfrastructureVirtualMachine(
         @PathParam(DatacenterResource.DATACENTER) @NotNull @Min(1) final Integer datacenterId,
         @PathParam(RackResource.RACK) @NotNull @Min(1) final Integer rackId,
@@ -125,17 +139,55 @@ public class VirtualMachineInfrastructureResource extends AbstractResource
         {
             if (vmtemplate.getRepository() != null)
             {
-                vmDto.addLink(restBuilder.buildVirtualMachineTemplateLink(vmtemplate.getEnterprise()
-                    .getId(), vmtemplate.getRepository().getDatacenter().getId(), vmtemplate.getId()));
+                vmDto.addLink(restBuilder.buildVirtualMachineTemplateLink(vmtemplate
+                    .getEnterprise().getId(), vmtemplate.getRepository().getDatacenter().getId(),
+                    vmtemplate.getId()));
             }
             else
             {
                 // imported virtual machines
-                vmDto.addLink(restBuilder.buildVirtualMachineTemplateLink(vmtemplate.getEnterprise()
-                    .getId(), vm.getHypervisor().getMachine().getRack().getDatacenter().getId(),
-                    vmtemplate.getId()));
+                vmDto.addLink(restBuilder.buildVirtualMachineTemplateLink(vmtemplate
+                    .getEnterprise().getId(), vm.getHypervisor().getMachine().getRack()
+                    .getDatacenter().getId(), vmtemplate.getId()));
             }
         }
         return vmDto;
+    }
+
+    /**
+     * Get list of disks in a virtual machine
+     * 
+     * @param datacenterId
+     * @param rackId
+     * @param machineId
+     * @param vmId
+     * @param restBuilder
+     * @return
+     * @throws Exception
+     */
+    @GET
+    @Path(DISKS_ACTION_PATH)
+    @Produces(DisksManagementDto.MEDIA_TYPE)
+    public DisksManagementDto getListOfDisks(
+        @PathParam(DatacenterResource.DATACENTER) @NotNull @Min(1) final Integer datacenterId,
+        @PathParam(RackResource.RACK) @NotNull @Min(1) final Integer rackId,
+        @PathParam(MachineResource.MACHINE) @Min(1) @NotNull final Integer machineId,
+        @PathParam(VirtualMachineInfrastructureResource.VIRTUAL_MACHINE_INFRASTRUCTURE) @Min(1) @NotNull final Integer vmId,
+        @Context final IRESTBuilder restBuilder) throws Exception
+    {
+
+        VirtualMachine vm =
+            service.getVirtualMachineFromInfrastructure(datacenterId, rackId, machineId, vmId);
+
+        List<DiskManagement> disks = storageService.getListOfHardDisksByVM(vm);
+
+        DisksManagementDto dto = new DisksManagementDto();
+
+        for (DiskManagement disk : disks)
+        {
+            dto.getCollection().add(DiskResource.createDiskTransferObject(disk, restBuilder));
+        }
+
+        return dto;
     }
 }

@@ -29,12 +29,12 @@ import com.abiquo.am.data.AMRedisDao;
 import com.abiquo.am.exceptions.AMError;
 import com.abiquo.am.services.ErepoFactory;
 import com.abiquo.am.services.filesystem.TemplateFileSystem;
-import com.abiquo.appliancemanager.config.AMConfigurationManager;
+import com.abiquo.appliancemanager.config.AMConfiguration;
 import com.abiquo.appliancemanager.exceptions.AMException;
 import com.abiquo.appliancemanager.exceptions.EventException;
 import com.abiquo.appliancemanager.transport.TemplateStatusEnumType;
 import com.abiquo.commons.amqp.impl.am.AMProducer;
-import com.abiquo.commons.amqp.impl.am.domain.OVFPackageInstanceStatusEvent;
+import com.abiquo.commons.amqp.impl.am.domain.TemplateStatusEvent;
 import com.abiquo.ovfmanager.ovf.exceptions.IdNotFoundException;
 
 @Component
@@ -46,8 +46,7 @@ public class AMNotifier extends AMProducer
     }
 
     // used on AMSink to discrimitate the Datacenter it belongs to .
-    private final static String REPO_LOCATION = AMConfigurationManager.getInstance()
-        .getAMConfiguration().getRepositoryLocation();
+    private final static String REPO_LOCATION = AMConfiguration.getRepositoryLocation();
 
     /**
      * Change the status for the provided OVF package Id.
@@ -108,7 +107,7 @@ public class AMNotifier extends AMProducer
             AMRedisDao.returnDao(dao);
         }
 
-        OVFPackageInstanceStatusEvent event = new OVFPackageInstanceStatusEvent();
+        TemplateStatusEvent event = new TemplateStatusEvent();
         event.setOvfId(ovfId);
         event.setStatus(status.name());
         event.setEnterpriseId(erId);

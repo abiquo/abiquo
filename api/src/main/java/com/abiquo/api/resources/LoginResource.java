@@ -23,6 +23,7 @@ package com.abiquo.api.resources;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 
 import org.apache.wink.common.annotations.Workspace;
@@ -56,6 +57,7 @@ public class LoginResource extends AbstractResource
      * @throws Exception UserDto
      */
     @GET
+    @Produces(UserDto.MEDIA_TYPE)
     public UserDto getUserByName(@Context final IRESTBuilder restBuilder) throws Exception
     {
         User user = userService.getCurrentUser();

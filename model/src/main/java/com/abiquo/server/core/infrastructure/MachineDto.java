@@ -33,6 +33,9 @@ import com.abiquo.model.transport.SingleResourceTransportDto;
 @XmlRootElement(name = "machine")
 public class MachineDto extends SingleResourceTransportDto implements Serializable
 {
+    public static final String BASE_MEDIA_TYPE = "application/vnd.abiquo.machine+xml";
+    public static final String MEDIA_TYPE = BASE_MEDIA_TYPE + "; version=" + API_VERSION;
+    
     private static final long serialVersionUID = -4971248626582072165L;
 
     private Integer id;
@@ -41,7 +44,7 @@ public class MachineDto extends SingleResourceTransportDto implements Serializab
 
     private Integer virtualRamInMb, virtualRamUsedInMb;
 
-    private Integer virtualCpuCores, virtualCpusUsed, virtualCpusPerCore;
+    private Integer virtualCpuCores, virtualCpusUsed;
 
     private MachineState state;
 
@@ -251,17 +254,6 @@ public class MachineDto extends SingleResourceTransportDto implements Serializab
         this.virtualCpusUsed = virtualCpusUsed;
     }
 
-    @XmlElement(name = "cpuRatio")
-    public Integer getVirtualCpusPerCore()
-    {
-        return (Integer) getDefaultMb(virtualCpusPerCore);
-    }
-
-    public void setVirtualCpusPerCore(final Integer virtualCpusPerCore)
-    {
-        this.virtualCpusPerCore = virtualCpusPerCore;
-    }
-
     private Number getDefaultMb(final Number mb)
     {
         return mb == null ? 1 : mb;
@@ -342,8 +334,20 @@ public class MachineDto extends SingleResourceTransportDto implements Serializab
         return initiatorIQN;
     }
 
-    public void setInitiatorIQN(String initiatorIQN)
+    public void setInitiatorIQN(final String initiatorIQN)
     {
         this.initiatorIQN = initiatorIQN;
+    }
+    
+    @Override
+    public String getMediaType()
+    {
+        return MachineDto.MEDIA_TYPE;
+    }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
     }
 }

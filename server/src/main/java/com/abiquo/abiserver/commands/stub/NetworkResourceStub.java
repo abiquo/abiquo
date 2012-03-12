@@ -164,4 +164,10 @@ public interface NetworkResourceStub
     public BasicResult setInternalVlansAsDefaultInEnterpriseByDatacenterLimit(Integer id,
         Integer limitId);
 
+    public BasicResult getInfrastructureNICsByVirtualMachine(Integer datacenterId, Integer rackId,
+        Integer machineId, Integer virtualMachineId);
+
+    public BasicResult editExternalIp(Integer enterpriseId, Integer datacenterId, Integer vlanId,
+        IpPoolManagement ipPoolManagement);
+
 }

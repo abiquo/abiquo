@@ -595,6 +595,9 @@
             {
                 dataCenterList.selectedIndex = -1;
                 onClickDataCenterList();
+                //Retrieve all datacenters
+                willShow();
+                filterInput.text = '';
                 if(dataCentersMap.isLoaded()){
 	                //Setting the Google Maps to its original position	                
 	                dataCentersMap.panTo(new LatLng(this._defaultLatitude,this._defaultLongitude));
@@ -609,6 +612,15 @@
             private function makeFullScreen():void
             {
                 FullScreenManager.getInstance().makeFullScreen(mapContainer);
+            }
+            
+            public function openDataCenter():void
+            {
+                //Event type defined in DataCenterManagement.mxml
+                var itemClickEvent:ItemClickEvent = new ItemClickEvent("dataCenterSelected",
+                                                                       true);
+                itemClickEvent.item = dataCenterList.selectedItem as DataCenter;
+                dispatchEvent(itemClickEvent);
             }
         ]]>
     </mx:Script>
@@ -653,6 +665,8 @@
         <mx:List id="dataCenterList"
             width="100%" height="100%"
             borderStyle="none"
+            doubleClickEnabled="true"
+            itemDoubleClick="openDataCenter()"
             itemRenderer="net.undf.abicloud.view.infrastructure.components.datacenter.DataCenterListRenderer"
             click="onClickDataCenterList()"/>
 

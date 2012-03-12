@@ -28,6 +28,7 @@ import java.util.List;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 
 import org.apache.wink.common.annotations.Parent;
@@ -58,6 +59,7 @@ public class DatacenterRepositoriesResource extends AbstractResource
     private InfrastructureService infService;
 
     @GET
+    @Produces(DatacenterRepositoriesDto.MEDIA_TYPE)
     public DatacenterRepositoriesDto getDatacenterRepositories(
         @PathParam(EnterpriseResource.ENTERPRISE) final Integer enterpId,
         @Context final IRESTBuilder restBuilder) throws Exception

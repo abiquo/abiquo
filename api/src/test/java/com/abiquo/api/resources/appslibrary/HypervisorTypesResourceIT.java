@@ -37,7 +37,7 @@ public class HypervisorTypesResourceIT extends AbstractJpaGeneratorIT
     public void getHypervisorTypes() throws Exception
     {
         String hypervisorTypesURI = resolveHypervisorTypesURI();
-        ClientResponse response = get(hypervisorTypesURI);
+        ClientResponse response = get(hypervisorTypesURI, HypervisorTypesDto.MEDIA_TYPE);
 
         HypervisorTypesDto dtos = response.getEntity(HypervisorTypesDto.class);
         assertEquals(dtos.getCollection().size(), HypervisorType.getIdMax());

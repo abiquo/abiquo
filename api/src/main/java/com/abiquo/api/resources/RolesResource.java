@@ -27,6 +27,7 @@ import java.util.Collection;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.UriInfo;
@@ -69,6 +70,7 @@ public class RolesResource extends AbstractResource
     UriInfo uriInfo;
 
     @GET
+    @Produces(RolesDto.MEDIA_TYPE)
     public RolesDto getRoles(
         @QueryParam(EnterpriseResource.ENTERPRISE_AS_PARAM) final String enterpriseId,
         @QueryParam("filter") final String filter, @QueryParam("orderBy") final String orderBy,

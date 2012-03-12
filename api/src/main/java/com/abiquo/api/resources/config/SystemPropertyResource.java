@@ -20,11 +20,13 @@
  */
 package com.abiquo.api.resources.config;
 
+import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 
 import org.apache.wink.common.annotations.Parent;
@@ -52,17 +54,21 @@ public class SystemPropertyResource extends AbstractResource
     private SystemPropertyService service;
 
     @GET
-    public SystemPropertyDto getSystemProperty(@PathParam(SYSTEM_PROPERTY) Integer propertyId,
-        @Context IRESTBuilder restBuilder) throws Exception
+    @Produces(SystemPropertyDto.MEDIA_TYPE)
+    public SystemPropertyDto getSystemProperty(
+        @PathParam(SYSTEM_PROPERTY) final Integer propertyId,
+        @Context final IRESTBuilder restBuilder) throws Exception
     {
         SystemProperty property = service.getSystemProperty(propertyId);
         return createTransferObject(property, restBuilder);
     }
 
     @PUT
-    public SystemPropertyDto modifySystemProperty(SystemPropertyDto systemProperty,
-        @PathParam(SYSTEM_PROPERTY) Integer propertyId, @Context IRESTBuilder restBuilder)
-        throws Exception
+    @Consumes(SystemPropertyDto.MEDIA_TYPE)
+    @Produces(SystemPropertyDto.MEDIA_TYPE)
+    public SystemPropertyDto modifySystemProperty(final SystemPropertyDto systemProperty,
+        @PathParam(SYSTEM_PROPERTY) final Integer propertyId,
+        @Context final IRESTBuilder restBuilder) throws Exception
     {
         SystemProperty property = service.getSystemProperty(propertyId);
 
@@ -72,7 +78,7 @@ public class SystemPropertyResource extends AbstractResource
     }
 
     @DELETE
-    public void deleteSystemProperty(@PathParam(SYSTEM_PROPERTY) Integer propertyId)
+    public void deleteSystemProperty(@PathParam(SYSTEM_PROPERTY) final Integer propertyId)
     {
         SystemProperty property = service.getSystemProperty(propertyId);
 
@@ -84,8 +90,8 @@ public class SystemPropertyResource extends AbstractResource
         service.removeSystemProperty(propertyId);
     }
 
-    public static SystemPropertyDto createTransferObject(SystemProperty systemProperty,
-        IRESTBuilder builder) throws Exception
+    public static SystemPropertyDto createTransferObject(final SystemProperty systemProperty,
+        final IRESTBuilder builder) throws Exception
     {
         SystemPropertyDto dto = new SystemPropertyDto();
         dto.setName(systemProperty.getName());
@@ -98,14 +104,16 @@ public class SystemPropertyResource extends AbstractResource
         return dto;
     }
 
-    public static SystemProperty createPersistenceObject(SystemPropertyDto dto) throws Exception
+    public static SystemProperty createPersistenceObject(final SystemPropertyDto dto)
+        throws Exception
     {
         SystemProperty systemProperty = new SystemProperty(dto.getName(), dto.getValue());
         systemProperty.setDescription(dto.getDescription());
         return systemProperty;
     }
 
-    private static SystemPropertyDto addLinks(IRESTBuilder builder, SystemPropertyDto systemProperty)
+    private static SystemPropertyDto addLinks(final IRESTBuilder builder,
+        final SystemPropertyDto systemProperty)
     {
         systemProperty.setLinks(builder.buildSystemPropertyLinks(systemProperty));
 

@@ -83,7 +83,7 @@ public class RolesResourceIT extends AbstractJpaGeneratorIT
         entitiesToPersist.add(r3);
         setup(entitiesToPersist.toArray());
 
-        ClientResponse response = get(rolesURI, SYSADMIN, SYSADMIN);
+        ClientResponse response = get(rolesURI, SYSADMIN, SYSADMIN, RolesDto.MEDIA_TYPE);
         assertEquals(200, response.getStatusCode());
 
         RolesDto entity = response.getEntity(RolesDto.class);
@@ -98,7 +98,7 @@ public class RolesResourceIT extends AbstractJpaGeneratorIT
                 .singletonMap(EnterpriseResource.ENTERPRISE_AS_PARAM, new String[] {Integer
                     .toString(e1.getId())}), false);
 
-        response = get(uri, SYSADMIN, SYSADMIN);
+        response = get(uri, SYSADMIN, SYSADMIN, RolesDto.MEDIA_TYPE);
 
         assertEquals(response.getStatusCode(), 200);
 
@@ -134,7 +134,7 @@ public class RolesResourceIT extends AbstractJpaGeneratorIT
                 .singletonMap(EnterpriseResource.ENTERPRISE_AS_PARAM, new String[] {Integer
                     .toString(e1.getId())}), false);
 
-        ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
+        ClientResponse response = get(uri, SYSADMIN, SYSADMIN, RolesDto.MEDIA_TYPE);
 
         assertEquals(response.getStatusCode(), 200);
 

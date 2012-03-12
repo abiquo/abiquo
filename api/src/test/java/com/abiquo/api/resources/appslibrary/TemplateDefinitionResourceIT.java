@@ -31,6 +31,7 @@ import java.util.List;
 
 import org.apache.wink.client.ClientResponse;
 import org.apache.wink.client.ClientWebException;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -38,7 +39,6 @@ import com.abiquo.api.resources.AbstractJpaGeneratorIT;
 import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.server.core.appslibrary.AppsLibrary;
 import com.abiquo.server.core.appslibrary.Category;
-import com.abiquo.server.core.appslibrary.Icon;
 import com.abiquo.server.core.appslibrary.TemplateDefinition;
 import com.abiquo.server.core.appslibrary.TemplateDefinitionDto;
 import com.abiquo.server.core.enterprise.Enterprise;
@@ -49,17 +49,16 @@ import com.abiquo.server.core.infrastructure.Datacenter;
 
 public class TemplateDefinitionResourceIT extends AbstractJpaGeneratorIT
 {
-    protected Category category;
 
     protected Enterprise enterprise;
 
     protected Datacenter datacenter;
 
-    protected TemplateDefinition templateDef;
-
     protected AppsLibrary appsLibrary;
 
-    protected Icon icon;
+    protected Category category;
+
+    protected TemplateDefinition templateDef;
 
     private static final String SYSADMIN = "sysadmin";
 
@@ -67,15 +66,18 @@ public class TemplateDefinitionResourceIT extends AbstractJpaGeneratorIT
     public void setUpUser()
     {
         enterprise = enterpriseGenerator.createUniqueInstance();
+        appsLibrary = appsLibraryGenerator.createUniqueInstance(enterprise);
+
         datacenter = datacenterGenerator.createUniqueInstance();
         category = categoryGenerator.createUniqueInstance();
-        icon = iconGenerator.createUniqueInstance();
+        category.setName("category_1");
 
         Role role = roleGenerator.createInstanceSysAdmin();
         User user = userGenerator.createInstance(enterprise, role, SYSADMIN, SYSADMIN);
 
         List<Object> entitiesToSetup = new ArrayList<Object>();
         entitiesToSetup.add(enterprise);
+        entitiesToSetup.add(appsLibrary);
         entitiesToSetup.add(datacenter);
 
         for (Privilege p : role.getPrivileges())
@@ -85,30 +87,28 @@ public class TemplateDefinitionResourceIT extends AbstractJpaGeneratorIT
         entitiesToSetup.add(role);
         entitiesToSetup.add(user);
 
+        entitiesToSetup.add(category);
+
         setup(entitiesToSetup.toArray());
+    }
+
+    @AfterMethod(groups = {APPS_INTEGRATION_TESTS})
+    public void tearDownUser()
+    {
+        super.tearDown();
     }
 
     @Test(groups = {APPS_INTEGRATION_TESTS})
     public void getTemplateDefinition() throws ClientWebException
     {
-        appsLibrary = appsLibraryGenerator.createUniqueInstance();
-        appsLibrary.setEnterprise(enterprise);
-        templateDef = templateDefGenerator.createInstance(appsLibrary, category, icon);
+        templateDef = templateDefGenerator.createInstance(appsLibrary, category);
         templateDef.setDescription("templateDef_1");
-        category.setName("category_1");
         templateDef.setType(DiskFormatType.UNKNOWN);
+        setup(templateDef);
 
-        List<Object> entitiesToSetup = new ArrayList<Object>();
-
-        entitiesToSetup.add(appsLibrary);
-        entitiesToSetup.add(category);
-        entitiesToSetup.add(icon);
-        entitiesToSetup.add(templateDef);
-
-        setup(entitiesToSetup.toArray());
         ClientResponse response =
             get(resolveTemplateDefinitionURI(enterprise.getId(), templateDef.getId()), SYSADMIN,
-                SYSADMIN);
+                SYSADMIN, TemplateDefinitionDto.MEDIA_TYPE);
 
         assertEquals(response.getStatusCode(), 200);
 
@@ -121,20 +121,13 @@ public class TemplateDefinitionResourceIT extends AbstractJpaGeneratorIT
     @Test(groups = {APPS_INTEGRATION_TESTS})
     public void modifyTemplateDefinition() throws ClientWebException
     {
-        appsLibrary = appsLibraryGenerator.createUniqueInstance();
-        appsLibrary.setEnterprise(enterprise);
-        templateDef = templateDefGenerator.createInstance(appsLibrary, category, icon);
+        templateDef = templateDefGenerator.createInstance(appsLibrary, category);
+        templateDef.setUrl("http://some.com/url");
+        setup(templateDef);
 
-        List<Object> entitiesToSetup = new ArrayList<Object>();
-
-        entitiesToSetup.add(appsLibrary);
-        entitiesToSetup.add(category);
-        entitiesToSetup.add(icon);
-        entitiesToSetup.add(templateDef);
-
-        setup(entitiesToSetup.toArray());
         ClientResponse response =
-            get(resolveTemplateDefinitionURI(enterprise.getId(), templateDef.getId()));
+            get(resolveTemplateDefinitionURI(enterprise.getId(), templateDef.getId()), SYSADMIN,
+                SYSADMIN, TemplateDefinitionDto.MEDIA_TYPE);
 
         assertEquals(response.getStatusCode(), 200);
 
@@ -151,7 +144,7 @@ public class TemplateDefinitionResourceIT extends AbstractJpaGeneratorIT
         assertEquals(response.getStatusCode(), 200);
         response =
             get(resolveTemplateDefinitionURI(enterprise.getId(), templateDef.getId()), SYSADMIN,
-                SYSADMIN);
+                SYSADMIN, TemplateDefinitionDto.MEDIA_TYPE);
         TemplateDefinitionDto retrievedPackageDto = response.getEntity(TemplateDefinitionDto.class);
         assertEquals(retrievedPackageDto.getDescription(), "new_description");
     }
@@ -159,20 +152,10 @@ public class TemplateDefinitionResourceIT extends AbstractJpaGeneratorIT
     @Test(groups = {APPS_INTEGRATION_TESTS})
     public void deleteTemplateDefinition() throws ClientWebException
     {
-        appsLibrary = appsLibraryGenerator.createUniqueInstance();
-        appsLibrary.setEnterprise(enterprise);
-        templateDef = templateDefGenerator.createInstance(appsLibrary, category, icon);
+        templateDef = templateDefGenerator.createInstance(appsLibrary, category);
         templateDef.setDescription("templateDef_1");
         templateDef.setType(DiskFormatType.UNKNOWN);
-
-        List<Object> entitiesToSetup = new ArrayList<Object>();
-
-        entitiesToSetup.add(appsLibrary);
-        entitiesToSetup.add(category);
-        entitiesToSetup.add(icon);
-        entitiesToSetup.add(templateDef);
-
-        setup(entitiesToSetup.toArray());
+        setup(templateDef);
 
         ClientResponse response =
             delete(resolveTemplateDefinitionURI(enterprise.getId(), templateDef.getId()), SYSADMIN,
@@ -182,8 +165,7 @@ public class TemplateDefinitionResourceIT extends AbstractJpaGeneratorIT
 
         response =
             get(resolveTemplateDefinitionURI(enterprise.getId(), templateDef.getId()), SYSADMIN,
-                SYSADMIN);
+                SYSADMIN, TemplateDefinitionDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), 404);
-
     }
 }

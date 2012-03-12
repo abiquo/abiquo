@@ -24,6 +24,7 @@ package com.abiquo.server.core.pricing;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.abiquo.model.transport.SingleResourceTransportDto;
+import com.abiquo.server.core.infrastructure.DatacenterDto;
 
 @XmlRootElement(name = "currency")
 public class CurrencyDto extends SingleResourceTransportDto
@@ -32,6 +33,8 @@ public class CurrencyDto extends SingleResourceTransportDto
      * 
      */
     private static final long serialVersionUID = 1L;
+    public static final String BASE_MEDIA_TYPE = "application/vnd.abiquo.currency+xml";
+    public static final String MEDIA_TYPE = BASE_MEDIA_TYPE + "; version=" + API_VERSION;
 
     public CurrencyDto()
     {
@@ -93,6 +96,18 @@ public class CurrencyDto extends SingleResourceTransportDto
     public void setDigits(final int digits)
     {
         this.digits = digits;
+    }
+    
+    @Override
+    public String getMediaType()
+    {
+        return CurrencyDto.MEDIA_TYPE;
+    }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
     }
 
 }

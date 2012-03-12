@@ -59,7 +59,6 @@ package net.undf.abicloud.business.managers
 
 		//use to differenciate server calls type
 		public var serverCallType:Boolean;
-		public var callProcessComplete:Boolean;
 		
         //////////////////////////////////////////////
         //Virtual Data Centers
@@ -79,6 +78,23 @@ package net.undf.abicloud.business.managers
         {
             this._virtualDataCenters = value;
             dispatchEvent(new Event("virtualDataCentersChange"));
+        }
+        
+        private var _totalVirtualDatacenters:int;
+
+        /**
+         * Total of Virtual Datacenters
+         */
+        [Bindable(event="totalVirtualDatacentersChange")]
+        public function get totalVirtualDatacenters():int
+        {
+            return this._totalVirtualDatacenters;
+        }
+
+        public function set totalVirtualDatacenters(value:int):void
+        {
+            this._totalVirtualDatacenters = value;
+            dispatchEvent(new Event("totalVirtualDatacentersChange"));
         }
 
         /**
@@ -217,6 +233,25 @@ package net.undf.abicloud.business.managers
             this._virtualAppliances = array;
             dispatchEvent(new Event("virtualAppliancesChange"));
         }
+        
+        private var _totalVirtualAppliances:int;
+
+        /**
+         * Total number of Virtual Appliances
+         **/
+        [Bindable(event="totalVirtualAppliancesChange")]
+        public function get totalVirtualAppliances():int
+        {
+            return this._totalVirtualAppliances;
+        }
+
+        public function set totalVirtualAppliances(value:int):void
+        {
+            this._totalVirtualAppliances = value;
+            dispatchEvent(new Event("totalVirtualAppliancesChange"));
+        }
+        
+        
 
         /**
          * Retuns the VirtualAppliance from model given its id, or null if no VirtualAppliance exists
@@ -279,6 +314,9 @@ package net.undf.abicloud.business.managers
             if (virtualApplianceToUpdate)
             {
                 virtualApplianceToUpdate.nodes = nodes;
+                
+                //Force the nodes refresh
+                virtualAppliance.nodes = nodes;
 
                 //Announcing that this VirtualAppliance has ready its list of nodes
                 var virtualApplianceEvent:VirtualApplianceEvent = new VirtualApplianceEvent(VirtualApplianceEvent.VIRTUAL_APPLIANCE_NODES_RETRIEVED,
@@ -353,6 +391,10 @@ package net.undf.abicloud.business.managers
 	                setTimestamp('virtualAppliance',vaToUpdate.id);
 	                vaToUpdate.nodes = updateNodesStatus(vaToUpdate);
 	                vaToUpdate.state = new State(10, State.LOCKED.description);
+	                //force refresh virtual appliance
+	                virtualAppliance.nodes = updateNodesStatus(virtualAppliance);
+	                virtualAppliance.state = new State(10, State.LOCKED.description);
+	                
 	                dispatchEvent(new Event("nodesUpdates")); 
 	            }            	
             }
@@ -365,6 +407,8 @@ package net.undf.abicloud.business.managers
             if (vaToUpdate)
             {
                 vaToUpdate.state = new State(8, State.OFF.description);
+                //force refresh virtual appliance
+                virtualAppliance.state = new State(8, State.OFF.description);
             }
         }
 
@@ -375,6 +419,8 @@ package net.undf.abicloud.business.managers
             if (vaToUpdate)
             {
                 vaToUpdate.state = new State(9, State.NEEDS_SYNC.description);
+                //force refresh virtual appliance
+                virtualAppliance.state = new State(9, State.NEEDS_SYNC.description);
             }
         }
 
@@ -401,20 +447,6 @@ package net.undf.abicloud.business.managers
             var index:int = virtualAppliance.logs.getItemIndex(log);
             if (index > -1)
                 virtualAppliance.logs.removeItemAt(index);
-        }
-
-        /**
-         * Updates the whole list of model's VirtualDatacenters and Appliances
-         */
-        public function checkVirtualDatacentersAndAppliances(virtualDatacentersChecked:ArrayCollection,
-                                                             virtualAppliancesChecked:ArrayCollection):void
-        {
-            this._virtualDataCenters = virtualDatacentersChecked;
-            this._virtualAppliances = virtualAppliancesChecked;
-
-            //Announcing that VirtualDatacenters and Appliances list has been updated
-            var event:VirtualApplianceEvent = new VirtualApplianceEvent(VirtualApplianceEvent.VIRTUAL_DATACENTERS_AND_APPLIANCES_CHECKED);
-            dispatchEvent(event)
         }
 
         public function changeVirtualApplianceState(vaNewValues:VirtualAppliance):void
@@ -463,7 +495,6 @@ package net.undf.abicloud.business.managers
         	   {
         	   	   taskStatus = NodeVirtualImage(virtualAppliance.nodes.getItemAt(i)).taskStatus;
         	   	   taskStatus.tasks = new ArrayCollection();
-        	   	   //taskStatus.statusName = TaskStatus.STARTED;
         	   }
         	}
         	

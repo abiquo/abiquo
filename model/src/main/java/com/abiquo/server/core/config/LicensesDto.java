@@ -27,6 +27,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.abiquo.model.transport.WrapperDto;
+import com.abiquo.server.core.infrastructure.DatacenterDto;
 
 /**
  * Represent a collection of Licenses.
@@ -35,6 +36,9 @@ import com.abiquo.model.transport.WrapperDto;
 public class LicensesDto extends WrapperDto<LicenseDto>
 {
     private static final long serialVersionUID = 1L;
+    
+    public static final String BASE_MEDIA_TYPE = "application/vnd.abiquo.licenses+xml";
+    public static final String MEDIA_TYPE = BASE_MEDIA_TYPE + "; version=" + API_VERSION;
 
     private Integer availablecores = 0;
 
@@ -64,6 +68,18 @@ public class LicensesDto extends WrapperDto<LicenseDto>
     public void setAvailablecores(Integer availablecores)
     {
         this.availablecores = availablecores;
+    }
+    
+    @Override
+    public String getMediaType()
+    {
+        return LicensesDto.MEDIA_TYPE;
+    }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
     }
 
 }

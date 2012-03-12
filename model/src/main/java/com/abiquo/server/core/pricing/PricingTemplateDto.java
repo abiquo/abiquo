@@ -28,14 +28,15 @@ import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.abiquo.model.transport.SingleResourceTransportDto;
+import com.abiquo.server.core.infrastructure.DatacenterDto;
 
 @XmlRootElement(name = "pricingTemplate")
 public class PricingTemplateDto extends SingleResourceTransportDto
 {
-    /**
-     * 
-     */
     private static final long serialVersionUID = -6898276066732200634L;
+    
+    public static final String BASE_MEDIA_TYPE = "application/vnd.abiquo.pricingtemplate+xml";
+    public static final String MEDIA_TYPE = BASE_MEDIA_TYPE + "; version=" + API_VERSION;
 
     public PricingTemplateDto()
     {
@@ -280,5 +281,16 @@ public class PricingTemplateDto extends SingleResourceTransportDto
     {
         this.defaultTemplate = defaultTemplate;
     }
+    
+    @Override
+    public String getMediaType()
+    {
+        return PricingTemplateDto.MEDIA_TYPE;
+    }
 
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
+    }
 }

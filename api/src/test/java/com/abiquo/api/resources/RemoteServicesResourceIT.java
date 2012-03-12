@@ -46,14 +46,12 @@ public class RemoteServicesResourceIT extends AbstractJpaGeneratorIT
     @Test
     public void getRemoteServicesList() throws Exception
     {
-        RemoteService rs = remoteServiceGenerator.createInstance(RemoteServiceType.TARANTINO);
+        RemoteService rs = remoteServiceGenerator.createInstance(RemoteServiceType.VIRTUAL_FACTORY);
         setup(rs.getDatacenter(), rs);
 
         String uri = resolveRemoteServicesURI(rs.getDatacenter().getId());
 
-        Resource resource = client.resource(uri).accept(MediaType.APPLICATION_XML);
-
-        ClientResponse response = resource.get();
+        ClientResponse response = get(uri, RemoteServicesDto.MEDIA_TYPE);
 
         assertEquals(response.getStatusCode(), 200);
 
@@ -70,15 +68,11 @@ public class RemoteServicesResourceIT extends AbstractJpaGeneratorIT
 
         String uri = resolveRemoteServicesURI(dc.getId());
 
-        Resource resource = client.resource(uri);
-
         RemoteServiceDto dto = new RemoteServiceDto();
         dto.setType(RemoteServiceType.DHCP_SERVICE);
         dto.setUri("http://localhost:8080/fooooo");
 
-        ClientResponse response =
-            resource.contentType(MediaType.APPLICATION_XML).accept(MediaType.APPLICATION_XML)
-                .post(dto);
+        ClientResponse response = post(uri, dto);
 
         assertEquals(response.getStatusCode(), 201);
 
@@ -92,23 +86,19 @@ public class RemoteServicesResourceIT extends AbstractJpaGeneratorIT
     @Test
     public void createRemoteServiceDuplicatedURL()
     {
-        RemoteService rs = remoteServiceGenerator.createInstance(RemoteServiceType.TARANTINO);
+        RemoteService rs = remoteServiceGenerator.createInstance(RemoteServiceType.VIRTUAL_FACTORY);
         rs.setUri("http://localhost:8080/ssm");
 
         setup(rs.getDatacenter(), rs);
 
         String uri = resolveRemoteServicesURI(rs.getDatacenter().getId());
 
-        Resource resource =
-            client.resource(uri).contentType(MediaType.APPLICATION_XML)
-                .accept(MediaType.APPLICATION_XML);
-
         RemoteServiceDto dto = new RemoteServiceDto();
         dto.setType(RemoteServiceType.APPLIANCE_MANAGER);
         dto.setUri("http://localhost:8080/ssm");
         dto.setStatus(1);
 
-        ClientResponse response = resource.post(dto);
+        ClientResponse response = post(uri, dto);
         Assert.assertErrors(response, 409, APIError.REMOTE_SERVICE_URL_ALREADY_EXISTS.getCode());
     }
 
@@ -120,16 +110,12 @@ public class RemoteServicesResourceIT extends AbstractJpaGeneratorIT
 
         String uri = resolveRemoteServicesURI(rs.getDatacenter().getId());
 
-        Resource resource =
-            client.resource(uri).contentType(MediaType.APPLICATION_XML)
-                .accept(MediaType.APPLICATION_XML);
-
         RemoteServiceDto dto = new RemoteServiceDto();
         dto.setType(RemoteServiceType.NODE_COLLECTOR);
         dto.setUri("http://remoteService:8080/nc");
         dto.setStatus(1);
 
-        ClientResponse response = resource.post(dto);
+        ClientResponse response = post(uri, dto);
         Assert.assertErrors(response, 409, APIError.REMOTE_SERVICE_TYPE_EXISTS.getCode());
     }
 }

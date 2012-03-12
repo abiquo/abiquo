@@ -25,6 +25,7 @@ import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.nodecollector.exception.CollectorException;
 import com.abiquo.nodecollector.exception.ConnectionException;
 import com.abiquo.nodecollector.exception.LoginException;
+import com.abiquo.nodecollector.exception.NodecollectorException;
 import com.abiquo.server.core.infrastructure.nodecollector.HostDto;
 import com.abiquo.server.core.infrastructure.nodecollector.VirtualSystemCollectionDto;
 
@@ -61,7 +62,7 @@ public interface HypervisorCollector
      * @return a {@link HostInfo} instance with the physical values.
      * @throws CollectorException if any problem occurs collecting the information.
      */
-    public HostDto getHostInfo() throws CollectorException;
+    public HostDto getHostInfo() throws NodecollectorException;
 
     /**
      * @return the Hypervisor type.

@@ -36,7 +36,7 @@ import org.apache.wink.server.handlers.AbstractHandler;
 import org.apache.wink.server.handlers.MessageContext;
 
 import com.abiquo.am.exceptions.AMError;
-import com.abiquo.appliancemanager.config.AMConfigurationManager;
+import com.abiquo.appliancemanager.config.AMConfiguration;
 import com.abiquo.appliancemanager.exceptions.AMException;
 
 /**
@@ -54,7 +54,7 @@ public class CheckRepositoryHandler extends AbstractHandler
 
         super.handleRequest(context);
     }
-    
+
     public Void canUseRepository()
     {
         // XXX consider global limiting of threads
@@ -97,8 +97,7 @@ public class CheckRepositoryHandler extends AbstractHandler
 
     public class RepositoryFileMarkExistAndWritable implements Callable<Boolean>
     {
-        private final File REPOSITORY_FILE_MARK = new File(AMConfigurationManager.getInstance()
-            .getAMConfiguration().getRepositoryPath()
+        private final File REPOSITORY_FILE_MARK = new File(AMConfiguration.getRepositoryPath()
             + ".abiquo_repository");
 
         @Override

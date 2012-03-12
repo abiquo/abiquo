@@ -26,13 +26,14 @@ import java.io.Serializable;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.abiquo.model.transport.SingleResourceTransportDto;
+import com.abiquo.server.core.infrastructure.DatacenterDto;
 
 /**
  * DTO to modify state parameters of the machine.
  * 
  * @author ssedano
  */
-@XmlRootElement(name = "virtualMachineState")
+@XmlRootElement(name = "virtualmachinestate")
 public class VirtualMachineStateDto extends SingleResourceTransportDto implements Serializable
 {
 
@@ -40,6 +41,8 @@ public class VirtualMachineStateDto extends SingleResourceTransportDto implement
      * 
      */
     private static final long serialVersionUID = 7891496375111061310L;
+    public static final String BASE_MEDIA_TYPE = "application/vnd.abiquo.virtualmachinestate+xml";
+    public static final String MEDIA_TYPE = BASE_MEDIA_TYPE + "; version=" + API_VERSION;
 
     /**
      * Machine state state. <br>
@@ -87,5 +90,17 @@ public class VirtualMachineStateDto extends SingleResourceTransportDto implement
     public void setState(final VirtualMachineState state)
     {
         this.state = state;
+    }
+    
+    @Override
+    public String getMediaType()
+    {
+        return VirtualMachineStateDto.MEDIA_TYPE;
+    }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
     }
 }

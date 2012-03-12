@@ -1,6 +1,5 @@
 <?xml version="1.0"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<!-- -->
 	<!-- POM RELATIONSHIPS -->
 	<!-- -->
@@ -16,11 +15,6 @@
 	</parent>
 	<!-- Dependences -->
 	<dependencies>
-		<!-- JETTY html tests -->
-		<!-- <dependency> <groupId>javax.activation</groupId> <artifactId>activation</artifactId> 
-			<version>1.1</version> </dependency> <dependency> <groupId>javax.mail</groupId> 
-			<artifactId>mail</artifactId> <version>1.4</version> </dependency> -->
-
 		<!-- ABIQUO DEPENDENCIES -->
 		<!-- TODO remove depends on SingleResourceTransportDto -->
 		<dependency>
@@ -37,8 +31,14 @@
 		<dependency>
 			<groupId>com.abiquo</groupId>
 			<artifactId>commons-amqp</artifactId>
-			<version>2.0-SNAPSHOT</version>
+			<version>${commonsamqp.version}</version>
 		</dependency>
+		<!-- Script execution 
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-exec</artifactId>
+			<version>1.1</version>
+		</dependency>-->
 		<!-- REST -->
 		<dependency>
 			<groupId>org.apache.wink</groupId>
@@ -103,9 +103,7 @@
 		<dependency>
 			<groupId>com.ning</groupId>
 			<artifactId>async-http-client</artifactId>
-			<version>1.6.2</version>
-			<!-- <exclusions> <exclusion> <groupId>log4j</groupId> <artifactId>log4j</artifactId> 
-				</exclusion> </exclusions> -->
+			<version>1.7.1</version>			
 		</dependency>
 		<!-- jedis -->
 		<dependency>
@@ -233,6 +231,10 @@
 			<classifier>tests</classifier>
 			<scope>test</scope>
 		</dependency>
+		<!-- JETTY html tests -->
+		<!-- <dependency> <groupId>javax.activation</groupId> <artifactId>activation</artifactId> 
+			<version>1.1</version> </dependency> <dependency> <groupId>javax.mail</groupId> 
+			<artifactId>mail</artifactId> <version>1.4</version> </dependency> -->
 	</dependencies>
 	<!-- -->
 	<!-- PROJECT INFORMATION -->
@@ -277,7 +279,7 @@
 							</includes>
 							<excludes>
 								<exclude>**/client/*</exclude>
-							</excludes>
+							</excludes>                                                       
 						</configuration>
 					</execution>
 					<execution>
@@ -291,7 +293,9 @@
 							<includes>
 								<include>**/client/*</include>
 								<include>**/appliancemanager/util/*</include>
-								<!-- <include>**/transport/*</include> <include>**/ApplianceManagerResourceConstants.class</include> -->
+                                <include>**/appliancemanager/exceptions/*</include>
+                                <include>**/appliancemanager/config/*</include>
+                                <!-- <include>**/transport/*</include> <include>**/ApplianceManagerResourceConstants.class</include> -->
 							</includes>
 						</configuration>
 					</execution>
@@ -303,7 +307,7 @@
 				<configuration>
 					<systemPropertyVariables>
 						<webapp.context>/am</webapp.context>
-						<webapp.dir>${basedir}/src/main/webapp</webapp.dir>
+						<webapp.dir>${basedir}/src/test/webapp</webapp.dir>
 						<rs.basedir>${basedir}</rs.basedir>
 					</systemPropertyVariables>
 				</configuration>

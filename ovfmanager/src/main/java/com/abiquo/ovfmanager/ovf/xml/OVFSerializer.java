@@ -21,12 +21,8 @@
 
 package com.abiquo.ovfmanager.ovf.xml;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.StringReader;
-import java.io.StringWriter;
-import java.net.URL;
 
 import javax.xml.bind.Binder;
 import javax.xml.bind.JAXBContext;
@@ -40,8 +36,6 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
-import javax.xml.validation.Schema;
-import javax.xml.validation.SchemaFactory;
 
 import org.dmtf.schemas.ovf.envelope._1.AbicloudNetworkType;
 import org.dmtf.schemas.ovf.envelope._1.AnnotationSectionType;
@@ -62,8 +56,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
 
 import com.abiquo.ovfmanager.ovf.exceptions.XMLException;
 
@@ -87,16 +79,6 @@ public class OVFSerializer
 
     /** Determines if the marshalling process to format the XML document. */
     private boolean formatOutput = true;
-
-    /** Determines if the unmarshalling process is to validate the XML document. */
-    private boolean validateXML = true;
-
-    /** Path to the OVF XSD schema document (in order to validate documents). */
-    private final static String OVF_ENVELOPE_SCHEMA_LOCATION =
-        "schemas/OVFEnvelope_dsp8023_1.0.0e.xsd";
-
-    /** Used to validate XML documents. */
-    private Schema envelopeSchema;
 
     /** The singleton instance. */
     private static OVFSerializer instance;
@@ -139,12 +121,8 @@ public class OVFSerializer
      */
     private OVFSerializer() throws JAXBException
     {
-        contextEnvelope = JAXBContext.newInstance(EnvelopeType.class);// ,
-        // AbicloudNetworkType.class);
+        contextEnvelope = JAXBContext.newInstance(EnvelopeType.class);
         factoryEnvelop = new org.dmtf.schemas.ovf.envelope._1.ObjectFactory();
-        // contextIndex = JAXBContext.newInstance(new
-        // Class[]{EnvelopeType.class});//RepositorySpace.class,OVFIndex.class});
-        // factoryIndex = new com.abiquo.repositoryspace.ObjectFactory();
     }
 
     /**
@@ -154,7 +132,7 @@ public class OVFSerializer
      * @param isNamespaceAware, determine if the created document is XML name space aware.
      * @return a DOM document containing the provided OVF envelope. TODO rename to "toDocument"
      */
-    public Document bindToDocument(EnvelopeType envelope, boolean isNamespaceAware)
+    public Document bindToDocument(final EnvelopeType envelope, final boolean isNamespaceAware)
         throws ParserConfigurationException, JAXBException
     {
         // Now serialize the Java Content tree back to XML data
@@ -171,41 +149,15 @@ public class OVFSerializer
     }
 
     /**
-     * Set up the schema to be used during validation.
-     * 
-     * @throws JAXBException
-     */
-    private void configureValidation() throws JAXBException
-    {
-        // The follow it doesn't compile since Maven refractoring... Where is the f... constant?
-        // SchemaFactory sf =
-        // SchemaFactory.newInstance(javax.xml.XMLConstants.W3C_XML_SCHEMA_NS_URI);
-        SchemaFactory sf = SchemaFactory.newInstance("http://www.w3.org/2001/XMLSchema");
-        URL schemaURL =
-            OVFSerializer.class.getClassLoader().getResource(OVF_ENVELOPE_SCHEMA_LOCATION);
-
-        try
-        {
-            logger.debug("Using schema from [{}]", schemaURL.toExternalForm());
-            envelopeSchema = sf.newSchema(schemaURL);
-        }
-        catch (Exception e) // SAXException or Null pointer
-        {
-            throw new JAXBException("Can not localize the OVFEnvelope schema in order to validate documents",
-                e);
-        }
-    }
-
-    /**
      * Read an expected OVF-envelope form the provided source.
      * 
      * @param is, the input stream source where read XML documents.
      * @return the OVF-envelope read from source.
      * @throws XMLException, if it is not an envelope type or any XML problem.
      */
-    public EnvelopeType readXMLEnvelope(InputStream is) throws XMLException
+    public EnvelopeType readXMLEnvelope(final InputStream is) throws XMLException
     {
-        XMLStreamReader reader;
+        XMLStreamReader reader = null;
         Unmarshaller unmarshall;
         JAXBElement<EnvelopeType> jaxbEnvelope;
 
@@ -213,15 +165,10 @@ public class OVFSerializer
         {
             reader = Stax2Factory.getStreamReaderFactory().createXMLStreamReader(is);
             unmarshall = contextEnvelope.createUnmarshaller();
-
-            if (validateXML)
-            {
-                unmarshall.setSchema(envelopeSchema);
-            }
+            unmarshall.setSchema(null); // never try to validate an OVF
 
             jaxbEnvelope = unmarshall.unmarshal(reader, EnvelopeType.class);
 
-            reader.close();
         }
         catch (JAXBException ea)
         {
@@ -231,81 +178,33 @@ public class OVFSerializer
         {
             throw new XMLException(ex);
         }
+        finally
+        {
+            try
+            {
+                if (reader != null)
+                {
+                    reader.close();
+                }
+            }
+            catch (XMLStreamException e)
+            {
+                e.printStackTrace();
+            }
+        }
 
         return jaxbEnvelope.getValue();
     }
 
-    /**
-     * Read an expected OVF-envelope form the provided source.
-     * 
-     * @param strEnvelope, an string representation of an XML OVF envelope file.
-     * @param isNamespaceAware, determine if the created document is XML name space aware.
-     * @return the OVF-envelope read from source.
-     * @deprecated use readXMLEnvelope with InputStream argument
-     */
-    @Deprecated
-    public EnvelopeType readXMLEnvelope(String strEnvelope, boolean isNamespaceAware)
-        throws ParserConfigurationException, JAXBException, SAXException, IOException
-    {
-        // Now serialize the Java Content tree back to XML data
-
-        StringReader stReader = new StringReader(strEnvelope);
-        InputSource source = new InputSource(stReader);
-
-        docBuilderFact.setNamespaceAware(isNamespaceAware);
-        DocumentBuilder docBuilder = docBuilderFact.newDocumentBuilder();
-
-        Document doc = docBuilder.parse(source);
-
-        Binder<Node> binder = contextEnvelope.createBinder();
-
-        JAXBElement<EnvelopeType> jaxb = binder.unmarshal(doc, EnvelopeType.class);
-        EnvelopeType envelope = jaxb.getValue();
-
-        stReader.close();
-
-        return envelope;
-    }
-
-    /**
-     * Configure the ''formatOutput'' property. Determines if the marshalling process to format the
-     * XML document.
-     */
-    public void setFormatOutput(boolean formatOutput)
-    {
-        this.formatOutput = formatOutput;
-    }
-
-    /**
-     * Configure the ''validateXML'' property. Determines if the unmarshalling process is to
-     * validate the XML document. If the schema can not be located the exception is logged.
-     */
-    public void setValidateXML(boolean validateXML) // throws JAXBException
-    {
-        this.validateXML = validateXML;
-
-        if (validateXML)
-        {
-            try
-            {
-                configureValidation();
-            }
-            catch (JAXBException e)
-            {
-                logger.error("Can not activate OVF documents validation ", e);
-            }
-        }
-    }
-
     /** Wrap into an JAXBElement the provided OVF envelope. **/
-    public JAXBElement<EnvelopeType> toJAXBElement(EnvelopeType envelope)
+    public JAXBElement<EnvelopeType> toJAXBElement(final EnvelopeType envelope)
     {
         return factoryEnvelop.createEnvelope(envelope);
     }
 
     /** Wrap into an JAXBElement the provided OVF envelope section. **/
     @SuppressWarnings("unchecked")
-    public <T extends SectionType> JAXBElement<T> toJAXBElement(T section)
+    public <T extends SectionType> JAXBElement<T> toJAXBElement(final T section)
     {
         JAXBElement<T> jaxB;
 
@@ -389,9 +288,9 @@ public class OVFSerializer
      * @param os, the destination of the XML document.
      * @throws XMLException, any XML problem.
      */
-    public void writeXML(EnvelopeType envelope, OutputStream os) throws XMLException
+    public void writeXML(final EnvelopeType envelope, final OutputStream os) throws XMLException
     {
-        XMLStreamWriter writer;
+        XMLStreamWriter writer = null;
         Marshaller marshall;
 
         try
@@ -401,13 +300,12 @@ public class OVFSerializer
 
             if (formatOutput)
             {
-                marshall.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, new Boolean(true));
+                marshall.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
             }
 
             JAXBElement<EnvelopeType> jaxbElem = factoryEnvelop.createEnvelope(envelope);
             marshall.marshal(jaxbElem, writer);
 
-            writer.close();
         }
         catch (JAXBException ea)
         {
@@ -417,49 +315,20 @@ public class OVFSerializer
         {
             throw new XMLException(ex);
         }
-    }
-
-    /**
-     * Creates an XML document representing the provided OVF-envelop and write it to output stream.
-     * 
-     * @param envelope, the object to be binded into an XML document.
-     * @param os, the destination of the XML document.
-     * @throws XMLException, any XML problem.
-     */
-    public String writeXML(EnvelopeType envelope)
-    {
-        Marshaller marshall;
-        StringWriter stringWriter = new StringWriter();
-        String envelopeXML = null;
-
-        try
+        finally
         {
-            marshall = contextEnvelope.createMarshaller();
-
-            if (formatOutput)
+            if (writer != null)
             {
-                marshall.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, new Boolean(true));
+                try
+                {
+                    writer.close();
+                }
+                catch (XMLStreamException e)
+                {
+                    e.printStackTrace();
+                }
             }
-
-            JAXBElement<EnvelopeType> jaxbElem = factoryEnvelop.createEnvelope(envelope);
-            marshall.marshal(jaxbElem, stringWriter);
-
-            stringWriter.close();
-
-            envelopeXML = stringWriter.toString();
-
         }
-        catch (JAXBException ea)
-        {
-            logger.error("An error was occured when getting the Envelope for logging purposes: {}",
-                ea);
-        }
-        catch (IOException e)
-        {
-            logger.error("An error was occured when getting the Envelope for logging purposes: {}",
-                e);
-        }
-        return envelopeXML;
     }
 
     /**
@@ -469,7 +338,7 @@ public class OVFSerializer
      * @param os, the destination of the XML document.
      * @throws XMLException, any XML problem.
      */
-    public void writeXML(SectionType section, OutputStream os) throws XMLException
+    public void writeXML(final SectionType section, final OutputStream os) throws XMLException
     {
         XMLStreamWriter writer;
         Marshaller marshall;
@@ -506,7 +375,8 @@ public class OVFSerializer
      * @param os, the destination of the XML document.
      * @throws XMLException, any XML problem.
      */
-    public void writeXML(VirtualSystemType virtualSystem, OutputStream os) throws XMLException
+    public void writeXML(final VirtualSystemType virtualSystem, final OutputStream os)
+        throws XMLException
     {
         EnvelopeType envelope;
 

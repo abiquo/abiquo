@@ -31,10 +31,25 @@ import com.abiquo.model.transport.WrapperDto;
 @XmlRootElement(name = "privileges")
 public class PrivilegesDto extends WrapperDto<PrivilegeDto>
 {
+    public static final String BASE_MEDIA_TYPE = "application/vnd.abiquo.privileges+xml";
+    public static final String MEDIA_TYPE = BASE_MEDIA_TYPE + "; version=" + API_VERSION;
+    
     @Override
     @XmlElement(name = "privilege")
     public List<PrivilegeDto> getCollection()
     {
         return collection;
+    }
+    
+    @Override
+    public String getMediaType()
+    {
+        return PrivilegesDto.MEDIA_TYPE;
+    }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
     }
 }

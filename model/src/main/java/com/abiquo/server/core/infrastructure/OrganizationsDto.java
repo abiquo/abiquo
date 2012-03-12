@@ -42,11 +42,11 @@ import com.abiquo.model.transport.WrapperDto;
 public class OrganizationsDto extends WrapperDto<OrganizationDto>
 {
 
-    /**
-     * 
-     */
     private static final long serialVersionUID = 5643469409057556537L;
-
+    
+    public static final String BASE_MEDIA_TYPE = "application/vnd.abiquo.organizations+xml";
+    public static final String MEDIA_TYPE = BASE_MEDIA_TYPE + "; version=" + API_VERSION;
+    
     /**
      * Gets the value of the host property.
      * <p>
@@ -71,6 +71,18 @@ public class OrganizationsDto extends WrapperDto<OrganizationDto>
             collection = new ArrayList<OrganizationDto>();
         }
         return this.collection;
+    }
+    
+    @Override
+    public String getMediaType()
+    {
+        return OrganizationsDto.MEDIA_TYPE;
+    }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
     }
 
 }

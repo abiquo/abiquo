@@ -25,15 +25,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.wink.common.annotations.Parent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -56,6 +61,8 @@ import com.abiquo.server.core.cloud.VirtualMachineState;
 import com.abiquo.server.core.cloud.VirtualMachineTaskDto;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
 import com.abiquo.server.core.infrastructure.network.IpsPoolManagementDto;
+import com.abiquo.server.core.task.Task;
+import com.abiquo.server.core.task.TasksDto;
 
 @Parent(VirtualAppliancesResource.class)
 @Path(VirtualApplianceResource.VIRTUAL_APPLIANCE_PARAM)
@@ -67,10 +74,6 @@ public class VirtualApplianceResource
     public static final String VIRTUAL_APPLIANCE_PARAM = "{" + VIRTUAL_APPLIANCE + "}";
 
     public static final String VIRTUAL_APPLIANCE_GET_IPS_PATH = "action/ips";
-
-    public static final String VIRTUAL_APPLIANCE_ACTION_ADD_IMAGE = "action/addImage";
-
-    public static final String VIRTUAL_APPLIANCE_ACTION_ADD_IMAGE_REL = "addimage";
 
     public static final String VIRTUAL_APPLIANCE_DEPLOY_PATH = "action/deploy";
 
@@ -96,7 +99,10 @@ public class VirtualApplianceResource
     private VirtualMachineLock vmLock;
 
     /**
-     * Return the virtual appliance if exists.
+     * Return the virtual appliance if exists. And also the expanded nodes. <br>
+     * <ul>
+     * <li>Last Task: returns the last {@link Task} of every node
+     * </ul>
      * 
      * @param vdcId identifier of the virtual datacenter.
      * @param vappId identifier of the virtual appliance.
@@ -105,17 +111,45 @@ public class VirtualApplianceResource
      * @throws Exception
      */
     @GET
+    @Produces(VirtualApplianceDto.MEDIA_TYPE)
     public VirtualApplianceDto getVirtualAppliance(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
-        @Context final IRESTBuilder restBuilder) throws Exception
+        @QueryParam(value = "expand") final String expand, @Context final IRESTBuilder restBuilder,
+        @Context final UriInfo uriInfo) throws Exception
     {
         VirtualAppliance vapp = service.getVirtualAppliance(vdcId, vappId);
+        VirtualApplianceDto dto = createTransferObject(vapp, restBuilder);
 
-        return createTransferObject(vapp, restBuilder);
+        expandNodes(vdcId, vappId, expand, uriInfo, dto);
+
+        return dto;
+    }
+
+    private void expandNodes(final Integer vdcId, final Integer vappId, final String expand,
+        final UriInfo uriInfo, final VirtualApplianceDto dto)
+    {
+        String[] expands = StringUtils.split(expand, ",");
+        if (expands != null)
+        {
+            for (String e : expands)
+            {
+                if ("last_task".equalsIgnoreCase(e))
+                {
+                    List<Task> lastTasks = service.getAllNodesLastTask(vdcId, vappId);
+                    if (lastTasks != null && !lastTasks.isEmpty())
+                    {
+                        TasksDto t = TaskResourceUtils.transform(lastTasks, uriInfo);
+                        dto.setLastTasks(t);
+                    }
+                }
+            }
+        }
     }
 
     @PUT
+    @Consumes(VirtualApplianceDto.MEDIA_TYPE)
+    @Produces(VirtualApplianceDto.MEDIA_TYPE)
     public VirtualApplianceDto updateVirtualAppliance(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
@@ -128,6 +162,7 @@ public class VirtualApplianceResource
 
     @GET
     @Path(VirtualApplianceResource.VIRTUAL_APPLIANCE_GET_IPS_PATH)
+    @Produces(IpsPoolManagementDto.MEDIA_TYPE)
     public IpsPoolManagementDto getIPsByVirtualAppliance(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
@@ -193,6 +228,7 @@ public class VirtualApplianceResource
 
     @GET
     @Path(VIRTUAL_APPLIANCE_STATE_REL)
+    @Produces(VirtualApplianceStateDto.MEDIA_TYPE)
     public VirtualApplianceStateDto getChangeState(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
@@ -207,6 +243,8 @@ public class VirtualApplianceResource
 
     @POST
     @Path(VIRTUAL_APPLIANCE_DEPLOY_PATH)
+    @Consumes(VirtualMachineTaskDto.MEDIA_TYPE)
+    @Produces(AcceptedRequestDto.MEDIA_TYPE)
     public AcceptedRequestDto<String> deploy(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
@@ -247,6 +285,8 @@ public class VirtualApplianceResource
 
     @POST
     @Path(VIRTUAL_APPLIANCE_UNDEPLOY_PATH)
+    @Consumes(VirtualMachineTaskDto.MEDIA_TYPE)
+    @Produces(AcceptedRequestDto.MEDIA_TYPE)
     public AcceptedRequestDto<String> undeploy(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
@@ -338,6 +378,7 @@ public class VirtualApplianceResource
 
     @GET
     @Path(VIRTUAL_APPLIANCE_PRICE_PATH)
+    @Produces(MediaType.TEXT_PLAIN)
     public String getPriceVirtualAppliance(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,

@@ -23,11 +23,13 @@ package com.abiquo.api.resources;
 
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 
@@ -109,6 +111,7 @@ public class RackResource extends AbstractResource
     // nor lesser than 1. You don't have to do anything with it. Only declare it. A custom handler
     // previous to this call is the responsible of manage it.
     @GET
+    @Produces(RackDto.MEDIA_TYPE)     
     public RackDto getRack(
         @PathParam(DatacenterResource.DATACENTER) @NotNull @Min(1) final Integer datacenterId,
         @PathParam(RACK) @NotNull @Min(1) final Integer rackId,
@@ -125,6 +128,8 @@ public class RackResource extends AbstractResource
     // previous to this call is the responsible of manage it. Please note the entity Rack does not
     // have any constraint. Constraints inside the entity are checked later.
     @PUT
+    @Consumes(RackDto.MEDIA_TYPE)
+    @Produces(RackDto.MEDIA_TYPE)
     public RackDto modifyRack(
         @PathParam(DatacenterResource.DATACENTER) @NotNull @Min(1) final Integer datacenterId,
         @PathParam(RACK) @NotNull @Min(1) final Integer rackId, final RackDto rackDto,

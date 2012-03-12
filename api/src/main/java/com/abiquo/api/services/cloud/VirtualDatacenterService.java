@@ -46,6 +46,7 @@ import com.abiquo.server.core.cloud.NodeVirtualImage;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualDatacenterDto;
 import com.abiquo.server.core.cloud.VirtualDatacenterRep;
+import com.abiquo.server.core.cloud.VirtualDatacenter.OrderByEnum;
 import com.abiquo.server.core.common.Limit;
 import com.abiquo.server.core.enterprise.DatacenterLimits;
 import com.abiquo.server.core.enterprise.DatacenterLimitsDAO;
@@ -58,6 +59,7 @@ import com.abiquo.server.core.infrastructure.network.Network;
 import com.abiquo.server.core.infrastructure.network.VLANNetwork;
 import com.abiquo.server.core.infrastructure.network.VLANNetworkDto;
 import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
+import com.abiquo.server.core.util.FilterOptions;
 
 @Service
 @Transactional(readOnly = true)
@@ -104,19 +106,15 @@ public class VirtualDatacenterService extends DefaultApiService
     }
 
     public Collection<VirtualDatacenter> getVirtualDatacenters(final Enterprise enterprise,
-        final Datacenter datacenter)
+        final Datacenter datacenter, final FilterOptions filterOptions)
     {
         User user = userService.getCurrentUser();
-        return getVirtualDatacenters(enterprise, datacenter, user);
+        return getVirtualDatacenters(enterprise, datacenter, user, filterOptions);
     }
 
-    Collection<VirtualDatacenter> getVirtualDatacenters(Enterprise enterprise,
-        final Datacenter datacenter, final User user)
+    public Collection<VirtualDatacenter> getVirtualDatacenters(Enterprise enterprise,
+        final Datacenter datacenter, final User user, final FilterOptions filterOptions)
     {
-        // boolean findByUser =
-        // user != null
-        // && (user.getRole().getType() == Role.Type.USER && !StringUtils.isEmpty(user
-        // .getAvailableVirtualDatacenters()));
         boolean findByUser =
             user != null && !securityService.canManageOtherEnterprises()
                 && !securityService.canManageOtherUsers()
@@ -129,18 +127,20 @@ public class VirtualDatacenterService extends DefaultApiService
 
         if (findByUser)
         {
-            return repo.findByEnterpriseAndDatacenter(enterprise, datacenter, user);
+            return repo.findByEnterpriseAndDatacenterFilter(enterprise, datacenter, user,
+                filterOptions);
         }
         else
         {
-            return repo.findByEnterpriseAndDatacenter(enterprise, datacenter);
+            return repo.findByEnterpriseAndDatacenterFilter(enterprise, datacenter, filterOptions);
         }
     }
 
     public Collection<VirtualDatacenter> getVirtualDatacentersByDatacenter(
-        final Datacenter datacenter)
+        final Datacenter datacenter, final Integer startwith, final Integer limit,
+        final String filter, final OrderByEnum orderByEnum, final Boolean asc)
     {
-        return repo.findByDatacenter(datacenter);
+        return repo.findByDatacenter(datacenter, startwith, limit, filter, orderByEnum, asc);
     }
 
     @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
@@ -170,8 +170,8 @@ public class VirtualDatacenterService extends DefaultApiService
 
         // set as default vlan (as it is the first one) and create it.
         VLANNetwork vlan =
-            networkService.createPrivateNetwork(vdc.getId(),
-                PrivateNetworkResource.createPersistenceObject(dto.getVlan()), false);
+            networkService.createPrivateNetwork(vdc.getId(), PrivateNetworkResource
+                .createPersistenceObject(dto.getVlan()), false);
 
         // find the default vlan stablished by the enterprise-datacenter limits
         DatacenterLimits dcLimits =
@@ -296,11 +296,8 @@ public class VirtualDatacenterService extends DefaultApiService
         final Datacenter datacenter, final Enterprise enterprise, final Network network)
     {
         VirtualDatacenter vdc =
-            new VirtualDatacenter(enterprise,
-                datacenter,
-                network,
-                dto.getHypervisorType(),
-                dto.getName());
+            new VirtualDatacenter(enterprise, datacenter, network, dto.getHypervisorType(), dto
+                .getName());
 
         setLimits(dto, vdc);
         validateVirtualDatacenter(vdc, dto.getVlan(), datacenter);
@@ -374,4 +371,8 @@ public class VirtualDatacenterService extends DefaultApiService
         return repo.findNodeVirtualImageByEnterprise(enterprise);
     }
 
+    public void detach(final VirtualDatacenter virtualDatacenter)
+    {
+        repo.detach(virtualDatacenter);
+    }
 }

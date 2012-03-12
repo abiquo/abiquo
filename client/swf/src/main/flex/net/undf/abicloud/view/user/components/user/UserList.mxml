@@ -466,8 +466,8 @@
                         {
                             if (User(copiedUsers[i]).id != AbiCloudModel.getInstance().loginManager.user.id){
                                 User(copiedUsers[i]).active = true;
-                            	User(copiedUsers[i]).pass = null;
                             }
+                        	User(copiedUsers[i]).pass = null;
                         }
 
                         event = new UserEvent(UserEvent.EDIT_USERS);
@@ -479,8 +479,8 @@
                         {
                             if (User(copiedUsers[i]).id != AbiCloudModel.getInstance().loginManager.user.id){
                                 User(copiedUsers[i]).active = false;
-                                User(copiedUsers[i]).pass = null;                            	
                             }
+                            User(copiedUsers[i]).pass = null;                            	
                         }
 
                         event = new UserEvent(UserEvent.EDIT_USERS);
@@ -683,6 +683,7 @@
             styleName="MoreActionsButton" dataProvider="{moreActionsDP}"
             label="@Resource(bundle='User', key='LABEL_MORE_ACTIONS')"
             labelField="label"
+            enabled="{selectedUser.id != AbiCloudModel.getInstance().loginManager.user.id}"
             open="onOpenMoreActions(event)"
             close="onCloseMoreActions(event)"/>
 

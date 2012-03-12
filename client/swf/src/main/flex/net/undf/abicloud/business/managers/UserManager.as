@@ -40,6 +40,7 @@ package net.undf.abicloud.business.managers
      * Manager for Users
      * Stores information about users, and methods for manipulate this information
      **/
+    [Bindable]
     public class UserManager extends EventDispatcher
     {
 
@@ -96,7 +97,6 @@ package net.undf.abicloud.business.managers
          */
         private var _totalUsers:int;
 
-        [Bindable]
         public function get totalUsers():int
         {
             return this._totalUsers;
@@ -247,6 +247,7 @@ package net.undf.abicloud.business.managers
         public function set totalRoles(total:int):void
         {
             this._totalRoles = total;
+            dispatchEvent(new Event("totalRolesUpdated_UserManager"));
         }
         
         ///////////////////////////////////
@@ -354,7 +355,6 @@ package net.undf.abicloud.business.managers
          */
         private var _totalEnterprises:int;
 
-        [Bindable]
         public function get totalEnterprises():int
         {
             return this._totalEnterprises;

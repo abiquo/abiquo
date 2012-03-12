@@ -41,6 +41,7 @@ import org.springframework.stereotype.Component;
 
 import com.abiquo.api.services.InfrastructureService;
 import com.abiquo.model.enumerator.FitPolicy;
+import com.abiquo.model.enumerator.NetworkType;
 import com.abiquo.scheduler.workload.NotEnoughResourcesException;
 import com.abiquo.scheduler.workload.VirtualimageAllocationService;
 import com.abiquo.server.core.cloud.HypervisorDAO;
@@ -59,6 +60,7 @@ import com.abiquo.server.core.infrastructure.network.NetworkAssignment;
 import com.abiquo.server.core.infrastructure.network.NetworkAssignmentDAO;
 import com.abiquo.server.core.infrastructure.network.VLANNetwork;
 import com.abiquo.server.core.infrastructure.network.VLANNetworkDAO;
+import com.abiquo.server.core.infrastructure.storage.DiskManagement;
 import com.abiquo.server.core.scheduler.FitPolicyRule;
 import com.abiquo.server.core.scheduler.FitPolicyRuleDAO;
 import com.abiquo.server.core.scheduler.VirtualMachineRequirements;
@@ -113,6 +115,7 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
         this.ipPoolManDao = new IpPoolManagementDAO(em);
         this.vlanNetworkDao = new VLANNetworkDAO(em);
         this.hypervisorDao = new HypervisorDAO(em);
+        this.fitPolicyDao = new FitPolicyRuleDAO(em);
     }
 
     /**
@@ -133,10 +136,10 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
         final VirtualMachine virtualMachine, final Integer sourceHypervisorId)
     {
         updateUse(virtualAppliance, virtualMachine, true); // upgrade resources on the target HA
-                                                           // hypervisor
+        // hypervisor
         // free resources on the original hypervisor
-        Machine sourceMachine = hypervisorDao.findById(sourceHypervisorId).getMachine();
-        updateUsagePhysicalMachine(sourceMachine, virtualMachine, true);
+        // Machine sourceMachine = hypervisorDao.findById(sourceHypervisorId).getMachine();
+        // updateUsagePhysicalMachine(sourceMachine, virtualMachine, true);
     }
 
     private void updateUse(final VirtualAppliance virtualAppliance,
@@ -181,6 +184,11 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
             cve.printStackTrace(); // FIXME
             throw new ResourceUpgradeUseException(msg.toString());
         }
+        catch (final NotEnoughResourcesException e)
+        {
+            // throwed by the 'updatedNetworkResources' method.
+            throw e;
+        }
         catch (final Exception e)
         // HibernateException NotEnoughResourcesException NoSuchObjectException
         {
@@ -191,12 +199,39 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
     }
 
     @Override
+    public void rollbackUseHA(final VirtualMachine virtualMachine)
+    {
+        final Machine physicalMachine = virtualMachine.getHypervisor().getMachine();
+
+        try
+        {
+            updateUsageDatastore(virtualMachine, true);
+            updateUsagePhysicalMachine(physicalMachine, virtualMachine, true);
+            // rollbackNetworkingResources(physicalMachine, virtualMachine);
+
+            virtualMachine.setState(VirtualMachineState.UNKNOWN);
+        }
+        catch (final Exception e)
+        {
+            throw new ResourceUpgradeUseException("Can not update resource use" + e.getMessage());
+        }
+
+        if (physicalMachine != null
+            && getAllocationFitPolicyOnDatacenter(physicalMachine.getDatacenter().getId()).equals(
+                FitPolicy.PROGRESSIVE))
+        {
+            infrastructureService.adjustPoweredMachinesInRack(physicalMachine.getRack());
+        }
+    }
+
+    @Override
     public void rollbackUse(final VirtualMachine virtualMachine)
     {
         final Machine physicalMachine = virtualMachine.getHypervisor().getMachine();
 
         try
         {
+
             updateUsageDatastore(virtualMachine, true);
             updateUsagePhysicalMachine(physicalMachine, virtualMachine, true);
             rollbackNetworkingResources(physicalMachine, virtualMachine);
@@ -255,7 +290,7 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
      * @throws NotEnoughResourcesException
      * @throws NoSuchObjectException
      */
-    private void updateNetworkingResources(final Machine physicalTarget,
+    public void updateNetworkingResources(final Machine physicalTarget,
         final VirtualMachine virtualMachine, final VirtualAppliance vapp)
         throws NotEnoughResourcesException, NoSuchObjectException
     {
@@ -290,10 +325,6 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
                     vlanNetwork.getId(), freeTag);
                 vlanNetwork.setTag(freeTag);
             }
-            Rasd rasd = ipPoolManagement.getRasd();
-            rasd.setAllocationUnits(String.valueOf(vlanNetwork.getTag()));
-            rasd.setParent(ipPoolManagement.getNetworkName());
-            rasd.setConnection(physicalTarget.getVirtualSwitch());
 
             final NetworkAssignment nb =
                 new NetworkAssignment(virtualDatacenter, rack, vlanNetwork);
@@ -327,7 +358,7 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
 
             if (!assigned)
             {
-                if (!vlanNetworkDao.isPublic(vlanNetwork))
+                if (vlanNetwork.getType().equals(NetworkType.INTERNAL))
                 {
                     vlanNetwork.setTag(null);
                 }
@@ -375,11 +406,13 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
     }
 
     @Override
-    public void updateUsed(final Machine machine, final VirtualMachineRequirements requirements)
+    public void updateUsed(final Machine machine, final Datastore datastore,
+        final VirtualMachineRequirements requirements)
     {
         machine.setVirtualCpusUsed((int) (machine.getVirtualCpusUsed() + requirements.getCpu()));
         machine.setVirtualRamUsedInMb((int) (machine.getVirtualRamUsedInMb() + requirements
             .getRam()));
+        datastore.setUsedSize(datastore.getUsedSize() + requirements.getHd());
     }
 
     /**
@@ -391,11 +424,22 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
      */
     private void updateUsageDatastore(final VirtualMachine virtual, final boolean isRollback)
     {
+        Long requestedSize;
 
-        if (virtual.getVirtualMachineTemplate().isStateful())
+        if (!virtual.getVirtualMachineTemplate().isStateful())
         {
-            // Stateful vmtemplates doesn't update the datastore utilization.
-            return;
+            requestedSize = virtual.getHdInBytes();
+            requestedSize += getDisksSizeInBytes(virtual);
+        }
+        else
+        {
+            // Stateful vmtemplate doesn't update the datastore utilization, except it has got hard
+            // disk.
+            requestedSize = getDisksSizeInBytes(virtual);
+            if (requestedSize.equals(0))
+            {
+                return;
+            }
         }
 
         Datastore datastore = virtual.getDatastore();
@@ -405,7 +449,7 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
 
         for (Datastore dstore : datastoresShared)
         {
-            updateDatastore(dstore, virtual.getHdInBytes(), isRollback);
+            updateDatastore(dstore, requestedSize, isRollback);
         }
     }
 
@@ -437,16 +481,8 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
     public Integer getFreeVLANFromUsedList(final List<Integer> vlanIds, final Rack rack)
         throws NotEnoughResourcesException
     {
-        Integer candidatePort = rack.getVlanIdMin();
-
         // Adding Vlans Id not to add
-
         vlanIds.addAll(getVlansIdAvoidAsCollection(rack));
-
-        if (vlanIds.isEmpty())
-        {
-            return candidatePort;
-        }
 
         // Create a HashSet which allows no duplicates
         HashSet<Integer> hashSet = new HashSet<Integer>(vlanIds);
@@ -457,7 +493,9 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
 
         List<Integer> vlanTemp = new ArrayList<Integer>(vlanIdsOrdered);
 
-        // Removing id min to vlan id min
+        // Removing used port groups minor than minId and bigger then maxId
+        // (that could be only public and external networks with tags ouside the
+        // minid-maxid range)
         for (Integer vlanId : vlanTemp)
         {
             if (vlanId.intValue() < rack.getVlanIdMin())
@@ -466,35 +504,15 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
             }
         }
 
-        if (vlanIdsOrdered.isEmpty())
+        for (Integer i = rack.getVlanIdMin(); i <= rack.getVlanIdMax(); i++)
         {
-            return candidatePort;
-        }
-
-        // Checking the minimal interval
-        if (vlanIdsOrdered.get(0).compareTo(rack.getVlanIdMin()) != 0)
-        {
-            return candidatePort;
-        }
-
-        int next = 1;
-
-        // Searching a gap in the vlan used list
-        for (int i = 0; i < vlanIdsOrdered.size(); i++)
-        {
-            if (vlanIds.get(i) == rack.getVlanIdMax())
+            if (!vlanIdsOrdered.contains(i))
             {
-                throw new NotEnoughResourcesException("The maximun number of VLAN id has been reached");
+                return i;
             }
-            if (next == vlanIdsOrdered.size()
-                || vlanIdsOrdered.get(next) != vlanIdsOrdered.get(i) + 1)
-            {
-                return vlanIdsOrdered.get(i) + 1;
-            }
-            next++;
         }
 
-        return candidatePort;
+        throw new NotEnoughResourcesException("The maximun number of VLAN tag has been reached");
     }
 
     public Collection<Integer> getVlansIdAvoidAsCollection(final Rack rack)
@@ -578,5 +596,19 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
         FitPolicyRule fit = fitPolicyDao.getFitPolicyForDatacenter(idDatacenter);
 
         return fit != null ? fit.getFitPolicy() : fitPolicyDao.getGlobalFitPolicy().getFitPolicy();
+    }
+
+    private long getDisksSizeInBytes(final VirtualMachine vm)
+    {
+        long size = 0;
+        if (vm.getDisks() != null && !vm.getDisks().isEmpty())
+        {
+            for (DiskManagement disk : vm.getDisks())
+            {
+                // bytes
+                size += disk.getSizeInMb() * 1024 * 1024;
+            }
+        }
+        return size;
     }
 }

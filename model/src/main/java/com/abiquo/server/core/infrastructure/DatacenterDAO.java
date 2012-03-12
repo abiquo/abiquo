@@ -89,9 +89,7 @@ public class DatacenterDAO extends DefaultDAOBase<Integer, Datacenter>
         Object[] vmResources =
             (Object[]) getSession().createSQLQuery(SUM_VM_RESOURCES)
                 .setParameter("datacenterId", datacenterId)
-                .setParameter("enterpriseId", enterpriseId)
-                .setParameter("not_deployed", VirtualMachineState.NOT_ALLOCATED.name())
-                .uniqueResult();
+                .setParameter("enterpriseId", enterpriseId).uniqueResult();
 
         Long cpu = vmResources[0] == null ? 0 : ((BigDecimal) vmResources[0]).longValue();
         Long ram = vmResources[1] == null ? 0 : ((BigDecimal) vmResources[1]).longValue();
@@ -169,7 +167,7 @@ public class DatacenterDAO extends DefaultDAOBase<Integer, Datacenter>
         "select sum(vm.cpu), sum(vm.ram), sum(vm.hd) from virtualmachine vm, hypervisor hy, physicalmachine pm "
             + " where hy.id = vm.idHypervisor and pm.idPhysicalMachine = hy.idPhysicalMachine "//
             // and pm.idState != 7" // not HA_DISABLED
-            + " and pm.idDatacenter = :datacenterId and vm.idEnterprise = :enterpriseId and STRCMP(vm.state, :not_deployed) != 0";
+            + " and pm.idDatacenter = :datacenterId and vm.idEnterprise = :enterpriseId and vm.state != 'NOT_ALLOCATED' and vm.idHypervisor is not null";
 
     private static final String SUM_STORAGE_RESOURCES =
         "select sum(r.limitResource) "

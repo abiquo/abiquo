@@ -27,7 +27,7 @@
     resizeEffect="{myResize}"
     creationComplete="onCreationComplete()"
     wikiUrl="{AbiCloudModel.getInstance().configurationManager.config.client_wiki_apps_uploadVM.value}"
-    xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:virtualimage="net.undf.abicloud.view.virtualimage.components.virtualimage.*">
+    xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:virtualimage="net.undf.abicloud.view.virtualimage.components.virtualimage.*" xmlns:utils="net.undf.abicloud.utils.*">
 
     <mx:Metadata>
 		[Event(name="VirtualImageFormClose", type="flash.events.Event")]
@@ -78,8 +78,6 @@
             [Bindable]
             private var virtualImageManager:VirtualImageManager;
 
-            private var iconForm:IconForm;
-
             [Bindable]
             private var formIsValid:Boolean = false;
 
@@ -111,6 +109,12 @@
 
             [Bindable]
             protected var _isEditable:Boolean;
+            
+            //Override this function due to the Javascript component
+            //To avoid a ugly displayed bug
+            override protected function headerMouseDown_handler(mouseEvent:MouseEvent):void
+            {
+            }
 
 			
             private function onCreationComplete():void
@@ -127,12 +131,7 @@
                 //Caching VirtualImageManager
                 virtualImageManager = AbiCloudModel.getInstance().virtualImageManager;
 
-                //Creating auxiliary form
-                this.iconForm = new IconForm();
-                this.iconForm.addEventListener("IconFormClose", closeIconForm);
-
                 //Listening for updates in model
-                ChangeWatcher.watch(virtualImageManager, "icons", onIconsUpdated);
                 ChangeWatcher.watch(virtualImageManager, "diskFormatTypes", onDiskFormatTypesUpdated);
                 AbiCloudModel.getInstance().virtualImageManager.addEventListener(VirtualImageEvent.VIRTUAL_IMAGE_UPLOAD_ERROR, onUploadError);
 
@@ -167,24 +166,6 @@
                 validateForm();
             }
 
-            private function requestIcons():void
-            {
-                var event:VirtualImageEvent = new VirtualImageEvent(VirtualImageEvent.GET_ICONS);
-                event.enterprise = AbiCloudModel.getInstance().loginManager.user.enterprise;
-                dispatchEvent(event)
-            }
-
-            private function onIconsUpdated(event:Event):void
-            {
-                if (_virtualImage)
-                {
-                    iconsList.selectedIndex = AbicloudUtils.getValuePositionInArray(virtualImageManager.icons.toArray(),
-                                                                                    "id",
-                                                                                    _virtualImage.icon);
-                }
-                validateForm();
-            }
-
 
             /**
              * Initializes this component to create a new Repository
@@ -204,8 +185,6 @@
 	                categoriesList.removeItemAt(0);             	
                 }                
                 
-                requestIcons();
-
                 this._virtualImage = virtualImage;
                 this.applianceManager = applianceManager;
 
@@ -238,9 +217,8 @@
 
                     hdUnitsSelector.selectedIndex = 0;
                     hdInput.value = this._virtualImage.hdRequired / hdUnitsSelector.selectedItem.conversion;
-                    iconsList.selectedIndex = AbicloudUtils.getValuePositionInArray(virtualImageManager.icons.toArray(),
-                                                                                    "id",
-                                                                                    _virtualImage.icon);
+                    iconInput.text = this._virtualImage.iconUrl;
+                    onClickValidateIcon();
                     publicImageInput.selected = this._virtualImage.shared;
                     chefEnabledCombobox.selected = this._virtualImage.chefEnabled;
                     this._costCodeId = this._virtualImage.costCode;
@@ -262,7 +240,7 @@
                     hdInput.value = 0;
                     hdUnitsSelector.selectedIndex = 0;
                     iconInput.text = "";
-                    iconsList.selectedIndex = -1;
+                    onClickValidateIcon();
                     chefEnabledCombobox.selected = false;
 
                     ovfPackageInstanceDTO = null;
@@ -293,8 +271,7 @@
                     updatedValues.cpuRequired = cpuInput.value;
                     updatedValues.ramRequired = ramInput.value * ramUnitsSelector.selectedItem.conversion;
                     updatedValues.hdRequired = hdInput.value * hdUnitsSelector.selectedItem.conversion;
-                    if (iconsList.selectedIndex > -1)
-                        updatedValues.icon = iconsList.selectedItem as Icon;
+                    updatedValues.iconUrl = iconInput.text;
 
                     updatedValues.shared = publicImageInput.selected;
                         
@@ -330,8 +307,7 @@
                     ovfPackageInstanceDTO.idUser = AbiCloudModel.getInstance().loginManager.user.id;
                     ovfPackageInstanceDTO.diskFileFormat = DiskFormatType(diskFormatTypeInput.selectedItem).name;
                     ovfPackageInstanceDTO.categoryName = Category(categoryInput.selectedItem).name;
-                    if (iconsList.selectedIndex > -1)
-                        ovfPackageInstanceDTO.iconPath = Icon(iconsList.selectedItem).path;
+                    ovfPackageInstanceDTO.iconPath = iconInput.text;
 
                     ovfPackageInstanceDTO.cpu = cpuInput.value;
                     ovfPackageInstanceDTO.ram = (ramInput.value * ramUnitsSelector.selectedItem.conversion) * AbiCloudModel.MB_TO_BYTES;
@@ -375,51 +351,6 @@
                 //Closing the form
                 dispatchEvent(new Event("VirtualImageFormClose"));
             }
-
-
-            private function addIcon():void
-            {
-                PopUpManager.addPopUp(this.iconForm, this, true);
-                PopUpManager.centerPopUp(this.iconForm);
-
-                this.iconForm.init();
-            }
-
-            private function editIcon():void
-            {
-                PopUpManager.addPopUp(this.iconForm, this, true);
-                PopUpManager.centerPopUp(this.iconForm);
-
-                this.iconForm.init(iconsList.selectedItem as Icon);
-            }
-
-            private function closeIconForm(event:Event):void
-            {
-                PopUpManager.removePopUp(this.iconForm);
-            }
-
-            private function askIconDeletion():void
-            {
-                AbiCloudAlert.showAlert(ResourceManager.getInstance().getString("Common",
-                                                                                "ALERT_TITLE_LABEL"),
-                                        ResourceManager.getInstance().getString("VirtualImage",
-                                                                                "ALERT_DELETE_ICON_HEADER"),
-                                        ResourceManager.getInstance().getString("VirtualImage",
-                                                                                "ALERT_DELETE_ICON_TEXT"),
-                                        Alert.YES | Alert.NO,
-                                        deleteIcon);
-            }
-
-            private function deleteIcon(closeEvent:CloseEvent):void
-            {
-                if (closeEvent.detail == Alert.YES)
-                {
-                    var virtualImageEvent:VirtualImageEvent = new VirtualImageEvent(VirtualImageEvent.DELETE_ICON);
-                    virtualImageEvent.icon = iconsList.selectedItem as Icon;
-                    dispatchEvent(virtualImageEvent);
-                }
-            }
-
 
 
             /**
@@ -642,6 +573,18 @@
             private function fileRef_complete(evt:Event):void {
                 
             }
+            
+            private function onClickValidateIcon():void
+            {
+                if(iconInput.text == "")
+                {
+	                iconImage.source = VirtualImageManager.DEFAULT_ICON_IMAGE_PATH;
+                }
+                else
+                {
+	                iconImage.load(iconInput.text);
+                }
+            }
         ]]>
     </mx:Script>
 
@@ -787,45 +730,23 @@
 
             <mx:FormItem label="@Resource(bundle='VirtualImage', key='LABEL_ICON')">
 
-                <mx:TextInput id="iconInput"
-                    height="18"
-                    change="validateForm()"
-                    text="{Icon(iconsList.selectedItem).name}"
-                    editable="false"/>
-
-                <mx:HorizontalList id="iconsList"
-                    width="100%" height="85"
-                    dataProvider="{virtualImageManager.icons}"
-                    change="validateForm()"
-                    selectable="{this._isEditable}"
-                    itemRenderer="net.undf.abicloud.view.virtualimage.components.icon.IconListItemRenderer"/>
-
-                <mx:HBox 
-                    width="100%"
-                    horizontalGap="3"
-                    verticalAlign="middle">
-                    <mx:Button id="addIconButton"
-                        styleName="AddButton"
-                        enabled="{this._isEditable}"
-                        toolTip="@Resource(bundle='Common', key='BUTTON_NEW_TOOLTIP')"
-                        click="addIcon()"/>
-
-                    <mx:Button id="deleteIconButton"
-                        enabled="{iconsList.selectedIndex > -1 &amp;&amp; this._isEditable}"
-                        styleName="RemoveButton"
-                        toolTip="@Resource(bundle='Common', key='BUTTON_DEL_TOOLTIP')"
-                        click="askIconDeletion()"/>
-
-                    <mx:Spacer 
-                        width="100%" height="6"/>
-
-                    <mx:Button id="editIconButton"
-                        enabled="{iconsList.selectedIndex > -1  &amp;&amp; this._isEditable}"
-                        styleName="ConfigurationButton"
-                        toolTip="@Resource(bundle='Common', key='BUTTON_EDIT_TOOLTIP')"
-                        click="editIcon()"/>
+                <mx:HBox verticalAlign="middle">
+                	
+	                <mx:TextInput id="iconInput"
+	                    height="18"
+	                    editable="{this._isEditable}"
+	                    change="validateForm()"/>
+	                
+	                <mx:Button id="validateButton"
+	                    height="18"
+	                    enabled="{this._isEditable}"
+	                    label="@Resource(bundle='Common', key='BUTTON_VALIDATE')"
+	                    click="onClickValidateIcon()"/>    
                 </mx:HBox>
-
+                
+                <utils:ImageDefault id="iconImage"
+                    width="72" height="70"/>
+                    
                 <mx:Spacer width="5"/>
             </mx:FormItem>
 
@@ -908,8 +829,7 @@
 
             <mx:ProgressBar id="uploadProgressBar"
                 width="100%" height="12"
-                barColor="#FE9608"
-                borderColor="#666666"
+                styleName="CustomProgressBar"
                 fontSize="10"
                 indeterminateMoveInterval="30"
                 minimum="0" maximum="100" indeterminate="true" label="%3%%"

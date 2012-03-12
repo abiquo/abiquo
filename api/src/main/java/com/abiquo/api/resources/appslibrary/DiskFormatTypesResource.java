@@ -27,6 +27,7 @@ import java.util.Collection;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 
 import org.apache.wink.common.annotations.Workspace;
@@ -50,6 +51,7 @@ public class DiskFormatTypesResource extends AbstractResource
     private DiskFormatTypeService service;
 
     @GET
+    @Produces(DiskFormatTypesDto.MEDIA_TYPE)
     public DiskFormatTypesDto getDiskFormatTypes(@Context final IRESTBuilder restBuilder)
         throws Exception
     {

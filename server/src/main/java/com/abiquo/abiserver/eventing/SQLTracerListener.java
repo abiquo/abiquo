@@ -46,7 +46,7 @@ public class SQLTracerListener implements TracerCallback
     static
     {
         parameterMappings = new HashMap<String, String>();
-        parameterMappings.put("datacenter", "admin/datacenters");
+        parameterMappings.put("datacenter", "admin/datacenters/");
         parameterMappings.put("rack", "racks");
         parameterMappings.put("machine", "machines");
         parameterMappings.put("storage", "");
@@ -55,8 +55,8 @@ public class SQLTracerListener implements TracerCallback
         parameterMappings.put("network", "");
         parameterMappings.put("subnet", "");
         parameterMappings.put("virtualDatacenter", "cloud/virtualdatacenters");
-        parameterMappings.put("virtualApp", "");
-        parameterMappings.put("virtualMachine", "");
+        parameterMappings.put("virtualApp", "virtualappliances");
+        parameterMappings.put("virtualMachine", "virtualmachines");
 
         // TODO: Uncomment this. Currently the hierarchy shows the enterprise and user who performs
         // the action. Not the enterprise/user resource where the action happens!

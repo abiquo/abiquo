@@ -32,6 +32,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.UriInfo;
@@ -45,12 +46,14 @@ import org.springframework.stereotype.Controller;
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.exceptions.InternalServerErrorException;
 import com.abiquo.api.resources.cloud.IpAddressesResource;
+import com.abiquo.api.resources.cloud.VirtualApplianceResource;
 import com.abiquo.api.resources.cloud.VirtualDatacenterResource;
 import com.abiquo.api.resources.cloud.VirtualMachineResource;
 import com.abiquo.api.services.DatacenterService;
 import com.abiquo.api.services.EnterpriseService;
 import com.abiquo.api.services.NetworkService;
 import com.abiquo.api.services.UserService;
+import com.abiquo.api.services.appslibrary.VirtualMachineTemplateService;
 import com.abiquo.api.services.cloud.VirtualApplianceService;
 import com.abiquo.api.services.cloud.VirtualDatacenterService;
 import com.abiquo.api.services.cloud.VirtualMachineService;
@@ -59,6 +62,8 @@ import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.model.enumerator.Privileges;
 import com.abiquo.server.core.cloud.NodeVirtualImage;
 import com.abiquo.server.core.cloud.VirtualAppliance;
+import com.abiquo.server.core.cloud.VirtualApplianceDto;
+import com.abiquo.server.core.cloud.VirtualAppliancesDto;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualDatacenterDto;
 import com.abiquo.server.core.cloud.VirtualDatacentersDto;
@@ -69,6 +74,7 @@ import com.abiquo.server.core.enterprise.EnterpriseDto;
 import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
 import com.abiquo.server.core.infrastructure.network.IpsPoolManagementDto;
+import com.abiquo.server.core.util.FilterOptions;
 import com.abiquo.server.core.util.PagedList;
 
 @Parent(EnterprisesResource.class)
@@ -85,42 +91,51 @@ public class EnterpriseResource extends AbstractResource
 
     public static final String ENTERPRISE_ACTION_GET_IPS_PATH = "action/ips";
 
+    public static final String ENTERPRISE_ACTION_GET_ICONS_PATH = "action/icons";
+
     public static final String ENTERPRISE_ACTION_GET_VIRTUALMACHINES_PATH =
         "action/virtualmachines";
 
     public static final String ENTERPRISE_ACTION_GET_VIRTUALDATACENTERS_PATH =
         "action/virtualdatacenters";
 
+    public static final String ENTERPRISE_ACTION_GET_VIRTUALAPPLIANCES_PATH =
+        "action/virtualappliances";
+
     protected static final Logger LOGGER = LoggerFactory.getLogger(EnterpriseResource.class);
 
     @Autowired
-    EnterpriseService service;
+    protected EnterpriseService service;
 
     @Autowired
-    NetworkService netService;
+    private NetworkService netService;
 
     @Autowired
-    VirtualMachineService vmService;
+    private VirtualMachineService vmService;
 
     @Autowired
-    DatacenterService dcService;
+    private DatacenterService dcService;
 
     @Autowired
-    VirtualDatacenterService vdcService;
+    private VirtualDatacenterService vdcService;
 
     @Autowired
-    VirtualApplianceService vappService;
+    private VirtualApplianceService vappService;
+
+    @Autowired
+    private VirtualMachineTemplateService vmtService;
 
     @Context
-    UriInfo uriInfo;
+    protected UriInfo uriInfo;
 
     @Autowired
-    UserService userService;
+    private UserService userService;
 
     @Autowired
-    SecurityService securityService;
+    private SecurityService securityService;
 
     @GET
+    @Produces(EnterpriseDto.MEDIA_TYPE)
     public EnterpriseDto getEnterprise(@PathParam(ENTERPRISE) final Integer enterpriseId,
         @Context final IRESTBuilder restBuilder) throws Exception
     {
@@ -153,6 +168,7 @@ public class EnterpriseResource extends AbstractResource
     }
 
     @PUT
+    @Produces(EnterpriseDto.MEDIA_TYPE)
     public EnterpriseDto modifyEnterprise(final EnterpriseDto enterprise,
         @PathParam(ENTERPRISE) final Integer enterpriseId, @Context final IRESTBuilder restBuilder)
         throws Exception
@@ -171,6 +187,7 @@ public class EnterpriseResource extends AbstractResource
     @SuppressWarnings("unchecked")
     @GET
     @Path(EnterpriseResource.ENTERPRISE_ACTION_GET_IPS_PATH)
+    @Produces(IpsPoolManagementDto.MEDIA_TYPE)
     public IpsPoolManagementDto getIPsByEnterprise(@PathParam(ENTERPRISE) @Min(0) final Integer id,
         @QueryParam(START_WITH) @DefaultValue("0") @Min(0) final Integer startwith,
         @QueryParam(BY) @DefaultValue("ip") final String orderBy,
@@ -215,6 +232,7 @@ public class EnterpriseResource extends AbstractResource
      */
     @GET
     @Path(EnterpriseResource.ENTERPRISE_ACTION_GET_VIRTUALMACHINES_PATH)
+    @Produces(VirtualMachinesDto.MEDIA_TYPE)
     public VirtualMachinesDto getVirtualMachines(
         @PathParam(EnterpriseResource.ENTERPRISE) final Integer enterpriseId,
         @Context final IRESTBuilder restBuilder) throws Exception
@@ -238,6 +256,28 @@ public class EnterpriseResource extends AbstractResource
     }
 
     /**
+     * Retrieves the list Of icons urls used in virtual images of an enterprise
+     * 
+     * @param enterpriseId identifier of the enterprise
+     * @param restBuilder {@link IRESTBuilder} object injected by context
+     * @return the list of String
+     * @throws Exception
+     */
+    @GET
+    @Path(EnterpriseResource.ENTERPRISE_ACTION_GET_ICONS_PATH)
+    public List<String> getIconsByEnterprise(
+        @PathParam(EnterpriseResource.ENTERPRISE) final Integer enterpriseId,
+        @Context final IRESTBuilder restBuilder) throws Exception
+    {
+
+        // check if the enterprise exists
+        Enterprise enterprise = service.getEnterprise(enterpriseId);
+
+        return vmtService.findIconsByEnterprise(enterprise.getId());
+
+    }
+
+    /**
      * Retrieves the list Of Virtual datacenters defined into an enterprise.
      * 
      * @param enterpriseId identifier of the enterprise
@@ -247,14 +287,22 @@ public class EnterpriseResource extends AbstractResource
      */
     @GET
     @Path(EnterpriseResource.ENTERPRISE_ACTION_GET_VIRTUALDATACENTERS_PATH)
+    @Produces(VirtualDatacentersDto.MEDIA_TYPE)
     public VirtualDatacentersDto getVirtualDatacenters(
         @PathParam(EnterpriseResource.ENTERPRISE) final Integer enterpriseId,
+        @QueryParam(START_WITH) @DefaultValue("0") @Min(0) final Integer startwith,
+        @QueryParam(LIMIT) @DefaultValue(DEFAULT_PAGE_LENGTH_STRING) @Min(1) final Integer limit,
+        @QueryParam(BY) @DefaultValue("name") final String orderBy,
+        @QueryParam(FILTER) @DefaultValue("") final String filter,
+        @QueryParam(ASC) @DefaultValue("true") final Boolean asc,
         @Context final IRESTBuilder restBuilder) throws Exception
     {
+        FilterOptions filterOptions = new FilterOptions(startwith, limit, filter, orderBy, asc);
 
         Enterprise enterprise = service.getEnterprise(enterpriseId);
 
-        Collection<VirtualDatacenter> all = vdcService.getVirtualDatacenters(enterprise, null);
+        Collection<VirtualDatacenter> all =
+            vdcService.getVirtualDatacenters(enterprise, null, filterOptions);
         VirtualDatacentersDto vdcs = new VirtualDatacentersDto();
 
         for (VirtualDatacenter d : all)
@@ -264,6 +312,49 @@ public class EnterpriseResource extends AbstractResource
 
         return vdcs;
 
+    }
+
+    /**
+     * Retrieves the list Of Virtual appliances defined into an enterprise.
+     * 
+     * @param enterpriseId identifier of the enterprise
+     * @param restBuilder {@linnk IRESTBuilder} object injected by context
+     * @return the {@link VirtualAppliancesDto} object. A {@link VirtualApplianceDto} wrapper.
+     * @throws Exception
+     */
+    @GET
+    @Produces(VirtualAppliancesDto.MEDIA_TYPE)
+    @Path(EnterpriseResource.ENTERPRISE_ACTION_GET_VIRTUALAPPLIANCES_PATH)
+    public VirtualAppliancesDto getVirtualAppliances(
+        @PathParam(EnterpriseResource.ENTERPRISE) final Integer enterpriseId,
+        @QueryParam(START_WITH) @DefaultValue("0") @Min(0) final Integer startwith,
+        @QueryParam(LIMIT) @DefaultValue(DEFAULT_PAGE_LENGTH_STRING) @Min(1) final Integer limit,
+        @QueryParam(BY) @DefaultValue("name") final String orderBy,
+        @QueryParam(FILTER) @DefaultValue("") final String filter,
+        @QueryParam(ASC) @DefaultValue("true") final Boolean asc,
+        @Context final IRESTBuilder restBuilder) throws Exception
+    {
+        FilterOptions filterOptions = new FilterOptions(startwith, limit, filter, orderBy, asc);
+
+        List<VirtualAppliance> all =
+            vappService.getVirtualAppliancesByEnterprise(enterpriseId, filterOptions);
+        VirtualAppliancesDto vappsDtos = new VirtualAppliancesDto();
+
+        if (all != null && !all.isEmpty())
+        {
+            for (VirtualAppliance vapp : all)
+            {
+                vappsDtos.getCollection().add(
+                    VirtualApplianceResource.createTransferObject(vapp, restBuilder));
+            }
+        }
+
+        if (all.isEmpty() == false)
+        {
+            vappsDtos.setTotalSize(((PagedList< ? >) all).getTotalResults());
+        }
+
+        return vappsDtos;
     }
 
     private static EnterpriseDto addLinks(final IRESTBuilder restBuilder,

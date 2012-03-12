@@ -243,6 +243,8 @@ public class VSMManager
     {
         RedisDao dao = RedisDaoFactory.getInstance();
 
+        VSMService.getInstance().stopAllMonitors();
+
         for (PhysicalMachine machine : dao.findAllPhysicalMachines())
         {
             String address = machine.getAddress();

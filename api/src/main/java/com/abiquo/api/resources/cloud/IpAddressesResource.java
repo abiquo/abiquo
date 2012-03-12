@@ -31,6 +31,7 @@ import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.UriInfo;
@@ -46,6 +47,7 @@ import com.abiquo.model.util.ModelTransformer;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagementDto;
 import com.abiquo.server.core.infrastructure.network.IpsPoolManagementDto;
+import com.abiquo.server.core.infrastructure.network.VLANNetwork;
 import com.abiquo.server.core.util.PagedList;
 
 /**
@@ -74,9 +76,10 @@ public class IpAddressesResource extends AbstractResource
     UriInfo uriInfo;
 
     @GET
+    @Produces(IpsPoolManagementDto.MEDIA_TYPE)
     public IpsPoolManagementDto getIPAddresses(
-        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
-        @PathParam(PrivateNetworkResource.PRIVATE_NETWORK) final Integer vlanId,
+        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) @Min(1) final Integer vdcId,
+        @PathParam(PrivateNetworkResource.PRIVATE_NETWORK) @Min(1) final Integer vlanId,
         @QueryParam(START_WITH) @DefaultValue("0") @Min(0) final Integer startwith,
         @QueryParam(BY) @DefaultValue("ip") final String orderBy,
         @QueryParam(FILTER) @DefaultValue("") final String filter,
@@ -103,6 +106,29 @@ public class IpAddressesResource extends AbstractResource
         ips.setTotalSize(((PagedList) all).getTotalResults());
 
         return ips;
+    }
+
+    /**
+     * Returns a single IP based on its private network's hierarchy.
+     * 
+     * @param vdcId identifier of the {@link VirtualDatacenter}
+     * @param vlanId identifier of the {@link VLANNetwork}
+     * @param ipId identifier of the {@link IpPoolManagment} we want to retrieve
+     * @param restBuilder Context-injected rest link builder.
+     * @return the found {@link IpPoolManagement} object.
+     */
+    @GET
+    @Path(IpAddressesResource.IP_ADDRESS_PARAM)
+    @Produces(IpPoolManagementDto.MEDIA_TYPE)
+    public IpPoolManagementDto getIPAddress(
+        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) @Min(1) final Integer vdcId,
+        @PathParam(PrivateNetworkResource.PRIVATE_NETWORK) @Min(1) final Integer vlanId,
+        @PathParam(IpAddressesResource.IP_ADDRESS) @Min(1) final Integer ipId,
+        @Context final IRESTBuilder restBuilder) throws Exception
+    {
+        IpPoolManagement ip = service.getIpPoolManagementByVlan(vdcId, vlanId, ipId);
+
+        return createTransferObject(ip, restBuilder);
     }
 
     public static IpPoolManagementDto createTransferObject(final IpPoolManagement ip,

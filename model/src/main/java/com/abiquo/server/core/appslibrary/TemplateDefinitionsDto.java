@@ -27,6 +27,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.abiquo.model.transport.WrapperDto;
+import com.abiquo.server.core.infrastructure.DatacenterDto;
 
 /**
  * Represent a collection of {@link TemplateDefinitionDto}
@@ -36,11 +37,25 @@ public class TemplateDefinitionsDto extends WrapperDto<TemplateDefinitionDto>
 {
 
     private static final long serialVersionUID = -6421402033472232181L;
+    public static final String BASE_MEDIA_TYPE = "application/vnd.abiquo.templatedefinitions+xml";
+    public static final String MEDIA_TYPE = BASE_MEDIA_TYPE + "; version=" + API_VERSION;
 
     @Override
     @XmlElement(name = "templateDefinition")
     public List<TemplateDefinitionDto> getCollection()
     {
         return collection;
+    }
+    
+    @Override
+    public String getMediaType()
+    {
+        return TemplateDefinitionsDto.MEDIA_TYPE;
+    }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
     }
 }

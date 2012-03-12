@@ -205,6 +205,15 @@ public class VSMEventProcessor implements VSMCallback
             String.format("Processed %s event in machine %s, the current machine state is %s.",
                 event.name(), machine.getName(), machine.getState().name());
 
+        if (!machine.isManaged())
+        {
+            message =
+                String
+                    .format(
+                        "Processed %s event in machine %s.  The  machine does not exist in the hypervisor.",
+                        event.name(), machine.getName());
+        }
+
         traceVirtualMachineStateUpdated(notification, message);
         LOGGER.debug(message);
     }
@@ -222,8 +231,8 @@ public class VSMEventProcessor implements VSMCallback
 
         if (traceEventByEvent.containsKey(event))
         {
-            tracer.systemLog(SeverityType.INFO, ComponentType.VIRTUAL_MACHINE,
-                traceEventByEvent.get(event), message);
+            tracer.systemLog(SeverityType.INFO, ComponentType.VIRTUAL_MACHINE, traceEventByEvent
+                .get(event), message);
         }
     }
 
@@ -298,8 +307,7 @@ public class VSMEventProcessor implements VSMCallback
                     new Object[] {vMachine.getName(), e.getMessage()});
             tracer.systemLog(SeverityType.MAJOR, ComponentType.VIRTUAL_MACHINE,
                 EventType.VM_DESTROY, "virtualMachine.destroyed.unsubscribeFailed", new Object[] {
-                vMachine.getName(),
-                e.getMessage()});
+                vMachine.getName(), e.getMessage()});
             return false;
         }
     }

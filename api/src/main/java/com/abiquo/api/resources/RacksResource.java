@@ -28,6 +28,7 @@ import java.util.List;
 
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -41,6 +42,8 @@ import org.apache.wink.common.annotations.Parent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
+import com.abiquo.api.exceptions.APIError;
+import com.abiquo.api.exceptions.BadRequestException;
 import com.abiquo.api.services.InfrastructureService;
 import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.server.core.infrastructure.Rack;
@@ -60,8 +63,8 @@ public class RacksResource extends AbstractResource
     protected InfrastructureService infrastructureService;
 
     @GET
-    @Produces(MediaType.APPLICATION_XML)
-    public RacksDto getRacks(
+    @Produces(RacksDto.MEDIA_TYPE)     
+    public  RacksDto getRacks(
         @PathParam(DatacenterResource.DATACENTER) @NotNull @Min(1) final Integer datacenterId,
         @QueryParam("filter") final String filter, @Context final IRESTBuilder restBuilder)
         throws Exception
@@ -80,10 +83,18 @@ public class RacksResource extends AbstractResource
         return racks;
     }
 
-    @POST
-    public RackDto postRack(@PathParam(DatacenterResource.DATACENTER) final Integer datacenterId,
+    @POST 
+    @Consumes(RackDto.MEDIA_TYPE) 
+    @Produces(RackDto.MEDIA_TYPE)     
+    public  RackDto postRack(@PathParam(DatacenterResource.DATACENTER) final Integer datacenterId,
         final RackDto rackDto, @Context final IRESTBuilder restBuilder) throws Exception
     {
+        // The rack must not exists
+        if (rackDto.getId() != null)
+        {
+            throw new BadRequestException(APIError.STATUS_BAD_REQUEST);
+        }
+
         Rack rack = createPersistenceObject(rackDto);
         Rack r = infrastructureService.addRack(rack, datacenterId);
         return createTransferObject(r, restBuilder);

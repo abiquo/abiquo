@@ -77,4 +77,14 @@ public interface StorageResourceStub
     public BasicResult deleteDiskFromVirtualMachine(final Integer vdcId, final Integer vappId,
         final Integer vmId, Integer diskOrder);
 
+    /**
+     * @param datacenterId
+     * @param rackId
+     * @param pmId physical machine id
+     * @param vmId virtual machine id
+     * @return
+     */
+    public BasicResult getHardDisksByVirtualMachine(Integer datacenterId, Integer rackId,
+        Integer pmId, Integer vmId);
+
 }

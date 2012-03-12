@@ -54,6 +54,8 @@ import com.abiquo.model.transport.WrapperDto;
 @XmlRootElement(name = "datastores")
 public class DatastoresDto extends WrapperDto<DatastoreDto> implements Serializable
 {
+    public static final String BASE_MEDIA_TYPE = "application/vnd.abiquo.datastores+xml";
+    public static final String MEDIA_TYPE = BASE_MEDIA_TYPE + "; version=" + API_VERSION;
 
     @XmlElement(name = "datastore")
     public List<DatastoreDto> getCollection()
@@ -63,6 +65,18 @@ public class DatastoresDto extends WrapperDto<DatastoreDto> implements Serializa
             collection = new ArrayList<DatastoreDto>();
         }
         return collection;
+    }
+    
+    @Override
+    public String getMediaType()
+    {
+        return DatastoresDto.MEDIA_TYPE;
+    }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
     }
 
 }

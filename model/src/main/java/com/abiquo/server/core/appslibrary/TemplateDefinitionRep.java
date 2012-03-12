@@ -47,9 +47,6 @@ public class TemplateDefinitionRep extends DefaultRepBase
     @Autowired
     CategoryDAO categoryDao;
 
-    @Autowired
-    IconDAO iconDao;
-
     public TemplateDefinitionRep()
     {
 
@@ -66,7 +63,6 @@ public class TemplateDefinitionRep extends DefaultRepBase
         listDao = new TemplateDefinitionListDAO(em);
         appsLibraryDao = new AppsLibraryDAO(em);
         categoryDao = new CategoryDAO(em);
-        iconDao = new IconDAO(em);
     }
 
     public List<TemplateDefinition> getTemplateDefinitionsByEnterprise(final Integer idEnterprise)
@@ -111,7 +107,7 @@ public class TemplateDefinitionRep extends DefaultRepBase
         old.setId(templateUrl);
         old.setCategory(templateDef.getCategory());
         old.setType(templateDef.getType());
-        old.setIcon(templateDef.getIcon());
+        old.setIconUrl(templateDef.getIconUrl());
         old.setProductName(templateDef.getProductName());
         old.setProductUrl(templateDef.getProductUrl());
         old.setProductVendor(templateDef.getProductVendor());

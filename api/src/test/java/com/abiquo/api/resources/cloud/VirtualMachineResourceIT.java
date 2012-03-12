@@ -240,7 +240,7 @@ public class VirtualMachineResourceIT extends AbstractJpaGeneratorIT
         String vmURI = resolveVirtualMachineURI(vdc.getId(), vapp.getId(), vm.getId());
         String tasksURI = vmURI.concat(TaskResourceUtils.TASKS_PATH);
 
-        ClientResponse response = get(tasksURI);
+        ClientResponse response = get(tasksURI, TasksDto.MEDIA_TYPE);
 
         TasksDto tasks = response.getEntity(TasksDto.class);
         assertEquals(response.getStatusCode(), Status.OK.getStatusCode());
@@ -261,7 +261,7 @@ public class VirtualMachineResourceIT extends AbstractJpaGeneratorIT
         tasksURI = vmURI.concat(TaskResourceUtils.TASKS_PATH);
         String taskURI = tasksURI.concat("/").concat(deploy.getTaskId());
 
-        response = get(taskURI);
+        response = get(taskURI, TaskDto.MEDIA_TYPE);
 
         TaskDto task = response.getEntity(TaskDto.class);
         assertEquals(response.getStatusCode(), Status.OK.getStatusCode());
@@ -281,7 +281,7 @@ public class VirtualMachineResourceIT extends AbstractJpaGeneratorIT
         tasksURI = vmURI.concat(TaskResourceUtils.TASKS_PATH);
         taskURI = tasksURI.concat("/").concat(deploy.getTaskId());
 
-        response = get(taskURI);
+        response = get(taskURI, TaskDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), Status.NOT_FOUND.getStatusCode());
 
         // NOT FOUND when invalid VAPP
@@ -289,7 +289,7 @@ public class VirtualMachineResourceIT extends AbstractJpaGeneratorIT
         tasksURI = vmURI.concat(TaskResourceUtils.TASKS_PATH);
         taskURI = tasksURI.concat("/").concat(deploy.getTaskId());
 
-        response = get(taskURI);
+        response = get(taskURI, TaskDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), Status.NOT_FOUND.getStatusCode());
 
         // NOT FOUND when invalid VM
@@ -297,7 +297,7 @@ public class VirtualMachineResourceIT extends AbstractJpaGeneratorIT
         tasksURI = vmURI.concat(TaskResourceUtils.TASKS_PATH);
         taskURI = tasksURI.concat("/").concat(deploy.getTaskId());
 
-        response = get(taskURI);
+        response = get(taskURI, TaskDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), Status.NOT_FOUND.getStatusCode());
     }
 
@@ -366,7 +366,8 @@ public class VirtualMachineResourceIT extends AbstractJpaGeneratorIT
 
         // Check for vm
         ClientResponse response =
-            get(resolveVirtualMachineURI(vdc.getId(), vapp.getId(), vm.getId()));
+            get(resolveVirtualMachineURI(vdc.getId(), vapp.getId(), vm.getId()),
+                VirtualMachineDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), Status.OK.getStatusCode());
         VirtualMachineDto vmDto = response.getEntity(VirtualMachineDto.class);
         assertLinkExist(vmDto,
@@ -385,7 +386,9 @@ public class VirtualMachineResourceIT extends AbstractJpaGeneratorIT
         assertNotNull(vmDto);
 
         // Check for vm2
-        response = get(resolveVirtualMachineURI(vdc.getId(), vapp.getId(), vm2.getId()));
+        response =
+            get(resolveVirtualMachineURI(vdc.getId(), vapp.getId(), vm2.getId()),
+                VirtualMachineDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), Status.OK.getStatusCode());
         vmDto = response.getEntity(VirtualMachineDto.class);
         resolveVirtualMachineActionGetIPsURI(vdc.getId(), vapp.getId(), vm2.getId());
@@ -411,7 +414,8 @@ public class VirtualMachineResourceIT extends AbstractJpaGeneratorIT
 
         // Check a randomly value
         ClientResponse response =
-            get(resolveVirtualMachineURI(vdc.getId(), vapp.getId(), new Random().nextInt(1000)));
+            get(resolveVirtualMachineURI(vdc.getId(), vapp.getId(), new Random().nextInt(1000)),
+                VirtualMachineDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), Status.NOT_FOUND.getStatusCode());
     }
 
@@ -456,13 +460,16 @@ public class VirtualMachineResourceIT extends AbstractJpaGeneratorIT
 
         // Check the vm has been succesfully created
         ClientResponse response =
-            get(resolveVirtualMachineURI(vdc.getId(), vapp.getId(), vm.getId()));
+            get(resolveVirtualMachineURI(vdc.getId(), vapp.getId(), vm.getId()),
+                VirtualMachineDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), Status.OK.getStatusCode());
         VirtualMachineDto vmDto = response.getEntity(VirtualMachineDto.class);
         assertNotNull(vmDto);
 
         // Check again the valid value of vm Id but with an invalid vapp Id
-        response = get(resolveVirtualMachineURI(vdc.getId(), vapp.getId() + 1, vm.getId()));
+        response =
+            get(resolveVirtualMachineURI(vdc.getId(), vapp.getId() + 1, vm.getId()),
+                VirtualMachineDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), Status.NOT_FOUND.getStatusCode());
     }
 
@@ -507,14 +514,16 @@ public class VirtualMachineResourceIT extends AbstractJpaGeneratorIT
 
         // Check the vm has been succesfully created
         ClientResponse response =
-            get(resolveVirtualMachineURI(vdc.getId(), vapp.getId(), vm.getId()));
+            get(resolveVirtualMachineURI(vdc.getId(), vapp.getId(), vm.getId()),
+                VirtualMachineDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), Status.OK.getStatusCode());
         VirtualMachineDto vmDto = response.getEntity(VirtualMachineDto.class);
         assertNotNull(vmDto);
 
         // Check again the valid value of vm Id but with an invalid vdc Id
         response =
-            get(resolveVirtualMachineURI(new Random().nextInt(1000), vapp.getId(), vm.getId()));
+            get(resolveVirtualMachineURI(new Random().nextInt(1000), vapp.getId(), vm.getId()),
+                VirtualMachineDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), Status.NOT_FOUND.getStatusCode());
     }
 
@@ -562,7 +571,8 @@ public class VirtualMachineResourceIT extends AbstractJpaGeneratorIT
         setup(entitiesToSetup.toArray());
 
         ClientResponse response =
-            get(resolveVirtualMachineActionGetIPsURI(vdc.getId(), vapp.getId(), vm.getId()));
+            get(resolveVirtualMachineActionGetIPsURI(vdc.getId(), vapp.getId(), vm.getId()),
+                NicsDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), Status.OK.getStatusCode());
 
         NicsDto entity = response.getEntity(NicsDto.class);
@@ -580,7 +590,7 @@ public class VirtualMachineResourceIT extends AbstractJpaGeneratorIT
         setup(ent, datacenter, vdc, vapp);
         ClientResponse response =
             get(resolveVirtualMachineActionGetIPsURI(vdc.getId(), vapp.getId(),
-                new Random().nextInt(1000)));
+                new Random().nextInt(1000)), NicsDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), Status.NOT_FOUND.getStatusCode());
     }
 
@@ -624,7 +634,8 @@ public class VirtualMachineResourceIT extends AbstractJpaGeneratorIT
         setup(entitiesToSetup.toArray());
 
         ClientResponse response =
-            get(resolveVirtualMachineActionGetIPsURI(vdc.getId() + 1, vapp.getId(), vm.getId()));
+            get(resolveVirtualMachineActionGetIPsURI(vdc.getId() + 1, vapp.getId(), vm.getId()),
+                NicsDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), Status.NOT_FOUND.getStatusCode());
     }
 
@@ -668,7 +679,8 @@ public class VirtualMachineResourceIT extends AbstractJpaGeneratorIT
         setup(entitiesToSetup.toArray());
 
         ClientResponse response =
-            get(resolveVirtualMachineActionGetIPsURI(vdc.getId(), vapp.getId() + 1, vm.getId()));
+            get(resolveVirtualMachineActionGetIPsURI(vdc.getId(), vapp.getId() + 1, vm.getId()),
+                NicsDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), Status.NOT_FOUND.getStatusCode());
     }
 
@@ -806,7 +818,7 @@ public class VirtualMachineResourceIT extends AbstractJpaGeneratorIT
         // Check for vm state
         ClientResponse response =
             get(resolveVirtualMachineURI(vdc.getId(), vapp.getId(), vm.getId()), "sysadmin",
-                "sysadmin");
+                "sysadmin", VirtualMachineDto.MEDIA_TYPE);
         VirtualMachineDto vmDto = response.getEntity(VirtualMachineDto.class);
         assertLinkExist(vmDto,
             resolveVirtualMachineStateURI(vdc.getId(), vapp.getId(), vm.getId()), "state");
@@ -835,7 +847,7 @@ public class VirtualMachineResourceIT extends AbstractJpaGeneratorIT
         NodeVirtualImage nvi = nodeVirtualImageGenerator.createInstance(vapp, vm);
 
         RemoteService rs =
-            remoteServiceGenerator.createInstance(RemoteServiceType.TARANTINO, datacenter);
+            remoteServiceGenerator.createInstance(RemoteServiceType.VIRTUAL_FACTORY, datacenter);
 
         List<Object> entitiesToSetup = new ArrayList<Object>();
         entitiesToSetup.add(datacenter);
@@ -1021,10 +1033,11 @@ public class VirtualMachineResourceIT extends AbstractJpaGeneratorIT
         // Check for vm
         ClientResponse response =
             get(resolveVirtualMachineURI(vdc.getId(), vapp.getId(), vm.getId()), "sysadmin",
-                "sysadmin", VirtualMachineResource.VM_NODE_MEDIA_TYPE);
+                "sysadmin", VirtualMachineWithNodeDto.MEDIA_TYPE);
         VirtualMachineWithNodeDto vmDto = response.getEntity(VirtualMachineWithNodeDto.class);
 
         assertNotNull(vmDto);
 
     }
+
 }

@@ -25,11 +25,15 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import com.abiquo.model.enumerator.DiskFormatTypeAlias;
 import com.abiquo.model.transport.SingleResourceTransportDto;
+import com.abiquo.server.core.infrastructure.DatacenterDto;
 
 @XmlRootElement(name = "diskformtattype")
 public class DiskFormatTypeDto extends SingleResourceTransportDto
 {
 
+    public static final String BASE_MEDIA_TYPE = "application/vnd.abiquo.diskformattype+xml";
+    public static final String MEDIA_TYPE = BASE_MEDIA_TYPE + "; version=" + API_VERSION;
+    
     private String uri, description;
 
     private DiskFormatTypeAlias alias;
@@ -88,5 +92,17 @@ public class DiskFormatTypeDto extends SingleResourceTransportDto
      * HYPERV_COMPATIBLES = new DiskFormatType[] {VHD_FLAT, VHD_SPARSE}; public static final
      * DiskFormatType[] XENSERVER_COMPATIBLES = HYPERV_COMPATIBLES;
      */
+    
+    @Override
+    public String getMediaType()
+    {
+        return DiskFormatTypeDto.MEDIA_TYPE;
+    }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
+    }
 
 }

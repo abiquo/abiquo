@@ -25,11 +25,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.validation.constraints.NotNull;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 
 import org.apache.wink.common.annotations.Parent;
@@ -37,6 +39,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
 import com.abiquo.api.exceptions.APIError;
+import com.abiquo.api.exceptions.ConflictException;
 import com.abiquo.api.exceptions.NotFoundException;
 import com.abiquo.api.services.InfrastructureService;
 import com.abiquo.api.util.IRESTBuilder;
@@ -65,6 +68,7 @@ public class RemoteServiceResource extends AbstractResource
      */
 
     @GET
+    @Produces(RemoteServiceDto.MEDIA_TYPE)
     public RemoteServiceDto getRemoteService(
         @PathParam(DatacenterResource.DATACENTER) final Integer datacenterId,
         @PathParam(REMOTE_SERVICE) @com.abiquo.model.validation.RemoteService @NotNull final String serviceType,
@@ -92,6 +96,8 @@ public class RemoteServiceResource extends AbstractResource
     }
 
     @PUT
+    @Consumes(RemoteServiceDto.MEDIA_TYPE)
+    @Produces(RemoteServiceDto.MEDIA_TYPE)
     public RemoteServiceDto modifyRemoteService(
         @PathParam(DatacenterResource.DATACENTER) final Integer datacenterId,
         @PathParam(REMOTE_SERVICE) @com.abiquo.model.validation.RemoteService @NotNull final String serviceType,
@@ -102,6 +108,11 @@ public class RemoteServiceResource extends AbstractResource
 
         RemoteServiceType type = RemoteServiceType.valueFromName(serviceType);
         RemoteService old = service.getRemoteService(datacenterId, type);
+
+        if (!old.getType().equals(remoteService.getType()))
+        {
+            throw new ConflictException(APIError.WRONG_REMOTE_SERVICE_TYPE);
+        }
 
         RemoteServiceDto r = service.modifyRemoteService(old.getId(), remoteService);
 

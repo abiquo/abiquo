@@ -27,6 +27,7 @@ package com.abiquo.server.core.infrastructure.network;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.abiquo.model.transport.SingleResourceTransportDto;
+import com.abiquo.server.core.infrastructure.DatacenterDto;
 
 /**
  * Configuration network for a virtual machine.
@@ -40,6 +41,8 @@ public class VMNetworkConfigurationDto extends SingleResourceTransportDto
      * Generated serial version id.
      */
     private static final long serialVersionUID = -3866622562676820662L;
+    public static final String BASE_MEDIA_TYPE = "application/vnd.abiquo.virtualmachinenetworkconfiguration+xml";
+    public static final String MEDIA_TYPE = BASE_MEDIA_TYPE + "; version=" + API_VERSION;
 
     public VMNetworkConfigurationDto()
     {
@@ -116,6 +119,18 @@ public class VMNetworkConfigurationDto extends SingleResourceTransportDto
     public void setUsed(final Boolean used)
     {
         this.used = used;
+    }
+    
+    @Override
+    public String getMediaType()
+    {
+        return VMNetworkConfigurationDto.MEDIA_TYPE;
+    }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
     }
 
 }

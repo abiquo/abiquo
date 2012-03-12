@@ -35,8 +35,6 @@ public class TemplateDefinitionGenerator extends DefaultEntityGenerator<Template
 
     CategoryGenerator categoryGenerator;
 
-    IconGenerator iconGenerator;
-
     public TemplateDefinitionGenerator(final SeedGenerator seed)
     {
         super(seed);
@@ -44,19 +42,18 @@ public class TemplateDefinitionGenerator extends DefaultEntityGenerator<Template
         appsLibraryGenerator = new AppsLibraryGenerator(seed);
 
         categoryGenerator = new CategoryGenerator(seed);
-
-        iconGenerator = new IconGenerator(seed);
-
     }
 
     @Override
-    public void assertAllPropertiesEqual(final TemplateDefinition obj1, final TemplateDefinition obj2)
+    public void assertAllPropertiesEqual(final TemplateDefinition obj1,
+        final TemplateDefinition obj2)
     {
-        AssertEx.assertPropertiesEqualSilent(obj1, obj2, TemplateDefinition.PRODUCT_VERSION_PROPERTY,
-            TemplateDefinition.NAME_PROPERTY, TemplateDefinition.PRODUCT_VENDOR_PROPERTY,
-            TemplateDefinition.PRODUCT_URL_PROPERTY, TemplateDefinition.URL_PROPERTY, TemplateDefinition.TYPE_PROPERTY,
+        AssertEx.assertPropertiesEqualSilent(obj1, obj2,
+            TemplateDefinition.PRODUCT_VERSION_PROPERTY, TemplateDefinition.NAME_PROPERTY,
+            TemplateDefinition.PRODUCT_VENDOR_PROPERTY, TemplateDefinition.PRODUCT_URL_PROPERTY,
+            TemplateDefinition.URL_PROPERTY, TemplateDefinition.TYPE_PROPERTY,
             TemplateDefinition.PRODUCT_NAME_PROPERTY, TemplateDefinition.DISK_FILE_SIZE_PROPERTY,
-            TemplateDefinition.DESCRIPTION_PROPERTY);
+            TemplateDefinition.DESCRIPTION_PROPERTY, TemplateDefinition.ICON_URL_PROPERTY);
     }
 
     @Override
@@ -65,26 +62,25 @@ public class TemplateDefinitionGenerator extends DefaultEntityGenerator<Template
 
         AppsLibrary appsLibrary = appsLibraryGenerator.createUniqueInstance();
         Category category = categoryGenerator.createUniqueInstance();
-        Icon icon = iconGenerator.createUniqueInstance();
 
-        return createInstance(appsLibrary, category, icon);
+        return createInstance(appsLibrary, category);
     }
 
-    public TemplateDefinition createInstance(final AppsLibrary appsLibrary, final Category category,
-        final Icon icon)
+    public TemplateDefinition createInstance(final AppsLibrary appsLibrary, final Category category)
     {
         TemplateDefinition templateDef =
-            new TemplateDefinition(newString(nextSeed(), 0, 30),
-                newString(nextSeed(), 0, 30),
-                newString(nextSeed(), 0, 30),
-                newString(nextSeed(), 0, 30),
-                newString(nextSeed(), 0, 30),
+            new TemplateDefinition(newString(nextSeed(), 1, 30),
+                newString(nextSeed(), 1, 30),
+                newString(nextSeed(), 1, 30),
+                newString(nextSeed(), 1, 30),
+                newString(nextSeed(), 1, 30),
+                newString(nextSeed(), 1, 30),
                 DiskFormatType.VDI_FLAT,
-                newString(nextSeed(), 0, 30),
-                nextSeed());
+                "http://" + newString(nextSeed(), 1, 30),
+                nextSeed() + 1);
         templateDef.setAppsLibrary(appsLibrary);
         templateDef.setCategory(category);
-        templateDef.setIcon(icon);
+        templateDef.setIconUrl("http://validuri.com/icon.png");
         return templateDef;
 
     }
@@ -102,13 +98,6 @@ public class TemplateDefinitionGenerator extends DefaultEntityGenerator<Template
         Category category = entity.getCategory();
         categoryGenerator.addAuxiliaryEntitiesToPersist(category, entitiesToPersist);
         entitiesToPersist.add(category);
-
-        if (entity.getIcon() != null)
-        {
-            Icon icon = entity.getIcon();
-            iconGenerator.addAuxiliaryEntitiesToPersist(icon, entitiesToPersist);
-            entitiesToPersist.add(icon);
-        }
 
     }
 }

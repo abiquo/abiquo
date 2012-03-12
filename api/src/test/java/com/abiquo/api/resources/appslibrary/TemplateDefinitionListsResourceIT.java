@@ -33,12 +33,14 @@ import java.util.List;
 import javax.ws.rs.core.MediaType;
 
 import org.apache.wink.client.ClientResponse;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.resources.AbstractJpaGeneratorIT;
 import com.abiquo.server.core.appslibrary.AppsLibrary;
+import com.abiquo.server.core.appslibrary.Category;
 import com.abiquo.server.core.appslibrary.TemplateDefinition;
 import com.abiquo.server.core.appslibrary.TemplateDefinitionList;
 import com.abiquo.server.core.appslibrary.TemplateDefinitionListDto;
@@ -56,18 +58,22 @@ public class TemplateDefinitionListsResourceIT extends AbstractJpaGeneratorIT
 
     private Enterprise enterprise;
 
+    private AppsLibrary appsLibrary;
+
     private static final String SYSADMIN = "sysadmin";
 
     @BeforeMethod(groups = {APPS_INTEGRATION_TESTS})
     public void setUpUser()
     {
         enterprise = enterpriseGenerator.createUniqueInstance();
+        appsLibrary = appsLibraryGenerator.createUniqueInstance(enterprise);
 
         Role role = roleGenerator.createInstanceSysAdmin();
         User user = userGenerator.createInstance(enterprise, role, SYSADMIN, SYSADMIN);
 
         List<Object> entitiesToSetup = new ArrayList<Object>();
         entitiesToSetup.add(enterprise);
+        entitiesToSetup.add(appsLibrary);
 
         for (Privilege p : role.getPrivileges())
         {
@@ -79,33 +85,57 @@ public class TemplateDefinitionListsResourceIT extends AbstractJpaGeneratorIT
         setup(entitiesToSetup.toArray());
     }
 
+    @AfterMethod(groups = {APPS_INTEGRATION_TESTS})
+    public void tearDownTest()
+    {
+        super.tearDown();
+    }
+
+    private void setupList()
+    {
+        Category category = categoryGenerator.createUniqueInstance();
+
+        TemplateDefinition templateDef0 =
+            templateDefGenerator.createInstance(appsLibrary, category);
+        TemplateDefinition templateDef1 =
+            templateDefGenerator.createInstance(appsLibrary, category);
+        TemplateDefinition templateDef2 =
+            templateDefGenerator.createInstance(appsLibrary, category);
+
+        TemplateDefinitionList list =
+            new TemplateDefinitionList("templateDefinitionList_1", "http://www.abiquo.com");
+        list.setAppsLibrary(appsLibrary);
+        setup(list);
+
+        templateDef0.addToTemplateDefinitionLists(list);
+        templateDef1.addToTemplateDefinitionLists(list);
+        templateDef2.addToTemplateDefinitionLists(list);
+
+        list.addTemplateDefinition(templateDef0);
+        list.addTemplateDefinition(templateDef1);
+        list.addTemplateDefinition(templateDef2);
+
+        // List<TemplateDefinition> listofpackages = new ArrayList<TemplateDefinition>();
+        // list.setTemplateDefinitions(listofpackages);
+        List<Object> entitiesToSetup2 = new ArrayList<Object>();
+        entitiesToSetup2.add(category);
+
+        entitiesToSetup2.add(templateDef0);
+        entitiesToSetup2.add(templateDef1);
+        entitiesToSetup2.add(templateDef2);
+
+        setup(entitiesToSetup2.toArray());
+    }
+
     @Test(groups = {APPS_INTEGRATION_TESTS})
     public void getTemplateDefinitionsListsByEnterprise() throws Exception
     {
-
-        TemplateDefinitionList list = new TemplateDefinitionList("new", "http://listurl.com/index.xml");
-
-        TemplateDefinition tempDef0 = templateDefGenerator.createUniqueInstance();
-        list.addTemplateDefinition(tempDef0);
-
-        AppsLibrary app = appsLibraryGenerator.createUniqueInstance();
-        app.setEnterprise(enterprise);
-
-        tempDef0.setAppsLibrary(app);
-        list.setAppsLibrary(app);
-
-        List<Object> entitiesToSetup = new ArrayList<Object>();
-
-        entitiesToSetup.add(app);
-        entitiesToSetup.add(tempDef0.getCategory());
-        entitiesToSetup.add(tempDef0.getIcon());
-        entitiesToSetup.add(tempDef0);
-        entitiesToSetup.add(list);
-        setup(entitiesToSetup.toArray());
+        setupList();
 
         validURI = resolveTemplateDefinitionListsURI(enterprise.getId());
 
-        ClientResponse response = get(validURI, SYSADMIN, SYSADMIN);
+        ClientResponse response =
+            get(validURI, SYSADMIN, SYSADMIN, TemplateDefinitionListsDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), 200);
 
         TemplateDefinitionListsDto entity = response.getEntity(TemplateDefinitionListsDto.class);
@@ -118,7 +148,7 @@ public class TemplateDefinitionListsResourceIT extends AbstractJpaGeneratorIT
     public void getTemplateDefinitionListsByNonExistentEnterpriseRises404() throws Exception
     {
         validURI = resolveTemplateDefinitionListsURI(2);
-        ClientResponse response = get(validURI);
+        ClientResponse response = get(validURI, TemplateDefinitionListsDto.MEDIA_TYPE);
         assertError(response, 404, APIError.NON_EXISTENT_ENTERPRISE);
     }
 
@@ -128,9 +158,6 @@ public class TemplateDefinitionListsResourceIT extends AbstractJpaGeneratorIT
         TemplateDefinitionListDto templateDefList = new TemplateDefinitionListDto(); // empty list
         templateDefList.setName("Empty List");
         templateDefList.setUrl("http://listurl.com/index.xml");
-        AppsLibrary app = appsLibraryGenerator.createUniqueInstance();
-        app.setEnterprise(enterprise);
-        setup(app);
 
         validURI = resolveTemplateDefinitionListsURI(enterprise.getId());
 
@@ -146,11 +173,6 @@ public class TemplateDefinitionListsResourceIT extends AbstractJpaGeneratorIT
     @Test(groups = {APPS_INTEGRATION_TESTS})
     public void createTemplateDefinitionList()
     {
-
-        AppsLibrary app = appsLibraryGenerator.createUniqueInstance();
-        app.setEnterprise(enterprise);
-        setup(app);
-
         validURI = resolveTemplateDefinitionListsURI(enterprise.getId());
 
         String xmlindexURI = "http://localhost:7979/testovf/ovfindex.xml";
@@ -158,7 +180,7 @@ public class TemplateDefinitionListsResourceIT extends AbstractJpaGeneratorIT
         String basicAuth = basicAuth(SYSADMIN, SYSADMIN);
 
         ClientResponse response =
-            client.resource(validURI).accept(MediaType.APPLICATION_XML)
+            client.resource(validURI).accept(TemplateDefinitionListDto.MEDIA_TYPE)
                 .contentType(MediaType.TEXT_PLAIN).header("Authorization", "Basic " + basicAuth)
                 .post(xmlindexURI);
 
@@ -172,11 +194,6 @@ public class TemplateDefinitionListsResourceIT extends AbstractJpaGeneratorIT
     @Test(groups = {APPS_INTEGRATION_TESTS})
     public void createTemplateDefinitionListFromOtherXml()
     {
-
-        AppsLibrary app = appsLibraryGenerator.createUniqueInstance();
-        app.setEnterprise(enterprise);
-        setup(app);
-
         validURI = resolveTemplateDefinitionListsURI(enterprise.getId());
 
         String xmlindexURI = "http://localhost:7979/testovf/anyother.xml";
@@ -184,7 +201,7 @@ public class TemplateDefinitionListsResourceIT extends AbstractJpaGeneratorIT
         String basicAuth = basicAuth(SYSADMIN, SYSADMIN);
 
         ClientResponse response =
-            client.resource(validURI).accept(MediaType.APPLICATION_XML)
+            client.resource(validURI).accept(TemplateDefinitionListDto.MEDIA_TYPE)
                 .contentType(MediaType.TEXT_PLAIN).header("Authorization", "Basic " + basicAuth)
                 .post(xmlindexURI);
 
@@ -198,11 +215,6 @@ public class TemplateDefinitionListsResourceIT extends AbstractJpaGeneratorIT
     @Test(groups = {APPS_INTEGRATION_TESTS})
     public void createTemplateDefinitionListwithBadURLRises404()
     {
-
-        AppsLibrary app = appsLibraryGenerator.createUniqueInstance();
-        app.setEnterprise(enterprise);
-        setup(app);
-
         validURI = resolveTemplateDefinitionListsURI(enterprise.getId());
 
         String badURL = "http://localhost:7979/testovf/nonexistent/ovfindex.xml";
@@ -210,7 +222,7 @@ public class TemplateDefinitionListsResourceIT extends AbstractJpaGeneratorIT
         String basicAuth = basicAuth(SYSADMIN, SYSADMIN);
 
         ClientResponse response =
-            client.resource(validURI).accept(MediaType.APPLICATION_XML)
+            client.resource(validURI).accept(TemplateDefinitionListDto.MEDIA_TYPE)
                 .contentType(MediaType.TEXT_PLAIN).header("Authorization", "Basic " + basicAuth)
                 .post(badURL);
 
@@ -220,17 +232,12 @@ public class TemplateDefinitionListsResourceIT extends AbstractJpaGeneratorIT
     @Test(groups = {APPS_INTEGRATION_TESTS})
     public void createTemplateDefinitionListBadFormatXMLrises400()
     {
-
-        AppsLibrary app = appsLibraryGenerator.createUniqueInstance();
-        app.setEnterprise(enterprise);
-        setup(app);
-
         validURI = resolveTemplateDefinitionListsURI(enterprise.getId());
 
         String xmlindexURI = "http://localhost:7979/testovf/invalidovfindex/ovfindex.xml";
 
         ClientResponse response =
-            client.resource(validURI).accept(MediaType.APPLICATION_XML)
+            client.resource(validURI).accept(TemplateDefinitionListDto.MEDIA_TYPE)
                 .contentType(MediaType.TEXT_PLAIN).post(xmlindexURI);
 
         assertError(response, 400, APIError.INVALID_OVF_INDEX_XML);

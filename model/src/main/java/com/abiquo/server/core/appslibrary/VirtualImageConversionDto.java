@@ -21,6 +21,7 @@
 
 package com.abiquo.server.core.appslibrary;
 
+import javax.ws.rs.core.MediaType;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.abiquo.model.enumerator.ConversionState;
@@ -113,5 +114,16 @@ public class VirtualImageConversionDto extends SingleResourceTransportDto
     {
         this.size = size;
     }
+    
+    @Override
+    public String getMediaType()
+    {
+        return MediaType.APPLICATION_XML;
+    }
 
+    @Override
+    public String getBaseMediaType()
+    {
+        return MediaType.APPLICATION_XML;
+    }
 }

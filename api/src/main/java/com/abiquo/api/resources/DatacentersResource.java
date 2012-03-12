@@ -29,13 +29,13 @@ import static com.abiquo.api.resources.RemoteServiceResource.createTransferObjec
 import java.util.Collection;
 import java.util.List;
 
+import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
 
 import org.apache.wink.common.annotations.Workspace;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -77,7 +77,7 @@ public class DatacentersResource extends AbstractResource
     private SecurityService securityService;
 
     @GET
-    @Produces({MediaType.APPLICATION_XML, LINK_MEDIA_TYPE})
+    @Produces(DatacentersDto.MEDIA_TYPE)
     public DatacentersDto getDatacenters(@Context final IRESTBuilder restBuilder,
         @QueryParam(value = "idEnterprise") final String idEnterprise,
         @QueryParam("pricing") final Integer pricingId) throws Exception
@@ -111,7 +111,7 @@ public class DatacentersResource extends AbstractResource
     }
 
     @GET
-    @Produces(FLAT_MEDIA_TYPE)
+    @Produces(DatacentersDto.MEDIA_TYPE)
     public DatacentersDto getDatacentersWithRS(@Context final IRESTBuilder restBuilder,
         @QueryParam(value = "idEnterprise") final String idEnterprise) throws Exception
     {
@@ -149,6 +149,8 @@ public class DatacentersResource extends AbstractResource
     }
 
     @POST
+    @Produces(DatacenterDto.MEDIA_TYPE)
+    @Consumes(DatacenterDto.MEDIA_TYPE)
     public DatacenterDto postDatacenter(final DatacenterDto datacenterDto,
         @Context final IRESTBuilder restBuilder) throws Exception
 

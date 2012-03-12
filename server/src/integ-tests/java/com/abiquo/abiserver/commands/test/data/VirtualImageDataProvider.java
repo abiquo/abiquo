@@ -21,7 +21,6 @@
 
 package com.abiquo.abiserver.commands.test.data;
 
-import com.abiquo.abiserver.business.hibernate.pojohb.virtualimage.IconHB;
 import com.abiquo.abiserver.pojo.virtualimage.Category;
 import com.abiquo.abiserver.pojo.virtualimage.Repository;
 import com.abiquo.abiserver.pojo.virtualimage.VirtualImage;
@@ -56,12 +55,6 @@ public final class VirtualImageDataProvider extends DataProvider
         virtualImage.setRepository(repo);
         virtualImage.setDeleted(false);
         
-        IconHB icon = new IconHB();
-        icon.setIdIcon(1);
-        icon.setPath("http://bestwindowssoftware.org/icon/ubuntu_icon.png");
-        icon.setName("ubuntu");
-        
-        virtualImage.setIcon(icon.toPojo());
         virtualImage.setDescription("Test");
         virtualImage.setIdEnterprise(null);
         virtualImage.setIdMaster(null);

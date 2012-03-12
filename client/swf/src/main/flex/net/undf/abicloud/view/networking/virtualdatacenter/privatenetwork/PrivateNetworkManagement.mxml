@@ -53,6 +53,17 @@
             import net.undf.abicloud.vo.networking.VlanNetwork;
             import net.undf.abicloud.vo.virtualappliance.VirtualDataCenter;
 
+            private var _isShown:Boolean;
+            
+            public function set isShown(value:Boolean):void
+            {
+            	this._isShown = value;
+            }
+            
+            public function get isShown():Boolean
+            {
+                return this._isShown;
+            }
             //PopUps
             private var vlanFormAdd:PrivateVLANFormAdd;
 
@@ -148,7 +159,7 @@
             	}
             	event.virtualDatacenter = this._virtualDatacenter;
             	event.callback = populatePrivateNetworks;
-            	if(this._virtualDatacenter && this.visible){
+            	if(this._virtualDatacenter && this._isShown){
 	            	dispatchEvent(event);            		
             	}
             	
@@ -162,6 +173,7 @@
                 
             	_virtualDatacenter.network.networks.addAll(networks);
             	setDefaultNetwork(this._virtualDatacenter.defaultVlan,networks);
+            	refreshPrivateIPList(networks);
             }
             
             private function setDefaultNetwork(vlan:VlanNetwork, networks:ArrayCollection):void{
@@ -203,6 +215,22 @@
                 dispatchEvent(new Event("selectedVLANChange"));
 
                 privateIPList.init(null, _virtualDatacenter, _selectedVLAN);
+            }
+            
+            private function refreshPrivateIPList(networks:ArrayCollection):void
+            {
+            	for(var i:int = 0 ; i < networks.length; i++)
+            	{
+            	   if(_selectedVLAN && _selectedVLAN.vlanNetworkId == VlanNetwork(networks.getItemAt(i)).vlanNetworkId)
+            	   {
+            	   	   vlanList.selectedIndex = i;
+            	   	   privateIPList.init(null, _virtualDatacenter, _selectedVLAN);
+            	   	   return;
+            	   }	
+            	}
+            	
+            	//If not, delete IP list
+            	privateIPList.ipList = new ArrayCollection();
             }
 
             private function addVLAN():void

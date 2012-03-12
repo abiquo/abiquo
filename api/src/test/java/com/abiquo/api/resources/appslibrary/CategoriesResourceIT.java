@@ -26,6 +26,8 @@ import static com.abiquo.api.common.UriTestResolver.resolveCategoriesURI;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
+import javax.ws.rs.core.Response.Status;
+
 import org.apache.wink.client.ClientResponse;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -56,7 +58,7 @@ public class CategoriesResourceIT extends AbstractJpaGeneratorIT
         setup(c1, c2);
 
         String categoriesURI = resolveCategoriesURI();
-        ClientResponse response = get(categoriesURI);
+        ClientResponse response = get(categoriesURI, CategoriesDto.MEDIA_TYPE);
 
         CategoriesDto dtos = response.getEntity(CategoriesDto.class);
         assertEquals(dtos.getCollection().size(), 3);
@@ -89,7 +91,7 @@ public class CategoriesResourceIT extends AbstractJpaGeneratorIT
         String href = resolveCategoriesURI();
         ClientResponse response = post(href, cat);
 
-        assertErrors(response, 409, APIError.CATEGORY_DUPLICATED_NAME);
+        assertErrors(response, Status.CONFLICT.getStatusCode(), APIError.CATEGORY_DUPLICATED_NAME);
     }
 
     // ********************* Helper methods ************************

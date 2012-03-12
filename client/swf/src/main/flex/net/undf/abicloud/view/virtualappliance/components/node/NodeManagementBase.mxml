@@ -95,10 +95,14 @@
             protected function updateVirtualApplianceState(event:Event):void
             {
             	//reconfigure if the virtual appliance is running
-            	if(this._virtualAppliance.state.description == State.DEPLOYED.description)
+            	if(this._virtualAppliance.state.description == State.DEPLOYED.description
+            	|| this._virtualAppliance.state.description == State.NEEDS_SYNC.description)
             	{
-	            	AbiCloudModel.getInstance().virtualApplianceManager.setVirtualApplianceInProgress(this._virtualAppliance);
-	            	onClickButtonClose();
+            		if(this._node.virtualMachine.state.description != State.NOT_ALLOCATED.description)
+            		{
+		            	AbiCloudModel.getInstance().virtualApplianceManager.setVirtualApplianceInProgress(this._virtualAppliance);
+		            	onClickButtonClose();
+            		}
             	}
             }
 

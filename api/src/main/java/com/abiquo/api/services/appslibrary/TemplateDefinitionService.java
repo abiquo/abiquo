@@ -23,7 +23,6 @@ package com.abiquo.api.services.appslibrary;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -38,21 +37,23 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.abiquo.api.exceptions.APIError;
+import com.abiquo.api.services.DefaultApiService;
 import com.abiquo.api.services.EnterpriseService;
-import com.abiquo.appliancemanager.client.ApplianceManagerResourceStubImpl;
+import com.abiquo.api.services.stub.AMServiceStub;
+import com.abiquo.appliancemanager.client.ExternalHttpConnection;
 import com.abiquo.appliancemanager.repositoryspace.OVFDescription;
 import com.abiquo.appliancemanager.transport.TemplateStateDto;
 import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.ovfmanager.ovf.xml.OVFSerializer;
+import com.abiquo.server.core.appslibrary.AppsLibraryDAO;
 import com.abiquo.server.core.appslibrary.AppsLibraryRep;
 import com.abiquo.server.core.appslibrary.Category;
-import com.abiquo.server.core.appslibrary.Icon;
 import com.abiquo.server.core.appslibrary.TemplateDefinition;
 import com.abiquo.server.core.appslibrary.TemplateDefinitionRep;
 import com.abiquo.server.core.enterprise.Enterprise;
 
 @Service
-public class TemplateDefinitionService extends DefaultApiServiceWithApplianceManagerClient
+public class TemplateDefinitionService extends DefaultApiService
 {
     private final static Logger LOGGER = LoggerFactory.getLogger(TemplateDefinitionService.class);
 
@@ -62,6 +63,15 @@ public class TemplateDefinitionService extends DefaultApiServiceWithApplianceMan
     @Autowired
     private AppsLibraryRep appslibraryRep;
 
+    @Autowired
+    private EnterpriseService enterpriseService;
+
+    @Autowired
+    private AMServiceStub amService;
+
+    @Autowired
+    protected AppsLibraryDAO appsLibraryDao;
+
     public TemplateDefinitionService()
     {
 
@@ -70,19 +80,23 @@ public class TemplateDefinitionService extends DefaultApiServiceWithApplianceMan
     public TemplateDefinitionService(final EntityManager em)
     {
         repo = new TemplateDefinitionRep(em);
-        entService = new EnterpriseService(em);
         appslibraryRep = new AppsLibraryRep(em);
+        enterpriseService = new EnterpriseService(em);
+        appsLibraryDao = new AppsLibraryDAO(em);
+        amService = new AMServiceStub();
     }
 
     @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
     public List<TemplateDefinition> getTemplateDefinitionsByEnterprise(final Integer idEnterprise)
     {
+        enterpriseService.getEnterprise(idEnterprise); // check can view
         return repo.getTemplateDefinitionsByEnterprise(idEnterprise);
     }
 
     @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
-    public TemplateDefinition getTemplateDefinition(final Integer id)
+    public TemplateDefinition getTemplateDefinition(final Integer id, final Integer idEnterprise)
     {
+        enterpriseService.getEnterprise(idEnterprise); // check can view
         TemplateDefinition ovfpackage = repo.getTemplateDefinition(id);
         if (ovfpackage == null)
         {
@@ -96,7 +110,11 @@ public class TemplateDefinitionService extends DefaultApiServiceWithApplianceMan
     public TemplateDefinition addTemplateDefinition(final TemplateDefinition templateDef,
         final Integer idEnterprise)
     {
-        Enterprise ent = entService.getEnterprise(idEnterprise);
+        Enterprise ent = enterpriseService.getEnterprise(idEnterprise); // check can view
+        templateDef.setAppsLibrary(appsLibraryDao.findByEnterpriseOrInitialize(ent));
+
+        validate(templateDef);
+
         return repo.addTemplateDefinition(templateDef, ent);
     }
 
@@ -104,13 +122,18 @@ public class TemplateDefinitionService extends DefaultApiServiceWithApplianceMan
     public TemplateDefinition updateTemplateDefinition(final Integer templateDefId,
         final TemplateDefinition templateDef, final Integer idEnterprise)
     {
-        Enterprise enterprise = entService.getEnterprise(idEnterprise);
+        Enterprise enterprise = enterpriseService.getEnterprise(idEnterprise); // check can view
+        templateDef.setAppsLibrary(appsLibraryDao.findByEnterpriseOrInitialize(enterprise));
+
+        validate(templateDef);
+
         return repo.updateTemplateDefinition(templateDefId, templateDef, enterprise);
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public void removeTemplateDefinition(final Integer id)
+    public void removeTemplateDefinition(final Integer id, final Integer idEnterprise)
     {
+        enterpriseService.getEnterprise(idEnterprise); // check can view
         TemplateDefinition templateDef = repo.getTemplateDefinition(id);
         if (templateDef == null)
         {
@@ -127,39 +150,24 @@ public class TemplateDefinitionService extends DefaultApiServiceWithApplianceMan
     public TemplateStateDto getTemplateState(final Integer id, final Integer datacenterId,
         final Integer enterpriseId)
     {
-        checkEnterpriseAndDatacenter(enterpriseId, datacenterId);
-
-        final String ovfUrl = getTemplateDefinition(id).getUrl();
-        final ApplianceManagerResourceStubImpl amClient = getApplianceManagerClient(datacenterId);
-
-        return amClient.getTemplateStatus(String.valueOf(enterpriseId), ovfUrl);
+        final String ovfUrl = getTemplateDefinition(id, enterpriseId).getUrl();
+        return amService.getTemplateState(datacenterId, enterpriseId, ovfUrl);
     }
 
     @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
     public void installTemplateDefinition(final Integer id, final Integer datacenterId,
         final Integer enterpriseId)
     {
-        checkEnterpriseAndDatacenter(enterpriseId, datacenterId);
-
-        final String ovfUrl = getTemplateDefinition(id).getUrl();
-        final ApplianceManagerResourceStubImpl amClient = getApplianceManagerClient(datacenterId);
-
-        // checks the repository is writable
-        amClient.getRepository(String.valueOf(enterpriseId), true);
-
-        amClient.installTemplateDefinition(String.valueOf(enterpriseId), ovfUrl);
+        final String ovfUrl = getTemplateDefinition(id, enterpriseId).getUrl();
+        amService.install(datacenterId, enterpriseId, ovfUrl);
     }
 
     @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
     public void uninstallTemplateDefinition(final Integer id, final Integer datacenterId,
         final Integer enterpriseId)
     {
-        checkEnterpriseAndDatacenter(enterpriseId, datacenterId);
-
-        final String ovfUrl = getTemplateDefinition(id).getUrl();
-        final ApplianceManagerResourceStubImpl amClient = getApplianceManagerClient(datacenterId);
-
-        amClient.delete(String.valueOf(enterpriseId), ovfUrl);
+        final String ovfUrl = getTemplateDefinition(id, enterpriseId).getUrl();
+        amService.delete(datacenterId, enterpriseId, ovfUrl);
     }
 
     /** #################### ovfindex.xml #################### */
@@ -177,16 +185,12 @@ public class TemplateDefinitionService extends DefaultApiServiceWithApplianceMan
         String name = descr.getProduct().getValue();
         String description = descr.getInfo().getValue();
 
-        // TODO data truncation
-        if (description.length() > 255)
-        {
-            description = description.substring(0, 254);
-        }
-
         TemplateDefinition pack = new TemplateDefinition();
-        pack.setDescription(description);
         pack.setName(name);
-        pack.setProductName(name);
+        // TODO data truncation
+        pack.setProductName(name.length() > 45 ? name.substring(0, 44) : name);
+        pack.setDescription(description.length() > 255 ? description.substring(0, 254)
+            : description);
 
         /**
          * TODO product verison .... url ...
@@ -197,10 +201,8 @@ public class TemplateDefinitionService extends DefaultApiServiceWithApplianceMan
         if (descr.getIcon() != null && descr.getIcon().size() == 1)
         {
             String iconPath = descr.getIcon().get(0).getFileRef();
+            pack.setIconUrl(iconPath);
             // TODO start with http://
-
-            Icon icon = appslibraryRep.findByIconPathOrCreateNew(iconPath);
-            pack.setIcon(icon);
         }
 
         DiskFormatType format = findByDiskFormatNameOrUnknow(descr.getDiskFormat());
@@ -228,10 +230,11 @@ public class TemplateDefinitionService extends DefaultApiServiceWithApplianceMan
     private Long getDiskFileSizeMbFromOvfId(final String ovfid)
     {
         InputStream isovf = null;
+        ExternalHttpConnection connection = new ExternalHttpConnection();
         try
         {
-            URL ovfurl = new URL(ovfid);
-            isovf = ovfurl.openStream();
+            isovf = connection.openConnection(ovfid);
+
             EnvelopeType envelope = OVFSerializer.getInstance().readXMLEnvelope(isovf);
 
             Long accSize = 0l;
@@ -254,6 +257,8 @@ public class TemplateDefinitionService extends DefaultApiServiceWithApplianceMan
         }
         finally
         {
+            connection.releaseConnection();
+
             if (isovf != null)
             {
                 try

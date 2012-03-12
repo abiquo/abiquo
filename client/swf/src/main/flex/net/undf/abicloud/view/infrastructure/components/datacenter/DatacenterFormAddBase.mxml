@@ -98,7 +98,7 @@
                 BindingUtils.bindSetter(uriChange,applianceManagerInput,"isUriValid");
 
                 if (!virtualFactoryType)
-                    virtualFactoryType = AbiCloudModel.getInstance().infrastructureManager.getRemoteServiceTypeById(RemoteServiceType.TARANTINO);
+                    virtualFactoryType = AbiCloudModel.getInstance().infrastructureManager.getRemoteServiceTypeById(RemoteServiceType.VIRTUAL_FACTORY);
                 if (!virtualSystemMonitorType)
                     virtualSystemMonitorType = AbiCloudModel.getInstance().infrastructureManager.getRemoteServiceTypeById(RemoteServiceType.VIRTUAL_SYSTEM_MONITOR);
                 if (!applianceManagerType)
@@ -182,12 +182,7 @@
                 remoteService.domainName = virtualFactoryInput.domainNameInput.text;
                 remoteService.port = Number(virtualFactoryInput.portInput.text);
                 remoteService.serviceMapping = virtualFactoryInput.serviceMappingInput.text;
-                remoteService.name = virtualFactoryInput.formedUri;
-                if(virtualFactoryType.valueOf == RemoteServiceType.TARANTINO 
-                && virtualFactoryInput.serviceMappingInput.text == "virtualfactory"){
-                    remoteService.serviceMapping = "tarantino";
-                    remoteService.name = remoteService.name.replace("virtualfactory","tarantino");
-                }
+                remoteService.name = virtualFactoryInput.formedUri;          
                 remoteServices.addItem(remoteService);
 
                 //VirtualSystemMonitor

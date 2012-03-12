@@ -93,10 +93,11 @@ public class VirtualMachineLock extends DefaultApiService
 
         if (!VirtualMachineState.NOT_ALLOCATED.equals(originalState))
         {
-            tracer.log(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE, EventType.VM_DEPLOY,
-                APIError.VIRTUAL_MACHINE_INVALID_STATE_DEPLOY.getMessage());
             tracer.systemLog(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
-                EventType.VM_DEPLOY, "virtualMachine.deployedOrAllocated");
+                EventType.VM_DEPLOY, "virtualMachine.deployedOrAllocated.system", vm.getName(),
+                originalState.name());
+            tracer.log(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE, EventType.VM_DEPLOY,
+                "virtualMachine.deployedOrAllocated", vm.getName());
             addConflictErrors(APIError.VIRTUAL_MACHINE_INVALID_STATE_DEPLOY);
             flushErrors();
         }

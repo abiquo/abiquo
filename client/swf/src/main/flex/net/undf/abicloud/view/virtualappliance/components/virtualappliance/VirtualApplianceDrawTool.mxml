@@ -104,6 +104,7 @@
             {
                 //Check privilege
                 SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.VAPP_DEPLOY_UNDEPLOY, "removeChild",powerOnOffButton,drawingToolBar);
+                SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.VAPP_DEPLOY_UNDEPLOY, "removeChild",applyChangesButton,drawingToolBar);
                 SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.VAPP_CREATE_INSTANCE, "removeChild",createBundleButton,drawingToolBar);
                                 
                 
@@ -147,6 +148,7 @@
 
                     //Creating the node renderer for the new node
                     nodeRenderer = new NodeRenderer();
+                    nodeRenderer.id = "node_container_" + i;
                     nodeRenderer.node = node;
                     nodeRenderer.virtualAppliance = this._virtualAppliance;
                     var bounds:Rectangle = new Rectangle(nodesArea.x, nodesArea.y,
@@ -464,6 +466,7 @@
                     {
                         node = nodeListCopy.getItemAt(i) as Node;
                         nodeRenderer = new NodeRenderer();
+                        nodeRenderer.id = "node_container_" + i;
                         nodeRenderer.node = node;
                         nodeRenderer.virtualAppliance = this._virtualAppliance;
                         nodeRenderer.bounds = bounds
@@ -573,10 +576,13 @@
                     if (event.dragSource.hasFormat("VirtualImage"))
                     {
                     	if(!isStatefulNodeAlreadyPresent(event.dragSource.dataForFormat("VirtualImage") as VirtualImage)){
-	                        //We can only accept VirtualImages which its Hypervisor type is
-	                        //the same than Virtual Appliances VirtualDataCenter Hypervisor type
-	                        var virtualImage:VirtualImage = event.dragSource.dataForFormat("VirtualImage") as VirtualImage;
-	                        DragManager.acceptDragDrop(nodesArea);
+	                        if(SecuredPrivilegeAccess.userHasPrivilege(PrivilegeType.VDC_MANAGE_VAPP))
+	                        {
+		                        //We can only accept VirtualImages which its Hypervisor type is
+		                        //the same than Virtual Appliances VirtualDataCenter Hypervisor type
+		                        var virtualImage:VirtualImage = event.dragSource.dataForFormat("VirtualImage") as VirtualImage;
+		                        DragManager.acceptDragDrop(nodesArea);
+	                        } 
                     	}
                     }
                 }
@@ -623,6 +629,7 @@
 
                     //Creating the node renderer for the new node
                     nodeRenderer = new NodeRenderer();
+                    nodeRenderer.id = "node_container_" + (this._virtualAppliance.nodes.length + 1);
                     nodeRenderer.node = node;
                     nodeRenderer.virtualAppliance = this._virtualAppliance;
                     var bounds:Rectangle = new Rectangle(nodesArea.x, nodesArea.y,

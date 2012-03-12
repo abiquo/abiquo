@@ -25,6 +25,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
 import com.abiquo.model.transport.SingleResourceTransportDto;
+import com.abiquo.server.core.infrastructure.DatacenterDto;
 
 @XmlRootElement(name = "initiatorMapping")
 @XmlType(propOrder = {"id", "initiatorIqn", "targetIqn", "targetLun"})
@@ -34,6 +35,9 @@ public class InitiatorMappingDto extends SingleResourceTransportDto
      * 
      */
     private static final long serialVersionUID = 1L;
+    
+    public static final String BASE_MEDIA_TYPE = "application/vnd.abiquo.initiatormapping+xml";
+    public static final String MEDIA_TYPE = BASE_MEDIA_TYPE + "; version=" + API_VERSION;
 
     private Integer id;
 
@@ -83,4 +87,15 @@ public class InitiatorMappingDto extends SingleResourceTransportDto
         this.initiatorIqn = initiatorIqn;
     }
 
+    @Override
+    public String getMediaType()
+    {
+        return InitiatorMappingDto.MEDIA_TYPE;
+    }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
+    }
 }

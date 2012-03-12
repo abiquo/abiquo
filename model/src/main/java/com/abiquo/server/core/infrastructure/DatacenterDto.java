@@ -23,7 +23,6 @@ package com.abiquo.server.core.infrastructure;
 
 import java.io.Serializable;
 
-import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.abiquo.model.transport.SingleResourceTransportDto;
@@ -31,6 +30,9 @@ import com.abiquo.model.transport.SingleResourceTransportDto;
 @XmlRootElement(name = "datacenter")
 public class DatacenterDto extends SingleResourceTransportDto implements Serializable
 {
+    public static final String BASE_MEDIA_TYPE = "application/vnd.abiquo.datacenter+xml";
+    public static final String MEDIA_TYPE = BASE_MEDIA_TYPE + "; version=" + API_VERSION;
+
     /**
      * Identifier of the datacenter.
      */
@@ -129,4 +131,17 @@ public class DatacenterDto extends SingleResourceTransportDto implements Seriali
     {
         this.uuid = uuid;
     }
+    
+    @Override
+    public String getMediaType()
+    {
+        return DatacenterDto.MEDIA_TYPE;
+    }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
+    }
+    
 }

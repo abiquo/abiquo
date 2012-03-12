@@ -21,8 +21,6 @@
 
 package com.abiquo.api.services.appslibrary;
 
-import java.util.Collection;
-import java.util.LinkedList;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -32,15 +30,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.abiquo.api.exceptions.APIError;
+import com.abiquo.api.services.DefaultApiService;
+import com.abiquo.api.services.InfrastructureService;
 import com.abiquo.api.services.appslibrary.event.TemplateFactory;
-import com.abiquo.appliancemanager.client.ApplianceManagerResourceStubImpl;
-import com.abiquo.appliancemanager.client.ApplianceManagerResourceStubImpl.ApplianceManagerStubException;
+import com.abiquo.api.services.stub.AMServiceStub;
 import com.abiquo.appliancemanager.transport.EnterpriseRepositoryDto;
 import com.abiquo.appliancemanager.transport.TemplateDto;
-import com.abiquo.appliancemanager.transport.TemplateStateDto;
-import com.abiquo.appliancemanager.transport.TemplatesStateDto;
-import com.abiquo.appliancemanager.transport.TemplateStatusEnumType;
 import com.abiquo.server.core.appslibrary.DatacenterRepositoryDto;
 import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
 import com.abiquo.server.core.enterprise.Enterprise;
@@ -48,16 +43,22 @@ import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.Repository;
 
 @Service
-public class DatacenterRepositoryService extends DefaultApiServiceWithApplianceManagerClient
+public class DatacenterRepositoryService extends DefaultApiService
 {
     public static final Logger logger = LoggerFactory.getLogger(DatacenterRepositoryService.class);
 
     @Autowired
     private TemplateFactory toVmtemplate;
 
+    @Autowired
+    private AMServiceStub amService;
+
+    @Autowired
+    private InfrastructureService infraService;
+
     /**
-     * Request the DOWNLOAD {@link TemplateDto} available in the ApplianceManager and
-     * update the {@link VirtualMachineTemplate} repository with new virtual machine templates.
+     * Request the DOWNLOAD {@link TemplateDto} available in the ApplianceManager and update the
+     * {@link VirtualMachineTemplate} repository with new virtual machine templates.
      */
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public void synchronizeDatacenterRepository(final Datacenter datacenter,
@@ -65,11 +66,16 @@ public class DatacenterRepositoryService extends DefaultApiServiceWithApplianceM
     {
         logger.debug("synchronizing datacenter repository (AM refresh)");
 
-        ApplianceManagerResourceStubImpl amStub = getApplianceManagerClient(datacenter.getId());
+        Repository repo = infraService.getRepository(datacenter);
 
-        Repository repo = checkRepositoryLocation(datacenter, amStub);
-        refreshRepository(enterprise.getId(), repo, amStub);
+        List<TemplateDto> disks =
+            amService.refreshRepository(enterprise.getId(), datacenter.getId(), repo.getUrl());
 
+        List<VirtualMachineTemplate> insertedVmtemplates =
+            toVmtemplate.insertVirtualMachineTemplates(disks, repo);
+
+        // Process existing vmtemplates
+        processExistingVirtualMachineTemplates(insertedVmtemplates, datacenter);
     }
 
     /**
@@ -83,14 +89,13 @@ public class DatacenterRepositoryService extends DefaultApiServiceWithApplianceM
     {
         try
         {
-            ApplianceManagerResourceStubImpl amStub = getApplianceManagerClient(datacenterId);
-            EnterpriseRepositoryDto erepoDto = amStub.getRepository(String.valueOf(enterpriseId));
+            EnterpriseRepositoryDto erepoDto = amService.getRepository(datacenterId, enterpriseId);
 
             repoDto.setRepositoryCapacityMb(erepoDto.getCapacityMb());
             repoDto.setRepositoryRemainingMb(erepoDto.getRemainingMb());
             // TODO enterprise utilization
         }
-        catch (Exception e) // TODO only if timeout getting usage
+        catch (Exception e)
         {
             // TODO trace or propagate the exception
             logger.error(String.format("Can not obtain the repository usage info "
@@ -104,90 +109,30 @@ public class DatacenterRepositoryService extends DefaultApiServiceWithApplianceM
         return repoDto;
     }
 
-    private Repository checkRepositoryLocation(final Datacenter datacenter,
-        final ApplianceManagerResourceStubImpl amStub)
-    {
-        final String repositoryLocation = amStub.getRepositoryConfiguration().getLocation();
-
-        final Repository repo = infService.getRepository(datacenter);
-
-        if (!repo.getUrl().equalsIgnoreCase(repositoryLocation))
-        {
-            addConflictErrors(APIError.VMTEMPLATE_REPOSITORY_CHANGED);
-            flushErrors();
-        }
-
-        return repo;
-    }
-
-    private void refreshRepository(final Integer idEnterprise, final Repository repo,
-        final ApplianceManagerResourceStubImpl amStub)
-    {
-
-        List<TemplateDto> disks = new LinkedList<TemplateDto>();
-        for (String ovfid : getAvailableOVFPackageInstance(idEnterprise, amStub))
-        {
-            try
-            {
-                TemplateDto packageInstance =
-                    amStub.getTemplate(String.valueOf(idEnterprise), ovfid);
-                disks.add(packageInstance);
-            }
-            catch (ApplianceManagerStubException e)
-            {
-                logger.error("Can not initialize VirtualMachineTemplate from ovf [{}]", ovfid);
-            }
-        }
-
-        List<VirtualMachineTemplate> insertedVmtemplates =
-            toVmtemplate.insertVirtualMachineTemplates(disks, repo);
-
-        // Process existing vmtemplates
-        processExistingVirtualMachineTemplates(insertedVmtemplates);
-    }
-
     /**
-     * Returns OVF ids of the DOWNLOADED {@link TemplateDto} in the enterprise repository
-     */
-    private List<String> getAvailableOVFPackageInstance(final Integer idEnterprise,
-        final ApplianceManagerResourceStubImpl amStub)
-    {
-        List<String> ovfids = new LinkedList<String>();
-
-        try
-        {
-            TemplatesStateDto list =
-                amStub.getTemplatesState(idEnterprise.toString());
-
-            for (TemplateStateDto status : list.getCollection())
-            {
-                if (status.getStatus() == TemplateStatusEnumType.DOWNLOAD)
-                {
-                    ovfids.add(status.getOvfId());
-                }
-            }
-        }
-        catch (ApplianceManagerStubException e)
-        {
-            addConflictErrors(APIError.VMTEMPLATE_SYNCH_DC_REPO);
-            flushErrors();
-        }
-
-        return ovfids;
-    }
-
-    /**
-     * Post process AM existing vmtemplates.
+     * Post process AM existing images.
      * <p>
-     * This method may be overriden in enterprise version to manage virtual machine template
-     * conversions.
+     * This method may be overriden in enterprise version to manage virtual image conversions.
      * 
-     * @param vmtemplates The existing vmtemplates.
+     * @param images The existing images.
      */
     protected void processExistingVirtualMachineTemplates(
-        final Collection<VirtualMachineTemplate> vmtemplates)
+        final List<VirtualMachineTemplate> vmtemplates, final Datacenter datacenter)
     {
-        // Do nothing
+        if (vmtemplates.isEmpty())
+        {
+            return;
+        }
+
+        if (Boolean.valueOf(System.getProperty("am.conversions.skip", "false")) == Boolean.FALSE)
+        {
+            toVmtemplate.generateConversions(vmtemplates, datacenter);
+        }
+        else
+        {
+            logger.warn("VirtualMachine template conversion avoid after refresh "
+                + "(see ''am.conversions.skip'' property)");
+        }
     }
 
 }

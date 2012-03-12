@@ -26,6 +26,7 @@ import java.util.List;
 
 import org.apache.wink.client.ClientResponse;
 import org.jclouds.abiquo.domain.infrastructure.Datacenter;
+import org.jclouds.rest.AuthorizationException;
 
 import com.abiquo.abiserver.commands.impl.InfrastructureCommandImpl;
 import com.abiquo.abiserver.commands.stub.AbstractAPIStub;
@@ -122,7 +123,7 @@ public class DatacentersResourceStubImpl extends AbstractAPIStub implements Data
         }
         catch (Exception ex)
         {
-            populateErrors(ex, result, "getDatacenters");
+            populateErrors(ex, result, "getDatacenter");
         }
         finally
         {
@@ -310,10 +311,20 @@ public class DatacentersResourceStubImpl extends AbstractAPIStub implements Data
 
         if (includeRS)
         {
-            for (org.jclouds.abiquo.domain.infrastructure.RemoteService rs : datacenter
-                .listRemoteServices())
+            try
             {
-                dc.getRemoteServices().add(RemoteService.create(rs.unwrap(), dc.getId()));
+                List<org.jclouds.abiquo.domain.infrastructure.RemoteService> remoteservices =
+                    datacenter.listRemoteServices();
+
+                for (org.jclouds.abiquo.domain.infrastructure.RemoteService rs : remoteservices)
+                {
+                    dc.getRemoteServices().add(RemoteService.create(rs.unwrap(), dc.getId()));
+                }
+            }
+            catch (AuthorizationException ex)
+            {
+                // DO NOTHING
+                // If in this case we cannot acces to remote services then won't return them
             }
         }
 
@@ -347,9 +358,9 @@ public class DatacentersResourceStubImpl extends AbstractAPIStub implements Data
         {
             return RemoteServiceType.VIRTUAL_SYSTEM_MONITOR;
         }
-        else if (rst.equals(RemoteServiceType.TARANTINO.getServiceMapping()))
+        else if (rst.equals(RemoteServiceType.VIRTUAL_FACTORY.getServiceMapping()))
         {
-            return RemoteServiceType.TARANTINO;
+            return RemoteServiceType.VIRTUAL_FACTORY;
         }
         return null;
     }

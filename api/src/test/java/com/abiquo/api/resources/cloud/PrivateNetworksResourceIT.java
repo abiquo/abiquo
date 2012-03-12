@@ -33,7 +33,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response.Status;
 
 import org.apache.wink.client.ClientResponse;
@@ -118,7 +117,7 @@ public class PrivateNetworksResourceIT extends AbstractJpaGeneratorIT
 
         setup(vlan.getConfiguration(), vlan, vlan2.getConfiguration(), vlan2);
 
-        ClientResponse response = resource.accept(MediaType.APPLICATION_XML).get();
+        ClientResponse response = resource.accept(VLANNetworksDto.MEDIA_TYPE).get();
         assertEquals(200, response.getStatusCode());
         VLANNetworksDto entity = response.getEntity(VLANNetworksDto.class);
         assertNotNull(entity);
@@ -131,7 +130,7 @@ public class PrivateNetworksResourceIT extends AbstractJpaGeneratorIT
     {
         Resource resource = client.resource(resolvePrivateNetworksURI(new Random().nextInt(1000)));
 
-        ClientResponse response = resource.accept(MediaType.APPLICATION_XML).get();
+        ClientResponse response = resource.accept(VLANNetworksDto.MEDIA_TYPE).get();
         assertEquals(response.getStatusCode(), Status.NOT_FOUND.getStatusCode());
     }
 
@@ -195,7 +194,7 @@ public class PrivateNetworksResourceIT extends AbstractJpaGeneratorIT
     {
         Resource res =
             client.resource(resolvePrivateNetworksURI(vdc.getId()))
-                .accept(MediaType.APPLICATION_XML).contentType(MediaType.APPLICATION_XML)
+                .accept(VLANNetworkDto.MEDIA_TYPE).contentType(VLANNetworkDto.MEDIA_TYPE)
                 .header("Authorization", "Basic " + basicAuth("sysadmin", "sysadmin"));
 
         // Name null
@@ -300,72 +299,6 @@ public class PrivateNetworksResourceIT extends AbstractJpaGeneratorIT
         response = post(resolvePrivateNetworksURI(vdc2.getId()), dto, "sysadmin", "sysadmin");
         assertEquals(201, response.getStatusCode());
 
-    }
-
-    /**
-     * Ensure we can not use any other rangs than the private ones
-     */
-    @Test
-    public void createPrivateNetworkRaises400WhenNetworkAddressIsNotPrivate()
-    {
-        // Loopback address
-        VLANNetworkDto dto = createValidNetworkDto();
-        dto.setAddress("127.0.0.0");
-        ClientResponse response =
-            post(resolvePrivateNetworksURI(vdc.getId()), dto, "sysadmin", "sysadmin");
-        assertErrors(response, 400, APIError.VLANS_PRIVATE_ADDRESS_WRONG);
-
-        // Multicast address
-        dto = createValidNetworkDto();
-        dto.setAddress("224.12.1.0");
-        response = post(resolvePrivateNetworksURI(vdc.getId()), dto, "sysadmin", "sysadmin");
-        assertErrors(response, 400, APIError.VLANS_PRIVATE_ADDRESS_WRONG);
-
-        // Wrong private address
-        dto = createValidNetworkDto();
-        dto.setAddress("172.32.111.0");
-        response = post(resolvePrivateNetworksURI(vdc.getId()), dto, "sysadmin", "sysadmin");
-        assertErrors(response, 400, APIError.VLANS_PRIVATE_ADDRESS_WRONG);
-
-        dto = createValidNetworkDto();
-        dto.setAddress("172.15.111.0");
-        response = post(resolvePrivateNetworksURI(vdc.getId()), dto, "sysadmin", "sysadmin");
-        assertErrors(response, 400, APIError.VLANS_PRIVATE_ADDRESS_WRONG);
-
-        // Random address
-        dto = createValidNetworkDto();
-        dto.setAddress("34.123.4.56");
-        response = post(resolvePrivateNetworksURI(vdc.getId()), dto, "sysadmin", "sysadmin");
-        assertErrors(response, 400, APIError.VLANS_PRIVATE_ADDRESS_WRONG);
-    }
-
-    /**
-     * Ensure the network address and the mask are coherent in terms of network range.
-     */
-    @Test
-    public void createPrivateNetworkRaises409WhenInvalidMasksRelatedToNetworkAddress()
-    {
-        // Loopback address
-        VLANNetworkDto dto = createValidNetworkDto();
-        dto.setAddress("10.60.1.0");
-        dto.setMask(20);
-        ClientResponse response =
-            post(resolvePrivateNetworksURI(vdc.getId()), dto, "sysadmin", "sysadmin");
-        assertErrors(response, 409, APIError.VLANS_TOO_BIG_NETWORK);
-
-        // Multicast address
-        dto = createValidNetworkDto();
-        dto.setAddress("192.168.1.0");
-        dto.setMask(22);
-        response = post(resolvePrivateNetworksURI(vdc.getId()), dto, "sysadmin", "sysadmin");
-        assertErrors(response, 409, APIError.VLANS_TOO_BIG_NETWORK_II);
-
-        // Wrong private address
-        dto = createValidNetworkDto();
-        dto.setAddress("10.40.1.23");
-        dto.setMask(31);
-        response = post(resolvePrivateNetworksURI(vdc.getId()), dto, "sysadmin", "sysadmin");
-        assertErrors(response, 409, APIError.VLANS_TOO_SMALL_NETWORK);
     }
 
     /**

@@ -26,6 +26,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.model.transport.SingleResourceWithLimitsDto;
+import com.abiquo.server.core.infrastructure.DatacenterDto;
 import com.abiquo.server.core.infrastructure.network.VLANNetworkDto;
 
 @XmlRootElement(name = "virtualDatacenter")
@@ -35,6 +36,8 @@ public class VirtualDatacenterDto extends SingleResourceWithLimitsDto
      * 
      */
     private static final long serialVersionUID = -2165018992377526633L;
+    public static final String BASE_MEDIA_TYPE = "application/vnd.abiquo.virtualdatacenter+xml";
+    public static final String MEDIA_TYPE = BASE_MEDIA_TYPE + "; version=" + API_VERSION;
 
     private Integer id;
 
@@ -83,5 +86,17 @@ public class VirtualDatacenterDto extends SingleResourceWithLimitsDto
     public VLANNetworkDto getVlan()
     {
         return vlan;
+    }
+    
+    @Override
+    public String getMediaType()
+    {
+        return VirtualDatacenterDto.MEDIA_TYPE;
+    }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
     }
 }

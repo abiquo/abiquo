@@ -114,9 +114,12 @@
             private function onCreationComplete():void{
             	//Checking privilege
                 if(!SecuredPrivilegeAccess.userHasPrivilege(PrivilegeType.VAPP_ASSIGN_NETWORK)
-                && !SecuredPrivilegeAccess.userHasPrivilege(PrivilegeType.VAPP_ASSIGN_VOLUME)){
+                && !SecuredPrivilegeAccess.userHasPrivilege(PrivilegeType.VAPP_ASSIGN_VOLUME)
+                && !SecuredPrivilegeAccess.userHasPrivilege(PrivilegeType.VAPP_CUSTOMISE_SETTINGS)){
                 	SecuredPrivilegeAccess.checkElementAccess("removeEditButton","condition",showConfigurationButton,buttonsContainer);
                 }
+                
+                SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.VDC_MANAGE_VAPP,"removeChild",eraseNodeButton,buttonsContainer);
                 
                 //Listener for virtualMachine state changes
                 AbiCloudModel.getInstance().virtualApplianceManager.addEventListener(VirtualApplianceEvent.VIRTUAL_MACHINE_CHANGE_STATE,updateState);
@@ -160,7 +163,7 @@
                 //the node that has been setted
                 if (this._node is NodeVirtualImage)
                 {
-                    this._nodeIconSource = (NodeVirtualImage(this._node).virtualImage.icon) ? NodeVirtualImage(this._node).virtualImage.icon.path : null;
+                    this._nodeIconSource = (NodeVirtualImage(this._node).virtualImage.iconUrl) ? NodeVirtualImage(this._node).virtualImage.iconUrl : null;
                     setSourcesFromNodeVirtualImage();
                     //We highlight pending changes when the virtuall appliance is running
                     updatePendingStatus();
@@ -458,7 +461,7 @@
             /**
              * Announces that user wants to delete this node
              **/
-            private function onClickEraseNodeButton(closeEvent:CloseEvent = null):void
+            public function onClickEraseNodeButton(closeEvent:CloseEvent = null):void
             {
                 if (!closeEvent || closeEvent.detail == Alert.YES )
                 {
@@ -495,7 +498,7 @@
              * Launches an event asking to show a configuration window
              * for this NodeRenderer
              */
-            private function onClickConfigurationButton():void
+            public function onClickConfigurationButton():void
             {
                 if (_node.modified == Node.CRASH)
                 {

@@ -24,12 +24,14 @@ package com.abiquo.api.resources;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
@@ -52,6 +54,7 @@ import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.model.enumerator.MachineState;
 import com.abiquo.model.util.ModelTransformer;
 import com.abiquo.server.core.cloud.Hypervisor;
+import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.infrastructure.Datastore;
 import com.abiquo.server.core.infrastructure.DatastoreDto;
 import com.abiquo.server.core.infrastructure.Machine;
@@ -81,9 +84,9 @@ public class MachineResource extends AbstractResource
 
     public static final String MACHINE_ACTION_POWER_ON_REL = "poweron";
 
-    public static final String MACHINE_ACTION_CHECK = "action/checkState";
+    public static final String MACHINE_ACTION_CHECK = "action/checkstate";
 
-    public static final String MACHINE_CHECK = "checkState";
+    public static final String MACHINE_CHECK = "checkstate";
 
     public static final String SHOW_CREDENTIALS_QUERY_PARAM = "credentials";
 
@@ -121,6 +124,7 @@ public class MachineResource extends AbstractResource
     VirtualApplianceService vappService;
 
     @GET
+    @Produces(MachineDto.MEDIA_TYPE)
     public MachineDto getMachine(
         @PathParam(DatacenterResource.DATACENTER) final Integer datacenterId,
         @PathParam(RackResource.RACK) final Integer rackId,
@@ -145,6 +149,8 @@ public class MachineResource extends AbstractResource
     }
 
     @PUT
+    @Consumes(MachineDto.MEDIA_TYPE)
+    @Produces(MachineDto.MEDIA_TYPE)
     public MachineDto modifyMachine(
         @PathParam(DatacenterResource.DATACENTER) final Integer datacenterId,
         @PathParam(RackResource.RACK) final Integer rackId,
@@ -152,6 +158,20 @@ public class MachineResource extends AbstractResource
         @Context final IRESTBuilder restBuilder) throws Exception
     {
         validatePathParameters(datacenterId, rackId, machineId);
+
+        Machine old = service.getMachine(machineId);
+
+        // if we enable the machine then we force a check
+        if (old.getState().equals(MachineState.HALTED)
+            && !machine.getState().equals(MachineState.HALTED))
+        {
+            MachineState newState =
+                infraService.checkMachineState(datacenterId, machine.getIp(), machine.getType(),
+                    old.getHypervisor().getUser(), old.getHypervisor().getPassword(),
+                    machine.getPort());
+            // machine will be updated with the given state
+            machine.setState(newState);
+        }
 
         Machine m = service.modifyMachine(machineId, machine);
 
@@ -181,6 +201,7 @@ public class MachineResource extends AbstractResource
      */
     @GET
     @Path(MACHINE_ACTION_CHECK)
+    @Produces(MachineStateDto.MEDIA_TYPE)
     public MachineStateDto checkMachineState(
         @PathParam(DatacenterResource.DATACENTER) final Integer datacenterId,
         @PathParam(RackResource.RACK) final Integer rackId,
@@ -234,9 +255,10 @@ public class MachineResource extends AbstractResource
 
     protected static MachineDto addLinks(final IRESTBuilder restBuilder,
         final Integer datacenterId, final Integer rackId, final Boolean managedRack,
-        final MachineDto machine)
+        final Enterprise enterprise, final MachineDto machine)
     {
-        machine.setLinks(restBuilder.buildMachineLinks(datacenterId, rackId, managedRack, machine));
+        machine.setLinks(restBuilder.buildMachineLinks(datacenterId, rackId, managedRack,
+            enterprise, machine));
 
         return machine;
     }
@@ -251,7 +273,6 @@ public class MachineResource extends AbstractResource
         dto.setName(machine.getName());
         dto.setState(machine.getState());
         dto.setVirtualCpuCores(machine.getVirtualCpuCores());
-        dto.setVirtualCpusPerCore(machine.getVirtualCpusPerCore());
         dto.setVirtualCpusUsed(machine.getVirtualCpusUsed());
         dto.setVirtualRamInMb(machine.getVirtualRamInMb());
         dto.setVirtualRamUsedInMb(machine.getVirtualRamUsedInMb());
@@ -297,7 +318,7 @@ public class MachineResource extends AbstractResource
         {
             dto =
                 addLinks(restBuilder, machine.getDatacenter().getId(), machine.getRack().getId(),
-                    machine.getBelongsToManagedRack(), dto);
+                    machine.getBelongsToManagedRack(), machine.getEnterprise(), dto);
         }
 
         return dto;
@@ -370,6 +391,10 @@ public class MachineResource extends AbstractResource
      */
     protected APIException translateException(final Exception e)
     {
+        if (e instanceof APIException)
+        {
+            return (APIException) e;
+        }
         return new ConflictException(APIError.NODECOLLECTOR_ERROR);
     }
 }

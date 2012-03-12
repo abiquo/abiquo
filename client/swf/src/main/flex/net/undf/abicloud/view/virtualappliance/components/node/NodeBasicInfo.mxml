@@ -93,7 +93,6 @@
             private function onCreationComplete():void
             {
                 SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.VAPP_CUSTOMISE_SETTINGS,"removeChild",saveButton,saveBox);
-                
             }
 
             /**
@@ -138,7 +137,7 @@
                 
                 if(cpuInput.value != _originalNode.virtualMachine.cpu
                 || ramInput.value != _originalNode.virtualMachine.ram
-                || (passwordInput.text != '' && passwordInput.text != _originalNode.virtualMachine.password)
+                || passwordInput.text != _originalNode.virtualMachine.password
                 || descriptionInput.text != _originalNode.virtualMachine.description)
                 {
 	                //Making a copy of the virtual machine, to not modify the original one before changes are saved in server
@@ -194,7 +193,8 @@
         <mx:FormItem 
             label="@Resource(bundle='Common', key='TEXTINPUT_LABEL_NAME')">
             <mx:TextInput id="nameInput"
-            	enabled="{this._isEditionAllowed}"/>
+            	enabled="{this._isEditionAllowed}"
+            	maxChars="255"/>
         </mx:FormItem>
 
         <mx:FormItem 

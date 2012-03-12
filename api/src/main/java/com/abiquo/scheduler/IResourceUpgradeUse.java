@@ -23,6 +23,7 @@ package com.abiquo.scheduler;
 
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualMachine;
+import com.abiquo.server.core.infrastructure.Datastore;
 import com.abiquo.server.core.infrastructure.Machine;
 import com.abiquo.server.core.scheduler.VirtualMachineRequirements;
 
@@ -55,17 +56,24 @@ public interface IResourceUpgradeUse
     /**
      * Decrements the physical machine resource utilization
      * 
-     * @param machine, the target physical machine to decrements its resource utilization.
      * @param virtualMachine, the resource requirements to be deallocated (based on its virtual
      *            machine template and additional resource configuration).
      */
     public void rollbackUse(VirtualMachine virtual);
 
     /**
-     * Increase the ram and cpu resources on the provided machine.
+     * Decrements the physical machine resource utilization after a failed VM deploy operation by HA
      * 
-     * @param requirements, the increased resources (now only used for CPU and RAM)
+     * @param virtualMachine
      */
-    public void updateUsed(final Machine machine, final VirtualMachineRequirements requirements);
+    public void rollbackUseHA(VirtualMachine virtualMachine);
+
+    /**
+     * Increase the ram, cpu and storage used resources on the provided machine and datastore.
+     * 
+     * @param requirements, the increased resources (now only used for CPU, RAM and HD)
+     */
+    public void updateUsed(final Machine machine, final Datastore datastore,
+        final VirtualMachineRequirements requirements);
 
 }

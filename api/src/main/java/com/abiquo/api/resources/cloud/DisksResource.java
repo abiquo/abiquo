@@ -25,15 +25,15 @@ import java.util.List;
 
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 
 import org.apache.wink.common.annotations.Parent;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
@@ -61,8 +61,6 @@ import com.abiquo.server.core.infrastructure.storage.DisksManagementDto;
 @Controller
 public class DisksResource extends AbstractResource
 {
-    private static final Logger LOGGER = LoggerFactory.getLogger(DisksResource.class);
-
     public static final String DISKS_PATH = "disks";
 
     /** Autowired business logic service. */
@@ -80,6 +78,7 @@ public class DisksResource extends AbstractResource
      *             {@link APIExceptionMapper} exception mapper.
      */
     @GET
+    @Produces(DisksManagementDto.MEDIA_TYPE)
     public DisksManagementDto getListOfHardDisks(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) @NotNull @Min(1) final Integer vdcId,
         @Context final IRESTBuilder restBuilder) throws Exception
@@ -106,6 +105,8 @@ public class DisksResource extends AbstractResource
      *             {@link APIExceptionMapper} exception mapper.
      */
     @POST
+    @Consumes(DiskManagementDto.MEDIA_TYPE)
+    @Produces(DiskManagementDto.MEDIA_TYPE)
     public DiskManagementDto createHardDisk(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) @NotNull @Min(1) final Integer vdcId,
         final DiskManagementDto inputDto, @Context final IRESTBuilder restBuilder) throws Exception

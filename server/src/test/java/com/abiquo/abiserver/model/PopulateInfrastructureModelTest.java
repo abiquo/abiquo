@@ -211,7 +211,7 @@ public class PopulateInfrastructureModelTest
         RemoteServiceHB vf = new RemoteServiceHB();
 
         vf.setIdDataCenter(datacenter.getIdDataCenter());
-        vf.setRemoteServiceType(RemoteServiceType.TARANTINO);
+        vf.setRemoteServiceType(RemoteServiceType.VIRTUAL_FACTORY);
 
         vf.setUri(virtualFactoryURL);
 
@@ -233,8 +233,6 @@ public class PopulateInfrastructureModelTest
 
         machine.setCpu(cpu);
         machine.setRam(ram);
-
-        machine.setCpuRatio(1); // XXX
 
         machine.setCpuUsed(0);
         machine.setRamUsed(0);

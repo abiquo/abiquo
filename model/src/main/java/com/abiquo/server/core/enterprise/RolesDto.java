@@ -31,9 +31,24 @@ import com.abiquo.model.transport.WrapperDto;
 @XmlRootElement(name = "roles")
 public class RolesDto extends WrapperDto<RoleDto>
 {
+    public static final String BASE_MEDIA_TYPE = "application/vnd.abiquo.roles+xml";
+    public static final String MEDIA_TYPE = BASE_MEDIA_TYPE + "; version=" + API_VERSION;
+    
     @XmlElement(name = "role")
     public List<RoleDto> getCollection()
     {
         return collection;
+    }
+    
+    @Override
+    public String getMediaType()
+    {
+        return RolesDto.MEDIA_TYPE;
+    }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
     }
 }

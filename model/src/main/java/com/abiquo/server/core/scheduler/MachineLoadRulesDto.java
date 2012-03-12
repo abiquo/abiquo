@@ -34,12 +34,25 @@ import com.abiquo.model.transport.WrapperDto;
 @XmlRootElement(name = "machineLoadRules")
 public class MachineLoadRulesDto extends WrapperDto<MachineLoadRuleDto>
 {
-
+    public static final String BASE_MEDIA_TYPE = "application/vnd.abiquo.machineloadrules+xml";
+    public static final String MEDIA_TYPE = BASE_MEDIA_TYPE + "; version=" + API_VERSION;
+    
     @Override
     @XmlElement(name = "machineLoadRule")
     public List<MachineLoadRuleDto> getCollection()
     {
         return collection;
     }
-
+    
+    @Override
+    public String getMediaType()
+    {
+        return MachineLoadRulesDto.MEDIA_TYPE;
+    }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
+    }
 }

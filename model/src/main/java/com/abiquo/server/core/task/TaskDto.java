@@ -24,6 +24,7 @@ package com.abiquo.server.core.task;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.abiquo.model.transport.SingleResourceTransportDto;
+import com.abiquo.server.core.infrastructure.DatacenterDto;
 import com.abiquo.server.core.task.enums.TaskState;
 import com.abiquo.server.core.task.enums.TaskType;
 
@@ -31,6 +32,8 @@ import com.abiquo.server.core.task.enums.TaskType;
 public class TaskDto extends SingleResourceTransportDto
 {
     private static final long serialVersionUID = 3587883337292250623L;
+    public static final String BASE_MEDIA_TYPE = "application/vnd.abiquo.task+xml";
+    public static final String MEDIA_TYPE = BASE_MEDIA_TYPE + "; version=" + API_VERSION;
 
     protected String ownerId;
 
@@ -118,5 +121,17 @@ public class TaskDto extends SingleResourceTransportDto
     public void setState(TaskState state)
     {
         this.state = state;
+    }
+    
+    @Override
+    public String getMediaType()
+    {
+        return TaskDto.MEDIA_TYPE;
+    }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
     }
 }

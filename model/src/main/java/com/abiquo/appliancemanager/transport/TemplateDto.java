@@ -192,5 +192,11 @@ public class TemplateDto extends TemplateDefinitionDto
     {
         this.hdSizeUnit = hdSizeUnit;
     }
+    
+    @Override
+    public String getBaseMediaType()
+    {
+        return BASE_MEDIA_TYPE;
+    }
 
 }

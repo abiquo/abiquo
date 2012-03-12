@@ -26,9 +26,6 @@ import static com.abiquo.am.services.TemplateConventions.getFileUrl;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLConnection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -50,7 +47,7 @@ import org.dmtf.schemas.wbem.wscim._1.common.CimString;
 import org.springframework.stereotype.Component;
 
 import com.abiquo.am.exceptions.AMError;
-import com.abiquo.appliancemanager.config.AMConfigurationManager;
+import com.abiquo.appliancemanager.client.ExternalHttpConnection;
 import com.abiquo.appliancemanager.exceptions.AMException;
 import com.abiquo.appliancemanager.exceptions.DownloadException;
 import com.abiquo.appliancemanager.transport.MemorySizeUnit;
@@ -67,42 +64,6 @@ import com.abiquo.ovfmanager.ovf.xml.OVFSerializer;
 @Component
 public class OVFDocumentFetch
 {
-    /** Timeout for all the HTTP connections. */
-    private final static Integer httpTimeout =
-        AMConfigurationManager.getInstance().getAMConfiguration().getTimeout();
-
-    private InputStream openHTTPConnection(final String ovfid) throws DownloadException
-    {
-        URL target;
-
-        try
-        {
-            target = new URL(ovfid);
-            URLConnection connection = target.openConnection();
-
-            connection.setUseCaches(true);
-            // XXX auth related --- connection.setAllowUserInteraction(true);
-
-            connection.setReadTimeout(httpTimeout);
-            connection.setConnectTimeout(httpTimeout);
-
-            return connection.getInputStream();
-        }
-        catch (MalformedURLException murl)
-        {
-            final String msg =
-                String.format("The provided OVF identifier [%s] is not an URL", ovfid);
-            throw new DownloadException(msg, murl);
-        }
-        catch (IOException e)
-        {
-            final String msg =
-                String.format("Unable open an inputstream for the location [%s]", ovfid);
-            throw new DownloadException(msg, e);
-
-        }
-
-    }
 
     /**
      * XXX
@@ -112,31 +73,39 @@ public class OVFDocumentFetch
      */
     public EnvelopeType obtainEnvelope(final String ovfId)
     {
-        InputStream evelopeStream = openHTTPConnection(ovfId);
-
         EnvelopeType envelope;
+        InputStream evelopeStream = null;
+
+        final ExternalHttpConnection connection = new ExternalHttpConnection();
+
         try
         {
+            evelopeStream = connection.openConnection(ovfId);
+
             envelope = OVFSerializer.getInstance().readXMLEnvelope(evelopeStream);
 
             envelope = fixOVfDocument(ovfId, envelope);
 
             checkEnvelopeIsValid(envelope);
         }
+        catch (AMException ame)
+        {
+            throw ame;
+        }
         catch (Exception e)
         {
-            if (e instanceof AMException)
-            {
-                throw (AMException) e;
-            }
-
             throw new AMException(AMError.TEMPLATE_INVALID, e);
         }
         finally
         {
+            connection.releaseConnection();
+
             try
             {
-                evelopeStream.close();
+                if (evelopeStream != null)
+                {
+                    evelopeStream.close();
+                }
             }
             catch (IOException e)
             {
@@ -366,7 +335,7 @@ public class OVFDocumentFetch
                 if (ftype.getSize() == null)
                 {
                     String fileUrl = getFileUrl(ftype.getHref(), ovfId);
-                    Long size = getFileSizeFromHttpHead(fileUrl);
+                    Long size = new ExternalHttpConnection().headFile(fileUrl);
 
                     ftype.setSize(BigInteger.valueOf(size));
                 }
@@ -375,33 +344,11 @@ public class OVFDocumentFetch
         catch (Exception e)
         {
             throw new InvalidSectionException(String.format("Invalid File References section "
-                + "(check all the files on the OVF document contains the ''size'' attribute):\n", e
-                .toString()));
+                + "(check all the files on the OVF document contains the ''size'' attribute):\n",
+                e.toString()));
         }
 
         return envelope;
-    }
-
-    private final static String CONTENT_LENGTH = "Content-Length";
-
-    private Long getFileSizeFromHttpHead(final String fileUrl) throws DownloadException
-    {
-        try
-        {
-            URLConnection connection = new URL(fileUrl).openConnection();
-
-            connection.setUseCaches(true);
-            connection.setReadTimeout(httpTimeout);
-            connection.setConnectTimeout(httpTimeout);
-
-            String contentLenght = connection.getHeaderField(CONTENT_LENGTH);
-
-            return Long.parseLong(contentLenght);
-        }
-        catch (Exception e)
-        {
-            throw new DownloadException(String.format("Can not obtain file [%s] size", fileUrl), e);
-        }
     }
 
     /**

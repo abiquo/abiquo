@@ -43,6 +43,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.exceptions.APIException;
+import com.abiquo.api.exceptions.InternalServerErrorException;
 import com.abiquo.api.services.cloud.VirtualMachineService;
 import com.abiquo.api.services.stub.NodecollectorServiceStub;
 import com.abiquo.api.services.stub.VsmServiceStub;
@@ -290,6 +291,15 @@ public class InfrastructureService extends DefaultApiService
             }
 
             validate(datastore);
+
+            // updates shared datastores
+            List<Datastore> datastoresShared = repo.findShares(datastore);
+            for (Datastore dstore : datastoresShared)
+            {
+                dstore.setSize(datastore.getSize());
+                dstore.setUsedSize(datastore.getUsedSize());
+            }
+
             repo.insertDatastore(datastore);
         }
 
@@ -300,7 +310,6 @@ public class InfrastructureService extends DefaultApiService
         }
 
         // Insert the machine into database
-        machine.setVirtualCpusPerCore(1);
         machine.setDatacenter(datacenter);
         machine.setRack(rack);
 
@@ -311,6 +320,18 @@ public class InfrastructureService extends DefaultApiService
         }
 
         validate(machine.getHypervisor());
+
+        // [ABICLOUDPREMIUM-2996] These values cannot be changed. Must always reflect the real ones.
+        // Even if the POST to create the machine was made with the information from NodeCollector,
+        // we need to make sure those values have not been changed.
+        Machine remoteMachine =
+            discoverRemoteHypervisor(datacenterId, IPAddress.newIPAddress(machine.getHypervisor()
+                .getIp()), machine.getHypervisor().getType(), machine.getHypervisor().getUser(),
+                machine.getHypervisor().getPassword(), machine.getHypervisor().getPort());
+        machine.setState(remoteMachine.getState());
+        machine.setVirtualRamInMb(remoteMachine.getVirtualRamInMb());
+        machine.setVirtualCpuCores(remoteMachine.getVirtualCpuCores());
+
         validate(machine);
 
         // Part 2: Insert the and machine into database.
@@ -342,6 +363,11 @@ public class InfrastructureService extends DefaultApiService
             "machine.created", machine.getName(), machine.getHypervisor().getIp(), machine
                 .getHypervisor().getType(), machine.getState());
 
+        if (machine.getInitiatorIQN() == null)
+        {
+            tracer.log(SeverityType.WARNING, ComponentType.MACHINE, EventType.MACHINE_CREATE,
+                "machine.withoutiqn", machine.getName(), machine.getHypervisor().getIp());
+        }
         return machine;
     }
 
@@ -469,9 +495,16 @@ public class InfrastructureService extends DefaultApiService
             }
         }
 
+        deleteMachineRulesFromRack(rack);
+
         repo.deleteRack(rack);
         tracer.log(SeverityType.INFO, ComponentType.RACK, EventType.RACK_DELETE, "rack.deleted",
             rack.getName());
+    }
+
+    protected void deleteMachineRulesFromRack(final Rack rack)
+    {
+        // PREMIUM
     }
 
     public List<Machine> getMachines(final Rack rack)
@@ -743,6 +776,12 @@ public class InfrastructureService extends DefaultApiService
                 machine.getDatastores().get(0).setEnabled(true);
             }
         }
+        else
+        {
+            // no datastores to enable
+            addConflictErrors(APIError.MACHINE_ANY_DATASTORE_DEFINED);
+            flushErrors();
+        }
 
     }
 
@@ -980,7 +1019,18 @@ public class InfrastructureService extends DefaultApiService
                 RemoteServiceType.VIRTUAL_SYSTEM_MONITOR);
         for (VirtualMachine vm : vmachines)
         {
-            vsmServiceStub.unsubscribe(vsm, vm);
+            try
+            {
+                vsmServiceStub.unsubscribe(vsm, vm);
+            }
+            catch (InternalServerErrorException ex)
+            {
+                LOGGER
+                    .error(String
+                        .format(
+                            "An unexpected error has ocurred when try to unsubscribe the virtual machine '%s', it probably unsubscribed yet",
+                            vm.getName()));
+            }
             vdcRep.deleteVirtualMachine(vm);
         }
     }

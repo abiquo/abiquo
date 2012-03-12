@@ -49,6 +49,8 @@ import com.abiquo.model.rest.RESTLink;
 import com.abiquo.model.transport.error.CommonError;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualDatacenterRep;
+import com.abiquo.server.core.cloud.VirtualMachine;
+import com.abiquo.server.core.cloud.VirtualMachineRep;
 import com.abiquo.server.core.common.Limit;
 import com.abiquo.server.core.enterprise.DatacenterLimits;
 import com.abiquo.server.core.enterprise.DatacenterLimitsDto;
@@ -90,6 +92,9 @@ public class EnterpriseService extends DefaultApiService
     @Autowired
     private SecurityService securityService;
 
+    @Autowired
+    protected VirtualMachineRep virtualMachineRep;
+
     public EnterpriseService()
     {
 
@@ -111,13 +116,14 @@ public class EnterpriseService extends DefaultApiService
     }
 
     @Transactional(readOnly = true)
-    public Collection<Enterprise> getEnterprises(final int idPricingTempl, final boolean included,
-        final String filterName, final Integer offset, final Integer numResults,
-        final String orderBy, final boolean desc)
+    public Collection<Enterprise> getEnterprises(final Integer startwith, final int idPricingTempl,
+        final boolean included, final String filterName, final Integer numResults)
     {
         User user = userService.getCurrentUser();
+
         PricingTemplate pt = null;
 
+        // id pricing -1
         if (idPricingTempl != -1)
         {
             if (idPricingTempl != 0)
@@ -133,16 +139,21 @@ public class EnterpriseService extends DefaultApiService
         {
             if (idPricingTempl != -1)
             {
-                return repo.findByPricingTemplate(pt, included, filterName, offset, numResults,
-                    orderBy, desc, user.getEnterprise().getId());
+                return repo.findByPricingTemplate(startwith, pt, included, filterName, numResults,
+                    user.getEnterprise().getId());
             }
+
             return Collections.singletonList(user.getEnterprise());
         }
 
         if (idPricingTempl != -1)
         {
-            return repo.findByPricingTemplate(pt, included, filterName, offset, numResults,
-                orderBy, desc, null);
+            if (idPricingTempl != 0)
+            {
+                pt = findPricingTemplate(idPricingTempl);
+            }
+            return repo
+                .findByPricingTemplate(startwith, pt, included, filterName, numResults, null);
         }
 
         if (!StringUtils.isEmpty(filterName))
@@ -150,7 +161,8 @@ public class EnterpriseService extends DefaultApiService
             return repo.findByNameAnywhere(filterName);
         }
 
-        return repo.findAll(offset, numResults);
+        return repo.findAll(startwith, numResults);
+
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
@@ -226,6 +238,25 @@ public class EnterpriseService extends DefaultApiService
 
         // userService.checkEnterpriseAdminCredentials(enterprise);
         userService.checkCurrentEnterprise(enterprise);
+        return enterprise;
+    }
+
+    /**
+     * This method does not enforce same enterprise. But does check for privs.
+     * 
+     * @param id
+     * @return Enterprise
+     */
+    @Transactional(readOnly = true)
+    public Enterprise getAnyEnterprise(final Integer id)
+    {
+        Enterprise enterprise = repo.findById(id);
+        if (enterprise == null)
+        {
+            addNotFoundErrors(APIError.NON_EXISTENT_ENTERPRISE);
+            flushErrors();
+        }
+
         return enterprise;
     }
 
@@ -387,6 +418,19 @@ public class EnterpriseService extends DefaultApiService
         }
 
         Enterprise enterprise = getEnterprise(enterpriseId);
+
+        List<VirtualMachine> vms =
+            (List<VirtualMachine>) virtualMachineRep.findManagedByHypervisor(machine
+                .getHypervisor());
+        for (VirtualMachine vm : vms)
+        {
+            if (!vm.getEnterprise().equals(enterprise))
+            {
+                addConflictErrors(APIError.MACHINE_CANNOT_BE_RESERVED);
+                flushErrors();
+            }
+        }
+
         repo.reserveMachine(machine, enterprise);
 
         return machine;
@@ -452,6 +496,20 @@ public class EnterpriseService extends DefaultApiService
         return repo.findLimitsByEnterpriseAndDatacenter(enterprise, datacenter);
     }
 
+    /**
+     * Checks enterprise and datacenter exists and have a limits relation (datacenter allowed by
+     * enterprise).
+     */
+    @Transactional(readOnly = true)
+    public DatacenterLimits findLimitsByEnterpriseVMTShared(final Integer enterpriseId,
+        final Integer datacenterId)
+    {
+        Enterprise enterprise = getAnyEnterprise(enterpriseId);
+        Datacenter datacenter = datacenterService.getDatacenter(datacenterId);
+
+        return repo.findLimitsByEnterpriseAndDatacenter(enterprise, datacenter);
+    }
+
     @Transactional(readOnly = true)
     public Collection<DatacenterLimits> findLimitsByDatacenter(final Integer datacenterId)
     {
@@ -482,11 +540,20 @@ public class EnterpriseService extends DefaultApiService
         }
 
         DatacenterLimits limit =
-            new DatacenterLimits(enterprise, datacenter, dto.getRamSoftLimitInMb(), dto
-                .getCpuCountSoftLimit(), dto.getHdSoftLimitInMb(), dto.getRamHardLimitInMb(), dto
-                .getCpuCountHardLimit(), dto.getHdHardLimitInMb(), dto.getStorageSoft(), dto
-                .getStorageHard(), dto.getPublicIpsSoft(), dto.getPublicIpsHard(), dto
-                .getVlansSoft(), dto.getVlansHard());
+            new DatacenterLimits(enterprise,
+                datacenter,
+                dto.getRamSoftLimitInMb(),
+                dto.getCpuCountSoftLimit(),
+                dto.getHdSoftLimitInMb(),
+                dto.getRamHardLimitInMb(),
+                dto.getCpuCountHardLimit(),
+                dto.getHdHardLimitInMb(),
+                dto.getStorageSoft(),
+                dto.getStorageHard(),
+                dto.getPublicIpsSoft(),
+                dto.getPublicIpsHard(),
+                dto.getVlansSoft(),
+                dto.getVlansHard());
 
         if (!limit.isValid())
         {
@@ -545,7 +612,8 @@ public class EnterpriseService extends DefaultApiService
         DatacenterLimits limit = findLimitsByEnterpriseAndIdentifier(enterprise, limitId);
 
         Collection<VirtualDatacenter> vdcs =
-            vdcRepo.findByEnterpriseAndDatacenter(enterprise, limit.getDatacenter());
+            vdcRepo.findByEnterpriseAndDatacenter(enterprise, limit.getDatacenter(), 0, 0, "",
+                VirtualDatacenter.OrderByEnum.NAME, true);
 
         if (vdcs != null && !vdcs.isEmpty())
         {

@@ -20,15 +20,28 @@
  */
 package com.abiquo.appliancemanager.web.servlet;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBElement;
+import javax.xml.bind.JAXBException;
+import javax.xml.namespace.QName;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamWriter;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.abiquo.am.exceptions.AMExceptionMapper;
+import com.abiquo.appliancemanager.config.AMConfiguration;
+import com.abiquo.appliancemanager.exceptions.AMException;
+import com.abiquo.model.transport.error.ErrorDto;
+import com.abiquo.ovfmanager.ovf.xml.Stax2Factory;
 
 /**
  * Base implementation of the Check Servlet.
@@ -46,6 +59,21 @@ public abstract class AbstractCheckServlet extends HttpServlet
     /** Serial UID. */
     private static final long serialVersionUID = 1L;
 
+    static JAXBContext contextError;
+
+    static
+    {
+        try
+        {
+            contextError = JAXBContext.newInstance(new Class[] {ErrorDto.class});
+        }
+        catch (JAXBException e)
+        {
+            e.printStackTrace();
+            LOGGER.error("Can't initialize ErrorDto serializer");
+        }
+    }
+
     /**
      * Performs a check to validate Remote Service status.
      * 
@@ -62,17 +90,64 @@ public abstract class AbstractCheckServlet extends HttpServlet
         {
             if (check())
             {
-                success(resp);
+                success(resp, AMConfiguration.getRepositoryLocation());
             }
             else
             {
                 fail(resp);
             }
         }
-        catch (Exception ex)
+        catch (AMException ex)
         {
-            LOGGER.warn("Check operation failed");
-            fail(resp, ex.getMessage());
+            LOGGER.warn("Check operation failed {}", ex.getError().getMessage());
+
+            resp.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE,
+                toString(AMExceptionMapper.createError(ex)));
+        }
+        catch (Exception e)
+        {
+            fail(resp, e.getMessage());
+        }
+    }
+
+    final private static QName errorsQname = new QName("error");
+
+    private String toString(final ErrorDto error)
+    {
+        ByteArrayOutputStream boutput = new ByteArrayOutputStream();
+        XMLStreamWriter writer = null;
+
+        try
+        {
+            writer = Stax2Factory.createXMLStreamWriter(boutput);
+            contextError.createMarshaller().marshal(
+                new JAXBElement<ErrorDto>(errorsQname, ErrorDto.class, null, error)//
+                , writer);
+
+            return boutput.toString();
+        }
+        catch (JAXBException e)
+        {
+            throw new RuntimeException(e);
+        }
+        catch (XMLStreamException e)
+        {
+            throw new RuntimeException(e);
+        }
+        finally
+        {
+
+            try
+            {
+                if (writer != null)
+                {
+                    writer.close();
+                }
+            }
+            catch (XMLStreamException e)
+            {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -81,10 +156,12 @@ public abstract class AbstractCheckServlet extends HttpServlet
      * available.
      * 
      * @param resp The Response.
+     * @throws IOException 
      */
-    protected void success(final HttpServletResponse resp)
+    protected void success(final HttpServletResponse resp, final String bodyContent) throws IOException
     {
         resp.setStatus(HttpServletResponse.SC_OK);
+        resp.getWriter().write(bodyContent);
     }
 
     /**

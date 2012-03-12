@@ -36,21 +36,22 @@ import org.apache.commons.io.FilenameUtils;
 import com.abiquo.am.services.EnterpriseRepositoryService;
 import com.abiquo.am.services.ErepoFactory;
 import com.abiquo.am.services.TemplateConventions;
-import com.abiquo.appliancemanager.client.ApplianceManagerResourceStubImpl;
+import com.abiquo.appliancemanager.client.AMClient;
+import com.abiquo.appliancemanager.client.AMClientException;
 import com.abiquo.appliancemanager.transport.MemorySizeUnit;
 import com.abiquo.appliancemanager.transport.TemplateDto;
 import com.abiquo.appliancemanager.transport.TemplateStateDto;
-import com.abiquo.appliancemanager.transport.TemplatesStateDto;
 import com.abiquo.appliancemanager.transport.TemplateStatusEnumType;
+import com.abiquo.appliancemanager.transport.TemplatesStateDto;
 import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.testng.TestServerListener;
 
 public class ApplianceManagerAsserts
 {
 
-    private final ApplianceManagerResourceStubImpl stub;
+    private final AMClient stub;
 
-    protected final static String idEnterprise = ApplianceManagerIT.idEnterprise;
+    protected final static Integer idEnterprise = ApplianceManagerIT.idEnterprise;
 
     protected final static String baseUrl = TestServerListener.BASE_URI;
 
@@ -58,16 +59,16 @@ public class ApplianceManagerAsserts
 
     private final static Long UPLOAD_FILE_SIZE_BYTES = (1024 * 1024) * 1l;
 
-    public ApplianceManagerAsserts(final ApplianceManagerResourceStubImpl stub)
+    public ApplianceManagerAsserts(final AMClient stub)
     {
         this.stub = stub;
     }
 
     public void ovfStatus(final String ovfId, final TemplateStatusEnumType expectedStatus)
+        throws AMClientException
     {
 
-        TemplateStateDto prevStatus =
-            stub.getTemplateStatus(idEnterprise, ovfId);
+        TemplateStateDto prevStatus = stub.getTemplateStatus(idEnterprise, ovfId);
 
         Assert.assertEquals(expectedStatus, prevStatus.getStatus());
         Assert.assertEquals(ovfId, prevStatus.getOvfId());
@@ -85,17 +86,19 @@ public class ApplianceManagerAsserts
 
     /**
      * @return the number of ovf availables
+     * @throws AMClientException
      */
     public Integer ovfAvailable(final String ovfId, final Boolean isContained)
+        throws AMClientException
     {
-        TemplatesStateDto prevList = stub.getTemplatesState(idEnterprise);
-
+        TemplatesStateDto prevList = stub.getTemplatesState(idEnterprise, TemplateStatusEnumType.DOWNLOAD);
+        
         Assert.assertEquals(isContained, isContained(prevList, ovfId));
 
         return prevList.getCollection().size();
     }
 
-    public void installOvf(final String ovfId)
+    public void installOvf(final String ovfId) throws AMClientException
     {
         // TODO OVFPackageInstanceStatusDto statusInstall =
         stub.installTemplateDefinition(idEnterprise, ovfId);
@@ -116,8 +119,10 @@ public class ApplianceManagerAsserts
 
     /**
      * Status DOWNLOAD, in the available list and the disk file in the repository fs.
+     * 
+     * @throws AMClientException
      */
-    public void ovfInstanceExist(final String ovfId)
+    public void ovfInstanceExist(final String ovfId) throws AMClientException
     {
         ovfStatus(ovfId, TemplateStatusEnumType.DOWNLOAD);
 
@@ -131,7 +136,7 @@ public class ApplianceManagerAsserts
     /**
      * Status NOT_DOWNLOAD and not available in the list
      */
-    public void ovfInstanceNoExist(final String ovfId)
+    public void ovfInstanceNoExist(final String ovfId) throws AMClientException
     {
         // The OVF is NOT_DOWNLOAD
         ovfStatus(ovfId, TemplateStatusEnumType.NOT_DOWNLOAD);
@@ -140,10 +145,10 @@ public class ApplianceManagerAsserts
         ovfAvailable(ovfId, false);
     }
 
-    public void clean(final String ovfId)
+    public void clean(final String ovfId) throws AMClientException
     {
         // deletes the ovfs
-        stub.delete(idEnterprise, ovfId);
+        stub.deleteTemplate(idEnterprise, ovfId);
         ovfAvailable(ovfId, false);
     }
 
@@ -155,7 +160,7 @@ public class ApplianceManagerAsserts
     protected static void createBundleDiskFile(final String ovfId, final String snapshot)
         throws Exception
     {
-        EnterpriseRepositoryService er = ErepoFactory.getRepo(idEnterprise);
+        EnterpriseRepositoryService er = ErepoFactory.getRepo(String.valueOf(idEnterprise));
 
         final String ovfpath = TemplateConventions.getRelativePackagePath(ovfId);
         final String diskFilePathRel = er.getDiskFilePath(ovfId);
@@ -193,8 +198,7 @@ public class ApplianceManagerAsserts
         return file;
     }
 
-    protected static TemplateDto createTestDiskInfoBundle(final String ovfId,
-        final String snapshot)
+    protected static TemplateDto createTestDiskInfoBundle(final String ovfId, final String snapshot)
     {
 
         final String name = ovfId.substring(ovfId.lastIndexOf('/') + 1);
@@ -203,7 +207,7 @@ public class ApplianceManagerAsserts
         // final String bundleOVFid =
         // ovfId.substring(0, ovfId.lastIndexOf('.')) + "-snapshot-" + snapshot + ".ovf";
 
-        EnterpriseRepositoryService er = ErepoFactory.getRepo(idEnterprise);
+        EnterpriseRepositoryService er = ErepoFactory.getRepo(String.valueOf(idEnterprise));
 
         final String diskFilePathRel = er.getDiskFilePath(ovfId);
         final String diskPath = ("-snapshot-" + diskFilePathRel);

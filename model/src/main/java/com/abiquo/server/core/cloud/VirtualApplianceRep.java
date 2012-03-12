@@ -22,6 +22,7 @@
 package com.abiquo.server.core.cloud;
 
 import java.util.Collection;
+import java.util.List;
 
 import javax.persistence.EntityManager;
 
@@ -39,6 +40,8 @@ import com.abiquo.server.core.cloud.stateful.NodeVirtualImageStatefulConversionD
 import com.abiquo.server.core.cloud.stateful.VirtualApplianceStatefulConversion;
 import com.abiquo.server.core.cloud.stateful.VirtualApplianceStatefulConversionDAO;
 import com.abiquo.server.core.common.DefaultRepBase;
+import com.abiquo.server.core.enterprise.Enterprise;
+import com.abiquo.server.core.util.FilterOptions;
 
 @Repository
 public class VirtualApplianceRep extends DefaultRepBase
@@ -81,6 +84,18 @@ public class VirtualApplianceRep extends DefaultRepBase
     public VirtualAppliance findVirtualApplianceByVirtualMachine(final VirtualMachine virtualMachine)
     {
         return nodeVirtualImageDao.findVirtualAppliance(virtualMachine);
+    }
+
+    public List<VirtualAppliance> findVirtualAppliancesByEnterprise(final Enterprise ent,
+        final FilterOptions filterOptions)
+    {
+        return virtualApplianceDao.findByEnterprise(ent, filterOptions);
+    }
+
+    public List<VirtualAppliance> findVirtualAppliancesByEnterpriseAndDatacenter(
+        final Integer entId, final Integer dcId)
+    {
+        return virtualApplianceDao.findByEnterpriseAndDatacenter(entId, dcId);
     }
 
     public VirtualAppliance findById(final Integer id)
@@ -202,4 +217,8 @@ public class VirtualApplianceRep extends DefaultRepBase
             .getDatacenterUUIDByVirtualImageConversionID(idVirtualImageConversion);
     }
 
+    public void persist(final VirtualAppliance vapp)
+    {
+        virtualApplianceDao.persist(vapp);
+    }
 }

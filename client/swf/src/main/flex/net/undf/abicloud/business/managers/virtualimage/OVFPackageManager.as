@@ -72,7 +72,7 @@ package net.undf.abicloud.business.managers.virtualimage
 
         public function OVFPackageManager()
         {
-
+            _ovfPackageListNames = new ArrayCollection();
         }
 
         private var ovfPackagesByURL:Object;

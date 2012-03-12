@@ -37,7 +37,6 @@ import com.abiquo.abiserver.commands.stub.VirtualMachineTemplateResourceStub;
 import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.result.DataResult;
 import com.abiquo.abiserver.pojo.virtualimage.Category;
-import com.abiquo.abiserver.pojo.virtualimage.Icon;
 import com.abiquo.abiserver.pojo.virtualimage.VirtualImage;
 import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.model.enumerator.StatefulInclusion;
@@ -85,7 +84,7 @@ public class VirtualMachineTemplateResourceStubImpl extends AbstractAPIStub impl
         final DataResult<List<VirtualImage>> result = new DataResult<List<VirtualImage>>();
 
         final String uri = createVirtualMachineTemplatesLink(idEnterprise, datacenterId);
-        Resource vmtemplatesResource = resource(uri);
+        Resource vmtemplatesResource = resource(uri, VirtualMachineTemplatesDto.MEDIA_TYPE);
 
         if (StringUtils.isNotEmpty(hypervisorTypeName))
         {
@@ -190,7 +189,7 @@ public class VirtualMachineTemplateResourceStubImpl extends AbstractAPIStub impl
         img.setDiskFileSize(vi.getDiskFileSize());
         img.setCostCode(vi.getCostCode());
         img.setCategory(createCategoryFromLink(getLink("category", vi.getLinks())));
-        img.setIcon(createIconFromLink(getLink("icon", vi.getLinks())));
+        img.setIconUrl(vi.getIconUrl());
         img.setRepository(createRepositoryFromLinks());
         img.setDiskFormatType(createDiskFormatType(DiskFormatType.valueOf(vi.getDiskFormatType())));
         img.setCreationUser(vi.getCreationUser());
@@ -203,7 +202,8 @@ public class VirtualMachineTemplateResourceStubImpl extends AbstractAPIStub impl
         RESTLink masterLink = getLink("master", vi.getLinks());
         if (masterLink != null)
         {
-            ClientResponse masterResponse = get(masterLink.getHref());
+            ClientResponse masterResponse =
+                get(masterLink.getHref(), VirtualMachineTemplateDto.MEDIA_TYPE);
             if (masterResponse.getStatusCode() == Status.OK.getStatusCode())
             {
                 VirtualMachineTemplateDto vmtDto =
@@ -254,20 +254,6 @@ public class VirtualMachineTemplateResourceStubImpl extends AbstractAPIStub impl
             return null;
         }
         return link.getHref().substring(link.getHref().lastIndexOf("/") + 1);
-    }
-
-    private Icon createIconFromLink(final RESTLink link)
-    {
-        if (link == null)
-        {
-            return null;
-        }
-
-        Icon i = new Icon();
-        i.setId(Integer.valueOf(link.getHref().substring(link.getHref().lastIndexOf("/") + 1)));
-        i.setPath(link.getTitle());
-        i.setName("defaultIconName"); // TODO default
-        return i;
     }
 
     private Category createCategoryFromLink(final RESTLink link)
@@ -334,6 +320,7 @@ public class VirtualMachineTemplateResourceStubImpl extends AbstractAPIStub impl
         dto.setRamRequired(vimage.getRamRequired());
         dto.setShared(vimage.isShared());
         dto.setChefEnabled(vimage.isChefEnabled());
+        dto.setIconUrl(vimage.getIconUrl());
 
         RESTLink enterpriseLink = new RESTLink("enterprise", createEnterpriseLink(enterpriseId));
         dto.addLink(enterpriseLink);
@@ -355,12 +342,6 @@ public class VirtualMachineTemplateResourceStubImpl extends AbstractAPIStub impl
             RESTLink categoryLink =
                 new RESTLink("category", createCategoryLink(vimage.getCategory().getId()));
             dto.addLink(categoryLink);
-        }
-        if (vimage.getIcon() != null)
-
-        {
-            RESTLink iconLink = new RESTLink("icon", createIconLink(vimage.getIcon().getId()));
-            dto.addLink(iconLink);
         }
         return dto;
 

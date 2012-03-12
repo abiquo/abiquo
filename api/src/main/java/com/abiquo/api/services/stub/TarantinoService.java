@@ -55,6 +55,7 @@ import com.abiquo.commons.amqp.impl.tarantino.domain.builder.VirtualMachineDescr
 import com.abiquo.commons.amqp.impl.tarantino.domain.dto.DatacenterTasks;
 import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
+import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineState;
@@ -136,7 +137,7 @@ public class TarantinoService extends DefaultApiService
         catch (RuntimeException e)
         {
             tracer.log(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE, eventType,
-                APIError.REDIS_CONNECTION_FAILED.getMessage());
+                "redis.error.user");
 
             tracer.systemError(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE, eventType, e,
                 "redis.persistTaskError", e.getMessage());
@@ -168,7 +169,7 @@ public class TarantinoService extends DefaultApiService
             catch (RuntimeException r)
             {
                 tracer.log(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE, eventType,
-                    APIError.GENERIC_OPERATION_ERROR.getMessage());
+                    "redis.error.user");
 
                 tracer.systemError(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE, eventType,
                     r, "redis.deleteTaskError", r.getMessage());
@@ -201,10 +202,20 @@ public class TarantinoService extends DefaultApiService
         // Unsubscribe the virtual machine to prevent unlock
         Datacenter datacenter = virtualMachine.getHypervisor().getMachine().getDatacenter();
         RemoteService service = remoteServiceService.getVSMRemoteService(datacenter);
-
-        logger.debug("Unsubscribing virtual machine {} from VSM", virtualMachine.getName());
-        vsm.unsubscribe(service, virtualMachine);
-        logger.debug("Virtual machine {} unsubscribed from VSM", virtualMachine.getName());
+        if (vsm.isVirtualMachineSubscribed(service, virtualMachine.getName()))
+        {
+            logger.debug("Unsubscribing virtual machine {} from VSM", virtualMachine.getName());
+            vsm.unsubscribe(service, virtualMachine);
+            logger.debug("Virtual machine {} unsubscribed from VSM", virtualMachine.getName());
+        }
+        else
+        {
+            // The machine must be subscribed
+            logger
+                .error(
+                    "Unsubscribing virtual machine {} from VSM: Error: the virtual machine was not subscribed. Was the Subscription deleted manually outside Abiquo?",
+                    virtualMachine.getName());
+        }
 
         try
         {
@@ -335,7 +346,20 @@ public class TarantinoService extends DefaultApiService
             remoteServiceService.getRemoteService(datacenter.getId(),
                 RemoteServiceType.VIRTUAL_SYSTEM_MONITOR);
 
-        vsm.unsubscribe(vsmRS, vm);
+        if (vsm.isVirtualMachineSubscribed(vsmRS, vm.getName()))
+        {
+            logger.debug("Unsubscribing virtual machine {} from VSM", vm.getName());
+            vsm.unsubscribe(vsmRS, vm);
+            logger.debug("Virtual machine {} unsubscribed from VSM", vm.getName());
+        }
+        else
+        {
+            // The machine must be subscribed
+            logger
+                .error(
+                    "Unsubscribing virtual machine {} from VSM: Error: the virtual machine was not subscribed. Was the Subscription deleted manually outside Abiquo?",
+                    vm.getName());
+        }
 
         try
         {
@@ -398,7 +422,7 @@ public class TarantinoService extends DefaultApiService
     @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
     public String deployVirtualMachineHA(final VirtualMachine virtualMachine,
         final VirtualMachineDescriptionBuilder virtualMachineDesciptionBuilder,
-        final boolean originalVMStateON)
+        final boolean originalVMStateON, final Map<String, String> extraData)
     {
         Datacenter datacenter = virtualMachine.getHypervisor().getMachine().getDatacenter();
 
@@ -407,24 +431,27 @@ public class TarantinoService extends DefaultApiService
             HypervisorConnection conn =
                 jobCreator.hypervisorConnectionConfiguration(virtualMachine.getHypervisor());
             DatacenterTaskBuilder builder =
-                new DatacenterTaskBuilder(virtualMachineDesciptionBuilder.build(), conn, "SYSTEM");
+                new DatacenterTaskBuilder(virtualMachineDesciptionBuilder.build(), conn, "admin");
+            // XXX: This should be system user
 
             DatacenterTasks deployTask = null;
 
             if (originalVMStateON)
             {
                 deployTask =
-                    builder.add(VirtualMachineStateTransition.CONFIGURE)
+                    builder.add(VirtualMachineStateTransition.CONFIGURE, extraData)
                         .add(VirtualMachineStateTransition.POWERON).buildTarantinoTask();
             }
             else
             {
                 deployTask =
-                    builder.add(VirtualMachineStateTransition.CONFIGURE).buildTarantinoTask();
+                    builder.add(VirtualMachineStateTransition.CONFIGURE, extraData)
+                        .buildTarantinoTask();
             }
 
-            enqueueTask(datacenter, builder.buildAsyncTask(String.valueOf(virtualMachine.getId()),
-                TaskType.HIGH_AVAILABILITY), deployTask, EventType.VM_MOVING_BY_HA);
+            enqueueTask(datacenter,
+                builder.buildAsyncTask(String.valueOf(virtualMachine.getId()), TaskType.HA_DEPLOY),
+                deployTask, EventType.VM_MOVING_BY_HA);
 
             return deployTask.getId();
         }
@@ -463,6 +490,80 @@ public class TarantinoService extends DefaultApiService
     }
 
     /**
+     * Undeploys VM after a Re-enable HA operation
+     * 
+     * @param virtualMachine
+     * @param virtualMachineDesciptionBuilder
+     * @param currentState
+     * @param sourceHypervisor VM is undeployed from this hypervisor, not the one we have in DB
+     * @return
+     */
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
+    public String undeployVirtualMachineHA(final VirtualMachine virtualMachine,
+        final VirtualMachineDescriptionBuilder virtualMachineDesciptionBuilder,
+        final VirtualMachineState currentState, final Hypervisor originalHypervisor)
+    {
+
+        Map<String, String> extraData = new HashMap<String, String>();
+        extraData.put("isHA", Boolean.TRUE.toString());
+        try
+        {
+            // VM is undeployed from this hypervisor, not the one we have in DB
+            HypervisorConnection conn =
+                jobCreator.hypervisorConnectionConfiguration(originalHypervisor);
+            DatacenterTaskBuilder builder =
+                new DatacenterTaskBuilder(virtualMachineDesciptionBuilder.build(), conn,
+                /* userService.getCurrentUser().getNick() */"admin");
+            // XXX: This should be system user
+
+            if (VirtualMachineState.ON.equals(currentState))
+            {
+                builder.add(VirtualMachineStateTransition.POWEROFF);
+            }
+
+            DatacenterTasks tarantinoTask =
+                builder.add(VirtualMachineStateTransition.DECONFIGURE, extraData)
+                    .buildTarantinoTask();
+
+            Task redisTask =
+                builder
+                    .buildAsyncTask(String.valueOf(virtualMachine.getId()), TaskType.HA_UNDEPLOY);
+
+            Datacenter datacenter = virtualMachine.getHypervisor().getMachine().getDatacenter();
+
+            // Add Redis task for progress tracking and send the tarantino task
+            logger.debug("Enqueuing task for virtual machine {}", virtualMachine.getName());
+            enqueueTask(datacenter, redisTask, tarantinoTask, EventType.VM_UNDEPLOY);
+            logger.debug("Task for virtual machine {} enqueued", virtualMachine.getName());
+
+            return tarantinoTask.getId();
+        }
+        catch (NotFoundException e)
+        {
+            throw e;
+        }
+        catch (RuntimeException e)
+        {
+            logger
+                .error("Error enqueuing the undeploy task dto to the virtual factory with error: "
+                    + e.getMessage());
+
+            tracer.log(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE, EventType.VM_UNDEPLOY,
+                APIError.GENERIC_OPERATION_ERROR.getMessage());
+
+            // For the Admin to know all errors
+            tracer.systemLog(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
+                EventType.VM_UNDEPLOY, "tarantino.undeployVMError", e.getMessage());
+
+            // There is no point in continue
+            addUnexpectedErrors(APIError.GENERIC_OPERATION_ERROR);
+            flushErrors();
+        }
+        return null;
+
+    }
+
+    /**
      * Creates and sends a deploy operation.
      * 
      * @param virtualMachine The virtual machine to reconfigure.
@@ -475,7 +576,6 @@ public class TarantinoService extends DefaultApiService
         final VirtualMachineDescriptionBuilder virtualMachineDesciptionBuilder,
         final VirtualMachineState currentState)
     {
-        Datacenter datacenter = virtualMachine.getHypervisor().getMachine().getDatacenter();
 
         try
         {
@@ -486,7 +586,7 @@ public class TarantinoService extends DefaultApiService
                     conn,
                     userService.getCurrentUser().getNick());
 
-            if (VirtualMachineState.ON.equals(currentState))
+            if (mustPowerOffToUndeploy(currentState))
             {
                 builder.add(VirtualMachineStateTransition.POWEROFF);
             }
@@ -551,7 +651,7 @@ public class TarantinoService extends DefaultApiService
                     conn,
                     userService.getCurrentUser().getNick());
 
-            if (VirtualMachineState.ON.equals(currentState))
+            if (mustPowerOffToUndeploy(currentState))
             {
                 builder.add(VirtualMachineStateTransition.POWEROFF);
             }
@@ -595,6 +695,12 @@ public class TarantinoService extends DefaultApiService
             flushErrors();
         }
         return null;
+    }
+
+    protected boolean mustPowerOffToUndeploy(final VirtualMachineState currentState)
+    {
+        return VirtualMachineState.ON.equals(currentState)
+            || VirtualMachineState.PAUSED.equals(currentState);
     }
 
     /**

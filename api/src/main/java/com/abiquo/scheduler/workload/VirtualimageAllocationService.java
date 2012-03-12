@@ -300,7 +300,7 @@ public class VirtualimageAllocationService
                 "The number of deployed VLAN has exceeded the networking resource security quotient";
             log.warn(warning);
             TracerFactory.getTracer().log(SeverityType.WARNING, ComponentType.NETWORK,
-                EventType.RACK_NRSQ_EXCEEDED, warning);
+                EventType.RACK_VLAN_POOL, warning);
         }
         if (numberOfDeployedVLAN.compareTo(new Long(vlanPerSwitch)) >= 0)
         {
@@ -338,8 +338,7 @@ public class VirtualimageAllocationService
 
             final boolean passCPU =
                 pass(Long.valueOf(machine.getVirtualCpusUsed()), requirements.getCpu(),
-                    Long.valueOf(machine.getVirtualCpuCores() * machine.getVirtualCpusPerCore()),
-                    100);
+                    Long.valueOf(machine.getVirtualCpuCores()), 100);
 
             final boolean passRAM =
                 pass(Long.valueOf(machine.getVirtualRamUsedInMb()), requirements.getRam(),

@@ -37,7 +37,6 @@ import org.hibernate.criterion.Restrictions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-import com.abiquo.server.core.cloud.VirtualMachineState;
 import com.abiquo.server.core.common.DefaultEntityCurrentUsed;
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
@@ -82,18 +81,25 @@ class EnterpriseDAO extends DefaultDAOBase<Integer, Enterprise>
         return createCriteria().list();
     }
 
-    public List<Enterprise> findAll(final Integer offset, final Integer numResults)
+    public List<Enterprise> findAll(Integer firstElem, final Integer numResults)
     {
+
+        // Check if the page requested is bigger than the last one
         Criteria criteria = createCriteria();
         Long total = count();
 
-        criteria.setFirstResult(offset * numResults);
+        if (firstElem >= total.intValue())
+        {
+            firstElem = total.intValue() - numResults;
+        }
+
+        criteria.setFirstResult(firstElem);
         criteria.setMaxResults(numResults);
 
         List<Enterprise> result = getResultList(criteria);
 
         com.abiquo.server.core.util.PagedList<Enterprise> page = new PagedList<Enterprise>(result);
-        page.setCurrentElement(offset);
+        page.setCurrentElement(firstElem);
         page.setPageSize(numResults);
         page.setTotalResults(total.intValue());
 
@@ -110,24 +116,30 @@ class EnterpriseDAO extends DefaultDAOBase<Integer, Enterprise>
         return result;
     }
 
-    public List<Enterprise> findByPricingTemplate(final PricingTemplate pt, final boolean included,
-        final String filterName, final Integer offset, final Integer numResults,
-        final String orderBy, final boolean desc, final Integer idEnterprise)
+    public List<Enterprise> findByPricingTemplate(Integer firstElem, final PricingTemplate pt,
+        final boolean included, final String filterName, final Integer numResults,
+        final Integer idEnterprise)
     {
-        Criteria criteria = createCriteria(pt, included, filterName, orderBy, desc, idEnterprise);
+        // Check if the page requested is bigger than the last one
+
+        Criteria criteria = createCriteria(pt, included, filterName, idEnterprise);
 
         Long total = count(criteria);
 
-        criteria = createCriteria(pt, included, filterName, orderBy, desc, idEnterprise);
+        if (firstElem >= total.intValue())
+        {
+            firstElem = total.intValue() - numResults;
+        }
 
-        criteria.setFirstResult(offset * numResults);
+        criteria = createCriteria(pt, included, filterName, idEnterprise);
+        criteria.setFirstResult(firstElem);
         criteria.setMaxResults(numResults);
 
         List<Enterprise> result = getResultList(criteria);
 
         PagedList<Enterprise> page = new PagedList<Enterprise>();
         page.addAll(result);
-        page.setCurrentElement(offset);
+        page.setCurrentElement(firstElem);
         page.setPageSize(numResults);
         page.setTotalResults(total.intValue());
 
@@ -227,21 +239,19 @@ class EnterpriseDAO extends DefaultDAOBase<Integer, Enterprise>
     private static final String SUM_VM_RESOURCES =
         "select sum(vm.cpu), sum(vm.ram), sum(vm.hd) from virtualmachine vm, hypervisor hy, physicalmachine pm "
             + " where hy.id = vm.idHypervisor and pm.idPhysicalMachine = hy.idPhysicalMachine "// and
-                                                                                               // pm.idState
-                                                                                               // !=
-                                                                                               // 7"
-                                                                                               // //
-                                                                                               // not
-                                                                                               // HA_DISABLED
-            + " and vm.idEnterprise = :enterpriseId and STRCMP(vm.state, :not_deployed) != 0";
+            // pm.idState
+            // !=
+            // 7"
+            // //
+            // not
+            // HA_DISABLED
+            + " and vm.idEnterprise = :enterpriseId and vm.state != 'NOT_ALLOCATED' and vm.idHypervisor is not null";
 
     public DefaultEntityCurrentUsed getEnterpriseResourceUsage(final int enterpriseId)
     {
         Object[] vmResources =
-            (Object[]) getSession().createSQLQuery(SUM_VM_RESOURCES)
-                .setParameter("enterpriseId", enterpriseId)
-                .setParameter("not_deployed", VirtualMachineState.NOT_ALLOCATED.name())
-                .uniqueResult();
+            (Object[]) getSession().createSQLQuery(SUM_VM_RESOURCES).setParameter("enterpriseId",
+                enterpriseId).uniqueResult();
 
         Long cpu = vmResources[0] == null ? 0 : ((BigDecimal) vmResources[0]).longValue();
         Long ram = vmResources[1] == null ? 0 : ((BigDecimal) vmResources[1]).longValue();
@@ -364,7 +374,7 @@ class EnterpriseDAO extends DefaultDAOBase<Integer, Enterprise>
     }
 
     private Criteria createCriteria(final PricingTemplate pricingTemplate, final boolean included,
-        final String filter, final String orderBy, final boolean desc, final Integer enterpriseId)
+        final String filter, final Integer enterpriseId)
     {
         Criteria criteria = createCriteria();
 
@@ -388,7 +398,6 @@ class EnterpriseDAO extends DefaultDAOBase<Integer, Enterprise>
         {
             criteria.add(withoutPricingTemplate());
         }
-
         if (enterpriseId != null)
         {
             criteria.add(Restrictions.eq(PersistentEntity.ID_PROPERTY, enterpriseId));
@@ -397,16 +406,6 @@ class EnterpriseDAO extends DefaultDAOBase<Integer, Enterprise>
         if (!StringUtils.isEmpty(filter))
         {
             criteria.add(filterBy(filter));
-        }
-
-        if (!StringUtils.isEmpty(orderBy))
-        {
-            Order order = Order.asc(orderBy);
-            if (desc)
-            {
-                order = Order.desc(orderBy);
-            }
-            criteria.addOrder(order);
         }
 
         return criteria;

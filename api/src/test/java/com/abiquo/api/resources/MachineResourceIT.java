@@ -50,6 +50,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.abiquo.api.common.SysadminAuthentication;
+import com.abiquo.api.services.stub.NodecollectorServiceStubMock;
 import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.model.transport.error.ErrorsDto;
 import com.abiquo.server.core.cloud.Hypervisor;
@@ -72,11 +73,11 @@ public class MachineResourceIT extends AbstractJpaGeneratorIT
     private String validMachineUri;
 
     private Machine validMachine;
-    
+
     private Hypervisor validHypervisor;
-    
+
     private Enterprise e;
-    
+
     private User u;
 
     @Override
@@ -84,6 +85,8 @@ public class MachineResourceIT extends AbstractJpaGeneratorIT
     public void setup()
     {
         Hypervisor hypervisor = hypervisorGenerator.createUniqueInstance();
+        hypervisor.setIpService(NodecollectorServiceStubMock.IP_DISCOVER_FIRST);
+
         Machine machine = hypervisor.getMachine();
 
         RemoteService rs =
@@ -127,11 +130,8 @@ public class MachineResourceIT extends AbstractJpaGeneratorIT
     @Test
     public void testGetMachineWithCredentials()
     {
-        RestClient client = new RestClient();
-        Resource resource = client.resource(validMachineUri + "?credentials=true");
-
-        ClientResponse response = resource.accept(MediaType.APPLICATION_XML).get();
-        assertEquals(200, response.getStatusCode());
+        ClientResponse response = get(validMachineUri + "?credentials=true", MachineDto.MEDIA_TYPE);
+        assertEquals(response.getStatusCode(), Status.OK.getStatusCode());
         MachineDto machine = response.getEntity(MachineDto.class);
 
         // Verify that the credentials are not returned
@@ -143,10 +143,10 @@ public class MachineResourceIT extends AbstractJpaGeneratorIT
     @Test
     public void getMachineDoesntExist() throws Exception
     {
-        Resource resource = client.resource(resolveMachineURI(1, 1, 123));
+        String machineUri = resolveMachineURI(1, 1, 123);
 
-        ClientResponse response = resource.accept(MediaType.APPLICATION_XML).get();
-        assertEquals(404, response.getStatusCode());
+        ClientResponse response = get(machineUri, MachineDto.MEDIA_TYPE);
+        assertEquals(response.getStatusCode(), Status.NOT_FOUND.getStatusCode());
 
         assertNonEmptyErrors(response.getEntity(ErrorsDto.class));
     }
@@ -154,9 +154,9 @@ public class MachineResourceIT extends AbstractJpaGeneratorIT
     @Test
     public void getMachineWithWrongDatacenter() throws ClientWebException
     {
-        Resource resource = client.resource(resolveMachineURI(1234, 1, 1));
+        String machineUri = resolveMachineURI(1234, 1, 1);
 
-        ClientResponse response = resource.accept(MediaType.APPLICATION_XML).get();
+        ClientResponse response = get(machineUri, MachineDto.MEDIA_TYPE);
         assertEquals(404, response.getStatusCode());
 
         assertNonEmptyErrors(response.getEntity(ErrorsDto.class));
@@ -165,9 +165,9 @@ public class MachineResourceIT extends AbstractJpaGeneratorIT
     @Test
     public void getMachineWithWrongRack() throws ClientWebException
     {
-        Resource resource = client.resource(resolveMachineURI(1, 1234, 1));
+        String machineUri = resolveMachineURI(1, 1234, 1);
 
-        ClientResponse response = resource.accept(MediaType.APPLICATION_XML).get();
+        ClientResponse response = get(machineUri, MachineDto.MEDIA_TYPE);
         assertEquals(404, response.getStatusCode());
 
         assertNonEmptyErrors(response.getEntity(ErrorsDto.class));
@@ -189,14 +189,11 @@ public class MachineResourceIT extends AbstractJpaGeneratorIT
     @Test
     public void modifyMachine() throws ClientWebException
     {
-        Resource resource = client.resource(validMachineUri);
 
-        MachineDto machine = resource.accept(MediaType.APPLICATION_XML).get(MachineDto.class);
+        MachineDto machine = get(validMachineUri, MachineDto.MEDIA_TYPE).getEntity(MachineDto.class);
         machine.setName("dummy_name");
 
-        ClientResponse response =
-            resource.accept(MediaType.APPLICATION_XML).contentType(MediaType.APPLICATION_XML)
-                .put(machine);
+        ClientResponse response = put(validMachineUri, machine);
         assertEquals(200, response.getStatusCode());
 
         MachineDto modified = response.getEntity(MachineDto.class);
@@ -209,11 +206,7 @@ public class MachineResourceIT extends AbstractJpaGeneratorIT
         MachineDto machine = getValidMachine();
         machine.setName("dummy_name");
 
-        Resource resource = client.resource(resolveMachineURI(1, 1, 123));
-
-        ClientResponse response =
-            resource.accept(MediaType.APPLICATION_XML).contentType(MediaType.APPLICATION_XML)
-                .put(machine);
+        ClientResponse response = put(resolveMachineURI(1, 1, 123), machine);
 
         assertEquals(404, response.getStatusCode());
     }
@@ -226,20 +219,16 @@ public class MachineResourceIT extends AbstractJpaGeneratorIT
 
         machine.setName("dummy_name");
 
-        Resource resource =
-            client.resource(resolveMachineURI(123, validMachine.getRack().getId(),
-                validMachine.getId()));
+        String machineUri = resolveMachineURI(123, validMachine.getRack().getId(),
+                validMachine.getId());
 
-        ClientResponse response =
-            resource.accept(MediaType.APPLICATION_XML).contentType(MediaType.APPLICATION_XML)
-                .put(machine);
+        ClientResponse response = put(machineUri, machine);
 
         assertEquals(404, response.getStatusCode());
 
         assertNonEmptyErrors(response.getEntity(ErrorsDto.class));
 
-        resource = client.resource(validMachineUri);
-        machine = resource.accept(MediaType.APPLICATION_XML).get(MachineDto.class);
+        machine = get(validMachineUri, MachineDto.MEDIA_TYPE).getEntity(MachineDto.class);
 
         assertEquals(old, machine.getName());
     }
@@ -252,20 +241,16 @@ public class MachineResourceIT extends AbstractJpaGeneratorIT
 
         machine.setName("dummy_name");
 
-        Resource resource =
-            client.resource(resolveMachineURI(validMachine.getDatacenter().getId(), 1234,
-                validMachine.getId()));
+        String machineUri = resolveMachineURI(validMachine.getDatacenter().getId(), 1234,
+                validMachine.getId());
 
-        ClientResponse response =
-            resource.accept(MediaType.APPLICATION_XML).contentType(MediaType.APPLICATION_XML)
-                .put(machine);
+        ClientResponse response = put(machineUri, machine);
 
         assertEquals(404, response.getStatusCode());
 
         assertNonEmptyErrors(response.getEntity(ErrorsDto.class));
 
-        resource = client.resource(validMachineUri);
-        machine = resource.accept(MediaType.APPLICATION_XML).get(MachineDto.class);
+        machine = get(validMachineUri, MachineDto.MEDIA_TYPE).getEntity(MachineDto.class);
 
         assertEquals(old, machine.getName());
     }
@@ -293,16 +278,11 @@ public class MachineResourceIT extends AbstractJpaGeneratorIT
     @Test
     public void removeMachineWrongDatacenter() throws ClientWebException
     {
-        Resource resource =
-            client.resource(resolveMachineURI(1234, validMachine.getRack().getId(),
+        ClientResponse response = delete(resolveMachineURI(1234, validMachine.getRack().getId(),
                 validMachine.getId()));
+        assertEquals(response.getStatusCode(), Status.NOT_FOUND.getStatusCode());
 
-        ClientResponse response = resource.accept(MediaType.APPLICATION_XML).delete();
-        assertEquals(404, response.getStatusCode());
-
-        resource = client.resource(validMachineUri);
-
-        response = resource.accept(MediaType.APPLICATION_XML).get();
+        response = get(validMachineUri, MachineDto.MEDIA_TYPE);
         MachineDto machine = response.getEntity(MachineDto.class);
 
         assertEquals(200, response.getStatusCode());
@@ -312,16 +292,12 @@ public class MachineResourceIT extends AbstractJpaGeneratorIT
     @Test
     public void removeMachineWrongRack() throws ClientWebException
     {
-        Resource resource =
-            client.resource(resolveMachineURI(validMachine.getDatacenter().getId(), 1234,
-                validMachine.getId()));
 
-        ClientResponse response = resource.accept(MediaType.APPLICATION_XML).delete();
+        ClientResponse response = delete(resolveMachineURI(validMachine.getDatacenter().getId(), 1234,
+            validMachine.getId()));
         assertEquals(404, response.getStatusCode());
 
-        resource = client.resource(validMachineUri);
-
-        response = resource.accept(MediaType.APPLICATION_XML).get();
+        response = get(validMachineUri, MachineDto.MEDIA_TYPE);
         MachineDto machine = response.getEntity(MachineDto.class);
 
         assertEquals(200, response.getStatusCode());
@@ -363,9 +339,9 @@ public class MachineResourceIT extends AbstractJpaGeneratorIT
         // Resource resource = client.resource(uri);
         // ClientResponse response = resource.accept(MediaType.APPLICATION_XML).get();
 
-        ClientResponse response = get(uri, "sysadmin", "sysadmin", MediaType.APPLICATION_XML);
+        ClientResponse response = get(uri, "sysadmin", "sysadmin", VirtualMachinesDto.MEDIA_TYPE);
 
-        Assert.assertEquals(response.getStatusCode(), 200);
+        Assert.assertEquals(Status.OK.getStatusCode(), response.getStatusCode());
         VirtualMachinesDto vms = response.getEntity(VirtualMachinesDto.class);
         Assert.assertEquals(vms.getCollection().size(), 1);
 
@@ -388,7 +364,7 @@ public class MachineResourceIT extends AbstractJpaGeneratorIT
             .setDatacenter(vm.getHypervisor().getMachine().getDatacenter());
         vm2.getVirtualMachineTemplate().getRepository()
             .setDatacenter(vm2.getHypervisor().getMachine().getDatacenter());
-        
+
         VirtualDatacenter vdc =
             vdcGenerator.createInstance(vm.getHypervisor().getMachine().getDatacenter(),
                 vm.getEnterprise());
@@ -426,24 +402,21 @@ public class MachineResourceIT extends AbstractJpaGeneratorIT
             resolveMachineActionGetVirtualMachinesURI(m.getDatacenter().getId(), m.getRack()
                 .getId(), m.getId());
 
-        ClientResponse response = get(uri, "sysadmin", "sysadmin");
+        ClientResponse response = get(uri, "sysadmin", "sysadmin", VirtualMachinesDto.MEDIA_TYPE);
         VirtualMachinesDto vms = response.getEntity(VirtualMachinesDto.class);
         Assert.assertEquals(vms.getCollection().size(), 2);
 
         response = delete(uri);
         Assert.assertEquals(response.getStatusCode(), Status.NO_CONTENT.getStatusCode());
 
-        response = get(uri, "sysadmin", "sysadmin");
+        response = get(uri, "sysadmin", "sysadmin", VirtualMachinesDto.MEDIA_TYPE);
         vms = response.getEntity(VirtualMachinesDto.class);
         Assert.assertEquals(vms.getCollection().size(), 1);
     }
 
     private MachineDto getValidMachine()
     {
-        RestClient client = new RestClient();
-        Resource resource = client.resource(validMachineUri);
-
-        ClientResponse response = resource.accept(MediaType.APPLICATION_XML).get();
+        ClientResponse response = get(validMachineUri, MachineDto.MEDIA_TYPE);
         assertEquals(200, response.getStatusCode());
         return response.getEntity(MachineDto.class);
     }

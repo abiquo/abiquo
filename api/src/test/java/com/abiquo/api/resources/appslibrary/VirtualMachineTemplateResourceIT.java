@@ -26,7 +26,6 @@ import static com.abiquo.api.common.Assert.assertLinkExist;
 import static com.abiquo.api.common.UriTestResolver.resolveCategoryURI;
 import static com.abiquo.api.common.UriTestResolver.resolveDatacenterRepositoryURI;
 import static com.abiquo.api.common.UriTestResolver.resolveEnterpriseURI;
-import static com.abiquo.api.common.UriTestResolver.resolveIconURI;
 import static com.abiquo.api.common.UriTestResolver.resolveVirtualMachineTemplateURI;
 import static com.abiquo.api.util.URIResolver.buildPath;
 import static org.testng.Assert.assertEquals;
@@ -36,6 +35,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.ws.rs.core.Response.Status;
 
 import org.apache.wink.client.ClientResponse;
 import org.testng.annotations.BeforeMethod;
@@ -50,9 +51,9 @@ import com.abiquo.api.resources.cloud.VirtualDatacentersResource;
 import com.abiquo.appliancemanager.util.URIResolver;
 import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.model.rest.RESTLink;
-import com.abiquo.server.core.appslibrary.Icon;
 import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
 import com.abiquo.server.core.appslibrary.VirtualMachineTemplateDto;
+import com.abiquo.server.core.appslibrary.VirtualMachineTemplatesDto;
 import com.abiquo.server.core.common.EnvironmentGenerator;
 import com.abiquo.server.core.enterprise.DatacenterLimits;
 import com.abiquo.server.core.enterprise.Enterprise;
@@ -68,6 +69,8 @@ import com.abiquo.testng.TestServerAndAMListener;
 public class VirtualMachineTemplateResourceIT extends AbstractJpaGeneratorIT
 {
     private static final String SYSADMIN = "sysadmin1";
+
+    private static final String ENTADMIN = "entadmin";
 
     private Enterprise ent;
 
@@ -91,7 +94,10 @@ public class VirtualMachineTemplateResourceIT extends AbstractJpaGeneratorIT
         am.setUri(TestServerAndAMListener.AM_URI);
 
         Role role = roleGenerator.createInstanceSysAdmin();
+        Role role2 = roleGenerator.createInstanceEnterpriseAdmin();
+
         User user = userGenerator.createInstance(ent, role, SYSADMIN, SYSADMIN);
+        User user2 = userGenerator.createInstance(ent, role2, ENTADMIN, ENTADMIN);
 
         List<Object> entitiesToSetup = new ArrayList<Object>();
         entitiesToSetup.add(ent);
@@ -104,8 +110,14 @@ public class VirtualMachineTemplateResourceIT extends AbstractJpaGeneratorIT
         {
             entitiesToSetup.add(p);
         }
+        for (Privilege p : role2.getPrivileges())
+        {
+            entitiesToSetup.add(p);
+        }
         entitiesToSetup.add(role);
+        entitiesToSetup.add(role2);
         entitiesToSetup.add(user);
+        entitiesToSetup.add(user2);
 
         setup(entitiesToSetup.toArray());
 
@@ -121,7 +133,7 @@ public class VirtualMachineTemplateResourceIT extends AbstractJpaGeneratorIT
 
         String uri =
             resolveVirtualMachineTemplateURI(ent.getId(), datacenter.getId(), vmtemplate.getId());
-        ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
+        ClientResponse response = get(uri, SYSADMIN, SYSADMIN, VirtualMachineTemplateDto.MEDIA_TYPE);
         assertError(response, 409, APIError.ENTERPRISE_NOT_ALLOWED_DATACENTER);
     }
 
@@ -135,7 +147,7 @@ public class VirtualMachineTemplateResourceIT extends AbstractJpaGeneratorIT
         String uri =
             resolveVirtualMachineTemplateURI(ent.getId() + 100, datacenter.getId(),
                 vmtemplate.getId());
-        ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
+        ClientResponse response = get(uri, SYSADMIN, SYSADMIN, VirtualMachineTemplateDto.MEDIA_TYPE);
         assertError(response, 404, APIError.NON_EXISTENT_ENTERPRISE);
     }
 
@@ -149,7 +161,7 @@ public class VirtualMachineTemplateResourceIT extends AbstractJpaGeneratorIT
         String uri =
             resolveVirtualMachineTemplateURI(ent.getId(), datacenter.getId() + 100,
                 vmtemplate.getId());
-        ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
+        ClientResponse response = get(uri, SYSADMIN, SYSADMIN, VirtualMachineTemplateDto.MEDIA_TYPE);
         assertError(response, 404, APIError.NON_EXISTENT_DATACENTER);
     }
 
@@ -163,7 +175,7 @@ public class VirtualMachineTemplateResourceIT extends AbstractJpaGeneratorIT
         String uri =
             resolveVirtualMachineTemplateURI(ent.getId(), datacenter.getId(),
                 vmtemplate.getId() + 100);
-        ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
+        ClientResponse response = get(uri, SYSADMIN, SYSADMIN, VirtualMachineTemplateDto.MEDIA_TYPE);
         assertError(response, 404, APIError.NON_EXISTENT_VIRTUAL_MACHINE_TEMPLATE);
     }
 
@@ -176,7 +188,7 @@ public class VirtualMachineTemplateResourceIT extends AbstractJpaGeneratorIT
 
         String uri =
             resolveVirtualMachineTemplateURI(ent.getId(), datacenter.getId(), vmtemplate.getId());
-        ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
+        ClientResponse response = get(uri, SYSADMIN, SYSADMIN, VirtualMachineTemplateDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), 200);
 
         VirtualMachineTemplateDto dto = response.getEntity(VirtualMachineTemplateDto.class);
@@ -195,30 +207,11 @@ public class VirtualMachineTemplateResourceIT extends AbstractJpaGeneratorIT
 
         String uri =
             resolveVirtualMachineTemplateURI(ent.getId(), datacenter.getId(), slave.getId());
-        ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
+        ClientResponse response = get(uri, SYSADMIN, SYSADMIN, VirtualMachineTemplateDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), 200);
 
         VirtualMachineTemplateDto dto = response.getEntity(VirtualMachineTemplateDto.class);
         assertVirtualMachineTemplateWithLinks(slave, dto);
-    }
-
-    @Test
-    public void getVirtualMachineTemplateWithIcon()
-    {
-        VirtualMachineTemplate vmtemplate =
-            virtualMachineTemplateGenerator.createInstance(ent, repository);
-        Icon icon = iconGenerator.createUniqueInstance();
-
-        vmtemplate.setIcon(icon);
-        setup(vmtemplate.getCategory(), icon, vmtemplate);
-
-        String uri =
-            resolveVirtualMachineTemplateURI(ent.getId(), datacenter.getId(), vmtemplate.getId());
-        ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
-        assertEquals(response.getStatusCode(), 200);
-
-        VirtualMachineTemplateDto dto = response.getEntity(VirtualMachineTemplateDto.class);
-        assertVirtualMachineTemplateWithLinks(vmtemplate, dto);
     }
 
     @Test
@@ -232,7 +225,7 @@ public class VirtualMachineTemplateResourceIT extends AbstractJpaGeneratorIT
 
         String uri =
             resolveVirtualMachineTemplateURI(ent.getId(), datacenter.getId(), vmtemplate.getId());
-        ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
+        ClientResponse response = get(uri, SYSADMIN, SYSADMIN, VirtualMachineTemplateDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), 200);
 
         VirtualMachineTemplateDto dto = response.getEntity(VirtualMachineTemplateDto.class);
@@ -250,7 +243,7 @@ public class VirtualMachineTemplateResourceIT extends AbstractJpaGeneratorIT
 
         String uri =
             resolveVirtualMachineTemplateURI(ent.getId(), datacenter.getId(), vmtemplate.getId());
-        ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
+        ClientResponse response = get(uri, SYSADMIN, SYSADMIN, VirtualMachineTemplateDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), 200);
 
         VirtualMachineTemplateDto dto = response.getEntity(VirtualMachineTemplateDto.class);
@@ -267,7 +260,6 @@ public class VirtualMachineTemplateResourceIT extends AbstractJpaGeneratorIT
 
     }
 
-    @Test
     public void editVirtualMachineTemplateChangeEnterpriseRises409()
     {
         VirtualMachineTemplate vmtemplate =
@@ -278,7 +270,7 @@ public class VirtualMachineTemplateResourceIT extends AbstractJpaGeneratorIT
 
         String uri =
             resolveVirtualMachineTemplateURI(ent.getId(), datacenter.getId(), vmtemplate.getId());
-        ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
+        ClientResponse response = get(uri, SYSADMIN, SYSADMIN, VirtualMachineTemplateDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), 200);
 
         VirtualMachineTemplateDto dto = response.getEntity(VirtualMachineTemplateDto.class);
@@ -308,7 +300,7 @@ public class VirtualMachineTemplateResourceIT extends AbstractJpaGeneratorIT
 
         String uri =
             resolveVirtualMachineTemplateURI(ent.getId(), datacenter.getId(), vmtemplate.getId());
-        ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
+        ClientResponse response = get(uri, SYSADMIN, SYSADMIN, VirtualMachineTemplateDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), 200);
 
         VirtualMachineTemplateDto dto = response.getEntity(VirtualMachineTemplateDto.class);
@@ -344,7 +336,7 @@ public class VirtualMachineTemplateResourceIT extends AbstractJpaGeneratorIT
 
         String uri =
             resolveVirtualMachineTemplateURI(ent.getId(), datacenter.getId(), vmtemplate.getId());
-        ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
+        ClientResponse response = get(uri, SYSADMIN, SYSADMIN, VirtualMachineTemplateDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), 200);
 
         VirtualMachineTemplateDto dto = response.getEntity(VirtualMachineTemplateDto.class);
@@ -371,7 +363,7 @@ public class VirtualMachineTemplateResourceIT extends AbstractJpaGeneratorIT
 
         String uri =
             resolveVirtualMachineTemplateURI(ent.getId(), datacenter.getId(), vmtemplate.getId());
-        ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
+        ClientResponse response = get(uri, SYSADMIN, SYSADMIN, VirtualMachineTemplateDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), 200);
 
         VirtualMachineTemplateDto dto = response.getEntity(VirtualMachineTemplateDto.class);
@@ -403,7 +395,7 @@ public class VirtualMachineTemplateResourceIT extends AbstractJpaGeneratorIT
         String uri =
             resolveVirtualMachineTemplateURI(ent.getId(), datacenter.getId(), master.getId());
 
-        ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
+        ClientResponse response = get(uri, SYSADMIN, SYSADMIN, VirtualMachineTemplateDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), 200, response.getEntity(String.class));
 
         response = delete(uri, SYSADMIN, SYSADMIN);
@@ -429,7 +421,7 @@ public class VirtualMachineTemplateResourceIT extends AbstractJpaGeneratorIT
             resolveVirtualMachineTemplateURI(enterprise.getId(), datacenter.getId(), vmt.getId());
 
         ClientResponse response =
-            get(uri, EnvironmentGenerator.SYSADMIN, EnvironmentGenerator.SYSADMIN);
+            get(uri, EnvironmentGenerator.SYSADMIN, EnvironmentGenerator.SYSADMIN, VirtualMachineTemplateDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), 200);
 
         response = delete(uri, EnvironmentGenerator.SYSADMIN, EnvironmentGenerator.SYSADMIN);
@@ -461,36 +453,33 @@ public class VirtualMachineTemplateResourceIT extends AbstractJpaGeneratorIT
                 .getEnterprise().getId(), dc.getId(), statefulVolume.getVirtualMachineTemplate()
                 .getId());
 
-        ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
+        ClientResponse response = get(uri, SYSADMIN, SYSADMIN, VirtualMachineTemplateDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), 200);
 
         response = delete(uri, SYSADMIN, SYSADMIN);
         assertError(response, 409, APIError.VMTEMPLATE_STATEFUL_TEMPLATE_CANNOT_BE_DELETED);
     }
 
-    public void deleteSharedMachineTemplateFromOtherEnterpriseRises409()
+    @Test//(groups = {APPS_INTEGRATION_TESTS})
+    public void deleteSharedMachineTemplateFromOtherEnterpriseByEntAdminRises409()
     {
-
         Enterprise ent1 = enterpriseGenerator.createUniqueInstance();
         Datacenter datacenter1 = datacenterGenerator.createUniqueInstance();
-
         Repository rep = repositoryGenerator.createInstance(datacenter1);
 
         DatacenterLimits limits = datacenterLimitsGenerator.createInstance(ent1, datacenter1);
-
         VirtualMachineTemplate vmtemplate =
             virtualMachineTemplateGenerator.createInstance(ent, repository);
 
         vmtemplate.setShared(Boolean.TRUE);
         vmtemplate.setEnterprise(ent1);
-
         vmtemplate.setOvfid(null);
         setup(ent1, datacenter1, rep, limits, vmtemplate.getCategory(), vmtemplate);
 
         String uri =
             resolveVirtualMachineTemplateURI(ent.getId(), datacenter.getId(), vmtemplate.getId());
 
-        ClientResponse response = delete(uri, SYSADMIN, SYSADMIN);
+        ClientResponse response = delete(uri, ENTADMIN, ENTADMIN);
         assertError(response, 409, APIError.VMTEMPLATE_SHARED_TEMPLATE_FROM_OTHER_ENTERPRISE);
     }
 
@@ -513,13 +502,6 @@ public class VirtualMachineTemplateResourceIT extends AbstractJpaGeneratorIT
         String category = resolveCategoryURI(vi.getCategory().getId());
         assertLinkExist(dto, edit, "edit");
         assertLinkExist(dto, category, CategoryResource.CATEGORY);
-
-        // Optional links
-        if (vi.getIcon() != null)
-        {
-            String icon = resolveIconURI(vi.getIcon().getId());
-            assertLinkExist(dto, icon, IconResource.ICON);
-        }
 
         if (vi.getMaster() != null)
         {
@@ -566,4 +548,61 @@ public class VirtualMachineTemplateResourceIT extends AbstractJpaGeneratorIT
             "erepos/{erepo}/templates/{template}", params);
     }
 
+    @Test
+    public void editVirtualMachineTemplateUnsharedWithNoVm()
+    {
+        VirtualMachineTemplate vmtemplate =
+            virtualMachineTemplateGenerator.createInstance(ent, repository);
+        vmtemplate.setShared(Boolean.TRUE);
+
+        vmtemplate.setOvfid(null);
+        setup(vmtemplate.getCategory(), vmtemplate);
+
+        String uri =
+            resolveVirtualMachineTemplateURI(ent.getId(), datacenter.getId(), vmtemplate.getId());
+        ClientResponse response = get(uri, SYSADMIN, SYSADMIN, VirtualMachineTemplateDto.BASE_MEDIA_TYPE);
+        assertEquals(response.getStatusCode(), Status.OK.getStatusCode());
+
+        VirtualMachineTemplateDto dto = response.getEntity(VirtualMachineTemplateDto.class);
+        dto.setShared(Boolean.FALSE);
+        String masterUri =
+            resolveVirtualMachineTemplateURI(ent.getId(), datacenter.getId(), vmtemplate.getId());
+
+        response = put(uri, dto, SYSADMIN, SYSADMIN);
+
+        assertEquals(response.getStatusCode(), Status.OK.getStatusCode());
+    }
+
+    @Test
+    public void editVirtualMachineTemplateUnsharedWithVmRises409()
+    {
+        // TODO Use EnvironmentGenerator in all test
+        // tearDown();
+        env = new EnvironmentGenerator(seed);
+        env.generateEnterprise();
+        env.generateInfrastructure();
+        env.generateVirtualDatacenter();
+        env.generateAllocatedVirtualMachine();
+        VirtualMachineTemplate vmtemplate = env.get(VirtualMachineTemplate.class);
+        vmtemplate.setShared(Boolean.TRUE);
+
+        setup(env.getEnvironment().toArray());
+
+        Datacenter datacenter = env.get(Datacenter.class);
+        Enterprise enterprise = env.get(Enterprise.class);
+
+        String uri =
+            resolveVirtualMachineTemplateURI(enterprise.getId(), datacenter.getId(), vmtemplate
+                .getId());
+        ClientResponse response = get(uri, SYSADMIN, SYSADMIN, VirtualMachineTemplateDto.BASE_MEDIA_TYPE);
+        assertEquals(response.getStatusCode(), 200);
+
+        VirtualMachineTemplateDto dto = response.getEntity(VirtualMachineTemplateDto.class);
+        dto.setShared(Boolean.FALSE);
+
+        response = put(uri, dto, SYSADMIN, SYSADMIN);
+
+        assertError(response, Status.CONFLICT.getStatusCode(),
+            APIError.VMTEMPLATE_TEMPLATE_USED_BY_VIRTUAL_MACHINES_CANNOT_BE_UNSHARED);
+    }
 }

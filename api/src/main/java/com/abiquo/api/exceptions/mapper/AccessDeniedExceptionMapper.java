@@ -21,7 +21,6 @@
 
 package com.abiquo.api.exceptions.mapper;
 
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
@@ -70,7 +69,7 @@ public class AccessDeniedExceptionMapper implements ExceptionMapper<SpringSecuri
 
         builder.status(status);
         builder.entity(errorsDto);
-        builder.type(MediaType.APPLICATION_XML);
+        builder.type(ErrorsDto.MEDIA_TYPE);
 
         return builder.build();
     }

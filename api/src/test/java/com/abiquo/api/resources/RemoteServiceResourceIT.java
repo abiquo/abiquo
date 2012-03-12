@@ -29,6 +29,7 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response.Status;
 
 import org.apache.wink.client.ClientResponse;
 import org.apache.wink.client.ClientWebException;
@@ -47,14 +48,12 @@ public class RemoteServiceResourceIT extends AbstractJpaGeneratorIT
     @Test
     public void getRemoteService() throws Exception
     {
-        RemoteService rs = remoteServiceGenerator.createInstance(RemoteServiceType.TARANTINO);
+        RemoteService rs = remoteServiceGenerator.createInstance(RemoteServiceType.VIRTUAL_FACTORY);
         setup(rs.getDatacenter(), rs);
 
         String uri = resolveRemoteServiceURI(rs.getDatacenter().getId(), rs.getType());
 
-        Resource resource = client.resource(uri);
-
-        ClientResponse response = resource.accept(MediaType.APPLICATION_XML).get();
+        ClientResponse response = get(uri, RemoteServiceDto.MEDIA_TYPE);
         RemoteServiceDto remoteService = response.getEntity(RemoteServiceDto.class);
 
         assertEquals(200, response.getStatusCode());
@@ -68,16 +67,14 @@ public class RemoteServiceResourceIT extends AbstractJpaGeneratorIT
     @Test
     public void getRemoteServiceDoesntExist() throws Exception
     {
-        RemoteService rs = remoteServiceGenerator.createInstance(RemoteServiceType.TARANTINO);
+        RemoteService rs = remoteServiceGenerator.createInstance(RemoteServiceType.VIRTUAL_FACTORY);
         setup(rs.getDatacenter(), rs);
 
         String uri =
             resolveRemoteServiceURI(rs.getDatacenter().getId(),
                 RemoteServiceType.STORAGE_SYSTEM_MONITOR);
 
-        Resource resource = client.resource(uri);
-
-        ClientResponse response = resource.accept(MediaType.APPLICATION_XML).get();
+        ClientResponse response = get(uri, RemoteServiceDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), 404);
 
         assertNonEmptyErrors(response.getEntity(ErrorsDto.class));
@@ -86,13 +83,12 @@ public class RemoteServiceResourceIT extends AbstractJpaGeneratorIT
     @Test
     public void getRemoteServiceWithWrongDatacenter() throws ClientWebException
     {
-        RemoteService rs = remoteServiceGenerator.createInstance(RemoteServiceType.TARANTINO);
+        RemoteService rs = remoteServiceGenerator.createInstance(RemoteServiceType.VIRTUAL_FACTORY);
         setup(rs.getDatacenter(), rs);
 
         String uri = resolveRemoteServiceURI(1234, rs.getType());
-        Resource resource = client.resource(uri);
 
-        ClientResponse response = resource.accept(MediaType.APPLICATION_XML).get();
+        ClientResponse response = get(uri, RemoteServiceDto.MEDIA_TYPE);
         assertEquals(404, response.getStatusCode());
 
         assertNonEmptyErrors(response.getEntity(ErrorsDto.class));
@@ -101,28 +97,26 @@ public class RemoteServiceResourceIT extends AbstractJpaGeneratorIT
     @Test
     public void modifyRemoteService() throws ClientWebException
     {
-        RemoteService rs = remoteServiceGenerator.createInstance(RemoteServiceType.TARANTINO);
+        RemoteService rs = remoteServiceGenerator.createInstance(RemoteServiceType.DHCP_SERVICE);
         setup(rs.getDatacenter(), rs);
 
         String uri = resolveRemoteServiceURI(rs.getDatacenter().getId(), rs.getType());
 
-        Resource resource = client.resource(uri).accept(MediaType.APPLICATION_XML);
+        RemoteServiceDto remoteService =
+            get(uri, RemoteServiceDto.MEDIA_TYPE).getEntity(RemoteServiceDto.class);
+        remoteService.setUri("http://example.com:8080/nodecollector");
 
-        RemoteServiceDto remoteService = resource.get(RemoteServiceDto.class);
-        remoteService.setType(RemoteServiceType.DHCP_SERVICE);
-
-        ClientResponse response =
-            resource.contentType(MediaType.APPLICATION_XML).put(remoteService);
-        assertEquals(200, response.getStatusCode());
+        ClientResponse response = put(uri, remoteService);
+        assertEquals(response.getStatusCode(), Status.OK.getStatusCode());
 
         RemoteServiceDto modified = response.getEntity(RemoteServiceDto.class);
-        assertEquals(RemoteServiceType.DHCP_SERVICE, modified.getType());
+        assertEquals("http://example.com:8080/nodecollector", modified.getUri());
     }
 
     @Test
     public void modifyRemoteServiceDoesntExist() throws ClientWebException
     {
-        RemoteService rs = remoteServiceGenerator.createInstance(RemoteServiceType.TARANTINO);
+        RemoteService rs = remoteServiceGenerator.createInstance(RemoteServiceType.VIRTUAL_FACTORY);
         setup(rs.getDatacenter(), rs);
 
         String validUri = resolveRemoteServiceURI(rs.getDatacenter().getId(), rs.getType());
@@ -130,47 +124,38 @@ public class RemoteServiceResourceIT extends AbstractJpaGeneratorIT
             resolveRemoteServiceURI(rs.getDatacenter().getId(),
                 RemoteServiceType.STORAGE_SYSTEM_MONITOR);
 
-        Resource resource = client.resource(validUri).accept(MediaType.APPLICATION_XML);
-
-        RemoteServiceDto remoteService = resource.get(RemoteServiceDto.class);
+        RemoteServiceDto remoteService =
+            get(validUri, RemoteServiceDto.MEDIA_TYPE).getEntity(RemoteServiceDto.class);
         remoteService.setType(RemoteServiceType.STORAGE_SYSTEM_MONITOR);
 
-        resource = client.resource(invalidUri);
+        ClientResponse response = put(invalidUri, remoteService);
 
-        ClientResponse response =
-            resource.accept(MediaType.APPLICATION_XML).contentType(MediaType.APPLICATION_XML)
-                .put(remoteService);
-
-        assertEquals(response.getStatusCode(), 404);
+        assertEquals(response.getStatusCode(), Status.NOT_FOUND.getStatusCode());
     }
 
     @Test
     public void modifyRemoteServiceWrongDatacenter() throws ClientWebException
     {
-        RemoteService rs = remoteServiceGenerator.createInstance(RemoteServiceType.TARANTINO);
+        RemoteService rs = remoteServiceGenerator.createInstance(RemoteServiceType.VIRTUAL_FACTORY);
         setup(rs.getDatacenter(), rs);
 
         String validUri = resolveRemoteServiceURI(rs.getDatacenter().getId(), rs.getType());
         String invalidUri = resolveRemoteServiceURI(1234, rs.getType());
 
-        Resource resource = client.resource(validUri).accept(MediaType.APPLICATION_XML);
-
-        RemoteServiceDto remoteService = resource.get(RemoteServiceDto.class);
+        RemoteServiceDto remoteService =
+            get(validUri, RemoteServiceDto.MEDIA_TYPE).getEntity(RemoteServiceDto.class);
         String old = remoteService.getUri();
 
         remoteService.setUri("http://10.60.1.11:8080/path");
 
-        resource = client.resource(invalidUri);
-
-        ClientResponse response =
-            resource.contentType(MediaType.APPLICATION_XML).put(remoteService);
+        ClientResponse response = put(invalidUri, remoteService);
 
         assertEquals(404, response.getStatusCode());
 
         assertNonEmptyErrors(response.getEntity(ErrorsDto.class));
 
-        resource = client.resource(validUri);
-        remoteService = resource.accept(MediaType.APPLICATION_XML).get(RemoteServiceDto.class);
+        remoteService =
+            get(validUri, RemoteServiceDto.MEDIA_TYPE).getEntity(RemoteServiceDto.class);
 
         assertEquals(old, remoteService.getUri());
     }
@@ -178,54 +163,43 @@ public class RemoteServiceResourceIT extends AbstractJpaGeneratorIT
     @Test
     public void removeRemoteService() throws ClientWebException
     {
-        RemoteService rs = remoteServiceGenerator.createInstance(RemoteServiceType.TARANTINO);
+        RemoteService rs = remoteServiceGenerator.createInstance(RemoteServiceType.VIRTUAL_FACTORY);
         setup(rs.getDatacenter(), rs);
 
         String uri = resolveRemoteServiceURI(rs.getDatacenter().getId(), rs.getType());
 
-        RestClient client = new RestClient();
-        Resource resource = client.resource(uri);
-
-        ClientResponse response = resource.accept(MediaType.APPLICATION_XML).delete();
-        assertEquals(response.getStatusCode(), 204);
+        ClientResponse response = delete(uri);
+        assertEquals(response.getStatusCode(), Status.NO_CONTENT.getStatusCode());
     }
 
     @Test
     public void removeRemoteServiceDoesntExist() throws ClientWebException
     {
-        RemoteService rs = remoteServiceGenerator.createInstance(RemoteServiceType.TARANTINO);
+        RemoteService rs = remoteServiceGenerator.createInstance(RemoteServiceType.VIRTUAL_FACTORY);
         setup(rs.getDatacenter(), rs);
 
         String uri =
             resolveRemoteServiceURI(rs.getDatacenter().getId(),
                 RemoteServiceType.STORAGE_SYSTEM_MONITOR);
 
-        RestClient client = new RestClient();
-        Resource resource = client.resource(uri);
-
-        ClientResponse response = resource.accept(MediaType.APPLICATION_XML).delete();
-        assertEquals(response.getStatusCode(), 404);
+        ClientResponse response = delete(uri);
+        assertEquals(response.getStatusCode(), Status.NOT_FOUND.getStatusCode());
     }
 
     @Test
     public void removeRemoteServiceWrongDatacenter() throws ClientWebException
     {
-        RemoteService rs = remoteServiceGenerator.createInstance(RemoteServiceType.TARANTINO);
+        RemoteService rs = remoteServiceGenerator.createInstance(RemoteServiceType.VIRTUAL_FACTORY);
         setup(rs.getDatacenter(), rs);
 
         String uri = resolveRemoteServiceURI(1234, rs.getType());
 
-        RestClient client = new RestClient();
-        Resource resource = client.resource(uri);
-
-        ClientResponse response = resource.accept(MediaType.APPLICATION_XML).delete();
+        ClientResponse response = delete(uri);
         assertEquals(404, response.getStatusCode());
 
-        client = new RestClient();
-        resource =
-            client.resource(resolveRemoteServiceURI(rs.getDatacenter().getId(), rs.getType()));
-
-        response = resource.accept(MediaType.APPLICATION_XML).get();
+        response =
+            get(resolveRemoteServiceURI(rs.getDatacenter().getId(), rs.getType()),
+                RemoteServiceDto.MEDIA_TYPE);
         RemoteServiceDto remoteService = response.getEntity(RemoteServiceDto.class);
 
         assertEquals(200, response.getStatusCode());
