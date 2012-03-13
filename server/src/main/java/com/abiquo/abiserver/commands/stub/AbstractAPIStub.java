@@ -24,9 +24,11 @@ package com.abiquo.abiserver.commands.stub;
 import static com.abiquo.util.URIResolver.resolveURI;
 import static java.lang.String.valueOf;
 
+import java.lang.reflect.UndeclaredThrowableException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.TimeoutException;
 
 import javax.ws.rs.core.Cookie;
 import javax.ws.rs.core.MediaType;
@@ -390,6 +392,15 @@ public class AbstractAPIStub
         else if (ex instanceof UserSessionException)
         {
             throw (UserSessionException) ex;
+        }
+        else if (ex instanceof UndeclaredThrowableException)
+        {
+            UndeclaredThrowableException undeclared = (UndeclaredThrowableException) ex;
+            if (undeclared.getCause() instanceof TimeoutException)
+            {
+                result.setSuccess(false);
+                result.setMessage("Connection timed out during '" + methodName + "' invocation");
+            }
         }
         else
         {
