@@ -129,8 +129,8 @@ public class AbstractAPIStub
             // Do not retry methods that fail with 5xx error codes
             props.put("jclouds.max-retries", "0");
             // Custom timeouts in ms
-            // props.put("jclouds.timeouts.CloudClient.deployVirtualApplianceAction", "90000");
-            // props.put("jclouds.timeouts.CloudClient.deployVirtualMachine", "90000");
+            // Reconfiguring external storage in some storage devices may take a while
+            props.put("jclouds.timeouts.CloudClient.replaceVolumes", "90000");
 
             context =
                 new AbiquoContextFactory().createContext(token,
