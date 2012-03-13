@@ -179,17 +179,6 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
         return getResultList(criteria);
     }
 
-    public List<Machine> findMachinesWithHAInProgress()
-    {
-        Criteria criteria = createCriteria(sameState(MachineState.HA_IN_PROGRESS));
-        criteria.createAlias(Machine.HYPERVISOR_PROPERTY, "hypervisor");
-
-        // Order by name
-        criteria.addOrder(Order.asc(Machine.NAME_PROPERTY));
-
-        return getResultList(criteria);
-    }
-
     public boolean existsAnyWithDatacenterAndName(final Datacenter datacenter, final String name)
     {
         assert datacenter != null;

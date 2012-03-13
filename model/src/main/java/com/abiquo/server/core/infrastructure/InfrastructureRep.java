@@ -732,11 +732,6 @@ public class InfrastructureRep extends DefaultRepBase
         return machineDao.findRackEnabledForHAMachines(rack);
     }
 
-    public List<Machine> findMachinesWithHAInProgress()
-    {
-        return machineDao.findMachinesWithHAInProgress();
-    }
-
     /**
      * Return all {@links UcsRack} associated to a
      * 
