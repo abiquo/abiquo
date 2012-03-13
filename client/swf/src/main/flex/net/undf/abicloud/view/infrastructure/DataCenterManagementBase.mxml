@@ -616,11 +616,14 @@
             
             public function openDataCenter():void
             {
-                //Event type defined in DataCenterManagement.mxml
-                var itemClickEvent:ItemClickEvent = new ItemClickEvent("dataCenterSelected",
-                                                                       true);
-                itemClickEvent.item = dataCenterList.selectedItem as DataCenter;
-                dispatchEvent(itemClickEvent);
+                if(SecuredPrivilegeAccess.userHasPrivilege(PrivilegeType.PHYS_DC_RETRIEVE_DETAILS))
+                {
+	                //Event type defined in DataCenterManagement.mxml
+	                var itemClickEvent:ItemClickEvent = new ItemClickEvent("dataCenterSelected",
+	                                                                       true);
+	                itemClickEvent.item = dataCenterList.selectedItem as DataCenter;
+	                dispatchEvent(itemClickEvent);
+                }
             }
         ]]>
     </mx:Script>

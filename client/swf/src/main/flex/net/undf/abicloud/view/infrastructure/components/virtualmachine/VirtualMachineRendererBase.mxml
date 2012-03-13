@@ -156,6 +156,7 @@
             	//Checking privilege
             	SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.VAPP_PERFORM_ACTIONS,"removeChild",actionTool,this);
             	SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.VAPP_PERFORM_ACTIONS,"removeChild",vmMoreActions,vmActions);
+            	SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.PHYS_DC_RETRIEVE_DETAILS,"removeChild",remoteAccessFormItem,virtualMachineForm);
             	
             	this._stateChangeWatcher = BindingUtils.bindSetter(updateStateChanges,busyIcon,"visible");
             }
@@ -746,6 +747,7 @@
 
                     <!-- VirtualMachine general info -->
                     <mx:Form 
+                    	id="virtualMachineForm"
                         fontSize="11"
                         paddingBottom="0"
                         paddingLeft="0"
@@ -846,6 +848,7 @@
                         </mx:FormItem>
 
                         <mx:FormItem 
+                        	id="remoteAccessFormItem"
                             height="17"
                             label="@Resource(bundle='Infrastructure', key='LABEL_REMOTE_ACCESS')"
                             visible="{AbiCloudModel.getInstance().configurationManager.config.client_virtual_allowVMRemoteAccess.value == 1}"
