@@ -187,7 +187,7 @@ public class VirtualMachineService extends DefaultApiService
 
     @Autowired
     private AMServiceStub amService;
-    
+
     public VirtualMachineService()
     {
 
@@ -1818,9 +1818,10 @@ public class VirtualMachineService extends DefaultApiService
         Datacenter datacenter = virtualMachine.getHypervisor().getMachine().getDatacenter();
 
         // Create the folder structure in the destination repository
-        String ovfPath = amService.preBundleTemplate(datacenter.getId(), virtualAppliance.getEnterprise().getId(),
-            instanceName);
-        
+        String ovfPath =
+            amService.preBundleTemplate(datacenter.getId(), virtualAppliance.getEnterprise()
+                .getId(), instanceName);
+
         // Do the instance
         String snapshotPath = FilenameUtils.getFullPath(ovfPath);
         String snapshotFilename =
@@ -3165,5 +3166,11 @@ public class VirtualMachineService extends DefaultApiService
     public void insertVirtualMachine(final VirtualMachine virtualMachine)
     {
         repo.insert(virtualMachine);
+    }
+
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
+    public Collection<VirtualMachine> getManagedByHypervisor(final Hypervisor hypervisor)
+    {
+        return repo.findManagedByHypervisor(hypervisor);
     }
 }
