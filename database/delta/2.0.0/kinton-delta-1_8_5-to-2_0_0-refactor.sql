@@ -726,6 +726,12 @@ BEGIN
 	-- Enable HeartBeat by default
 	UPDATE alerts al SET al.value='YES' where al.type='HEARTBEAT';
 
+	-- Datacenter update 
+	UPDATE datacenter set uuid = null;
+        UPDATE remote_service r set uri = CONCAT((select REPLACE(REPLACE(r.uri, RIGHT(r.uri, LENGTH(r.uri) - LOCATE(':', r.uri, 5)), '80'), 'tcp', 'http')), '/bpm-async') where r.remoteServiceType = 'BPM_SERVICE';
+
+
+
 	-- ######################################## --	
 	-- ######## SCHEMA: COLUMNS REMOVED ####### --
 	-- ######################################## --
