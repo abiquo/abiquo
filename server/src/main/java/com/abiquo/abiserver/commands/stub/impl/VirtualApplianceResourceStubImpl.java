@@ -246,7 +246,8 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
                             createVirtualMachineUrl(virtualDatacenterId, virtualAppliance.getId(),
                                 n.getVirtualMachine().getId());
 
-                        ClientResponse put = put(linkVirtualMachine, virtualMachineDto);
+                        ClientResponse put = put(linkVirtualMachine, virtualMachineDto,
+                            AcceptedRequestDto.MEDIA_TYPE, virtualMachineDto.getMediaType());
                         if (put.getStatusCode() != Status.OK.getStatusCode()
                             && put.getStatusCode() != Status.NO_CONTENT.getStatusCode()
                             && put.getStatusCode() != Status.ACCEPTED.getStatusCode())
