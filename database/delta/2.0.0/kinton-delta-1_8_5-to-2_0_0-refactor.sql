@@ -396,6 +396,8 @@ BEGIN
 	ALTER TABLE kinton.ovf_package_list MODIFY COLUMN name VARCHAR(45) NOT NULL;
 	ALTER TABLE kinton.accounting_event_detail MODIFY COLUMN costCode INT(4) DEFAULT NULL;
 	ALTER TABLE kinton.accounting_event_vm MODIFY COLUMN costCode INT(4) DEFAULT NULL;
+	ALTER TABLE kinton.vlan_network MODIFY COLUMN networktype varchar(15) NOT NULL DEFAULT 'internal';
+	ALTER TABLE kinton.user MODIFY COLUMN creationDate timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP;
 
 	-- ############################################ --	
 	-- ######## SCHEMA: CONSTRAINTS MODIFIED ###### --
@@ -406,7 +408,22 @@ BEGIN
 		ALTER TABLE kinton.ovf_package_list_has_ovf_package DROP FOREIGN KEY fk_ovf_package_list_has_ovf_package_ovf_package1;
 	END IF;
 	IF NOT EXISTS (SELECT * FROM information_schema.table_constraints WHERE table_schema= 'kinton' AND table_name='ovf_package_list_has_ovf_package' AND constraint_name='fk_ovf_package_list_has_ovf_package_ovf_package1') THEN
-		ALTER TABLE kinton.ovf_package_list_has_ovf_package ADD CONSTRAINT fk_ovf_package_list_has_ovf_package_ovf_package1 FOREIGN KEY fk_ovf_package_list_has_ovf_package_ovf_package1 (id_ovf_package) REFERENCES ovf_package (id_ovf_package) ON DELETE CASCADE ON UPDATE NO ACTION;
+		ALTER TABLE kinton.ovf_package_list_has_ovf_package ADD CONSTRAINT fk_ovf_package_list_has_ovf_package_ovf_package1 FOREIGN KEY fk_ovf_package_list_has_ovf_package_ovf_package1 (id_ovf_package) REFERENCES ovf_package (id_ovf_package) ON DELETE NO ACTION ON UPDATE NO ACTION;
+	END IF;
+
+	IF EXISTS (SELECT * FROM information_schema.table_constraints WHERE table_schema= 'kinton' AND table_name='ovf_package_list_has_ovf_package' AND constraint_name='fk_ovf_package_list_has_ovf_package_ovf_package_list1') THEN
+		ALTER TABLE kinton.ovf_package_list_has_ovf_package DROP FOREIGN KEY fk_ovf_package_list_has_ovf_package_ovf_package_list1;
+	END IF;
+	IF NOT EXISTS (SELECT * FROM information_schema.table_constraints WHERE table_schema= 'kinton' AND table_name='ovf_package_list_has_ovf_package' AND constraint_name='fk_ovf_package_list_has_ovf_package_ovf_package_list1') THEN
+		ALTER TABLE kinton.ovf_package_list_has_ovf_package ADD CONSTRAINT fk_ovf_package_list_has_ovf_package_ovf_package_list1 FOREIGN KEY fk_ovf_package_list_has_ovf_package_ovf_package_list1 (id_ovf_package_list) REFERENCES ovf_package_list (id_ovf_package_list) ON DELETE CASCADE ON UPDATE NO ACTION;
+	END IF;
+
+	-- Constraint 'fk_ovf_package_list_repository' in ovf_package_list
+	IF EXISTS (SELECT * FROM information_schema.table_constraints WHERE table_schema= 'kinton' AND table_name='ovf_package_list' AND constraint_name='fk_ovf_package_list_repository') THEN
+		ALTER TABLE kinton.ovf_package_list DROP FOREIGN KEY fk_ovf_package_list_repository;
+	END IF;
+	IF NOT EXISTS (SELECT * FROM information_schema.table_constraints WHERE table_schema= 'kinton' AND table_name='ovf_package_list' AND constraint_name='fk_ovf_package_list_repository') THEN
+		ALTER TABLE kinton.ovf_package_list ADD CONSTRAINT fk_ovf_package_list_repository FOREIGN KEY fk_ovf_package_list_repository (id_apps_library) REFERENCES apps_library (id_apps_library) ON DELETE CASCADE ON UPDATE NO ACTION;
 	END IF;
 	-- Constraint idResource_FK rebuilt
 	IF EXISTS (SELECT * FROM information_schema.table_constraints WHERE table_schema= 'kinton' AND table_name='rasd_management' AND constraint_name='idResource_FK') THEN
@@ -417,19 +434,11 @@ BEGIN
 	END IF;
 	-- Index for unicity in user table
 	IF NOT EXISTS (SELECT * FROM information_schema.table_constraints WHERE table_schema= 'kinton' AND table_name='user' AND constraint_name='user_auth_idx') THEN
-		ALTER TABLE user ADD UNIQUE INDEX user_auth_idx (user, authType); 
+		ALTER TABLE user ADD UNIQUE KEY user_auth_idx (user, authType); 
 	END IF;
 	-- Index name on category table
 	IF NOT EXISTS (SELECT * FROM information_schema.table_constraints WHERE table_schema= 'kinton' AND table_name='category' AND constraint_name='name') THEN
 		ALTER TABLE `kinton`.`category` ADD UNIQUE INDEX `name`(`name`) using BTREE;
-	END IF;
-	-- Index fk_role_enterprise on role table
-	IF NOT EXISTS (SELECT * FROM information_schema.table_constraints WHERE table_schema= 'kinton' AND table_name='role' AND constraint_name='fk_role_enterprise') THEN
-		ALTER TABLE role ADD INDEX `fk_role_enterprise` (`idEnterprise`) USING BTREE; 
-	END IF;
-	-- Index fk_role_1 on role table deleted
-	IF EXISTS (SELECT * FROM information_schema.table_constraints WHERE table_schema= 'kinton' AND table_name='role' AND constraint_name='fk_role_1') THEN
-		ALTER TABLE `kinton`.`role` DROP INDEX `fk_role_1`;
 	END IF;
 
 	-- ########################################################## --	
