@@ -193,8 +193,7 @@ public enum APIError
         "The virtual appliance cannot be deleted in this state. It should be NOT_DEPLOYED or UNKNOWN"), VIRTUALAPPLIANCE_MOVE_MISSING_VDC(
         "VAPP-6",
         "The virtual appliance cannot be moved because it has no link to its virtual datacenter"), VIRTUALAPPLIANCE_INVALID_STATE_MOVE_COPY(
-        "VAPP-8",
-        "The virtual appliance cannot be moved or copied in this state. It should be NOT_DEPLOYED"), VIRTUALAPPLIANCE_INVALID_DC_MOVE_COPY(
+        "VAPP-8", "The virtual appliance should be undeployed to be moved or copied."), VIRTUALAPPLIANCE_INVALID_DC_MOVE_COPY(
         "VAPP-7",
         "The virtual appliance cannot be moved or copied because the target virtual datacenter is not in the same datacenter"), VIRTUALAPPLIANCE_MOVE_COPY_CAPTURED_VM(
         "VAPP-9",
