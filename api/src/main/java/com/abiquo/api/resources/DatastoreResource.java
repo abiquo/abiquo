@@ -67,7 +67,7 @@ import com.abiquo.server.core.infrastructure.DatastoreDto;
 @Parent(DatastoresResource.class)
 @Controller
 @Path(DatastoreResource.DATASTORE_PATH)
-public class DatastoreResource
+public class DatastoreResource extends AbstractResource
 {
     public static final String DATASTORE = "datastore";
 

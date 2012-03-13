@@ -43,6 +43,7 @@ import org.apache.wink.common.annotations.Parent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
+import com.abiquo.api.resources.AbstractResource;
 import com.abiquo.api.resources.TaskResourceUtils;
 import com.abiquo.api.services.NetworkService;
 import com.abiquo.api.services.cloud.VirtualApplianceService;
@@ -67,7 +68,7 @@ import com.abiquo.server.core.task.TasksDto;
 @Parent(VirtualAppliancesResource.class)
 @Path(VirtualApplianceResource.VIRTUAL_APPLIANCE_PARAM)
 @Controller
-public class VirtualApplianceResource
+public class VirtualApplianceResource extends AbstractResource
 {
     public static final String VIRTUAL_APPLIANCE = "virtualappliance";
 

@@ -23,11 +23,11 @@ package com.abiquo.server.core.infrastructure.network;
 
 import java.io.Serializable;
 
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.abiquo.model.enumerator.NetworkType;
 import com.abiquo.model.transport.SingleResourceTransportDto;
-import com.abiquo.server.core.infrastructure.RemoteServicesDto;
 
 @XmlRootElement(name = "network")
 public class VLANNetworkDto extends SingleResourceTransportDto implements Serializable
@@ -71,6 +71,7 @@ public class VLANNetworkDto extends SingleResourceTransportDto implements Serial
         this.id = id;
     }
 
+    @XmlElement(defaultValue = "")
     public String getName()
     {
         return name;

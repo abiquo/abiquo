@@ -69,7 +69,7 @@ import com.abiquo.server.core.infrastructure.DatastoresDto;
 @Parent(MachineResource.class)
 @Controller
 @Path(DatastoresResource.DATASTORES_PATH)
-public class DatastoresResource
+public class DatastoresResource extends AbstractResource
 {
     public static final String DATASTORES_PATH = "datastores";
 
