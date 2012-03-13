@@ -230,7 +230,7 @@
             	}
             	
             	//If not, delete IP list
-            	privateIPList.ipList = new ArrayCollection();
+            	//privateIPList.ipList = new ArrayCollection();
             }
 
             private function addVLAN():void
