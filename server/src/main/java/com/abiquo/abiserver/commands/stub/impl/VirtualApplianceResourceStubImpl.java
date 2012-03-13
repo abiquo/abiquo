@@ -248,7 +248,7 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
 
                         ClientResponse put =
                             put(linkVirtualMachine, virtualMachineDto,
-                                VirtualMachineDto.MEDIA_TYPE, AcceptedRequestDto.MEDIA_TYPE);
+                                AcceptedRequestDto.MEDIA_TYPE, VirtualMachineWithNodeDto.MEDIA_TYPE);
                         if (put.getStatusCode() != Status.OK.getStatusCode()
                             && put.getStatusCode() != Status.NO_CONTENT.getStatusCode()
                             && put.getStatusCode() != Status.ACCEPTED.getStatusCode())
