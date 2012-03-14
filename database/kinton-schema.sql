@@ -3419,11 +3419,12 @@ CREATE TRIGGER kinton.create_ip_pool_management_update_stats AFTER INSERT ON kin
   FOR EACH ROW BEGIN
     DECLARE idDataCenterObj INTEGER;
     IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN
-      SELECT DISTINCT vn.network_id INTO idDataCenterObj
-	FROM rasd_management rm, vlan_network vn, network_configuration nc
+      SELECT dc.idDataCenter INTO idDataCenterObj
+	FROM rasd_management rm, vlan_network vn, network_configuration nc, datacenter dc
 	WHERE NEW.vlan_network_id = vn.vlan_network_id
 	AND vn.networktype = 'PUBLIC'
 	AND vn.network_configuration_id = nc.network_configuration_id
+	AND dc.network_id = vn.network_id
 	AND NEW.idManagement = rm.idManagement;
       IF idDataCenterObj IS NOT NULL THEN
 	-- INSERT INTO debug_msg (msg) VALUES (CONCAT('create_ip_pool_management_update_stats +1 ', IFNULL(idDataCenterObj,'NULL')));
@@ -3443,11 +3444,12 @@ CREATE TRIGGER kinton.delete_ip_pool_management_update_stats AFTER DELETE ON kin
     DECLARE idDataCenterObj INTEGER;
     IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN
       -- Query for Public Ips deleted (disabled)
-      SELECT DISTINCT vn.network_id INTO idDataCenterObj
-	FROM rasd_management rm, vlan_network vn, network_configuration nc
+      SELECT dc.idDataCenter INTO idDataCenterObj
+	FROM rasd_management rm, vlan_network vn, network_configuration nc, datacenter dc
 	WHERE OLD.vlan_network_id = vn.vlan_network_id
 	AND vn.networktype = 'PUBLIC'
 	AND vn.network_configuration_id = nc.network_configuration_id
+	AND dc.network_id = vn.network_id
 	AND OLD.idManagement = rm.idManagement;
       IF idDataCenterObj IS NOT NULL THEN
     -- detects IP disabled/enabled at Edit Public Ips
@@ -3555,9 +3557,10 @@ CREATE TRIGGER kinton.update_ip_pool_management_update_stats AFTER UPDATE ON kin
         DECLARE idEnterpriseObj INTEGER;
 	   DECLARE networkTypeObj VARCHAR(15);
         IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN   
-		SELECT vn.networktype, vn.network_id INTO networkTypeObj, idDataCenterObj
-		FROM vlan_network vn
-		WHERE OLD.vlan_network_id = vn.vlan_network_id;
+		SELECT vn.networktype, dc.idDataCenter INTO networkTypeObj, idDataCenterObj
+		FROM vlan_network vn, datacenter dc
+		WHERE dc.network_id = vn.network_id
+		AND OLD.vlan_network_id = vn.vlan_network_id;
 		-- INSERT INTO debug_msg (msg) VALUES (CONCAT('update_ip_pool_management_update_stats', '-', OLD.ip, '-',OLD.available,'-', NEW.available,'-', IFNULL(networkTypeObj,'NULL'), '-', IFNULL(idDataCenterObj,'NULL')));
 		IF networkTypeObj = 'PUBLIC' THEN		
 			IF OLD.available=FALSE AND NEW.available=TRUE THEN
@@ -3589,7 +3592,6 @@ CREATE TRIGGER kinton.update_ip_pool_management_update_stats AFTER UPDATE ON kin
         END IF;
     END;
 |
-
 -- ******************************************************************************************
 -- Description: 
 --  * Registers new limits created for datacenter by enterprise, so they show in statistics
