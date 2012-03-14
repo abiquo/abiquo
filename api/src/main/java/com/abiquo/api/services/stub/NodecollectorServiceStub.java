@@ -604,7 +604,13 @@ public class NodecollectorServiceStub extends DefaultApiService
 
         for (VirtualSystemDto vs : vsc.getVirtualSystems())
         {
-            vms.add(transportVSToVM(vs));
+            VirtualMachine vm = transportVSToVM(vs);
+            // ABICLOUDPREMIUM-3405: abiquo cannot manage virtual machines without primary disk. So
+            // we skip them.
+            if (vm.getVirtualMachineTemplate() != null)
+            {
+                vms.add(vm);
+            }
 
         }
 
