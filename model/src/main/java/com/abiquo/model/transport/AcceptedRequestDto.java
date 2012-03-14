@@ -19,18 +19,14 @@
  * Boston, MA 02111-1307, USA.
  */
 
-/**
- * 
- */
 package com.abiquo.model.transport;
 
-import java.util.List;
+import java.io.Serializable;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.abiquo.model.rest.RESTLink;
-import com.abiquo.server.core.infrastructure.DatacenterDto;
 
 /**
  * This Entity is the response of 202. It is a list of links (most of the cases one) and an optional
@@ -39,17 +35,17 @@ import com.abiquo.server.core.infrastructure.DatacenterDto;
  * @author ssedano
  */
 @XmlRootElement(name = "acceptedrequest")
-public class AcceptedRequestDto<T> extends SingleResourceTransportDto
+public class AcceptedRequestDto<T> extends SingleResourceTransportDto implements Serializable
 {
     private static final long serialVersionUID = -7743440222172054557L;
+
     public static final String BASE_MEDIA_TYPE = "application/vnd.abiquo.acceptedrequest+xml";
+
     public static final String MEDIA_TYPE = BASE_MEDIA_TYPE + "; version=" + API_VERSION;
 
     private static final String STATUS_REL = "status";
 
     private T entity;
-
-    protected List<RESTLink> links;
 
     @XmlElement(name = "message", namespace = "", nillable = true, required = false)
     public T getEntity()
@@ -64,21 +60,20 @@ public class AcceptedRequestDto<T> extends SingleResourceTransportDto
 
     public void setStatusUrlLink(final String url)
     {
-        RESTLink link = new RESTLink(STATUS_REL, url);
-        addLink(link);
+        addLink(new RESTLink(STATUS_REL, url));
     }
 
     public RESTLink getStatusLink()
     {
         return searchLink(STATUS_REL);
     }
-    
+
     @Override
     public String getMediaType()
     {
         return AcceptedRequestDto.MEDIA_TYPE;
     }
-    
+
     @Override
     public String getBaseMediaType()
     {

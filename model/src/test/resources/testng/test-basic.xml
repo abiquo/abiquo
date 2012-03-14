@@ -8,6 +8,7 @@
         </groups>
         <packages>
             <package name="com.abiquo.model.util.*" />
+            <package name="com.abiquo.model.transport.*" />
             <package name="com.abiquo.server.core.*" />
         </packages>
     </test>
