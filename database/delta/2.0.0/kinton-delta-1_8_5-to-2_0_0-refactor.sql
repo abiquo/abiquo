@@ -396,7 +396,7 @@ BEGIN
 	ALTER TABLE kinton.ovf_package_list MODIFY COLUMN name VARCHAR(45) NOT NULL;
 	ALTER TABLE kinton.accounting_event_detail MODIFY COLUMN costCode INT(4) DEFAULT NULL;
 	ALTER TABLE kinton.accounting_event_vm MODIFY COLUMN costCode INT(4) DEFAULT NULL;
-	ALTER TABLE kinton.vlan_network MODIFY COLUMN networktype varchar(15) NOT NULL DEFAULT 'internal';
+	ALTER TABLE kinton.vlan_network MODIFY COLUMN networktype varchar(15) NOT NULL DEFAULT 'INTERNAL';
 	ALTER TABLE kinton.user MODIFY COLUMN creationDate timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP;
 
 	-- ############################################ --	
