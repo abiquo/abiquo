@@ -250,11 +250,10 @@ public class DatacenterResource extends AbstractResource
     // --------- //
 
     /**
-     * @title Return the list of Hypervisor Types allowed in Datacenter.
-     * 
      * Just Return the list of Hypervisor Types allowed in Datacenter. It depends on the 
      * registered hypervisors.
      *
+     * @title Return the list of Hypervisor Types allowed in Datacenter
      * @param datacenterId The ID of the datacenter where this remote service is assigned.
      * @param ip The IP of the target cloud node.
      * @return The Hypervisor Type.
