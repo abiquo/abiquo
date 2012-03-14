@@ -96,7 +96,9 @@ public class VirtualMachineResource extends AbstractResource
 
     public static final String VIRTUAL_MACHINE_ACTION_RESET = "action/reset";
 
-    public static final String VIRTUAL_MACHINE_STATE_PATH = "state";
+    public static final String VIRTUAL_MACHINE_STATE_PATH = "action/state";
+
+    public static final String VIRTUAL_MACHINE_STATE_REL = "state";
 
     // Chef constants to help link builders. Method implementation are premium.
     public static final String VIRTUAL_MACHINE_RUNLIST_PATH = "config/runlist";
@@ -118,8 +120,6 @@ public class VirtualMachineResource extends AbstractResource
     public static final String VIRTUAL_MACHINE_ACTION_SNAPSHOT = "action/instance";
 
     public static final String VIRTUAL_MACHINE_ACTION_UNDEPLOY_REL = "undeploy";
-
-    public static final String VIRTUAL_MACHINE_STATE_REL = "state";
 
     public static final String FORCE_UNDEPLOY = "force";
 
