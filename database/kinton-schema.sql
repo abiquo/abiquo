@@ -1635,7 +1635,7 @@ CREATE TABLE  `kinton`.`enterprise_limits_by_datacenter` (
   `version_c` integer NOT NULL DEFAULT 1,
   `default_vlan_network_id` int(11) unsigned default NULL,
   PRIMARY KEY (`idDatacenterLimit`),
-  CONSTRAINT `enterprise_PK1` FOREIGN KEY (`default_vlan_network_id`) REFERENCES `vlan_network` (`vlan_network_id`)
+  CONSTRAINT `enterprise_FK7` FOREIGN KEY (`default_vlan_network_id`) REFERENCES `vlan_network` (`vlan_network_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
 
 -- MySQL Administrator dump 1.4

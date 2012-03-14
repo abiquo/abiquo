@@ -440,7 +440,7 @@ BEGIN
 	IF NOT EXISTS (SELECT * FROM information_schema.table_constraints WHERE table_schema= 'kinton' AND table_name='category' AND constraint_name='name') THEN
 		ALTER TABLE `kinton`.`category` ADD UNIQUE INDEX `name`(`name`) using BTREE;
 	END IF;
-
+	
 	-- ########################################################## --	
         -- ######## DATA: NEW DATA (INSERTS, UPDATES, DELETES ####### --
 	-- ########################################################## --
@@ -691,7 +691,7 @@ BEGIN
 	IF @existsCount = 0 THEN 
 		INSERT INTO kinton.roles_privileges VALUES (1,49,0);
 	END IF;
-	SELECT COUNT(*) INTO @existsCount FROM kinton.roles_privileges WHERE idRole='' AND idPrivilege='50';
+	SELECT COUNT(*) INTO @existsCount FROM kinton.roles_privileges WHERE idRole='1' AND idPrivilege='50';
 	IF @existsCount = 0 THEN 
 		INSERT INTO kinton.roles_privileges VALUES (1,50,0);
 	END IF;
