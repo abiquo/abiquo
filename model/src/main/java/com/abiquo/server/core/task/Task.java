@@ -131,6 +131,13 @@ public class Task extends RedisEntityBase
         return this.getState() == TaskState.ABORTED;
     }
 
+    public boolean isFinished()
+    {
+        return this.getState() == TaskState.ABORTED
+            || this.getState() == TaskState.FINISHED_SUCCESSFULLY
+            || this.getState() == TaskState.FINISHED_UNSUCCESSFULLY;
+    }
+
     @Override
     public String toString()
     {

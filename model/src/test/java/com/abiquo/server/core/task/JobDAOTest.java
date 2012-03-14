@@ -31,9 +31,9 @@ import java.util.Map;
 
 import org.testng.annotations.Test;
 
-import com.abiquo.model.util.redis.RedisDAOTestBase;
-
 import redis.clients.jedis.Transaction;
+
+import com.abiquo.model.util.redis.RedisDAOTestBase;
 
 public class JobDAOTest extends RedisDAOTestBase
 {
@@ -102,6 +102,7 @@ public class JobDAOTest extends RedisDAOTestBase
     public void test_delete()
     {
         Job job = generator.createUniqueInstance();
+        save(job);
         delete(job);
 
         Job fromDb = dao.findById(job.getId(), jedis);

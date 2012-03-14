@@ -134,6 +134,17 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
         return result;
     }
 
+    public List<Machine> findMachinesWithHAInProgress()
+    {
+        Criteria criteria = createCriteria(sameState(MachineState.HA_IN_PROGRESS));
+        criteria.createAlias(Machine.HYPERVISOR_PROPERTY, "hypervisor");
+
+        // Order by name
+        criteria.addOrder(Order.asc(Machine.NAME_PROPERTY));
+
+        return getResultList(criteria);
+    }
+
     public List<Machine> findRackEnabledForHAMachines(final Rack rack)
     {
         if (rack instanceof UcsRack)
