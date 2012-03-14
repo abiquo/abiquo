@@ -192,10 +192,10 @@ public enum APIError
         "VAPP-5",
         "The virtual appliance cannot be deleted in this state. It should be NOT_DEPLOYED or UNKNOWN"), VIRTUALAPPLIANCE_MOVE_MISSING_VDC(
         "VAPP-6",
-        "The virtual appliance cannot be moved because it has no link to its virtual datacenter"), VIRTUALAPPLIANCE_INVALID_STATE_MOVE_COPY(
-        "VAPP-8", "The virtual appliance should be undeployed to be moved or copied."), VIRTUALAPPLIANCE_INVALID_DC_MOVE_COPY(
+        "The virtual appliance cannot be moved because it has no link to its virtual datacenter"), VIRTUALAPPLIANCE_INVALID_DC_MOVE_COPY(
         "VAPP-7",
-        "The virtual appliance cannot be moved or copied because the target virtual datacenter is not in the same datacenter"), VIRTUALAPPLIANCE_MOVE_COPY_CAPTURED_VM(
+        "The virtual appliance cannot be moved or copied because the target virtual datacenter is not in the same datacenter"), VIRTUALAPPLIANCE_INVALID_STATE_MOVE_COPY(
+        "VAPP-8", "The virtual appliance should be undeployed to be moved or copied."), VIRTUALAPPLIANCE_MOVE_COPY_CAPTURED_VM(
         "VAPP-9",
         "The virtual appliance cannot be moved or copied because it contains captured virtual machines"), VIRTUALAPPLIANCE_MOVE_COPY_INCOMPATIBLE_VM(
         "VAPP-10",
@@ -388,7 +388,7 @@ public enum APIError
         "OVF Package list name already exists"), //
     TEMPLATE_DEFINITION_LIST_REFRESH_NO_URL(
         "OVF-PACKAGE-LIST-1",
-        "The template definition list isn't associated to any url (ovfindex.xml), so it can't be refreshed form the source"), //
+        "The template definition list isn't associated to any url (ovfindex.xml), so it can't be refreshed from the source"), //
     TEMPLATE_DEFINITION_LIST_NAME_NOT_FOUND("OVF-PACKAGE-LIST-2",
         "OVF Package list name is required"),
 
@@ -741,8 +741,8 @@ public enum APIError
         // Outputs all errors in wiki table format
         for (APIError error : errors)
         {
-            System.out.println(String.format("| %s | %s | %s |", error.code, error.message,
-                error.name()));
+            System.out.println(String.format("| %s | %s | %s |", error.code, error.message, error
+                .name()));
         }
 
         System.out.println("\n ************ Flex client labels ************** \n");
