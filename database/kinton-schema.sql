@@ -186,7 +186,7 @@ CREATE TABLE  `kinton`.`vlan_network` (
   `network_configuration_id` int(11) unsigned NOT NULL, 
   `network_name` varchar(40) NOT NULL,
   `vlan_tag` int(4) unsigned DEFAULT NULL,
-  `networktype` varchar(15) NOT NULL DEFAULT 'internal',
+  `networktype` varchar(15) NOT NULL DEFAULT 'INTERNAL',
   `version_c` integer NOT NULL DEFAULT 1,
   `enterprise_id` int(10) unsigned DEFAULT NULL,
   PRIMARY KEY  (`vlan_network_id`),
