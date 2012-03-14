@@ -128,6 +128,9 @@
                 //Checking privileges
                 SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.ENTERPRISE_ADMINISTER_ALL, "removeChild",publicImageFormItem,virtualImageFormContainer);
                 
+                //Chef privilege
+                SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.USERS_MANAGE_CHEF_ENTERPRISE, "removeChild",chefEnabledFormItem,virtualImageFormContainer);
+                
                 //Caching VirtualImageManager
                 virtualImageManager = AbiCloudModel.getInstance().virtualImageManager;
 

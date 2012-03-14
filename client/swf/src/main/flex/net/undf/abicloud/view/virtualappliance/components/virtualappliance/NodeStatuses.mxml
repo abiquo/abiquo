@@ -38,7 +38,6 @@
 			
 			private var _virtualAppliance:VirtualAppliance;
 			
-			[Bindable]
 			public function set virtualAppliance(value:VirtualAppliance):void
 			{
 				this._virtualAppliance = value;

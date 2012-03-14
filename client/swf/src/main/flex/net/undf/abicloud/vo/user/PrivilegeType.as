@@ -66,6 +66,7 @@ package net.undf.abicloud.vo.user
 		public static const USERS_MANAGE_ENTERPRISE_BRANDING:String = "USERS_MANAGE_ENTERPRISE_BRANDING";
 		public static const USERS_MANAGE_USERS:String = "USERS_MANAGE_USERS";
 		public static const USERS_MANAGE_OTHER_ENTERPRISES:String = "USERS_MANAGE_OTHER_ENTERPRISES";
+		public static const USERS_MANAGE_CHEF_ENTERPRISE:String = "USERS_MANAGE_CHEF_ENTERPRISE";
 		public static const USERS_PROHIBIT_VDC_RESTRICTION:String = "USERS_PROHIBIT_VDC_RESTRICTION";
 		public static const USERS_VIEW_PRIVILEGES:String = "USERS_VIEW_PRIVILEGES";
 		public static const USERS_MANAGE_ROLES:String = "USERS_MANAGE_ROLES";
