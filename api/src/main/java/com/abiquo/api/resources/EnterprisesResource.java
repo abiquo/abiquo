@@ -25,8 +25,8 @@ import static com.abiquo.api.resources.EnterpriseResource.createTransferObject;
 
 import java.util.Collection;
 
-import javax.ws.rs.Consumes;
 import javax.validation.constraints.Min;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -64,6 +64,19 @@ public class EnterprisesResource extends AbstractResource
     @Context
     UriInfo uriInfo;
 
+    /**
+     * Returns all enterprises
+     * 
+     * @title Retrive all enterprises
+     * @param startwith
+     * @param filterName
+     * @param numResults
+     * @param idPricingTempl
+     * @param included
+     * @param restBuilder a Context-injected object to create the links of the Dto
+     * @return a {EnterprisesDto} object with all enterprises
+     * @throws Exception
+     */
     @GET
     @Produces(EnterprisesDto.MEDIA_TYPE)
     public EnterprisesDto getEnterprises(
@@ -98,6 +111,15 @@ public class EnterprisesResource extends AbstractResource
         return enterprises;
     }
 
+    /**
+     * Creates and enterprise and returns it after creation
+     * 
+     * @title Create an enterprise
+     * @param enterprise enteprise to create
+     * @param restBuilder a Context-injected object to create the links of the Dto
+     * @return a {EnterpriseDto} object with created enterprise
+     * @throws Exception
+     */
     @POST
     @Consumes(EnterpriseDto.MEDIA_TYPE)
     @Produces(EnterpriseDto.MEDIA_TYPE)

@@ -148,6 +148,15 @@ public class DatacenterResource extends AbstractResource
     @Context
     UriInfo uriInfo;
 
+    /**
+     * Returns a datacenter
+     * 
+     * @title Retrieve a datacenter
+     * @param datacenterId identifier of the datacenter
+     * @param restBuilder a Context-injected object to create the links of the Dto
+     * @return a {DatacenterDto} object with the requested datacenter
+     * @throws Exception
+     */
     @GET
     @Produces(DatacenterDto.MEDIA_TYPE)
     public DatacenterDto getDatacenter(@PathParam(DATACENTER) final Integer datacenterId,
@@ -158,6 +167,16 @@ public class DatacenterResource extends AbstractResource
         return createTransferObject(datacenter, restBuilder);
     }
 
+    /**
+     * Modifies a datacenter
+     * 
+     * @title Modify a datacenter
+     * @param datacenterDto datacenter to modify
+     * @param datacenterId identifier of the datacenter
+     * @param restBuilder a Context-injected object to create the links of the Dto
+     * @return a {DatacenterDto} object with the modified datacenter
+     * @throws Exception
+     */
     @PUT
     @Consumes(DatacenterDto.MEDIA_TYPE)
     @Produces(DatacenterDto.MEDIA_TYPE)
@@ -171,6 +190,18 @@ public class DatacenterResource extends AbstractResource
         return createTransferObject(datacenter, restBuilder);
     }
 
+    /**
+     * Returns all enterpises that are using the datacenter
+     * 
+     * @title Retrive all enterprises
+     * @param datacenterId identifier of the datacenter
+     * @param startwith
+     * @param network
+     * @param limit
+     * @param restBuilder a Context-injected object to create the links of the Dto
+     * @return an {EnterpriseDto} object with all enterprises that are using the datacenter
+     * @throws Exception
+     */
     @GET
     @Path(ENTERPRISES_PATH)
     @Produces(EnterprisesDto.MEDIA_TYPE)
@@ -204,6 +235,15 @@ public class DatacenterResource extends AbstractResource
 
     }
 
+    /**
+     * Returns available hypervisor types from a datacenter
+     * 
+     * @tilte Retrive available hypervisor types
+     * @param datacenterId identifier of the datacenter
+     * @param restBuilder a Context-injected object to create the links of the Dto
+     * @return an {HypervisorTypesDto} object with all available hypervisor types in the datacenter
+     * @throws Exception
+     */
     @GET
     @Path(HYPERVISORS_PATH)
     @Produces(HypervisorTypesDto.MEDIA_TYPE)
@@ -222,12 +262,24 @@ public class DatacenterResource extends AbstractResource
         return dto;
     }
 
+    /**
+     * Deletes a datacenter
+     * 
+     * @title Delete a datacenter
+     * @param datacenterId identifier of the datacenter
+     */
     @DELETE
     public void deleteDatacenter(@PathParam(DATACENTER) final Integer datacenterId)
     {
         service.removeDatacenter(datacenterId);
     }
 
+    /**
+     * Updates used resources from a datacenter
+     * 
+     * @title Updates used resources
+     * @param datacenterId identifier of the datacenter
+     */
     @PUT
     @Path(UPDATE_RESOURCES_PATH)
     public void updateUsedResources(@PathParam(DATACENTER) final Integer datacenterId)
@@ -250,11 +302,9 @@ public class DatacenterResource extends AbstractResource
     // --------- //
 
     /**
-     * @title Return the list of Hypervisor Types allowed in Datacenter.
+     * Return the hypervisor type of a remote machine using the given @ip
      * 
-     * Just Return the list of Hypervisor Types allowed in Datacenter. It depends on the 
-     * registered hypervisors.
-     *
+     * @title Retrieve a hypervisor type of a remote machine
      * @param datacenterId The ID of the datacenter where this remote service is assigned.
      * @param ip The IP of the target cloud node.
      * @return The Hypervisor Type.
@@ -273,8 +323,9 @@ public class DatacenterResource extends AbstractResource
     }
 
     /**
-     * @title Returns back the parameters to create a physical machine. 
+     * Returns back the parameters to create a physical machine.
      * 
+     * @title Discover a single remote machine
      * @param datacenterId identifier of the datacenter. It is useful to search the uri of the
      *            DiscoveryManager to call.
      * @param ip ip address of the hypevisor
@@ -309,6 +360,7 @@ public class DatacenterResource extends AbstractResource
      * Returns back the list of physical machines that match the request of @hypervisorType, @user
      * and @password inside the values @ipFrom and @ipTo.
      * 
+     * @title Discover multiple remote machines
      * @param datacenterId identifier of the datacenter to search the corresponding Discovery
      *            Manager.
      * @param ipFrom first ip to look for
@@ -343,8 +395,9 @@ public class DatacenterResource extends AbstractResource
     }
 
     /**
-     * Check the machine state and update it.
+     * Checks the machine state.
      * 
+     * @title Check the state of a remote machine
      * @param datacenterId The ID of the datacenter where this remote service are assigned.
      * @param ip The IP of the target cloud node.
      * @param hypervisorType The cloud node hypervisor type.
@@ -385,6 +438,7 @@ public class DatacenterResource extends AbstractResource
     /**
      * Checks the ipmi configuration
      * 
+     * @title Check the ipmi configuration of a remote machine
      * @param datacenterId The ID of the datacenter where this remote service is assigned.
      * @param ip The IP of the target cloud node.
      * @param user The hypervisor user.

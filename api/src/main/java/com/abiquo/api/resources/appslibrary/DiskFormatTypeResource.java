@@ -52,6 +52,15 @@ public class DiskFormatTypeResource extends AbstractResource
     @Autowired
     private DiskFormatTypeService service;
 
+    /**
+     * Returns a disk format type.
+     * 
+     * @title Retrive a disk format type
+     * @param diskFormatTypeId identifier of the disk format type
+     * @param restBuilder a Context-injected object to create the links of the Dto
+     * @return a {DiskFormatTypeDto} object with the requested disk format type
+     * @throws Exception
+     */
     @GET
     @Produces(DiskFormatTypeDto.MEDIA_TYPE)
     public DiskFormatTypeDto getDiskFormatType(

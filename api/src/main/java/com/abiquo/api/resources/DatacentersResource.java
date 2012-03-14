@@ -76,6 +76,16 @@ public class DatacentersResource extends AbstractResource
     @Autowired
     private SecurityService securityService;
 
+    /**
+     * Returns all datacenters
+     * 
+     * @title Retrieve all datacenters
+     * @param restBuilder a Context-injected object to create the links of the Dto
+     * @param idEnterprise identifier of an enterprise
+     * @param pricingId identifier of a pricing template
+     * @return a {DatacentersDto} object with all datacenters
+     * @throws Exception
+     */
     @GET
     @Produces(DatacentersDto.MEDIA_TYPE)
     public DatacentersDto getDatacenters(@Context final IRESTBuilder restBuilder,
@@ -110,6 +120,15 @@ public class DatacentersResource extends AbstractResource
         return datacenters;
     }
 
+    /**
+     * Returns all datacenters with own remote services
+     * 
+     * @title Retrive all datacenter with own remote services
+     * @param restBuilder a Context-injected object to create the links of the Dto
+     * @param idEnterprise identifier of an enterprise
+     * @return a {DatacentersDto} object with all datacenters and own remote services
+     * @throws Exception
+     */
     @GET
     @Produces(DatacentersDto.MEDIA_TYPE)
     public DatacentersDto getDatacentersWithRS(@Context final IRESTBuilder restBuilder,
@@ -148,6 +167,15 @@ public class DatacentersResource extends AbstractResource
         return datacenters;
     }
 
+    /**
+     * Creates a datacenter and returns it after creation
+     * 
+     * @title Create a datacenter
+     * @param datacenterDto datacenter to create
+     * @param restBuilder a Context-injected object to create the links of the Dto
+     * @return a {DatacenterDto} object with the created datacenter
+     * @throws Exception
+     */
     @POST
     @Produces(DatacenterDto.MEDIA_TYPE)
     @Consumes(DatacenterDto.MEDIA_TYPE)

@@ -34,7 +34,6 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 
 import org.apache.wink.common.annotations.Parent;
@@ -71,8 +70,22 @@ public class UsersResource extends AbstractResource
     @Autowired
     SecurityService securityService;
 
+    /**
+     * Returns the users of an enterprise.
+     * 
+     * @title Retrive the users of an enterprise
+     * @param enterpriseId identifier of the enterprise
+     * @param filter
+     * @param orderBy
+     * @param desc
+     * @param connected
+     * @param page
+     * @param numResults
+     * @param restBuilder a Context-injected object to create the links of the Dto
+     * @return a {UsersDto} object with all user retrived from the enterprise
+     * @throws Exception
+     */
     @GET
-    // @Consumes({MediaType.APPLICATION_XML, LINK_MEDIA_TYPE})
     @Produces({UsersDto.MEDIA_TYPE, LinksDto.MEDIA_TYPE})
     public UsersDto getUsers(@PathParam(EnterpriseResource.ENTERPRISE) final String enterpriseId,
         @QueryParam("filter") final String filter, @QueryParam("orderBy") final String orderBy,
@@ -115,6 +128,22 @@ public class UsersResource extends AbstractResource
         return users;
     }
 
+    /**
+     * Returns the users with own roles of an enterprise.
+     * 
+     * @title Retrive the users with own roles of an enterprise
+     * @param enterpriseId identifier of the enterprise
+     * @param filter
+     * @param orderBy
+     * @param desc
+     * @param connected
+     * @param page
+     * @param numResults
+     * @param restBuilder a Context-injected object to create the links of the Dto
+     * @return a {UsersWithRolesDto} object with all user and his own role retrived from the
+     *         enterprise
+     * @throws Exception
+     */
     @GET
     @Produces(UsersWithRolesDto.MEDIA_TYPE)
     public UsersWithRolesDto getUsersWithRoles(
@@ -162,6 +191,16 @@ public class UsersResource extends AbstractResource
         return users;
     }
 
+    /**
+     * Creates a user and returns it after creation
+     * 
+     * @title Create a user in the enterprise
+     * @param enterpriseId identifier of the enterprise
+     * @param user user to create
+     * @param restBuilder a Context-injected object to create the links of the Dto
+     * @return a {UserDto} object with the created user
+     * @throws Exception
+     */
     @POST
     @Consumes(UserDto.MEDIA_TYPE)
     @Produces(UserDto.MEDIA_TYPE)

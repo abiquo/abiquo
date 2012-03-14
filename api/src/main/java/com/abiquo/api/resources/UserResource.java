@@ -79,6 +79,17 @@ public class UserResource extends AbstractResource
     @Autowired
     private SecurityService securityService;
 
+    /**
+     * Returns a user from an enterprise
+     * 
+     * @title Retrieve a user
+     * @param enterpriseIdOrWildcard identifier of the enterprise or the '_' wildcard if enterprise
+     *            is unknown
+     * @param userId identifier of the user
+     * @param restBuilder a Context-injected object to create the links of the Dto
+     * @return a {userDto} object with the requested user
+     * @throws Exception
+     */
     @GET
     @Produces(UserDto.MEDIA_TYPE)
     public UserDto getUser(
@@ -111,6 +122,18 @@ public class UserResource extends AbstractResource
         return createTransferObject(user, restBuilder);
     }
 
+    /**
+     * Updates a user with the given data
+     * 
+     * @title Modify a user of an enterprise
+     * @param enterpriseIdOrWildcard identifier of the enterprise or the '_' wildcard if enterprise
+     *            is unknown
+     * @param userId identifier of the user
+     * @param user user to modify
+     * @param restBuilder a Context-injected object to create the links of the Dto
+     * @return a {userDto} object with the modified user
+     * @throws Exception
+     */
     @PUT
     @Consumes(UserDto.MEDIA_TYPE)
     @Produces(UserDto.MEDIA_TYPE)
@@ -129,6 +152,13 @@ public class UserResource extends AbstractResource
         return createTransferObject(u, restBuilder);
     }
 
+    /**
+     * Deletes a user from an enterprise.
+     * 
+     * @title Detele a user from an enterprise
+     * @param enterpriseId indentifier of the enterprise
+     * @param userId identifier of the user to delete
+     */
     @DELETE
     public void deleteUser(@PathParam(EnterpriseResource.ENTERPRISE) final Integer enterpriseId,
         @PathParam(USER) final Integer userId)
@@ -137,6 +167,16 @@ public class UserResource extends AbstractResource
         service.removeUser(userId);
     }
 
+    /**
+     * Returns the virtual machines of a user
+     * 
+     * @title Retrive the virtual machines of the user
+     * @param enterpriseId identifier of the enterprise
+     * @param userId identifier of the user
+     * @param restBuilder a Context-injected object to create the links of the Dto
+     * @return a {VirtualMachinesDto} object with all virtual machines of the user
+     * @throws Exception
+     */
     @GET
     @Path(UserResource.USER_ACTION_GET_VIRTUALMACHINES_PATH)
     @Produces(VirtualMachinesDto.MEDIA_TYPE)

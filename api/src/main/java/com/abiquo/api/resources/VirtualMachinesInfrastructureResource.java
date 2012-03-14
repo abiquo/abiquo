@@ -75,6 +75,7 @@ public class VirtualMachinesInfrastructureResource extends AbstractResource
     /**
      * Returns all the virtual machines deployed in a physical machine.
      * 
+     * @title Retrieve all the virtual machines deployed in a physical machine
      * @param datacenterId identifier of the datacenter.
      * @param rackId identifier of the rack.
      * @param machineId identifier of the machine.
@@ -105,6 +106,16 @@ public class VirtualMachinesInfrastructureResource extends AbstractResource
         return dto;
     }
 
+    /**
+     * Delete all virtual machines not managed by abiquo.
+     * 
+     * @title Delete all virtual machines not managed by abiquo
+     * @param datacenterId identifier of the datacenter
+     * @param rackId indetifier of the rack
+     * @param machineId indentifier of the machine
+     * @param restBuilder a Context-injected object to create the links of the Dto
+     * @throws Exception
+     */
     @DELETE
     public void deleteVirtualMachinesNotManaged(
         @PathParam(DatacenterResource.DATACENTER) @NotNull @Min(1) final Integer datacenterId,

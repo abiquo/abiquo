@@ -81,6 +81,7 @@ public class DatacenterRepositoryResource extends AbstractResource
     /**
      * Return the remote repository if exists.
      * 
+     * @tilte Retrive a remote repository
      * @param refresh, communicate with the EnterpriseRepositoryResource (ApplianceManager
      *            datacenter service) to add vmtemplates include in the repository filesystem.
      * @param includeUsage, communicate with the EnterpriseRepositoryResource (ApplianceManager
@@ -118,6 +119,15 @@ public class DatacenterRepositoryResource extends AbstractResource
         return repositoryDto;
     }
 
+    /**
+     * Refresh datacenter repository
+     * 
+     * @title Refresh datacenter repository
+     * @param enterpId identifier of the enterprise
+     * @param dcId identifier of the datacenter reporsitory
+     * @param restBuilder a Context-injected object to create the links of the Dto
+     * @throws Exception
+     */
     @PUT
     @Path(DATACENTER_REPOSITORY_REFRESH_PATH)
     public void refreshDatacenterRepository(

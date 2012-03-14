@@ -68,6 +68,17 @@ public class MachinesResource extends AbstractResource
     @Autowired
     protected InfrastructureService infrastructureService;
 
+    /**
+     * Returns all machines from a rack
+     * 
+     * @title Retrieve all machines
+     * @param datacenterId indentifier of the datacenter
+     * @param rackId identifier of the rack
+     * @param filter
+     * @param restBuilder a Context-injected object to create the links of the Dto
+     * @return a {MacinesDto} object with all machines from a rack
+     * @throws Exception
+     */
     @GET
     @Produces(MachinesDto.MEDIA_TYPE)
     public MachinesDto getMachines(
@@ -86,6 +97,17 @@ public class MachinesResource extends AbstractResource
         return transformMachinesDto(restBuilder, all);
     }
 
+    /**
+     * Creates a machine and returns it after creation.
+     * 
+     * @title Create a machine
+     * @param datacenterId identifier of the datacenter
+     * @param rackId identifier of the rack
+     * @param machine machine to create
+     * @param restBuilder a Context-injected object to create the links of the Dto
+     * @return a {MachineDto} object with the created machine
+     * @throws Exception
+     */
     @POST
     @Consumes(MachineDto.MEDIA_TYPE)
     @Produces(MachineDto.MEDIA_TYPE)
@@ -102,6 +124,17 @@ public class MachinesResource extends AbstractResource
         return transfer;
     }
 
+    /**
+     * Creates multiple machines after discover them in the given ips.
+     * 
+     * @title Create multiple machines
+     * @param datacenterId identifier of the datacenter
+     * @param rackId identifier of the rack
+     * @param machinesToCreateDto data from machines will be discovered
+     * @param restBuilder a Context-injected object to create the links of the Dto
+     * @return a {MachinesDto} object with all created machines
+     * @throws Exception
+     */
     @POST
     @Consumes(MachinesToCreateDto.MEDIA_TYPE)
     @Produces(MachinesToCreateDto.MEDIA_TYPE)

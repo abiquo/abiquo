@@ -107,11 +107,21 @@ public class RackResource extends AbstractResource
     @Autowired
     private InfrastructureService service;
 
+    /**
+     * Returns a rack
+     * 
+     * @title Retrieve a rack
+     * @param datacenterId identifier of the datacenter
+     * @param rackId identifier of the rack
+     * @param restBuilder a Context-injected object to create the links of the Dto
+     * @return a {RackDto} object with the recuested rack
+     * @throws Exception
+     */
     // Get the Rack. Please note the method annotations to check the parameters can not be null
     // nor lesser than 1. You don't have to do anything with it. Only declare it. A custom handler
     // previous to this call is the responsible of manage it.
     @GET
-    @Produces(RackDto.MEDIA_TYPE)     
+    @Produces(RackDto.MEDIA_TYPE)
     public RackDto getRack(
         @PathParam(DatacenterResource.DATACENTER) @NotNull @Min(1) final Integer datacenterId,
         @PathParam(RACK) @NotNull @Min(1) final Integer rackId,
@@ -123,6 +133,17 @@ public class RackResource extends AbstractResource
         return createTransferObject(rack, restBuilder);
     }
 
+    /**
+     * Modifies a rack
+     * 
+     * @title Modify a rack
+     * @param datacenterId identifier of the datacenter
+     * @param rackId identifier of the rack
+     * @param rackDto rack to modify
+     * @param restBuilder a Context-injected object to create the links of the Dto
+     * @return a {rackDto} object with the modified rack
+     * @throws Exception
+     */
     // Modify the Rack. Please note the method annotations to check the parameters can not be null
     // nor lesser than 1. You don't have to do anything with it. Only declare it. A custom handler
     // previous to this call is the responsible of manage it. Please note the entity Rack does not
@@ -157,6 +178,14 @@ public class RackResource extends AbstractResource
         return createTransferObject(rack, restBuilder);
     }
 
+    /**
+     * Deletes a rack
+     * 
+     * @title Delete a rack
+     * @param datacenterId identifier of the datacenter
+     * @param rackId indentifier of the rack
+     * @param force boolean to force cascade deletion
+     */
     // Get the Rack. Please note the method annotations to check the parameters can not be null
     // nor lesser than 1. You don't have to do anything with it. Only declare it. A custom handler
     // previous to this call is the responsible of manage it.

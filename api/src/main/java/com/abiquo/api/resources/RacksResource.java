@@ -36,7 +36,6 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
 
 import org.apache.wink.common.annotations.Parent;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,9 +61,19 @@ public class RacksResource extends AbstractResource
     @Autowired
     protected InfrastructureService infrastructureService;
 
+    /**
+     * Returns all racks from a datacenter.
+     * 
+     * @title Retrieve all racks
+     * @param datacenterId identifier of the datacenter
+     * @param filter
+     * @param restBuilder a Context-injected object to create the links of the Dto
+     * @return a {RacksDto} object with all racks from a datacenter
+     * @throws Exception
+     */
     @GET
-    @Produces(RacksDto.MEDIA_TYPE)     
-    public  RacksDto getRacks(
+    @Produces(RacksDto.MEDIA_TYPE)
+    public RacksDto getRacks(
         @PathParam(DatacenterResource.DATACENTER) @NotNull @Min(1) final Integer datacenterId,
         @QueryParam("filter") final String filter, @Context final IRESTBuilder restBuilder)
         throws Exception
@@ -83,10 +92,20 @@ public class RacksResource extends AbstractResource
         return racks;
     }
 
-    @POST 
-    @Consumes(RackDto.MEDIA_TYPE) 
-    @Produces(RackDto.MEDIA_TYPE)     
-    public  RackDto postRack(@PathParam(DatacenterResource.DATACENTER) final Integer datacenterId,
+    /**
+     * Creates a rack and returns it after creation
+     * 
+     * @title Create a rack
+     * @param datacenterId identifier of the datacenter
+     * @param rackDto rack to create
+     * @param restBuilder a Context-injected object to create the links of the Dto
+     * @return a {RackDto} object with the created rack
+     * @throws Exception
+     */
+    @POST
+    @Consumes(RackDto.MEDIA_TYPE)
+    @Produces(RackDto.MEDIA_TYPE)
+    public RackDto postRack(@PathParam(DatacenterResource.DATACENTER) final Integer datacenterId,
         final RackDto rackDto, @Context final IRESTBuilder restBuilder) throws Exception
     {
         // The rack must not exists

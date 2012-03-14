@@ -69,6 +69,20 @@ public class RolesResource extends AbstractResource
     @Context
     UriInfo uriInfo;
 
+    /**
+     * Return all roles of an enterprise
+     * 
+     * @title Retrieve all roles
+     * @param enterpriseId identifier of the enterprise
+     * @param filter
+     * @param orderBy
+     * @param desc
+     * @param page
+     * @param numResults
+     * @param restBuilder a Context-injected object to create the links of the Dto
+     * @return a {RolesDto} object with all roles from an enterprise
+     * @throws Exception
+     */
     @GET
     @Produces(RolesDto.MEDIA_TYPE)
     public RolesDto getRoles(

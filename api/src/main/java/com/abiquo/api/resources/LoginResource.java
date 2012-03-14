@@ -53,6 +53,7 @@ public class LoginResource extends AbstractResource
     /**
      * Returns the current user with its credentials if any.
      * 
+     * @title Retrieve the current user
      * @return current user.
      * @throws Exception UserDto
      */
