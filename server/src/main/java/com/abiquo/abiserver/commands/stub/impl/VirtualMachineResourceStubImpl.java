@@ -167,15 +167,22 @@ public class VirtualMachineResourceStubImpl extends AbstractAPIStub implements
         if (response.getStatusCode() == Status.ACCEPTED.getStatusCode())
         {
             result.setSuccess(true);
+            try
+            {
+                // Retrieve the VirtualDatacenter to associate the new virtual appliance
+                org.jclouds.abiquo.domain.cloud.VirtualAppliance vapp =
+                    getApiClient().getCloudService().getVirtualDatacenter(virtualDatacenterId)
+                        .getVirtualAppliance(virtualApplianceId);
 
-            // Retrieve the VirtualDatacenter to associate the new virtual appliance
-            org.jclouds.abiquo.domain.cloud.VirtualAppliance vapp =
-                getApiClient().getCloudService().getVirtualDatacenter(virtualDatacenterId)
-                    .getVirtualAppliance(virtualApplianceId);
+                org.jclouds.abiquo.domain.cloud.VirtualMachine vm =
+                    vapp.getVirtualMachine(virtualMachine.getId());
+                result.setData(new State(StateEnum.valueOf(vm.getState().name())));
+            }
+            finally
+            {
+                releaseApiClient();
+            }
 
-            org.jclouds.abiquo.domain.cloud.VirtualMachine vm =
-                vapp.getVirtualMachine(virtualMachine.getId());
-            result.setData(new State(StateEnum.valueOf(vm.getState().name())));
         }
         else
         {
@@ -199,15 +206,21 @@ public class VirtualMachineResourceStubImpl extends AbstractAPIStub implements
         if (response.getStatusCode() == Status.ACCEPTED.getStatusCode())
         {
             result.setSuccess(true);
+            try
+            {
+                // Retrieve the VirtualDatacenter to associate the new virtual appliance
+                org.jclouds.abiquo.domain.cloud.VirtualAppliance vapp =
+                    getApiClient().getCloudService().getVirtualDatacenter(virtualDatacenterId)
+                        .getVirtualAppliance(virtualApplianceId);
 
-            // Retrieve the VirtualDatacenter to associate the new virtual appliance
-            org.jclouds.abiquo.domain.cloud.VirtualAppliance vapp =
-                getApiClient().getCloudService().getVirtualDatacenter(virtualDatacenterId)
-                    .getVirtualAppliance(virtualApplianceId);
-
-            org.jclouds.abiquo.domain.cloud.VirtualMachine vm =
-                vapp.getVirtualMachine(virtualMachine.getId());
-            result.setData(new State(StateEnum.valueOf(vm.getState().name())));
+                org.jclouds.abiquo.domain.cloud.VirtualMachine vm =
+                    vapp.getVirtualMachine(virtualMachine.getId());
+                result.setData(new State(StateEnum.valueOf(vm.getState().name())));
+            }
+            finally
+            {
+                releaseApiClient();
+            }
         }
         else
         {
