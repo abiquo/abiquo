@@ -22,6 +22,8 @@
 package com.abiquo.api.resources.cloud;
 
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
@@ -96,7 +98,7 @@ public class VirtualMachineResource extends AbstractResource
 
     public static final String VIRTUAL_MACHINE_ACTION_RESET = "action/reset";
 
-    public static final String VIRTUAL_MACHINE_STATE_PATH = "action/state";
+    public static final String VIRTUAL_MACHINE_STATE_PATH = "state";
 
     public static final String VIRTUAL_MACHINE_STATE_REL = "state";
 
@@ -108,10 +110,6 @@ public class VirtualMachineResource extends AbstractResource
     public static final String VIRTUAL_MACHINE_BOOTSTRAP_PATH = "config/bootstrap";
 
     public static final String VIRTUAL_MACHINE_BOOTSTRAP_REL = "bootstrap";
-
-    public static final String VM_NODE_MEDIA_TYPE = "application/vnd.vm-node+xml";
-
-    public static final String VM_NODE_EXTENDED_MEDIA_TYPE = "application/vnd.vm-node-extended+xml";
 
     public static final String VIRTUAL_MACHINE_ACTION_DEPLOY_REL = "deploy";
 
@@ -271,7 +269,7 @@ public class VirtualMachineResource extends AbstractResource
             {
                 throw new InternalServerErrorException(APIError.STATUS_INTERNAL_SERVER_ERROR);
             }
-            return buildAcceptedRequestDtoWithTaskLink(taskId, uriInfo);
+            return buildAcceptedRequestDtoWithTaskLinkNoAction(taskId, uriInfo);
         }
         catch (Exception ex)
         {
@@ -949,6 +947,11 @@ public class VirtualMachineResource extends AbstractResource
         }
     }
 
+    /**
+     * @param taskId
+     * @param uriInfo
+     * @return AcceptedRequestDto<String>
+     */
     protected AcceptedRequestDto<String> buildAcceptedRequestDtoWithTaskLink(final String taskId,
         final UriInfo uriInfo)
     {
@@ -959,6 +962,63 @@ public class VirtualMachineResource extends AbstractResource
         link = link.replaceAll("(/)*$", "");
         link = link.concat(TaskResourceUtils.TASKS_PATH).concat("/").concat(taskId);
 
+        // Build AcceptedRequestDto
+        AcceptedRequestDto<String> a202 = new AcceptedRequestDto<String>();
+        a202.setStatusUrlLink(link);
+        a202.setEntity("You can keep track of the progress in the link");
+
+        return a202;
+    }
+
+    /**
+     * This function expects a uri. With its <b>numerical</b> id as a last segment. The final slash
+     * is optional and additional uri segments as well. If presents all segments after the id will
+     * be deleted. <br>
+     * <br>
+     * <b>This function does not work with UUID as id<br>
+     * <br>
+     * </b> TODO UUID <br>
+     * <br>
+     * <code>
+     *     http://example.com/api/cloud/virtualdatacenters/2/virtualappliances/4/virtualmachines/1/state -> http://example.com/api/cloud/virtualdatacenters/2/virtualappliances/4/virtualmachines/1/tasks/taskId <br>
+     * 
+     *     http://example.com/api/cloud/virtualdatacenters/2/virtualappliances/4/virtualmachines/1 -> http://example.com/api/cloud/virtualdatacenters/2/virtualappliances/4/virtualmachines/1/tasks/taskId <br>
+     * 
+     *     http://example.com/api/cloud/virtualdatacenters/2/virtualappliances/4/virtualmachines/1/ -> http://example.com/api/cloud/virtualdatacenters/2/virtualappliances/4/virtualmachines/1/tasks/taskId <br>
+     * 
+     *     http://example.com/api/cloud/virtualdatacenters/2/virtualappliances/4/virtualmachines/1/action/undeploy -> http://example.com/api/cloud/virtualdatacenters/2/virtualappliances/4/virtualmachines/1/tasks/taskId <br>
+     * 
+     *     http://example.com/api/cloud/virtualdatacenters/2/virtualappliances/4/state -> http://example.com/api/cloud/virtualdatacenters/2/virtualappliances/4/tasks/taskId <br>
+     * 
+     *     http://example.com/api/cloud/virtualdatacenters/2/virtualappliances/4 -> http://example.com/api/cloud/virtualdatacenters/2/virtualappliances/4/tasks/taskId <br>
+     * 
+     *     http://example.com/api/cloud/virtualdatacenters/2/virtualappliances/4/ -> http://example.com/api/cloud/virtualdatacenters/2/virtualappliances/4/tasks/taskId <br>
+     * 
+     *     http://example.com/api/cloud/virtualdatacenters/2/virtualappliances/4/undeploy -> http://example.com/api/cloud/virtualdatacenters/2/virtualappliances//tasks/taskId <br>
+     *     
+     * 
+     *     <b>Even with invalid urls</b>
+     *     http://example.com/api/cloud/virtualdatacenters/2/virtualappliances/4/virtualmachines/1j/ -> http://example.com/api/cloud/virtualdatacenters/2/virtualappliances/4/virtualmachines/1/tasks/taskId <br>
+     * <code>
+     * 
+     * @param taskId
+     * @param uriInfo
+     * @return AcceptedRequestDto<String>
+     */
+    protected AcceptedRequestDto<String> buildAcceptedRequestDtoWithTaskLinkNoAction(
+        final String taskId, final UriInfo uriInfo)
+    {
+        // Build task link
+        String link = uriInfo.getRequestUri().toString();
+
+        Pattern regex = Pattern.compile("(.*/\\d+)[/]?.*$");
+        Matcher regexMatcher = regex.matcher(link);
+        if (regexMatcher.find())
+        {
+            link =
+                regexMatcher.replaceAll(regexMatcher.group(1).concat(TaskResourceUtils.TASKS_PATH)
+                    .concat("/").concat(taskId));
+        }
         // Build AcceptedRequestDto
         AcceptedRequestDto<String> a202 = new AcceptedRequestDto<String>();
         a202.setStatusUrlLink(link);
