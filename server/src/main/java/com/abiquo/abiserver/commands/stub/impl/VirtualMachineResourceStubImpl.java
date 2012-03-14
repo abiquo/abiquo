@@ -182,7 +182,6 @@ public class VirtualMachineResourceStubImpl extends AbstractAPIStub implements
             {
                 releaseApiClient();
             }
-
         }
         else
         {
@@ -206,6 +205,7 @@ public class VirtualMachineResourceStubImpl extends AbstractAPIStub implements
         if (response.getStatusCode() == Status.ACCEPTED.getStatusCode())
         {
             result.setSuccess(true);
+
             try
             {
                 // Retrieve the VirtualDatacenter to associate the new virtual appliance
