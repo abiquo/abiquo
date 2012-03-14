@@ -43,46 +43,52 @@ public class RemoteServiceDAO extends DefaultDAOBase<Integer, RemoteService>
         super(RemoteService.class);
     }
 
-    public RemoteServiceDAO(EntityManager entityManager)
+    public RemoteServiceDAO(final EntityManager entityManager)
     {
         super(RemoteService.class, entityManager);
     }
 
-    private static Criterion equalUri(String uri)
+    private static Criterion equalUri(final String uri)
     {
         assert !StringUtils.isEmpty(uri);
 
         return Restrictions.eq(RemoteService.URI_PROPERTY, uri);
     }
 
-    private static Criterion equalDatacenter(Datacenter datacenter)
+    private static Criterion equalDatacenter(final Datacenter datacenter)
     {
         return Restrictions.eq(RemoteService.DATACENTER_PROPERTY, datacenter);
     }
 
-    private static Criterion equalType(RemoteServiceType type)
+    private static Criterion equalType(final RemoteServiceType type)
     {
         return Restrictions.eq(RemoteService.TYPE_PROPERTY, type);
     }
 
-    public boolean existRemoteServiceUri(String uri) throws URISyntaxException
+    public boolean existRemoteServiceUri(final String uri) throws URISyntaxException
     {
         assert !StringUtils.isEmpty(uri);
 
         return this.existsAnyByCriterions(equalUri(uri));
     }
 
-    public List<RemoteService> findByDatacenter(Datacenter datacenter)
+    public List<RemoteService> findByDatacenter(final Datacenter datacenter)
     {
         return findByCriterions(equalDatacenter(datacenter));
     }
 
-    public List<RemoteService> findByDatacenterAndType(Datacenter datacenter, RemoteServiceType type)
+    public List<RemoteService> findByDatacenterAndType(final Datacenter datacenter,
+        final RemoteServiceType type)
     {
         return findByCriterions(equalDatacenter(datacenter), equalType(type));
     }
 
-    public String getRemoteServiceUri(Datacenter datacenter, RemoteServiceType type)
+    public List<RemoteService> findByType(final RemoteServiceType type)
+    {
+        return findByCriterions(equalType(type));
+    }
+
+    public String getRemoteServiceUri(final Datacenter datacenter, final RemoteServiceType type)
     {
         List<RemoteService> nodecollectors = findByDatacenterAndType(datacenter, type);
 
@@ -96,6 +102,5 @@ public class RemoteServiceDAO extends DefaultDAOBase<Integer, RemoteService>
         }
 
         return nodecollectors.get(0).getUri();
-
     }
 }

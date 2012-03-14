@@ -92,7 +92,7 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
         return Restrictions.eq(Machine.ENTERPRISE_PROPERTY, enterprise);
     }
 
-    private static Criterion sameState(MachineState state)
+    private static Criterion sameState(final MachineState state)
     {
         return Restrictions.eq(Machine.STATE_PROPERTY, state);
     }
@@ -816,6 +816,20 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
             ids.add(m.getId());
         }
         return ids;
+    }
+
+    private static final String QUERY_ALL_IDS_IN =
+        "SELECT m.id "
+            + "FROM com.abiquo.server.core.infrastructure.Machine m WHERE m.datacenter IN (:datacenters)";
+
+    /**
+     * returns machien ids form selected datacenters
+     */
+    public List<Integer> findAllIdsInDatacenters(final Datacenter... datacenters)
+    {
+        Query query = getSession().createQuery(QUERY_ALL_IDS_IN);
+        query.setParameterList("datacenters", datacenters);
+        return query.list();
     }
 
     private static final String QUERY_TOTAL_USED_CORES = "SELECT sum(virtualCpuCores) "

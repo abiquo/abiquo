@@ -23,8 +23,10 @@ package com.abiquo.server.core.infrastructure;
 import java.lang.reflect.InvocationTargetException;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 
 import javax.persistence.EntityManager;
 import javax.persistence.OptimisticLockException;
@@ -836,5 +838,62 @@ public class MachineDAOTest extends DefaultDAOTestBase<MachineDAO, Machine>
         Long totalCores = dao.getTotalUsedCoresExceptMachine(machine1);
 
         assertEquals(totalCores.longValue(), 0L);
+    }
+
+    @Test
+    public void testGetIdsInDatacenter()
+    {
+        DatacenterGenerator datacenterGenerator = new DatacenterGenerator(getSeed());
+        RackGenerator rackGenerator = new RackGenerator(getSeed());
+        MachineGenerator machineGenerator = new MachineGenerator(getSeed());
+
+        Datacenter datacenter1 = datacenterGenerator.createUniqueInstance();
+        Datacenter datacenter2 = datacenterGenerator.createUniqueInstance();
+        Rack rack1 = rackGenerator.createInstance(datacenter1);
+        Rack rack2 = rackGenerator.createInstance(datacenter2);
+
+        final Machine machine11 = machineGenerator.createMachine(datacenter1, rack1);
+        final Machine machine12 = machineGenerator.createMachine(datacenter1, rack1);
+
+        final Machine machine21 = machineGenerator.createMachine(datacenter2, rack2);
+        final Machine machine22 = machineGenerator.createMachine(datacenter2, rack2);
+
+        ds().persistAll(datacenter1, datacenter2, rack1, rack2, machine11, machine12, machine21,
+            machine22);
+
+        Set<Integer> dc1Ids = new HashSet<Integer>()
+        {
+            {
+                add(machine11.getId());
+                add(machine12.getId());
+            }
+        };
+        Set<Integer> dc2Ids = new HashSet<Integer>()
+        {
+            {
+                add(machine21.getId());
+                add(machine22.getId());
+            }
+        };
+
+        MachineDAO dao = createDaoForRollbackTransaction();
+
+        List<Integer> resultDc1 = dao.findAllIdsInDatacenters(datacenter1);
+        assertEquals(resultDc1.size(), 2);
+        for (Integer dc1 : resultDc1)
+        {
+            assertTrue(dc1Ids.contains(dc1));
+        }
+
+        List<Integer> resultDc2 = dao.findAllIdsInDatacenters(datacenter2);
+        assertEquals(resultDc2.size(), 2);
+        for (Integer dc2 : resultDc2)
+        {
+            assertTrue(dc2Ids.contains(dc2));
+        }
+
+        List<Integer> resultAll = dao.findAllIdsInDatacenters(datacenter1, datacenter2);
+        assertEquals(resultAll.size(), 4);
+
     }
 }
