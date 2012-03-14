@@ -396,6 +396,8 @@ BEGIN
 	ALTER TABLE kinton.ovf_package_list MODIFY COLUMN name VARCHAR(45) NOT NULL;
 	ALTER TABLE kinton.accounting_event_detail MODIFY COLUMN costCode INT(4) DEFAULT NULL;
 	ALTER TABLE kinton.accounting_event_vm MODIFY COLUMN costCode INT(4) DEFAULT NULL;
+	ALTER TABLE kinton.vlan_network MODIFY COLUMN networktype varchar(15) NOT NULL DEFAULT 'INTERNAL';
+	ALTER TABLE kinton.user MODIFY COLUMN creationDate timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP;
 
 	-- ############################################ --	
 	-- ######## SCHEMA: CONSTRAINTS MODIFIED ###### --
@@ -406,7 +408,22 @@ BEGIN
 		ALTER TABLE kinton.ovf_package_list_has_ovf_package DROP FOREIGN KEY fk_ovf_package_list_has_ovf_package_ovf_package1;
 	END IF;
 	IF NOT EXISTS (SELECT * FROM information_schema.table_constraints WHERE table_schema= 'kinton' AND table_name='ovf_package_list_has_ovf_package' AND constraint_name='fk_ovf_package_list_has_ovf_package_ovf_package1') THEN
-		ALTER TABLE kinton.ovf_package_list_has_ovf_package ADD CONSTRAINT fk_ovf_package_list_has_ovf_package_ovf_package1 FOREIGN KEY fk_ovf_package_list_has_ovf_package_ovf_package1 (id_ovf_package) REFERENCES ovf_package (id_ovf_package) ON DELETE CASCADE ON UPDATE NO ACTION;
+		ALTER TABLE kinton.ovf_package_list_has_ovf_package ADD CONSTRAINT fk_ovf_package_list_has_ovf_package_ovf_package1 FOREIGN KEY fk_ovf_package_list_has_ovf_package_ovf_package1 (id_ovf_package) REFERENCES ovf_package (id_ovf_package) ON DELETE NO ACTION ON UPDATE NO ACTION;
+	END IF;
+
+	IF EXISTS (SELECT * FROM information_schema.table_constraints WHERE table_schema= 'kinton' AND table_name='ovf_package_list_has_ovf_package' AND constraint_name='fk_ovf_package_list_has_ovf_package_ovf_package_list1') THEN
+		ALTER TABLE kinton.ovf_package_list_has_ovf_package DROP FOREIGN KEY fk_ovf_package_list_has_ovf_package_ovf_package_list1;
+	END IF;
+	IF NOT EXISTS (SELECT * FROM information_schema.table_constraints WHERE table_schema= 'kinton' AND table_name='ovf_package_list_has_ovf_package' AND constraint_name='fk_ovf_package_list_has_ovf_package_ovf_package_list1') THEN
+		ALTER TABLE kinton.ovf_package_list_has_ovf_package ADD CONSTRAINT fk_ovf_package_list_has_ovf_package_ovf_package_list1 FOREIGN KEY fk_ovf_package_list_has_ovf_package_ovf_package_list1 (id_ovf_package_list) REFERENCES ovf_package_list (id_ovf_package_list) ON DELETE CASCADE ON UPDATE NO ACTION;
+	END IF;
+
+	-- Constraint 'fk_ovf_package_list_repository' in ovf_package_list
+	IF EXISTS (SELECT * FROM information_schema.table_constraints WHERE table_schema= 'kinton' AND table_name='ovf_package_list' AND constraint_name='fk_ovf_package_list_repository') THEN
+		ALTER TABLE kinton.ovf_package_list DROP FOREIGN KEY fk_ovf_package_list_repository;
+	END IF;
+	IF NOT EXISTS (SELECT * FROM information_schema.table_constraints WHERE table_schema= 'kinton' AND table_name='ovf_package_list' AND constraint_name='fk_ovf_package_list_repository') THEN
+		ALTER TABLE kinton.ovf_package_list ADD CONSTRAINT fk_ovf_package_list_repository FOREIGN KEY fk_ovf_package_list_repository (id_apps_library) REFERENCES apps_library (id_apps_library) ON DELETE CASCADE ON UPDATE NO ACTION;
 	END IF;
 	-- Constraint idResource_FK rebuilt
 	IF EXISTS (SELECT * FROM information_schema.table_constraints WHERE table_schema= 'kinton' AND table_name='rasd_management' AND constraint_name='idResource_FK') THEN
@@ -417,19 +434,11 @@ BEGIN
 	END IF;
 	-- Index for unicity in user table
 	IF NOT EXISTS (SELECT * FROM information_schema.table_constraints WHERE table_schema= 'kinton' AND table_name='user' AND constraint_name='user_auth_idx') THEN
-		ALTER TABLE user ADD UNIQUE INDEX user_auth_idx (user, authType); 
+		ALTER TABLE user ADD UNIQUE KEY user_auth_idx (user, authType); 
 	END IF;
 	-- Index name on category table
 	IF NOT EXISTS (SELECT * FROM information_schema.table_constraints WHERE table_schema= 'kinton' AND table_name='category' AND constraint_name='name') THEN
 		ALTER TABLE `kinton`.`category` ADD UNIQUE INDEX `name`(`name`) using BTREE;
-	END IF;
-	-- Index fk_role_enterprise on role table
-	IF NOT EXISTS (SELECT * FROM information_schema.table_constraints WHERE table_schema= 'kinton' AND table_name='role' AND constraint_name='fk_role_enterprise') THEN
-		ALTER TABLE role ADD INDEX `fk_role_enterprise` (`idEnterprise`) USING BTREE; 
-	END IF;
-	-- Index fk_role_1 on role table deleted
-	IF EXISTS (SELECT * FROM information_schema.table_constraints WHERE table_schema= 'kinton' AND table_name='role' AND constraint_name='fk_role_1') THEN
-		ALTER TABLE `kinton`.`role` DROP INDEX `fk_role_1`;
 	END IF;
 
 	-- ########################################################## --	
@@ -726,6 +735,12 @@ BEGIN
 	-- Enable HeartBeat by default
 	UPDATE alerts al SET al.value='YES' where al.type='HEARTBEAT';
 
+	-- Datacenter update 
+	UPDATE datacenter set uuid = null;
+        UPDATE remote_service r set uri = CONCAT((select REPLACE(REPLACE(r.uri, RIGHT(r.uri, LENGTH(r.uri) - LOCATE(':', r.uri, 5)), '80'), 'tcp', 'http')), '/bpm-async') where r.remoteServiceType = 'BPM_SERVICE';
+
+
+
 	-- ######################################## --	
 	-- ######## SCHEMA: COLUMNS REMOVED ####### --
 	-- ######################################## --
@@ -868,6 +883,7 @@ DROP TRIGGER IF EXISTS kinton.update_rasd_management_update_stats;
 DROP TRIGGER IF EXISTS kinton.update_rasd_update_stats;
 DROP TRIGGER IF EXISTS kinton.create_ip_pool_management_update_stats;
 DROP TRIGGER IF EXISTS kinton.delete_ip_pool_management_update_stats;
+DROP TRIGGER IF EXISTS kinton.update_ip_pool_management_update_stats;
 
 -- Brand new one
 DROP TRIGGER IF EXISTS kinton.create_volume_management_update_stats;
@@ -1817,15 +1833,14 @@ CREATE TRIGGER kinton.create_ip_pool_management_update_stats AFTER INSERT ON kin
   FOR EACH ROW BEGIN
     DECLARE idDataCenterObj INTEGER;
     IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN
-      -- Query for new Public Ips created
-      -- SELECT COUNT(*) INTO numPublicIpsCreated
-      SELECT distinct dc.idDataCenter INTO idDataCenterObj
-      FROM vlan_network vn, network_configuration nc, datacenter dc
-      WHERE NEW.vlan_network_id = vn.network_id 
-      -- AND 
-      --  vn.network_configuration_id = nc.network_configuration_id
-      AND vn.network_id = dc.network_id;
+      SELECT DISTINCT vn.network_id INTO idDataCenterObj
+	FROM rasd_management rm, vlan_network vn, network_configuration nc
+	WHERE NEW.vlan_network_id = vn.vlan_network_id
+	AND vn.networktype = 'PUBLIC'
+	AND vn.network_configuration_id = nc.network_configuration_id
+	AND NEW.idManagement = rm.idManagement;
       IF idDataCenterObj IS NOT NULL THEN
+	-- INSERT INTO debug_msg (msg) VALUES (CONCAT('create_ip_pool_management_update_stats +1 ', IFNULL(idDataCenterObj,'NULL')));
         UPDATE IGNORE cloud_usage_stats SET publicIPsTotal = publicIPsTotal+1 WHERE idDataCenter = idDataCenterObj;
       END IF;
     END IF;
@@ -1837,17 +1852,61 @@ CREATE TRIGGER kinton.delete_ip_pool_management_update_stats AFTER DELETE ON kin
     DECLARE idDataCenterObj INTEGER;
     IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN
       -- Query for Public Ips deleted (disabled)
-      SELECT distinct dc.idDataCenter INTO idDataCenterObj
-      FROM vlan_network vn, network_configuration nc, datacenter dc
-       WHERE OLD.vlan_network_id = vn.vlan_network_id
-      AND vn.network_id = dc.network_id;
+      SELECT DISTINCT vn.network_id INTO idDataCenterObj
+	FROM rasd_management rm, vlan_network vn, network_configuration nc
+	WHERE OLD.vlan_network_id = vn.vlan_network_id
+	AND vn.networktype = 'PUBLIC'
+	AND vn.network_configuration_id = nc.network_configuration_id
+	AND OLD.idManagement = rm.idManagement;
       IF idDataCenterObj IS NOT NULL THEN
     -- detects IP disabled/enabled at Edit Public Ips
+   	-- INSERT INTO debug_msg (msg) VALUES (CONCAT('delete_ip_pool_management_update_stats -1 ', IFNULL(idDataCenterObj,'NULL')));
         UPDATE IGNORE cloud_usage_stats SET publicIPsTotal = publicIPsTotal-1 WHERE idDataCenter = idDataCenterObj;
       END IF;
     END IF;
   END;
 |
+SELECT "Recreating trigger update_ip_pool_management_update_stats..." as " ";
+CREATE TRIGGER kinton.update_ip_pool_management_update_stats AFTER UPDATE ON kinton.ip_pool_management
+    FOR EACH ROW BEGIN
+        DECLARE idDataCenterObj INTEGER;
+        DECLARE idVirtualDataCenterObj INTEGER;
+        DECLARE idEnterpriseObj INTEGER;
+	   DECLARE networkTypeObj VARCHAR(15);
+        IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN   
+		SELECT vn.networktype, vn.network_id INTO networkTypeObj, idDataCenterObj
+		FROM vlan_network vn
+		WHERE OLD.vlan_network_id = vn.vlan_network_id;
+		-- INSERT INTO debug_msg (msg) VALUES (CONCAT('update_ip_pool_management_update_stats', '-', OLD.ip, '-',OLD.available,'-', NEW.available,'-', IFNULL(networkTypeObj,'NULL'), '-', IFNULL(idDataCenterObj,'NULL')));
+		IF networkTypeObj = 'PUBLIC' THEN		
+			IF OLD.available=FALSE AND NEW.available=TRUE THEN
+				UPDATE IGNORE cloud_usage_stats SET publicIPsTotal = publicIPsTotal+1 WHERE idDataCenter = idDataCenterObj;
+			END IF;
+			IF OLD.available=TRUE AND NEW.available=FALSE THEN
+				UPDATE IGNORE cloud_usage_stats SET publicIPsTotal = publicIPsTotal-1 WHERE idDataCenter = idDataCenterObj;
+			END IF;
+		END IF;
+	    -- Checks for public available 
+            -- Checks for reserved IPs		
+            IF OLD.mac IS NULL AND NEW.mac IS NOT NULL THEN
+                -- Query for datacenter
+                SELECT vdc.idDataCenter, vdc.idVirtualDataCenter, vdc.idEnterprise  INTO idDataCenterObj, idVirtualDataCenterObj, idEnterpriseObj
+                FROM rasd_management rm, virtualdatacenter vdc, vlan_network vn
+                WHERE vdc.idVirtualDataCenter = rm.idVirtualDataCenter
+		AND NEW.vlan_network_id = vn.vlan_network_id
+		AND vn.networktype = 'PUBLIC'
+		AND NEW.idManagement = rm.idManagement;
+                -- New Public IP assignment for a VDC ---> Reserved
+                UPDATE IGNORE cloud_usage_stats SET publicIPsUsed = publicIPsUsed+1 WHERE idDataCenter = idDataCenterObj;
+                UPDATE IGNORE enterprise_resources_stats SET publicIPsReserved = publicIPsReserved+1 WHERE idEnterprise = idEnterpriseObj;
+                UPDATE IGNORE vdc_enterprise_stats SET publicIPsReserved = publicIPsReserved+1 WHERE idVirtualDataCenter = idVirtualDataCenterObj;
+                UPDATE IGNORE dc_enterprise_stats SET publicIPsReserved = publicIPsReserved+1 WHERE idDataCenter = idDataCenterObj;
+                IF EXISTS( SELECT * FROM `information_schema`.ROUTINES WHERE ROUTINE_SCHEMA='kinton' AND ROUTINE_TYPE='PROCEDURE' AND ROUTINE_NAME='AccountingIPsRegisterEvents' ) THEN
+                    CALL AccountingIPsRegisterEvents('IP_RESERVED',NEW.idManagement,NEW.ip,idVirtualDataCenterObj, idEnterpriseObj);
+                END IF;
+            END IF;
+        END IF;
+    END;
 |
 SELECT "Recreating trigger create_volume_management_update_stats..." as " ";
 CREATE TRIGGER kinton.create_volume_management_update_stats AFTER INSERT ON kinton.volume_management

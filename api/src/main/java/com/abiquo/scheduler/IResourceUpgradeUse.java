@@ -50,8 +50,14 @@ public interface IResourceUpgradeUse
      * 
      * @param sourceMachineId, the machine id of the source (where the HA vmachine were deployed)
      */
-    public void updateUseHa(VirtualAppliance virtualAppliance, VirtualMachine virtualMachine,
-        Integer sourceMachineId);
+
+    /**
+     * Updates physical machine resources Used and networking. No datastore update is done.
+     * 
+     * @param virtualMachine
+     * @param machine
+     */
+    public void updateUseHa(final VirtualMachine virtualMachine, final Machine machine);
 
     /**
      * Decrements the physical machine resource utilization
@@ -66,7 +72,7 @@ public interface IResourceUpgradeUse
      * 
      * @param virtualMachine
      */
-    public void rollbackUseHA(VirtualMachine virtualMachine);
+    public void rollbackUseHA(final VirtualMachine virtualMachine, final Machine machine);
 
     /**
      * Increase the ram, cpu and storage used resources on the provided machine and datastore.

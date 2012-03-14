@@ -92,6 +92,11 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
         return Restrictions.eq(Machine.ENTERPRISE_PROPERTY, enterprise);
     }
 
+    private static Criterion sameState(MachineState state)
+    {
+        return Restrictions.eq(Machine.STATE_PROPERTY, state);
+    }
+
     private Criterion filterBy(final String filter)
     {
         Disjunction filterDisjunction = Restrictions.disjunction();

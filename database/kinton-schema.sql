@@ -186,7 +186,7 @@ CREATE TABLE  `kinton`.`vlan_network` (
   `network_configuration_id` int(11) unsigned NOT NULL, 
   `network_name` varchar(40) NOT NULL,
   `vlan_tag` int(4) unsigned DEFAULT NULL,
-  `networktype` varchar(15) NOT NULL DEFAULT 'internal',
+  `networktype` varchar(15) NOT NULL DEFAULT 'INTERNAL',
   `version_c` integer NOT NULL DEFAULT 1,
   `enterprise_id` int(10) unsigned DEFAULT NULL,
   PRIMARY KEY  (`vlan_network_id`),
@@ -928,7 +928,7 @@ CREATE TABLE  `kinton`.`user` (
   `availableVirtualDatacenters` varchar(255),
   `active` int(1) unsigned NOT NULL default '0',
   `authType` varchar(20) NOT NULL,
-  `creationDate` timestamp NOT NULL,
+  `creationDate` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `version_c` int(11) default 0,
   PRIMARY KEY  (`idUser`),
   KEY `User_FK1` (`idRole`),
@@ -1072,7 +1072,7 @@ CREATE TABLE  `kinton`.`virtualimage` (
   `stateful` int(1) unsigned NOT NULL,
   `diskFileSize` BIGINT(20) UNSIGNED NOT NULL,
   `chefEnabled` boolean NOT NULL default false,
-  `cost_code` int(4),
+  `cost_code` int(4) DEFAULT 0,
   `creation_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `creation_user` varchar(128) NOT NULL,
   `version_c` integer NOT NULL DEFAULT 1,
@@ -1500,7 +1500,7 @@ CREATE  TABLE IF NOT EXISTS `kinton`.`ovf_package` (
   `name` VARCHAR(255) NULL ,
   `description` VARCHAR(255) NULL ,
   `iconUrl` varchar(255) default NULL,
-  `productName` VARCHAR(45) NULL ,
+  `productName` VARCHAR(255) NULL ,
   `productUrl` VARCHAR(45) NULL ,
   `productVersion` VARCHAR(45) NULL ,
   `productVendor` VARCHAR(45) NULL ,
@@ -2116,10 +2116,10 @@ DROP TRIGGER IF EXISTS kinton.update_rasd_management_update_stats;
 DROP TRIGGER IF EXISTS `kinton`.`update_rasd_update_stats`;
 DROP TRIGGER IF EXISTS `kinton`.`user_created`;
 DROP TRIGGER IF EXISTS `kinton`.`user_deleted`;
-DROP TRIGGER IF EXISTS `kinton`.`create_ip_pool_management_update_stats`;
+DROP TRIGGER IF EXISTS kinton.create_ip_pool_management_update_stats;
 DROP TRIGGER IF EXISTS `kinton`.`create_vlan_network_update_stats`;
 DROP TRIGGER IF EXISTS `kinton`.`delete_vlan_network_update_stats`;
-DROP TRIGGER IF EXISTS `kinton`.`update_ip_pool_management_update_stats`;
+DROP TRIGGER IF EXISTS kinton.update_ip_pool_management_update_stats;
 DROP TRIGGER IF EXISTS kinton.delete_ip_pool_management_update_stats;
 DROP TRIGGER IF EXISTS `kinton`.`update_network_configuration_update_stats`;
 DROP TRIGGER IF EXISTS `kinton`.`dclimit_created`;
@@ -3415,19 +3415,18 @@ CREATE TRIGGER `kinton`.`update_rasd_update_stats` AFTER UPDATE ON `kinton`.`ras
 --
 -- Fires: On an INSERT for the ip_pool_management
 -- ******************************************************************************************
-CREATE TRIGGER `kinton`.`create_ip_pool_management_update_stats` AFTER INSERT ON `kinton`.`ip_pool_management`
+CREATE TRIGGER kinton.create_ip_pool_management_update_stats AFTER INSERT ON kinton.ip_pool_management
   FOR EACH ROW BEGIN
     DECLARE idDataCenterObj INTEGER;
     IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN
-      -- Query for new Public Ips created
-      -- SELECT COUNT(*) INTO numPublicIpsCreated
-      SELECT distinct dc.idDataCenter INTO idDataCenterObj
-      FROM vlan_network vn, network_configuration nc, datacenter dc
-      WHERE NEW.vlan_network_id = vn.network_id 
-      -- AND 
-      --  vn.network_configuration_id = nc.network_configuration_id
-      AND vn.network_id = dc.network_id;
+      SELECT DISTINCT vn.network_id INTO idDataCenterObj
+	FROM rasd_management rm, vlan_network vn, network_configuration nc
+	WHERE NEW.vlan_network_id = vn.vlan_network_id
+	AND vn.networktype = 'PUBLIC'
+	AND vn.network_configuration_id = nc.network_configuration_id
+	AND NEW.idManagement = rm.idManagement;
       IF idDataCenterObj IS NOT NULL THEN
+	-- INSERT INTO debug_msg (msg) VALUES (CONCAT('create_ip_pool_management_update_stats +1 ', IFNULL(idDataCenterObj,'NULL')));
         UPDATE IGNORE cloud_usage_stats SET publicIPsTotal = publicIPsTotal+1 WHERE idDataCenter = idDataCenterObj;
       END IF;
     END IF;
@@ -3439,17 +3438,20 @@ CREATE TRIGGER `kinton`.`create_ip_pool_management_update_stats` AFTER INSERT ON
 --
 -- Fires: On an DELETE for the ip_pool_management
 -- ******************************************************************************************
-CREATE TRIGGER `kinton`.`delete_ip_pool_management_update_stats` AFTER DELETE ON `kinton`.`ip_pool_management`
+CREATE TRIGGER kinton.delete_ip_pool_management_update_stats AFTER DELETE ON kinton.ip_pool_management
   FOR EACH ROW BEGIN
     DECLARE idDataCenterObj INTEGER;
     IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN
       -- Query for Public Ips deleted (disabled)
-      SELECT distinct dc.idDataCenter INTO idDataCenterObj
-      FROM vlan_network vn, network_configuration nc, datacenter dc
-       WHERE OLD.vlan_network_id = vn.vlan_network_id
-      AND vn.network_id = dc.network_id;
+      SELECT DISTINCT vn.network_id INTO idDataCenterObj
+	FROM rasd_management rm, vlan_network vn, network_configuration nc
+	WHERE OLD.vlan_network_id = vn.vlan_network_id
+	AND vn.networktype = 'PUBLIC'
+	AND vn.network_configuration_id = nc.network_configuration_id
+	AND OLD.idManagement = rm.idManagement;
       IF idDataCenterObj IS NOT NULL THEN
     -- detects IP disabled/enabled at Edit Public Ips
+   	-- INSERT INTO debug_msg (msg) VALUES (CONCAT('delete_ip_pool_management_update_stats -1 ', IFNULL(idDataCenterObj,'NULL')));
         UPDATE IGNORE cloud_usage_stats SET publicIPsTotal = publicIPsTotal-1 WHERE idDataCenter = idDataCenterObj;
       END IF;
     END IF;
@@ -3546,13 +3548,27 @@ END;
 --
 -- Fires: On an UPDATE for the ip_pool_management
 -- ******************************************************************************************
-CREATE TRIGGER `kinton`.`update_ip_pool_management_update_stats` AFTER UPDATE ON `kinton`.`ip_pool_management`
+CREATE TRIGGER kinton.update_ip_pool_management_update_stats AFTER UPDATE ON kinton.ip_pool_management
     FOR EACH ROW BEGIN
         DECLARE idDataCenterObj INTEGER;
         DECLARE idVirtualDataCenterObj INTEGER;
         DECLARE idEnterpriseObj INTEGER;
+	   DECLARE networkTypeObj VARCHAR(15);
         IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN   
-            -- Checks for reserved IPs
+		SELECT vn.networktype, vn.network_id INTO networkTypeObj, idDataCenterObj
+		FROM vlan_network vn
+		WHERE OLD.vlan_network_id = vn.vlan_network_id;
+		-- INSERT INTO debug_msg (msg) VALUES (CONCAT('update_ip_pool_management_update_stats', '-', OLD.ip, '-',OLD.available,'-', NEW.available,'-', IFNULL(networkTypeObj,'NULL'), '-', IFNULL(idDataCenterObj,'NULL')));
+		IF networkTypeObj = 'PUBLIC' THEN		
+			IF OLD.available=FALSE AND NEW.available=TRUE THEN
+				UPDATE IGNORE cloud_usage_stats SET publicIPsTotal = publicIPsTotal+1 WHERE idDataCenter = idDataCenterObj;
+			END IF;
+			IF OLD.available=TRUE AND NEW.available=FALSE THEN
+				UPDATE IGNORE cloud_usage_stats SET publicIPsTotal = publicIPsTotal-1 WHERE idDataCenter = idDataCenterObj;
+			END IF;
+		END IF;
+	    -- Checks for public available 
+            -- Checks for reserved IPs		
             IF OLD.mac IS NULL AND NEW.mac IS NOT NULL THEN
                 -- Query for datacenter
                 SELECT vdc.idDataCenter, vdc.idVirtualDataCenter, vdc.idEnterprise  INTO idDataCenterObj, idVirtualDataCenterObj, idEnterpriseObj
