@@ -250,8 +250,11 @@ public class DatacenterResource extends AbstractResource
     // --------- //
 
     /**
-     * Get the hypervisor type of the specified cloud node.
+     * @title Return the list of Hypervisor Types allowed in Datacenter.
      * 
+     * Just Return the list of Hypervisor Types allowed in Datacenter. It depends on the 
+     * registered hypervisors.
+     *
      * @param datacenterId The ID of the datacenter where this remote service is assigned.
      * @param ip The IP of the target cloud node.
      * @return The Hypervisor Type.
@@ -270,7 +273,7 @@ public class DatacenterResource extends AbstractResource
     }
 
     /**
-     * Returns back the parameters to create a physical machine. It doesn't create it!
+     * @title Returns back the parameters to create a physical machine. 
      * 
      * @param datacenterId identifier of the datacenter. It is useful to search the uri of the
      *            DiscoveryManager to call.
