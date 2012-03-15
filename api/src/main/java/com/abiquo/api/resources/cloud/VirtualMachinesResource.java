@@ -118,6 +118,13 @@ public class VirtualMachinesResource extends AbstractResource
      * Creates a resource {@link VirtualMachine} under this root.
      * 
      * @title Create a virtual machine
+     * @wiki The name of the virtual machine is not the same as you can see through our GUI. But the
+     *       identifier of the virtual machine itself in the hypervisor. If you want to change the
+     *       virtual machine's name to a more friendly name you must change the node name. A node is
+     *       the representation of a member of a virtual appliance with a name. To be able to set
+     *       that name you must create the virtual machine with its node data. This representation
+     *       has 'application/vnd.abiquo.virtualmachinewithnode+xml' media type. Here is the minimal
+     *       data required for creating a virtual machine.
      * @param virtualMachineDto virtual machine
      * @param vdcId identifier of the virtual datacenter
      * @param vappId identifier of the virtual appliance

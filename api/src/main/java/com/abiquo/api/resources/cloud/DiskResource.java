@@ -96,6 +96,8 @@ public class DiskResource extends AbstractResource
      * Expose the method to delete an existing Hard Disk.
      * 
      * @title Delete a hard disk
+     * @wiki Deletes a Hard Disk. This method will raise an exception if the hard disk is used by a
+     *       Virtual Machine.
      * @param vdcId identifier of the {@link VirtualDatacenter}
      * @param diskId identifier fo the {@link DiskManagement} to delete.
      * @param restBuilder a Context-injected object to create the links of the Dto

@@ -107,7 +107,7 @@ public class DatastoreResource extends AbstractResource
     /**
      * Modifies a datastore
      * 
-     * @title Modifty a datastore
+     * @title Updates a Datastore
      * @param datacenterId identifier of the datacenter
      * @param rackId identifier of the rack
      * @param machineId identifier of the machine

@@ -61,7 +61,7 @@ public class PrivilegeResource extends AbstractResource
     SecurityService securityService;
 
     /**
-     * Returns an especific privilege
+     * Returns an specific privilege
      * 
      * @title Retrieve a privilege
      * @param privilegeId identifier of the privilefe

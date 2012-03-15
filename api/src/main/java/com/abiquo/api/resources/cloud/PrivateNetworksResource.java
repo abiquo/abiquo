@@ -48,6 +48,10 @@ import com.abiquo.server.core.infrastructure.network.VLANNetwork;
 import com.abiquo.server.core.infrastructure.network.VLANNetworkDto;
 import com.abiquo.server.core.infrastructure.network.VLANNetworksDto;
 
+/**
+ * @wiki The PrivateNetwork Resource offers the functionality of managing the private networks
+ *       associated with a virtual datacenter.
+ */
 @Parent(VirtualDatacenterResource.class)
 @Path(PrivateNetworksResource.PRIVATE_NETWORKS_PATH)
 @Controller
