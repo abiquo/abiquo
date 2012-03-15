@@ -1,82 +1,3 @@
---#############
---#
---# PRE-UPGRADE PROCESS: costCode upgrade SP...
---#
---#############
-DROP PROCEDURE IF EXISTS kinton.costCodeUpgrade;
-
-DELIMITER |
-CREATE PROCEDURE kinton.costCodeUpgrade() 
-BEGIN
-    IF NOT EXISTS ( SELECT * FROM information_schema.tables WHERE table_schema='kinton' AND table_name='costCode') THEN
-		SELECT "Adding new table costCode..." as " ";
-		CREATE TABLE kinton.costCode (
-		  idCostCode int(10) NOT NULL AUTO_INCREMENT ,
-		  name varchar(20) NOT NULL ,
-		  description varchar(100) NOT NULL ,
-		  version_c int(11) default 0,
-		  PRIMARY KEY (idCostCode)
-		  ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
-	END IF;
-
-    #
-    # Populate up cost codes from the accounting and virtualimage tables...
-    #
-    SELECT COUNT(*) INTO @existsCount FROM kinton.costCode;
-    IF @existsCount = 0 THEN
-        INSERT INTO kinton.costCode(name, description)
-            SELECT DISTINCT(costCode), 'Automatically populated during upgrade'
-            FROM kinton.accounting_event_detail
-            WHERE costCode IS NOT NULL AND costCode NOT LIKE '' AND NOT EXISTS (SELECT 1 FROM kinton.costCode cc WHERE cc.name=costCode);
-        INSERT INTO kinton.costCode(name, description)
-            SELECT DISTINCT(costCode), 'Automatically populated during upgrade'
-            FROM kinton.accounting_event_vm
-            WHERE costCode IS NOT NULL AND costCode NOT LIKE '' AND NOT EXISTS (SELECT 1 FROM kinton.costCode cc WHERE cc.name=costCode);
-        INSERT INTO kinton.costCode(name, description)
-            SELECT DISTINCT(cost_code), 'Automatically populated during upgrade'
-            FROM kinton.virtualimage
-            WHERE cost_code IS NOT NULL AND cost_code NOT LIKE '' AND NOT EXISTS (SELECT 1 FROM kinton.costCode cc WHERE cc.name=cost_code);
-    END IF;
-
-    #
-    # Now update the strings to contain numeric values associated with the idCostCode
-    # When we subsequently modify the column type they should point to the correct cost code idValues...
-    #
-    SELECT COUNT(*) INTO @existsCount FROM kinton.costCode;
-    IF @existsCount > 0 THEN
-        UPDATE kinton.accounting_event_detail, kinton.costCode
-            SET kinton.accounting_event_detail.costCode=kinton.costCode.idCostCode
-        WHERE
-            kinton.accounting_event_detail.costCode=kinton.costCode.name;
-        UPDATE kinton.accounting_event_vm, kinton.costCode
-            SET kinton.accounting_event_vm.costCode=kinton.costCode.idCostCode
-        WHERE
-            kinton.accounting_event_vm.costCode=kinton.costCode.name;
-        UPDATE kinton.virtualimage, kinton.costCode
-            SET kinton.virtualimage.cost_code=kinton.costCode.idCostCode
-        WHERE
-            kinton.virtualimage.cost_code=kinton.costCode.name;
-    END IF;
-
-    #
-    # Finally, alter the column types...
-    #
-    ALTER TABLE kinton.accounting_event_detail MODIFY COLUMN costCode INT(20) DEFAULT NULL;
-    ALTER TABLE kinton.accounting_event_vm MODIFY COLUMN costCode INT(20) DEFAULT NULL;
-    ALTER TABLE kinton.virtualimage MODIFY COLUMN cost_code INT(20) DEFAULT 0;
-END;
-|
-DELIMITER ;
-
-# Now invoke the SP
-CALL kinton.costCodeUpgrade();
-
-COMMIT;
-
-# And on successful completion, remove the SP, so we are not cluttering the DBMS with upgrade code!
-DROP PROCEDURE IF EXISTS kinton.costCodeUpgrade;
-
-
 -- ############################################################################################################### --	
 -- ############################################################################################################### --	
 -- INDEX:
@@ -460,6 +381,29 @@ BEGIN
 		ALTER TABLE kinton.ovf_package ADD COLUMN iconUrl VARCHAR(255) DEFAULT NULL AFTER description;
 	END IF;
 
+    #
+    # Populate up cost codes from the virtualimage table...
+    #
+    SELECT COUNT(*) INTO @existsCount FROM kinton.costCode;
+    IF @existsCount = 0 THEN
+        INSERT INTO kinton.costCode(name, description)
+            SELECT DISTINCT(cost_code), 'Automatically populated during upgrade'
+            FROM kinton.virtualimage
+            WHERE cost_code IS NOT NULL AND cost_code NOT LIKE '' AND NOT EXISTS (SELECT 1 FROM kinton.costCode cc WHERE cc.name=cost_code);
+    END IF;
+
+    #
+    # Now update the strings to contain numeric values associated with the idCostCode
+    # When we subsequently modify the column type they should point to the correct cost code idValues...
+    #
+    SELECT COUNT(*) INTO @existsCount FROM kinton.costCode;
+    IF @existsCount > 0 THEN
+        UPDATE kinton.virtualimage, kinton.costCode
+            SET kinton.virtualimage.cost_code=kinton.costCode.idCostCode
+        WHERE
+            kinton.virtualimage.cost_code=kinton.costCode.name;
+    END IF;
+
 
 	-- ######################################## --	
 	-- ######## SCHEMA: COLUMNS MODIFIED ###### --
@@ -468,14 +412,12 @@ BEGIN
 	ALTER TABLE kinton.physicalmachine MODIFY COLUMN vswitchName varchar(200) NOT NULL;
 	ALTER TABLE kinton.ovf_package MODIFY COLUMN name VARCHAR(255)  CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL;
 	ALTER TABLE kinton.ovf_package MODIFY COLUMN productName VARCHAR(255)  CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL;
-	ALTER TABLE kinton.virtualimage MODIFY COLUMN cost_code int(4) DEFAULT 0;
+	ALTER TABLE kinton.virtualimage MODIFY COLUMN cost_code int(10) DEFAULT 0;
 	-- /* ABICLOUDPREMIUM-2878 - For consistency porpouse, changed vharchar(30) to varchar(256) */
 	ALTER TABLE kinton.metering MODIFY COLUMN physicalmachine VARCHAR(256)  CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL;
 	ALTER TABLE kinton.metering MODIFY COLUMN user VARCHAR(128) NOT NULL;
 	ALTER TABLE kinton.repository MODIFY COLUMN URL VARCHAR(255) NOT NULL;
 	ALTER TABLE kinton.ovf_package_list MODIFY COLUMN name VARCHAR(45) NOT NULL;
-	ALTER TABLE kinton.accounting_event_detail MODIFY COLUMN costCode INT(4) DEFAULT NULL;
-	ALTER TABLE kinton.accounting_event_vm MODIFY COLUMN costCode INT(4) DEFAULT NULL;
 	ALTER TABLE kinton.vlan_network MODIFY COLUMN networktype varchar(15) NOT NULL DEFAULT 'INTERNAL';
 	ALTER TABLE kinton.user MODIFY COLUMN creationDate timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP;
 
@@ -520,7 +462,7 @@ BEGIN
 	IF NOT EXISTS (SELECT * FROM information_schema.table_constraints WHERE table_schema= 'kinton' AND table_name='category' AND constraint_name='name') THEN
 		ALTER TABLE `kinton`.`category` ADD UNIQUE INDEX `name`(`name`) using BTREE;
 	END IF;
-	
+
 	-- ########################################################## --	
         -- ######## DATA: NEW DATA (INSERTS, UPDATES, DELETES ####### --
 	-- ########################################################## --
@@ -578,7 +520,7 @@ BEGIN
 	IF @existsCount = 0 THEN 
 		INSERT INTO kinton.system_properties (name, value, description) VALUES ('client.network.defaultSufixDNS','','default sufix DNS');
 	END IF;
-	
+
 	-- Update System Properties
 	SELECT COUNT(*) INTO @existsCount FROM kinton.system_properties WHERE name='client.wiki.defaultURL' AND value='http://community.abiquo.com/display/ABI18/Abiquo+Documentation+Home';
 	IF @existsCount = 1 THEN 
@@ -763,7 +705,7 @@ BEGIN
 	IF @existsCount = 0 THEN 
 		INSERT INTO kinton.currency values (3, "JPY", CONCAT("Yen - " , 0xc2a5), 0, 0);
 	END IF;
-	
+
 	-- PRICING --
 	-- Dumping data for table kinton.roles_privileges
 	--
@@ -1594,9 +1536,9 @@ CREATE TRIGGER kinton.virtualdatacenter_updated AFTER UPDATE ON kinton.virtualda
 		DECLARE done INTEGER DEFAULT 0;
 		DECLARE cursorVlan CURSOR FOR SELECT DISTINCT vn.network_id, vn.network_name FROM vlan_network vn WHERE vn.network_id = OLD.networktypeID;
 		DECLARE CONTINUE HANDLER FOR SQLSTATE '02000' SET done = 1;
-		    
+
 		OPEN cursorVlan;
-		    
+
 		REPEAT
 		   FETCH cursorVlan into vlanNetworkIdObj, networkNameObj;
 		   IF NOT done THEN
