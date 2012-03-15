@@ -111,10 +111,6 @@ public class VirtualMachineResource extends AbstractResource
 
     public static final String VIRTUAL_MACHINE_BOOTSTRAP_REL = "bootstrap";
 
-    public static final String VM_NODE_MEDIA_TYPE = "application/vnd.vm-node+xml";
-
-    public static final String VM_NODE_EXTENDED_MEDIA_TYPE = "application/vnd.vm-node-extended+xml";
-
     public static final String VIRTUAL_MACHINE_ACTION_DEPLOY_REL = "deploy";
 
     public static final String VIRTUAL_MACHINE_ACTION_SNAPSHOT_REL = "instance";
@@ -951,6 +947,11 @@ public class VirtualMachineResource extends AbstractResource
         }
     }
 
+    /**
+     * @param taskId
+     * @param uriInfo
+     * @return AcceptedRequestDto<String>
+     */
     protected AcceptedRequestDto<String> buildAcceptedRequestDtoWithTaskLink(final String taskId,
         final UriInfo uriInfo)
     {
@@ -986,7 +987,7 @@ public class VirtualMachineResource extends AbstractResource
      *     http://example.com/api/cloud/virtualdatacenters/2/virtualappliances/4/virtualmachines/1/ -> http://example.com/api/cloud/virtualdatacenters/2/virtualappliances/4/virtualmachines/1/tasks/taskId <br>
      * 
      *     http://example.com/api/cloud/virtualdatacenters/2/virtualappliances/4/virtualmachines/1/action/undeploy -> http://example.com/api/cloud/virtualdatacenters/2/virtualappliances/4/virtualmachines/1/tasks/taskId <br>
-     *  
+     * 
      *     http://example.com/api/cloud/virtualdatacenters/2/virtualappliances/4/state -> http://example.com/api/cloud/virtualdatacenters/2/virtualappliances/4/tasks/taskId <br>
      * 
      *     http://example.com/api/cloud/virtualdatacenters/2/virtualappliances/4 -> http://example.com/api/cloud/virtualdatacenters/2/virtualappliances/4/tasks/taskId <br>

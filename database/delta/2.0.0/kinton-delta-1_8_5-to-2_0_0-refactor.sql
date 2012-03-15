@@ -1,3 +1,82 @@
+--#############
+--#
+--# PRE-UPGRADE PROCESS: costCode upgrade SP...
+--#
+--#############
+DROP PROCEDURE IF EXISTS kinton.costCodeUpgrade;
+
+DELIMITER |
+CREATE PROCEDURE kinton.costCodeUpgrade() 
+BEGIN
+    IF NOT EXISTS ( SELECT * FROM information_schema.tables WHERE table_schema='kinton' AND table_name='costCode') THEN
+		SELECT "Adding new table costCode..." as " ";
+		CREATE TABLE kinton.costCode (
+		  idCostCode int(10) NOT NULL AUTO_INCREMENT ,
+		  name varchar(20) NOT NULL ,
+		  description varchar(100) NOT NULL ,
+		  version_c int(11) default 0,
+		  PRIMARY KEY (idCostCode)
+		  ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
+	END IF;
+
+    #
+    # Populate up cost codes from the accounting and virtualimage tables...
+    #
+    SELECT COUNT(*) INTO @existsCount FROM kinton.costCode;
+    IF @existsCount = 0 THEN
+        INSERT INTO kinton.costCode(name, description)
+            SELECT DISTINCT(costCode), 'Automatically populated during upgrade'
+            FROM kinton.accounting_event_detail
+            WHERE costCode IS NOT NULL AND costCode NOT LIKE '' AND NOT EXISTS (SELECT 1 FROM kinton.costCode cc WHERE cc.name=costCode);
+        INSERT INTO kinton.costCode(name, description)
+            SELECT DISTINCT(costCode), 'Automatically populated during upgrade'
+            FROM kinton.accounting_event_vm
+            WHERE costCode IS NOT NULL AND costCode NOT LIKE '' AND NOT EXISTS (SELECT 1 FROM kinton.costCode cc WHERE cc.name=costCode);
+        INSERT INTO kinton.costCode(name, description)
+            SELECT DISTINCT(cost_code), 'Automatically populated during upgrade'
+            FROM kinton.virtualimage
+            WHERE cost_code IS NOT NULL AND cost_code NOT LIKE '' AND NOT EXISTS (SELECT 1 FROM kinton.costCode cc WHERE cc.name=cost_code);
+    END IF;
+
+    #
+    # Now update the strings to contain numeric values associated with the idCostCode
+    # When we subsequently modify the column type they should point to the correct cost code idValues...
+    #
+    SELECT COUNT(*) INTO @existsCount FROM kinton.costCode;
+    IF @existsCount > 0 THEN
+        UPDATE kinton.accounting_event_detail, kinton.costCode
+            SET kinton.accounting_event_detail.costCode=kinton.costCode.idCostCode
+        WHERE
+            kinton.accounting_event_detail.costCode=kinton.costCode.name;
+        UPDATE kinton.accounting_event_vm, kinton.costCode
+            SET kinton.accounting_event_vm.costCode=kinton.costCode.idCostCode
+        WHERE
+            kinton.accounting_event_vm.costCode=kinton.costCode.name;
+        UPDATE kinton.virtualimage, kinton.costCode
+            SET kinton.virtualimage.cost_code=kinton.costCode.idCostCode
+        WHERE
+            kinton.virtualimage.cost_code=kinton.costCode.name;
+    END IF;
+
+    #
+    # Finally, alter the column types...
+    #
+    ALTER TABLE kinton.accounting_event_detail MODIFY COLUMN costCode INT(20) DEFAULT NULL;
+    ALTER TABLE kinton.accounting_event_vm MODIFY COLUMN costCode INT(20) DEFAULT NULL;
+    ALTER TABLE kinton.virtualimage MODIFY COLUMN cost_code INT(20) DEFAULT 0;
+END;
+|
+DELIMITER ;
+
+# Now invoke the SP
+CALL kinton.costCodeUpgrade();
+
+COMMIT;
+
+# And on successful completion, remove the SP, so we are not cluttering the DBMS with upgrade code!
+DROP PROCEDURE IF EXISTS kinton.costCodeUpgrade;
+
+
 -- ############################################################################################################### --	
 -- ############################################################################################################### --	
 -- INDEX:
@@ -380,6 +459,7 @@ BEGIN
 		SELECT "Adding iconUrl on ovf_package" as " ";
 		ALTER TABLE kinton.ovf_package ADD COLUMN iconUrl VARCHAR(255) DEFAULT NULL AFTER description;
 	END IF;
+
 
 	-- ######################################## --	
 	-- ######## SCHEMA: COLUMNS MODIFIED ###### --
