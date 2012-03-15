@@ -61,6 +61,8 @@ public class TemplateDefinitionsResource extends AbstractResource
      * Returns all template definitions
      * 
      * @title Retrieve all template definitions
+     * @wiki This method retrieves all the Template Definitions for a given enterprise, including
+     *       those the being used on any Template Definition List.
      * @param idEnterprise identifier of the enterprise
      * @param restBuilder a Context-injected object to create the links of the Dto
      * @return a {TemplateDefinitionsDto} object with all template definitions
@@ -90,6 +92,11 @@ public class TemplateDefinitionsResource extends AbstractResource
      * Creates a template definition and returns it after creation
      * 
      * @title Create a template definition
+     * @wiki In case you have an OVF Envelope document available in an HTTP URL (e.g
+     *       http://rs.bcn.abiquo.com:9000/ovf/10/*desc.ovf*) you can use it to add as a template
+     *       definition into abiquo. Category and Icon links: you can add new icons and categories
+     *       while creating Template Definition, just by adding icon path in the title field of link
+     *       and in case of category adding category name in the title field.
      * @param idEnterprise identifier of the enterprise
      * @param templateDef template definition to create
      * @param restBuilder a Context-injected object to create the links of the Dto

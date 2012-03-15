@@ -96,6 +96,8 @@ public class TemplateDefinitionListResource extends AbstractResource
      * Modifies a template definition list
      * 
      * @title Modify a template definition list
+     * @wiki Fetch new Template Definitions from an ovfindex.xml source, only apply if the list is
+     *       associated to an ovfindex.xml (url datamodel).
      * @param templateDefinitionList the template definition list to modify
      * @param idEnterprise identifier of the enterprise
      * @param templateDefinitionListId identifier of the template definition list
@@ -123,6 +125,7 @@ public class TemplateDefinitionListResource extends AbstractResource
      * Refreshes a template definition list from the url
      * 
      * @title Refresh a template definition list from the url
+     * @wiki Deleting the list doesn't delete the containing Template Definitions.
      * @param idEnterprise identifier of the enterprise
      * @param templateDefinitionListId itentifier of the template definition list
      * @param restBuilder a Context-injected object to create the links of the Dto
@@ -163,6 +166,8 @@ public class TemplateDefinitionListResource extends AbstractResource
      * all the {@link TemplateDefinition} in the current list.
      * 
      * @title Retrieve a list of the status of all template status list
+     * @wiki Template Definition are available sources, but in order to create a Virtual Machine the
+     *       Defininition should be downloaded into the Datacenter Repository (NFS filesystem).
      */
     @GET
     @Path(TemplateDefinitionListResource.TEMPLATE_DEFINITION_LIST_REPOSITORY_STATUS_PATH)
