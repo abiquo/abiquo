@@ -126,7 +126,7 @@ public class MachineResource extends AbstractResource
     /**
      * Returns a machine
      * 
-     * @title Retrieve a machine
+     * @title Retrieve a Machine
      * @param datacenterId identifier of the datacenter
      * @param rackId identifier of the rack
      * @param machineId identifier of the machine
@@ -163,7 +163,7 @@ public class MachineResource extends AbstractResource
     /**
      * Modifies a machine
      * 
-     * @title Modify a machine
+     * @title Update an existing Machine
      * @param datacenterId idenfier of the datacenter
      * @param rackId identifier of the rack
      * @param machineId identifier of the machine
@@ -205,7 +205,7 @@ public class MachineResource extends AbstractResource
     /**
      * Deletes a machine.
      * 
-     * @title Delete a machine
+     * @title Delete a Machine
      * @param datacenterId identifier of the datacenter
      * @param rackId identifier of the rack
      * @param machineId identifier of the machine
@@ -222,7 +222,10 @@ public class MachineResource extends AbstractResource
     /**
      * Checks the machine state and updates it.
      * 
-     * @title Check machine state
+     * @title Check Machine state
+     * @wiki This feature checks physical machine state using the discovery manager and returns it.
+     *       The sync query parameter allows you to update the database with the value of state
+     *       returned by the discovery manager.
      * @param datacenterId The ID of the datacenter where this remote service and machine are
      *            assigned.
      * @param ip The IP of the target cloud node.

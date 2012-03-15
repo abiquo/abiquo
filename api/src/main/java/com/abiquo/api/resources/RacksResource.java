@@ -49,6 +49,11 @@ import com.abiquo.server.core.infrastructure.Rack;
 import com.abiquo.server.core.infrastructure.RackDto;
 import com.abiquo.server.core.infrastructure.RacksDto;
 
+/**
+ * @author scastro
+ * @wiki The Rack Resource offers the functionality of managing the rack infrastructure in a logical
+ *       way. Distribute your machines into the Rack resource.
+ */
 @Parent(DatacenterResource.class)
 @Path(RacksResource.RACKS_PATH)
 @Controller
@@ -64,7 +69,7 @@ public class RacksResource extends AbstractResource
     /**
      * Returns all racks from a datacenter.
      * 
-     * @title Retrieve all racks
+     * @title Retrieve a list of Racks
      * @param datacenterId identifier of the datacenter
      * @param filter
      * @param restBuilder a Context-injected object to create the links of the Dto
@@ -95,7 +100,7 @@ public class RacksResource extends AbstractResource
     /**
      * Creates a rack and returns it after creation
      * 
-     * @title Create a rack
+     * @title Create a new Rack
      * @param datacenterId identifier of the datacenter
      * @param rackDto rack to create
      * @param restBuilder a Context-injected object to create the links of the Dto

@@ -125,7 +125,9 @@ public class UserResource extends AbstractResource
     /**
      * Updates a user with the given data
      * 
-     * @title Modify a user of an enterprise
+     * @title Updates an existing user
+     * @wiki When updating an existing user, the password field can be omitted if you do not want to
+     *       change it.
      * @param enterpriseIdOrWildcard identifier of the enterprise or the '_' wildcard if enterprise
      *            is unknown
      * @param userId identifier of the user
@@ -155,7 +157,7 @@ public class UserResource extends AbstractResource
     /**
      * Deletes a user from an enterprise.
      * 
-     * @title Detele a user from an enterprise
+     * @title Detele an existing user
      * @param enterpriseId indentifier of the enterprise
      * @param userId identifier of the user to delete
      */
@@ -170,7 +172,7 @@ public class UserResource extends AbstractResource
     /**
      * Returns the virtual machines of a user
      * 
-     * @title Retrive the virtual machines of the user
+     * @title Retrieve the list of virtual machines by user
      * @param enterpriseId identifier of the enterprise
      * @param userId identifier of the user
      * @param restBuilder a Context-injected object to create the links of the Dto

@@ -137,7 +137,7 @@ public class EnterpriseResource extends AbstractResource
     /**
      * Returns an enterprise.
      * 
-     * @title Retrieve an enterprise
+     * @title Retrieve an Enterprise
      * @param enterpriseId identifier of an enterprise
      * @param restBuilder a Context-injected object to create the links of the Dto
      * @return an {EntepriseDto} object with the requested enterprise
@@ -179,7 +179,7 @@ public class EnterpriseResource extends AbstractResource
     /**
      * Modifies an enterprise
      * 
-     * @title Modify an enteprise
+     * @title Update an existing enteprise
      * @param enterprise enterprise to modify
      * @param enterpriseId identifier of the enterprise
      * @param restBuilder a Context-injected object to create the links of the Dto
@@ -200,7 +200,7 @@ public class EnterpriseResource extends AbstractResource
     /**
      * Deletes an enteprise.
      * 
-     * @title Delete an enterprise
+     * @title Delete an existing Enterprise
      * @param enterpriseId identifier of the enterprise
      */
     @DELETE
@@ -212,7 +212,7 @@ public class EnterpriseResource extends AbstractResource
     /**
      * Returns all ips from an enterprise
      * 
-     * @title Retrive all ips
+     * @title Retrieve the list of private IPs created by an Enterprise
      * @param id identifier of the enterprise
      * @param startwith
      * @param orderBy
@@ -264,7 +264,7 @@ public class EnterpriseResource extends AbstractResource
     /**
      * Retrieves the list Of Virtual machines defined into an enterprise.
      * 
-     * @title Retrieve all virtual machines
+     * @title Retrieve a list of virtual machines by an Enterprise
      * @param enterpriseId identifier of the enterprise
      * @param restBuilder {@linnk IRESTBuilder} object injected by context
      * @return the {@link VirtualMachinesDto} object. A {@link VirtualMachineDto} wrapper.
@@ -298,7 +298,7 @@ public class EnterpriseResource extends AbstractResource
     /**
      * Retrieves the list Of icons urls used in virtual images of an enterprise
      * 
-     * @title Retrive all icons
+     * @title Retrive a list of icons of an Enterprise
      * @param enterpriseId identifier of the enterprise
      * @param restBuilder {@link IRESTBuilder} object injected by context
      * @return the list of String
@@ -321,7 +321,7 @@ public class EnterpriseResource extends AbstractResource
     /**
      * Retrieves the list Of Virtual datacenters defined into an enterprise.
      * 
-     * @title Retrieve all vitual datacenters
+     * @title Retrieve a list of vitual datacenters by an Enterprise
      * @param enterpriseId identifier of the enterprise
      * @param restBuilder {@linnk IRESTBuilder} object injected by context
      * @return the {@link VirtualDatacentersDto} object. A {@link VirtualDatacenterDto} wrapper.
@@ -359,7 +359,7 @@ public class EnterpriseResource extends AbstractResource
     /**
      * Retrieves the list Of Virtual appliances defined into an enterprise.
      * 
-     * @title Retrieve all virtual appliances
+     * @title Retrieve the list of virtual appliances by an Enterprise
      * @param enterpriseId identifier of the enterprise
      * @param restBuilder {@linnk IRESTBuilder} object injected by context
      * @return the {@link VirtualAppliancesDto} object. A {@link VirtualApplianceDto} wrapper.

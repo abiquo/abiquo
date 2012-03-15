@@ -54,6 +54,10 @@ import com.abiquo.server.core.enterprise.UsersDto;
 import com.abiquo.server.core.enterprise.UsersWithRolesDto;
 import com.abiquo.server.core.util.PagedList;
 
+/**
+ * @wiki The User Resource offers the functionality of managing the users of an enterprise in a
+ *       logical way.
+ */
 @Parent(EnterpriseResource.class)
 @Path(UsersResource.USERS_PATH)
 @Controller
@@ -73,7 +77,7 @@ public class UsersResource extends AbstractResource
     /**
      * Returns the users of an enterprise.
      * 
-     * @title Retrive the users of an enterprise
+     * @title Retrieve a list of users
      * @param enterpriseId identifier of the enterprise
      * @param filter
      * @param orderBy
@@ -131,7 +135,7 @@ public class UsersResource extends AbstractResource
     /**
      * Returns the users with own roles of an enterprise.
      * 
-     * @title Retrive the users with own roles of an enterprise
+     * @title Retrive a list of users with own roles
      * @param enterpriseId identifier of the enterprise
      * @param filter
      * @param orderBy
@@ -194,7 +198,8 @@ public class UsersResource extends AbstractResource
     /**
      * Creates a user and returns it after creation
      * 
-     * @title Create a user in the enterprise
+     * @title Create a new user
+     * @wiki When creating a new user, the password must be provided in plain text.
      * @param enterpriseId identifier of the enterprise
      * @param user user to create
      * @param restBuilder a Context-injected object to create the links of the Dto

@@ -110,7 +110,7 @@ public class RackResource extends AbstractResource
     /**
      * Returns a rack
      * 
-     * @title Retrieve a rack
+     * @title Retrieve a Rack
      * @param datacenterId identifier of the datacenter
      * @param rackId identifier of the rack
      * @param restBuilder a Context-injected object to create the links of the Dto
@@ -136,7 +136,7 @@ public class RackResource extends AbstractResource
     /**
      * Modifies a rack
      * 
-     * @title Modify a rack
+     * @title Update an existing Rack
      * @param datacenterId identifier of the datacenter
      * @param rackId identifier of the rack
      * @param rackDto rack to modify
@@ -181,7 +181,7 @@ public class RackResource extends AbstractResource
     /**
      * Deletes a rack
      * 
-     * @title Delete a rack
+     * @title Delete a Rack
      * @param datacenterId identifier of the datacenter
      * @param rackId indentifier of the rack
      * @param force boolean to force cascade deletion

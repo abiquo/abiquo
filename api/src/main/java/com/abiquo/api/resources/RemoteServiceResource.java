@@ -70,7 +70,7 @@ public class RemoteServiceResource extends AbstractResource
     /**
      * Returns a remote service from a datacenter
      * 
-     * @title Retrive a remote service
+     * @title Retrieve a Remote Service
      * @param datacenterId identifier of the datacenter
      * @param serviceType remote service type to retrieve, must be one of the followings: {
      *            virtualfactory, storagesystemmonitor, virtualsystemmonitor, nodecollector,
@@ -97,7 +97,8 @@ public class RemoteServiceResource extends AbstractResource
     /**
      * Checks a remote service status and updates the state
      * 
-     * @title Check a remote service status
+     * @title Check the status of a Remote Service
+     * @wiki Returns the status of a remoter service in a HTTP response code
      * @param datacenterId identifier of the datacenter
      * @param serviceType remote service type to check, must be one of the followings: {
      *            virtualfactory, storagesystemmonitor, virtualsystemmonitor, nodecollector,
@@ -121,7 +122,7 @@ public class RemoteServiceResource extends AbstractResource
     /**
      * Modifies a remote serivce.
      * 
-     * @title Modify a remote service
+     * @title Update an existing Remote Service
      * @param datacenterId indentifier of the datacenter
      * @param serviceType remote service type to modify, must be one of the followings: {
      *            virtualfactory, storagesystemmonitor, virtualsystemmonitor, nodecollector,
@@ -160,7 +161,7 @@ public class RemoteServiceResource extends AbstractResource
     /**
      * Deletes a remote serivce
      * 
-     * @title delete a remote service
+     * @title Delete a Remote Service
      * @param datacenterId identifier of the datacenter
      * @param serviceType remote service type to delete, must be one of the followings: {
      *            virtualfactory, storagesystemmonitor, virtualsystemmonitor, nodecollector,

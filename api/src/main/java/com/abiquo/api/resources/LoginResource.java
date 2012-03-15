@@ -39,6 +39,10 @@ import com.abiquo.server.core.enterprise.UserDto;
  * Resource accessible by anyone to authenticate against Abiquo API.
  * 
  * @author ssedano
+ * @wiki The Login resource is secured with a specific role that everyone who logs in successfully
+ *       is granted. Basically it returns the currently logged in user. If this resource returns a
+ *       code 200 (OK), the current user has been validated and loaded into the Security Context
+ *       with all its Granted Authorities.
  */
 @Path(LoginResource.LOGIN_PATH)
 @Controller
@@ -53,7 +57,7 @@ public class LoginResource extends AbstractResource
     /**
      * Returns the current user with its credentials if any.
      * 
-     * @title Retrieve the current user
+     * @title Retrieve the currently logged in user
      * @return current user.
      * @throws Exception UserDto
      */

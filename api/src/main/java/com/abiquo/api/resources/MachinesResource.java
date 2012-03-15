@@ -55,6 +55,10 @@ import com.abiquo.server.core.infrastructure.MachineDto;
 import com.abiquo.server.core.infrastructure.MachinesDto;
 import com.abiquo.server.core.infrastructure.MachinesToCreateDto;
 
+/**
+ * @author scastro
+ * @wiki This resource allows you to manage physical machines in the cloud infrastructure.
+ */
 @Parent(RackResource.class)
 @Path(MachinesResource.MACHINES_PATH)
 @Controller
@@ -71,7 +75,7 @@ public class MachinesResource extends AbstractResource
     /**
      * Returns all machines from a rack
      * 
-     * @title Retrieve all machines
+     * @title Retrieve a list of Machines
      * @param datacenterId indentifier of the datacenter
      * @param rackId identifier of the rack
      * @param filter
@@ -101,6 +105,13 @@ public class MachinesResource extends AbstractResource
      * Creates a machine and returns it after creation.
      * 
      * @title Create a machine
+     * @wiki The best way to create a machine is to call first the Retrieve remote machine
+     *       information function to get all its properties. Once the properties are retrieved, the
+     *       next step is to edit the <vswitch> to choose one. Then another step is to enable a
+     *       Datastore. All of the datastores start with <enabled> tag set to false. You should
+     *       enable one and then call this method.\n This feature can not be executed if the machine
+     *       belongs to a UCS Rack. Machines in UCS Rack (See UcsRack Data Model) are
+     *       auto-discovered and the only way to create them is by creating the UCS Rack itself .
      * @param datacenterId identifier of the datacenter
      * @param rackId identifier of the rack
      * @param machine machine to create
@@ -128,6 +139,13 @@ public class MachinesResource extends AbstractResource
      * Creates multiple machines after discover them in the given ips.
      * 
      * @title Create multiple machines
+     * @wiki This functionality allows you to add multiple physical machines that will be discovered
+     *       by the discovery manager. Is important to know that the datastore with more free space
+     *       will be enabled automatically for each discovered physical machine. \n
+     *       <p>
+     *       This feature cannot be executed if the machine belongs to a UCS Rack. Machines in UCS
+     *       Rack (See UcsRack Data Model) are auto-discovered and the only way to create them is by
+     *       creating the UCS Rack itself .
      * @param datacenterId identifier of the datacenter
      * @param rackId identifier of the rack
      * @param machinesToCreateDto data from machines will be discovered

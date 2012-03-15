@@ -44,6 +44,11 @@ import com.abiquo.server.core.infrastructure.RemoteService;
 import com.abiquo.server.core.infrastructure.RemoteServiceDto;
 import com.abiquo.server.core.infrastructure.RemoteServicesDto;
 
+/**
+ * @author scastro
+ * @wiki The Remote Service resource offers the functionality of managing the remote services of a
+ *       datacenter in a logical way.
+ */
 @Parent(DatacenterResource.class)
 @Path(RemoteServicesResource.REMOTE_SERVICES_PATH)
 @Controller
@@ -58,7 +63,7 @@ public class RemoteServicesResource extends AbstractResource
     /**
      * Returns all remote services from a datacenter
      * 
-     * @title Retrive all remote services
+     * @title Retrive a list of Remote Services
      * @param datacenterId identifier of the datacenter
      * @param restBuilder a Context-injected object to create the links of the Dto
      * @return a {RemoteServicesDto} object with all remote services from the datacenter
@@ -87,7 +92,7 @@ public class RemoteServicesResource extends AbstractResource
     /**
      * Creates a remote service and returns it after creation
      * 
-     * @title Create a remote service
+     * @title Create a Remote Service
      * @param datacenterId identifier of the datacenter
      * @param remoteService remote service to create
      * @param restBuilder a Context-injected object to create the links of the Dto

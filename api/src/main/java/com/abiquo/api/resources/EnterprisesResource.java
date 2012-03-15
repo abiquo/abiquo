@@ -48,6 +48,10 @@ import com.abiquo.server.core.enterprise.EnterpriseDto;
 import com.abiquo.server.core.enterprise.EnterprisesDto;
 import com.abiquo.server.core.util.PagedList;
 
+/**
+ * @wiki The Enterprise Resource offers the functionality of managing the enterprise infrastructure
+ *       in a logical way.
+ */
 @Path(EnterprisesResource.ENTERPRISES_PATH)
 @Controller
 @Workspace(workspaceTitle = "Abiquo administration workspace", collectionTitle = "Enterprises")
@@ -67,7 +71,7 @@ public class EnterprisesResource extends AbstractResource
     /**
      * Returns all enterprises
      * 
-     * @title Retrive all enterprises
+     * @title Retrive a list of Enterprises
      * @param startwith
      * @param filterName
      * @param numResults
@@ -114,7 +118,7 @@ public class EnterprisesResource extends AbstractResource
     /**
      * Creates and enterprise and returns it after creation
      * 
-     * @title Create an enterprise
+     * @title Creates a new Enterprise
      * @param enterprise enteprise to create
      * @param restBuilder a Context-injected object to create the links of the Dto
      * @return a {EnterpriseDto} object with created enterprise
