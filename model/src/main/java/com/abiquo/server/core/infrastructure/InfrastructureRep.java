@@ -838,6 +838,18 @@ public class InfrastructureRep extends DefaultRepBase
     }
 
     /**
+     * Return all machines in a rack that are empty of VM.
+     * 
+     * @param rackId rack.
+     * @return Integer
+     */
+    public List<Machine> getAllMachinesToShutDownFromRack(final Integer rackId)
+    {
+
+        return rackDao.getAllMachinesToShutDownFromRack(rackId);
+    }
+
+    /**
      * Return all the public VLANs by Datacenter.
      * 
      * @param datacenter {@link Datacenter} where we search for.
