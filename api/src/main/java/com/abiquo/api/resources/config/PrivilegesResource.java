@@ -51,6 +51,14 @@ public class PrivilegesResource extends AbstractResource
     @Autowired
     private EnterpriseService service;
 
+    /**
+     * Returns all privileges from abiquo
+     * 
+     * @title Retrieve all privileges
+     * @param restBuilder a Context-injected object to create the links of the Dto
+     * @return a {PrivilegesDto} objec with all privileges from abiquo
+     * @throws Exception
+     */
     @GET
     @Produces(PrivilegesDto.MEDIA_TYPE)
     public PrivilegesDto getPrivileges(@Context final IRESTBuilder restBuilder) throws Exception

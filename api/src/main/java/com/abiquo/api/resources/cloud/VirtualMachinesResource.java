@@ -69,6 +69,21 @@ public class VirtualMachinesResource extends AbstractResource
     @Autowired
     protected VirtualDatacenterService vdcService;
 
+    /**
+     * Returns all virtual machines
+     * 
+     * @title Retrive all virtual machines
+     * @param vdcId
+     * @param vappId
+     * @param startwith
+     * @param orderBy
+     * @param filter
+     * @param limit
+     * @param descOrAsc
+     * @param restBuilder
+     * @return
+     * @throws Exception
+     */
     @GET
     @Produces(VirtualMachinesDto.MEDIA_TYPE)
     public VirtualMachinesDto getVirtualMachines(
@@ -102,7 +117,8 @@ public class VirtualMachinesResource extends AbstractResource
     /**
      * Creates a resource {@link VirtualMachine} under this root.
      * 
-     * @param v virtual machine
+     * @title Create a virtual machine
+     * @param virtualMachineDto virtual machine
      * @param vdcId identifier of the virtual datacenter
      * @param vappId identifier of the virtual appliance
      * @param restBuilder {@link IRESTBuilder} object injected by context.
@@ -133,6 +149,7 @@ public class VirtualMachinesResource extends AbstractResource
     /**
      * Creates a resource {@link VirtualMachine} under this root.
      * 
+     * @title Create a virtual machine and a node
      * @param v virtual machine
      * @param vdcId identifier of the virtual datacenter
      * @param vappId identifier of the virtual appliance
@@ -160,6 +177,16 @@ public class VirtualMachinesResource extends AbstractResource
         return vappsDto;
     }
 
+    /**
+     * Returns all virtual machines with own node
+     * 
+     * @title Retrieve all virtual machines with own node
+     * @param vdcId
+     * @param vappId
+     * @param restBuilder
+     * @return
+     * @throws Exception
+     */
     @GET
     @Produces({VirtualMachinesWithNodeDto.MEDIA_TYPE})
     public VirtualMachinesWithNodeDto getVirtualMachinesWithNode(
@@ -181,6 +208,16 @@ public class VirtualMachinesResource extends AbstractResource
         return vappsDto;
     }
 
+    /**
+     * Returns all virutal machines with own node and user extra info
+     * 
+     * @title Retrieve all virutal machines with own node and user extra info
+     * @param vdcId
+     * @param vappId
+     * @param restBuilder
+     * @return
+     * @throws Exception
+     */
     @GET
     @Produces(VirtualMachinesWithNodeExtendedDto.MEDIA_TYPE)
     public VirtualMachinesWithNodeExtendedDto getVirtualMachinesWithNodeExtended(

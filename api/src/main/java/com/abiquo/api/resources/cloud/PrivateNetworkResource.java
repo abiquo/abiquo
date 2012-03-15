@@ -65,6 +65,16 @@ public class PrivateNetworkResource extends AbstractResource
     @Autowired
     NetworkService service;
 
+    /**
+     * Returns a private network
+     * 
+     * @title Retrieve a private network
+     * @param virtualDatacenterId
+     * @param vlanId
+     * @param restBuilder
+     * @return
+     * @throws Exception
+     */
     @GET
     @Produces(VLANNetworkDto.MEDIA_TYPE)
     public VLANNetworkDto getPrivateNetwork(
@@ -79,6 +89,7 @@ public class PrivateNetworkResource extends AbstractResource
     /**
      * Updates a private network.
      * 
+     * @title Modify a private network
      * @param vdcId identifier of the virtual datacenter.
      * @param vlanId identifier of the vlan.
      * @param dto object with the new data to modify
@@ -102,6 +113,7 @@ public class PrivateNetworkResource extends AbstractResource
     /**
      * Delete an existing private network.
      * 
+     * @title Delete a private network
      * @param vdcId identifier of the virtual datacenter.
      * @param vlanId identifier of the vlan
      * @param restBuilder Context-injected REST link builder.

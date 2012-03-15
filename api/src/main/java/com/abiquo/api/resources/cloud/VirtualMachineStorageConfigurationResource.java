@@ -113,6 +113,7 @@ public class VirtualMachineStorageConfigurationResource extends AbstractResource
     /**
      * Returns all the defined disks in the virtual machine.
      * 
+     * @title Retrieve all hard disk
      * @param vdcId identifier of the Virtual Datacenter.
      * @param vappId identifier of the Virtual Appliance.
      * @param vmId identifier of the Virtual Machine.
@@ -145,6 +146,7 @@ public class VirtualMachineStorageConfigurationResource extends AbstractResource
     /**
      * Attaches Hard Disks to be used by a Virtual Machine.
      * 
+     * @title Attach hard disks
      * @param vdcId identifier of the Virtual Datacenter.
      * @param vappId identifier of the Virtual Appliance.
      * @param vmId identifier of the Virtual Machine.
@@ -196,6 +198,7 @@ public class VirtualMachineStorageConfigurationResource extends AbstractResource
     /**
      * Detach all hard disks from the virtual machine.
      * 
+     * @title Detach all hard disks
      * @param vdcId The id of the virtual datacenter where the virtual machine belongs to.
      * @param vappId The id of the virtual appliance of the virtual machine.
      * @param vmId The id of the virtual machine.
@@ -245,6 +248,7 @@ public class VirtualMachineStorageConfigurationResource extends AbstractResource
     /**
      * Modify the hard disks of the virtual machine.
      * 
+     * @title Change hard disks
      * @param vdcId The id of the virtual datacenter where the virtual machine belongs to.
      * @param vappId The id of the virtual appliance of the virtual machine.
      * @param vmId The id of the virtual machine.
@@ -297,6 +301,7 @@ public class VirtualMachineStorageConfigurationResource extends AbstractResource
     /**
      * Returns a single disk according on its order in Virtual Machine
      * 
+     * @title Retrieve a hard disk
      * @param vdcId identifier of the Virtual Datacenter.
      * @param vappId identifier of the Virtual Appliance.
      * @param vmId identifier of the Virtual Machine.
@@ -324,6 +329,7 @@ public class VirtualMachineStorageConfigurationResource extends AbstractResource
     /**
      * Detach a hard disk from the virtual machine.
      * 
+     * @title Detach a single hard disks
      * @param vdcId The id of the virtual datacenter where the virtual machine belongs to.
      * @param vappId The id of the virtual appliance of the virtual machine.
      * @param vmId The id of the virtual machine.

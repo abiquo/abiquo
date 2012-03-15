@@ -124,6 +124,7 @@ public class VirtualMachineNetworkConfigurationResource extends AbstractResource
     /**
      * Returns all the posible network configurations that a machine can hold.
      * 
+     * @title Retrive the posible network configuration
      * @param vdcId identifier of the Virtual Datacenter.
      * @param vappId identifier of the Virtual Appliance.
      * @param vmId identifier of the Virtual Machine.
@@ -157,6 +158,7 @@ public class VirtualMachineNetworkConfigurationResource extends AbstractResource
     /**
      * Returns a the single network configuration.
      * 
+     * @title Retrive a single network configuration
      * @param vdcId identifier of the Virtual Datacenter.
      * @param vappId identifier of the Virtual Appliance.
      * @param vmId identifier of the virtual machine.
@@ -186,8 +188,9 @@ public class VirtualMachineNetworkConfigurationResource extends AbstractResource
     }
 
     /**
-     * Modify a the single network configuration. (Only 'used' parameter can be modified).
+     * Modify the single network configuration. (Only 'used' parameter can be modified).
      * 
+     * @title Modify the single network configuration
      * @param vdcId identifier of the virtual datacenter.
      * @param vappId identifier of the virutal appliance.
      * @param vmId identifier of the virtual machine.
@@ -241,6 +244,7 @@ public class VirtualMachineNetworkConfigurationResource extends AbstractResource
     /**
      * To get all the NICs attached to a given Virtual Machine.
      * 
+     * @title Retrieve the attached NICs
      * @param vdcId Identifier of the Virtual Datacenter.
      * @param vappId Identifier of the Virtual Appliance.
      * @param vmId Identifier of the Virtual Machine.
@@ -278,6 +282,7 @@ public class VirtualMachineNetworkConfigurationResource extends AbstractResource
      * that identifies IPs.
      * </pre>
      * 
+     * @title Associate Ips
      * @param vdcId Identifier of the Virtual Datacenter.
      * @param vappId Identifier of the Virtual Appliance.
      * @param vmId Identifier of the Virtual Machine.
@@ -333,6 +338,7 @@ public class VirtualMachineNetworkConfigurationResource extends AbstractResource
      * that identifies IPs.
      * </pre>
      * 
+     * @title Change the associated IPs
      * @param vdcId Identifier of the Virtual Datacenter.
      * @param vappId Identifier of the Virtual Appliance.
      * @param vmId Identifier of the Virtual Machine.
@@ -384,6 +390,7 @@ public class VirtualMachineNetworkConfigurationResource extends AbstractResource
     /**
      * Returns a single ip according on its id in Virtual Machine
      * 
+     * @title Retrieve a single IP
      * @param vdcId identifier of the Virtual Datacenter.
      * @param vappId identifier of the Virtual Appliance.
      * @param vmId identifier of the Virtual Machine.
@@ -414,6 +421,7 @@ public class VirtualMachineNetworkConfigurationResource extends AbstractResource
     /**
      * Remove a Virtual Machine NIC. Release the association between Private IP and NIC.
      * 
+     * @title Remove a Virtual Machine NIC
      * @param vdcId Identifier of the Virtual Datacenter.
      * @param vappId Identifier of the Virtual Appliance.
      * @param vmId Identifier of the Virtual Machine.

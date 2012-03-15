@@ -75,6 +75,21 @@ public class IpAddressesResource extends AbstractResource
     @Context
     UriInfo uriInfo;
 
+    /**
+     * @title Retrieve all ips from a private network
+     * @param vdcId
+     * @param vlanId
+     * @param startwith
+     * @param orderBy
+     * @param filter
+     * @param limit
+     * @param descOrAsc
+     * @param available
+     * @param freeIps
+     * @param restBuilder
+     * @return
+     * @throws Exception
+     */
     @GET
     @Produces(IpsPoolManagementDto.MEDIA_TYPE)
     public IpsPoolManagementDto getIPAddresses(
@@ -111,6 +126,7 @@ public class IpAddressesResource extends AbstractResource
     /**
      * Returns a single IP based on its private network's hierarchy.
      * 
+     * @title Retrieve an IP address
      * @param vdcId identifier of the {@link VirtualDatacenter}
      * @param vlanId identifier of the {@link VLANNetwork}
      * @param ipId identifier of the {@link IpPoolManagment} we want to retrieve

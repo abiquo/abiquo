@@ -61,6 +61,16 @@ public class TemplateDefinitionListsResource extends AbstractResource
     @Autowired
     private AppsLibraryTransformer transformer;
 
+    /**
+     * Returns all template definition lists
+     * 
+     * @title Retrieve all template definition lists
+     * @param idEnterprise identifier of the enterprise
+     * @param restBuilder a Context-injected object to create the links of the Dto
+     * @return a {TemplateDefinitionListsDto} object with all requested template definition lists
+     * @throws Exception
+     * @throws SocketTimeoutException
+     */
     @GET
     @Produces(TemplateDefinitionListsDto.MEDIA_TYPE)
     public TemplateDefinitionListsDto getTemplateDefinitionLists(
@@ -90,6 +100,8 @@ public class TemplateDefinitionListsResource extends AbstractResource
     /**
      * if TEMPLATE_DEFINITION_POST_QUERY_PARM is set do not use the content body
      * {@link TemplateDefinitionListDto}.
+     * 
+     * @title Create a template definition list
      */
     @POST
     @Consumes(TemplateDefinitionListDto.MEDIA_TYPE)
@@ -114,6 +126,8 @@ public class TemplateDefinitionListsResource extends AbstractResource
     /**
      * if TEMPLATE_DEFINITION_POST_QUERY_PARM is set do not use the content body
      * {@link TemplateDefinitionListDto}.
+     * 
+     * @title Create a template definition list from OVF
      */
     @POST
     @Produces(TemplateDefinitionListDto.MEDIA_TYPE)

@@ -61,6 +61,16 @@ public class SystemPropertiesResource extends AbstractResource
     @Autowired
     private SystemPropertyService service;
 
+    /**
+     * Returns all abiquo system properties
+     * 
+     * @title Retrive all system properties
+     * @param name name of the property
+     * @param component component of the property
+     * @param restBuilder a Context-injected object to create the links of the Dto
+     * @return a {PropertiesDto} with all system properties of abiquo
+     * @throws Exception
+     */
     @GET
     @Produces(SystemPropertiesDto.MEDIA_TYPE)
     public SystemPropertiesDto getSystemProperties(@QueryParam(NAME_QUERY_PARAM) final String name,
@@ -97,6 +107,15 @@ public class SystemPropertiesResource extends AbstractResource
         return properties;
     }
 
+    /**
+     * Create a system property
+     * 
+     * @title Create a system property
+     * @param systemProperty system property to create
+     * @param restBuilder a Context-injected object to create the links of the Dto
+     * @return a {SystemPropertyDto} object with the created system property
+     * @throws Exception
+     */
     @POST
     @Consumes(SystemPropertyDto.MEDIA_TYPE)
     @Produces(SystemPropertyDto.MEDIA_TYPE)
@@ -108,6 +127,16 @@ public class SystemPropertiesResource extends AbstractResource
         return createTransferObject(prop, restBuilder);
     }
 
+    /**
+     * Modifies multiple system properties
+     * 
+     * @title Mofify multiple system properties
+     * @param systemProperties system properties to modify
+     * @param component component name
+     * @param restBuilder a Context-injected object to create the links of the Dto
+     * @return a {systemPropertiesDto} with the modified system properties
+     * @throws Exception
+     */
     @PUT
     @Consumes(SystemPropertiesDto.MEDIA_TYPE)
     @Produces(SystemPropertiesDto.MEDIA_TYPE)

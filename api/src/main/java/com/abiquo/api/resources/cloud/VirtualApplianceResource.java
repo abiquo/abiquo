@@ -105,6 +105,7 @@ public class VirtualApplianceResource extends AbstractResource
      * <li>Last Task: returns the last {@link Task} of every node
      * </ul>
      * 
+     * @title Retrieve a virtual appliance
      * @param vdcId identifier of the virtual datacenter.
      * @param vappId identifier of the virtual appliance.
      * @param restBuilder to build the links
@@ -148,6 +149,17 @@ public class VirtualApplianceResource extends AbstractResource
         }
     }
 
+    /**
+     * Modifies a virtual appliance
+     * 
+     * @title Modify a virtual appliance
+     * @param vdcId identifier of the virtual datacenter
+     * @param vappId identifier of the virtual appliance
+     * @param dto virtual appliance to modify
+     * @param restBuilder a Context-injected object to create the links of the Dto
+     * @return a {VirtualApplianceDto} with the modified virtual appliance
+     * @throws Exception
+     */
     @PUT
     @Consumes(VirtualApplianceDto.MEDIA_TYPE)
     @Produces(VirtualApplianceDto.MEDIA_TYPE)
@@ -161,6 +173,16 @@ public class VirtualApplianceResource extends AbstractResource
         return createTransferObject(vapp, restBuilder);
     }
 
+    /**
+     * Returns all IPs from a vrtual appliance
+     * 
+     * @title Retrive all IPs
+     * @param vdcId identifier of the virtual datacenter
+     * @param vappId identifier of the virtual appliance
+     * @param restBuilder a Context-injected object to create the links of the Dto
+     * @return a {IpsPollManagementDto} with all IPs of the virtual appliance
+     * @throws Exception
+     */
     @GET
     @Path(VirtualApplianceResource.VIRTUAL_APPLIANCE_GET_IPS_PATH)
     @Produces(IpsPoolManagementDto.MEDIA_TYPE)
@@ -227,6 +249,16 @@ public class VirtualApplianceResource extends AbstractResource
          */
     }
 
+    /**
+     * Returns the state of the virtual appliance
+     * 
+     * @title Retrieve the state of the virtual appliance
+     * @param vdcId identifier of the virtual datacenter
+     * @param vappId identifier of the virtual appliance
+     * @param restBuilder a Context-injected object to create the links of the Dto
+     * @return a {VirtualAplianceStateDto} object with the state of the virtual appliance
+     * @throws Exception
+     */
     @GET
     @Path(VIRTUAL_APPLIANCE_STATE_REL)
     @Produces(VirtualApplianceStateDto.MEDIA_TYPE)
@@ -242,6 +274,18 @@ public class VirtualApplianceResource extends AbstractResource
 
     }
 
+    /**
+     * Start a deploy task for all virtual machines of a virtual appliances
+     * 
+     * @title Deploy a virtual appliance
+     * @param vdcId identifier of the virtual datacenter
+     * @param vappId identifier of the virtual appliance
+     * @param taskOptions options of the task
+     * @param restBuilder a Context-injected object to create the links of the Dto
+     * @param uriInfo
+     * @return a {AcceptedRequestDto} object
+     * @throws Exception
+     */
     @POST
     @Path(VIRTUAL_APPLIANCE_DEPLOY_PATH)
     @Consumes(VirtualMachineTaskDto.MEDIA_TYPE)
@@ -284,6 +328,18 @@ public class VirtualApplianceResource extends AbstractResource
         return dto;
     }
 
+    /**
+     * Start an undeploy task for all virtual machines of a virtual appliances
+     * 
+     * @title Deploy a virtual appliance
+     * @param vdcId identifier of the virtual datacenter
+     * @param vappId identifier of the virtual appliance
+     * @param taskOptions options of the task
+     * @param restBuilder a Context-injected object to create the links of the Dto
+     * @param uriInfo
+     * @return a {AcceptedRequestDto}
+     * @throws Exception
+     */
     @POST
     @Path(VIRTUAL_APPLIANCE_UNDEPLOY_PATH)
     @Consumes(VirtualMachineTaskDto.MEDIA_TYPE)
@@ -348,6 +404,7 @@ public class VirtualApplianceResource extends AbstractResource
     /**
      * Delete the virtual appliance if exists.
      * 
+     * @title Delete a virtual appliance
      * @param vdcId identifier of the virtual datacenter.
      * @param vappId identifier of the virtual appliance.
      * @param restBuilder to build the links
@@ -377,6 +434,16 @@ public class VirtualApplianceResource extends AbstractResource
         }
     }
 
+    /**
+     * Returns a message (String) with the price info of the virtual appliance
+     * 
+     * @title Retrieve the price message
+     * @param vdcId identifier of the virtual datacenter
+     * @param vappId identifier of the virtual appliance
+     * @param restBuilder a Context-injected object to create the links of the Dto
+     * @return a {String} with the price message of the virtual appliance
+     * @throws Exception
+     */
     @GET
     @Path(VIRTUAL_APPLIANCE_PRICE_PATH)
     @Produces(MediaType.TEXT_PLAIN)

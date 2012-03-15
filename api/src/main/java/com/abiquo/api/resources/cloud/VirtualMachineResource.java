@@ -56,7 +56,6 @@ import com.abiquo.scheduler.SchedulerLock;
 import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
 import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.cloud.NodeVirtualImage;
-import com.abiquo.server.core.cloud.VirtualApplianceDto;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineDto;
@@ -136,12 +135,14 @@ public class VirtualMachineResource extends AbstractResource
     private VirtualMachineLock vmLock;
 
     /**
-     * Return the virtual appliance if exists.
+     * Return the virtual machine if exists.
      * 
+     * @title Retrieve a virtual machine
      * @param vdcId identifier of the virtual datacenter.
      * @param vappId identifier of the virtual appliance.
+     * @param vmId identifier of the virtual machine
      * @param restBuilder to build the links
-     * @return the {@link VirtualApplianceDto} transfer object for the virtual appliance.
+     * @return the {@link VirtualMachineDto} transfer object for the virtual machine.
      * @throws Exception
      */
     @GET
@@ -160,6 +161,7 @@ public class VirtualMachineResource extends AbstractResource
     }
 
     /***
+     * @title Modify a virtual machine
      * @param vdcId VirtualDatacenter id
      * @param vappId VirtualAppliance id
      * @param vmId VirtualMachine id
@@ -204,6 +206,7 @@ public class VirtualMachineResource extends AbstractResource
     /**
      * Updates this virtual Machine Node information (e.g. name)
      * 
+     * @title Modify the virtual machine Node information
      * @param vdcId
      * @param vappId
      * @param vmId
@@ -230,6 +233,7 @@ public class VirtualMachineResource extends AbstractResource
     /**
      * Change the {@link VirtualMachineState} the virtual machine
      * 
+     * @title Change the state of a virtual machine
      * @param vdcId VirtualDatacenter id
      * @param vappId VirtualAppliance id
      * @param vmId VirtualMachine id
@@ -284,6 +288,7 @@ public class VirtualMachineResource extends AbstractResource
     /**
      * Retrieve the {@link VirtualMachineState} the virtual machine
      * 
+     * @title Retrieve the state of the virtual machine
      * @param vdcId VirtualDatacenter id
      * @param vappId VirtualAppliance id
      * @param vmId VirtualMachine id
@@ -347,6 +352,7 @@ public class VirtualMachineResource extends AbstractResource
      * <li><b>UNKNOWN</b></li>
      * </ul>
      * 
+     * @title Delete a virtual machine
      * @param vdcId VirtualDatacenter id
      * @param vappId VirtualAppliance id
      * @param vmId VirtualMachine id
@@ -395,12 +401,13 @@ public class VirtualMachineResource extends AbstractResource
      * <li>Enable the resource <code>Progress<code></li>
      * </ul>
      * 
+     * @title Deploy a virtual machine
      * @param vdcId VirtualDatacenter id
      * @param vappId VirtualAppliance id
      * @param vmId VirtualMachine id
      * @param restBuilder injected restbuilder context parameter
-     * @param forceSoftLimits dto of options * @return a link where you can keep track of the
-     *            progress and a message.
+     * @param forceSoftLimits dto of options
+     * @return a link where you can keep track of the progress and a message.
      * @throws Exception
      */
     @POST
@@ -458,6 +465,7 @@ public class VirtualMachineResource extends AbstractResource
      * <li>Enable the resource <code>Progress<code></li>
      * </ul>
      * 
+     * @title Deploy a virtual machine
      * @param vdcId VirtualDatacenter id
      * @param vappId VirtualAppliance id
      * @param vmId VirtualMachine id
@@ -492,6 +500,7 @@ public class VirtualMachineResource extends AbstractResource
      * <li>Enable the resource <code>Progress<code></li>
      * </ul>
      * 
+     * @title Undeploy the virtual machine
      * @param vdcId VirtualDatacenter id
      * @param vappId VirtualAppliance id
      * @param vmId VirtualMachine id
@@ -546,6 +555,7 @@ public class VirtualMachineResource extends AbstractResource
     /**
      * Snapshot a {@link VirtualMachine}.>
      * 
+     * @title Snapshot a virtual machine
      * @param vdcId VirtualDatacenter id
      * @param vappId VirtualAppliance id
      * @param vmId VirtualMachine id
@@ -837,12 +847,15 @@ public class VirtualMachineResource extends AbstractResource
     }
 
     /**
-     * Return the virtual appliance if exists.
+     * Return the virtual machine if exists.
      * 
+     * @title Retrieve a virtual machine with the node
      * @param vdcId identifier of the virtual datacenter.
      * @param vappId identifier of the virtual appliance.
+     * @param vmId identifier of the virtual machine
      * @param restBuilder to build the links
-     * @return the {@link VirtualApplianceDto} transfer object for the virtual appliance.
+     * @return the {@link VirtualMachineWithNodeDto} transfer object for the virtual machine with
+     *         the node.
      * @throws Exception
      */
     @GET
@@ -860,6 +873,17 @@ public class VirtualMachineResource extends AbstractResource
                 .getVirtualMachine().getIps());
     }
 
+    /**
+     * Returns all tasks for a machine
+     * 
+     * @title Retrive all tasks
+     * @param vdcId identifier of the virtual datacenter
+     * @param vappId identifier of the virtual appliance
+     * @param vmId identifier of the virtual machine
+     * @param uriInfo
+     * @return a {TasksDto} with all tasks for the machine
+     * @throws Exception
+     */
     @GET
     @Produces(TasksDto.MEDIA_TYPE)
     @Path(TaskResourceUtils.TASKS_PATH)
@@ -875,6 +899,18 @@ public class VirtualMachineResource extends AbstractResource
         return TaskResourceUtils.transform(tasks, uriInfo);
     }
 
+    /**
+     * Returns a task for a virtual machine
+     * 
+     * @title Retrieve a task
+     * @param vdcId identifier of the virtual datacenter
+     * @param vappId identifier of the virtual appliance
+     * @param vmId identifier of the virtual machine
+     * @param taskId identifier of the task
+     * @param uriInfo
+     * @return a {TaksDto} with the task of the machine
+     * @throws Exception
+     */
     @GET
     @Produces(TaskDto.MEDIA_TYPE)
     @Path(TaskResourceUtils.TASK_PATH)
@@ -910,6 +946,7 @@ public class VirtualMachineResource extends AbstractResource
     /**
      * Reset a {@link VirtualMachine}.
      * 
+     * @title Reset a virtual machine
      * @param vdcId VirtualDatacenter id
      * @param vappId VirtualAppliance id
      * @param vmId VirtualMachine id

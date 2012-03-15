@@ -29,8 +29,8 @@ import java.util.Collection;
 
 import javax.annotation.Resource;
 import javax.validation.constraints.Min;
-import javax.ws.rs.DefaultValue;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -86,6 +86,21 @@ public class VirtualDatacentersResource extends AbstractResource
     @Autowired
     private SecurityService securityService;
 
+    /**
+     * Returns all virtual datacenters
+     * 
+     * @title Retrieve all virtual datacenters
+     * @param enterpriseId identifier of an enterprise
+     * @param datacenterId identifier of a datacenter
+     * @param startwith
+     * @param orderBy
+     * @param filter
+     * @param limit
+     * @param descOrAsc
+     * @param restBuilder a Context-injected object to create the links of the Dto
+     * @return a {VirtualDatacentersDto} object with all virtual datacenters
+     * @throws Exception
+     */
     @GET
     @Produces(VirtualDatacentersDto.MEDIA_TYPE)
     public VirtualDatacentersDto getVirtualDatacenters(
@@ -135,6 +150,17 @@ public class VirtualDatacentersResource extends AbstractResource
         return vdcs;
     }
 
+    /**
+     * Creates a virtual datacenter and returns it after creation
+     * 
+     * @title Create a virtual datacenter
+     * @param dto the virtual datacetner to create
+     * @param datacenterId identifier of the datacenter
+     * @param enterpriseId identifier of the enterprise
+     * @param restBuilder a Context-injected object to create the links of the Dto
+     * @return a {VirtualDatacenterDto} object with the created virtual datacenter
+     * @throws Exception
+     */
     @POST
     @Consumes(VirtualDatacenterDto.MEDIA_TYPE)
     @Produces(VirtualDatacenterDto.MEDIA_TYPE)

@@ -57,6 +57,15 @@ public class TemplateDefinitionsResource extends AbstractResource
     @Autowired
     private AppsLibraryTransformer transformer;
 
+    /**
+     * Returns all template definitions
+     * 
+     * @title Retrieve all template definitions
+     * @param idEnterprise identifier of the enterprise
+     * @param restBuilder a Context-injected object to create the links of the Dto
+     * @return a {TemplateDefinitionsDto} object with all template definitions
+     * @throws Exception
+     */
     @GET
     @Produces(TemplateDefinitionsDto.MEDIA_TYPE)
     public TemplateDefinitionsDto getTemplateDefinitions(
@@ -77,6 +86,16 @@ public class TemplateDefinitionsResource extends AbstractResource
         return templateDefs;
     }
 
+    /**
+     * Creates a template definition and returns it after creation
+     * 
+     * @title Create a template definition
+     * @param idEnterprise identifier of the enterprise
+     * @param templateDef template definition to create
+     * @param restBuilder a Context-injected object to create the links of the Dto
+     * @return a {TemplateDefinitionDto} object with the created template definition
+     * @throws Exception
+     */
     @POST
     @Consumes(TemplateDefinitionDto.MEDIA_TYPE)
     @Produces(TemplateDefinitionDto.MEDIA_TYPE)

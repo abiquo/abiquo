@@ -70,6 +70,7 @@ public class DisksResource extends AbstractResource
     /**
      * Exposes the method to query all the extra disks generated into a virtual datacenter.
      * 
+     * @title Retrieve all hard disks
      * @param vdcId identifier of the virtual datacenter
      * @param restBuilder a Context-injected object to create the links of the Dto
      * @return a instance of {@link DisksManagementDto}. Is the wrapper list for
@@ -97,6 +98,7 @@ public class DisksResource extends AbstractResource
     /**
      * Expose the method to create a new Hard Disk.
      * 
+     * @title Create a hard disk
      * @param vdcId identifier of the {@link VirtualDatacenter}
      * @param inputDto object {@link DiskManagementDto} to create.
      * @param restBuilder a Context-injected object to create the links of the Dto

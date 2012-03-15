@@ -238,7 +238,7 @@ public class DatacenterResource extends AbstractResource
     /**
      * Returns available hypervisor types from a datacenter
      * 
-     * @tilte Retrive available hypervisor types
+     * @title Retrive available hypervisor types
      * @param datacenterId identifier of the datacenter
      * @param restBuilder a Context-injected object to create the links of the Dto
      * @return an {HypervisorTypesDto} object with all available hypervisor types in the datacenter

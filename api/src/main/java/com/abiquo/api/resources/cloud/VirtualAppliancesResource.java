@@ -28,15 +28,13 @@ import java.util.List;
 import javax.validation.constraints.Min;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
-import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 
 import org.apache.commons.lang.StringUtils;
@@ -66,6 +64,22 @@ public class VirtualAppliancesResource extends AbstractResource
     @Autowired
     VirtualApplianceService service;
 
+    /**
+     * Returns all virtual appliances from a virtual datacenter
+     * 
+     * @title Retrieve all virtual appliances
+     * @param vdcId identifier of the virtual datacenter
+     * @param startwith
+     * @param limit
+     * @param orderBy
+     * @param filter
+     * @param asc
+     * @param expand
+     * @param uriInfo
+     * @param restBuilder a Context-injected object to create the links of the Dto
+     * @return a {VirtualAppliancesDto} object with all virtual appliances from a virtual datacenter
+     * @throws Exception
+     */
     @GET
     @Produces(VirtualAppliancesDto.MEDIA_TYPE)
     public VirtualAppliancesDto getVirtualAppliances(
@@ -125,6 +139,16 @@ public class VirtualAppliancesResource extends AbstractResource
         }
     }
 
+    /**
+     * Creates a virtual appliance and returns it after creation
+     * 
+     * @title Create a virtual appliance
+     * @param vdcId identifier of the virtual datacenter
+     * @param dto virtual appliance to create
+     * @param restBuilder a Context-injected object to create the links of the Dto
+     * @return a {VirtualApplianceDto} object with the created virtual appliance
+     * @throws Exception
+     */
     @POST
     @Consumes(VirtualApplianceDto.MEDIA_TYPE)
     @Produces(VirtualApplianceDto.MEDIA_TYPE)
