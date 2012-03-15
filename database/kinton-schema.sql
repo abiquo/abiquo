@@ -1072,7 +1072,7 @@ CREATE TABLE  `kinton`.`virtualimage` (
   `stateful` int(1) unsigned NOT NULL,
   `diskFileSize` BIGINT(20) UNSIGNED NOT NULL,
   `chefEnabled` boolean NOT NULL default false,
-  `cost_code` int(4) DEFAULT 0,
+  `cost_code` int(10) DEFAULT 0,
   `creation_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `creation_user` varchar(128) NOT NULL,
   `version_c` integer NOT NULL DEFAULT 1,
