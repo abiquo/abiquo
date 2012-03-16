@@ -545,7 +545,8 @@
             							true,
             							1.5,
             							virtualImagesFilter.text,
-            							null);
+            							null,
+            							this._virtualDatacenter);
             }
             
             private function filterVirtualImages():void{
