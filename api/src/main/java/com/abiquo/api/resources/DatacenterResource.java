@@ -170,7 +170,7 @@ public class DatacenterResource extends AbstractResource
     /**
      * Modifies a datacenter
      * 
-     * @title Modify a datacenter
+     * @title Update an existing datacenter
      * @param datacenterDto datacenter to modify
      * @param datacenterId identifier of the datacenter
      * @param restBuilder a Context-injected object to create the links of the Dto
@@ -193,7 +193,7 @@ public class DatacenterResource extends AbstractResource
     /**
      * Returns all enterpises that are using the datacenter
      * 
-     * @title Retrive all enterprises
+     * @title Retrive a list of Enterprises
      * @param datacenterId identifier of the datacenter
      * @param startwith
      * @param network
@@ -265,7 +265,7 @@ public class DatacenterResource extends AbstractResource
     /**
      * Deletes a datacenter
      * 
-     * @title Delete a datacenter
+     * @title Delete an existing Datacenter
      * @param datacenterId identifier of the datacenter
      */
     @DELETE
@@ -277,7 +277,7 @@ public class DatacenterResource extends AbstractResource
     /**
      * Updates used resources from a datacenter
      * 
-     * @title Updates used resources
+     * @title Update used resources from a datacenter
      * @param datacenterId identifier of the datacenter
      */
     @PUT
@@ -304,7 +304,7 @@ public class DatacenterResource extends AbstractResource
     /**
      * Return the hypervisor type of a remote machine using the given @ip
      * 
-     * @title Retrieve a hypervisor type of a remote machine
+     * @title Retrieve the hypervisor type from remote machine
      * @param datacenterId The ID of the datacenter where this remote service is assigned.
      * @param ip The IP of the target cloud node.
      * @return The Hypervisor Type.
@@ -325,7 +325,16 @@ public class DatacenterResource extends AbstractResource
     /**
      * Returns back the parameters to create a physical machine.
      * 
-     * @title Discover a single remote machine
+     * @title Retrieve remote machine information
+     * @wiki This feature is used to retrieve information from a remote machine giving its user,
+     *       password and hypervisor type. The response entity is a Machine that can be used to
+     *       copy-paste the entity in physical machine creation. Behind the scenes, it uses the
+     *       Discovery Manager remote service. Since the Discovery Manager data model is not fully
+     *       compatible with the API data model, you will find the <vswitch /> tag has a trailing
+     *       slash with all the virtual switches found. Moreover, all the datastores <enabled> tags
+     *       are always set to "false" and physical machine creation requires at least one datastore
+     *       enabled. Please edit these values in the Machine before calling physical machine
+     *       creation.
      * @param datacenterId identifier of the datacenter. It is useful to search the uri of the
      *            DiscoveryManager to call.
      * @param ip ip address of the hypevisor
@@ -360,7 +369,17 @@ public class DatacenterResource extends AbstractResource
      * Returns back the list of physical machines that match the request of @hypervisorType, @user
      * and @password inside the values @ipFrom and @ipTo.
      * 
-     * @title Discover multiple remote machines
+     * @title Retrieve a list of remote machine information
+     * @wiki This feature is used to retrieve information from a list of remote machines giving the
+     *       user, password and hypervisor type of each machine. You can also filter the search by
+     *       vswitch value. The response entity is a list of Machine that can be used to create
+     *       multiple physical machines. Behind the scenes, it uses the Discovery Manager remote
+     *       service. The Discovery Manager data model is not fully compatible with the API data
+     *       model, so you may find the <vswitch /> tag with a trailing slash with all the virtual
+     *       switches found in a machine. Moreover, all the datastores <enabled> tags are always set
+     *       to "false" and physical machine creation requires at least one datastore enabled.
+     *       Please edit these values in the Machine before calling the create multiple physical
+     *       machines method.
      * @param datacenterId identifier of the datacenter to search the corresponding Discovery
      *            Manager.
      * @param ipFrom first ip to look for
@@ -397,7 +416,11 @@ public class DatacenterResource extends AbstractResource
     /**
      * Checks the machine state.
      * 
-     * @title Check the state of a remote machine
+     * @title Check the state from remote machine
+     * @wiki This feature is used to check the state from a remote machine Machine giving its user,
+     *       password and hypervisor type. This machine does not need to be managed by abiquo. The
+     *       response entity is a MachineState. Behind the scenes, it uses the Discovery Manager
+     *       remote service.
      * @param datacenterId The ID of the datacenter where this remote service are assigned.
      * @param ip The IP of the target cloud node.
      * @param hypervisorType The cloud node hypervisor type.
@@ -438,7 +461,10 @@ public class DatacenterResource extends AbstractResource
     /**
      * Checks the ipmi configuration
      * 
-     * @title Check the ipmi configuration of a remote machine
+     * @title Check IPMI configuration from remote machine
+     * @wiki This feature is used to check the configuration from a remote machine Machine giving
+     *       its user, password and port. This machine does not need to be managed by abiquo. Behind
+     *       the scenes, it uses the Discovery Manager remote service.
      * @param datacenterId The ID of the datacenter where this remote service is assigned.
      * @param ip The IP of the target cloud node.
      * @param user The hypervisor user.

@@ -47,6 +47,10 @@ import com.abiquo.server.core.config.SystemPropertiesDto;
 import com.abiquo.server.core.config.SystemProperty;
 import com.abiquo.server.core.config.SystemPropertyDto;
 
+/**
+ * @wiki The System Property resource provides access to Abiquo internal configuration parameters.
+ *       This page describes the methods exposed to view and manage these System Properties.
+ */
 @Path(SystemPropertiesResource.SYSTEM_PROPERTIES_PATH)
 @Controller
 @Workspace(workspaceTitle = "Abiquo configuration workspace", collectionTitle = "Properties")

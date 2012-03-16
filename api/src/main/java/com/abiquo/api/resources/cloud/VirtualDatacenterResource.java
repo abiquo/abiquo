@@ -268,6 +268,9 @@ public class VirtualDatacenterResource extends AbstractResource
      * Returns the default vlan from a virtual datacenter.
      * 
      * @title Retrieve the default vlan
+     * @wiki In the external networks resource you can set the default VLAN behavior by virtual
+     *       datacenter. This means that if you perform the get default VLAN request after you have
+     *       created the virtual datacenter, you will see the Enterprise-default VLAN.
      * @param id identifier of the virtual datacenter
      * @param restBuilder a Context-injected object to create the links of the Dto
      * @return a {VLANNetworkDto} object with the default vlan of the virtual datacenter
@@ -287,8 +290,9 @@ public class VirtualDatacenterResource extends AbstractResource
     // ALERT! this method is @override in enterprise version, any change here
     // should be also changed in enterprise version.
     /**
-     * Changes the default vlan for a virtual datacenetr
+     * Changes the default vlan for a virtual datacenter
      * 
+     * @title Changes the default vlan for a virtual datacenter
      * @param id identifier of the virtual datacenter
      * @param links link from new default vlan
      * @param restBuilder a Context-injected object to create the links of the Dto

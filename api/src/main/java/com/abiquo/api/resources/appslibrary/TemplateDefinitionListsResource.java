@@ -48,6 +48,12 @@ import com.abiquo.server.core.appslibrary.TemplateDefinitionList;
 import com.abiquo.server.core.appslibrary.TemplateDefinitionListDto;
 import com.abiquo.server.core.appslibrary.TemplateDefinitionListsDto;
 
+/**
+ * @wiki A Template Definition List providing a way to organize multiple Template Definitions. A
+ *       single Template Definition can be shared by many lists. Its compatible with ovfindex.xml
+ *       format.
+ * @author apuig@abiquo.com
+ */
 @Parent(EnterpriseResource.class)
 @Path(TemplateDefinitionListsResource.TEMPLATE_DEFINITION_LISTS_PATH)
 @Controller
@@ -102,6 +108,7 @@ public class TemplateDefinitionListsResource extends AbstractResource
      * {@link TemplateDefinitionListDto}.
      * 
      * @title Create a template definition list
+     * @wiki All the contained Template Definitions will also be created.
      */
     @POST
     @Consumes(TemplateDefinitionListDto.MEDIA_TYPE)

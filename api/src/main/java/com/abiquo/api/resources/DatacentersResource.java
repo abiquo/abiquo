@@ -79,7 +79,7 @@ public class DatacentersResource extends AbstractResource
     /**
      * Returns all datacenters
      * 
-     * @title Retrieve all datacenters
+     * @title Retrieve a list of Datacenters
      * @param restBuilder a Context-injected object to create the links of the Dto
      * @param idEnterprise identifier of an enterprise
      * @param pricingId identifier of a pricing template
@@ -123,7 +123,7 @@ public class DatacentersResource extends AbstractResource
     /**
      * Returns all datacenters with own remote services
      * 
-     * @title Retrive all datacenter with own remote services
+     * @title Retrieve a list of datacenters with their Remote Services
      * @param restBuilder a Context-injected object to create the links of the Dto
      * @param idEnterprise identifier of an enterprise
      * @return a {DatacentersDto} object with all datacenters and own remote services
@@ -170,7 +170,10 @@ public class DatacentersResource extends AbstractResource
     /**
      * Creates a datacenter and returns it after creation
      * 
-     * @title Create a datacenter
+     * @title Create a new Datacenter
+     * @wiki A datacenter can be created with remote services if you send them in the dto. In this
+     *       case if the remote services return configuration errors, then the datacenter will be
+     *       created and the response will show the configuration errors.
      * @param datacenterDto datacenter to create
      * @param restBuilder a Context-injected object to create the links of the Dto
      * @return a {DatacenterDto} object with the created datacenter

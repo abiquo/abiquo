@@ -63,6 +63,9 @@ import com.abiquo.server.core.cloud.VirtualDatacentersDto;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.infrastructure.Datacenter;
 
+/**
+ * @wiki The VirtualDatacenter Resource offers the functionality of managing the virtual datacenters
+ */
 @Path(VirtualDatacentersResource.VIRTUAL_DATACENTERS_PATH)
 @Controller
 @Workspace(workspaceTitle = "Abiquo cloud workspace", collectionTitle = "VirtualDatacenters")

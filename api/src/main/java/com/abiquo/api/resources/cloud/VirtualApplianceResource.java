@@ -278,6 +278,11 @@ public class VirtualApplianceResource extends AbstractResource
      * Start a deploy task for all virtual machines of a virtual appliances
      * 
      * @title Deploy a virtual appliance
+     * @wiki Deploys all the virtual machines in the virtual appliance with the given options. This
+     *       call returns a 202 HTTP code (accepted) and a list of URIs where you can track each
+     *       deploy (one for each virtual machine in the virtual appliance). The options are yet to
+     *       be finalized. For the purposes of this example we will be using:
+     *       -forceEnterpriseSoftLimits = OFF
      * @param vdcId identifier of the virtual datacenter
      * @param vappId identifier of the virtual appliance
      * @param taskOptions options of the task
@@ -331,7 +336,16 @@ public class VirtualApplianceResource extends AbstractResource
     /**
      * Start an undeploy task for all virtual machines of a virtual appliances
      * 
-     * @title Deploy a virtual appliance
+     * @title Uneploy a virtual appliance
+     * @wiki Perform an undeploy of all the machines that are DEPLOYED (meaning that they exist in
+     *       the hypervisor). This means that after the call, all of the virtual machines in that
+     *       virtual appliance in Abiquo will be NOT_ALLOCATED. If an undeploy is successful, all
+     *       the virtual machines in that virtual appliance will be deleted from the hypervisor. If
+     *       any of the virtual machines are in the ON state, Abiquo will perform a power off before
+     *       deconfiguring them. You can also set the force undeploy parameter in the virtual
+     *       machine task entity. If this is set to true, it will also delete the imported virtual
+     *       machines. This call returns a 202 HTTP code (accepted) and a list of URIs where you can
+     *       track each undeploy (one for each virtual machine in the virtual appliance).
      * @param vdcId identifier of the virtual datacenter
      * @param vappId identifier of the virtual appliance
      * @param taskOptions options of the task
@@ -405,6 +419,7 @@ public class VirtualApplianceResource extends AbstractResource
      * Delete the virtual appliance if exists.
      * 
      * @title Delete a virtual appliance
+     * @wiki This deletes a Virtual Appliance
      * @param vdcId identifier of the virtual datacenter.
      * @param vappId identifier of the virtual appliance.
      * @param restBuilder to build the links

@@ -45,6 +45,11 @@ import com.abiquo.appliancemanager.transport.TemplateStateDto;
 import com.abiquo.server.core.appslibrary.TemplateDefinition;
 import com.abiquo.server.core.appslibrary.TemplateDefinitionDto;
 
+/**
+ * Template Definitions are a summarized version of the OVF format OVF Envelope.
+ * 
+ * @author apuig@abiquo.com
+ */
 @Parent(TemplateDefinitionsResource.class)
 @Path(TemplateDefinitionResource.TEMPLATE_DEFINITION_PARAM)
 @Controller
@@ -151,6 +156,8 @@ public class TemplateDefinitionResource extends AbstractResource
      * Deletes a template definition
      * 
      * @title Delete a template definition
+     * @wiki If the current Template Definition being deleted is used on some Template Definition
+     *       List then the list is updated to exclude the deleted Template Definition.
      * @param idEnterprise identifier of the enterprise
      * @param templateDefId identifier of the template definition
      */

@@ -66,6 +66,10 @@ import com.abiquo.server.core.infrastructure.Datastore;
 import com.abiquo.server.core.infrastructure.DatastoreDto;
 import com.abiquo.server.core.infrastructure.DatastoresDto;
 
+/**
+ * @wiki This resource allows you to manage datastore from physical machines in the cloud
+ *       infrastructure.
+ */
 @Parent(MachineResource.class)
 @Controller
 @Path(DatastoresResource.DATASTORES_PATH)
@@ -82,7 +86,7 @@ public class DatastoresResource extends AbstractResource
     /**
      * Returns all datastores from a machine
      * 
-     * @title Retrive all datastores
+     * @title Retrive a list of Datastores from a physical machine
      * @param datacenterId identifier of the datacenter
      * @param rackId identifier of the rack
      * @param machineId identifier of the machine
@@ -117,7 +121,7 @@ public class DatastoresResource extends AbstractResource
     /**
      * Creates a datastore and returns it after ceration
      * 
-     * @title Create a datastore
+     * @title Create a new Datastore in a physical machine
      * @param datacenterId identifier of the datacenter
      * @param rackId identifier of the rack
      * @param machineId identifier of the machine

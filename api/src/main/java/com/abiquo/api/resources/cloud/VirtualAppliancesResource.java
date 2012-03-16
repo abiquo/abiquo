@@ -54,6 +54,19 @@ import com.abiquo.server.core.task.TasksDto;
 import com.abiquo.server.core.util.FilterOptions;
 import com.abiquo.server.core.util.PagedList;
 
+/**
+ * @wiki A virtual appliance is a pre-configured software stack comprising one or more virtual
+ *       machines. Each virtual machine is an independently installable run-time entity comprising
+ *       an operating system, applications and other application-specific data. A virtual appliance
+ *       is not a mere aggregation of virtual machines. Some high level operations can be performed
+ *       on it, which act on its virtual machines. A virtual appliances holds little information: a
+ *       name, a reference to its parent (Virtual Datacenter), and the enterprise to which it
+ *       belongs, as well as the owner (User) who created it. A virtual appliance also has a state,
+ *       which indicates the actions that can be performed on it. The state is inferred from the
+ *       state of its virtual machines. This means that we do not persist this information anywhere
+ *       in the application. In this way Abiquo does not need to constantly synchronize the state of
+ *       the virtual appliance.
+ */
 @Parent(VirtualDatacenterResource.class)
 @Path(VirtualAppliancesResource.VIRTUAL_APPLIANCES_PATH)
 @Controller
@@ -143,6 +156,8 @@ public class VirtualAppliancesResource extends AbstractResource
      * Creates a virtual appliance and returns it after creation
      * 
      * @title Create a virtual appliance
+     * @wiki This resource creates a Virtual Appliance within a Virtual Datacenter. The only
+     *       parameter that we can set is the name.
      * @param vdcId identifier of the virtual datacenter
      * @param dto virtual appliance to create
      * @param restBuilder a Context-injected object to create the links of the Dto
