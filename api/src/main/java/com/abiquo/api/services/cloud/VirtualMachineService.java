@@ -362,6 +362,11 @@ public class VirtualMachineService extends DefaultApiService
             getVirtualApplianceAndCheckVirtualDatacenter(vdcId, vappId);
 
         VirtualMachine newvm = buildVirtualMachineFromDto(vdc, virtualAppliance, dto);
+
+        // the provided VM Dto doesn't have the conversion link (is itn't published already)
+        // so the created object form Dto needs to set the same conversion
+        newvm.setVirtualImageConversion(virtualMachine.getVirtualImageConversion());
+
         newvm.setTemporal(virtualMachine.getId()); // we set the id to temporal since we are trying
 
         // we need to get the configuration value ALWAYS after to set the ips of the new virtual
