@@ -311,7 +311,7 @@ public class RackDAOTest extends DefaultDAOTestBase<RackDAO, Rack>
         for (int i = 0; i < 7; i++)
         {
             Machine machine = machineGenerator.createUniqueInstance();
-            machine.setState(MachineState.HALTED_FOR_SAVE);
+            machine.setState(MachineState.MANAGED);
             machine.setRack(ucsRack);
             machine.setBelongsToManagedRack(Boolean.TRUE);
 
@@ -321,7 +321,7 @@ public class RackDAOTest extends DefaultDAOTestBase<RackDAO, Rack>
             ds().persistAll(machine, visor);
         }
         Machine machine = machineGenerator.createUniqueInstance();
-        machine.setState(MachineState.MANAGED);
+        machine.setState(MachineState.PROVISIONED);
         machine.setRack(ucsRack);
         machine.setBelongsToManagedRack(Boolean.TRUE);
 
@@ -355,7 +355,7 @@ public class RackDAOTest extends DefaultDAOTestBase<RackDAO, Rack>
         ds().persistAll(datacenter, ucsRack);
 
         Machine machine = machineGenerator.createUniqueInstance();
-        machine.setState(MachineState.HALTED_FOR_SAVE);
+        machine.setState(MachineState.MANAGED);
         machine.setRack(ucsRack);
         machine.setBelongsToManagedRack(Boolean.TRUE);
 
@@ -365,12 +365,11 @@ public class RackDAOTest extends DefaultDAOTestBase<RackDAO, Rack>
         ds().persistAll(machine, visor);
 
         Machine machine1 = machineGenerator.createUniqueInstance();
-        machine1.setState(MachineState.HALTED_FOR_SAVE);
+        machine1.setState(MachineState.MANAGED);
         machine1.setRack(ucsRack);
         machine1.setBelongsToManagedRack(Boolean.TRUE);
 
-        machine.setDatacenter(datacenter);
-        visor.setMachine(machine1);
+        machine1.setDatacenter(datacenter);
         ds().persistAll(machine1);
 
         List<Machine> machines =
