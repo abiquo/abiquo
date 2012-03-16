@@ -238,11 +238,10 @@ public enum EventType implements Serializable
         1700,
         "UCS_COMMUNICATION_PROBLEM",
         "There is a problem accessing to UCS. Might be due to several causes. Check that UCS is working, reacheable, and the credentials"), UCS_ASSOCIATE(
-        1701, "UCS_BLADE_ASSOCIATION", "Blade association with a Service Profile in UCS"), UCS_DISASSOCIATE(
-        1702, "Blade disassociated from UCS Service Profile",
-        "Blade disassociation with a Service Profile in UCS"), UCS_DELETED(1703,
-        "SERVICE_PROFILE_DELETED", "Service Profile deletion in UCS"), UCS_BLADE_POWEROFF(1704,
-        "UCS_BLADE_POWER_OFF", "Blade powered off in UCS"), UCS_BLADE_POWERON(1705,
+        1701, "UCS_BLADE_ASSOCIATION", "Blade associated with a Service Profile in UCS"), UCS_DISASSOCIATE(
+        1702, "UCS_DISASSOCIATE", "Blade disassociated from UCS Service Profile"), UCS_DELETED(
+        1703, "SERVICE_PROFILE_DELETED", "Service Profile deletion in UCS"), UCS_BLADE_POWEROFF(
+        1704, "UCS_BLADE_POWER_OFF", "Blade powered off in UCS"), UCS_BLADE_POWERON(1705,
         "UCS_BLADE_POWER_ON", "Blade powered on in UCS");
 
     private final int event;
