@@ -1018,7 +1018,8 @@
 	            							false,
 	            							1.1,
 	            							this._virtualImageList.virtualImagesFilter.text,
-	            							this._currentVirtualDataCenter.hyperType);
+	            							this._currentVirtualDataCenter.hyperType,
+	            							this._currentVirtualDataCenter);
             	}
             }
             
