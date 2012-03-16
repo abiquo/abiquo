@@ -95,7 +95,7 @@
             <resultHandlers>
                 <MethodInvoker generator="{VirtualApplianceResultHandler}"
                     method="handleGetVirtualDataCentersFasterByEnterprise"
-                    arguments="{[resultObject]}"/>
+                    arguments="{[resultObject, event.callback]}"/>
 
                 <!-- Unblock screen -->
                 <InlineInvoker method="ScreenBlocker.unblockScreen"/>

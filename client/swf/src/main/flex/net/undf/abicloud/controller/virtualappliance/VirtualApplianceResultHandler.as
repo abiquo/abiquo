@@ -92,15 +92,12 @@ package net.undf.abicloud.controller.virtualappliance
             }
         }
         
-        public function handleGetVirtualDataCentersFasterByEnterprise(result:BasicResult):void
+        public function handleGetVirtualDataCentersFasterByEnterprise(result:BasicResult, callback:Function):void
         {
             if (result.success)
             {
                 //Adding the VirtualDataCenter list to the model
-                AbiCloudModel.getInstance().virtualApplianceManager.virtualDataCenters = DataResult(result).data as ArrayCollection;
-                
-                AbiCloudModel.getInstance().virtualApplianceManager.dispatchEvent(new VirtualApplianceEvent(VirtualApplianceEvent.VIRTUAL_DATACENTER_RETRIEVED));
-                
+                callback(DataResult(result).data as ArrayCollection);
             }
             else
             {
