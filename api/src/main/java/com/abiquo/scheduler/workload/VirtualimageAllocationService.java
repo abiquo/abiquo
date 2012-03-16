@@ -551,6 +551,18 @@ public class VirtualimageAllocationService
     }
 
     /**
+     * Return all machines in a rack that are empty of VM.
+     * 
+     * @param rackId rack.
+     * @return Integer
+     */
+    public List<Machine> getAllEmptyOnMachines(final Integer rackId)
+    {
+
+        return datacenterRepo.getAllMachinesToShutDownFromRack(rackId);
+    }
+
+    /**
      * Returns any machine that is in the rack in HALTED_FOR_SAVE.
      * 
      * @param rackId rack.
