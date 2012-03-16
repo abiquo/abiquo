@@ -34,6 +34,7 @@ import java.util.Set;
 
 import javax.persistence.EntityManager;
 
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,6 +51,7 @@ import com.abiquo.api.services.TaskService;
 import com.abiquo.api.services.UserService;
 import com.abiquo.api.services.VirtualMachineAllocatorService;
 import com.abiquo.api.services.stub.TarantinoService;
+import com.abiquo.api.spring.security.SecurityService;
 import com.abiquo.model.transport.error.CommonError;
 import com.abiquo.scheduler.VirtualMachineRequirementsFactory;
 import com.abiquo.scheduler.limit.VirtualMachinePrice;
@@ -66,7 +68,7 @@ import com.abiquo.server.core.cloud.VirtualDatacenterRep;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineState;
 import com.abiquo.server.core.enterprise.Enterprise;
-import com.abiquo.server.core.infrastructure.Datacenter;
+import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.infrastructure.management.RasdManagement;
 import com.abiquo.server.core.infrastructure.management.RasdManagementDAO;
 import com.abiquo.server.core.infrastructure.storage.Tier;
@@ -134,6 +136,9 @@ public class VirtualApplianceService extends DefaultApiService
     @Autowired
     private DatacenterService dcServbice;
 
+    @Autowired
+    SecurityService securityService;
+
     public VirtualApplianceService()
     {
 
@@ -150,6 +155,7 @@ public class VirtualApplianceService extends DefaultApiService
         this.vmService = new VirtualMachineService(em);
         this.vmallocator = new VirtualMachineAllocatorService(em);
         this.requirements = new VirtualMachineRequirementsFactory();
+        this.securityService = new SecurityService();
     }
 
     /**
@@ -179,7 +185,24 @@ public class VirtualApplianceService extends DefaultApiService
         final FilterOptions filterOptions)
     {
         Enterprise enterprise = entService.getEnterprise(entId);
-        return virtualApplianceRepo.findVirtualAppliancesByEnterprise(enterprise, filterOptions);
+
+        final User user = userService.getCurrentUser();
+
+        boolean findByUser =
+            user != null && !securityService.canManageOtherEnterprises()
+                && !securityService.canManageOtherUsers()
+                && !StringUtils.isEmpty(user.getAvailableVirtualDatacenters());
+
+        if (findByUser)
+        {
+            return virtualApplianceRepo.findVirtualAppliancesByEnterprise(enterprise,
+                filterOptions, user);
+        }
+        else
+        {
+            return virtualApplianceRepo.findVirtualAppliancesByEnterprise(enterprise,
+                filterOptions, null);
+        }
     }
 
     /**
@@ -193,10 +216,25 @@ public class VirtualApplianceService extends DefaultApiService
     public List<VirtualAppliance> getVirtualAppliancesByEnterpriseAndDatacenter(
         final Integer entId, final Integer dcId)
     {
-        Enterprise enterprise = entService.getEnterprise(entId);
-        Datacenter datacenter = dcServbice.getDatacenter(dcId);
+        entService.getEnterprise(entId); // checks enterprise
+        dcServbice.getDatacenter(dcId); // checks datacenter
 
-        return virtualApplianceRepo.findVirtualAppliancesByEnterpriseAndDatacenter(entId, dcId);
+        final User user = userService.getCurrentUser();
+
+        boolean findByUser =
+            user != null && !securityService.canManageOtherEnterprises()
+                && !securityService.canManageOtherUsers()
+                && !StringUtils.isEmpty(user.getAvailableVirtualDatacenters());
+
+        if (findByUser)
+        {
+            return virtualApplianceRepo.findVirtualAppliancesByEnterpriseAndDatacenter(entId, dcId,
+                user);
+        }
+        else
+        {
+            return virtualApplianceRepo.findVirtualAppliancesByEnterpriseAndDatacenter(entId, dcId);
+        }
     }
 
     @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
