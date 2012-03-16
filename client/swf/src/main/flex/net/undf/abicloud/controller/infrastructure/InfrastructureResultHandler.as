@@ -24,6 +24,7 @@ package net.undf.abicloud.controller.infrastructure
     import flash.events.Event;
     
     import mx.collections.ArrayCollection;
+    import mx.controls.Alert;
     import mx.resources.ResourceManager;
     
     import net.undf.abicloud.controller.ResultHandler;
@@ -38,6 +39,7 @@ package net.undf.abicloud.controller.infrastructure
     import net.undf.abicloud.vo.infrastructure.PhysicalMachineCreation;
     import net.undf.abicloud.vo.infrastructure.Rack;
     import net.undf.abicloud.vo.infrastructure.State;
+    import net.undf.abicloud.vo.infrastructure.UcsRack;
     import net.undf.abicloud.vo.infrastructure.VirtualMachine;
     import net.undf.abicloud.vo.result.BasicResult;
     import net.undf.abicloud.vo.result.DataResult;
@@ -267,7 +269,6 @@ package net.undf.abicloud.controller.infrastructure
             if (result.success)
             {
                 //Rack created successfully
-                //AbiCloudModel.getInstance().infrastructureManager.addInfrastructureElement(DataResult(result).data as InfrastructureElement);
                 AbiCloudModel.getInstance().infrastructureManager.addRack(DataResult(result).data as Rack);
             }
             else

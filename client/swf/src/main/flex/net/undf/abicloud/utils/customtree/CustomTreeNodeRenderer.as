@@ -33,6 +33,7 @@ package net.undf.abicloud.utils.customtree
     import mx.managers.DragManager;
     
     import net.undf.abicloud.controller.ThemeHandler;
+    import net.undf.abicloud.vo.infrastructure.Rack;
     import net.undf.abicloud.vo.infrastructure.UcsRack;
 
 
@@ -114,6 +115,12 @@ package net.undf.abicloud.utils.customtree
                 this._label.text = this._customTreeNode.labelText;
                 if(this._customTreeNode.item is UcsRack){
 	            	this._label.text += " ["+UcsRack.TYPE+"]";                	
+                }
+                
+                //HA enable
+                if(this._customTreeNode.item is Rack && Rack(this._customTreeNode.item).haEnabled)
+                {
+                	this._label.text += " ("+resourceManager.getString('Infrastructure','LABEL_HA_ENABLE')+")";
                 }
                 
                 //Setting the proper node icon
