@@ -61,6 +61,7 @@
         <security:intercept-url pattern="/admin/enterprises/*/action/volumes" method="GET" access="ROLE_VDC_ENUMERATE" />
         <security:intercept-url pattern="/admin/enterprises/*/action/virtualmachines" method="GET" access="ROLE_VAPP_CUSTOMISE_SETTINGS" />
         <security:intercept-url pattern="/admin/enterprises/*/action/virtualappliances" method="GET" access="ROLE_VDC_ENUMERATE" />
+        <security:intercept-url pattern="/admin/enterprises/*/action/virtualdatacenters" method="GET" access="ROLE_VDC_ENUMERATE, ROLE_PHYS_DC_RETRIEVE_DETAILS" />
         <security:intercept-url pattern="/admin/enterprises/*/action/externalnetworks" method="GET" access="ROLE_ENTERPRISE_ENUMERATE, ROLE_VDC_ENUMERATE" />
         <security:intercept-url pattern="/admin/enterprises/*/action/externalnetworks/*" method="GET" access="ROLE_ENTERPRISE_ENUMERATE, ROLE_VDC_ENUMERATE" />
         <security:intercept-url pattern="/admin/enterprises/*/action/chefelements" method="GET" access="ROLE_VAPP_CUSTOMISE_SETTINGS" />
