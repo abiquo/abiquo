@@ -25,10 +25,13 @@ package net.undf.abicloud.business.managers
     import flash.events.EventDispatcher;
     
     import mx.collections.ArrayCollection;
+    import mx.controls.Alert;
+    import mx.resources.ResourceManager;
     import mx.utils.ObjectUtil;
     
     import net.undf.abicloud.events.InfrastructureEvent;
     import net.undf.abicloud.utils.customtree.CustomTreeNode;
+    import net.undf.abicloud.view.general.AbiCloudAlert;
     import net.undf.abicloud.vo.infrastructure.DataCenter;
     import net.undf.abicloud.vo.infrastructure.DataCenterAllocationLimit;
     import net.undf.abicloud.vo.infrastructure.Datastore;
@@ -37,7 +40,9 @@ package net.undf.abicloud.business.managers
     import net.undf.abicloud.vo.infrastructure.PhysicalMachine;
     import net.undf.abicloud.vo.infrastructure.Rack;
     import net.undf.abicloud.vo.infrastructure.State;
+    import net.undf.abicloud.vo.infrastructure.UcsRack;
     import net.undf.abicloud.vo.infrastructure.VirtualMachine;
+    import net.undf.abicloud.vo.result.DataResult;
     import net.undf.abicloud.vo.service.RemoteService;
     import net.undf.abicloud.vo.service.RemoteServiceType;
     import net.undf.abicloud.vo.virtualhardware.ResourceAllocationLimit;
@@ -151,6 +156,21 @@ package net.undf.abicloud.business.managers
             var event:InfrastructureEvent =  new InfrastructureEvent(InfrastructureEvent.RACK_CREATED);
             event.infrastructureElement = rack;
             dispatchEvent(event);
+            
+            if(rack.haEnabled)
+            {
+	            var message:String = ResourceManager.getInstance().getString("Infrastructure","ALERT_RACK_HA_ENABLE_TEXT");
+	            if(rack is UcsRack)
+	            {
+	                message = ResourceManager.getInstance().getString("Infrastructure","ALERT_UCS_RACK_HA_ENABLE_TEXT");
+	            }
+	            AbiCloudAlert.showConfirmation(ResourceManager.getInstance().getString("Common",
+	                                                                                   "ALERT_SUCCESS_TITLE_LABEL"),
+	                                           ResourceManager.getInstance().getString("Infrastructure",
+	                                                                                   "ALERT_RACK_HA_ENABLE_HEADER"),
+	                                           message,
+	                                           Alert.OK);
+            }
         }
 
 
@@ -388,36 +408,6 @@ package net.undf.abicloud.business.managers
         {
             return this._racks;
         }
-
-        /**
-         * Returns all user's racks
-         **/
-       /* [Bindable(event="infrastructureUpdated_InfrastructureManager")]
-         public function get racks():Array
-        {
-            var allRacks:Array = new Array();
-            var infrastructureLength:int = _infrastructure.length;
-            var i:int;
-            var element:InfrastructureElement;
-
-            for (i = 0; i < infrastructureLength; i++)
-            {
-                element = _infrastructure.getItemAt(i) as InfrastructureElement;
-                if (element is Rack)
-                    allRacks.push(element);
-            }
-
-            return allRacks;
-        } */
-        
-       /*  [Bindable(event="infrastructureUpdated_InfrastructureManager")]
-        public function get racks():ArrayCollection{
-        	return this._racks;
-        }
-        
-        public function set racks(racks:ArrayCollection):void{
-        	this._racks = racks;
-        } */
         
          /**
          * Set the list of Physical Machines assigned to a given rack
@@ -500,40 +490,6 @@ package net.undf.abicloud.business.managers
          */
         public function editRack(editedRack:Rack):void
         {
-            //Looking for the rack to update
-           /*  var rackList:ArrayCollection = racks;
-            var length:int = rackList.length;
-            var i:int;
-            var oldRack:Rack;
-            for (i = 0; i < length; i++)
-            {
-                oldRack = rackList[i] as Rack;
-                if (oldRack.id == editedRack.id)
-                    //Rack found. Exiting...
-                    break;
-                else
-                    oldRack = null;
-            }
-
-            if (oldRack)
-            {
-                //Updating the old Rack without modifying its memory address
-                oldRack.id = editedRack.id;
-                oldRack.name = editedRack.name;
-                oldRack.shortDescription = editedRack.shortDescription;
-                oldRack.largeDescription = editedRack.largeDescription;
-
-                //Announcing that this rack has been edited successfully
-                var infrastructureEvent:InfrastructureEvent = new InfrastructureEvent(InfrastructureEvent.INFRASTRUCTURE_ELEMENT_EDITED,
-                                                                                      false);
-                infrastructureEvent.infrastructureElement = oldRack;
-                dispatchEvent(infrastructureEvent);
-            }
-            else
-            {
-                //Rack not found. Ignoring changes
-            } */
-
 			 //Announcing that infrastructure has been updated
             this.dispatchEvent(new Event(RACKS_UPDATED, true));
         }
