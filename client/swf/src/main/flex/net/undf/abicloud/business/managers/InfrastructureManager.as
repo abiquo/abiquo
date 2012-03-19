@@ -157,17 +157,20 @@ package net.undf.abicloud.business.managers
             event.infrastructureElement = rack;
             dispatchEvent(event);
             
-            var message:String = ResourceManager.getInstance().getString("Infrastructure","ALERT_RACK_HA_ENABLE_TEXT");
-            if(rack is UcsRack)
+            if(rack.haEnabled)
             {
-                message = ResourceManager.getInstance().getString("Infrastructure","ALERT_UCS_RACK_HA_ENABLE_TEXT");
+	            var message:String = ResourceManager.getInstance().getString("Infrastructure","ALERT_RACK_HA_ENABLE_TEXT");
+	            if(rack is UcsRack)
+	            {
+	                message = ResourceManager.getInstance().getString("Infrastructure","ALERT_UCS_RACK_HA_ENABLE_TEXT");
+	            }
+	            AbiCloudAlert.showConfirmation(ResourceManager.getInstance().getString("Common",
+	                                                                                   "ALERT_SUCCESS_TITLE_LABEL"),
+	                                           ResourceManager.getInstance().getString("Infrastructure",
+	                                                                                   "ALERT_RACK_HA_ENABLE_HEADER"),
+	                                           message,
+	                                           Alert.OK);
             }
-            AbiCloudAlert.showConfirmation(ResourceManager.getInstance().getString("Common",
-                                                                                   "ALERT_SUCCESS_TITLE_LABEL"),
-                                           ResourceManager.getInstance().getString("Infrastructure",
-                                                                                   "ALERT_RACK_HA_ENABLE_HEADER"),
-                                           message,
-                                           Alert.OK);
         }
 
 
