@@ -319,8 +319,22 @@ public class RESTBuilder implements IRESTBuilder
     protected RESTLink buildMachineRackLink(final AbiquoLinkBuilder builder,
         final Map<String, String> params, final Boolean managedRack)
     {
-        return builder.buildRestLink(RackResource.class, RackResource.RACK, params,
-            RackDto.BASE_MEDIA_TYPE);
+        RESTLink link;
+
+        if (!managedRack)
+        {
+            link =
+                builder.buildRestLink(RackResource.class, RackResource.RACK, params,
+                    RackDto.BASE_MEDIA_TYPE);
+        }
+        else
+        {
+            link =
+                builder.buildRestLink(RackResource.class, RackResource.RACK, params,
+                    UcsRackDto.BASE_MEDIA_TYPE);
+        }
+
+        return link;
     }
 
     public List<RESTLink> buildMachineLinks(final Integer datacenterId, final Integer rackId,
