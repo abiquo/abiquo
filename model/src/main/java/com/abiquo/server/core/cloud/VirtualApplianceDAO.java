@@ -21,10 +21,14 @@
 
 package com.abiquo.server.core.cloud;
 
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 import javax.persistence.EntityManager;
 
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.Transformer;
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.Criteria;
 import org.hibernate.Query;
@@ -37,6 +41,7 @@ import org.springframework.stereotype.Repository;
 import com.abiquo.server.core.cloud.VirtualAppliance.OrderByEnum;
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
 import com.abiquo.server.core.enterprise.Enterprise;
+import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.util.FilterOptions;
 import com.abiquo.server.core.util.PagedList;
 import com.softwarementors.bzngine.entities.PersistentEntity;
@@ -48,6 +53,12 @@ public class VirtualApplianceDAO extends DefaultDAOBase<Integer, VirtualApplianc
         + "FROM VirtualAppliance vapp "//
         + "WHERE vapp.enterprise.id = :entId "//
         + "and vapp.virtualDatacenter.datacenter = :dcId";
+
+    private static final String GET_VAPPS_BY_ENTERPRISE_AND_DATACENTER_AND_USER = " SELECT vapp "//
+        + "FROM VirtualAppliance vapp "//
+        + "WHERE vapp.enterprise.id = :entId "//
+        + "and vapp.virtualDatacenter.datacenter = :dcId "//
+        + "and vapp.virtualDatacenter.id IN (:allowedVDCs) ";
 
     private static Criterion sameEnterprise(final Enterprise enterprise)
     {
@@ -77,8 +88,11 @@ public class VirtualApplianceDAO extends DefaultDAOBase<Integer, VirtualApplianc
         return criteria.list();
     }
 
+    /**
+     * @param user, only users with restricted VDCs. If no restricted then use user = null
+     */
     public List<VirtualAppliance> findByEnterprise(final Enterprise enterprise,
-        final FilterOptions filterOptions)
+        final FilterOptions filterOptions, final User user)
     {
         if (filterOptions == null)
         {
@@ -113,6 +127,13 @@ public class VirtualApplianceDAO extends DefaultDAOBase<Integer, VirtualApplianc
         criteria.setFirstResult(startwith);
         criteria.setMaxResults(limit);
 
+        if (user != null)
+        {
+            criteria.createAlias(VirtualAppliance.VIRTUAL_DATACENTER_PROPERTY, "virtualdatacenter");
+            criteria.add(Restrictions.in("virtualdatacenter." + PersistentEntity.ID_PROPERTY,
+                availableVdsToUser(user)));
+        }
+
         List<VirtualAppliance> result = getResultList(criteria);
 
         PagedList<VirtualAppliance> page = new PagedList<VirtualAppliance>();
@@ -132,6 +153,36 @@ public class VirtualApplianceDAO extends DefaultDAOBase<Integer, VirtualApplianc
         query.setInteger("dcId", dcId);
 
         return query.list();
+    }
+
+    /**
+     * @param user, only users with restricted VDCs
+     */
+    public List<VirtualAppliance> findByEnterpriseAndDatacenter(final Integer entId,
+        final Integer dcId, final User user)
+    {
+        Query query = getSession().createQuery(GET_VAPPS_BY_ENTERPRISE_AND_DATACENTER_AND_USER);
+        query.setInteger("entId", entId);
+        query.setInteger("dcId", dcId);
+        query.setParameterList("allowedVDCs", availableVdsToUser(user));
+
+        return query.list();
+    }
+
+    @SuppressWarnings("unchecked")
+    private static Collection<Integer> availableVdsToUser(final User user)
+    {
+        Collection<String> idsStrings =
+            Arrays.asList(user.getAvailableVirtualDatacenters().split(","));
+
+        return CollectionUtils.collect(idsStrings, new Transformer()
+        {
+            @Override
+            public Object transform(final Object input)
+            {
+                return Integer.valueOf(input.toString());
+            }
+        });
     }
 
     public VirtualAppliance findById(final VirtualDatacenter vdc, final Integer vappId)

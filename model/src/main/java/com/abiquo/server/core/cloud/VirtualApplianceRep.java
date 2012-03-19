@@ -41,6 +41,7 @@ import com.abiquo.server.core.cloud.stateful.VirtualApplianceStatefulConversion;
 import com.abiquo.server.core.cloud.stateful.VirtualApplianceStatefulConversionDAO;
 import com.abiquo.server.core.common.DefaultRepBase;
 import com.abiquo.server.core.enterprise.Enterprise;
+import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.util.FilterOptions;
 
 @Repository
@@ -87,15 +88,24 @@ public class VirtualApplianceRep extends DefaultRepBase
     }
 
     public List<VirtualAppliance> findVirtualAppliancesByEnterprise(final Enterprise ent,
-        final FilterOptions filterOptions)
+        final FilterOptions filterOptions, final User user)
     {
-        return virtualApplianceDao.findByEnterprise(ent, filterOptions);
+        return virtualApplianceDao.findByEnterprise(ent, filterOptions, user);
     }
 
     public List<VirtualAppliance> findVirtualAppliancesByEnterpriseAndDatacenter(
         final Integer entId, final Integer dcId)
     {
         return virtualApplianceDao.findByEnterpriseAndDatacenter(entId, dcId);
+    }
+
+    /**
+     * @param user, only users with restricted VDCs
+     */
+    public List<VirtualAppliance> findVirtualAppliancesByEnterpriseAndDatacenter(
+        final Integer entId, final Integer dcId, final User user)
+    {
+        return virtualApplianceDao.findByEnterpriseAndDatacenter(entId, dcId, user);
     }
 
     public VirtualAppliance findById(final Integer id)

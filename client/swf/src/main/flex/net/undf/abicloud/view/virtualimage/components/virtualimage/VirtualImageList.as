@@ -131,7 +131,8 @@ package net.undf.abicloud.view.virtualimage.components.virtualimage
         public function onInit(repository:Repository, category:Category,
                                      editable:Boolean, sizeMultiplier:Number,
                                      filter:String,
-                                     hypervisorType:HyperVisorType = null):void
+                                     hypervisorType:HyperVisorType = null,
+                                     virtualDatacenter:VirtualDataCenter = null):void
         {
             
             //first, we clean previous list of virtual image
@@ -146,6 +147,7 @@ package net.undf.abicloud.view.virtualimage.components.virtualimage
             this.sizeMultiplier = sizeMultiplier;
             this._filter = filter;
             this.hypervisorType = hypervisorType;
+            this._virtualDatacenter = virtualDatacenter;
 
             //Setting basic layout and style
             this.percentWidth = 100;
