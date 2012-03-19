@@ -316,6 +316,13 @@ public class RESTBuilder implements IRESTBuilder
             builder);
     }
 
+    protected RESTLink buildMachineRackLink(final AbiquoLinkBuilder builder,
+        final Map<String, String> params)
+    {
+        return builder.buildRestLink(RackResource.class, RackResource.RACK, params,
+            RackDto.BASE_MEDIA_TYPE);
+    }
+
     public List<RESTLink> buildMachineLinks(final Integer datacenterId, final Integer rackId,
         final Boolean managedRack, final Enterprise enterprise, final MachineDto machine,
         final AbiquoLinkBuilder builder)
@@ -327,8 +334,7 @@ public class RESTBuilder implements IRESTBuilder
         params.put(RackResource.RACK, rackId.toString());
         params.put(MachineResource.MACHINE, machine.getId().toString());
 
-        links.add(builder.buildRestLink(RackResource.class, RackResource.RACK, params,
-            RackDto.BASE_MEDIA_TYPE));
+        links.add(buildMachineRackLink(builder, params));
         links.add(builder.buildRestLink(MachineResource.class, REL_EDIT, params,
             MachineDto.BASE_MEDIA_TYPE));
         links.add(builder.buildRestLink(DatastoresResource.class,
