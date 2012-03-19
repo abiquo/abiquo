@@ -82,6 +82,12 @@
              **/
             public function init(virtualAppliance:VirtualAppliance = null, defaultVirtualDataCenter:VirtualDataCenter = null):void
             {
+                //retrieve the list of virtual datacenter
+                var event:VirtualApplianceEvent = new VirtualApplianceEvent(VirtualApplianceEvent.GET_VIRTUAL_DATACENTERS_BY_ENTERPRISE_FASTER);
+                event.callback = onVirtualDataCentersRetrieved;
+                event.enterprise = AbiCloudModel.getInstance().loginManager.user.enterprise; 
+                dispatchEvent(event);
+                
                 this._virtualAppliance = virtualAppliance;
                 this._defaultVirtualDataCenter = defaultVirtualDataCenter;
                 automaticOpenCheckIsEnable = false;
@@ -97,28 +103,6 @@
                     publicInput.selected = false;
                     virtualDataCenterInput.enabled = true;
                     acceptButton.enabled = false;
-
-                    if (this._defaultVirtualDataCenter)
-                    {
-                        //Setting this Virtual DataCenter as selected by default
-                        var length:int = virtualDataCenterInput.dataProvider.length;
-                        var i:int;
-                        for (i = 0; i < length; i++)
-                        {
-                            if (VirtualDataCenter(virtualDataCenterInput.dataProvider[i]).id == this._defaultVirtualDataCenter.id)
-                            {
-                                virtualDataCenterInput.selectedIndex = i;
-                                break;
-                            }
-                        }
-                    }
-                    else
-                    {
-                        //There is not a Virtual DataCenter selected by default
-                        virtualDataCenterInput.selectedIndex = -1;
-                        virtualDataCenterInput.prompt = ResourceManager.getInstance().getString("VirtualAppliance",
-                                                                                                "COMBOBOX_PROMPT_VIRTUALDATACENTER")
-                    }
                 }
                 else
                 {
@@ -143,6 +127,33 @@
 
                 this._listenerRegistered = false;
                 nameInput.setFocus();
+            }
+            
+            private function onVirtualDataCentersRetrieved(value:ArrayCollection):void
+            {
+            	virtualDataCenterInput.dataProvider = value;
+            	
+            	if (this._defaultVirtualDataCenter)
+                {
+                    //Setting this Virtual DataCenter as selected by default
+                    var length:int = virtualDataCenterInput.dataProvider.length;
+                    var i:int;
+                    for (i = 0; i < length; i++)
+                    {
+                        if (VirtualDataCenter(virtualDataCenterInput.dataProvider[i]).id == this._defaultVirtualDataCenter.id)
+                        {
+                            virtualDataCenterInput.selectedIndex = i;
+                            break;
+                        }
+                    }
+                }
+                else
+                {
+                    //There is not a Virtual DataCenter selected by default
+                    virtualDataCenterInput.selectedIndex = -1;
+                    virtualDataCenterInput.prompt = ResourceManager.getInstance().getString("VirtualAppliance",
+                                                                                            "COMBOBOX_PROMPT_VIRTUALDATACENTER")
+                }
             }
 
             private function onAccept():void
@@ -289,7 +300,6 @@
             <mx:ComboBox id="virtualDataCenterInput"
                 height="18"
                 labelField="name"
-                dataProvider="{AbiCloudModel.getInstance().virtualApplianceManager.virtualDataCenters}"
                 change="validateForm()"
                 prompt="@Resource(bundle='VirtualAppliance', key='COMBOBOX_PROMPT_VIRTUALDATACENTER')"/>
         </mx:FormItem>
