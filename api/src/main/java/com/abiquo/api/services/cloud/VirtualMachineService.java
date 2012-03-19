@@ -114,8 +114,12 @@ import com.abiquo.server.core.infrastructure.management.RasdDAO;
 import com.abiquo.server.core.infrastructure.management.RasdManagement;
 import com.abiquo.server.core.infrastructure.management.RasdManagementDAO;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
+import com.abiquo.server.core.infrastructure.network.IpPoolManagementDAO;
+import com.abiquo.server.core.infrastructure.network.NetworkAssignment;
+import com.abiquo.server.core.infrastructure.network.NetworkAssignmentDAO;
 import com.abiquo.server.core.infrastructure.network.NetworkConfiguration;
 import com.abiquo.server.core.infrastructure.network.VLANNetwork;
+import com.abiquo.server.core.infrastructure.network.VLANNetworkDAO;
 import com.abiquo.server.core.infrastructure.storage.DiskManagement;
 import com.abiquo.server.core.infrastructure.storage.StorageRep;
 import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
@@ -187,6 +191,15 @@ public class VirtualMachineService extends DefaultApiService
     @Autowired
     private AMServiceStub amService;
 
+    @Autowired
+    private IpPoolManagementDAO ipPoolManDao;
+
+    @Autowired
+    private NetworkAssignmentDAO netAssignDao;
+
+    @Autowired
+    private VLANNetworkDAO vlanNetworkDao;
+
     public VirtualMachineService()
     {
 
@@ -210,6 +223,8 @@ public class VirtualMachineService extends DefaultApiService
         this.storageRep = new StorageRep(em);
         this.jobCreator = new TarantinoJobCreator(em);
         this.ipService = new NetworkService(em);
+        this.ipPoolManDao = new IpPoolManagementDAO(em);
+        this.vlanNetworkDao = new VLANNetworkDAO(em);
         this.tracer = new TracerLogger();
     }
 
@@ -2818,10 +2833,57 @@ public class VirtualMachineService extends DefaultApiService
         {
             rasdDao.enableTemporalOnlyFilter();
 
+            List<RasdManagement> rasds = backUpVm.getRasdManagements();
+
+            // First of all, we have to release the VLAN tags if it is needed.
+            // This is not a very optimal algorithm, since we traverse again the Rasds later,
+            // but we need to know the id
+            // of the virtual machine before to delete the entity to know if we can to release the
+            // TAG.
+            for (RasdManagement rollbackRasd : rasds)
+            {
+                if (rollbackRasd instanceof IpPoolManagement)
+                {
+
+                    IpPoolManagement originalRasd =
+                        (IpPoolManagement) rasdDao.findById(rollbackRasd.getTemporal());
+
+                    if (!originalRasd.isAttached())
+                    {
+                        // check if it was the last IP of the VLAN, and release the VLAN
+                        // tag.
+                        VLANNetwork vlanNetwork = originalRasd.getVlanNetwork();
+
+                        final boolean assigned =
+                            ipPoolManDao.isVlanAssignedToDifferentVM(backUpVm.getId(), vlanNetwork);
+
+                        if (!assigned)
+                        {
+                            if (vlanNetwork.getType().equals(NetworkType.INTERNAL))
+                            {
+                                vlanNetwork.setTag(null);
+                            }
+
+                            NetworkAssignment na = netAssignDao.findByVlanNetwork(vlanNetwork);
+
+                            if (na != null)
+                            {
+                                netAssignDao.remove(na);
+                            }
+                        }
+                    }
+                }
+            }
+
+            /*
+             * CAUTION! We need this flush exactly here. Otherwise it tries to set teh
+             * vlanNetwork.setTag(null) after to delete the related IpPoolManagement (that will be
+             * deleted in the next loop) and it raises an UnknowEntityException.
+             */
+            vlanNetworkDao.flush();
+
             // we need to first delete the vm (as it updates the rasd_man)
             repo.deleteVirtualMachine(backUpVm);
-
-            List<RasdManagement> rasds = backUpVm.getRasdManagements();
 
             for (RasdManagement rollbackRasd : rasds)
             {
