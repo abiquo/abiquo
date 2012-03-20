@@ -595,7 +595,8 @@ public enum APIError
             + "Please verify the credentials"), CHEF_INVALID_ENTERPRISE("CHEF-8",
         "The enterprise is not configured to use Chef"), CHEF_INVALID_VIRTUALMACHINE("CHEF-9",
         "The virtual machine cannot use Chef. "
-            + "Please, verify that the image is Chef enabled and the Enterprise can use Chef"),
+            + "Please, verify that the image is Chef enabled and the Enterprise can use Chef"), CHEF_INVALID_PRIVATE_KEY(
+        "CHEF-10", "The provided data is not a valid private key. Please verify the key format."),
 
     // Parsing links
     LINKS_INVALID_LINK("LNK-0", "Invalid link. Check documentation"), LINKS_ONLY_ACCEPTS_ONE_LINK(
