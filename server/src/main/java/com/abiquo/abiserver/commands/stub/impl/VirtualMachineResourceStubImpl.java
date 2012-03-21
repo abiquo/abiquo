@@ -133,8 +133,8 @@ public class VirtualMachineResourceStubImpl extends AbstractAPIStub implements
     {
         BasicResult result = new BasicResult();
         String vmachineUrl =
-            resolveVirtualMachineUrl(virtualDatacenterId, virtualApplianceId,
-                virtualMachine.getId());
+            resolveVirtualMachineUrl(virtualDatacenterId, virtualApplianceId, virtualMachine
+                .getId());
 
         ClientResponse response = delete(vmachineUrl);
 
@@ -197,10 +197,10 @@ public class VirtualMachineResourceStubImpl extends AbstractAPIStub implements
     {
         DataResult result = new DataResult();
         String url =
-            createVirtualMachineResetUrl(virtualDatacenterId, virtualApplianceId,
-                virtualMachine.getId());
+            createVirtualMachineResetUrl(virtualDatacenterId, virtualApplianceId, virtualMachine
+                .getId());
 
-        ClientResponse response = post(url, null);
+        ClientResponse response = post(url, null, AcceptedRequestDto.MEDIA_TYPE);
 
         if (response.getStatusCode() == Status.ACCEPTED.getStatusCode())
         {

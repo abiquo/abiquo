@@ -925,6 +925,11 @@ public class RESTBuilder implements IRESTBuilder
             AcceptedRequestDto.BASE_MEDIA_TYPE));
 
         links.add(builder.buildRestLink(VirtualMachineResource.class,
+            VirtualMachineResource.VIRTUAL_MACHINE_ACTION_RESET,
+            VirtualMachineResource.VIRTUAL_MACHINE_ACTION_RESET_REL, params,
+            AcceptedRequestDto.BASE_MEDIA_TYPE));
+
+        links.add(builder.buildRestLink(VirtualMachineResource.class,
             VirtualMachineResource.VIRTUAL_MACHINE_ACTION_SNAPSHOT,
             VirtualMachineResource.VIRTUAL_MACHINE_ACTION_SNAPSHOT_REL, params,
             AcceptedRequestDto.BASE_MEDIA_TYPE));
