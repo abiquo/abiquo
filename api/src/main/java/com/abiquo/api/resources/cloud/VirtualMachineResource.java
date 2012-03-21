@@ -119,6 +119,8 @@ public class VirtualMachineResource extends AbstractResource
 
     public static final String VIRTUAL_MACHINE_ACTION_UNDEPLOY_REL = "undeploy";
 
+    public static final String VIRTUAL_MACHINE_ACTION_RESET_REL = "reset";
+
     public static final String FORCE_UNDEPLOY = "force";
 
     @Autowired
@@ -423,8 +425,8 @@ public class VirtualMachineResource extends AbstractResource
             SchedulerLock.acquire(lockMsg);
 
             String taskId =
-                vmService.deployVirtualMachine(vmId, vappId, vdcId,
-                    forceSoftLimits.isForceEnterpriseSoftLimits());
+                vmService.deployVirtualMachine(vmId, vappId, vdcId, forceSoftLimits
+                    .isForceEnterpriseSoftLimits());
 
             return buildAcceptedRequestDtoWithTaskLink(taskId, uriInfo);
         }
@@ -568,8 +570,8 @@ public class VirtualMachineResource extends AbstractResource
         try
         {
             String taskId =
-                vmService.instanceVirtualMachine(vmId, vappId, vdcId,
-                    snapshotData.getInstanceName(), originalState);
+                vmService.instanceVirtualMachine(vmId, vappId, vdcId, snapshotData
+                    .getInstanceName(), originalState);
             if (taskId == null)
             {
                 throw new InternalServerErrorException(APIError.STATUS_INTERNAL_SERVER_ERROR);
@@ -804,9 +806,9 @@ public class VirtualMachineResource extends AbstractResource
 
         dto.addLinks(restBuilder.buildVirtualMachineCloudAdminLinks(vdc.getId(), vappId, v,
             rack == null ? null : rack.getDatacenter().getId(), rack == null ? null : rack.getId(),
-            machine == null ? null : machine.getId(),
-            enterprise == null ? null : enterprise.getId(), user == null ? null : user.getId(),
-            v.isChefEnabled(), volumeIds, diskIds, ips, vdc.getHypervisorType()));
+            machine == null ? null : machine.getId(), enterprise == null ? null : enterprise
+                .getId(), user == null ? null : user.getId(), v.isChefEnabled(), volumeIds,
+            diskIds, ips, vdc.getHypervisorType()));
 
         final VirtualMachineTemplate vmtemplate = v.getVirtualMachineTemplate();
         if (vmtemplate.getRepository() != null)
@@ -853,9 +855,9 @@ public class VirtualMachineResource extends AbstractResource
     {
         NodeVirtualImage node = vmService.getNodeVirtualImage(vdcId, vappId, vmId);
 
-        return createNodeTransferObject(node, vdcId, vappId, restBuilder,
-            getVolumeIds(node.getVirtualMachine()), getDiskIds(node.getVirtualMachine()), node
-                .getVirtualMachine().getIps());
+        return createNodeTransferObject(node, vdcId, vappId, restBuilder, getVolumeIds(node
+            .getVirtualMachine()), getDiskIds(node.getVirtualMachine()), node.getVirtualMachine()
+            .getIps());
     }
 
     @GET
