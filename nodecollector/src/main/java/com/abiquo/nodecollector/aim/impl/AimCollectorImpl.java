@@ -24,6 +24,7 @@ package com.abiquo.nodecollector.aim.impl;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.thrift.TException;
 import org.apache.thrift.transport.TSocket;
 import org.apache.thrift.transport.TTransport;
@@ -150,6 +151,8 @@ public class AimCollectorImpl implements AimCollector
         List<ResourceType> resources = new LinkedList<ResourceType>();
         for (Datastore ds : datastores)
         {
+            // removing final slash '/'
+            ds.setPath(FilenameUtils.getFullPathNoEndSeparator(ds.getPath()));
             resources.add(datastoreToResource(ds));
         }
 
