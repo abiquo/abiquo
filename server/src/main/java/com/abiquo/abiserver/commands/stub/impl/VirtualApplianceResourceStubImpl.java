@@ -396,6 +396,18 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
         {
             populateErrors(enterpriseResponse, result, "getVirtualDatacenter");
         }
+        if (virtualApplianceDto.getLastTasks() != null
+            && !virtualApplianceDto.getLastTasks().isEmpty())
+        {
+            for (TaskDto t : virtualApplianceDto.getLastTasks().getCollection())
+            {
+                if (t.getState() == TaskState.FINISHED_UNSUCCESSFULLY)
+                {
+                    app.setError(Boolean.TRUE);
+                    break;
+                }
+            }
+        }
         return app;
     }
 
@@ -417,6 +429,18 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
             ? "<connections></connections>" : virtualApplianceDto.getNodeconnections());
         app.setNodeConnections(nodeconnections.toString());
         app.setState(new State(StateEnum.valueOf(virtualApplianceDto.getState().name())));
+        if (virtualApplianceDto.getLastTasks() != null
+            && !virtualApplianceDto.getLastTasks().isEmpty())
+        {
+            for (TaskDto t : virtualApplianceDto.getLastTasks().getCollection())
+            {
+                if (t.getState() == TaskState.FINISHED_UNSUCCESSFULLY)
+                {
+                    app.setError(Boolean.TRUE);
+                    break;
+                }
+            }
+        }
         Integer vdcId = virtualApplianceDto.getIdFromLink("virtualdatacenter");
         String link = createVirtualDatacenterLink(vdcId);
         ClientResponse vdcResponse = get(link, VirtualDatacenterDto.MEDIA_TYPE);
@@ -477,6 +501,7 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
                 if (t.getState() == TaskState.FINISHED_UNSUCCESSFULLY)
                 {
                     app.setError(Boolean.TRUE);
+                    break;
                 }
             }
         }
@@ -1061,7 +1086,8 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
 
         if (listRequest != null)
         {
-            buildRequest.append("?startwith=" + listRequest.getOffset());
+            buildRequest.append("?expand=last_task")
+                .append("&startwith=" + listRequest.getOffset());
             buildRequest.append("&limit=" + listRequest.getNumberOfNodes());
             if (listRequest.getOrderBy() != null && !listRequest.getOrderBy().isEmpty())
             {
