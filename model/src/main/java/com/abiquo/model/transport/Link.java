@@ -1,10 +1,19 @@
 package com.abiquo.model.transport;
 
+import static java.lang.annotation.ElementType.FIELD;
+import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.ElementType.PARAMETER;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
 import org.apache.commons.lang.StringUtils;
 
+@Retention(RetentionPolicy.RUNTIME)
 public @interface Link
 {
 
@@ -45,4 +54,5 @@ public @interface Link
             this.link = constraintAnnotation;
         }
     }
+
 }

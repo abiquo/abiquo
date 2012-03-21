@@ -28,7 +28,7 @@ import com.abiquo.model.transport.Links;
 import com.abiquo.model.transport.SingleResourceTransportDto;
 
 @XmlRootElement(name = "enterpriseExclusionRule")
-@Links({
+@Links( {
 @Link(href = "http://example.com/api/admin/enterprises/{idEnterprise}", rel = "enterprise", title = "enterprise1", required = true),
 @Link(href = "http://example.com/api/admin/enterprises/{idEnterprise}", rel = "enterprise", title = "enterprise2", required = true)})
 public class EnterpriseExclusionRuleDto extends SingleResourceTransportDto
