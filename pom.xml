@@ -40,7 +40,6 @@
         <module>vsm</module>
         <module>am</module>
         <module>server</module>
-        <module>client</module>
         <module>api</module>
         <module>nodecollector</module>
     </modules>
