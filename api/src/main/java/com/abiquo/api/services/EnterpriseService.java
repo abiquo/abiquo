@@ -443,7 +443,7 @@ public class EnterpriseService extends DefaultApiService
         Machine machine = repo.findReservedMachine(enterprise, machineId);
         if (machine == null)
         {
-            addNotFoundErrors(APIError.NON_EXISTENT_MACHINE);
+            addNotFoundErrors(APIError.MACHINE_NOT_RESERVED);
             flushErrors();
         }
 
