@@ -784,7 +784,7 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
      */
     public List<IpPoolManagement> findPublicIpsByDatacenter(final Integer datacenterId,
         Integer startwith, final Integer limit, final String filter, final OrderByEnum orderByEnum,
-        final Boolean descOrAsc, NetworkType type)
+        final Boolean descOrAsc, NetworkType type, final Boolean all)
     {
         NetworkType type2 = type;
         String query = BY_DATACENTER;
@@ -802,7 +802,8 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
         }
 
         Query finalQuery =
-            getSession().createQuery(query + " " + defineOrderBy(orderByEnum, descOrAsc));
+            getSession().createQuery(
+                query + " " + defineAllFilter(all) + " " + defineOrderBy(orderByEnum, descOrAsc));
         finalQuery.setParameter("datacenter_id", datacenterId);
         finalQuery.setParameter("filterLike", filter == null || filter.isEmpty() ? "%" : "%"
             + filter + "%");
