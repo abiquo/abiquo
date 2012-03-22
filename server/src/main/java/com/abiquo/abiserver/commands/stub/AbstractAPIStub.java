@@ -133,6 +133,7 @@ public class AbstractAPIStub
             // Custom timeouts in ms
             // Reconfiguring external storage in some storage devices may take a while
             props.put("jclouds.timeouts.CloudClient.replaceVolumes", "90000");
+            props.put("jclouds.timeouts.CloudClient.updateVolume", "90000");
 
             context =
                 new AbiquoContextFactory().createContext(token,
