@@ -82,9 +82,11 @@ public enum EventType implements Serializable
         314, "REMOTE_SERVICES_CREATE", "Remote Service created"), REMOTE_SERVICES_UPDATE(315,
         "REMOTE_SERVICE_UPDATE", "Remote Service updated"), REMOTE_SERVICES_CHECK(316,
         "REMOTE_SERVICES_CHECK", "Remote service checked"), REMOTE_SERVICES_DELETE(317,
-        "REMOTE_SERVICES_DELETE", "Remote Service deleted"), RACK_RETRIEVAL(318, "RACK_RETRIEVAL",
-        "Retrieve Rack"), APPLIANCE_MANAGER_CONFIGURATION(319, "APPLIANCE_MANAGER_CONFIGURATION_",
-        "The appliance manager is not well configured"),
+        "REMOTE_SERVICES_DELETE", "Remote Service deleted"), REMOTE_SERVICES_ERROR(318,
+        "REMOTE_SERVICES_ERROR", "Remote Service error"), REMOTE_SERVICES_SUCCESS(319,
+        "REMOTE_SERVICES_SUCCESS", "Remote Services Successful Creation"), RACK_RETRIEVAL(320,
+        "RACK_RETRIEVAL", "Retrieve Rack"), APPLIANCE_MANAGER_CONFIGURATION(321,
+        "APPLIANCE_MANAGER_CONFIGURATION_", "The appliance manager is not well configured"),
 
     // Storage system-related events
     SSM_CREATE(400, "SSM_CREATE", "Storage System Manager created"), SSM_MODIFY(401, "SSM_MODIFY",

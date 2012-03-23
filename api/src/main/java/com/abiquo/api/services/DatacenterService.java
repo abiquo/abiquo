@@ -222,15 +222,17 @@ public class DatacenterService extends DefaultApiService
             // Log the event
             for (ErrorDto error : responseRemoteService.getConfigErrors().getCollection())
             {
-                tracer.log(SeverityType.MAJOR, ComponentType.DATACENTER, EventType.DC_CREATE,
-                    "datacenter.createError", datacenter.getName(), error.getMessage());
+                tracer.log(SeverityType.MAJOR, ComponentType.DATACENTER,
+                    EventType.REMOTE_SERVICES_ERROR, "remoteServices.down", datacenter.getName(),
+                    error.getMessage());
             }
         }
         else
         {
             // Log the event
-            tracer.log(SeverityType.INFO, ComponentType.DATACENTER, EventType.DC_CREATE,
-                "datacenter.created", datacenter.getName(), datacenter.getLocation());
+            tracer.log(SeverityType.INFO, ComponentType.DATACENTER,
+                EventType.REMOTE_SERVICES_SUCCESSFUL_CREATION, "remoteServices.successfulCreation",
+                datacenter.getName());
         }
 
         return responseRemoteService;
