@@ -34,7 +34,10 @@ import java.util.Set;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response.Status;
 
+import org.apache.log.util.LoggerOutputStream;
 import org.apache.wink.client.ClientResponse;
+
+import ch.qos.logback.classic.Logger;
 
 import com.abiquo.abiserver.business.hibernate.pojohb.user.UserHB;
 import com.abiquo.abiserver.commands.stub.AbstractAPIStub;
@@ -582,7 +585,7 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
         }
 
         result.setSuccess(Boolean.FALSE);
-        result.setMessage("Unknow exception. External networks not found.");
+        result.setMessage("Limits by enterprise and datacenter do not exist");
         return result;
     }
 
@@ -635,8 +638,8 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
             }
         }
 
-        result.setSuccess(Boolean.FALSE);
-        result.setMessage("Unknown exception. External networks not found.");
+        result.setSuccess(Boolean.TRUE);
+        result.setData(listOfNetworks);
         return result;
     }
 
