@@ -64,7 +64,8 @@ public enum EventType implements Serializable
         229, "VM_STATE", "Apply state Virtual Machine"), VM_RECONFIGURE(230, "VM_RECONFIGURE",
         "Reconfigure Virtual Machine"), VM_INSTANCE(231, "VM_INSTANCE", "Instance Virtual Machine"), VM_JOB(
         232, "VM_JOB", "Common Job for Virtual Machine"), VM_TASK(233, "VM_TASK",
-        "Common Taskfor Virtual Machine"),
+        "Common Taskfor Virtual Machine"), VM_REFRESH_RESOURCES(234, "VM_REFRESH_RESOURCES",
+        "Refresh virtual machine resources"),
 
     // Infrastructure-related events
     DC_CREATE(300, "DC_CREATE", "Datacenter Created"), DC_MODIFY(301, "DC_MODIFY",

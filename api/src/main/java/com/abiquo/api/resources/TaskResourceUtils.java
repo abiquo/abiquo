@@ -47,7 +47,7 @@ public class TaskResourceUtils extends AbstractResource
 
     public static final String TASK_PATH = TASKS_PATH + "/{" + TASK + "}";
 
-    protected static final String SELF_REL = "self";
+    public static final String SELF_REL = "self";
 
     protected static final String PARENT_REL = "parent";
 
