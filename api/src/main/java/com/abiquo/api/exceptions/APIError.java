@@ -195,15 +195,17 @@ public enum APIError
         "VAPP-6",
         "The virtual appliance cannot be moved because it has no link to its virtual datacenter"), VIRTUALAPPLIANCE_INVALID_DC_MOVE_COPY(
         "VAPP-7",
-        "The virtual appliance cannot be moved or copied because the target virtual datacenter is not in the same datacenter"), VIRTUALAPPLIANCE_INVALID_STATE_MOVE_COPY(
-        "VAPP-8", "The virtual appliance should be undeployed to be moved or copied."), VIRTUALAPPLIANCE_MOVE_COPY_CAPTURED_VM(
+        "The virtual appliance cannot be moved or copied because the target virtual datacenter is not in the same datacenter"), VIRTUALAPPLIANCE_INVALID_STATE_MOVE(
+        "VAPP-8", "The virtual appliance cannot be moved in this state. It should be NOT_DEPLOYED"), VIRTUALAPPLIANCE_MOVE_COPY_CAPTURED_VM(
         "VAPP-9",
         "The virtual appliance cannot be moved or copied because it contains captured virtual machines"), VIRTUALAPPLIANCE_MOVE_COPY_INCOMPATIBLE_VM(
         "VAPP-10",
         "The virtual appliance cannot be moved or copied because it contains virtual machine templates that are not compatible with the target hypervisor"), VIRTUALAPPLIANCE_COPY_PERSISTENT_VM(
         "VAPP-11",
-        "The virtual appliance cannot be copied because it contains persistent virtual machine templates"), VIRTUALAPPLIANCE_EMPTY(
-        "VAPP-12", "The virtual appliance does not contain any virtual machines"),
+        "The virtual appliance cannot be copied since it contains persistent virtual machines templates"), VIRTUALAPPLIANCE_EMPTY(
+        "VAPP-12", "The virtual appliance does not contain any virtual machines"), VIRTUALAPPLIANCE_INVALID_STATE_COPY(
+        "VAPP-13",
+        "The virtual appliance cannot be copied in this state. It should be NOT_DEPLOYED"),
 
     // VIRTUAL CONVERSION
     NON_EXISTENT_VIRTUALAPPLIANCE_STATEFULCONVERSION("VASC-0",
@@ -740,8 +742,8 @@ public enum APIError
         // Outputs all errors in wiki table format
         for (APIError error : errors)
         {
-            System.out.println(String.format("| %s | %s | %s |", error.code, error.message,
-                error.name()));
+            System.out.println(String.format("| %s | %s | %s |", error.code, error.message, error
+                .name()));
         }
 
         System.out.println("\n ************ Flex client labels ************** \n");
