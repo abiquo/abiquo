@@ -34,6 +34,7 @@ import org.slf4j.LoggerFactory;
 import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.nodecollector.constants.MessageValues;
 import com.abiquo.nodecollector.domain.Collector;
+import com.abiquo.nodecollector.domain.collectors.xenserver.CpuProperties;
 import com.abiquo.nodecollector.domain.collectors.xenserver.SRType;
 import com.abiquo.nodecollector.domain.collectors.xenserver.SoftwareVersion;
 import com.abiquo.nodecollector.exception.CollectorException;
@@ -143,10 +144,12 @@ public class XenServerCollector extends AbstractCollector
             Map<Host, Host.Record> hosts = Host.getAllRecords(connection);
             Host host = hosts.keySet().iterator().next();
             Host.Record hostRecord = hosts.get(host);
+            CpuProperties cpuProperties = CpuProperties.of(hostRecord);
+
             String repositoryLocation =
                 System.getProperty("abiquo.appliancemanager.repositoryLocation");
 
-            info.setCpu(Long.valueOf(hostRecord.hostCPUs.size()));
+            info.setCpu(cpuProperties.getRealCores());
             info.setName(hostRecord.nameLabel);
             info.setRam(host.getMetrics(connection).getMemoryTotal(connection));
             info.setHypervisor(HypervisorType.XENSERVER.getValue());

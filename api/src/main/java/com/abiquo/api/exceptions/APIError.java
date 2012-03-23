@@ -7,7 +7,8 @@
  * modify it under the terms of the GNU LESSER GENERAL PUBLIC
  * LICENSE as published by the Free Software Foundation under
  * version 3 of the License
- * * This software is distributed in the hope that it will be useful,
+ *
+ * This software is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * LESSER GENERAL PUBLIC LICENSE v.3 for more details.
@@ -181,7 +182,8 @@ public enum APIError
         "Cannot change enterprise because this network is used as the default by a Virtual Datacenter"), VLANS_NOT_UNMANAGED(
         "VLAN-46", "The virtual network is not Unmanaged "), VLANS_UNMANAGED_WITH_VM_CAN_NOT_BE_DELETED(
         "VLAN-47", "Cannot delete Unmanaged Networks associated with Virtual Machines"), VLANS_MISSING_ENTERPRISE_LINK(
-        "VLAN-48", "Enterprise link with rel 'enterprise' is mandatory "),
+        "VLAN-48", "Enterprise link with rel 'enterprise' is mandatory "), VLANS_IP_IS_IN_QUARANTINE(
+        "VLAN-49", "The IP %s is in quarantine"),
 
     // VIRTUAL APPLIANCE
     NON_EXISTENT_VIRTUALAPPLIANCE("VAPP-0", "The requested virtual appliance does not exist"), VIRTUALAPPLIANCE_NOT_DEPLOYED(
@@ -240,7 +242,8 @@ public enum APIError
         "The IQN of the target Physical Machine is not set"), MANAGED_MACHINE_CANNOT_CHANGE_NAME(
         "MACHINE-11", "The Machine is in a managed Rack and its name cannot be changed."), MACHINE_CANNOT_BE_RESERVED(
         "MACHINE-12",
-        "The machine cannot be reserved because another enterprise has deployed virtual machines on it."),
+        "The machine cannot be reserved because another enterprise has deployed virtual machines on it."), MACHINE_NOT_RESERVED(
+        "MACHINE-13", "The requested machine cannot be released because it is not reserved"),
 
     HYPERVISOR_EXIST_IP("HYPERVISOR-1",
         "Invalid hypervisor IP. A hypervisor with that IP already exists"), HYPERVISOR_EXIST_SERVICE_IP(
@@ -365,7 +368,7 @@ public enum APIError
         "The current repository holds virtual images being used on some virtual appliances, so it is not possible to remove this remote service. You can modify the appliance manager but only if the same repository is used."), REMOTE_SERVICE_STORAGE_REMOTE_WITH_POOLS(
         "RS-9", "Cannot delete a storage manager with associated storage pools"), REMOTE_SERVICE_DHCP_IS_BEING_USED(
         "RS-10", "Cannot delete a DHCP Service. There are virtual machines deployed."), REMOTE_SERVICE_VSM_IS_BEING_USED(
-        "RS-10",
+        "RS-11",
         "Cannot delete a Virtual System Monitor Service. There are virtual machines deployed."), REMOTE_SERVICE_WRONG_URL(
         "RS-12", "URL supplied is not valid"), REMOTE_SERVICE_DHCP_WRONG_URI("RS-13",
         "The DHCP URI is invalid"), REMOTE_SERVICE_DATACENTER_UUID_NOT_FOUND("RS-14",
@@ -376,7 +379,7 @@ public enum APIError
         "The provided remote service can not be used in for a remote service client pool"), REMOTE_SERVICE_ERROR_BORROWING(
         "RS-18",
         "An unexpected error occured while getting the remote service client from the client pool"), APPLIANCE_MANAGER_CALL(
-        "AM-1", "Failed Appliance Manager communication"),
+        "AM-2", "Failed Appliance Manager communication"),
     //
     AM_CLIENT("AM-0", "Failed Appliance Manager communication"), AM_TIMEOUT("AM-1",
         "Timeout during Appliance Manager communication"), AM_UNAVAILABE("AM-2",
@@ -388,7 +391,7 @@ public enum APIError
         "OVF Package list name already exists"), //
     TEMPLATE_DEFINITION_LIST_REFRESH_NO_URL(
         "OVF-PACKAGE-LIST-1",
-        "The template definition list isn't associated to any url (ovfindex.xml), so it can't be refreshed from the source"), //
+        "The template definition list isn't associated to any url (ovfindex.xml), so it can't be refreshed form the source"), //
     TEMPLATE_DEFINITION_LIST_NAME_NOT_FOUND("OVF-PACKAGE-LIST-2",
         "OVF Package list name is required"),
 
@@ -405,7 +408,7 @@ public enum APIError
         "Virtual machine template cannot be added due to invalid allocation units"), VMTEMPLATE_SYNCH_DC_REPO(
         "VIMAGE-SYNCH-DATACENTER-REPOSITORY", "Cannot obtain downloaded OVF in the datacenter"), VIMAGE_DATACENTER_REPOSITORY_NOT_FOUND(
         "DATACENTER-REPOSITORY-NOT-CREATED",
-        "Datacenter Repository not configured; check the Datacenter's Appliance Manager. Contact Infrastructure Administrator"), VMTEMPLATE_REPOSITORY_CHANGED(
+        "Datacenter Repository not configured; check Datacenter's Appliance Manager. Contact Infrastructure Administrator"), VMTEMPLATE_REPOSITORY_CHANGED(
         "VIMAGE-REPOSITORY-CHANGED", "Datacenter repository location has changed"), VIMAGE_AM_DOWN(
         "VIMAGE-AM-DOWN", "Check Appliance Manager configuration error"), NON_EXISTENT_VIRTUAL_MACHINE_TEMPLATE(
         "VIMAGE-0", "The requested virtual machine template does not exist"), VIMAGE_IS_NOT_BUNDLE(
@@ -501,8 +504,7 @@ public enum APIError
         "TIER-6", "Cannot disable a tier with associated storage pools"), TIER_DISABLED("TIER-7",
         "The requested tier is disabled"), TIER_LINK_VIRTUALDATACENTER_PARAM_NOT_FOUND("TIER-8",
         "VirtualDatacenter parameter was not found in tier link"), TIER_LINK_VIRTUALDATACENTER_DIFFERENT(
-        "TIER-9", "Tier's virtualdatacenter link does not match the virtualdatacenter supplied"), TIER_LINK_WRONG_DATACENTER(
-        "TIER-10", "The Tier does not belong to indicated datacenter"),
+        "TIER-9", "The Tier's virtualdatacenter link does not match the virtualdatacenter supplied"),
 
     // DEVICES
     NON_EXISTENT_DEVICE("DEVICE-0", "The requested device does not exist"), DEVICE_DUPLICATED(
@@ -636,7 +638,8 @@ public enum APIError
         "PRICINGTEMPLATE-6", "Pricing Template name cannot be empty"), MISSING_CURRENCY_LINK(
         "PRICINGTEMPLATE-7", "Missing link to the currency"), CHARGING_PERIOD_VALUES(
         "PRICINGTEMPLATE-8", "Charging period values should be between 2 and 6"), MINIMUM_CHARGE_EMPTY(
-        "PRICINGTEMPLATE-9", "Check Minimum Charge value is not null or wrong type"),
+        "PRICINGTEMPLATE-9", "Check Minimum Charge value is not null or wrong type"), MINIMUM_CHARGE_VALUES(
+        "PRICINGTEMPLATE-10", "Minimum Charge values should be between 0 and 6"),
 
     // CURRENCY
     NON_EXISTENT_CURRENCY("CURRENCY-0", "The requested Currency does not exist"), ONE_CURRENCY_REQUIRED(
@@ -741,8 +744,8 @@ public enum APIError
         // Outputs all errors in wiki table format
         for (APIError error : errors)
         {
-            System.out.println(String.format("| %s | %s | %s |", error.code, error.message, error
-                .name()));
+            System.out.println(String.format("| %s | %s | %s |", error.code, error.message,
+                error.name()));
         }
 
         System.out.println("\n ************ Flex client labels ************** \n");
@@ -751,7 +754,7 @@ public enum APIError
         for (APIError error : errors)
         {
             System.out.println(String.format("%s=%s", error.code, error.message));
-
         }
     }
+
 }
