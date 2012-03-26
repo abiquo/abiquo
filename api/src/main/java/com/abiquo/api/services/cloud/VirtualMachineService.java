@@ -26,8 +26,10 @@ import static com.abiquo.api.util.URIResolver.buildPath;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import javax.persistence.EntityManager;
@@ -2148,6 +2150,8 @@ public class VirtualMachineService extends DefaultApiService
         // The function #getStorageFreeAttachmentSlot do the work. However, it only takes
         // the information from database, and we need to have a list of integers of the
         // already assigned slots before in the loop. 'blackList' stores them.
+        List<IpPoolManagement> ipPoolList = removeRepetedResources(resources);
+
         for (IpPoolManagement ip : resources)
         {
             boolean allocated = allocateResource(vm, vapp, ip, getFreeAttachmentSlot(blackList));
@@ -2175,6 +2179,28 @@ public class VirtualMachineService extends DefaultApiService
                 blackList.add(ip.getSequence());
             }
         }
+    }
+
+    private List<IpPoolManagement> removeRepetedResources(final List<IpPoolManagement> resources)
+    {
+        Map ipMap = new HashMap();
+
+        for (IpPoolManagement ip : resources)
+        {
+            ipMap.put(ip.getIp(), ip);
+        }
+
+        if (resources.size() > ipMap.size())
+        {
+            String errorCode = APIError.RESOURCES_ALREADY_ASSIGNED.getCode();
+            String message = APIError.RESOURCES_ALREADY_ASSIGNED.getMessage();
+            CommonError error = new CommonError(errorCode, message);
+            addNotFoundErrors(error);
+            flushErrors();
+        }
+
+        return new ArrayList<IpPoolManagement>(ipMap.values());
+
     }
 
     /**
