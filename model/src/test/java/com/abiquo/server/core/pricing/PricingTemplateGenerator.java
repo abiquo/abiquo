@@ -63,7 +63,7 @@ public class PricingTemplateGenerator extends DefaultEntityGenerator<PricingTemp
         assertEquals(obj1.getMinimumChargePeriod().setScale(2), obj2.getMinimumChargePeriod()
             .setScale(2));
         assertEquals(obj1.getPublicIp().setScale(2), obj2.getPublicIp().setScale(2));
-        assertEquals(obj1.getMemoryMB().setScale(2), obj2.getMemoryMB().setScale(2));
+        assertEquals(obj1.getMemoryGB().setScale(2), obj2.getMemoryGB().setScale(2));
         assertEquals(obj1.getCurrency().getId(), obj2.getCurrency().getId());
     }
 
