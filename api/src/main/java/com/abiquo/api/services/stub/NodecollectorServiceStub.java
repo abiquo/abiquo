@@ -21,6 +21,8 @@
 
 package com.abiquo.api.services.stub;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -98,6 +100,7 @@ public class NodecollectorServiceStub extends DefaultApiService
     {
         NodeCollectorRESTClient restCli = initializeRESTClient(nodecollector);
 
+        checkIPformat(hypervisorIp);
         try
         {
             return restCli.getRemoteHypervisorType(hypervisorIp);
@@ -134,13 +137,27 @@ public class NodecollectorServiceStub extends DefaultApiService
         }
         catch (NoManagedException e)
         {
-            addConflictErrors(new CommonError(APIError.NC_NOT_MANAGED_HOST.getCode(),
-                e.getMessage()));
+            addConflictErrors(new CommonError(APIError.NC_NOT_MANAGED_HOST.getCode(), e
+                .getMessage()));
         }
 
         flushErrors();
 
         return null;
+
+    }
+
+    private void checkIPformat(final String hypervisorIp)
+    {
+        try
+        {
+            InetAddress addr = InetAddress.getByName(hypervisorIp);
+        }
+        catch (UnknownHostException e)
+        {
+            addConflictErrors(APIError.NC_INVALID_IP);
+            flushErrors();
+        }
 
     }
 
@@ -255,8 +272,8 @@ public class NodecollectorServiceStub extends DefaultApiService
         }
         catch (NoManagedException e)
         {
-            addConflictErrors(new CommonError(APIError.NC_NOT_MANAGED_HOST.getCode(),
-                e.getMessage()));
+            addConflictErrors(new CommonError(APIError.NC_NOT_MANAGED_HOST.getCode(), e
+                .getMessage()));
         }
 
         flushErrors();
@@ -328,8 +345,8 @@ public class NodecollectorServiceStub extends DefaultApiService
         }
         catch (NoManagedException e)
         {
-            addConflictErrors(new CommonError(APIError.NC_NOT_MANAGED_HOST.getCode(),
-                e.getMessage()));
+            addConflictErrors(new CommonError(APIError.NC_NOT_MANAGED_HOST.getCode(), e
+                .getMessage()));
         }
 
         flushErrors();
@@ -394,8 +411,8 @@ public class NodecollectorServiceStub extends DefaultApiService
         }
         catch (NoManagedException e)
         {
-            addConflictErrors(new CommonError(APIError.NC_NOT_MANAGED_HOST.getCode(),
-                e.getMessage()));
+            addConflictErrors(new CommonError(APIError.NC_NOT_MANAGED_HOST.getCode(), e
+                .getMessage()));
         }
 
         flushErrors();
@@ -463,8 +480,8 @@ public class NodecollectorServiceStub extends DefaultApiService
         }
         catch (NoManagedException e)
         {
-            addConflictErrors(new CommonError(APIError.NC_NOT_MANAGED_HOST.getCode(),
-                e.getMessage()));
+            addConflictErrors(new CommonError(APIError.NC_NOT_MANAGED_HOST.getCode(), e
+                .getMessage()));
         }
 
         flushErrors();
@@ -659,7 +676,7 @@ public class NodecollectorServiceStub extends DefaultApiService
                 }
 
                 VirtualMachineTemplate vi = new VirtualMachineTemplate(); // XXX this is not stored
-                                                                          // in the DDBB
+                // in the DDBB
                 VirtualDiskEnumType diskFormatType =
                     VirtualDiskEnumType.fromValue(rt.getResourceSubType().toString());
                 vi.setDiskFormatType(DiskFormatType.fromURI(diskFormatType.value()));
