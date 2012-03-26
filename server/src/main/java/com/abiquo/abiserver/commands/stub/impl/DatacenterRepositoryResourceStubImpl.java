@@ -34,6 +34,7 @@ import com.abiquo.abiserver.pojo.infrastructure.DataCenter;
 import com.abiquo.abiserver.pojo.result.DataResult;
 import com.abiquo.abiserver.pojo.service.RemoteServiceType;
 import com.abiquo.abiserver.pojo.virtualimage.Repository;
+import com.abiquo.model.rest.RESTLink;
 import com.abiquo.server.core.appslibrary.DatacenterRepositoryDto;
 import com.abiquo.server.core.enterprise.DatacenterLimitsDto;
 import com.abiquo.server.core.enterprise.DatacentersLimitsDto;
@@ -120,26 +121,31 @@ public class DatacenterRepositoryResourceStubImpl extends AbstractAPIStub implem
         datacenter.setName(limit.searchLink("datacenter").getTitle());
 
         // we only need the appliance manager address
-        try
+        RESTLink amRESTLink = limit.searchLink("applianceManagerRepositoryUri");
+        if (amRESTLink != null)
         {
-            URI amLink = new URI(limit.searchLink("applianceManagerRepositoryUri").getHref());
-            com.abiquo.abiserver.pojo.service.RemoteService am =
-                new com.abiquo.abiserver.pojo.service.RemoteService();
-            am.setIdDataCenter(idDataCenter);
-            am.setRemoteServiceType(new RemoteServiceType(com.abiquo.model.enumerator.RemoteServiceType.APPLIANCE_MANAGER));
-            am.setUri(amLink.toASCIIString());
-            am.setDomainName(amLink.getHost());
-            am.setPort(amLink.getPort());
-            am.setProtocol("http://");
+            try
+            {
+                URI amLink = new URI(amRESTLink.getHref());
+                com.abiquo.abiserver.pojo.service.RemoteService am =
+                    new com.abiquo.abiserver.pojo.service.RemoteService();
+                am.setIdDataCenter(idDataCenter);
+                am
+                    .setRemoteServiceType(new RemoteServiceType(com.abiquo.model.enumerator.RemoteServiceType.APPLIANCE_MANAGER));
+                am.setUri(amLink.toASCIIString());
+                am.setDomainName(amLink.getHost());
+                am.setPort(amLink.getPort());
+                am.setProtocol("http://");
 
-            ArrayList<com.abiquo.abiserver.pojo.service.RemoteService> rss =
-                new ArrayList<com.abiquo.abiserver.pojo.service.RemoteService>();
-            rss.add(am);
-            datacenter.setRemoteServices(rss);
-        }
-        catch (URISyntaxException e)
-        {
-            e.printStackTrace();
+                ArrayList<com.abiquo.abiserver.pojo.service.RemoteService> rss =
+                    new ArrayList<com.abiquo.abiserver.pojo.service.RemoteService>();
+                rss.add(am);
+                datacenter.setRemoteServices(rss);
+            }
+            catch (URISyntaxException e)
+            {
+                e.printStackTrace();
+            }
         }
 
         return datacenter;
