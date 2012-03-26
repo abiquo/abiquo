@@ -190,9 +190,12 @@ public enum APIError
         "The virtual appliance is not running"), VIRTUALAPPLIANCE_DEPLOYED("VAPP-3",
         "The virtual appliance is deployed"), VIRTUALAPPLIANCE_NON_MANAGED_IMAGES("VAPP-4",
         "The virtual appliance has non-managed VM templates"), VIRTUALAPPLIANCE_INVALID_STATE_DELETE(
-        "VAPP-5", "The virtual appliance cannot be deleted in this state. It should be NOT_DEPLOYED or UNKNOWN"), VIRTUALAPPLIANCE_MOVE_MISSING_VDC(
-        "VAPP-6", "The virtual appliance cannot be moved because it has no link to its virtual datacenter"), VIRTUALAPPLIANCE_INVALID_STATE_MOVE_COPY(
-        "VAPP-8", "The virtual appliance cannot be moved or copied in this state. It should be NOT_DEPLOYED"), VIRTUALAPPLIANCE_INVALID_DC_MOVE_COPY(
+        "VAPP-5",
+        "The virtual appliance cannot be deleted in this state. It should be NOT_DEPLOYED or UNKNOWN"), VIRTUALAPPLIANCE_MOVE_MISSING_VDC(
+        "VAPP-6",
+        "The virtual appliance cannot be moved because it has no link to its virtual datacenter"), VIRTUALAPPLIANCE_INVALID_STATE_MOVE_COPY(
+        "VAPP-8",
+        "The virtual appliance cannot be moved or copied in this state. It should be NOT_DEPLOYED"), VIRTUALAPPLIANCE_INVALID_DC_MOVE_COPY(
         "VAPP-7",
         "The virtual appliance cannot be moved or copied because the target virtual datacenter is not in the same datacenter"), VIRTUALAPPLIANCE_MOVE_COPY_CAPTURED_VM(
         "VAPP-9",
@@ -307,7 +310,7 @@ public enum APIError
         "VM-32",
         "Cannot reconfigure the virual machine template once the virtual machine is present in the hypervisor"), VIRTUAL_MACHINE_IMPORTED_CAN_NOT_RECONFIGURE(
         "VM-33", "We do not currently allow imported virtual machines to be reconfigured"), VIRTUAL_MACHINE_IMPORTED_CAN_NOT_RECONFIGURE_FULLY(
-            "VM-33", "Only 'cpu' and 'ram' can be reconfigured in imported virtual machines"), VIRTUAL_MACHINE_IMPORTED_WILL_BE_DELETED(
+        "VM-33", "Only 'cpu' and 'ram' can be reconfigured in imported virtual machines"), VIRTUAL_MACHINE_IMPORTED_WILL_BE_DELETED(
         "VM-44",
         "You are trying to undeploy an imported virtual machine. If you undeploy it, the virtual machine template cannot be recovered. If you are confident of this action, please call this functionality again with the 'forceUndeploy=true' option"),
 
@@ -345,7 +348,8 @@ public enum APIError
         "Cannot change the user nick"), USER_PASSWORD_IS_NECESSARY("USER 11",
         "The field password is required"), USER_NAME_IS_NECESSARY("USER 12",
         "The field name is required"), USER_NICK_IS_NECESSARY("USER 13",
-        "The field nick (username) is required"),
+        "The field nick (username) is required"), USER_VDC_RESTRICTED("USER 14",
+        "Your enterprise didn't allowed you to manage this virtual datacenter"),
 
     // REMOTE SERVICE
     NOT_ASSIGNED_REMOTE_SERVICE_DATACENTER("RS-0",
@@ -375,7 +379,7 @@ public enum APIError
         "RS-17",
         "An unexpected error occured while getting the remote service client from the client pool"), APPLIANCE_MANAGER_CALL(
         "AM-1", "Failed Appliance Manager communication"),
-            //
+    //
     AM_CLIENT("AM-0", "Failed Appliance Manager communication"), AM_TIMEOUT("AM-1",
         "Timeout during Appliance Manager communication"), AM_UNAVAILABE("AM-2",
         "AM service unavailable, check the URL service."), AM_FAILED_REQUEST("AM-3",
@@ -737,8 +741,8 @@ public enum APIError
         // Outputs all errors in wiki table format
         for (APIError error : errors)
         {
-            System.out.println(String.format("| %s | %s | %s |", error.code, error.message, error
-                .name()));
+            System.out.println(String.format("| %s | %s | %s |", error.code, error.message,
+                error.name()));
         }
 
         System.out.println("\n ************ Flex client labels ************** \n");
