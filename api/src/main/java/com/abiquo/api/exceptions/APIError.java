@@ -383,7 +383,6 @@ public enum APIError
         "RS-18",
         "An unexpected error occured while getting the remote service client from the client pool"), APPLIANCE_MANAGER_CALL(
         "AM-2", "Failed Appliance Manager communication"),
-
     //
     AM_CLIENT("AM-0", "Failed Appliance Manager communication"), AM_TIMEOUT("AM-1",
         "Timeout during Appliance Manager communication"), AM_UNAVAILABE("AM-2",
@@ -606,8 +605,11 @@ public enum APIError
             + "Please verify the credentials"), CHEF_INVALID_ENTERPRISE("CHEF-8",
         "The enterprise is not configured to use Chef"), CHEF_INVALID_VIRTUALMACHINE("CHEF-9",
         "The virtual machine cannot use Chef. "
-            + "Please, verify that the image is Chef enabled and the Enterprise can use Chef"), CHEF_INVALID_PRIVATE_KEY(
-        "CHEF-10", "The provided data is not a valid private key. Please verify the key format."),
+            + "Please, verify that the image is Chef enabled and the Enterprise can use Chef"), CHEF_INVALID_VALIDATOR_KEY(
+        "CHEF-10",
+        "The provided validator certificate is not a valid private key. Please verify the key format."), CHEF_INVALID_CLIENT_KEY(
+        "CHEF-11",
+        "The provided admin certificate is not a valid private key. Please verify the key format."),
 
     // Parsing links
     LINKS_INVALID_LINK("LNK-0", "Invalid link. Check documentation"), LINKS_ONLY_ACCEPTS_ONE_LINK(
@@ -749,8 +751,8 @@ public enum APIError
         // Outputs all errors in wiki table format
         for (APIError error : errors)
         {
-            System.out.println(String.format("| %s | %s | %s |", error.code, error.message,
-                error.name()));
+            System.out.println(String.format("| %s | %s | %s |", error.code, error.message, error
+                .name()));
         }
 
         System.out.println("\n ************ Flex client labels ************** \n");
