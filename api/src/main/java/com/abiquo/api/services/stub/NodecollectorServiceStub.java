@@ -21,6 +21,8 @@
 
 package com.abiquo.api.services.stub;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -97,6 +99,7 @@ public class NodecollectorServiceStub extends DefaultApiService
     {
         NodeCollectorRESTClient restCli = initializeRESTClient(nodecollector);
 
+        checkIPformat(hypervisorIp);
         try
         {
             return restCli.getRemoteHypervisorType(hypervisorIp);
@@ -136,6 +139,20 @@ public class NodecollectorServiceStub extends DefaultApiService
         flushErrors();
 
         return null;
+
+    }
+
+    private void checkIPformat(final String hypervisorIp)
+    {
+        try
+        {
+            InetAddress addr = InetAddress.getByName(hypervisorIp);
+        }
+        catch (UnknownHostException e)
+        {
+            addConflictErrors(APIError.NC_INVALID_IP);
+            flushErrors();
+        }
 
     }
 
@@ -495,15 +512,8 @@ public class NodecollectorServiceStub extends DefaultApiService
         int cpus = (int) host.getCpu();
 
         Machine machine =
-            new Machine(datacenter,
-                host.getName(),
-                "",
-                ram,
-                0,
-                cpus,
-                0,
-                transfromToState(host.getStatus()),
-                "");
+            new Machine(datacenter, host.getName(), "", ram, 0, cpus, 0, transfromToState(host
+                .getStatus()), "");
 
         // Long totalStorage = 0L;
         String switches = "";
@@ -633,7 +643,7 @@ public class NodecollectorServiceStub extends DefaultApiService
                 }
 
                 VirtualMachineTemplate vi = new VirtualMachineTemplate(); // XXX this is not stored
-                                                                          // in the DDBB
+                // in the DDBB
                 VirtualDiskEnumType diskFormatType =
                     VirtualDiskEnumType.fromValue(rt.getResourceSubType().toString());
                 vi.setDiskFormatType(DiskFormatType.fromURI(diskFormatType.value()));
