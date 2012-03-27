@@ -476,10 +476,10 @@ public class VirtualDatacenterRep extends DefaultRepBase
     public List<IpPoolManagement> findPublicIpsByEnterprise(final Integer datacenterId,
         final Integer enterpriseId, final Integer startwith, final Integer limit,
         final String filter, final OrderByEnum orderByEnum, final Boolean descOrAsc,
-        final NetworkType netType)
+        final NetworkType netType, final Boolean all)
     {
         return ipManagementDAO.findPublicIpsByEnterpriseAndDatacenter(datacenterId, enterpriseId,
-            startwith, limit, filter, orderByEnum, descOrAsc, netType);
+            startwith, limit, filter, orderByEnum, descOrAsc, netType, all);
     }
 
     public List<IpPoolManagement> findPublicIpsByVlan(final Integer datacenterId,

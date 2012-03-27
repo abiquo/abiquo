@@ -844,7 +844,7 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
     @Override
     public BasicResult getListNetworkPoolByVirtualDatacenter(final Integer vdcId,
         final Integer offset, final Integer numElem, final String filterLike, final String orderBy,
-        final Boolean asc, String type) throws NetworkCommandException
+        final Boolean asc, String type, final Boolean all) throws NetworkCommandException
     {
         DataResult<ListResponse<IpPoolManagement>> dataResult =
             new DataResult<ListResponse<IpPoolManagement>>();
@@ -856,6 +856,7 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
         buildRequest.append("&limit=" + numElem);
         buildRequest.append("&by=" + transformOrderBy(orderBy));
         buildRequest.append("&asc=" + (asc ? "true" : "false"));
+        buildRequest.append("&all=" + (all ? "true" : "false"));
         if (type != null && type.equals("EXTERNAL"))
         {
             type = "EXTERNAL_UNMANAGED";

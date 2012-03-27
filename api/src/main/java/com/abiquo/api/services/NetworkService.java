@@ -683,7 +683,7 @@ public class NetworkService extends DefaultApiService
     @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
     public List<IpPoolManagement> getListIpPoolManagementByVdc(final Integer vdcId,
         final Integer firstElem, final Integer numElem, final String has, final String orderBy,
-        final Boolean asc, final String type)
+        final Boolean asc, final String type, final Boolean all)
     {
         // Check if the orderBy element is actually one of the available ones
         IpPoolManagement.OrderByEnum orderByEnum = IpPoolManagement.OrderByEnum.fromValue(orderBy);
@@ -722,7 +722,7 @@ public class NetworkService extends DefaultApiService
             // get the enterprise and datacenter and get the external and unmanaged ips
             List<IpPoolManagement> ips =
                 repo.findPublicIpsByEnterprise(vdc.getDatacenter().getId(), vdc.getEnterprise()
-                    .getId(), firstElem, numElem, has, orderByEnum, asc, netType);
+                    .getId(), firstElem, numElem, has, orderByEnum, asc, netType, all);
             LOGGER
                 .debug("Returning the list of external and unmanaged IPs used by VirtualDatacenter '"
                     + vdc.getName() + "'.");
