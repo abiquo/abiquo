@@ -75,6 +75,10 @@ public class SnapshotUtils
             {
                 return FROM_STATEFUL_DISK;
             }
+            else if (virtualMachine.isCaptured())
+            {
+                  return SnapshotType.FROM_IMPORTED_VIRTUALMACHINE;
+            }
             else if (hypervisorType.isInstanceFormatFixed())
             {
                 if (hypervisorType.getInstanceFormat() == virtualMachine
@@ -86,10 +90,6 @@ public class SnapshotUtils
                 {
                     return SnapshotType.FROM_DISK_CONVERSION;
                 }
-            }
-            if (virtualMachine.isCaptured())
-            {
-                return SnapshotType.FROM_IMPORTED_VIRTUALMACHINE;
             }
             else if (virtualMachine.getVirtualImageConversion() != null)
             {
