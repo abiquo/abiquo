@@ -657,7 +657,7 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
         DataResult result = new DataResult();
         String link = createVirtualApplianceUrl(virtualDatacenterId, virtualApplianceId);
 
-        ClientResponse response = get(link, VirtualApplianceDto.MEDIA_TYPE);
+        ClientResponse response = get(link + "?expand=last_task", VirtualApplianceDto.MEDIA_TYPE);
 
         if (response.getStatusCode() == Status.OK.getStatusCode())
         {
@@ -1143,7 +1143,8 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
 
         if (listRequest != null)
         {
-            buildRequest.append("?startwith=" + listRequest.getOffset());
+            buildRequest.append("?expand=last_task");
+            buildRequest.append("&startwith=" + listRequest.getOffset());
             buildRequest.append("&limit=" + listRequest.getNumberOfNodes());
             if (listRequest.getOrderBy() != null && !listRequest.getOrderBy().isEmpty())
             {
