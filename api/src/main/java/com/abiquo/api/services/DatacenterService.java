@@ -231,7 +231,7 @@ public class DatacenterService extends DefaultApiService
         {
             // Log the event
             tracer.log(SeverityType.INFO, ComponentType.DATACENTER,
-                EventType.REMOTE_SERVICES_SUCCESSFUL_CREATION, "remoteServices.successfulCreation",
+                EventType.REMOTE_SERVICES_SUCCESS, "remoteServices.successfulCreation",
                 datacenter.getName());
         }
 

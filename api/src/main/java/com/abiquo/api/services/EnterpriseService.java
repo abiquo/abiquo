@@ -67,6 +67,9 @@ import com.abiquo.server.core.infrastructure.Machine;
 import com.abiquo.server.core.infrastructure.MachineDto;
 import com.abiquo.server.core.pricing.PricingRep;
 import com.abiquo.server.core.pricing.PricingTemplate;
+import com.abiquo.tracer.ComponentType;
+import com.abiquo.tracer.EventType;
+import com.abiquo.tracer.SeverityType;
 
 @Service
 public class EnterpriseService extends DefaultApiService
@@ -211,6 +214,8 @@ public class EnterpriseService extends DefaultApiService
         isValidEnterprise(enterprise);
 
         repo.insert(enterprise);
+        tracer.log(SeverityType.INFO, ComponentType.ENTERPRISE, EventType.ENTERPRISE_CREATE,
+            "enterprise.created", enterprise.getName());
         return enterprise;
     }
 
@@ -319,11 +324,16 @@ public class EnterpriseService extends DefaultApiService
 
                     PricingTemplate pricingTemplate = findPricingTemplate(idPricing);
                     old.setPricingTemplate(pricingTemplate);
+                    tracer.log(SeverityType.INFO, ComponentType.ENTERPRISE,
+                        EventType.PRICING_TEMPLATE_ASSIGNED, "pricingtemplate.assigned",
+                        pricingTemplate.getName(), old.getName());
                 }
             }
         }
 
         repo.update(old);
+        tracer.log(SeverityType.INFO, ComponentType.ENTERPRISE, EventType.ENTERPRISE_MODIFY,
+            "enterprise.modified", old.getName());
         return old;
     }
 
@@ -388,6 +398,9 @@ public class EnterpriseService extends DefaultApiService
 
         removeEnterpriseProperties(enterprise);
         repo.delete(enterprise);
+        tracer.log(SeverityType.INFO, ComponentType.ENTERPRISE, EventType.ENTERPRISE_DELETE,
+            "enterprise.deleted", enterprise.getName());
+
     }
 
     protected void deleteRole(final Role role)

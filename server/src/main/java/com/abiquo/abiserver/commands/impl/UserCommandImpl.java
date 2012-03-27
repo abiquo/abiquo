@@ -327,12 +327,12 @@ public class UserCommandImpl extends BasicCommand implements UserCommand
 
         DataResult<Enterprise> dataResult = proxy.createEnterprise(enterprise);
 
-        if (dataResult.getSuccess())
-        {
-            traceLog(SeverityType.INFO, ComponentType.ENTERPRISE, EventType.ENTERPRISE_CREATE,
-                userSession, null, null, "Enterprise '" + enterprise.getName()
-                    + "' has been created", null, null, null, null, enterprise.getName());
-        }
+        // if (dataResult.getSuccess())
+        // {
+        // traceLog(SeverityType.INFO, ComponentType.ENTERPRISE, EventType.ENTERPRISE_CREATE,
+        // userSession, null, null, "Enterprise '" + enterprise.getName()
+        // + "' has been created", null, null, null, null, enterprise.getName());
+        // }
         return dataResult;
     }
 
@@ -394,10 +394,10 @@ public class UserCommandImpl extends BasicCommand implements UserCommand
             result.setMessage(resourceManager.getMessage("editEnterprise.success"));
 
             // Log the event
-            traceLog(SeverityType.INFO, ComponentType.ENTERPRISE, EventType.ENTERPRISE_MODIFY,
-                userSession, null, null, "Enterprise '" + enterprise.getName()
-                    + "' has been modified [Name: " + enterprise.getName() + "]", null, null, null,
-                null, enterprise.getName());
+            // traceLog(SeverityType.INFO, ComponentType.ENTERPRISE, EventType.ENTERPRISE_MODIFY,
+            // userSession, null, null, "Enterprise '" + enterprise.getName()
+            // + "' has been modified [Name: " + enterprise.getName() + "]", null, null, null,
+            // null, enterprise.getName());
         }
         else
         {
@@ -439,8 +439,8 @@ public class UserCommandImpl extends BasicCommand implements UserCommand
         {
             result.setMessage(resourceManager.getMessage("deleteEnterprise.success"));
 
-            traceLog(SeverityType.INFO, ComponentType.ENTERPRISE, EventType.ENTERPRISE_DELETE,
-                userSession, null, null, null, null, null, null, null, enterprise.getName());
+            // traceLog(SeverityType.INFO, ComponentType.ENTERPRISE, EventType.ENTERPRISE_DELETE,
+            // userSession, null, null, null, null, null, null, null, enterprise.getName());
         }
         else
         {
