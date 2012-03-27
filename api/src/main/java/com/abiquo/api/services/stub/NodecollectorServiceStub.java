@@ -44,6 +44,7 @@ import com.abiquo.nodecollector.exception.CannotExecuteException;
 import com.abiquo.nodecollector.exception.CollectorException;
 import com.abiquo.nodecollector.exception.ConnectionException;
 import com.abiquo.nodecollector.exception.LoginException;
+import com.abiquo.nodecollector.exception.NoManagedException;
 import com.abiquo.nodecollector.exception.ServiceUnavailableException;
 import com.abiquo.nodecollector.exception.UnprovisionedException;
 import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
@@ -130,7 +131,11 @@ public class NodecollectorServiceStub extends DefaultApiService
         catch (CannotExecuteException e)
         {
             addConflictErrors(new CommonError(APIError.STATUS_CONFLICT.getCode(), e.getMessage()));
-            flushErrors();
+        }
+        catch (NoManagedException e)
+        {
+            addConflictErrors(new CommonError(APIError.NC_NOT_MANAGED_HOST.getCode(),
+                e.getMessage()));
         }
 
         flushErrors();
@@ -247,7 +252,11 @@ public class NodecollectorServiceStub extends DefaultApiService
         catch (CannotExecuteException e)
         {
             addConflictErrors(new CommonError(APIError.STATUS_CONFLICT.getCode(), e.getMessage()));
-            flushErrors();
+        }
+        catch (NoManagedException e)
+        {
+            addConflictErrors(new CommonError(APIError.NC_NOT_MANAGED_HOST.getCode(),
+                e.getMessage()));
         }
 
         flushErrors();
@@ -316,7 +325,11 @@ public class NodecollectorServiceStub extends DefaultApiService
         catch (CannotExecuteException e)
         {
             addConflictErrors(new CommonError(APIError.STATUS_CONFLICT.getCode(), e.getMessage()));
-            flushErrors();
+        }
+        catch (NoManagedException e)
+        {
+            addConflictErrors(new CommonError(APIError.NC_NOT_MANAGED_HOST.getCode(),
+                e.getMessage()));
         }
 
         flushErrors();
@@ -378,7 +391,11 @@ public class NodecollectorServiceStub extends DefaultApiService
         catch (CannotExecuteException e)
         {
             addConflictErrors(new CommonError(APIError.STATUS_CONFLICT.getCode(), e.getMessage()));
-            flushErrors();
+        }
+        catch (NoManagedException e)
+        {
+            addConflictErrors(new CommonError(APIError.NC_NOT_MANAGED_HOST.getCode(),
+                e.getMessage()));
         }
 
         flushErrors();
@@ -443,7 +460,11 @@ public class NodecollectorServiceStub extends DefaultApiService
         catch (CannotExecuteException e)
         {
             addConflictErrors(new CommonError(APIError.STATUS_CONFLICT.getCode(), e.getMessage()));
-            flushErrors();
+        }
+        catch (NoManagedException e)
+        {
+            addConflictErrors(new CommonError(APIError.NC_NOT_MANAGED_HOST.getCode(),
+                e.getMessage()));
         }
 
         flushErrors();
