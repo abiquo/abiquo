@@ -35,6 +35,7 @@ import com.abiquo.commons.amqp.impl.tarantino.domain.VirtualMachineDefinition;
 import com.abiquo.commons.amqp.impl.tarantino.domain.dto.DatacenterTasks;
 import com.abiquo.commons.amqp.impl.tarantino.domain.operations.ApplyVirtualMachineStateOp;
 import com.abiquo.commons.amqp.impl.tarantino.domain.operations.ReconfigureVirtualMachineOp;
+import com.abiquo.commons.amqp.impl.tarantino.domain.operations.RefreshVirtualMachineResourcesOp;
 import com.abiquo.commons.amqp.impl.tarantino.domain.operations.SnapshotVirtualMachineOp;
 import com.abiquo.server.core.cloud.VirtualMachineStateTransition;
 import com.abiquo.server.core.task.Job;
@@ -131,7 +132,7 @@ public class DatacenterTaskBuilder
         return this.asyncTask;
     }
 
-    private String format(final String name, boolean capitalize)
+    private String format(final String name, final boolean capitalize)
     {
         String formatted = name.toLowerCase();
 
@@ -259,6 +260,24 @@ public class DatacenterTaskBuilder
             FilenameUtils.concat(destinationDisk.getPath(), destinationDisk.getSnapshotFilename()));
 
         this.asyncTask.getJobs().add(redisJob);
+
+        return this;
+    }
+
+    /**
+     * Adds a new {@link SnapshotVirtualMachineOp} to the Jobs collection.
+     * 
+     * @param destinationDisk The destination disk for the snapshot
+     * @return The {@link DatacenterTaskBuilder} self
+     */
+    public DatacenterTaskBuilder addRefreshResources()
+    {
+        RefreshVirtualMachineResourcesOp job = new RefreshVirtualMachineResourcesOp();
+        job.setVirtualMachine(definition);
+        job.setHypervisorConnection(hypervisor);
+
+        this.tarantinoTask.addDatacenterJob(job);
+        this.asyncTask.getJobs().add(createRedisJob(job.getId(), JobType.REFRESH));
 
         return this;
     }

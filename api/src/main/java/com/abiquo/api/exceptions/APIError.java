@@ -196,15 +196,17 @@ public enum APIError
         "VAPP-6",
         "The virtual appliance cannot be moved because it has no link to its virtual datacenter"), VIRTUALAPPLIANCE_INVALID_DC_MOVE_COPY(
         "VAPP-7",
-        "The virtual appliance cannot be moved or copied because the target virtual datacenter is not in the same datacenter"), VIRTUALAPPLIANCE_INVALID_STATE_MOVE_COPY(
-        "VAPP-8", "The virtual appliance should be undeployed to be moved or copied."), VIRTUALAPPLIANCE_MOVE_COPY_CAPTURED_VM(
+        "The virtual appliance cannot be moved or copied because the target virtual datacenter is not in the same datacenter"), VIRTUALAPPLIANCE_INVALID_STATE_MOVE(
+        "VAPP-8", "The virtual appliance cannot be moved in this state. It should be NOT_DEPLOYED"), VIRTUALAPPLIANCE_MOVE_COPY_CAPTURED_VM(
         "VAPP-9",
         "The virtual appliance cannot be moved or copied because it contains captured virtual machines"), VIRTUALAPPLIANCE_MOVE_COPY_INCOMPATIBLE_VM(
         "VAPP-10",
         "The virtual appliance cannot be moved or copied because it contains virtual machine templates that are not compatible with the target hypervisor"), VIRTUALAPPLIANCE_COPY_PERSISTENT_VM(
         "VAPP-11",
-        "The virtual appliance cannot be copied because it contains persistent virtual machine templates"), VIRTUALAPPLIANCE_EMPTY(
-        "VAPP-12", "The virtual appliance does not contain any virtual machines"),
+        "The virtual appliance cannot be copied since it contains persistent virtual machines templates"), VIRTUALAPPLIANCE_EMPTY(
+        "VAPP-12", "The virtual appliance does not contain any virtual machines"), VIRTUALAPPLIANCE_INVALID_STATE_COPY(
+        "VAPP-13",
+        "The virtual appliance cannot be copied in this state. It should be NOT_DEPLOYED"),
 
     // VIRTUAL CONVERSION
     NON_EXISTENT_VIRTUALAPPLIANCE_STATEFULCONVERSION("VASC-0",
@@ -240,10 +242,11 @@ public enum APIError
         "MACHINE-8", "Invalid IPMI configuration"), MACHINE_INVALID_IP_RANGE("MACHINE-9",
         "Invalid IP range"), MACHINE_IQN_MISSING("MACHINE-10",
         "The IQN of the target Physical Machine is not set"), MANAGED_MACHINE_CANNOT_CHANGE_NAME(
-        "MACHINE-11", "The Machine is in a managed Rack and its name cannot be changed."), MACHINE_CANNOT_BE_RESERVED(
+        "MACHINE-11", "The Machine is in a managed Rack and its name cannot be changed."), MACHINE_RESERVED_ENTERPRISE(
         "MACHINE-12",
-        "The machine cannot be reserved because another enterprise has deployed virtual machines on it."), MACHINE_NOT_RESERVED(
-        "MACHINE-13", "The requested machine cannot be released because it is not reserved"),
+        "The requested machine cannot be reserved because another enterprise has already reserved it."), MACHINE_NOT_RESERVED(
+        "MACHINE-13", "The requested machine cannot be released because it is not reserved"), MACHINE_ALREADY_RESERVED(
+        "MACHINE-14", "The requested machine is already reserved."),
 
     HYPERVISOR_EXIST_IP("HYPERVISOR-1",
         "Invalid hypervisor IP. A hypervisor with that IP already exists"), HYPERVISOR_EXIST_SERVICE_IP(
@@ -313,7 +316,8 @@ public enum APIError
         "VM-33", "We do not currently allow imported virtual machines to be reconfigured"), VIRTUAL_MACHINE_IMPORTED_CAN_NOT_RECONFIGURE_FULLY(
         "VM-33", "Only 'cpu' and 'ram' can be reconfigured in imported virtual machines"), VIRTUAL_MACHINE_IMPORTED_WILL_BE_DELETED(
         "VM-44",
-        "You are trying to undeploy an imported virtual machine. If you undeploy it, the virtual machine template cannot be recovered. If you are confident of this action, please call this functionality again with the 'forceUndeploy=true' option"),
+        "You are trying to undeploy an imported virtual machine. If you undeploy it, the virtual machine template cannot be recovered. If you are confident of this action, please call this functionality again with the 'forceUndeploy=true' option"), RESOURCES_ALREADY_ASSIGNED(
+        "VM-45", "Some of the indicated resources are already used"),
 
     // ROLE
     NON_EXISTENT_ROLE("ROLE-0", "The requested role does not exist"), NON_MODIFICABLE_ROLE(
@@ -440,7 +444,8 @@ public enum APIError
         "Unexpected exception building the request to discovery manager"), NC_UNAVAILABLE_EXCEPTION(
         "NC-7", "The discovery manager is currently not available"), NC_VIRTUAL_MACHINE_NOT_FOUND(
         "NC-8", "The requested virtual machine was not found on the remote hypervisor"), NC_NOT_MANAGED_HOST(
-        "NC-9", "The requested host is not managed"),
+        "NC-9", "The requested host is not managed"), NC_INVALID_IP("NC-10",
+        "The IP format is invalid"),
 
     // STORAGE POOL
     MISSING_REQUIRED_QUERY_PARAMETER_IQN("SP-1", "Missing IQN query parameter"), CONFLICT_STORAGE_POOL(
@@ -601,8 +606,11 @@ public enum APIError
             + "Please verify the credentials"), CHEF_INVALID_ENTERPRISE("CHEF-8",
         "The enterprise is not configured to use Chef"), CHEF_INVALID_VIRTUALMACHINE("CHEF-9",
         "The virtual machine cannot use Chef. "
-            + "Please, verify that the image is Chef enabled and the Enterprise can use Chef"), CHEF_INVALID_PRIVATE_KEY(
-        "CHEF-10", "The provided data is not a valid private key. Please verify the key format."),
+            + "Please, verify that the image is Chef enabled and the Enterprise can use Chef"), CHEF_INVALID_VALIDATOR_KEY(
+        "CHEF-10",
+        "The provided validator certificate is not a valid private key. Please verify the key format."), CHEF_INVALID_CLIENT_KEY(
+        "CHEF-11",
+        "The provided admin certificate is not a valid private key. Please verify the key format."),
 
     // Parsing links
     LINKS_INVALID_LINK("LNK-0", "Invalid link. Check documentation"), LINKS_ONLY_ACCEPTS_ONE_LINK(
