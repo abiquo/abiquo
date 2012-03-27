@@ -643,7 +643,7 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
     public Machine findReservedMachine(final Enterprise enterprise, final Integer machineId)
     {
         Criteria criteria = createCriteria(sameEnterprise(enterprise), sameId(machineId));
-        return getSingleResult(criteria);
+        return (Machine) criteria.uniqueResult();
     }
 
     public void reserveMachine(final Machine machine, final Enterprise enterprise)
