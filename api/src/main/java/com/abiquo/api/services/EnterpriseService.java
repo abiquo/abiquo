@@ -49,7 +49,6 @@ import com.abiquo.model.rest.RESTLink;
 import com.abiquo.model.transport.error.CommonError;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualDatacenterRep;
-import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineRep;
 import com.abiquo.server.core.common.Limit;
 import com.abiquo.server.core.enterprise.DatacenterLimits;
@@ -419,16 +418,19 @@ public class EnterpriseService extends DefaultApiService
 
         Enterprise enterprise = getEnterprise(enterpriseId);
 
-        List<VirtualMachine> vms =
-            (List<VirtualMachine>) virtualMachineRep.findManagedByHypervisor(machine
-                .getHypervisor());
-        for (VirtualMachine vm : vms)
+        if (machine.getEnterprise() != null)
         {
-            if (!vm.getEnterprise().equals(enterprise))
+            if (machine.getEnterprise().getId() != enterpriseId)
             {
-                addConflictErrors(APIError.MACHINE_CANNOT_BE_RESERVED);
+                addConflictErrors(APIError.MACHINE_RESERVED_ENTERPRISE);
                 flushErrors();
             }
+            else
+            {
+                addConflictErrors(APIError.MACHINE_ALREADY_RESERVED);
+                flushErrors();
+            }
+
         }
 
         repo.reserveMachine(machine, enterprise);

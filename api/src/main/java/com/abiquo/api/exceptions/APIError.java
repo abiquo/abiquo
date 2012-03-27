@@ -240,9 +240,10 @@ public enum APIError
         "MACHINE-8", "Invalid IPMI configuration"), MACHINE_INVALID_IP_RANGE("MACHINE-9",
         "Invalid IP range"), MACHINE_IQN_MISSING("MACHINE-10",
         "The IQN of the target Physical Machine is not set"), MANAGED_MACHINE_CANNOT_CHANGE_NAME(
-        "MACHINE-11", "The Machine is in a managed Rack and its name cannot be changed."), MACHINE_CANNOT_BE_RESERVED(
+        "MACHINE-11", "The Machine is in a managed Rack and its name cannot be changed."), MACHINE_RESERVED_ENTERPRISE(
         "MACHINE-12",
-        "The machine cannot be reserved because another enterprise has deployed virtual machines on it."),
+        "The requested machine cannot be reserved because another enterprise has already reserved it."), MACHINE_ALREADY_RESERVED(
+        "MACHINE-13", "The requested machine is already reserved."),
 
     HYPERVISOR_EXIST_IP("HYPERVISOR-1",
         "Invalid hypervisor IP. A hypervisor with that IP already exists"), HYPERVISOR_EXIST_SERVICE_IP(
@@ -740,8 +741,8 @@ public enum APIError
         // Outputs all errors in wiki table format
         for (APIError error : errors)
         {
-            System.out.println(String.format("| %s | %s | %s |", error.code, error.message, error
-                .name()));
+            System.out.println(String.format("| %s | %s | %s |", error.code, error.message,
+                error.name()));
         }
 
         System.out.println("\n ************ Flex client labels ************** \n");
