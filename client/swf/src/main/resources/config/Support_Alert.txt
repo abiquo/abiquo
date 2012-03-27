@@ -1,3 +1,0 @@
-<html><body><br><b>Designated Support Contacts</b> can raise support tickets <a href="http://support.abiquo.com" target="_blank"><u>here</u></a>.
-<p>If you are not a Designated Support Contact, please contact your organization's support personnel to obtain support for this product.
-<p>This message can be customized by editing the Support_Alert.txt file.</body></html>
