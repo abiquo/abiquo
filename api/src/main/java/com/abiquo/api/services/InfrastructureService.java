@@ -55,6 +55,7 @@ import com.abiquo.model.transport.error.CommonError;
 import com.abiquo.model.transport.error.ErrorsDto;
 import com.abiquo.model.util.AddressingUtils;
 import com.abiquo.server.core.cloud.Hypervisor;
+import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualDatacenterRep;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineState;
@@ -1083,5 +1084,11 @@ public class InfrastructureService extends DefaultApiService
         // XXX community impl
         LOGGER.error("[powerOff] community not implemented");
         return null;
+    }
+
+    @Transactional(readOnly = true)
+    public VirtualAppliance getVirtualApplianceFromVirtualMachineHelper(final VirtualMachine vm)
+    {
+        return vdcRep.findVirtualApplianceByVirtualMachine(vm);
     }
 }

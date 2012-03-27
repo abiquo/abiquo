@@ -45,6 +45,7 @@ import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.model.rest.RESTLink;
 import com.abiquo.model.util.ModelTransformer;
 import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
+import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineDto;
 import com.abiquo.server.core.infrastructure.storage.DiskManagement;
@@ -93,7 +94,9 @@ public class VirtualMachineInfrastructureResource extends AbstractResource
         VirtualMachine vm =
             service.getVirtualMachineFromInfrastructure(datacenterId, rackId, machineId, vmId);
 
-        return createTransferObject(datacenterId, rackId, machineId, vm, restBuilder);
+        VirtualAppliance vapp = service.getVirtualApplianceFromVirtualMachineHelper(vm);
+
+        return createTransferObject(datacenterId, rackId, machineId, vm, vapp, restBuilder);
     }
 
     /**
@@ -107,7 +110,7 @@ public class VirtualMachineInfrastructureResource extends AbstractResource
      */
     public static VirtualMachineDto createTransferObject(final Integer datacenterId,
         final Integer rackId, final Integer machineId, final VirtualMachine vm,
-        final IRESTBuilder restBuilder) throws Exception
+        final VirtualAppliance vapp, final IRESTBuilder restBuilder) throws Exception
     {
         // TODO: Try with enterprise and user != null
         VirtualMachineDto vmDto =
@@ -132,7 +135,7 @@ public class VirtualMachineInfrastructureResource extends AbstractResource
             userId = vm.getUser().getId();
         }
         vmDto.setLinks(restBuilder.buildVirtualMachineAdminLinks(datacenterId, rackId, machineId,
-            enterpriseId, userId, vm.getHypervisor().getType()));
+            enterpriseId, userId, vm.getHypervisor().getType(), vapp, vm.getId()));
 
         final VirtualMachineTemplate vmtemplate = vm.getVirtualMachineTemplate();
         if (vmtemplate != null)

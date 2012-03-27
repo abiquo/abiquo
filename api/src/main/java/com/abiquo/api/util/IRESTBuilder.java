@@ -32,6 +32,7 @@ import com.abiquo.server.core.appslibrary.CategoryDto;
 import com.abiquo.server.core.appslibrary.TemplateDefinitionDto;
 import com.abiquo.server.core.appslibrary.TemplateDefinitionListDto;
 import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
+import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualApplianceDto;
 import com.abiquo.server.core.cloud.VirtualApplianceStateDto;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
@@ -145,7 +146,8 @@ public interface IRESTBuilder
         Integer machineId, Datastore datastore);
 
     public List<RESTLink> buildVirtualMachineAdminLinks(Integer datacenterId, Integer rackId,
-        Integer machineId, Integer enterpriseId, Integer userId, HypervisorType machineType);
+        Integer machineId, Integer enterpriseId, Integer userId, HypervisorType machineType,
+        VirtualAppliance vapp, Integer vmId);
 
     public List<RESTLink> buildVirtualMachineCloudLinks(Integer vdcId, Integer vappId,
         VirtualMachine vm, boolean chefEnabled, final Integer[] volumeIds, final Integer[] diskIds,
@@ -178,7 +180,7 @@ public interface IRESTBuilder
         final Integer vappId, final VirtualMachine vm, final Integer datacenterId,
         final Integer rackId, final Integer machineId, final Integer enterpriseId,
         final Integer userId, boolean chefEnabled, Integer[] volumeIds, Integer[] diksIds,
-        final List<IpPoolManagement> ips, final HypervisorType vdcType);
+        final List<IpPoolManagement> ips, final HypervisorType vdcType, final VirtualAppliance vapp);
 
     public List<RESTLink> buildEnterpriseExclusionRuleLinks(
         final EnterpriseExclusionRuleDto enterpriseExclusionDto,
