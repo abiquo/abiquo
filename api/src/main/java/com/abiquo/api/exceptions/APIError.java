@@ -242,7 +242,8 @@ public enum APIError
         "The IQN of the target Physical Machine is not set"), MANAGED_MACHINE_CANNOT_CHANGE_NAME(
         "MACHINE-11", "The Machine is in a managed Rack and its name cannot be changed."), MACHINE_CANNOT_BE_RESERVED(
         "MACHINE-12",
-        "The machine cannot be reserved because another enterprise has deployed virtual machines on it."),
+        "The machine cannot be reserved because another enterprise has deployed virtual machines on it."), MACHINE_NOT_RESERVED(
+        "MACHINE-13", "The requested machine cannot be released because it is not reserved"),
 
     HYPERVISOR_EXIST_IP("HYPERVISOR-1",
         "Invalid hypervisor IP. A hypervisor with that IP already exists"), HYPERVISOR_EXIST_SERVICE_IP(
