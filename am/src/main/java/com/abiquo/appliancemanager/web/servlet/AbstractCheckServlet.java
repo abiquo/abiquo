@@ -27,6 +27,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.core.MediaType;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
@@ -94,15 +95,13 @@ public abstract class AbstractCheckServlet extends HttpServlet
             }
             else
             {
-                fail(resp);
+                fail(resp, "Can't check Appliance Manager");
             }
         }
         catch (AMException ex)
         {
             LOGGER.warn("Check operation failed {}", ex.getError().getMessage());
-
-            resp.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE,
-                toString(AMExceptionMapper.createError(ex)));
+            fail(resp, toString(AMExceptionMapper.createError(ex)));
         }
         catch (Exception e)
         {
@@ -156,24 +155,13 @@ public abstract class AbstractCheckServlet extends HttpServlet
      * available.
      * 
      * @param resp The Response.
-     * @throws IOException 
+     * @throws IOException
      */
-    protected void success(final HttpServletResponse resp, final String bodyContent) throws IOException
+    protected void success(final HttpServletResponse resp, final String bodyContent)
+        throws IOException
     {
         resp.setStatus(HttpServletResponse.SC_OK);
         resp.getWriter().write(bodyContent);
-    }
-
-    /**
-     * Returns a {@link HttpServletResponse#SC_SERVICE_UNAVAILABLE} HTTP code indicating that the
-     * Remote Service is not available.
-     * 
-     * @param resp The Response.
-     * @throws If error code cannot be sent.
-     */
-    protected void fail(final HttpServletResponse resp) throws IOException
-    {
-        resp.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
     }
 
     /**
@@ -186,7 +174,9 @@ public abstract class AbstractCheckServlet extends HttpServlet
      */
     protected void fail(final HttpServletResponse resp, final String msg) throws IOException
     {
-        resp.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE, msg);
+        resp.setContentType(MediaType.TEXT_PLAIN);
+        resp.setStatus(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
+        resp.getWriter().write(msg);
     }
 
     @Override

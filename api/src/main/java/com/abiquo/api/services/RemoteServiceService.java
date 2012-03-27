@@ -157,6 +157,18 @@ public class RemoteServiceService extends DefaultApiService
             if (!configurationErrors.isEmpty())
             {
                 responseDto.setConfigurationErrors(configurationErrors);
+
+                // can't add an AM with errors as the Datacenter repository won't be created
+                if (rs.getType() == RemoteServiceType.APPLIANCE_MANAGER)
+                {
+                    infrastructureRepo.deleteRemoteService(remoteService);
+
+                    tracer.log(SeverityType.WARNING, ComponentType.DATACENTER,
+                        EventType.REMOTE_SERVICES_CREATE, "remoteServices.am.error",
+                        responseDto.getUri(), datacenter.getName(), configurationErrors.toString());
+
+                    return responseDto;
+                }
             }
         }
 
@@ -201,8 +213,7 @@ public class RemoteServiceService extends DefaultApiService
                     remoteService.setStatus(STATUS_ERROR);
                     APIError error = APIError.REMOTE_SERVICE_CONNECTION_FAILED;
                     configurationErrors.add(new ErrorDto(error.getCode(), remoteService.getType()
-                        .getName()
-                        + ", " + amEx.getMessage()));
+                        .getName() + ", " + amEx.getMessage()));
 
                     return configurationErrors;
                 }
@@ -228,8 +239,7 @@ public class RemoteServiceService extends DefaultApiService
                 remoteService.setStatus(STATUS_ERROR);
                 APIError error = APIError.REMOTE_SERVICE_CONNECTION_FAILED;
                 configurationErrors.add(new ErrorDto(error.getCode(), remoteService.getType()
-                    .getName()
-                    + ", " + error.getMessage()));
+                    .getName() + ", " + error.getMessage()));
                 return configurationErrors;
             }
         }
@@ -395,7 +405,7 @@ public class RemoteServiceService extends DefaultApiService
                 try
                 {
                     String newRepositoryLocation = getAMConfiguredRepositoryLocation(dto.getUri());
-                    
+
                     Repository oldRepository =
                         infrastructureRepo.findRepositoryByDatacenter(old.getDatacenter());
 
@@ -426,15 +436,16 @@ public class RemoteServiceService extends DefaultApiService
             String repositoryLocation = null;
             try
             {
-                repositoryLocation =  getAMConfiguredRepositoryLocation(dto.getUri());
+                repositoryLocation = getAMConfiguredRepositoryLocation(dto.getUri());
             }
             catch (AMClientException amEx)
             {
                 addConflictErrors(APIError.REMOTE_SERVICE_CONNECTION_FAILED);
             }
 
-            if (repositoryLocation != null && infrastructureRepo.existRepositoryInOtherDatacenter(old.getDatacenter(),
-                repositoryLocation))
+            if (repositoryLocation != null
+                && infrastructureRepo.existRepositoryInOtherDatacenter(old.getDatacenter(),
+                    repositoryLocation))
             {
                 addConflictErrors(APIError.APPLIANCE_MANAGER_REPOSITORY_ALREADY_DEFINED);
             }
@@ -545,9 +556,8 @@ public class RemoteServiceService extends DefaultApiService
                 ClientResponse response = checkResource.get();
                 if (response.getStatusCode() != 200)
                 {
-                    configurationErrors.add(new ErrorDto(APIError.REMOTE_SERVICE_CONNECTION_FAILED
-                        .getCode(), type.getName() + ", "
-                        + APIError.REMOTE_SERVICE_CONNECTION_FAILED.getMessage()));
+                    configurationErrors.add(createRemoteServiceConnectionError(type, response));
+
                     if (flushErrors)
                     {
                         switch (response.getStatusCode())
@@ -622,6 +632,30 @@ public class RemoteServiceService extends DefaultApiService
     }
 
     /**
+     * Crates a REMOTE_SERVICE_CONNECTION_FAILED Error containing the response body (if any) or the
+     * status message
+     */
+    private ErrorDto createRemoteServiceConnectionError(final RemoteServiceType type,
+        final ClientResponse clientResponse)
+    {
+        String failedBody = null;
+
+        try
+        {
+            failedBody = clientResponse.getEntity(String.class);
+        }
+        catch (Exception e)
+        {
+        }
+
+        return new ErrorDto(APIError.REMOTE_SERVICE_CONNECTION_FAILED.getCode(), type.getName()
+            + ", "
+            + String.format("%s\nCaused by:[%d] - [%s]", APIError.REMOTE_SERVICE_CONNECTION_FAILED
+                .getMessage(), clientResponse.getStatusCode(), org.apache.commons.lang.StringUtils
+                .isEmpty(failedBody) ? clientResponse.getMessage() : failedBody));
+    }
+
+    /**
      * Checks the datacenter uuid (or set it if not already defined)
      * 
      * @param rsDatacenterId, UUID from the remote service
@@ -657,8 +691,8 @@ public class RemoteServiceService extends DefaultApiService
     {
         ErrorsDto configurationErrors = new ErrorsDto();
 
-        if (infrastructureRepo.existAnyRemoteServiceWithTypeInDatacenter(datacenter, remoteService
-            .getType()))
+        if (infrastructureRepo.existAnyRemoteServiceWithTypeInDatacenter(datacenter,
+            remoteService.getType()))
         {
             APIError error = APIError.REMOTE_SERVICE_TYPE_EXISTS;
             configurationErrors.add(new ErrorDto(error.getCode(), remoteService.getType().getName()
@@ -677,8 +711,7 @@ public class RemoteServiceService extends DefaultApiService
             {
                 APIError error = APIError.REMOTE_SERVICE_UNDEFINED_PORT;
                 configurationErrors.add(new ErrorDto(error.getCode(), remoteService.getType()
-                    .getName()
-                    + " : " + error.getMessage()));
+                    .getName() + " : " + error.getMessage()));
                 if (flushErrors)
                 {
                     addConflictErrors(error);
@@ -692,8 +725,7 @@ public class RemoteServiceService extends DefaultApiService
                     {
                         APIError error = APIError.REMOTE_SERVICE_URL_ALREADY_EXISTS;
                         configurationErrors.add(new ErrorDto(error.getCode(), remoteService
-                            .getType().getName()
-                            + " : " + error.getMessage()));
+                            .getType().getName() + " : " + error.getMessage()));
                         if (flushErrors)
                         {
                             addConflictErrors(error);
