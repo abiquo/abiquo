@@ -88,6 +88,7 @@ import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
 import com.abiquo.server.core.appslibrary.VirtualMachineTemplateDto;
 import com.abiquo.server.core.appslibrary.VirtualMachineTemplatesDto;
 import com.abiquo.server.core.cloud.HypervisorTypesDto;
+import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualApplianceDto;
 import com.abiquo.server.core.cloud.VirtualApplianceStateDto;
 import com.abiquo.server.core.cloud.VirtualAppliancesDto;
@@ -775,7 +776,8 @@ public class RESTBuilder implements IRESTBuilder
     @Override
     public List<RESTLink> buildVirtualMachineAdminLinks(final Integer datacenterId,
         final Integer rackId, final Integer machineId, final Integer enterpriseId,
-        final Integer userId, final HypervisorType machineType)
+        final Integer userId, final HypervisorType machineType, final VirtualAppliance vapp,
+        final Integer vmId)
     {
         List<RESTLink> links = new ArrayList<RESTLink>();
 
@@ -795,6 +797,16 @@ public class RESTBuilder implements IRESTBuilder
             // Title is used in the UI
             machineLink.setTitle(machineType.name());
             links.add(machineLink);
+        }
+
+        if (vapp != null)
+        {
+            params.put(VirtualDatacenterResource.VIRTUAL_DATACENTER, vapp.getVirtualDatacenter()
+                .getId().toString());
+            params.put(VirtualApplianceResource.VIRTUAL_APPLIANCE, vapp.getId().toString());
+            params.put(VirtualMachineResource.VIRTUAL_MACHINE, vmId.toString());
+            links.add(builder.buildRestLink(VirtualMachineResource.class,
+                VirtualMachineResource.VIRTUAL_MACHINE, params, VirtualMachineDto.BASE_MEDIA_TYPE));
         }
 
         if (enterpriseId != null)
@@ -907,13 +919,14 @@ public class RESTBuilder implements IRESTBuilder
         final Integer vappId, final VirtualMachine vm, final Integer datacenterId,
         final Integer rackId, final Integer machineId, final Integer enterpriseId,
         final Integer userId, final boolean chefEnabled, final Integer[] volumeIds,
-        final Integer[] diskIds, final List<IpPoolManagement> ips, final HypervisorType vdcType)
+        final Integer[] diskIds, final List<IpPoolManagement> ips, final HypervisorType vdcType,
+        final VirtualAppliance vapp)
     {
 
         List<RESTLink> links = new ArrayList<RESTLink>();
         AbiquoLinkBuilder builder = AbiquoLinkBuilder.createBuilder(linkProcessor);
         links.addAll(buildVirtualMachineAdminLinks(datacenterId, rackId, machineId, enterpriseId,
-            userId, vdcType));
+            userId, vdcType, vapp, vm.getId()));
         Map<String, String> params = new HashMap<String, String>();
         params.put(VirtualDatacenterResource.VIRTUAL_DATACENTER, vdcId.toString());
         params.put(VirtualApplianceResource.VIRTUAL_APPLIANCE, vappId.toString());

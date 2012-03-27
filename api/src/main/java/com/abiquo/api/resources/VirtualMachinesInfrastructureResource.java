@@ -44,6 +44,7 @@ import org.springframework.stereotype.Controller;
 import com.abiquo.api.exceptions.mapper.APIExceptionMapper;
 import com.abiquo.api.services.InfrastructureService;
 import com.abiquo.api.util.IRESTBuilder;
+import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachinesDto;
 
@@ -98,9 +99,10 @@ public class VirtualMachinesInfrastructureResource extends AbstractResource
         VirtualMachinesDto dto = new VirtualMachinesDto();
         for (VirtualMachine vm : vms)
         {
+            VirtualAppliance vapp = service.getVirtualApplianceFromVirtualMachineHelper(vm);
             dto.getCollection().add(
                 VirtualMachineInfrastructureResource.createTransferObject(datacenterId, rackId,
-                    machineId, vm, restBuilder));
+                    machineId, vm, vapp, restBuilder));
         }
         return dto;
     }
