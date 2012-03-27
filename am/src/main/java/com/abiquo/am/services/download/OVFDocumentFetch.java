@@ -202,23 +202,42 @@ public class OVFDocumentFetch
 
             for (RASDType rasdType : hardwareSectionType.getItem())
             {
-                ResourceType resourceType = rasdType.getResourceType();
-                int resTnumeric = Integer.parseInt(resourceType.getValue());
 
-                // TODO use CIMResourceTypeEnum from value and then a SWITCH
+                ResourceType resourceType = rasdType.getResourceType();
+                if (resourceType == null) // empty rasd element
+                {
+                    continue;
+                }
+                int resTnumeric = Integer.parseInt(resourceType.getValue());
 
                 // Get the information on the ram
                 if (CIMResourceTypeEnum.Processor.getNumericResourceType() == resTnumeric)
                 {
-                    String cpuVal = rasdType.getVirtualQuantity().getValue().toString();
+                    try
+                    {
+                        String cpuVal = rasdType.getVirtualQuantity().getValue().toString();
 
-                    cpu = Integer.parseInt(cpuVal);
+                        cpu = Integer.parseInt(cpuVal);
+                    }
+                    catch (Exception e)
+                    {
+                        throw new AMException(AMError.TEMPLATE_INVALID,
+                            "Invalid CPU virtualQuantity");
+                    }
                 }
                 else if (CIMResourceTypeEnum.Memory.getNumericResourceType() == resTnumeric)
                 {
-                    BigInteger ramVal = rasdType.getVirtualQuantity().getValue();
+                    try
+                    {
+                        BigInteger ramVal = rasdType.getVirtualQuantity().getValue();
 
-                    ram = ramVal.longValue();
+                        ram = ramVal.longValue();
+                    }
+                    catch (Exception e)
+                    {
+                        throw new AMException(AMError.TEMPLATE_INVALID,
+                            "Invalid RAM virtualQuantity");
+                    }
 
                     if (rasdType.getAllocationUnits() != null
                         & rasdType.getAllocationUnits().getValue() != null)
@@ -235,7 +254,7 @@ public class OVFDocumentFetch
 
                     if (!diskIdToDiskFormat.containsKey(diskId))
                     {
-                        throw new RequiredAttributeException("Virtual System make reference to an undeclared disk "
+                        throw new RequiredAttributeException("Virtual System makes reference to an undeclared disk "
                             + diskId);
                     }
 
