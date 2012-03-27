@@ -34,8 +34,8 @@ import static com.abiquo.model.enumerator.DiskFormatType.XEN_COMPATIBLES;
 public enum HypervisorType
 {
     VBOX(8889, VDI_FLAT, VBOX_COMPATIBLES), KVM(8889, VMDK_FLAT, KVM_COMPATIBLES), XEN_3(8889,
-        VMDK_FLAT, XEN_COMPATIBLES), VMX_04(443, VMDK_FLAT, VMWARE_COMPATIBLES), HYPERV_301(5985,
-        VHD_SPARSE, HYPERV_COMPATIBLES), XENSERVER(9363, VHD_SPARSE, XENSERVER_COMPATIBLES);
+        VMDK_FLAT, XEN_COMPATIBLES), VMX_04(443, VMDK_FLAT, VMWARE_COMPATIBLES, VMDK_FLAT), HYPERV_301(
+        5985, VHD_SPARSE, HYPERV_COMPATIBLES), XENSERVER(9363, VHD_SPARSE, XENSERVER_COMPATIBLES);
 
     public final int defaultPort;
 
@@ -43,7 +43,18 @@ public enum HypervisorType
 
     public DiskFormatType[] compatibilityTable;
 
+    public DiskFormatType instanceFormat;
+
     /* package */private final static int ID_MAX = 6;
+
+    private HypervisorType(final int defaultPort, final DiskFormatType baseFormat,
+        final DiskFormatType[] compatibilityTable, final DiskFormatType instanceFormat)
+    {
+        this.defaultPort = defaultPort;
+        this.baseFormat = baseFormat;
+        this.compatibilityTable = compatibilityTable;
+        this.instanceFormat = instanceFormat;
+    }
 
     private HypervisorType(final int defaultPort, final DiskFormatType baseFormat,
         final DiskFormatType[] compatibilityTable)
@@ -56,6 +67,16 @@ public enum HypervisorType
     public int id()
     {
         return ordinal() + 1;
+    }
+
+    public boolean isInstanceFormatFixed()
+    {
+        return instanceFormat != null;
+    }
+
+    public DiskFormatType getInstanceFormat()
+    {
+        return instanceFormat;
     }
 
     public boolean isCompatible(final DiskFormatType type)
