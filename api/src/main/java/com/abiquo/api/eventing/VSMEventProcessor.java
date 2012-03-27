@@ -37,10 +37,10 @@ import com.abiquo.api.services.RemoteServiceService;
 import com.abiquo.api.services.VirtualMachineAllocatorService;
 import com.abiquo.api.services.stub.VsmServiceStub;
 import com.abiquo.api.tracer.TracerLogger;
-import com.abiquo.commons.amqp.impl.tarantino.domain.State;
 import com.abiquo.commons.amqp.impl.vsm.VSMCallback;
 import com.abiquo.commons.amqp.impl.vsm.domain.VirtualSystemEvent;
 import com.abiquo.scheduler.SchedulerLock;
+import com.abiquo.server.core.cloud.NodeVirtualImage;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineRep;
 import com.abiquo.server.core.cloud.VirtualMachineState;
@@ -63,7 +63,7 @@ public class VSMEventProcessor implements VSMCallback
     private final static Logger LOGGER = LoggerFactory.getLogger(VSMEventProcessor.class);
 
     @Autowired
-    protected VirtualMachineRep vmRepo;
+    protected VirtualMachineRep virtualMachineRep;
 
     @Autowired
     protected TracerLogger tracer;
@@ -72,16 +72,10 @@ public class VSMEventProcessor implements VSMCallback
     protected VirtualMachineAllocatorService allocatorService;
 
     @Autowired
-    private RemoteServiceService remoteServiceService;
-
-    @Autowired
-    protected VsmServiceStub vsmStub;
+    protected RemoteServiceService remoteServiceService;
 
     @Autowired
     protected VsmServiceStub vsm;
-
-    @Autowired
-    protected RemoteServiceService remoteService;
 
     /** Event to virtual machine state translations */
     protected final Map<VMEventType, VirtualMachineState> stateByEvent =
@@ -118,9 +112,11 @@ public class VSMEventProcessor implements VSMCallback
      */
     public VSMEventProcessor(final EntityManager em)
     {
-        this.vmRepo = new VirtualMachineRep(em);
+        this.virtualMachineRep = new VirtualMachineRep(em);
         this.tracer = new TracerLogger();
         this.allocatorService = new VirtualMachineAllocatorService(em);
+        this.remoteServiceService = new RemoteServiceService(em);
+        this.vsm = new VsmServiceStub();
     }
 
     public VSMEventProcessor()
@@ -143,11 +139,11 @@ public class VSMEventProcessor implements VSMCallback
         }
 
         // Update virtual machine state
-        VirtualMachine machine = vmRepo.findByName(notification.getVirtualSystemId());
+        VirtualMachine machine = virtualMachineRep.findByName(notification.getVirtualSystemId());
 
         if (machine != null)
         {
-            vmRepo.update(updateMachineState(machine, notification));
+            virtualMachineRep.update(updateMachineState(machine, notification));
         }
     }
 
@@ -231,8 +227,8 @@ public class VSMEventProcessor implements VSMCallback
 
         if (traceEventByEvent.containsKey(event))
         {
-            tracer.systemLog(SeverityType.INFO, ComponentType.VIRTUAL_MACHINE, traceEventByEvent
-                .get(event), message);
+            tracer.systemLog(SeverityType.INFO, ComponentType.VIRTUAL_MACHINE,
+                traceEventByEvent.get(event), message);
         }
     }
 
@@ -257,27 +253,27 @@ public class VSMEventProcessor implements VSMCallback
     protected void onVMDestroyedEvent(final VirtualMachine virtualMachine, final VMEventType event,
         final VirtualSystemEvent notification)
     {
-
-        // only apply the destroyedevent when there is and event not started by Abiquo
-        if (!State.LOCKED.equals(virtualMachine.getState())
-            && !State.NOT_ALLOCATED.equals(virtualMachine.getState())
-            && virtualMachine.getState().existsInHypervisor())
+        if (virtualMachine.getState().existsInHypervisor())
         {
-            // Resources are freed
-            // State NOT_ALLOCATED is set in this method too
-            unsubscribeVMToVSM(virtualMachine);
-            final String lockMsg =
-                "DESTROY event for virtualmachine '" + virtualMachine.getId() + "'";
+            unsubscribeVirtualMachine(virtualMachine);
+
+            final String lockMessage =
+                "DESTROY event for virtualmachine '" + virtualMachine.getName() + "'";
             try
             {
-                SchedulerLock.acquire(lockMsg);
-
-                // XXX virtualMachine should be loaded inside the LOCK
+                SchedulerLock.acquire(lockMessage);
                 allocatorService.deallocateVirtualMachine(virtualMachine);
             }
             finally
             {
-                SchedulerLock.release(lockMsg);
+                SchedulerLock.release(lockMessage);
+            }
+
+            if (virtualMachine.isCaptured())
+            {
+                NodeVirtualImage node = virtualMachineRep.findNodeVirtualImageByVm(virtualMachine);
+                virtualMachineRep.deleteNodeVirtualImage(node);
+                virtualMachineRep.deleteVirtualMachine(virtualMachine);
             }
         }
 
@@ -287,28 +283,31 @@ public class VSMEventProcessor implements VSMCallback
     /**
      * Performs an unsubscribe when a DESTROYED event is detected
      * 
-     * @param vMachine
-     * @return
+     * @param virtualMachine The virtual machine to unsubscribe
+     * @return True if the virtual machine is successfully unsubscribed. Otherwise false.
      */
-    protected boolean unsubscribeVMToVSM(final VirtualMachine vMachine)
+    protected void unsubscribeVirtualMachine(final VirtualMachine virtualMachine)
     {
         try
         {
-            Datacenter datacenter = vMachine.getHypervisor().getMachine().getDatacenter();
+            Datacenter datacenter = virtualMachine.getHypervisor().getMachine().getDatacenter();
             RemoteService remoteService = remoteServiceService.getVSMRemoteService(datacenter);
-            vsmStub.unsubscribe(remoteService, vMachine);
-            return true;
+
+            if (vsm.isVirtualMachineSubscribed(remoteService, virtualMachine.getName()))
+            {
+                vsm.unsubscribe(remoteService, virtualMachine);
+            }
         }
         catch (Exception e)
         {
             LOGGER
                 .error(
                     "There was a problem processing a DESTROY event  on Virtual Machine {}: Unsubscribing to VSM failed {}",
-                    new Object[] {vMachine.getName(), e.getMessage()});
+                    new Object[] {virtualMachine.getName(), e.getMessage()});
+
             tracer.systemLog(SeverityType.MAJOR, ComponentType.VIRTUAL_MACHINE,
                 EventType.VM_DESTROY, "virtualMachine.destroyed.unsubscribeFailed", new Object[] {
-                vMachine.getName(), e.getMessage()});
-            return false;
+                virtualMachine.getName(), e.getMessage()});
         }
     }
 }
