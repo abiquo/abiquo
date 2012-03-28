@@ -85,7 +85,7 @@ public enum APIError
         "Missing enterprise link"), ENTERPRISE_WITH_BLOCKED_USER(
         "ENTERPRISE-9",
         "Cannot delete enterprise because some users have roles that cannot be deleted, please change their enterprise before continuing"), ENTERPRISE_NOT_ALLOWED_DATACENTER(
-        "ENTERPRISE-10", "The Enterprise does not have permissions to use the requested datacenter"), INVALID_ENTERPRISE_LINK(
+        "ENTERPRISE-10", "The Enterprise does not have permission to use the requested datacenter"), INVALID_ENTERPRISE_LINK(
         "ENTERPRISE-11", "Invalid Enterprise identifier in the Enterprise link"), MISSING_PRICING_TEMPLATE_LINK(
         "ENTERPRISE-12", "Missing link to the pricing template"), PRICING_TEMPLATE_PARAM_NOT_FOUND(
         "ENTERPRISE-13", "Missing pricing template parameter"), NON_EXISTENT_ENTERPRISE_PROPS(
@@ -250,7 +250,7 @@ public enum APIError
         "Invalid hypervisor IP. A hypervisor with that IP already exists"), HYPERVISOR_EXIST_SERVICE_IP(
         "HYPERVISOR-2",
         "Invalid hypervisor service IP. A hypervisor with that service IP already exists"), HYPERVISOR_TYPE_MISSING(
-        "HYPERVISOR-3", "The Hypervisor technology of the target Hypervisor is not set"),
+        "HYPERVISOR-3", "The Hypervisor type of the target Hypervisor is not set"),
 
     // NETWORK
     NETWORK_INVALID_CONFIGURATION("NET-0",
@@ -315,7 +315,7 @@ public enum APIError
         "VM-33", "Only 'cpu' and 'ram' can be reconfigured in imported virtual machines"), VIRTUAL_MACHINE_IMPORTED_WILL_BE_DELETED(
         "VM-44",
         "You are trying to undeploy an imported virtual machine. If you undeploy it, the virtual machine template cannot be recovered. If you are confident of this action, please call this functionality again with the 'forceUndeploy=true' option"), RESOURCES_ALREADY_ASSIGNED(
-        "VM-45", "Some of the indicated resources are already used"),
+        "VM-45", "Some of the resources indicated are already used"),
 
     // ROLE
     NON_EXISTENT_ROLE("ROLE-0", "The requested role does not exist"), NON_MODIFICABLE_ROLE(
@@ -376,10 +376,10 @@ public enum APIError
         "The remote service does not have the *abiquo.datacenter.id* property set"), REMOTE_SERVICE_DATACENTER_UUID_INCONSISTENT(
         "RS-14",
         "The remote service is configured with a different datacenter UUID, please adjust the *abiquo.datacenter.id* property in the remote service."), REMOTE_SERVICE_UNDEFINED_PORT(
-        "RS-15", "A port must be defined in the uri"), REMOTE_SERVICE_NON_POOLABLE("RS-16",
-        "The provided remote service can not be used in for a remote service client pool"), REMOTE_SERVICE_ERROR_BORROWING(
+        "RS-15", "A port must be defined in the URI"), REMOTE_SERVICE_NON_POOLABLE("RS-16",
+        "The remote service indicated cannot be used in a remote service client pool"), REMOTE_SERVICE_ERROR_BORROWING(
         "RS-17",
-        "An unexpected error occured while getting the remote service client from the client pool"), APPLIANCE_MANAGER_CALL(
+        "An unexpected error occurred while getting the remote service client from the client pool"), APPLIANCE_MANAGER_CALL(
         "AM-1", "Failed Appliance Manager communication"),
     //
     AM_CLIENT("AM-0", "Failed Appliance Manager communication"), AM_TIMEOUT("AM-1",
@@ -392,7 +392,7 @@ public enum APIError
         "OVF Package list name already exists"), //
     TEMPLATE_DEFINITION_LIST_REFRESH_NO_URL(
         "OVF-PACKAGE-LIST-1",
-        "The template definition list isn't associated to any url (ovfindex.xml), so it can't be refreshed from the source"), //
+        "The template definition list is not associated with a URL (ovfindex.xml), so it cannot be refreshed from the source"), //
     TEMPLATE_DEFINITION_LIST_NAME_NOT_FOUND("OVF-PACKAGE-LIST-2",
         "OVF Package list name is required"),
 
@@ -429,7 +429,7 @@ public enum APIError
         "The Virtual Machine Template is being used by Virtual Machines and cannot be deleted"), VMTEMPLATE_TEMPLATE_USED_BY_VIRTUAL_MACHINES_CANNOT_BE_UNSHARED(
         "VIMAGE-11",
         "The Virtual Machine Template is being used by Virtual Machines and cannot be modified to not shared"), VIMAGE_MALFORMED_ICON_URI(
-        "VIMAGE-12", "The Icon URL is not well formed"),
+        "VIMAGE-12", "The URL of the Icon is not well formed"),
 
     // NODE COLLECTOR
     NON_EXISTENT_IP("NC-0", "The requested IP does not exist"), MISSING_IP_PARAMETER("NC-1",
@@ -485,7 +485,7 @@ public enum APIError
         "VSM-3", "An error occurred when unsubscribing the virtual machine"), REFRESH_STATE_PROBLEM(
         "VSM-4", "An error occurred when refreshing the virtual machine state"), INVALIDATE_STATE_PROBLEM(
         "VSM-5", "An error occurred when resetting the last known state of the virtual machine"), VSM_UNAVAILABE(
-        "VSM-6", "VSM service unavailable, check the URL service."),
+        "VSM-6", "VSM service unavailable; check the URL of the service."),
 
     // LICENSE
     LICENSE_UNEXISTING("LICENSE-0", "The requested license does not exist"), LICENSE_INVALID(
@@ -509,7 +509,7 @@ public enum APIError
 
     // DEVICES
     NON_EXISTENT_DEVICE("DEVICE-0", "The requested device does not exist"), DEVICE_DUPLICATED(
-        "DEVICE-1", "Duplicated Storage Device"),
+        "DEVICE-1", "Duplicate Storage Device"),
 
     // STATISTICS
     NON_EXISTENT_STATS("STATS-0", "Non-existent statistical data"), NON_EXISTENT_STATS_FOR_DATACENTER(
@@ -565,8 +565,8 @@ public enum APIError
         "SSM-5", "Could not create the volume in the target storage device"), SSM_DELETE_VOLUME_ERROR(
         "SSM-6", "Could not delete the volume from the target storage device"), SSM_UPDATE_ERROR(
         "SSM-7", "Could not update the volume in the target storage devide"), SSM_ADD_INITIATOR_ERROR(
-        "SSM-8", "Could not add the given iscsi initiator in the target storage device"), SSM_REMOVE_INITIATOR_ERROR(
-        "SSM-9", "Could not remove the given iscsi initiator from the target storage device"),
+        "SSM-8", "Could not add the given iSCSI initiator in the target storage device"), SSM_REMOVE_INITIATOR_ERROR(
+        "SSM-9", "Could not remove the given iSCSI initiator from the target storage device"),
 
     // RULES
     NON_EXISTENT_EER("RULE-1", "The requested restrict shared server rule does not exist"), NON_EXISTENT_FPR(
@@ -585,12 +585,12 @@ public enum APIError
         "HD-5", "Invalid link to the hard disk to attach"), HD_ATTACH_INVALID_VDC_LINK("HD-6",
         "Invalid virtual datacenter in the link to the volume to attach"), HD_CREATION_NOT_UNAVAILABLE(
         "HD-7",
-        "Cannot perform this action because the hard disk creation is not available for this hypervisor"),
+        "Cannot perform this action because hard disks creation is not available for this hypervisor"),
 
     // Chef
     CHEF_ERROR_GETTING_RECIPES("CHEF-0",
         "Could not get the list of available recipes for the enterprise"), CHEF_ERROR_GETTING_ROLES(
-        "CHEF-1", "Could not get the list of available roles for the enterprise"), CHEF_ERROR_CONNECTION(
+        "CHEF-1", "Could not get the list of available Chef roles for the enterprise"), CHEF_ERROR_CONNECTION(
         "CHEF-2", "Cannot connect to the Chef Server"), CHEF_NODE_DOES_NOT_EXIST("CHEF-3",
         "The node does not exist on the Chef Server. "
             + "If the virtual machine is bootstrapping, please wait until the process completes."), CHEF_ELEMENT_DOES_NOT_EXIST(
@@ -603,7 +603,7 @@ public enum APIError
         "The enterprise is not configured to use Chef"), CHEF_INVALID_VIRTUALMACHINE("CHEF-9",
         "The virtual machine cannot use Chef. "
             + "Please, verify that the image is Chef enabled and the Enterprise can use Chef"), CHEF_INVALID_PRIVATE_KEY(
-        "CHEF-10", "The provided data is not a valid private key. Please verify the key format."),
+        "CHEF-10", "The data supplied is not a valid private key. Please verify the key format."),
 
     // Parsing links
     LINKS_INVALID_LINK("LNK-0", "Invalid link. Check documentation"), LINKS_ONLY_ACCEPTS_ONE_LINK(
@@ -613,7 +613,7 @@ public enum APIError
 
     // CATEGORY
     NON_EXISTENT_CATEGORY("CATEGORY-1", "The requested category does not exist"), CATEGORY_DUPLICATED_NAME(
-        "CATEGORY-2", "Duplicated name for the category"), CATEGORY_NOT_ERASABLE("CATEGORY-3",
+        "CATEGORY-2", "Duplicate category name"), CATEGORY_NOT_ERASABLE("CATEGORY-3",
         "This category cannot be deleted"), INVALID_CATEGORY_LINK("CATEGORY-4",
         "Invalid Category identifier in the Category link"), CATEGORY_CANNOT_BE_NULL("CATEGORY-5",
         "Category name cannot be null"),
@@ -635,7 +635,7 @@ public enum APIError
         "PRICINGTEMPLATE-2", "Duplicate name for Pricing Template"), NON_EXISTENT_PRICING_TEMPLATE(
         "PRICINGTEMPLATE-3", "The requested Pricing Template does not exist"), DELETE_ERROR_WITH_ENTERPRISE(
         "PRICINGTEMPLATE-4", "Cannot delete a Pricing Template with associated Enterprise"), PRICING_TEMPLATE_MINIMUM_CHARGE_PERIOD(
-        "PRICINGTEMPLATE-5", "The smallest charging period is for DAY"), PRICING_TEMPLATE_EMPTY_NAME(
+        "PRICINGTEMPLATE-5", "The smallest charging period is DAY"), PRICING_TEMPLATE_EMPTY_NAME(
         "PRICINGTEMPLATE-6", "Pricing Template name cannot be empty"), MISSING_CURRENCY_LINK(
         "PRICINGTEMPLATE-7", "Missing link to the currency"), CHARGING_PERIOD_VALUES(
         "PRICINGTEMPLATE-8", "Charging period values should be between 2 and 6"), MINIMUM_CHARGE_EMPTY(
