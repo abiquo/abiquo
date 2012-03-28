@@ -37,6 +37,7 @@ import com.abiquo.abiserver.commands.stub.AbstractAPIStub;
 import com.abiquo.abiserver.commands.stub.VirtualDatacenterResourceStub;
 import com.abiquo.abiserver.persistence.DAOFactory;
 import com.abiquo.abiserver.persistence.hibernate.HibernateDAOFactory;
+import com.abiquo.abiserver.pojo.infrastructure.HyperVisorType;
 import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.result.DataResult;
 import com.abiquo.abiserver.pojo.result.ListRequest;
@@ -271,6 +272,7 @@ public class VirtualDatacenterResourceStubImpl extends AbstractAPIStub implement
                 pojo.setName(vdc.getName());
                 pojo.setLimits(limits);
                 pojo.setIdDataCenter(datacenterId);
+                pojo.setHyperType(new HyperVisorType(vdc.getHypervisorType()));
 
                 collection.add(pojo);
             }
