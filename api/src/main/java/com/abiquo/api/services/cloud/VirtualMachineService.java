@@ -2120,10 +2120,16 @@ public class VirtualMachineService extends DefaultApiService
                     if (resource instanceof DiskManagement)
                     {
                         vdcRep.updateDisk((DiskManagement) resource);
+                        tracer.log(SeverityType.INFO, ComponentType.STORAGE_DEVICE,
+                            EventType.HARD_DISK_ASSIGN, "hardDisk.assigned", resource.getRasd()
+                                .getLimit(), vm.getName());
                     }
                     else
                     {
                         storageRep.updateVolume((VolumeManagement) resource);
+                        tracer.log(SeverityType.INFO, ComponentType.VOLUME,
+                            EventType.VOLUME_ATTACH, "volume.attached", resource.getRasd()
+                                .getElementName(), resource.getRasd().getLimit(), vm.getName());
                     }
                 }
             }
@@ -2177,6 +2183,9 @@ public class VirtualMachineService extends DefaultApiService
 
                 // if it is new allocated, we set the integer into the 'blacklisted' list.
                 blackList.add(ip.getSequence());
+                tracer.log(SeverityType.INFO, ComponentType.NETWORK,
+                    EventType.NIC_ASSIGNED_VIRTUAL_MACHINE, "nic.attached", vm.getName(),
+                    ip.getIp(), ip.getVlanNetwork().getName());
             }
         }
     }
@@ -2256,6 +2265,9 @@ public class VirtualMachineService extends DefaultApiService
                         ip.setVirtualDatacenter(null);
                     }
                     vdcRep.updateIpManagement(ip);
+                    tracer.log(SeverityType.INFO, ComponentType.NETWORK,
+                        EventType.NIC_ASSIGNED_VIRTUAL_MACHINE, "nic.released", oldVm.getName(),
+                        ip.getIp(), ip.getVlanNetwork().getName());
                 }
 
                 // if the dellocated ip is the one with the default configuration,
@@ -2299,6 +2311,9 @@ public class VirtualMachineService extends DefaultApiService
                 {
                     vdcRep.deleteRasd(disk.getRasd());
                     rasdDao.remove(disk);
+                    tracer.log(SeverityType.INFO, ComponentType.STORAGE_DEVICE,
+                        EventType.HARD_DISK_ASSIGN, "hardDisk.released", disk.getSizeInMb(),
+                        oldVm.getName());
                 }
                 else
                 {
@@ -2343,6 +2358,8 @@ public class VirtualMachineService extends DefaultApiService
                     }
                     vol.detach();
                     storageRep.updateVolume(vol);
+                    tracer.log(SeverityType.INFO, ComponentType.VOLUME, EventType.VOLUME_DETACH,
+                        "volume.detached", vol.getName(), vol.getSizeInMB(), oldVm.getName());
                 }
                 else
                 {
