@@ -339,7 +339,7 @@
         <security:intercept-url pattern="/cloud/virtualdatacenters/*/volumes/*/action/initiatormappings/*" method="GET" access="ROLE_VDC_MANAGE_STORAGE" />
         <security:intercept-url pattern="/cloud/virtualdatacenters/*/volumes/*/action/initiatormappings/*" method="OPTIONS" access="ROLE_AUTHENTICATED" />
         <!-- DISKS -->
-        <security:intercept-url pattern="/cloud/virtualdatacenters/*/disks" method="POST" access="ROLE_VDC_MANAGE_STORAGE, ROLE_VDC_MANAGE_VAPP" />
+        <security:intercept-url pattern="/cloud/virtualdatacenters/*/disks" method="POST" access="ROLE_MANAGE_HARD_DISKS" />
         <security:intercept-url pattern="/cloud/virtualdatacenters/*/disks" method="GET" access="ROLE_VDC_MANAGE_STORAGE,ROLE_VDC_ENUMERATE" />
         <security:intercept-url pattern="/cloud/virtualdatacenters/*/disks" method="OPTIONS" access="ROLE_AUTHENTICATED" />       
         <security:intercept-url pattern="/cloud/virtualdatacenters/*/disks/*" method="DELETE" access="ROLE_VDC_MANAGE_STORAGE, ROLE_VDC_MANAGE_VAPP" />
@@ -389,9 +389,9 @@
         <security:intercept-url pattern="/cloud/virtualdatacenters/*/virtualappliances/*/virtualmachines/*/network/nics/*" method="DELETE" access="ROLE_VAPP_CUSTOMISE_SETTINGS" />
         <security:intercept-url pattern="/cloud/virtualdatacenters/*/virtualappliances/*/virtualmachines/*/network/nics/*" method="PUT" access="ROLE_VAPP_CUSTOMISE_SETTINGS" />
         <security:intercept-url pattern="/cloud/virtualdatacenters/*/virtualappliances/*/virtualmachines/*/storage/disks" method="GET" access="ROLE_VDC_MANAGE_VAPP,ROLE_VAPP_CUSTOMISE_SETTINGS" />
-        <security:intercept-url pattern="/cloud/virtualdatacenters/*/virtualappliances/*/virtualmachines/*/storage/disks" method="POST" access="ROLE_VAPP_CUSTOMISE_SETTINGS" />
-        <security:intercept-url pattern="/cloud/virtualdatacenters/*/virtualappliances/*/virtualmachines/*/storage/disks" method="PUT" access="ROLE_VAPP_CUSTOMISE_SETTINGS" />
-        <security:intercept-url pattern="/cloud/virtualdatacenters/*/virtualappliances/*/virtualmachines/*/storage/disks" method="DELETE" access="ROLE_VAPP_CUSTOMISE_SETTINGS" />
+        <security:intercept-url pattern="/cloud/virtualdatacenters/*/virtualappliances/*/virtualmachines/*/storage/disks" method="POST" access="ROLE_MANAGE_HARD_DISKS" />
+        <security:intercept-url pattern="/cloud/virtualdatacenters/*/virtualappliances/*/virtualmachines/*/storage/disks" method="PUT" access="ROLE_MANAGE_HARD_DISKS" />
+        <security:intercept-url pattern="/cloud/virtualdatacenters/*/virtualappliances/*/virtualmachines/*/storage/disks" method="DELETE" access="ROLE_MANAGE_HARD_DISKS" />
         <security:intercept-url pattern="/cloud/virtualdatacenters/*/virtualappliances/*/virtualmachines/*/storage/disks/*" method="GET" access="ROLE_VDC_MANAGE_VAPP,ROLE_VAPP_CUSTOMISE_SETTINGS" />
         <security:intercept-url pattern="/cloud/virtualdatacenters/*/virtualappliances/*/virtualmachines/*/storage/disks/*" method="DELETE" access="ROLE_VAPP_CUSTOMISE_SETTINGS" />
         <security:intercept-url pattern="/cloud/virtualdatacenters/*/virtualappliances/*/virtualmachines/*/storage/volumes" method="GET" access="ROLE_VDC_MANAGE_VAPP,ROLE_VAPP_CUSTOMISE_SETTINGS" />
