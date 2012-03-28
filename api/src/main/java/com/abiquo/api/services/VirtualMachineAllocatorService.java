@@ -593,7 +593,7 @@ public class VirtualMachineAllocatorService extends DefaultApiService
      */
     protected void shutDownMachines(final List<Machine> machines, int howMany)
     {
-        LOG.debug("Stopping {} machines", machines.size());
+        LOG.debug("Stopping {} machines", howMany);
         for (Machine machine : machines)
         {
             // Since we don't know in advance which are associated we must try all of them
