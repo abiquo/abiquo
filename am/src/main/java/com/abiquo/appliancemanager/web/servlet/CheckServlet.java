@@ -54,12 +54,23 @@ public class CheckServlet extends AbstractCheckServlet
     private final static String REPO_MARK = AMConfiguration.getRepositoryPath()
         + ".abiquo_repository";
 
+    private final boolean DO_CHECK = Boolean.parseBoolean(System.getProperty(
+        "abiquo.appliancemanager.checkMountedRepository", "true"));
+
     @Override
     protected boolean check() throws Exception
     {
         if (!checkRedis())
         {
             throw new AMException(AMError.AM_CHECK, "No connection to Redis server");
+        }
+
+        if (!DO_CHECK)
+        {
+            LOGGER.warn("Won't check if the repository is mounted "
+                + "(see ''abiquo.appliancemanager.checkMountedRepository'' property). "
+                + "This is normal if the NFS repository is exported from the same machine");
+            return true;
         }
 
         if (!checkRepositoryMounted())
@@ -95,7 +106,6 @@ public class CheckServlet extends AbstractCheckServlet
 
     public synchronized boolean checkRepositoryMounted()
     {
-
         final String repositoryLocatino =
             FilenameUtils.normalizeNoEndSeparator(AMConfiguration.getRepositoryLocation());
         final String repositoryMountPoint =
