@@ -23,13 +23,18 @@ package com.abiquo.server.core.appslibrary;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.ForeignKey;
 import org.hibernate.validator.constraints.Length;
 
 import com.abiquo.server.core.common.DefaultEntityBase;
+import com.abiquo.server.core.enterprise.Enterprise;
 import com.google.common.annotations.VisibleForTesting;
 import com.softwarementors.validation.constraints.LeadingOrTrailingWhitespace;
 import com.softwarementors.validation.constraints.Required;
@@ -53,6 +58,7 @@ public class Category extends DefaultEntityBase
         setName(name);
         setDefaultCategory(false);
         setErasable(true);
+        setEnterprise(null);
     }
 
     private final static String ID_COLUMN = "idCategory";
@@ -155,6 +161,28 @@ public class Category extends DefaultEntityBase
         Category category = new Category(name);
         category.setDefaultCategory(true);
         return category;
+    }
+
+    public final static String ENTERPRISE_PROPERTY = "enterprise";
+
+    private final static boolean ENTERPRISE_REQUIRED = false;
+
+    private final static String ENTERPRISE_ID_COLUMN = "idEnterprise";
+
+    @JoinColumn(name = ENTERPRISE_ID_COLUMN)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @ForeignKey(name = "FK_" + TABLE_NAME + "_enterprise")
+    private Enterprise enterprise;
+
+    @Required(value = ENTERPRISE_REQUIRED)
+    public Enterprise getEnterprise()
+    {
+        return this.enterprise;
+    }
+
+    public void setEnterprise(final Enterprise enterprise)
+    {
+        this.enterprise = enterprise;
     }
 
 }

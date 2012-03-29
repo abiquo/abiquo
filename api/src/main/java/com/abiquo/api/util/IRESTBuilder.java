@@ -235,7 +235,7 @@ public interface IRESTBuilder
     public List<RESTLink> buildDiskLinks(final DiskManagement disk, final Integer vdcId,
         final Integer vappId);
 
-    public List<RESTLink> buildCategoryLinks(CategoryDto categorydto);
+    public List<RESTLink> buildCategoryLinks(final Category category);
 
     public List<RESTLink> buildVirtualDatacenterDiskLinks(DiskManagement disk);
 

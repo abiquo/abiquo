@@ -1453,13 +1453,18 @@ public class RESTBuilder implements IRESTBuilder
     }
 
     @Override
-    public List<RESTLink> buildCategoryLinks(final CategoryDto categorydto)
+    public List<RESTLink> buildCategoryLinks(final Category category)
     {
         List<RESTLink> links = new ArrayList<RESTLink>();
         Map<String, String> params = new HashMap<String, String>();
-        params.put(CategoryResource.CATEGORY, categorydto.getId().toString());
-
+        params.put(CategoryResource.CATEGORY, category.getId().toString());
         AbiquoLinkBuilder builder = AbiquoLinkBuilder.createBuilder(linkProcessor);
+        if (category.getEnterprise() != null)
+        {
+            params.put(EnterpriseResource.ENTERPRISE, category.getEnterprise().getId().toString());
+            links.add(builder.buildRestLink(EnterpriseResource.class,
+                EnterpriseResource.ENTERPRISE, params, EnterpriseDto.BASE_MEDIA_TYPE));
+        }
         RESTLink editLink =
             builder.buildRestLink(CategoryResource.class, REL_EDIT, params,
                 CategoryDto.BASE_MEDIA_TYPE);

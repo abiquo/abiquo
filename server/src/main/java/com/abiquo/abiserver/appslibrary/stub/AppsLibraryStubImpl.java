@@ -54,6 +54,7 @@ import com.abiquo.appliancemanager.transport.TemplateStateDto;
 import com.abiquo.appliancemanager.transport.TemplatesStateDto;
 import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.model.rest.RESTLink;
+import com.abiquo.model.transport.LinksDto;
 import com.abiquo.model.transport.error.ErrorDto;
 import com.abiquo.model.transport.error.ErrorsDto;
 import com.abiquo.server.core.appslibrary.CategoriesDto;
@@ -746,12 +747,16 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
      */
 
     @Override
-    public DataResult<List<Category>> getCategories()
+    public DataResult<List<Category>> getCategories(final Integer idEnterprise)
     {
 
         DataResult<List<Category>> result = new DataResult<List<Category>>();
 
-        final String uri = createCategoriesLink();
+        String uri = createCategoriesLink();
+        if (idEnterprise != null)
+        {
+            uri = uri + "?idEnterprise=" + String.valueOf(idEnterprise);
+        }
 
         ClientResponse response = get(uri, CategoriesDto.MEDIA_TYPE);
 
@@ -776,10 +781,17 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
     }
 
     @Override
-    public DataResult<Category> createCategory(final CategoryDto categoryDto)
+    public DataResult<Category> createCategory(final CategoryDto categoryDto,
+        final Integer idEnterprise)
     {
         DataResult<Category> result = new DataResult<Category>();
 
+        if (idEnterprise != 0)
+        {
+            RESTLink link = new RESTLink("enterprise", createEnterpriseLink(idEnterprise));
+            link.setType(LinksDto.MEDIA_TYPE);
+            categoryDto.addLink(link);
+        }
         String uri = createCategoriesLink();
 
         ClientResponse response = post(uri, categoryDto);

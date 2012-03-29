@@ -26,6 +26,9 @@ import static com.abiquo.api.common.UriTestResolver.resolveCategoriesURI;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.ws.rs.core.Response.Status;
 
 import org.apache.wink.client.ClientResponse;
@@ -37,17 +40,42 @@ import com.abiquo.api.resources.AbstractJpaGeneratorIT;
 import com.abiquo.server.core.appslibrary.CategoriesDto;
 import com.abiquo.server.core.appslibrary.Category;
 import com.abiquo.server.core.appslibrary.CategoryDto;
+import com.abiquo.server.core.enterprise.Enterprise;
+import com.abiquo.server.core.enterprise.Privilege;
+import com.abiquo.server.core.enterprise.Role;
+import com.abiquo.server.core.enterprise.User;
 
 public class CategoriesResourceIT extends AbstractJpaGeneratorIT
 {
     protected Category category;
+
+    protected Enterprise enterprise;
+
+    private static final String SYSADMIN = "sysadmin";
 
     @Override
     @BeforeMethod
     public void setup()
     {
         category = categoryGenerator.createUniqueInstance();
-        setup(category);
+
+        enterprise = enterpriseGenerator.createUniqueInstance();
+        Role role = roleGenerator.createInstanceSysAdmin();
+        User user = userGenerator.createInstance(enterprise, role, SYSADMIN, SYSADMIN);
+
+        List<Object> entitiesToSetup = new ArrayList<Object>();
+        entitiesToSetup.add(enterprise);
+
+        for (Privilege p : role.getPrivileges())
+        {
+            entitiesToSetup.add(p);
+        }
+        entitiesToSetup.add(role);
+        entitiesToSetup.add(user);
+
+        entitiesToSetup.add(category);
+
+        setup(entitiesToSetup.toArray());
     }
 
     @Test
@@ -73,7 +101,7 @@ public class CategoriesResourceIT extends AbstractJpaGeneratorIT
         String href = resolveCategoriesURI();
 
         // Assert response code is OK
-        ClientResponse response = post(href, dto);
+        ClientResponse response = post(href, dto, SYSADMIN, SYSADMIN);
         assertEquals(response.getStatusCode(), 201);
 
         // Ensure all the fields are the same than before but with an id assigned
