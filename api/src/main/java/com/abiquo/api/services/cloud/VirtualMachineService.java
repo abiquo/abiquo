@@ -26,8 +26,10 @@ import static com.abiquo.api.util.URIResolver.buildPath;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import javax.persistence.EntityManager;
@@ -2118,10 +2120,16 @@ public class VirtualMachineService extends DefaultApiService
                     if (resource instanceof DiskManagement)
                     {
                         vdcRep.updateDisk((DiskManagement) resource);
+                        tracer.log(SeverityType.INFO, ComponentType.STORAGE_DEVICE,
+                            EventType.HARD_DISK_ASSIGN, "hardDisk.assigned", resource.getRasd()
+                                .getLimit(), vm.getName());
                     }
                     else
                     {
                         storageRep.updateVolume((VolumeManagement) resource);
+                        tracer.log(SeverityType.INFO, ComponentType.VOLUME,
+                            EventType.VOLUME_ATTACH, "volume.attached", resource.getRasd()
+                                .getElementName(), resource.getRasd().getLimit(), vm.getName());
                     }
                 }
             }
@@ -2148,6 +2156,8 @@ public class VirtualMachineService extends DefaultApiService
         // The function #getStorageFreeAttachmentSlot do the work. However, it only takes
         // the information from database, and we need to have a list of integers of the
         // already assigned slots before in the loop. 'blackList' stores them.
+        List<IpPoolManagement> ipPoolList = removeRepetedResources(resources);
+
         for (IpPoolManagement ip : resources)
         {
             boolean allocated = allocateResource(vm, vapp, ip, getFreeAttachmentSlot(blackList));
@@ -2173,8 +2183,33 @@ public class VirtualMachineService extends DefaultApiService
 
                 // if it is new allocated, we set the integer into the 'blacklisted' list.
                 blackList.add(ip.getSequence());
+                tracer.log(SeverityType.INFO, ComponentType.NETWORK,
+                    EventType.NIC_ASSIGNED_VIRTUAL_MACHINE, "nic.attached", vm.getName(),
+                    ip.getIp(), ip.getVlanNetwork().getName());
             }
         }
+    }
+
+    private List<IpPoolManagement> removeRepetedResources(final List<IpPoolManagement> resources)
+    {
+        Map ipMap = new HashMap();
+
+        for (IpPoolManagement ip : resources)
+        {
+            ipMap.put(ip.getIp(), ip);
+        }
+
+        if (resources.size() > ipMap.size())
+        {
+            String errorCode = APIError.RESOURCES_ALREADY_ASSIGNED.getCode();
+            String message = APIError.RESOURCES_ALREADY_ASSIGNED.getMessage();
+            CommonError error = new CommonError(errorCode, message);
+            addNotFoundErrors(error);
+            flushErrors();
+        }
+
+        return new ArrayList<IpPoolManagement>(ipMap.values());
+
     }
 
     /**
@@ -2230,6 +2265,9 @@ public class VirtualMachineService extends DefaultApiService
                         ip.setVirtualDatacenter(null);
                     }
                     vdcRep.updateIpManagement(ip);
+                    tracer.log(SeverityType.INFO, ComponentType.NETWORK,
+                        EventType.NIC_ASSIGNED_VIRTUAL_MACHINE, "nic.released", oldVm.getName(),
+                        ip.getIp(), ip.getVlanNetwork().getName());
                 }
 
                 // if the dellocated ip is the one with the default configuration,
@@ -2273,6 +2311,9 @@ public class VirtualMachineService extends DefaultApiService
                 {
                     vdcRep.deleteRasd(disk.getRasd());
                     rasdDao.remove(disk);
+                    tracer.log(SeverityType.INFO, ComponentType.STORAGE_DEVICE,
+                        EventType.HARD_DISK_ASSIGN, "hardDisk.released", disk.getSizeInMb(),
+                        oldVm.getName());
                 }
                 else
                 {
@@ -2317,6 +2358,8 @@ public class VirtualMachineService extends DefaultApiService
                     }
                     vol.detach();
                     storageRep.updateVolume(vol);
+                    tracer.log(SeverityType.INFO, ComponentType.VOLUME, EventType.VOLUME_DETACH,
+                        "volume.detached", vol.getName(), vol.getSizeInMB(), oldVm.getName());
                 }
                 else
                 {

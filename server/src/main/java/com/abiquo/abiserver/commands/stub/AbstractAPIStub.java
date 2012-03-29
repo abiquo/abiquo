@@ -357,6 +357,24 @@ public class AbstractAPIStub
             result.setResultCode(BasicResult.NOT_AUTHORIZED);
             throw new UserSessionException(result);
         }
+        else if (response.getStatusCode() == 406)
+        {
+            ErrorManager.getInstance(AbiCloudConstants.ERROR_PREFIX).reportError(
+                new ResourceManager(BasicCommand.class), result,
+                "onFaultAuthorization.noPermission", methodName);
+            result.setMessage(StringUtils.isBlank(message) ? response.getMessage() : message);
+            result.setResultCode(BasicResult.NOT_AUTHORIZED);
+            throw new UserSessionException(result);
+        }
+        else if (response.getStatusCode() == 415)
+        {
+            ErrorManager.getInstance(AbiCloudConstants.ERROR_PREFIX).reportError(
+                new ResourceManager(BasicCommand.class), result,
+                "onFaultAuthorization.noPermission", methodName);
+            result.setMessage(StringUtils.isBlank(message) ? response.getMessage() : message);
+            result.setResultCode(BasicResult.NOT_AUTHORIZED);
+            throw new UserSessionException(result);
+        }
         else
         {
             ErrorsDto errors = response.getEntity(ErrorsDto.class);

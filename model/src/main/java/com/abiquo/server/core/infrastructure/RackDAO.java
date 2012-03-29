@@ -259,7 +259,8 @@ import com.softwarementors.bzngine.entities.PersistentEntity;
 
     private final static String HQL_EMPTY_OFF_MACHINES_IN_RACK =
         "select m from Machine m where m.rack.id = :rackId and m.state = "
-            + MachineState.HALTED_FOR_SAVE.ordinal();
+            + MachineState.HALTED_FOR_SAVE.ordinal()
+            + " order by (case when exists (select n from Hypervisor n where n.machine = m) then 0 else 1 end)";
 
     private final static String HQL_EMPTY_ON_MACHINES_IN_RACK =
         "select m from Machine m where m.rack.id = :rackId and m.state = "
@@ -293,7 +294,8 @@ import com.softwarementors.bzngine.entities.PersistentEntity;
     }
 
     /**
-     * Returns any machine that is in the rack in HALTED_FOR_SAVE.
+     * Returns any machine that is in the rack in HALTED_FOR_SAVE. If howMany <= 0 an empty list is
+     * returned.
      * 
      * @param rackId rack.
      * @return Machine
@@ -301,20 +303,20 @@ import com.softwarementors.bzngine.entities.PersistentEntity;
     public List<Machine> getRandomMachinesToStartFromRack(final Integer rackId,
         final Integer howMany)
     {
-
+        if (howMany <= 0)
+        {
+            return new ArrayList<Machine>();
+        }
         Query q =
             getSession().createQuery(HQL_EMPTY_OFF_MACHINES_IN_RACK).setInteger("rackId", rackId);
 
-        List<Machine> machines = q.list();
-        if (machines.isEmpty())
-        {
-            return null;
-        }
-        return machines.subList(0, howMany < machines.size() ? howMany : machines.size());
+        List<Machine> machines = q.setMaxResults(howMany).list();
+        return machines;
     }
 
     /**
-     * Returns any machine that is in the rack in MANAGED.
+     * Returns any machine that is in the rack in MANAGED. If howMany <= 0 an empty list is
+     * returned.
      * 
      * @param rackId rack.
      * @return Machine
@@ -324,16 +326,26 @@ import com.softwarementors.bzngine.entities.PersistentEntity;
     {
         if (howMany <= 0)
         {
-            return null;
+            return new ArrayList<Machine>();
         }
         Query q =
             getSession().createQuery(HQL_EMPTY_ON_MACHINES_IN_RACK).setInteger("rackId", rackId);
 
-        List<Machine> machines = q.list();
-        if (machines.isEmpty())
-        {
-            return null;
-        }
-        return machines.subList(0, howMany < machines.size() ? howMany : machines.size());
+        List<Machine> machines = q.setMaxResults(howMany).list();
+        return machines;
+    }
+
+    /**
+     * Returns all machine that is in the rack in MANAGED.
+     * 
+     * @param rackId rack.
+     * @return Machine
+     */
+    public List<Machine> getAllMachinesToShutDownFromRack(final Integer rackId)
+    {
+        Query q =
+            getSession().createQuery(HQL_EMPTY_ON_MACHINES_IN_RACK).setInteger("rackId", rackId);
+
+        return q.list();
     }
 }

@@ -68,6 +68,7 @@ import com.vmware.vim25.HostDatastoreConnectInfo;
 import com.vmware.vim25.HostHardwareInfo;
 import com.vmware.vim25.HostHostBusAdapter;
 import com.vmware.vim25.HostInternetScsiHba;
+import com.vmware.vim25.HostListSummary;
 import com.vmware.vim25.HostNetworkInfo;
 import com.vmware.vim25.HostProxySwitch;
 import com.vmware.vim25.HostVirtualSwitch;
@@ -139,6 +140,8 @@ public class ESXiCollector extends AbstractCollector
     private static final String NAME = "name";
 
     private static final String HARDWARE = "hardware";
+
+    private static final String HOST_SUMMARY = "summary";
 
     private static PropertySpec[] virtualMachineSpec;
 
@@ -383,6 +386,11 @@ public class ESXiCollector extends AbstractCollector
         {
             LOGGER.error("Unexpected exception:", e);
             throw new CollectorException(MessageValues.COLL_EXCP_PH, e);
+        }
+
+        if (isInMaintenanceMode(hostSystem))
+        {
+            throw new NoManagedException(MessageValues.NOMAN_ESXI_LIC);
         }
 
         // Please check the following url to understand the DynamicProperty indexation in this code
@@ -1360,6 +1368,30 @@ public class ESXiCollector extends AbstractCollector
         }
 
         return rdPort;
+    }
+
+    /**
+     * Checks if the Host is in maintenance mode
+     */
+    private boolean isInMaintenanceMode(final ObjectContent hostSystem) throws CollectorException
+    {
+        try
+        {
+            HostListSummary summary =
+                (HostListSummary) getDynamicProperty(hostSystem, HOST_SUMMARY);
+
+            if (summary.rebootRequired)
+            {
+                LOGGER.warn("ESXi host requires reboot");
+            }
+
+            return summary.getRuntime().isInMaintenanceMode();
+        }
+        catch (Exception e)
+        {
+            LOGGER.error(MessageValues.UNP_EXCP, e.getMessage());
+            throw new CollectorException(MessageValues.UNP_EXCP);
+        }
     }
 
     /**

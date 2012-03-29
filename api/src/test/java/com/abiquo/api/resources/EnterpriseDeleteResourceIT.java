@@ -50,7 +50,7 @@ public class EnterpriseDeleteResourceIT extends AbstractJpaGeneratorIT
     public void setupSysadmin()
     {
         Enterprise e = enterpriseGenerator.createUniqueInstance();
-        Role r = roleGenerator.createUniqueInstance();
+        Role r = roleGenerator.createInstanceSysAdmin();
         User u = userGenerator.createInstance(e, r, "sysadmin", "sysadmin");
 
         List<Object> entitiesToSetup = new ArrayList<Object>();

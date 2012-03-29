@@ -81,8 +81,8 @@ import com.abiquo.tracer.SeverityType;
 public class VirtualMachineTemplateService extends DefaultApiService
 {
 
-    final private static Logger logger = LoggerFactory
-        .getLogger(VirtualMachineTemplateService.class);
+    final private static Logger logger =
+        LoggerFactory.getLogger(VirtualMachineTemplateService.class);
 
     @Autowired
     private RepositoryDAO repositoryDao;
@@ -227,7 +227,11 @@ public class VirtualMachineTemplateService extends DefaultApiService
         HypervisorType hypervisor = null;
         if (categoryName != null)
         {
-            category = appsLibraryRep.findCategoryByName(categoryName);
+            category = appsLibraryRep.findCategoryByName(categoryName, null);
+            if (category == null)
+            {
+                category = appsLibraryRep.findCategoryByName(categoryName, enterprise);
+            }
         }
         if (hypervisorName != null)
         {
@@ -471,8 +475,8 @@ public class VirtualMachineTemplateService extends DefaultApiService
             // moreover check if the current user doesn't have the privelige to impersonate between
             // enterprises
             if (!vmtemplateToDelete.getEnterprise().getId().equals(ent.getId())
-                && !securityService.hasPrivilege(Privileges.ENTERPRISE_ADMINISTER_ALL,
-                    userService.getCurrentUser()))
+                && !securityService.hasPrivilege(Privileges.ENTERPRISE_ADMINISTER_ALL, userService
+                    .getCurrentUser()))
             {
                 addConflictErrors(APIError.VMTEMPLATE_SHARED_TEMPLATE_FROM_OTHER_ENTERPRISE);
                 flushErrors();
@@ -563,7 +567,9 @@ public class VirtualMachineTemplateService extends DefaultApiService
         checkEnterpriseCanUseDatacenter(enterpriseId, datacenterId);
 
         Datacenter datacenter = infrastructureService.getDatacenter(datacenterId);
-        Category category = categoryService.getCategoryByName(categoryName);
+        Enterprise enterprise = userService.getCurrentUser().getEnterprise();
+        Category category =
+            categoryService.getCategoryByNameAndEnterprise(categoryName, enterprise);
 
         if (virtualdatacenterId == null)
         {

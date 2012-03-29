@@ -39,7 +39,6 @@ import com.abiquo.server.core.infrastructure.management.RasdDAO;
 import com.abiquo.server.core.infrastructure.management.RasdManagement;
 import com.abiquo.server.core.infrastructure.management.RasdManagementDAO;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
-import com.abiquo.server.core.infrastructure.network.IpPoolManagement.OrderByEnum;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagementDAO;
 import com.abiquo.server.core.infrastructure.network.Network;
 import com.abiquo.server.core.infrastructure.network.NetworkAssignment;
@@ -49,6 +48,7 @@ import com.abiquo.server.core.infrastructure.network.NetworkConfigurationDAO;
 import com.abiquo.server.core.infrastructure.network.NetworkDAO;
 import com.abiquo.server.core.infrastructure.network.VLANNetwork;
 import com.abiquo.server.core.infrastructure.network.VLANNetworkDAO;
+import com.abiquo.server.core.infrastructure.network.IpPoolManagement.OrderByEnum;
 import com.abiquo.server.core.infrastructure.storage.DiskManagement;
 import com.abiquo.server.core.infrastructure.storage.DiskManagementDAO;
 import com.abiquo.server.core.util.FilterOptions;
@@ -380,7 +380,7 @@ public class VirtualDatacenterRep extends DefaultRepBase
     {
         return ipManagementDAO.findNextIpAvailable(vlanId, excludedIp);
     }
-    
+
     /**
      * Return next available private IP by VLAN with filter options.
      * 
@@ -389,7 +389,8 @@ public class VirtualDatacenterRep extends DefaultRepBase
      * @param excludedIp ip excluded from result if exists
      * @return list of IpPoolManagement.
      */
-    public IpPoolManagement findNextExternalIpAvailable(final Integer vlanId, final String... excludedIp)
+    public IpPoolManagement findNextExternalIpAvailable(final Integer vlanId,
+        final String... excludedIp)
     {
         return ipManagementDAO.findNextExternalIpAvailable(vlanId, excludedIp);
     }
@@ -465,19 +466,20 @@ public class VirtualDatacenterRep extends DefaultRepBase
 
     public List<IpPoolManagement> findPublicIpsByDatacenter(final Integer datacenterId,
         final Integer startwith, final Integer limit, final String filter,
-        final OrderByEnum orderByEnum, final Boolean descOrAsc, final NetworkType netType)
+        final OrderByEnum orderByEnum, final Boolean descOrAsc, final NetworkType netType,
+        final Boolean all)
     {
         return ipManagementDAO.findPublicIpsByDatacenter(datacenterId, startwith, limit, filter,
-            orderByEnum, descOrAsc, netType);
+            orderByEnum, descOrAsc, netType, all);
     }
 
     public List<IpPoolManagement> findPublicIpsByEnterprise(final Integer datacenterId,
         final Integer enterpriseId, final Integer startwith, final Integer limit,
         final String filter, final OrderByEnum orderByEnum, final Boolean descOrAsc,
-        final NetworkType netType)
+        final NetworkType netType, final Boolean all)
     {
         return ipManagementDAO.findPublicIpsByEnterpriseAndDatacenter(datacenterId, enterpriseId,
-            startwith, limit, filter, orderByEnum, descOrAsc, netType);
+            startwith, limit, filter, orderByEnum, descOrAsc, netType, all);
     }
 
     public List<IpPoolManagement> findPublicIpsByVlan(final Integer datacenterId,

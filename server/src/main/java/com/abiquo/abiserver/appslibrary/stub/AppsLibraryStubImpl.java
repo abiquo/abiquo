@@ -54,6 +54,7 @@ import com.abiquo.appliancemanager.transport.TemplateStateDto;
 import com.abiquo.appliancemanager.transport.TemplatesStateDto;
 import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.model.rest.RESTLink;
+import com.abiquo.model.transport.LinksDto;
 import com.abiquo.model.transport.error.ErrorDto;
 import com.abiquo.model.transport.error.ErrorsDto;
 import com.abiquo.server.core.appslibrary.CategoriesDto;
@@ -121,8 +122,8 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
             getTemplateDefinitionListIdFromName(idEnterprise, templateDefinitionListName);
 
         String uri =
-            createTemplateDefinitionListLink(idEnterprise.toString(),
-                templateDefinitionListId.toString());
+            createTemplateDefinitionListLink(idEnterprise.toString(), templateDefinitionListId
+                .toString());
         ClientResponse response = delete(uri);
 
         if (response.getStatusType().getFamily() != Family.SUCCESSFUL)
@@ -233,8 +234,8 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
         }
 
         final String uri =
-            createTemplateStateLink(String.valueOf(idEnterprise),
-                String.valueOf(templateDefinitionId));
+            createTemplateStateLink(String.valueOf(idEnterprise), String
+                .valueOf(templateDefinitionId));
 
         ClientResponse response =
             resource(uri, TemplateStateDto.MEDIA_TYPE).queryParam("datacenterId", datacenterId)
@@ -292,8 +293,8 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
             getTemplateDefinitionIdByUrl(templateDefinitionUrl, idEnterprise);
 
         final String uri =
-            createTemplateDefinitionInstallLink(String.valueOf(idEnterprise),
-                String.valueOf(templateDefinitionId));
+            createTemplateDefinitionInstallLink(String.valueOf(idEnterprise), String
+                .valueOf(templateDefinitionId));
 
         Resource resource = resource(uri, MediaType.TEXT_PLAIN);
         ClientResponse response = resource.post(String.valueOf(datacenterId));
@@ -329,8 +330,8 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
             getTemplateDefinitionIdByUrl(templateDefinitionUrl, idEnterprise);
 
         final String uri =
-            createTemplateDefinitionUninstallLink(String.valueOf(idEnterprise),
-                String.valueOf(templateDefinitionId));
+            createTemplateDefinitionUninstallLink(String.valueOf(idEnterprise), String
+                .valueOf(templateDefinitionId));
 
         Resource resource = resource(uri, MediaType.TEXT_PLAIN);
         ClientResponse response = resource.post(String.valueOf(datacenterId));
@@ -511,6 +512,9 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
         try
         {
             list = refreshTemplateDefintionListFromRepository(idEnterprise, idList);
+
+            result.setSuccess(Boolean.TRUE);
+            result.setData(createFlexOVFPackageListObject(list));
         }
         catch (WebApplicationException e)
         {
@@ -521,11 +525,7 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
                 : "Request fails");
         }
 
-        result.setSuccess(Boolean.TRUE);
-        result.setData(createFlexOVFPackageListObject(list));
-
         return result;
-
     }
 
     private TemplateDefinitionListDto refreshTemplateDefintionListFromRepository(
@@ -573,8 +573,8 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
             getTemplateDefinitionListIdFromName(idEnterprise, templateDefinitionListName);
 
         String uri =
-            createTemplateDefinitionLink(idEnterprise.toString(),
-                templateDefinitionListId.toString());
+            createTemplateDefinitionLink(idEnterprise.toString(), templateDefinitionListId
+                .toString());
         ClientResponse response = get(uri, TemplateDefinitionsDto.MEDIA_TYPE);
 
         if (response.getStatusType().getFamily() != Family.SUCCESSFUL)
@@ -630,8 +630,8 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
     public static com.abiquo.abiserver.pojo.virtualimage.DiskFormatType createFlexDiskFormatTypeObject(
         final DiskFormatTypeDto diskFormatTypeDto)
     {
-        return new com.abiquo.abiserver.pojo.virtualimage.DiskFormatType(DiskFormatType.fromId(diskFormatTypeDto
-            .getId()));
+        return new com.abiquo.abiserver.pojo.virtualimage.DiskFormatType(DiskFormatType
+            .fromId(diskFormatTypeDto.getId()));
     }
 
     protected OVFPackageList createFlexOVFPackageListObject(final TemplateDefinitionListDto listDto)
@@ -747,12 +747,16 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
      */
 
     @Override
-    public DataResult<List<Category>> getCategories()
+    public DataResult<List<Category>> getCategories(final Integer idEnterprise)
     {
 
         DataResult<List<Category>> result = new DataResult<List<Category>>();
 
-        final String uri = createCategoriesLink();
+        String uri = createCategoriesLink();
+        if (idEnterprise != null)
+        {
+            uri = uri + "?idEnterprise=" + String.valueOf(idEnterprise);
+        }
 
         ClientResponse response = get(uri, CategoriesDto.MEDIA_TYPE);
 
@@ -777,10 +781,17 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
     }
 
     @Override
-    public DataResult<Category> createCategory(final CategoryDto categoryDto)
+    public DataResult<Category> createCategory(final CategoryDto categoryDto,
+        final Integer idEnterprise)
     {
         DataResult<Category> result = new DataResult<Category>();
 
+        if (idEnterprise != 0)
+        {
+            RESTLink link = new RESTLink("enterprise", createEnterpriseLink(idEnterprise));
+            link.setType(LinksDto.MEDIA_TYPE);
+            categoryDto.addLink(link);
+        }
         String uri = createCategoriesLink();
 
         ClientResponse response = post(uri, categoryDto);
