@@ -310,8 +310,14 @@ public class EnterpriseResource extends AbstractResource
             vdcs.add(VirtualDatacenterResource.createTransferObject(d, restBuilder));
         }
 
-        return vdcs;
+        if (!all.isEmpty())
+        {
+            vdcs.setTotalSize(((PagedList< ? >) all).getTotalResults());
+            vdcs.addLinks(restBuilder.buildPaggingLinks(uriInfo.getAbsolutePath().toString(),
+                (PagedList< ? >) all));
+        }
 
+        return vdcs;
     }
 
     /**

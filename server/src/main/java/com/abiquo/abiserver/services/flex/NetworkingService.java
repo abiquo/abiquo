@@ -52,7 +52,7 @@ public class NetworkingService
 {
 
     /** The stub used to connect to the API. */
-    private NetworkResourceStub networkStub;
+    private final NetworkResourceStub networkStub;
 
     /**
      * Constructor The implemention of the BasicCommand and the ResourceLocator to be used is
@@ -147,7 +147,7 @@ public class NetworkingService
         vlandto.setMask(configuration.getMask());
         vlandto.setPrimaryDNS(configuration.getPrimaryDNS());
         vlandto.setSecondaryDNS(configuration.getSecondaryDNS());
-        vlandto.setTag((tag.equals(0))? null : tag);
+        vlandto.setTag(tag.equals(0) ? null : tag);
         vlandto.setSufixDNS(configuration.getSufixDNS());
         DhcpOptionsDto options = new DhcpOptionsDto();
         for (DhcpOption opt : dhcpOptions)
@@ -272,9 +272,18 @@ public class NetworkingService
     public BasicResult getNetworkPoolInfoByVDC(final UserSession userSession,
         final Integer virtualDataCenterId, final ListRequest listRequest, final String type)
     {
+        return getNetworkPoolInfoByVDC(userSession, virtualDataCenterId, listRequest, type, false);
+    }
+
+    // overloaded method not to change client call
+    // with parameter all =false we don't get prohibited IP's
+    public BasicResult getNetworkPoolInfoByVDC(final UserSession userSession,
+        final Integer virtualDataCenterId, final ListRequest listRequest, final String type,
+        final Boolean all)
+    {
         return proxyStub(userSession).getListNetworkPoolByVirtualDatacenter(virtualDataCenterId,
             listRequest.getOffset(), listRequest.getNumberOfNodes(), listRequest.getFilterLike(),
-            listRequest.getOrderBy(), listRequest.getAsc(), type);
+            listRequest.getOrderBy(), listRequest.getAsc(), type, all);
     }
 
     /**
@@ -310,9 +319,10 @@ public class NetworkingService
         return proxyStub(userSession).getNICsByVirtualMachine(virtualDatacenterId, vappId,
             virtualMachineId);
     }
-    
+
     public BasicResult getInfrastructureNICsByVirtualMachine(final UserSession userSession,
-        final Integer datacenterId, final Integer rackId, final Integer machineId, final Integer virtualMachineId)
+        final Integer datacenterId, final Integer rackId, final Integer machineId,
+        final Integer virtualMachineId)
     {
         return proxyStub(userSession).getInfrastructureNICsByVirtualMachine(datacenterId, rackId,
             machineId, virtualMachineId);

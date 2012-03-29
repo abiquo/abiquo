@@ -51,7 +51,6 @@ import com.abiquo.model.transport.error.CommonError;
 import com.abiquo.server.core.appslibrary.Category;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualDatacenterRep;
-import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineRep;
 import com.abiquo.server.core.common.Limit;
 import com.abiquo.server.core.enterprise.DatacenterLimits;
@@ -67,8 +66,12 @@ import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.InfrastructureRep;
 import com.abiquo.server.core.infrastructure.Machine;
 import com.abiquo.server.core.infrastructure.MachineDto;
+import com.abiquo.server.core.infrastructure.network.VLANNetwork;
 import com.abiquo.server.core.pricing.PricingRep;
 import com.abiquo.server.core.pricing.PricingTemplate;
+import com.abiquo.tracer.ComponentType;
+import com.abiquo.tracer.EventType;
+import com.abiquo.tracer.SeverityType;
 
 @Service
 public class EnterpriseService extends DefaultApiService
@@ -99,6 +102,10 @@ public class EnterpriseService extends DefaultApiService
 
     @Autowired
     private CategoryService categoryService;
+
+    /** Autowired Virtual Infrastructure DAO repository. */
+    @Autowired
+    protected VirtualDatacenterRep virtualDatacenterRep;
 
     public EnterpriseService()
     {
@@ -216,6 +223,8 @@ public class EnterpriseService extends DefaultApiService
         isValidEnterprise(enterprise);
 
         repo.insert(enterprise);
+        tracer.log(SeverityType.INFO, ComponentType.ENTERPRISE, EventType.ENTERPRISE_CREATE,
+            "enterprise.created", enterprise.getName());
         return enterprise;
     }
 
@@ -324,11 +333,16 @@ public class EnterpriseService extends DefaultApiService
 
                     PricingTemplate pricingTemplate = findPricingTemplate(idPricing);
                     old.setPricingTemplate(pricingTemplate);
+                    tracer.log(SeverityType.INFO, ComponentType.ENTERPRISE,
+                        EventType.PRICING_TEMPLATE_ASSIGNED, "pricingtemplate.assigned",
+                        pricingTemplate.getName(), old.getName());
                 }
             }
         }
 
         repo.update(old);
+        tracer.log(SeverityType.INFO, ComponentType.ENTERPRISE, EventType.ENTERPRISE_MODIFY,
+            "enterprise.modified", old.getName());
         return old;
     }
 
@@ -399,8 +413,22 @@ public class EnterpriseService extends DefaultApiService
                 categoryService.removeCategory(c.getId());
             }
         }
+        Collection<VLANNetwork> vlans =
+            virtualDatacenterRep.findExternalVlansByEnterprise(enterprise);
+
+        if (vlans != null)
+        {
+            for (VLANNetwork v : vlans)
+            {
+                virtualDatacenterRep.deleteVLAN(v);
+            }
+        }
+
         removeEnterpriseProperties(enterprise);
         repo.delete(enterprise);
+        tracer.log(SeverityType.INFO, ComponentType.ENTERPRISE, EventType.ENTERPRISE_DELETE,
+            "enterprise.deleted", enterprise.getName());
+
     }
 
     protected void deleteRole(final Role role)
@@ -432,16 +460,19 @@ public class EnterpriseService extends DefaultApiService
 
         Enterprise enterprise = getEnterprise(enterpriseId);
 
-        List<VirtualMachine> vms =
-            (List<VirtualMachine>) virtualMachineRep.findManagedByHypervisor(machine
-                .getHypervisor());
-        for (VirtualMachine vm : vms)
+        if (machine.getEnterprise() != null)
         {
-            if (!vm.getEnterprise().equals(enterprise))
+            if (machine.getEnterprise().getId() != enterpriseId)
             {
-                addConflictErrors(APIError.MACHINE_CANNOT_BE_RESERVED);
+                addConflictErrors(APIError.MACHINE_RESERVED_ENTERPRISE);
                 flushErrors();
             }
+            else
+            {
+                addConflictErrors(APIError.MACHINE_ALREADY_RESERVED);
+                flushErrors();
+            }
+
         }
 
         repo.reserveMachine(machine, enterprise);
@@ -456,7 +487,7 @@ public class EnterpriseService extends DefaultApiService
         Machine machine = repo.findReservedMachine(enterprise, machineId);
         if (machine == null)
         {
-            addNotFoundErrors(APIError.NON_EXISTENT_MACHINE);
+            addNotFoundErrors(APIError.MACHINE_NOT_RESERVED);
             flushErrors();
         }
 

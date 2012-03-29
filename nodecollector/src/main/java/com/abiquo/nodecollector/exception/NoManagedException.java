@@ -24,7 +24,7 @@ package com.abiquo.nodecollector.exception;
 /**
  * @author jdevesa
  */
-public class NoManagedException extends Exception
+public class NoManagedException extends NodecollectorException
 {
 
     /**
