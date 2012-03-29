@@ -27,7 +27,10 @@ BEGIN
     -- ######## SCHEMA: TABLES ADDED ####### --
     -- ##################################### --     
     SELECT "STEP 2 CREATING NEW TABLES..." as " ";
-    
+    IF NOT EXISTS (SELECT * FROM information_schema.columns WHERE table_schema= 'kinton' AND table_name='category' AND column_name='idEnterprise') THEN
+		SELECT "Adding idEnterprise on category" as " ";
+		ALTER TABLE kinton.category ADD COLUMN idEnterprise int(10) unsigned default NULL;
+	END IF;
 
     -- ###################################### --    
         -- ######## SCHEMA: COLUMNS ADDED ####### --
@@ -45,7 +48,13 @@ BEGIN
     -- ######## SCHEMA: CONSTRAINTS MODIFIED ###### --
     -- ############################################ --  
     SELECT "STEP 5 MODIFIYING CONSTRAINTS..." as " ";
-    
+    IF EXISTS (SELECT * FROM information_schema.table_constraints WHERE table_schema= 'kinton' AND table_name='category' AND constraint_name='category_enterprise_FK') THEN
+		ALTER TABLE kinton.category DROP FOREIGN KEY category_enterprise_FK;
+	END IF;
+
+    IF NOT EXISTS (SELECT * FROM information_schema.table_constraints WHERE table_schema= 'kinton' AND table_name='category' AND constraint_name='category_enterprise_FK') THEN
+		ALTER TABLE kinton.category ADD CONSTRAINT category_enterprise_FK FOREIGN KEY category_enterprise_FK (idEnterprise) REFERENCES enterprise (idEnterprise) ON DELETE CASCADE ON UPDATE NO ACTION;
+	END IF;
 
     -- ########################################################## --    
         -- ######## DATA: NEW DATA (INSERTS, UPDATES, DELETES ####### --

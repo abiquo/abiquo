@@ -278,19 +278,21 @@ public class AppsLibraryService
      * CATEGORY
      */
 
-    public DataResult<List<Category>> getCategories(final UserSession userSession)
+    public DataResult<List<Category>> getCategories(final UserSession userSession,
+        final Integer idEnterprise)
     {
-        return proxyStub(userSession).getCategories();
+        return proxyStub(userSession).getCategories(idEnterprise);
     }
 
     public DataResult<Category> createCategory(final UserSession userSession,
-        final String categoryName)
+        final String categoryName, final Integer idEnterprise)
     {
         CategoryDto categoryDto = new CategoryDto();
         categoryDto.setName(categoryName);
         categoryDto.setDefaultCategory(false);
         categoryDto.setErasable(true);
-        return proxyStub(userSession).createCategory(categoryDto);
+
+        return proxyStub(userSession).createCategory(categoryDto, idEnterprise);
     }
 
     public BasicResult deleteCategory(final UserSession userSession, final Integer idCategory)

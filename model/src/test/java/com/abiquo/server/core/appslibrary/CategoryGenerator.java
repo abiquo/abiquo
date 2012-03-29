@@ -24,15 +24,20 @@ package com.abiquo.server.core.appslibrary;
 import java.util.List;
 
 import com.abiquo.server.core.common.DefaultEntityGenerator;
+import com.abiquo.server.core.enterprise.Enterprise;
+import com.abiquo.server.core.enterprise.EnterpriseGenerator;
 import com.softwarementors.commons.test.SeedGenerator;
 import com.softwarementors.commons.testng.AssertEx;
 
 public class CategoryGenerator extends DefaultEntityGenerator<Category>
 {
 
+    private final EnterpriseGenerator enterpriseGenerator;
+
     public CategoryGenerator(final SeedGenerator seed)
     {
         super(seed);
+        enterpriseGenerator = new EnterpriseGenerator(seed);
     }
 
     @Override
@@ -40,6 +45,11 @@ public class CategoryGenerator extends DefaultEntityGenerator<Category>
     {
         AssertEx.assertPropertiesEqualSilent(obj1, obj2, Category.NAME_PROPERTY,
             Category.DEFAULT_PROPERTY, Category.ERASABLE_PROPERTY);
+        if (obj1.getEnterprise() != null)
+        {
+            enterpriseGenerator
+                .assertAllPropertiesEqual(obj1.getEnterprise(), obj2.getEnterprise());
+        }
     }
 
     @Override
@@ -60,6 +70,11 @@ public class CategoryGenerator extends DefaultEntityGenerator<Category>
         final List<Object> entitiesToPersist)
     {
         super.addAuxiliaryEntitiesToPersist(entity, entitiesToPersist);
+        if (entity.getEnterprise() != null)
+        {
+            Enterprise enterprise = entity.getEnterprise();
+            enterpriseGenerator.addAuxiliaryEntitiesToPersist(enterprise, entitiesToPersist);
+            entitiesToPersist.add(enterprise);
+        }
     }
-
 }

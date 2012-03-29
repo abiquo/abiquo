@@ -613,11 +613,14 @@ public enum APIError
 
     // CATEGORY
     NON_EXISTENT_CATEGORY("CATEGORY-1", "The requested category does not exist"), CATEGORY_DUPLICATED_NAME(
-        "CATEGORY-2", "Duplicate category name"), CATEGORY_NOT_ERASABLE("CATEGORY-3",
+        "CATEGORY-2", "Duplicated name for the category."), CATEGORY_NOT_ERASABLE("CATEGORY-3",
         "This category cannot be deleted"), INVALID_CATEGORY_LINK("CATEGORY-4",
         "Invalid Category identifier in the Category link"), CATEGORY_CANNOT_BE_NULL("CATEGORY-5",
-        "Category name cannot be null"),
-
+        "Category name cannot be null"), CATEGORY_CANNOT_MOVE_LOCAL("CATEGORY-6",
+        "Cannot move a local category to other enterprise."), CATEGORY_NO_PRIVELIGES_TO_CREATE_GLOBAL(
+        "CATEGORY-7", "Current User does not have enough privileges to create a global category."), CATEGORY_CANNOT_CHANGE_TO_LOCAL(
+        "CATEGORY-8", "Cannot change a global category to a local category."), CATEGORY_NO_PRIVELIGES_TO_REMOVE(
+        "CATEGORY-9", "Current User does not have enough privileges to remove category."),
     // ICONS
     ICON_DUPLICATED_PATH("ICON-1", "Duplicate path for an icon"), NON_EXISTENT_ICON("ICON-2",
         "The requested icon does not exist"), NON_EXISENT_ICON_WITH_PATH("ICON-3",
@@ -745,8 +748,8 @@ public enum APIError
         // Outputs all errors in wiki table format
         for (APIError error : errors)
         {
-            System.out.println(String.format("| %s | %s | %s |", error.code, error.message,
-                error.name()));
+            System.out.println(String.format("| %s | %s | %s |", error.code, error.message, error
+                .name()));
         }
 
         System.out.println("\n ************ Flex client labels ************** \n");

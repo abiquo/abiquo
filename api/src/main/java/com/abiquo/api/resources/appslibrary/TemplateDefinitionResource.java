@@ -109,7 +109,7 @@ public class TemplateDefinitionResource extends AbstractResource
         @PathParam(EnterpriseResource.ENTERPRISE) final Integer idEnterprise,
         @Context final IRESTBuilder restBuilder) throws Exception
     {
-        TemplateDefinition d = transformer.createPersistenceObject(templateDef);
+        TemplateDefinition d = transformer.createPersistenceObject(templateDef, true);
 
         d = service.updateTemplateDefinition(templateDefId, d, idEnterprise);
 
