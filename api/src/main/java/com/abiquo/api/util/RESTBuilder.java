@@ -73,6 +73,7 @@ import com.abiquo.api.resources.cloud.VirtualMachinesResource;
 import com.abiquo.api.resources.config.PrivilegeResource;
 import com.abiquo.api.resources.config.SystemPropertyResource;
 import com.abiquo.api.services.InfrastructureService;
+import com.abiquo.appliancemanager.transport.TemplatesStateDto;
 import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.model.rest.RESTLink;
 import com.abiquo.model.transport.AcceptedRequestDto;
@@ -600,6 +601,11 @@ public class RESTBuilder implements IRESTBuilder
 
         links.add(builder.buildRestLink(TemplateDefinitionListResource.class, REL_EDIT, params,
             TemplateDefinitionListDto.BASE_MEDIA_TYPE));
+
+        links.add(builder.buildRestLink(TemplateDefinitionListResource.class,
+            TemplateDefinitionListResource.TEMPLATE_DEFINITION_LIST_REPOSITORY_STATUS_PATH,
+            TemplateDefinitionListResource.TEMPLATE_DEFINITION_LIST_REPOSITORY_STATUS_REL, params,
+            TemplatesStateDto.BASE_MEDIA_TYPE));
 
         return links;
     }
