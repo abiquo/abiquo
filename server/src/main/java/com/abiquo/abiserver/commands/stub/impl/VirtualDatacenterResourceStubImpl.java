@@ -37,6 +37,7 @@ import com.abiquo.abiserver.commands.stub.AbstractAPIStub;
 import com.abiquo.abiserver.commands.stub.VirtualDatacenterResourceStub;
 import com.abiquo.abiserver.persistence.DAOFactory;
 import com.abiquo.abiserver.persistence.hibernate.HibernateDAOFactory;
+import com.abiquo.abiserver.pojo.infrastructure.HyperVisorType;
 import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.result.DataResult;
 import com.abiquo.abiserver.pojo.result.ListRequest;
@@ -97,8 +98,8 @@ public class VirtualDatacenterResourceStubImpl extends AbstractAPIStub implement
         vlanDto.setSufixDNS(netConfig.getSufixDNS());
 
         String datacenterLink =
-            URIResolver.resolveURI(apiUri, "admin/datacenters/{datacenter}",
-                Collections.singletonMap("datacenter", String.valueOf(vdc.getIdDataCenter())));
+            URIResolver.resolveURI(apiUri, "admin/datacenters/{datacenter}", Collections
+                .singletonMap("datacenter", String.valueOf(vdc.getIdDataCenter())));
 
         String enterpriseLink = createEnterpriseLink(vdc.getEnterprise().getId());
         URIResolver.resolveURI(apiUri, "cloud/virtualdatacenters", new HashMap<String, String>());
@@ -254,6 +255,10 @@ public class VirtualDatacenterResourceStubImpl extends AbstractAPIStub implement
 
             for (VirtualDatacenterDto vdc : dto.getCollection())
             {
+                int datacenterId =
+                    URIResolver.getLinkId(vdc.searchLink("datacenter"), "admin/datacenters",
+                        "{datacenter}", "datacenter");
+
                 // TODO set all limits
                 ResourceAllocationLimit limits = new ResourceAllocationLimit();
 
@@ -266,6 +271,8 @@ public class VirtualDatacenterResourceStubImpl extends AbstractAPIStub implement
                 pojo.setId(vdc.getId());
                 pojo.setName(vdc.getName());
                 pojo.setLimits(limits);
+                pojo.setIdDataCenter(datacenterId);
+                pojo.setHyperType(new HyperVisorType(vdc.getHypervisorType()));
 
                 collection.add(pojo);
             }

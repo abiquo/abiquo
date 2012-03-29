@@ -229,8 +229,8 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
                 virtualApplianceId);
 
             traceLog(SeverityType.CRITICAL, ComponentType.VIRTUAL_APPLIANCE, EventType.VAPP_CREATE,
-                userSession, null, virtualAppliance.getVirtualDataCenter().getName(), e
-                    .getMessage(), null, null, null, null, null);
+                userSession, null, virtualAppliance.getVirtualDataCenter().getName(),
+                e.getMessage(), null, null, null, null, null);
 
             return dataResult;
         }
@@ -264,8 +264,8 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
         if (!result.getSuccess())
         {
             BasicCommand.traceLog(SeverityType.CRITICAL, ComponentType.VIRTUAL_DATACENTER,
-                EventType.VDC_CREATE, userSession, null, virtualDataCenter.getName(), result
-                    .getMessage(), null, null, null, null, null);
+                EventType.VDC_CREATE, userSession, null, virtualDataCenter.getName(),
+                result.getMessage(), null, null, null, null, null);
         }
         else
         {
@@ -297,15 +297,19 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
 
         if (!result.getSuccess())
         {
-            BasicCommand.traceLog(SeverityType.CRITICAL, ComponentType.VIRTUAL_DATACENTER,
-                EventType.VDC_DELETE, userSession, null, virtualDataCenter.getName(), result
-                    .getMessage(), null, null, null, null, null);
+            BasicCommand.traceLog(SeverityType.INFO, ComponentType.VIRTUAL_DATACENTER,
+                EventType.VDC_DELETE, userSession, null, virtualDataCenter.getName(),
+                "Error deleting Virtual datacenter '" + virtualDataCenter.getName() + "'", null,
+                null, null, null, null);
         }
         else
         {
-            BasicCommand.traceLog(SeverityType.INFO, ComponentType.VIRTUAL_DATACENTER,
-                EventType.VDC_DELETE, userSession, null, virtualDataCenter.getName(), null, null,
-                null, null, null, null);
+
+            BasicCommand.traceLog(SeverityType.CRITICAL, ComponentType.VIRTUAL_DATACENTER,
+                EventType.VDC_DELETE, userSession, null, virtualDataCenter.getName(),
+                "Virtual datacenter '" + virtualDataCenter.getName() + "' with a "
+                    + virtualDataCenter.getHyperType().getName() + " hypervisor has been deleted",
+                null, null, null, null, null);
         }
 
         return result;
@@ -355,8 +359,8 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
         if (!result.getSuccess())
         {
             BasicCommand.traceLog(SeverityType.CRITICAL, ComponentType.VIRTUAL_DATACENTER,
-                EventType.VDC_MODIFY, userSession, null, virtualDataCenter.getName(), result
-                    .getMessage(), null, null, null, null, null);
+                EventType.VDC_MODIFY, userSession, null, virtualDataCenter.getName(),
+                result.getMessage(), null, null, null, null, null);
         }
         else
         {
@@ -780,8 +784,8 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
                 .getVirtualDataCenter().getName(), message, vApp, null, null, null, null);
         }
 
-        errorManager.reportError(resourceManager, dataResult, reportErrorKey, exception, vApp
-            .getId());
+        errorManager.reportError(resourceManager, dataResult, reportErrorKey, exception,
+            vApp.getId());
 
         if (exception instanceof VirtualApplianceTimeoutException)
         {
@@ -890,8 +894,8 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
 
                     VirtualSystemEvent event = new VirtualSystemEvent();
                     event.setEventType(eventType.name());
-                    event.setVirtualSystemAddress(String.format("http://%s:%d/", hv.getIp(), hv
-                        .getPort()));
+                    event.setVirtualSystemAddress(String.format("http://%s:%d/", hv.getIp(),
+                        hv.getPort()));
                     event.setVirtualSystemId(vm.getName());
                     event.setVirtualSystemType(hv.getType().getName());
 
@@ -1116,8 +1120,8 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
             ResourceAllocationSettingData rasd = netMan.getRasd();
             session.delete(rasd);
 
-            if (resourceManagement.getVirtualDataCenter().getDefaultVlan().getNetworkType().equals(
-                NetworkType.UNMANAGED.name()))
+            if (resourceManagement.getVirtualDataCenter().getDefaultVlan().getNetworkType()
+                .equals(NetworkType.UNMANAGED.name()))
             {
                 session.delete(netMan);
             }

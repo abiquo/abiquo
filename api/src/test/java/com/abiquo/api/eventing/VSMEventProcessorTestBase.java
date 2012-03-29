@@ -109,13 +109,13 @@ public abstract class VSMEventProcessorTestBase extends AbstractUnitTest
         {
             if (stage.getEvent() != null)
             {
-                VirtualMachine foundVM = processor.vmRepo.findByName(stage.getName());
+                VirtualMachine foundVM = processor.virtualMachineRep.findByName(stage.getName());
 
                 processor.onEvent(buildEvent(stage.getEvent(), foundVM.getName(), foundVM
                     .getHypervisor().getMachine().getName(), foundVM.getHypervisor().getType()
                     .name()));
 
-                foundVM = processor.vmRepo.findByName(stage.getName());
+                foundVM = processor.virtualMachineRep.findByName(stage.getName());
 
                 assertEquals(foundVM.getState(), stage.getExpected());
             }
@@ -200,13 +200,13 @@ public abstract class VSMEventProcessorTestBase extends AbstractUnitTest
         {
             if (stage.getEvent() != null)
             {
-                VirtualMachine foundVM = processor.vmRepo.findByName(stage.getName());
+                VirtualMachine foundVM = processor.virtualMachineRep.findByName(stage.getName());
 
                 processor.onEvent(buildEvent(stage.getEvent(), foundVM.getName(), foundVM
                     .getHypervisor().getMachine().getName(), foundVM.getHypervisor().getType()
                     .name()));
 
-                foundVM = processor.vmRepo.findByName(stage.getName());
+                foundVM = processor.virtualMachineRep.findByName(stage.getName());
 
                 // state is as NOT_ALLOCATED as expected
                 assertEquals(foundVM.getState(), stage.getExpected());
