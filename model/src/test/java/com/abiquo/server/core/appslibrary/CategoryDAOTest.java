@@ -21,6 +21,9 @@
 
 package com.abiquo.server.core.appslibrary;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 
@@ -29,16 +32,22 @@ import org.testng.annotations.Test;
 
 import com.abiquo.server.core.common.persistence.DefaultDAOTestBase;
 import com.abiquo.server.core.common.persistence.TestDataAccessManager;
+import com.abiquo.server.core.enterprise.Enterprise;
+import com.abiquo.server.core.enterprise.EnterpriseGenerator;
 import com.softwarementors.bzngine.engines.jpa.test.configuration.EntityManagerFactoryForTesting;
 import com.softwarementors.bzngine.entities.test.PersistentInstanceTester;
 
 public class CategoryDAOTest extends DefaultDAOTestBase<CategoryDAO, Category>
 {
+
+    private EnterpriseGenerator enterpriseGenerator;
+
     @Override
     @BeforeMethod
     protected void methodSetUp()
     {
         super.methodSetUp();
+        enterpriseGenerator = new EnterpriseGenerator(getSeed());
     }
 
     @Override
@@ -97,12 +106,30 @@ public class CategoryDAOTest extends DefaultDAOTestBase<CategoryDAO, Category>
 
         CategoryDAO dao = createDaoForRollbackTransaction();
 
-        Category result = dao.findByName(category.getName());
+        Category result = dao.findByNameAndEnterprise(category.getName(), null);
         assertNotNull(result);
         assertEquals(result.getName(), category.getName());
 
-        result = dao.findByName(category.getName() + "UNEXISTING");
+        result = dao.findByNameAndEnterprise(category.getName() + "UNEXISTING", null);
         assertNull(result);
+    }
+
+    @Test
+    public void testFindByNameAndEnterprise()
+    {
+
+        Enterprise enterprise = enterpriseGenerator.createUniqueInstance();
+        Category category = eg().createUniqueInstance();
+        category.setEnterprise(enterprise);
+        List<Object> entitiesToPersist = new ArrayList<Object>();
+        eg().addAuxiliaryEntitiesToPersist(category, entitiesToPersist);
+        persistAll(ds(), entitiesToPersist, category);
+
+        CategoryDAO dao = createDaoForRollbackTransaction();
+
+        Category result = dao.findByNameAndEnterprise(category.getName(), enterprise);
+        assertNotNull(result);
+        assertEquals(result.getName(), category.getName());
     }
 
     @Test

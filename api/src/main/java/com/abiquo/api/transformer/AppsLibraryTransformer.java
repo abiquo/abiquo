@@ -37,8 +37,11 @@ import org.springframework.transaction.annotation.Transactional;
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.resources.appslibrary.CategoryResource;
 import com.abiquo.api.services.DefaultApiService;
+import com.abiquo.api.services.UserService;
+import com.abiquo.api.spring.security.SecurityService;
 import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.model.enumerator.DiskFormatType;
+import com.abiquo.model.enumerator.Privileges;
 import com.abiquo.model.rest.RESTLink;
 import com.abiquo.model.transport.error.CommonError;
 import com.abiquo.server.core.appslibrary.AppsLibraryRep;
@@ -48,6 +51,8 @@ import com.abiquo.server.core.appslibrary.TemplateDefinitionDto;
 import com.abiquo.server.core.appslibrary.TemplateDefinitionList;
 import com.abiquo.server.core.appslibrary.TemplateDefinitionListDto;
 import com.abiquo.server.core.appslibrary.TemplateDefinitionsDto;
+import com.abiquo.server.core.enterprise.Enterprise;
+import com.abiquo.server.core.enterprise.User;
 
 @Service
 public class AppsLibraryTransformer extends DefaultApiService
@@ -56,6 +61,12 @@ public class AppsLibraryTransformer extends DefaultApiService
 
     @Autowired
     private AppsLibraryRep appslibraryRep;
+
+    @Autowired
+    private UserService userService;
+
+    @Autowired
+    private SecurityService securityService;
 
     public TemplateDefinitionDto createTransferObject(final TemplateDefinition templateDef,
         final IRESTBuilder builder) throws Exception
@@ -78,8 +89,8 @@ public class AppsLibraryTransformer extends DefaultApiService
             "UNKNOWN" : templateDef.getType().name()));
 
         final Integer idEnterprise = templateDef.getAppsLibrary().getEnterprise().getId();
-        dto.addLinks(builder.buildTemplateDefinitionLinks(idEnterprise, dto,
-            templateDef.getCategory()));
+        dto.addLinks(builder.buildTemplateDefinitionLinks(idEnterprise, dto, templateDef
+            .getCategory()));
 
         return dto;
     }
@@ -110,8 +121,8 @@ public class AppsLibraryTransformer extends DefaultApiService
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public TemplateDefinition createPersistenceObject(final TemplateDefinitionDto templateDef)
-        throws Exception
+    public TemplateDefinition createPersistenceObject(final TemplateDefinitionDto templateDef,
+        final boolean createCategory) throws Exception
     {
         DiskFormatType diskFormatType = null;
         try
@@ -143,21 +154,30 @@ public class AppsLibraryTransformer extends DefaultApiService
         RESTLink categoryLink = templateDef.searchLink(CategoryResource.CATEGORY);
         if (categoryLink == null)
         {
-            category = appslibraryRep.findCategoryByName("Others");
+            category = appslibraryRep.findCategoryByName("Others", null);
         }
         else
         {
-            category = appslibraryRep.findCategoryByName(categoryLink.getTitle());
+            category = appslibraryRep.findCategoryByName(categoryLink.getTitle(), null);
             if (category == null)
             {
                 if (categoryLink.getTitle() == null)
                 {
-                    category = appslibraryRep.findCategoryByName("Others");
+                    category = appslibraryRep.findCategoryByName("Others", null);
                 }
                 else
                 {
+
                     category = new Category(categoryLink.getTitle());
-                    appslibraryRep.insertCategory(category);
+                    if (!securityService.hasPrivilege(Privileges.ENTERPRISE_ADMINISTER_ALL))
+                    {
+                        User currentuser = userService.getCurrentUser();
+                        category.setEnterprise(currentuser.getEnterprise());
+                    }
+                    if (createCategory)
+                    {
+                        appslibraryRep.insertCategory(category);
+                    }
                 }
             }
         }
@@ -191,7 +211,7 @@ public class AppsLibraryTransformer extends DefaultApiService
             for (TemplateDefinitionDto templateDefDto : templateDefListDto.getTemplateDefinitions()
                 .getCollection())
             {
-                TemplateDefinition template = createPersistenceObject(templateDefDto);
+                TemplateDefinition template = createPersistenceObject(templateDefDto, false);
                 if (template.isValid())
                 {
                     templateDefinitions.add(template);

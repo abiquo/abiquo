@@ -20,6 +20,7 @@
  */
 package com.abiquo.server.core.appslibrary;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -90,9 +91,21 @@ public class AppsLibraryRep extends DefaultRepBase
         return categoryDAO.findDefault();
     }
 
-    public List<Category> findAllCategories()
+    public List<Category> findAllCategories(final Integer idEnterprise, final boolean onlyLocal)
     {
-        return categoryDAO.findAll();
+        List<Category> result = new ArrayList<Category>();
+        if (idEnterprise != 0)
+        {
+            if (onlyLocal)
+            {
+                return categoryDAO.findLocalCategories(idEnterprise);
+            }
+            result.addAll(categoryDAO.findLocalCategories(idEnterprise));
+        }
+
+        result.addAll(categoryDAO.findGlobalCategories());
+
+        return result;
     }
 
     public Category findCategoryById(final Integer idCategory)
@@ -100,9 +113,9 @@ public class AppsLibraryRep extends DefaultRepBase
         return categoryDAO.findById(idCategory);
     }
 
-    public Category findCategoryByName(final String name)
+    public Category findCategoryByName(final String name, final Enterprise enterprise)
     {
-        return categoryDAO.findByName(name);
+        return categoryDAO.findByNameAndEnterprise(name, enterprise);
     }
 
     public Category findByCategoryNameOrCreateNew(final String categoryName)
@@ -112,7 +125,7 @@ public class AppsLibraryRep extends DefaultRepBase
             return getDefaultCategory();
         }
 
-        Category cat = findCategoryByName(categoryName);
+        Category cat = findCategoryByName(categoryName, null);
 
         if (cat == null)
         {

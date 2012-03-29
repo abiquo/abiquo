@@ -63,9 +63,10 @@ public interface AppsLibraryStub
      * CATEGORIES
      */
 
-    public DataResult<List<Category>> getCategories();
+    public DataResult<List<Category>> getCategories(final Integer idEnterprise);
 
-    public DataResult<Category> createCategory(final CategoryDto categoryDto);
+    public DataResult<Category> createCategory(final CategoryDto categoryDto,
+        final Integer idEnterprise);
 
     public BasicResult deleteCategory(final Integer idCategory);
 

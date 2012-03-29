@@ -85,7 +85,7 @@ public enum APIError
         "Missing enterprise link"), ENTERPRISE_WITH_BLOCKED_USER(
         "ENTERPRISE-9",
         "Cannot delete enterprise because some users have roles that cannot be deleted, please change their enterprise before continuing"), ENTERPRISE_NOT_ALLOWED_DATACENTER(
-        "ENTERPRISE-10", "The Enterprise does not have permissions to use the requested datacenter"), INVALID_ENTERPRISE_LINK(
+        "ENTERPRISE-10", "The Enterprise does not have permission to use the requested datacenter"), INVALID_ENTERPRISE_LINK(
         "ENTERPRISE-11", "Invalid Enterprise identifier in the Enterprise link"), MISSING_PRICING_TEMPLATE_LINK(
         "ENTERPRISE-12", "Missing link to the pricing template"), PRICING_TEMPLATE_PARAM_NOT_FOUND(
         "ENTERPRISE-13", "Missing pricing template parameter"), NON_EXISTENT_ENTERPRISE_PROPS(
@@ -254,7 +254,7 @@ public enum APIError
         "Invalid hypervisor IP. A hypervisor with that IP already exists"), HYPERVISOR_EXIST_SERVICE_IP(
         "HYPERVISOR-2",
         "Invalid hypervisor service IP. A hypervisor with that service IP already exists"), HYPERVISOR_TYPE_MISSING(
-        "HYPERVISOR-3", "The Hypervisor technology of the target Hypervisor is not set"),
+        "HYPERVISOR-3", "The Hypervisor type of the target Hypervisor is not set"),
 
     // NETWORK
     NETWORK_INVALID_CONFIGURATION("NET-0",
@@ -319,7 +319,7 @@ public enum APIError
         "VM-33", "Only 'cpu' and 'ram' can be reconfigured in imported virtual machines"), VIRTUAL_MACHINE_IMPORTED_WILL_BE_DELETED(
         "VM-44",
         "You are trying to undeploy an imported virtual machine. If you undeploy it, the virtual machine template cannot be recovered. If you are confident of this action, please call this functionality again with the 'forceUndeploy=true' option"), RESOURCES_ALREADY_ASSIGNED(
-        "VM-45", "Some of the indicated resources are already used"),
+        "VM-45", "Some of the resources indicated are already used"),
 
     // ROLE
     NON_EXISTENT_ROLE("ROLE-0", "The requested role does not exist"), NON_MODIFICABLE_ROLE(
@@ -434,7 +434,7 @@ public enum APIError
         "The Virtual Machine Template is being used by Virtual Machines and cannot be deleted"), VMTEMPLATE_TEMPLATE_USED_BY_VIRTUAL_MACHINES_CANNOT_BE_UNSHARED(
         "VIMAGE-11",
         "The Virtual Machine Template is being used by Virtual Machines and cannot be modified to not shared"), VIMAGE_MALFORMED_ICON_URI(
-        "VIMAGE-12", "The Icon URL is not well formed"),
+        "VIMAGE-12", "The URL of the Icon is not well formed"),
 
     // NODE COLLECTOR
     NON_EXISTENT_IP("NC-0", "The requested IP does not exist"), MISSING_IP_PARAMETER("NC-1",
@@ -491,7 +491,7 @@ public enum APIError
         "VSM-3", "An error occurred when unsubscribing the virtual machine"), REFRESH_STATE_PROBLEM(
         "VSM-4", "An error occurred when refreshing the virtual machine state"), INVALIDATE_STATE_PROBLEM(
         "VSM-5", "An error occurred when resetting the last known state of the virtual machine"), VSM_UNAVAILABE(
-        "VSM-6", "VSM service unavailable, check the URL service."),
+        "VSM-6", "VSM service unavailable; check the URL of the service."),
 
     // LICENSE
     LICENSE_UNEXISTING("LICENSE-0", "The requested license does not exist"), LICENSE_INVALID(
@@ -515,7 +515,7 @@ public enum APIError
 
     // DEVICES
     NON_EXISTENT_DEVICE("DEVICE-0", "The requested device does not exist"), DEVICE_DUPLICATED(
-        "DEVICE-1", "Duplicated Storage Device"),
+        "DEVICE-1", "Duplicate Storage Device"),
 
     // STATISTICS
     NON_EXISTENT_STATS("STATS-0", "Non-existent statistical data"), NON_EXISTENT_STATS_FOR_DATACENTER(
@@ -571,8 +571,8 @@ public enum APIError
         "SSM-5", "Could not create the volume in the target storage device"), SSM_DELETE_VOLUME_ERROR(
         "SSM-6", "Could not delete the volume from the target storage device"), SSM_UPDATE_ERROR(
         "SSM-7", "Could not update the volume in the target storage devide"), SSM_ADD_INITIATOR_ERROR(
-        "SSM-8", "Could not add the given iscsi initiator in the target storage device"), SSM_REMOVE_INITIATOR_ERROR(
-        "SSM-9", "Could not remove the given iscsi initiator from the target storage device"),
+        "SSM-8", "Could not add the given iSCSI initiator in the target storage device"), SSM_REMOVE_INITIATOR_ERROR(
+        "SSM-9", "Could not remove the given iSCSI initiator from the target storage device"),
 
     // RULES
     NON_EXISTENT_EER("RULE-1", "The requested restrict shared server rule does not exist"), NON_EXISTENT_FPR(
@@ -591,12 +591,12 @@ public enum APIError
         "HD-5", "Invalid link to the hard disk to attach"), HD_ATTACH_INVALID_VDC_LINK("HD-6",
         "Invalid virtual datacenter in the link to the volume to attach"), HD_CREATION_NOT_UNAVAILABLE(
         "HD-7",
-        "Cannot perform this action because the hard disk creation is not available for this hypervisor"),
+        "Cannot perform this action because hard disk creation is not available for this hypervisor"),
 
     // Chef
     CHEF_ERROR_GETTING_RECIPES("CHEF-0",
         "Could not get the list of available recipes for the enterprise"), CHEF_ERROR_GETTING_ROLES(
-        "CHEF-1", "Could not get the list of available roles for the enterprise"), CHEF_ERROR_CONNECTION(
+        "CHEF-1", "Could not get the list of available Chef roles for the enterprise"), CHEF_ERROR_CONNECTION(
         "CHEF-2", "Cannot connect to the Chef Server"), CHEF_NODE_DOES_NOT_EXIST("CHEF-3",
         "The node does not exist on the Chef Server. "
             + "If the virtual machine is bootstrapping, please wait until the process completes."), CHEF_ELEMENT_DOES_NOT_EXIST(
@@ -622,11 +622,14 @@ public enum APIError
 
     // CATEGORY
     NON_EXISTENT_CATEGORY("CATEGORY-1", "The requested category does not exist"), CATEGORY_DUPLICATED_NAME(
-        "CATEGORY-2", "Duplicated name for the category"), CATEGORY_NOT_ERASABLE("CATEGORY-3",
+        "CATEGORY-2", "Duplicated name for the category."), CATEGORY_NOT_ERASABLE("CATEGORY-3",
         "This category cannot be deleted"), INVALID_CATEGORY_LINK("CATEGORY-4",
         "Invalid Category identifier in the Category link"), CATEGORY_CANNOT_BE_NULL("CATEGORY-5",
-        "Category name cannot be null"),
-
+        "Category name cannot be null"), CATEGORY_CANNOT_MOVE_LOCAL("CATEGORY-6",
+        "Cannot move a local category to other enterprise."), CATEGORY_NO_PRIVELIGES_TO_CREATE_GLOBAL(
+        "CATEGORY-7", "Current User does not have enough privileges to create a global category."), CATEGORY_CANNOT_CHANGE_TO_LOCAL(
+        "CATEGORY-8", "Cannot change a global category to a local category."), CATEGORY_NO_PRIVELIGES_TO_REMOVE(
+        "CATEGORY-9", "Current User does not have enough privileges to remove category."),
     // ICONS
     ICON_DUPLICATED_PATH("ICON-1", "Duplicate path for an icon"), NON_EXISTENT_ICON("ICON-2",
         "The requested icon does not exist"), NON_EXISENT_ICON_WITH_PATH("ICON-3",
@@ -644,7 +647,7 @@ public enum APIError
         "PRICINGTEMPLATE-2", "Duplicate name for Pricing Template"), NON_EXISTENT_PRICING_TEMPLATE(
         "PRICINGTEMPLATE-3", "The requested Pricing Template does not exist"), DELETE_ERROR_WITH_ENTERPRISE(
         "PRICINGTEMPLATE-4", "Cannot delete a Pricing Template with associated Enterprise"), PRICING_TEMPLATE_MINIMUM_CHARGE_PERIOD(
-        "PRICINGTEMPLATE-5", "The smallest charging period is for DAY"), PRICING_TEMPLATE_EMPTY_NAME(
+        "PRICINGTEMPLATE-5", "The smallest charging period is DAY"), PRICING_TEMPLATE_EMPTY_NAME(
         "PRICINGTEMPLATE-6", "Pricing Template name cannot be empty"), MISSING_CURRENCY_LINK(
         "PRICINGTEMPLATE-7", "Missing link to the currency"), CHARGING_PERIOD_VALUES(
         "PRICINGTEMPLATE-8", "Charging period values should be between 2 and 6"), MINIMUM_CHARGE_EMPTY(
@@ -754,8 +757,8 @@ public enum APIError
         // Outputs all errors in wiki table format
         for (APIError error : errors)
         {
-            System.out.println(String.format("| %s | %s | %s |", error.code, error.message,
-                error.name()));
+            System.out.println(String.format("| %s | %s | %s |", error.code, error.message, error
+                .name()));
         }
 
         System.out.println("\n ************ Flex client labels ************** \n");
