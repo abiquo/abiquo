@@ -51,12 +51,14 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 
 import org.apache.wink.common.annotations.Parent;
@@ -111,6 +113,8 @@ public class VirtualMachineStorageConfigurationResource extends AbstractResource
     /** Parameter to map the input values related to Disks. */
     public static final String DISK_PARAM = "{" + DISK + "}";
 
+    public static final String FORCE = "force";
+
     /** Autowired business logic service. */
     @Autowired
     protected StorageService service;
@@ -163,6 +167,7 @@ public class VirtualMachineStorageConfigurationResource extends AbstractResource
      * @param vmId identifier of the Virtual Machine.
      * @param hdRefs A list of links to the volumes to attach.
      * @param restBuilder a Context-injected object to create the links of the Dto
+     * @param force indicates if trace soft limit or not
      * @return the {@link DiskManagementDto} object that contains all the {@link DiskManagementDto}
      * @throws Exception any thrown exception. Moved to HTTP status code in the
      *             {@link APIExceptionMapper} exception mapper.
@@ -175,14 +180,16 @@ public class VirtualMachineStorageConfigurationResource extends AbstractResource
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) @NotNull @Min(1) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) @NotNull @Min(1) final Integer vappId,
         @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) @NotNull @Min(1) final Integer vmId,
-        final LinksDto hdRefs, @Context final IRESTBuilder restBuilder) throws Exception
+        @QueryParam(FORCE) @DefaultValue("false") final Boolean force, final LinksDto hdRefs,
+        @Context final IRESTBuilder restBuilder) throws Exception
     {
         VirtualMachineState originalState =
             vmLock.lockVirtualMachineBeforeReconfiguring(vdcId, vappId, vmId);
 
         try
         {
-            Object result = service.attachHardDisks(vdcId, vappId, vmId, hdRefs, originalState);
+            Object result =
+                service.attachHardDisks(vdcId, vappId, vmId, hdRefs, originalState, force);
 
             // The attach method may return a Tarantino task identifier if the operation requires a
             // reconfigure. Otherwise it will return null.
