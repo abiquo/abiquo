@@ -31,10 +31,13 @@ package com.abiquo.server.core.infrastructure.nodecollector;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.ws.rs.core.MediaType;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
+
+import com.abiquo.model.transport.WrapperDto;
 
 /**
  * Wrapper class to get a list of State Machines.
@@ -57,10 +60,8 @@ import javax.xml.bind.annotation.XmlType;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "fsms")
-public class FsmsDto
+public class FsmsDto extends WrapperDto<FsmDto>
 {
-    
-    protected List<FsmDto> collection = new ArrayList<FsmDto>();
 
     /**
      * 
@@ -82,6 +83,7 @@ public class FsmsDto
      * <p>
      * Objects of the following type(s) are allowed in the list {@link FsmDto }
      */
+    @Override
     @XmlElement(name = "fsm")
     public List<FsmDto> getCollection()
     {
@@ -90,5 +92,17 @@ public class FsmsDto
             collection = new ArrayList<FsmDto>();
         }
         return this.collection;
+    }
+
+    @Override
+    public String getMediaType()
+    {
+        return MediaType.APPLICATION_XML;
+    }
+
+    @Override
+    public String getBaseMediaType()
+    {
+        return MediaType.APPLICATION_XML;
     }
 }
