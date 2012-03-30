@@ -21,17 +21,34 @@
 
 package com.abiquo.server.core.appslibrary;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.persistence.EntityManager;
 
+import org.hibernate.Query;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
+import com.abiquo.server.core.enterprise.Enterprise;
 
 @Repository("jpaCategoryDAO")
 /* package */class CategoryDAO extends DefaultDAOBase<Integer, Category>
 {
+
+    public static final String BY_NAME_AND_ENTERPRISE =
+        " SELECT c from Category c, Enterprise e where c.enterprise.id = :idEnterprise and c.name = :name";
+
+    public static final String BY_NAME_AND_NO_ENTERPRISE =
+        " select c from Category c  where c.enterprise is NULL and c.name=:name";
+
+    public static final String BY_GLOBAL = " select c from Category c  where c.enterprise is NULL";
+
+    public static final String BY_LOCAL =
+        " select c from Category c  where c.enterprise.id = :idEnterprise";
+
     public CategoryDAO()
     {
         super(Category.class);
@@ -47,9 +64,46 @@ import com.abiquo.server.core.common.persistence.DefaultDAOBase;
         return getSingleResult(createCriteria(isDefault()));
     }
 
-    public Category findByName(final String categoryName)
+    public ArrayList<Category> findGlobalCategories()
     {
-        return findUniqueByProperty(Category.NAME_PROPERTY, categoryName);
+
+        ArrayList<Category> result = new ArrayList<Category>();
+        Query query = getSession().createQuery(BY_GLOBAL);
+        result = (ArrayList<Category>) query.list();
+        return result;
+    }
+
+    public ArrayList<Category> findLocalCategories(final Integer idEnterprise)
+    {
+
+        ArrayList<Category> result = new ArrayList<Category>();
+        Query query = getSession().createQuery(BY_LOCAL);
+        query.setParameter("idEnterprise", idEnterprise);
+        result = (ArrayList<Category>) query.list();
+        return result;
+
+    }
+
+    public Category findByNameAndEnterprise(final String categoryName, final Enterprise enterprise)
+    {
+
+        Query query;
+        if (enterprise == null)
+        {
+            query = getSession().createQuery(BY_NAME_AND_NO_ENTERPRISE);
+        }
+        else
+        {
+            query = getSession().createQuery(BY_NAME_AND_ENTERPRISE);
+            query.setParameter("idEnterprise", enterprise.getId());
+        }
+        query.setParameter("name", categoryName);
+        List<Category> results = query.list();
+        if (!results.isEmpty())
+        {
+            return results.get(0);
+        }
+        return null;
     }
 
     public boolean existsAnyWithName(final String name)
@@ -65,6 +119,11 @@ import com.abiquo.server.core.common.persistence.DefaultDAOBase;
     private static Criterion equalsName(final String name)
     {
         return Restrictions.eq(Category.NAME_PROPERTY, name);
+    }
+
+    private static Criterion sameEnterprise(final Enterprise enterprise)
+    {
+        return Restrictions.eq(Category.ENTERPRISE_PROPERTY, enterprise);
     }
 
     private Criterion isDefault()

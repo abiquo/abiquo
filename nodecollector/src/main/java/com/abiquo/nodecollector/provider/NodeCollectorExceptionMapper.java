@@ -38,6 +38,7 @@ import com.abiquo.nodecollector.exception.CannotExecuteException;
 import com.abiquo.nodecollector.exception.CollectorException;
 import com.abiquo.nodecollector.exception.ConnectionException;
 import com.abiquo.nodecollector.exception.LoginException;
+import com.abiquo.nodecollector.exception.NoManagedException;
 import com.abiquo.nodecollector.exception.NodecollectorException;
 import com.abiquo.nodecollector.exception.ServiceUnavailableException;
 import com.abiquo.nodecollector.exception.UnprovisionedException;
@@ -62,7 +63,7 @@ public class NodeCollectorExceptionMapper<T extends Exception> implements Except
         {
             // It comes from the {@link InputParamConstraintHandler}. Return as it comes.
             WebApplicationException wepExcp = (WebApplicationException) exception;
-            return (wepExcp.getResponse());
+            return wepExcp.getResponse();
         }
         else if (exception instanceof NodecollectorException)
         {
@@ -93,7 +94,7 @@ public class NodeCollectorExceptionMapper<T extends Exception> implements Except
         }
     }
 
-    private Status defineStatus(NodecollectorException exception)
+    private Status defineStatus(final NodecollectorException exception)
     {
         if (exception instanceof LoginException)
         {
@@ -103,7 +104,7 @@ public class NodeCollectorExceptionMapper<T extends Exception> implements Except
         {
             return Status.BAD_REQUEST;
         }
-        else if (exception instanceof ServiceUnavailableException)
+        if (exception instanceof ServiceUnavailableException)
         {
             return Status.SERVICE_UNAVAILABLE;
         }
@@ -122,6 +123,10 @@ public class NodeCollectorExceptionMapper<T extends Exception> implements Except
         if (exception instanceof CannotExecuteException)
         {
             return Status.CONFLICT;
+        }
+        if (exception instanceof NoManagedException)
+        {
+            return Status.NOT_ACCEPTABLE;
         }
         else
         {

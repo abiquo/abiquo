@@ -37,6 +37,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.UriInfo;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.wink.common.annotations.Parent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,14 +50,12 @@ import com.abiquo.api.resources.cloud.IpAddressesResource;
 import com.abiquo.api.resources.cloud.VirtualApplianceResource;
 import com.abiquo.api.resources.cloud.VirtualDatacenterResource;
 import com.abiquo.api.resources.cloud.VirtualMachineResource;
-import com.abiquo.api.services.DatacenterService;
 import com.abiquo.api.services.EnterpriseService;
 import com.abiquo.api.services.NetworkService;
 import com.abiquo.api.services.UserService;
 import com.abiquo.api.services.appslibrary.VirtualMachineTemplateService;
 import com.abiquo.api.services.cloud.VirtualApplianceService;
 import com.abiquo.api.services.cloud.VirtualDatacenterService;
-import com.abiquo.api.services.cloud.VirtualMachineService;
 import com.abiquo.api.spring.security.SecurityService;
 import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.model.enumerator.Privileges;
@@ -74,6 +73,8 @@ import com.abiquo.server.core.enterprise.EnterpriseDto;
 import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
 import com.abiquo.server.core.infrastructure.network.IpsPoolManagementDto;
+import com.abiquo.server.core.task.Task;
+import com.abiquo.server.core.task.TasksDto;
 import com.abiquo.server.core.util.FilterOptions;
 import com.abiquo.server.core.util.PagedList;
 
@@ -109,12 +110,6 @@ public class EnterpriseResource extends AbstractResource
 
     @Autowired
     private NetworkService netService;
-
-    @Autowired
-    private VirtualMachineService vmService;
-
-    @Autowired
-    private DatacenterService dcService;
 
     @Autowired
     private VirtualDatacenterService vdcService;
@@ -352,8 +347,14 @@ public class EnterpriseResource extends AbstractResource
             vdcs.add(VirtualDatacenterResource.createTransferObject(d, restBuilder));
         }
 
-        return vdcs;
+        if (!all.isEmpty())
+        {
+            vdcs.setTotalSize(((PagedList< ? >) all).getTotalResults());
+            vdcs.addLinks(restBuilder.buildPaggingLinks(uriInfo.getAbsolutePath().toString(),
+                (PagedList< ? >) all));
+        }
 
+        return vdcs;
     }
 
     /**
@@ -375,7 +376,8 @@ public class EnterpriseResource extends AbstractResource
         @QueryParam(BY) @DefaultValue("name") final String orderBy,
         @QueryParam(FILTER) @DefaultValue("") final String filter,
         @QueryParam(ASC) @DefaultValue("true") final Boolean asc,
-        @Context final IRESTBuilder restBuilder) throws Exception
+        @QueryParam(value = "expand") final String expand, @Context final IRESTBuilder restBuilder)
+        throws Exception
     {
         FilterOptions filterOptions = new FilterOptions(startwith, limit, filter, orderBy, asc);
 
@@ -387,8 +389,13 @@ public class EnterpriseResource extends AbstractResource
         {
             for (VirtualAppliance vapp : all)
             {
-                vappsDtos.getCollection().add(
-                    VirtualApplianceResource.createTransferObject(vapp, restBuilder));
+                VirtualApplianceDto dto =
+                    VirtualApplianceResource.createTransferObject(vapp, restBuilder);
+                if (!StringUtils.isBlank(expand))
+                {
+                    this.expandNodes(expand, uriInfo, vapp, dto);
+                }
+                vappsDtos.getCollection().add(dto);
             }
         }
 
@@ -398,6 +405,29 @@ public class EnterpriseResource extends AbstractResource
         }
 
         return vappsDtos;
+    }
+
+    private void expandNodes(final String expand, final UriInfo uriInfo,
+        final VirtualAppliance app, final VirtualApplianceDto dto)
+    {
+        String[] expands = StringUtils.split(expand, ",");
+        if (expands != null)
+        {
+            for (String e : expands)
+            {
+                if ("last_task".equalsIgnoreCase(e))
+                {
+                    List<Task> lastTasks =
+                        vappService.getAllNodesLastTask(app.getVirtualDatacenter().getId(),
+                            app.getId());
+                    if (lastTasks != null && !lastTasks.isEmpty())
+                    {
+                        TasksDto t = TaskResourceUtils.transform(lastTasks, uriInfo);
+                        dto.setLastTasks(t);
+                    }
+                }
+            }
+        }
     }
 
     private static EnterpriseDto addLinks(final IRESTBuilder restBuilder,

@@ -178,8 +178,6 @@ public class VSMManager
      */
     public boolean checkSystem()
     {
-        logger.info("Checking VSM status...");
-
         boolean initialized = true;
 
         if (!current.isInitialized())
@@ -215,11 +213,7 @@ public class VSMManager
             }
         }
 
-        if (initialized)
-        {
-            logger.info("VSM is up and running properly.");
-        }
-        else
+        if (!initialized)
         {
             logger.error("VSM is NOT running properly. Check redis and rabbitmq status.");
         }

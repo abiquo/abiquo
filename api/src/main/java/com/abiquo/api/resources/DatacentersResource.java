@@ -130,7 +130,7 @@ public class DatacentersResource extends AbstractResource
      * @throws Exception
      */
     @GET
-    @Produces(DatacentersDto.MEDIA_TYPE)
+    @Produces(DatacentersDto.RS_MEDIA_TYPE)
     public DatacentersDto getDatacentersWithRS(@Context final IRESTBuilder restBuilder,
         @QueryParam(value = "idEnterprise") final String idEnterprise) throws Exception
     {

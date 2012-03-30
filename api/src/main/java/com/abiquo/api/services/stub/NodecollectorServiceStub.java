@@ -21,6 +21,8 @@
 
 package com.abiquo.api.services.stub;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -44,6 +46,7 @@ import com.abiquo.nodecollector.exception.CannotExecuteException;
 import com.abiquo.nodecollector.exception.CollectorException;
 import com.abiquo.nodecollector.exception.ConnectionException;
 import com.abiquo.nodecollector.exception.LoginException;
+import com.abiquo.nodecollector.exception.NoManagedException;
 import com.abiquo.nodecollector.exception.ServiceUnavailableException;
 import com.abiquo.nodecollector.exception.UnprovisionedException;
 import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
@@ -97,6 +100,7 @@ public class NodecollectorServiceStub extends DefaultApiService
     {
         NodeCollectorRESTClient restCli = initializeRESTClient(nodecollector);
 
+        checkIPformat(hypervisorIp);
         try
         {
             return restCli.getRemoteHypervisorType(hypervisorIp);
@@ -130,12 +134,30 @@ public class NodecollectorServiceStub extends DefaultApiService
         catch (CannotExecuteException e)
         {
             addConflictErrors(new CommonError(APIError.STATUS_CONFLICT.getCode(), e.getMessage()));
-            flushErrors();
+        }
+        catch (NoManagedException e)
+        {
+            addConflictErrors(new CommonError(APIError.NC_NOT_MANAGED_HOST.getCode(),
+                e.getMessage()));
         }
 
         flushErrors();
 
         return null;
+
+    }
+
+    private void checkIPformat(final String hypervisorIp)
+    {
+        try
+        {
+            InetAddress addr = InetAddress.getByName(hypervisorIp);
+        }
+        catch (UnknownHostException e)
+        {
+            addConflictErrors(APIError.NC_INVALID_IP);
+            flushErrors();
+        }
 
     }
 
@@ -247,7 +269,11 @@ public class NodecollectorServiceStub extends DefaultApiService
         catch (CannotExecuteException e)
         {
             addConflictErrors(new CommonError(APIError.STATUS_CONFLICT.getCode(), e.getMessage()));
-            flushErrors();
+        }
+        catch (NoManagedException e)
+        {
+            addConflictErrors(new CommonError(APIError.NC_NOT_MANAGED_HOST.getCode(),
+                e.getMessage()));
         }
 
         flushErrors();
@@ -316,7 +342,11 @@ public class NodecollectorServiceStub extends DefaultApiService
         catch (CannotExecuteException e)
         {
             addConflictErrors(new CommonError(APIError.STATUS_CONFLICT.getCode(), e.getMessage()));
-            flushErrors();
+        }
+        catch (NoManagedException e)
+        {
+            addConflictErrors(new CommonError(APIError.NC_NOT_MANAGED_HOST.getCode(),
+                e.getMessage()));
         }
 
         flushErrors();
@@ -378,7 +408,11 @@ public class NodecollectorServiceStub extends DefaultApiService
         catch (CannotExecuteException e)
         {
             addConflictErrors(new CommonError(APIError.STATUS_CONFLICT.getCode(), e.getMessage()));
-            flushErrors();
+        }
+        catch (NoManagedException e)
+        {
+            addConflictErrors(new CommonError(APIError.NC_NOT_MANAGED_HOST.getCode(),
+                e.getMessage()));
         }
 
         flushErrors();
@@ -443,7 +477,11 @@ public class NodecollectorServiceStub extends DefaultApiService
         catch (CannotExecuteException e)
         {
             addConflictErrors(new CommonError(APIError.STATUS_CONFLICT.getCode(), e.getMessage()));
-            flushErrors();
+        }
+        catch (NoManagedException e)
+        {
+            addConflictErrors(new CommonError(APIError.NC_NOT_MANAGED_HOST.getCode(),
+                e.getMessage()));
         }
 
         flushErrors();
@@ -495,15 +533,8 @@ public class NodecollectorServiceStub extends DefaultApiService
         int cpus = (int) host.getCpu();
 
         Machine machine =
-            new Machine(datacenter,
-                host.getName(),
-                "",
-                ram,
-                0,
-                cpus,
-                0,
-                transfromToState(host.getStatus()),
-                "");
+            new Machine(datacenter, host.getName(), "", ram, 0, cpus, 0, transfromToState(host
+                .getStatus()), "");
 
         // Long totalStorage = 0L;
         String switches = "";
@@ -633,7 +664,7 @@ public class NodecollectorServiceStub extends DefaultApiService
                 }
 
                 VirtualMachineTemplate vi = new VirtualMachineTemplate(); // XXX this is not stored
-                                                                          // in the DDBB
+                // in the DDBB
                 VirtualDiskEnumType diskFormatType =
                     VirtualDiskEnumType.fromValue(rt.getResourceSubType().toString());
                 vi.setDiskFormatType(DiskFormatType.fromURI(diskFormatType.value()));

@@ -111,7 +111,7 @@ public class TemplateDefinitionsResource extends AbstractResource
         final TemplateDefinitionDto templateDef, @Context final IRESTBuilder restBuilder)
         throws Exception
     {
-        TemplateDefinition opl = transformer.createPersistenceObject(templateDef);
+        TemplateDefinition opl = transformer.createPersistenceObject(templateDef, true);
         opl = service.addTemplateDefinition(opl, idEnterprise);
         return transformer.createTransferObject(opl, restBuilder);
     }
