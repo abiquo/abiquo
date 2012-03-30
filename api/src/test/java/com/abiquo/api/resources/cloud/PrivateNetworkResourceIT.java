@@ -105,9 +105,8 @@ public class PrivateNetworkResourceIT extends AbstractJpaGeneratorIT
     @Test
     public void getPrivateNetwork() throws Exception
     {
-        Resource resource = client.resource(validURI);
-
-        ClientResponse response = resource.accept(VLANNetworkDto.MEDIA_TYPE).get();
+        ClientResponse response =
+            get(validURI, "basicUser", "basicUser", VLANNetworkDto.MEDIA_TYPE);
         VLANNetworkDto network = response.getEntity(VLANNetworkDto.class);
 
         assertEquals(200, response.getStatusCode());
@@ -117,11 +116,9 @@ public class PrivateNetworkResourceIT extends AbstractJpaGeneratorIT
     @Test
     public void getPrivateNetworkDoesntExist() throws Exception
     {
-        String invalidNetworkURI =
-            resolvePrivateNetworkURI(vdc.getId(), vlan.getId() + 1);
-        Resource resource = client.resource(invalidNetworkURI);
-
-        ClientResponse response = resource.accept(VLANNetworkDto.MEDIA_TYPE).get();
+        String invalidNetworkURI = resolvePrivateNetworkURI(vdc.getId(), vlan.getId() + 1);
+        ClientResponse response =
+            get(invalidNetworkURI, "basicUser", "basicUser", VLANNetworkDto.MEDIA_TYPE);
         assertErrors(response, 404, APIError.VLANS_NON_EXISTENT_VIRTUAL_NETWORK);
     }
 
@@ -129,9 +126,9 @@ public class PrivateNetworkResourceIT extends AbstractJpaGeneratorIT
     public void getPrivateNetworkWithWrongVirtualDatacenter() throws ClientWebException
     {
         String invalidVDCURI = resolvePrivateNetworkURI(vdc.getId() + 1, vlan.getId());
-        Resource resource = client.resource(invalidVDCURI);
 
-        ClientResponse response = resource.accept(VLANNetworkDto.MEDIA_TYPE).get();
+        ClientResponse response =
+            get(invalidVDCURI, "basicUser", "basicUser", VLANNetworkDto.MEDIA_TYPE);
         assertErrors(response, 404, APIError.NON_EXISTENT_VIRTUAL_DATACENTER);
     }
 
@@ -146,21 +143,27 @@ public class PrivateNetworkResourceIT extends AbstractJpaGeneratorIT
         // Creation of virtualdatacenter2 and vlan2
         VirtualDatacenter vdc2 = vdcGenerator.createInstance(rs.getDatacenter());
         DatacenterLimits dclimit = new DatacenterLimits(vdc2.getEnterprise(), vdc2.getDatacenter());
-        setup(vdc2.getEnterprise(), vdc2.getNetwork(), vdc2, dclimit);
+        Role r = roleGenerator.createInstance();
+        User u =
+            userGenerator.createInstance(vdc2.getEnterprise(), r, "anotherUser", "anotherUser");
+        setup(vdc2.getEnterprise(), vdc2.getNetwork(), vdc2, dclimit, r, u);
         VLANNetwork vlan2 = vlanGenerator.createInstance(vdc2.getNetwork(), rs);
         vlan2.setEnterprise(vdc2.getEnterprise());
         setup(vlan2.getConfiguration(), vlan2);
 
         // Ensure we have create it correctly.
-        Resource resource = client.resource(resolvePrivateNetworkURI(vdc2.getId(), vlan2.getId()));
-        ClientResponse response = resource.accept(VLANNetworkDto.MEDIA_TYPE).get();
+
+        ClientResponse response =
+            get(resolvePrivateNetworkURI(vdc2.getId(), vlan2.getId()), "anotherUser",
+                "anotherUser", VLANNetworkDto.MEDIA_TYPE);
+        assertEquals(response.getStatusCode(), 200);
         VLANNetworkDto network = response.getEntity(VLANNetworkDto.class);
-        assertEquals(200, response.getStatusCode());
         assertNotNull(network);
 
         // Try to cross parameters.
-        resource = client.resource(resolvePrivateNetworkURI(vdc.getId(), vlan2.getId()));
-        response = resource.accept(VLANNetworkDto.MEDIA_TYPE).get();
+        response =
+            get(resolvePrivateNetworkURI(vdc.getId(), vlan2.getId()), "basicUser", "basicUser",
+                VLANNetworkDto.MEDIA_TYPE);
 
         // The VLAN does not exist!
         assertErrors(response, 404, APIError.VLANS_NON_EXISTENT_VIRTUAL_NETWORK);
@@ -214,7 +217,7 @@ public class PrivateNetworkResourceIT extends AbstractJpaGeneratorIT
         // Ensure the IPs of the VLAN have changed its 'vlanname' attribute. Get a random IP and
         // check it
         String ipsUri = resolvePrivateNetworkIPsURI(vdc.getId(), vlan.getId());
-        response = get(ipsUri, IpsPoolManagementDto.MEDIA_TYPE);
+        response = get(ipsUri, "basicUser", "basicUser", IpsPoolManagementDto.MEDIA_TYPE);
         IpsPoolManagementDto dtoIPs = response.getEntity(IpsPoolManagementDto.class);
         assertNotNull(dtoIPs);
         IpPoolManagementDto dtoIP = dtoIPs.getCollection().get(new Random().nextInt(24));
@@ -237,22 +240,19 @@ public class PrivateNetworkResourceIT extends AbstractJpaGeneratorIT
                 .put(dto);
         assertEquals(response.getStatusCode(), 400);
 
-        resource = client.resource(resolvePrivateNetworkURI(-400, vlan.getId()));
         response =
-            resource.accept(VLANNetworkDto.MEDIA_TYPE).contentType(VLANNetworkDto.MEDIA_TYPE)
-                .put(dto);
+            put(resolvePrivateNetworkURI(-400, vlan.getId()), dto, "basicUser", "basicUser",
+                VLANNetworkDto.MEDIA_TYPE, VLANNetworkDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), 400);
 
-        resource = client.resource(resolvePrivateNetworkURI(vdc.getId(), 0));
         response =
-            resource.accept(VLANNetworkDto.MEDIA_TYPE).contentType(VLANNetworkDto.MEDIA_TYPE)
-                .put(dto);
+            put(resolvePrivateNetworkURI(vdc.getId(), 0), dto, "basicUser", "basicUser",
+                VLANNetworkDto.MEDIA_TYPE, VLANNetworkDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), 400);
 
-        resource = client.resource(resolvePrivateNetworkURI(vdc.getId(), -1000));
         response =
-            resource.accept(VLANNetworkDto.MEDIA_TYPE).contentType(VLANNetworkDto.MEDIA_TYPE)
-                .put(dto);
+            put(resolvePrivateNetworkURI(vdc.getId(), -1000), dto, "basicUser", "basicUser",
+                VLANNetworkDto.MEDIA_TYPE, VLANNetworkDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), 400);
     }
 
@@ -334,9 +334,8 @@ public class PrivateNetworkResourceIT extends AbstractJpaGeneratorIT
 
     private VLANNetworkDto getValidPrivateNetwork()
     {
-        Resource resource = client.resource(validURI);
-
-        return resource.accept(VLANNetworkDto.MEDIA_TYPE).get(VLANNetworkDto.class);
+        return get(validURI, "basicUser", "basicUser", VLANNetworkDto.MEDIA_TYPE).getEntity(
+            VLANNetworkDto.class);
     }
 
     /**

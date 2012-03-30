@@ -41,6 +41,9 @@ public class RESTHandlerFactoryTest extends HandlersFactory
         // Injects the IRESTLinkBuilder object to all the methods.
         listOfHandlers.add(new RESTHandler());
 
+        // cloud enterprise security
+        listOfHandlers.add(new CloudEnterpriseSecurityRequestHandler());
+
         return listOfHandlers;
     }
 

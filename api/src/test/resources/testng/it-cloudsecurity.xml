@@ -1,0 +1,12 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
+<suite name="API cloud enterprise security integration tests" verbose="1">
+    <listeners>
+        <listener class-name="com.abiquo.testng.TestDatabaseListener" />
+        <listener class-name="com.abiquo.testng.TestServerListener" />
+    </listeners>
+    <test name="Cloud enterprise security integration tests">
+        <classes>
+            <class name="com.abiquo.api.handlers.CloudEnterpriseSecurityIT" />
+        </classes>
+    </test>
+</suite>
