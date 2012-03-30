@@ -58,6 +58,16 @@ public class DatacenterRepositoriesResource extends AbstractResource
     @Autowired
     private InfrastructureService infService;
 
+    /**
+     * Returns all datacenter repositories from an enterprise
+     * 
+     * @title Retrive all datacenter repositories
+     * @param enterpId identifier of the enterprise
+     * @param restBuilder a Context-injected object to create the links of the Dto
+     * @return a {DatacenterRepositoriesDto} object with all datacenter reposritories from an
+     *         enterprise
+     * @throws Exception
+     */
     @GET
     @Produces(DatacenterRepositoriesDto.MEDIA_TYPE)
     public DatacenterRepositoriesDto getDatacenterRepositories(

@@ -30,7 +30,6 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
 
 import org.apache.wink.common.annotations.Parent;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,6 +69,16 @@ public class TemplateDefinitionListResource extends AbstractResource
     @Autowired
     protected AppsLibraryTransformer transformer;
 
+    /**
+     * Returns a template definition list
+     * 
+     * @title Retrieve a template definition list
+     * @param idEnterprise identifier of the enterprise
+     * @param templateDefinitionListId identifier of the template definition
+     * @param restBuilder a Context-injected object to create the links of the Dto
+     * @return a {TemplateDefinitionListDto} object with the requested template list
+     * @throws Exception
+     */
     @GET
     @Produces(TemplateDefinitionListDto.MEDIA_TYPE)
     public TemplateDefinitionListDto getTemplateDefinitionList(
@@ -83,6 +92,19 @@ public class TemplateDefinitionListResource extends AbstractResource
         return transformer.createTransferObject(templateDefinitionList, restBuilder);
     }
 
+    /**
+     * Modifies a template definition list
+     * 
+     * @title Modify a template definition list
+     * @wiki Fetch new Template Definitions from an ovfindex.xml source, only apply if the list is
+     *       associated to an ovfindex.xml (url datamodel).
+     * @param templateDefinitionList the template definition list to modify
+     * @param idEnterprise identifier of the enterprise
+     * @param templateDefinitionListId identifier of the template definition list
+     * @param restBuilder a Context-injected object to create the links of the Dto
+     * @return a {TemplateDefinitionListDto} object with the modified template definition list
+     * @throws Exception
+     */
     @PUT
     @Consumes(TemplateDefinitionListDto.MEDIA_TYPE)
     @Produces(TemplateDefinitionListDto.MEDIA_TYPE)
@@ -99,6 +121,17 @@ public class TemplateDefinitionListResource extends AbstractResource
         return transformer.createTransferObject(d, restBuilder);
     }
 
+    /**
+     * Refreshes a template definition list from the url
+     * 
+     * @title Refresh a template definition list from the url
+     * @wiki Deleting the list doesn't delete the containing Template Definitions.
+     * @param idEnterprise identifier of the enterprise
+     * @param templateDefinitionListId itentifier of the template definition list
+     * @param restBuilder a Context-injected object to create the links of the Dto
+     * @return a {TemplateDefinitionListDto} object with the refreshed template definition list
+     * @throws Exception
+     */
     @PUT
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces(TemplateDefinitionListDto.MEDIA_TYPE)
@@ -114,6 +147,13 @@ public class TemplateDefinitionListResource extends AbstractResource
         return transformer.createTransferObject(d, restBuilder);
     }
 
+    /**
+     * Deletes a template definition list
+     * 
+     * @title Delete a template definition list
+     * @param idEnterprise identifier of the enterprise
+     * @param templateDefinitionListId identifier of the template definition list
+     */
     @DELETE
     public void deleteTemplateDefinitionList(
         @PathParam(EnterpriseResource.ENTERPRISE) final Integer idEnterprise,
@@ -125,6 +165,10 @@ public class TemplateDefinitionListResource extends AbstractResource
     /**
      * Get the all {@link TemplateStateDto} in the provided {@link DatacenterRepositoryResource} for
      * all the {@link TemplateDefinition} in the current list.
+     * 
+     * @title Retrieve a list of the status of all template status list
+     * @wiki Template Definition are available sources, but in order to create a Virtual Machine the
+     *       Defininition should be downloaded into the Datacenter Repository (NFS filesystem).
      */
     @GET
     @Path(TemplateDefinitionListResource.TEMPLATE_DEFINITION_LIST_REPOSITORY_STATUS_PATH)

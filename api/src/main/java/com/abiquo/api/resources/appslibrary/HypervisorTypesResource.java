@@ -50,6 +50,14 @@ public class HypervisorTypesResource extends AbstractResource
     @Autowired
     private HypervisorTypeService service;
 
+    /**
+     * Returns all hypervisor types
+     * 
+     * @title Retrive all hypervisor types
+     * @param restBuilder a Context-injected object to create the links of the Dto
+     * @return a {HypervisorTypesDto} object with all hypervisor types
+     * @throws Exception
+     */
     @GET
     @Produces(HypervisorTypesDto.MEDIA_TYPE)
     public HypervisorTypesDto getHypervisorTypes(@Context final IRESTBuilder restBuilder)
