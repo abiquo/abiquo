@@ -52,7 +52,7 @@ public class VirtualMachineResourceStubImpl extends AbstractAPIStub implements
 
     @Override
     public BasicResult updateVirtualMachine(final Integer virtualDatacenterId,
-        final Integer virtualApplianceId, final VirtualMachine virtualMachine)
+        final Integer virtualApplianceId, final VirtualMachine virtualMachine, final boolean force)
     {
 
         BasicResult result = new BasicResult();
@@ -78,7 +78,7 @@ public class VirtualMachineResourceStubImpl extends AbstractAPIStub implements
                 vm.setPassword(virtualMachine.getPassword());
 
                 // Here we actually perform the request to create the virtual machine
-                vm.update();
+                vm.update(force);
             }
             // else all updated
 

@@ -127,7 +127,8 @@ public class StorageService extends DefaultApiService
      */
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public Object attachHardDisks(final Integer vdcId, final Integer vappId, final Integer vmId,
-        final LinksDto hdRefs, final VirtualMachineState originalState)
+        final LinksDto hdRefs, final VirtualMachineState originalState,
+        final Boolean forceSoftLimits)
     {
         VirtualDatacenter vdc = getVirtualDatacenter(vdcId);
         VirtualAppliance vapp = getVirtualAppliance(vdc, vappId);
@@ -138,7 +139,8 @@ public class StorageService extends DefaultApiService
 
         newvm.getDisks().addAll(disks);
 
-        return vmService.reconfigureVirtualMachine(vdc, vapp, oldvm, newvm, originalState);
+        return vmService.reconfigureVirtualMachine(vdc, vapp, oldvm, newvm, originalState,
+            forceSoftLimits);
     }
 
     /**
@@ -492,8 +494,8 @@ public class StorageService extends DefaultApiService
         if (tracer != null)
         {
             tracer.log(SeverityType.INFO, ComponentType.VIRTUAL_MACHINE,
-                EventType.HARD_DISK_ASSIGN, "hardDisk.assigned", createdDisk.getId(),
-                createdDisk.getSizeInMb(), vm.getName());
+                EventType.HARD_DISK_ASSIGN, "hardDisk.assigned", createdDisk.getId(), createdDisk
+                    .getSizeInMb(), vm.getName());
         }
 
         return createdDisk;
@@ -561,8 +563,8 @@ public class StorageService extends DefaultApiService
         // creating volumes in other enterprises VDC
         Enterprise enterprise = vdc.getEnterprise();
 
-        LOGGER.debug("Checking limits for enterprise {} to a locate a volume of {}MB",
-            enterprise.getName(), sizeInMB);
+        LOGGER.debug("Checking limits for enterprise {} to a locate a volume of {}MB", enterprise
+            .getName(), sizeInMB);
 
         DatacenterLimits dcLimits =
             datacenterRepo.findDatacenterLimits(enterprise, vdc.getDatacenter());
