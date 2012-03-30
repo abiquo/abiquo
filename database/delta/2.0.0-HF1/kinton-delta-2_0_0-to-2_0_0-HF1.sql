@@ -27,7 +27,10 @@ BEGIN
     -- ######## SCHEMA: TABLES ADDED ####### --
     -- ##################################### --     
     SELECT "STEP 2 CREATING NEW TABLES..." as " ";
-    
+    IF NOT EXISTS (SELECT * FROM information_schema.columns WHERE table_schema= 'kinton' AND table_name='category' AND column_name='idEnterprise') THEN
+        SELECT "Adding idEnterprise on category" as " ";
+        ALTER TABLE kinton.category ADD COLUMN idEnterprise int(10) unsigned default NULL;
+    END IF;
 
     -- ###################################### --    
         -- ######## SCHEMA: COLUMNS ADDED ####### --
@@ -45,7 +48,13 @@ BEGIN
     -- ######## SCHEMA: CONSTRAINTS MODIFIED ###### --
     -- ############################################ --  
     SELECT "STEP 5 MODIFIYING CONSTRAINTS..." as " ";
-    
+    IF EXISTS (SELECT * FROM information_schema.table_constraints WHERE table_schema= 'kinton' AND table_name='category' AND constraint_name='category_enterprise_FK') THEN
+        ALTER TABLE kinton.category DROP FOREIGN KEY category_enterprise_FK;
+    END IF;
+
+    IF NOT EXISTS (SELECT * FROM information_schema.table_constraints WHERE table_schema= 'kinton' AND table_name='category' AND constraint_name='category_enterprise_FK') THEN
+        ALTER TABLE kinton.category ADD CONSTRAINT category_enterprise_FK FOREIGN KEY category_enterprise_FK (idEnterprise) REFERENCES enterprise (idEnterprise) ON DELETE CASCADE ON UPDATE NO ACTION;
+    END IF;
 
     -- ########################################################## --    
         -- ######## DATA: NEW DATA (INSERTS, UPDATES, DELETES ####### --
@@ -66,22 +75,24 @@ BEGIN
     IF @existsCount = 0 THEN 
         INSERT INTO kinton.roles_privileges VALUES (1,51,0);
     END IF;
-    
-    
-        -- CHEF --
-        -- Dumping data for table kinton.privilege
-       SELECT COUNT(*) INTO @existsCount FROM kinton.privilege WHERE idPrivilege='52' AND name='MANAGE_HARD_DISKS';
-       IF @existsCount = 0 THEN 
-          INSERT INTO kinton.privilege VALUES (52,'MANAGE_HARD_DISKS',0);
-       END IF;
 
-      -- CHEF --
-      -- Dumping data for table kinton.roles_privileges
-      --
-      SELECT COUNT(*) INTO @existsCount FROM kinton.roles_privileges WHERE idRole='1' AND idPrivilege='52';
-      IF @existsCount = 0 THEN 
-             INSERT INTO kinton.roles_privileges VALUES (1,52,0);
-      END IF;
+    -- New System Properties
+    SELECT COUNT(*) INTO @existsCount FROM kinton.system_properties WHERE name='client.main.showHardDisk' AND value='1' AND description='Show (1) or hide (0) hard disk tab';
+    IF @existsCount = 0 THEN 
+        INSERT INTO kinton.system_properties (name, value, description) VALUES ('client.main.showHardDisk','1','Show (1) or hide (0) hard disk tab');
+    END IF;
+
+    -- New Privilege
+    SELECT COUNT(*) INTO @existsCount FROM kinton.privilege WHERE idPrivilege='52' AND name='MANAGE_HARD_DISKS';
+    IF @existsCount = 0 THEN 
+        INSERT INTO kinton.privilege VALUES (52,'MANAGE_HARD_DISKS',0);
+    END IF;
+
+    -- Assign New Privilege to Cloud Admin
+    SELECT COUNT(*) INTO @existsCount FROM kinton.roles_privileges WHERE idRole='1' AND idPrivilege='52';
+    IF @existsCount = 0 THEN 
+        INSERT INTO kinton.roles_privileges VALUES (1,52,0);
+    END IF;
 
 
     -- ######################################## --  

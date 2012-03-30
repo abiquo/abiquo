@@ -247,7 +247,7 @@ public class DisksResourceIT extends AbstractJpaGeneratorIT
         assertEquals(response.getStatusCode(), Status.NO_CONTENT.getStatusCode());
 
         // Not found should be raised afeter delete the disk
-        response = get(uri, DiskManagementDto.MEDIA_TYPE);
+        response = get(uri, "basicUser", "basicUser", DiskManagementDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), Status.NOT_FOUND.getStatusCode());
     }
 

@@ -344,7 +344,6 @@ public class RackDAOTest extends DefaultDAOTestBase<RackDAO, Rack>
     @Test
     public void getAllMachinesToShutDownFromRackCheckOrder()
     {
-
         DatacenterGenerator generator = new DatacenterGenerator(getSeed());
         UcsRackGenerator ucsRackGenerator = new UcsRackGenerator(getSeed());
         MachineGenerator machineGenerator = new MachineGenerator(getSeed());

@@ -122,9 +122,12 @@ CREATE TABLE  `kinton`.`category` (
   `name` varchar(30) NOT NULL,
   `isErasable` int(1) unsigned NOT NULL default '1',
   `isDefault` int(1) unsigned NOT NULL default '0',
+  `idEnterprise` int(10) unsigned DEFAULT NULL,
   `version_c` int(11) default 0,
   PRIMARY KEY  (`idCategory`),
-  UNIQUE KEY (`name`)
+  KEY `category_enterprise_FK` (`idEnterprise`),
+  CONSTRAINT `category_enterprise_FK` FOREIGN KEY (`idEnterprise`) REFERENCES `enterprise` (`idEnterprise`),
+  UNIQUE KEY (`name`,`idEnterprise`)
 ) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8;
 
 --
@@ -133,10 +136,10 @@ CREATE TABLE  `kinton`.`category` (
 
 /*!40000 ALTER TABLE `category` DISABLE KEYS */;
 LOCK TABLES `category` WRITE;
-INSERT INTO `kinton`.`category` VALUES  (1,'Others',0,1,0),
- (2,'Database servers',1,0, 0),
- (4,'Applications servers',1,0,0),
- (5,'Web servers',1,0,0);
+INSERT INTO `kinton`.`category` VALUES  (1,'Others',0,1,null,0),
+ (2,'Database servers',1,0,null, 0),
+ (4,'Applications servers',1,0,null,0),
+ (5,'Web servers',1,0,null,0);
 UNLOCK TABLES;
 /*!40000 ALTER TABLE `category` ENABLE KEYS */;
 
@@ -1408,6 +1411,7 @@ INSERT INTO `kinton`.`system_properties` (`name`, `value`, `description`) VALUES
  ("client.main.disableChangePassword","1","Allow (1) or deny (0) user to change their password"),
  ("client.logout.url","","Redirect to this URL after logout (empty -> login screen)"),
  ("client.main.allowLogout","1","Allow (1) or deny (0) user to logout"),
+ ("client.main.showHardDisk","1","Show (1) or hide (0) hard disk tab"),
  ("client.wiki.showHelp","1","Show (1) or hide (0) the help icon within the plateform"), 
  ("client.wiki.showDefaultHelp","0","Use (1) or not (0) the default help URL within the plateform"), 
  ("client.wiki.defaultURL","http://community.abiquo.com/display/ABI20/Abiquo+Documentation+Home","The default URL opened when not specific help URL is specified"),

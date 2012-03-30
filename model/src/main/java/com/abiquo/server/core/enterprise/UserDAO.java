@@ -30,6 +30,7 @@ import javax.persistence.EntityManager;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.Criteria;
+import org.hibernate.Query;
 import org.hibernate.criterion.CriteriaSpecification;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Disjunction;
@@ -253,4 +254,28 @@ public class UserDAO extends DefaultDAOBase<Integer, User>
     {
         return existsAnyByCriterions(sameRole(role));
     }
+
+    public boolean isUserAllowedToUseVirtualDatacenter(final String username,
+        final String authtype, final String[] privileges, final Integer idVdc)
+    {
+
+        Query query = getSession().createSQLQuery(USER_ALLOWED_VDC_SQL);
+        query.setParameter("username", username);
+        query.setParameter("authtype", authtype);
+        query.setParameterList("privileges", privileges);
+        query.setParameter("idvdc", idVdc);
+        List result = query.list();
+
+        if (result == null || result.isEmpty())
+        {
+            return false;
+        }
+        else
+        {
+            return true;
+        }
+    }
+
+    private static final String USER_ALLOWED_VDC_SQL =
+        "select 1 from user u where u.user = :username and u.authType = :authtype and (('ENTERPRISE_ADMINISTER_ALL' in (:privileges) or 'USERS_MANAGE_OTHER_ENTERPRISES' in (:privileges)) or u.idEnterprise = (select vdc.idEnterprise from virtualdatacenter vdc where vdc.idVirtualDatacenter = :idvdc and (u.availableVirtualDatacenters is null or u.availableVirtualDatacenters REGEXP CONCAT('.*[,]?',:idvdc,'($|[,].*$)'))))";
 }

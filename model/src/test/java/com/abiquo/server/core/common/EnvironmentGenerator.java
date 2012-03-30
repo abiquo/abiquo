@@ -291,6 +291,34 @@ public class EnvironmentGenerator
     }
 
     /**
+     * Generates and adds the following entities to the environment:
+     * <ol>
+     * <li>An enterprise</li>
+     * <li>The given user related Privileges</li>
+     * <li>The given user role</li>
+     * <li>The given user user in the generated enterprise</li>
+     * </ol>
+     * 
+     * @param user The given user to create
+     * @return The environment entities.
+     */
+    public List<Object> generateEnterprise(final User user)
+    {
+        Enterprise ent = enterpriseGenerator.createInstanceNoLimits();
+        user.setEnterprise(ent);
+
+        add(ent);
+        for (Privilege p : user.getRole().getPrivileges())
+        {
+            add(p);
+        }
+        add(user.getRole());
+        add(user);
+
+        return getEnvironment();
+    }
+
+    /**
      * <b>This method <i>must</i> be preceeded by {@link #generateEnterprise()}</b><br>
      * Generates and adds the following entities to the environment:
      * <ol>

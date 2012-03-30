@@ -160,7 +160,7 @@ public class VirtualMachineDAO extends DefaultDAOBase<Integer, VirtualMachine>
         criteria.createAlias(VirtualMachine.VIRTUAL_MACHINE_TEMPLATE_PROPERTY, "template");
         Restrictions.and(Restrictions.eq(VirtualMachine.HYPERVISOR_PROPERTY, null), Restrictions
             .in("template." + VirtualMachineTemplate.DISKFORMAT_TYPE_PROPERTY, Arrays
-                .asList(hypervisor.getType().compatibilityTable)));
+                .asList(hypervisor.getType().compatibleFormats)));
         criteria.addOrder(Order.asc(VirtualMachine.NAME_PROPERTY));
         List<VirtualMachine> result = getResultList(criteria);
         return result;

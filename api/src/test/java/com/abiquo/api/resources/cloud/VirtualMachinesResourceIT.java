@@ -187,7 +187,8 @@ public class VirtualMachinesResourceIT extends AbstractJpaGeneratorIT
 
         // Check for vapp
         ClientResponse response =
-            get(resolveVirtualMachinesURI(vdc.getId(), vapp.getId()), VirtualMachinesDto.MEDIA_TYPE);
+            get(resolveVirtualMachinesURI(vdc.getId(), vapp.getId()), "sysadmin", "sysadmin",
+                VirtualMachinesDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), Status.OK.getStatusCode());
         VirtualMachinesDto vms = response.getEntity(VirtualMachinesDto.class);
         assertNotNull(vms);
@@ -196,7 +197,7 @@ public class VirtualMachinesResourceIT extends AbstractJpaGeneratorIT
 
         // Check for vapp2
         response =
-            get(resolveVirtualMachinesURI(vdc.getId(), vapp2.getId()),
+            get(resolveVirtualMachinesURI(vdc.getId(), vapp2.getId()), "sysadmin", "sysadmin",
                 VirtualMachinesDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), Status.OK.getStatusCode());
         vms = response.getEntity(VirtualMachinesDto.class);
@@ -217,8 +218,8 @@ public class VirtualMachinesResourceIT extends AbstractJpaGeneratorIT
             vdc.getDefaultVlan().getConfiguration(), vdc.getDefaultVlan(), vdc, vapp);
 
         final ClientResponse response =
-            get(resolveVirtualMachinesURI(vdc.getId(), new Random().nextInt()),
-                VirtualMachinesDto.MEDIA_TYPE);
+            get(resolveVirtualMachinesURI(vdc.getId(), new Random().nextInt()), "sysadmin",
+                "sysadmin", VirtualMachinesDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), Status.NOT_FOUND.getStatusCode());
     }
 
@@ -233,8 +234,8 @@ public class VirtualMachinesResourceIT extends AbstractJpaGeneratorIT
             vdc.getDefaultVlan().getConfiguration(), vdc.getDefaultVlan(), vdc, vapp);
 
         final ClientResponse response =
-            get(resolveVirtualMachinesURI(new Random().nextInt(), vapp.getId()),
-                VirtualMachinesDto.MEDIA_TYPE);
+            get(resolveVirtualMachinesURI(new Random().nextInt(), vapp.getId()), "sysadmin",
+                "sysadmin", VirtualMachinesDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), Status.NOT_FOUND.getStatusCode());
     }
 
