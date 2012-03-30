@@ -59,7 +59,7 @@ public class HypervisorTypesDto extends WrapperDto<HypervisorTypeDto>
         {
             HypervisorTypeDto aux = new HypervisorTypeDto();
             aux.setBaseFormat(ht.baseFormat);
-            aux.setCompatibilityTable(ht.compatibilityTable);
+            aux.setCompatibilityTable(ht.compatibleFormats);
             aux.setDefaultPort(ht.defaultPort);
             aux.setId(ht.id());
             collection.add(aux);

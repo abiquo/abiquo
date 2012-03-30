@@ -21,10 +21,14 @@
 
 package com.abiquo.model.enumerator;
 
+import java.util.Set;
+
 import javax.xml.bind.annotation.XmlEnum;
 import javax.xml.bind.annotation.XmlType;
 
 import org.apache.commons.lang.StringUtils;
+
+import com.google.common.collect.Sets;
 
 @XmlType(name = "diskFormatType")
 @XmlEnum
@@ -84,21 +88,21 @@ public enum DiskFormatType
 
     public final String extension;
 
-    public static final DiskFormatType[] VBOX_COMPATIBLES = new DiskFormatType[] {VMDK_SPARSE,
-    VHD_FLAT, VHD_SPARSE, VDI_FLAT, VDI_SPARSE};
+    public static final Set<DiskFormatType> VBOX_COMPATIBLES = Sets.newHashSet(VMDK_SPARSE,
+        VHD_FLAT, VHD_SPARSE, VDI_FLAT, VDI_SPARSE);
 
-    public static final DiskFormatType[] KVM_COMPATIBLES = new DiskFormatType[] {RAW, VMDK_SPARSE,
-    VMDK_FLAT, VHD_FLAT, VHD_SPARSE, QCOW2_FLAT, QCOW2_SPARSE};
+    public static final Set<DiskFormatType> KVM_COMPATIBLES = Sets.newHashSet(RAW, VMDK_SPARSE,
+        VMDK_FLAT, VHD_FLAT, VHD_SPARSE, QCOW2_FLAT, QCOW2_SPARSE);
 
-    public static final DiskFormatType[] XEN_COMPATIBLES = new DiskFormatType[] {VMDK_FLAT};
+    public static final Set<DiskFormatType> XEN_COMPATIBLES = Sets.newHashSet(VMDK_FLAT);
 
-    public static final DiskFormatType[] VMWARE_COMPATIBLES = new DiskFormatType[] {VMDK_FLAT,
-    VMDK_SPARSE};
+    public static final Set<DiskFormatType> VMWARE_COMPATIBLES = Sets.newHashSet(VMDK_FLAT,
+        VMDK_SPARSE);
 
-    public static final DiskFormatType[] HYPERV_COMPATIBLES = new DiskFormatType[] {VHD_FLAT,
-    VHD_SPARSE};
+    public static final Set<DiskFormatType> HYPERV_COMPATIBLES = Sets.newHashSet(VHD_FLAT,
+        VHD_SPARSE);
 
-    public static final DiskFormatType[] XENSERVER_COMPATIBLES = HYPERV_COMPATIBLES;
+    public static final Set<DiskFormatType> XENSERVER_COMPATIBLES = HYPERV_COMPATIBLES;
 
     /* package */final static int ID_MIN = 0;
 
