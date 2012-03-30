@@ -64,7 +64,7 @@ public class InfrastructureService
 
     private InfrastructureCommand infrastructureCommand;
 
-    private VirtualMachineResourceStub vmStub;
+    private final VirtualMachineResourceStub vmStub;
 
     public InfrastructureService()
     {
@@ -72,11 +72,8 @@ public class InfrastructureService
         try
         {
             infrastructureCommand =
-                (InfrastructureCommand) Thread
-                    .currentThread()
-                    .getContextClassLoader()
-                    .loadClass(
-                        "com.abiquo.abiserver.commands.impl.InfrastructureCommandPremiumImpl")
+                (InfrastructureCommand) Thread.currentThread().getContextClassLoader().loadClass(
+                    "com.abiquo.abiserver.commands.impl.InfrastructureCommandPremiumImpl")
                     .newInstance();
         }
         catch (Exception e)
@@ -455,7 +452,7 @@ public class InfrastructureService
      */
     public BasicResult editVirtualMachine(final UserSession session,
         final VirtualMachine virtualMachine, final Integer virtualDatacenterId,
-        final Integer virtualApplianceId)
+        final Integer virtualApplianceId, final Boolean force)
     {
 
         VirtualMachineResourceStub vmachineResource =
@@ -463,7 +460,7 @@ public class InfrastructureService
                 VirtualMachineResourceStub.class);
 
         return vmachineResource.updateVirtualMachine(virtualDatacenterId, virtualApplianceId,
-            virtualMachine);
+            virtualMachine, force);
     }
 
     /**

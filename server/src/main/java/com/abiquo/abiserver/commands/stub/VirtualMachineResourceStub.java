@@ -30,7 +30,7 @@ public interface VirtualMachineResourceStub
 
 {
     public BasicResult updateVirtualMachine(Integer virtualDatacenterId,
-        Integer virtualApplianceId, VirtualMachine virtualMachine);
+        Integer virtualApplianceId, VirtualMachine virtualMachine, final boolean force);
 
     public BasicResult deleteVirtualMachine(Integer virtualDatacenterId,
         Integer virtualApplianceId, VirtualMachine virtualMachine);
