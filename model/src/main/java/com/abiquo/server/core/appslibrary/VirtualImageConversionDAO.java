@@ -22,6 +22,7 @@
 package com.abiquo.server.core.appslibrary;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -73,9 +74,15 @@ public class VirtualImageConversionDAO extends DefaultDAOBase<Integer, VirtualIm
         return Restrictions.eq(VirtualImageConversion.TARGET_TYPE_PROPERTY, image.getTargetType());
     }
 
-    private static Criterion targetFormatIn(final DiskFormatType... formats)
+    private static Criterion targetFormatIn(final Collection<DiskFormatType> formats)
     {
         return Restrictions.in(VirtualImageConversion.TARGET_TYPE_PROPERTY, formats);
+    }
+
+    private static Criterion targetFormatIn(final DiskFormatType format)
+    {
+        return Restrictions.in(VirtualImageConversion.TARGET_TYPE_PROPERTY,
+            Collections.singletonList(format));
     }
 
     private static Criterion sourceFormatNull()
@@ -101,7 +108,7 @@ public class VirtualImageConversionDAO extends DefaultDAOBase<Integer, VirtualIm
     {
         final Criterion compat =
             Restrictions.and(sameImage(virtualImage),
-                targetFormatIn(hypervisorType.compatibilityTable));
+                targetFormatIn(hypervisorType.compatibleFormats));
 
         return createCriteria(compat).list();
     }

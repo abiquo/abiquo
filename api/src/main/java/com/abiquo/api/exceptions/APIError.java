@@ -194,12 +194,10 @@ public enum APIError
         "VAPP-5",
         "The virtual appliance cannot be deleted in this state. It should be NOT_DEPLOYED or UNKNOWN"), VIRTUALAPPLIANCE_MOVE_MISSING_VDC(
         "VAPP-6",
-        "The virtual appliance cannot be moved because it has no link to its virtual datacenter"), VIRTUALAPPLIANCE_INVALID_STATE_MOVE_COPY(
-        "VAPP-8",
-        "The virtual appliance cannot be moved or copied in this state. It should be NOT_DEPLOYED"), VIRTUALAPPLIANCE_INVALID_DC_MOVE_COPY(
+        "The virtual appliance cannot be moved because it has no link to its virtual datacenter"), VIRTUALAPPLIANCE_INVALID_STATE_MOVE(
+        "VAPP-8", "The virtual appliance cannot be moved in this state. It should be NOT_DEPLOYED"), VIRTUALAPPLIANCE_INVALID_DC_MOVE_COPY(
         "VAPP-7",
-        "The virtual appliance cannot be moved or copied because the target virtual datacenter is not in the same datacenter"), VIRTUALAPPLIANCE_INVALID_STATE_MOVE(
-        "VAPP-8", "The virtual appliance cannot be moved in this state. It should be NOT_DEPLOYED"), VIRTUALAPPLIANCE_MOVE_COPY_CAPTURED_VM(
+        "The virtual appliance cannot be moved or copied because the target virtual datacenter is not in the same datacenter"), VIRTUALAPPLIANCE_MOVE_COPY_CAPTURED_VM(
         "VAPP-9",
         "The virtual appliance cannot be moved or copied because it contains captured virtual machines"), VIRTUALAPPLIANCE_MOVE_COPY_INCOMPATIBLE_VM(
         "VAPP-10",
@@ -355,7 +353,8 @@ public enum APIError
         "Cannot change the user nick"), USER_PASSWORD_IS_NECESSARY("USER 11",
         "The field password is required"), USER_NAME_IS_NECESSARY("USER 12",
         "The field name is required"), USER_NICK_IS_NECESSARY("USER 13",
-        "The field nick (username) is required"),
+        "The field nick (username) is required"), USER_VDC_RESTRICTED("USER 14",
+        "Your enterprise didn't allowed you to manage this virtual datacenter"),
 
     // REMOTE SERVICE
     NOT_ASSIGNED_REMOTE_SERVICE_DATACENTER("RS-0",
@@ -757,8 +756,8 @@ public enum APIError
         // Outputs all errors in wiki table format
         for (APIError error : errors)
         {
-            System.out.println(String.format("| %s | %s | %s |", error.code, error.message, error
-                .name()));
+            System.out.println(String.format("| %s | %s | %s |", error.code, error.message,
+                error.name()));
         }
 
         System.out.println("\n ************ Flex client labels ************** \n");

@@ -21,7 +21,7 @@
 
 package com.abiquo.server.core.appslibrary;
 
-import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -172,12 +172,12 @@ import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
     private Criterion compatibleOrConversions(final HypervisorType hypervisorType,
         final Criteria criteria)
     {
-        return Restrictions.or(compatible(Arrays.asList(hypervisorType.compatibilityTable)), //
-            compatibleConversions(Arrays.asList(hypervisorType.compatibilityTable), criteria));
+        return Restrictions.or(compatible(hypervisorType.compatibleFormats), //
+            compatibleConversions(hypervisorType.compatibleFormats, criteria));
     }
 
     /** Virtual Machine Template is compatible. */
-    private Criterion compatible(final List<DiskFormatType> types)
+    private Criterion compatible(final Collection<DiskFormatType> types)
     {
         return Restrictions.in(VirtualMachineTemplate.DISKFORMAT_TYPE_PROPERTY, types);
     }
@@ -185,7 +185,7 @@ import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
     /**
      * If (finished) conversions check some compatible. Left join to {@link VirtualImageConversion}
      */
-    private Criterion compatibleConversions(final List<DiskFormatType> types,
+    private Criterion compatibleConversions(final Collection<DiskFormatType> types,
         final Criteria criteria)
     {
         criteria.createAlias(VirtualMachineTemplate.CONVERSIONS_PROPERTY, "conversions",
@@ -328,17 +328,17 @@ import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
         switch (stateful)
         {
             case ALL:
-                Restrictions.and(cri, Restrictions
-                    .isNotNull(VirtualMachineTemplate.VOLUME_PROPERTY));
+                Restrictions.and(cri,
+                    Restrictions.isNotNull(VirtualMachineTemplate.VOLUME_PROPERTY));
                 break;
             case USED:
                 // use function criteriaWithStatefulNavigation before
-                return Restrictions.and(cri, Restrictions.eq("vl."
-                    + VolumeManagement.STATE_PROPERTY, VolumeState.ATTACHED));
+                return Restrictions.and(cri,
+                    Restrictions.eq("vl." + VolumeManagement.STATE_PROPERTY, VolumeState.ATTACHED));
             case NOTUSED:
                 // use function criteriaWithStatefulNavigation before
-                return Restrictions.and(cri, Restrictions.eq("vl."
-                    + VolumeManagement.STATE_PROPERTY, VolumeState.DETACHED));
+                return Restrictions.and(cri,
+                    Restrictions.eq("vl." + VolumeManagement.STATE_PROPERTY, VolumeState.DETACHED));
         }
         return cri;
     }
@@ -351,16 +351,16 @@ import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
     private static Criterion sameEnterpriseOrSharedInRepo(final Enterprise enterprise,
         final com.abiquo.server.core.infrastructure.Repository repository)
     {
-        return Restrictions.and(sameRepositoryAndNotStatefull(repository), Restrictions.or(
-            sameEnterprise(enterprise), sharedVirtualMachineTemplate()));
+        return Restrictions.and(sameRepositoryAndNotStatefull(repository),
+            Restrictions.or(sameEnterprise(enterprise), sharedVirtualMachineTemplate()));
     }
 
     private static Criterion sameEnterpriseOrSharedInRepo(final Enterprise enterprise,
         final com.abiquo.server.core.infrastructure.Repository repository, final String path)
     {
         Criterion sameEnterpriseOrSharedInRepo =
-            Restrictions.and(sameRepositoryAndNotStatefull(repository), Restrictions.or(
-                sameEnterprise(enterprise), sharedVirtualMachineTemplate()));
+            Restrictions.and(sameRepositoryAndNotStatefull(repository),
+                Restrictions.or(sameEnterprise(enterprise), sharedVirtualMachineTemplate()));
 
         return Restrictions.and(Restrictions.eq(VirtualMachineTemplate.PATH_PROPERTY, path),
             sameEnterpriseOrSharedInRepo);
