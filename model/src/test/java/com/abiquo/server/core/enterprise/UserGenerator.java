@@ -23,11 +23,11 @@ package com.abiquo.server.core.enterprise;
 
 import java.util.Calendar;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.List;
 
 import org.apache.commons.codec.digest.DigestUtils;
 
+import com.abiquo.server.core.cloud.VirtualDatacenterGenerator;
 import com.abiquo.server.core.common.DefaultEntityGenerator;
 import com.abiquo.server.core.enterprise.User.AuthType;
 import com.softwarementors.commons.test.SeedGenerator;
@@ -40,7 +40,9 @@ public class UserGenerator extends DefaultEntityGenerator<User>
 
     RoleGenerator roleGenerator;
 
-    public UserGenerator(SeedGenerator seed)
+    VirtualDatacenterGenerator virtualDatacenterGenerator;
+
+    public UserGenerator(final SeedGenerator seed)
     {
         super(seed);
 
@@ -48,10 +50,12 @@ public class UserGenerator extends DefaultEntityGenerator<User>
 
         roleGenerator = new RoleGenerator(seed);
 
+        virtualDatacenterGenerator = new VirtualDatacenterGenerator(seed);
+
     }
 
     @Override
-    public void assertAllPropertiesEqual(User obj1, User obj2)
+    public void assertAllPropertiesEqual(final User obj1, final User obj2)
     {
         AssertEx.assertPropertiesEqualSilent(obj1, obj2, User.NAME_PROPERTY, User.NICK_PROPERTY,
             User.LOCALE_PROPERTY, User.PASSWORD_PROPERTY, User.SURNAME_PROPERTY,
@@ -65,28 +69,28 @@ public class UserGenerator extends DefaultEntityGenerator<User>
         return createInstance(enterprise);
     }
 
-    public User createInstance(Enterprise enterprise)
+    public User createInstance(final Enterprise enterprise)
     {
         Role role = roleGenerator.createUniqueInstance();
 
         return createInstance(enterprise, role);
     }
 
-    public User createInstance(Role role)
+    public User createInstance(final Role role)
     {
         Enterprise enterprise = enterpriseGenerator.createUniqueInstance();
 
         return createInstance(enterprise, role);
     }
 
-    public User createInstance(Enterprise enterprise, Role role)
+    public User createInstance(final Enterprise enterprise, final Role role)
     {
         String password = newString(nextSeed(), 0, 255);
 
         return createInstance(enterprise, role, password);
     }
 
-    public User createInstance(AuthType authType)
+    public User createInstance(final AuthType authType)
     {
         String password = newString(nextSeed(), 0, 255);
         Enterprise enterprise = enterpriseGenerator.createUniqueInstance();
@@ -94,7 +98,14 @@ public class UserGenerator extends DefaultEntityGenerator<User>
         return createInstance(enterprise, role, password);
     }
 
-    public User createInstance(Enterprise enterprise, Role role, String password)
+    public User createInstance(final AuthType authType, final Role role)
+    {
+        String password = newString(nextSeed(), 0, 255);
+        Enterprise enterprise = enterpriseGenerator.createUniqueInstance();
+        return createInstance(enterprise, role, password);
+    }
+
+    public User createInstance(final Enterprise enterprise, final Role role, final String password)
     {
         String name = newString(nextSeed(), 0, 255);
         String surname = newString(nextSeed(), 0, 255);
@@ -104,7 +115,8 @@ public class UserGenerator extends DefaultEntityGenerator<User>
             User.AuthType.ABIQUO);
     }
 
-    public User createInstance(Enterprise enterprise, Role role, String password, AuthType authType)
+    public User createInstance(final Enterprise enterprise, final Role role, final String password,
+        final AuthType authType)
     {
         String name = newString(nextSeed(), 0, 255);
         String surname = newString(nextSeed(), 0, 255);
@@ -113,7 +125,8 @@ public class UserGenerator extends DefaultEntityGenerator<User>
         return createInstance(enterprise, role, password, name, surname, email, nick, authType);
     }
 
-    public User createInstance(Enterprise enterprise, Role role, String nick, String password)
+    public User createInstance(final Enterprise enterprise, final Role role, final String nick,
+        final String password)
     {
         String name = newString(nextSeed(), 0, 255);
         String surname = newString(nextSeed(), 0, 255);
@@ -123,8 +136,8 @@ public class UserGenerator extends DefaultEntityGenerator<User>
     }
 
     @Deprecated
-    public User createInstance(Enterprise enterprise, Role role, String password, String name,
-        String surname, String email, String nick)
+    public User createInstance(final Enterprise enterprise, final Role role, final String password,
+        final String name, final String surname, final String email, final String nick)
     {
         String locale = newString(nextSeed(), 0, 255);
 
@@ -143,8 +156,9 @@ public class UserGenerator extends DefaultEntityGenerator<User>
         return user;
     }
 
-    public User createInstance(Enterprise enterprise, Role role, String password, String name,
-        String surname, String email, String nick, AuthType authType)
+    public User createInstance(final Enterprise enterprise, final Role role, final String password,
+        final String name, final String surname, final String email, final String nick,
+        final AuthType authType)
     {
         String locale = newString(nextSeed(), 0, 255);
 
@@ -168,7 +182,7 @@ public class UserGenerator extends DefaultEntityGenerator<User>
         User user = createUniqueInstance();
         String key = newString(nextSeed(), 0, 255);
 
-        Calendar cal = GregorianCalendar.getInstance();
+        Calendar cal = Calendar.getInstance();
         cal.add(Calendar.DAY_OF_YEAR, 5);
 
         Date expireDate = cal.getTime();
@@ -180,7 +194,8 @@ public class UserGenerator extends DefaultEntityGenerator<User>
     }
 
     @Override
-    public void addAuxiliaryEntitiesToPersist(User entity, List<Object> entitiesToPersist)
+    public void addAuxiliaryEntitiesToPersist(final User entity,
+        final List<Object> entitiesToPersist)
     {
         super.addAuxiliaryEntitiesToPersist(entity, entitiesToPersist);
 

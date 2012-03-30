@@ -118,7 +118,7 @@ public class VirtualApplianceResourceIT extends AbstractJpaGeneratorIT
 
         // Check for vapp2
         response =
-            get(resolveVirtualApplianceURI(vdc.getId(), vapp2.getId()),
+            get(resolveVirtualApplianceURI(vdc.getId(), vapp2.getId()), SYSADMIN, SYSADMIN,
                 VirtualApplianceDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), Status.OK.getStatusCode());
         vappdto = response.getEntity(VirtualApplianceDto.class);

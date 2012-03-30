@@ -159,6 +159,16 @@ public class RoleGenerator extends DefaultEntityGenerator<Role>
         return role;
     }
 
+    public Role createInstance(final Privileges... privileges)
+    {
+        Role role = createInstance();
+        for (Privileges p : privileges)
+        {
+            role.addPrivilege(new Privilege(p));
+        }
+        return role;
+    }
+
     public Role createInstance(final String name, final Privilege... privileges)
     {
         Role role = createInstance(name);
