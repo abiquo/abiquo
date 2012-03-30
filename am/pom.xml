@@ -162,7 +162,12 @@
 			<groupId>commons-lang</groupId>
 			<artifactId>commons-lang</artifactId>
 			<version>2.4</version>
-		</dependency>
+    </dependency>
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+      <version>${guava.version}</version>
+    </dependency>
 		<!-- JSON -->
 		<!-- TODO use jackson.version -->
 		<dependency>
