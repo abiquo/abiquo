@@ -48,6 +48,10 @@ import com.abiquo.server.core.infrastructure.network.VLANNetwork;
 import com.abiquo.server.core.infrastructure.network.VLANNetworkDto;
 import com.abiquo.server.core.infrastructure.network.VLANNetworksDto;
 
+/**
+ * @wiki The PrivateNetwork Resource offers the functionality of managing the private networks
+ *       associated with a virtual datacenter.
+ */
 @Parent(VirtualDatacenterResource.class)
 @Path(PrivateNetworksResource.PRIVATE_NETWORKS_PATH)
 @Controller
@@ -58,6 +62,15 @@ public class PrivateNetworksResource extends AbstractResource
     @Autowired
     private NetworkService service;
 
+    /**
+     * Returns all private networks from a virtual datacenter
+     * 
+     * @title Retrieve all private networks
+     * @param virtualDatacenterId identifier of the virtual datacenter
+     * @param restBuilder a Context-injected object to create the links of the Dto
+     * @return a {VLANNetworksDto} object with all private nertworks
+     * @throws Exception
+     */
     @GET
     @Produces(VLANNetworksDto.MEDIA_TYPE)
     public VLANNetworksDto getPrivateNetworks(
@@ -81,6 +94,16 @@ public class PrivateNetworksResource extends AbstractResource
         return networks;
     }
 
+    /**
+     * Creates a private network
+     * 
+     * @title Create a private network
+     * @param virtualDatacenterId identifier of the virtual datacenter
+     * @param dto private network to create
+     * @param restBuilder a Context-injected object to create the links of the Dto
+     * @return a {VLANNetworkDto} with the created private network
+     * @throws Exception
+     */
     @POST
     @Consumes(VLANNetworkDto.MEDIA_TYPE)
     @Produces(VLANNetworkDto.MEDIA_TYPE)

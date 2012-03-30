@@ -41,4 +41,11 @@ public interface VirtualMachineResourceStub
 
     public DataResult rebootVirtualMachine(final Integer virtualDatacenterId,
         final Integer virtualApplianceId, final VirtualMachine virtualMachine);
+
+    public BasicResult rebootInfrastructureVirtualMachine(final Integer datacenterId,
+        final Integer rackId, final Integer machineId, VirtualMachine virtualMachine);
+
+    public BasicResult editInfrastructureVirtualMachineState(final Integer datacenterId,
+        final Integer rackId, final Integer machineId, VirtualMachine virtualMachine,
+        VirtualMachineState off);
 }

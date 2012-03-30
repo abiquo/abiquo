@@ -71,6 +71,7 @@ public class DiskResource extends AbstractResource
     /**
      * Exposes the method to query the extra disks generated into a virtual datacenter.
      * 
+     * @title Retrieve a hard disk
      * @param vdcId identifier of the virtual datacenter.
      * @param diskId identifier of the disk.
      * @param restBuilder a Context-injected object to create the links of the Dto
@@ -94,6 +95,9 @@ public class DiskResource extends AbstractResource
     /**
      * Expose the method to delete an existing Hard Disk.
      * 
+     * @title Delete a hard disk
+     * @wiki Deletes a Hard Disk. This method will raise an exception if the hard disk is used by a
+     *       Virtual Machine.
      * @param vdcId identifier of the {@link VirtualDatacenter}
      * @param diskId identifier fo the {@link DiskManagement} to delete.
      * @param restBuilder a Context-injected object to create the links of the Dto

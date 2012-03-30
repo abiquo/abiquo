@@ -66,10 +66,14 @@ import com.abiquo.server.core.infrastructure.Datastore;
 import com.abiquo.server.core.infrastructure.DatastoreDto;
 import com.abiquo.server.core.infrastructure.DatastoresDto;
 
+/**
+ * @wiki This resource allows you to manage datastore from physical machines in the cloud
+ *       infrastructure.
+ */
 @Parent(MachineResource.class)
 @Controller
 @Path(DatastoresResource.DATASTORES_PATH)
-public class DatastoresResource
+public class DatastoresResource extends AbstractResource
 {
     public static final String DATASTORES_PATH = "datastores";
 
@@ -79,13 +83,24 @@ public class DatastoresResource
     @Autowired
     MachineService machineService;
 
+    /**
+     * Returns all datastores from a machine
+     * 
+     * @title Retrive a list of Datastores from a physical machine
+     * @param datacenterId identifier of the datacenter
+     * @param rackId identifier of the rack
+     * @param machineId identifier of the machine
+     * @param restBuilder a Context-injected object to create the links of the Dto
+     * @return a {DatastoresDto} with all datastores from the machine
+     * @throws Exception
+     */
     @GET
     @Produces(DatastoresDto.MEDIA_TYPE)
     public DatastoresDto getDatastores(
-        @PathParam(DatacenterResource.DATACENTER) Integer datacenterId,
-        @PathParam(RackResource.RACK) Integer rackId,
-        @PathParam(MachineResource.MACHINE) Integer machineId, @Context IRESTBuilder restBuilder)
-        throws Exception
+        @PathParam(DatacenterResource.DATACENTER) final Integer datacenterId,
+        @PathParam(RackResource.RACK) final Integer rackId,
+        @PathParam(MachineResource.MACHINE) final Integer machineId,
+        @Context final IRESTBuilder restBuilder) throws Exception
     {
         if (!machineService.isAssignedTo(datacenterId, rackId, machineId))
         {
@@ -103,14 +118,26 @@ public class DatastoresResource
         return dto;
     }
 
+    /**
+     * Creates a datastore and returns it after ceration
+     * 
+     * @title Create a new Datastore in a physical machine
+     * @param datacenterId identifier of the datacenter
+     * @param rackId identifier of the rack
+     * @param machineId identifier of the machine
+     * @param dto datastore to create
+     * @param restBuilder a Context-injected object to create the links of the Dto
+     * @return a {DatastoreDto} object with the created datastore
+     * @throws Exception
+     */
     @POST
     @Consumes(DatastoreDto.MEDIA_TYPE)
     @Produces(DatastoreDto.MEDIA_TYPE)
     public DatastoreDto postDatastore(
-        @PathParam(DatacenterResource.DATACENTER) Integer datacenterId,
-        @PathParam(RackResource.RACK) Integer rackId,
-        @PathParam(MachineResource.MACHINE) Integer machineId, DatastoreDto dto,
-        @Context IRESTBuilder restBuilder) throws Exception
+        @PathParam(DatacenterResource.DATACENTER) final Integer datacenterId,
+        @PathParam(RackResource.RACK) final Integer rackId,
+        @PathParam(MachineResource.MACHINE) final Integer machineId, final DatastoreDto dto,
+        @Context final IRESTBuilder restBuilder) throws Exception
     {
         if (!machineService.isAssignedTo(datacenterId, rackId, machineId))
         {
@@ -122,8 +149,9 @@ public class DatastoresResource
         return createTransferObject(datastore, datacenterId, rackId, machineId, restBuilder);
     }
 
-    public static DatastoreDto createTransferObject(Datastore datastore, Integer datacenterId,
-        Integer rackId, Integer machineId, IRESTBuilder restBuilder) throws Exception
+    public static DatastoreDto createTransferObject(final Datastore datastore,
+        final Integer datacenterId, final Integer rackId, final Integer machineId,
+        final IRESTBuilder restBuilder) throws Exception
     {
         DatastoreDto dto = ModelTransformer.transportFromPersistence(DatastoreDto.class, datastore);
 

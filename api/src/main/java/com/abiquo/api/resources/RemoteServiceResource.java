@@ -67,6 +67,18 @@ public class RemoteServiceResource extends AbstractResource
      * REST methods
      */
 
+    /**
+     * Returns a remote service from a datacenter
+     * 
+     * @title Retrieve a Remote Service
+     * @param datacenterId identifier of the datacenter
+     * @param serviceType remote service type to retrieve, must be one of the followings: {
+     *            virtualfactory, storagesystemmonitor, virtualsystemmonitor, nodecollector,
+     *            dhcpservice, bpmservice, appliancemanager }
+     * @param restBuilder a Context-injected object to create the links of the Dto
+     * @return a {RemoteSerivceDto} object with the requested remote service
+     * @throws Exception
+     */
     @GET
     @Produces(RemoteServiceDto.MEDIA_TYPE)
     public RemoteServiceDto getRemoteService(
@@ -82,6 +94,18 @@ public class RemoteServiceResource extends AbstractResource
         return createTransferObject(remoteService, restBuilder);
     }
 
+    /**
+     * Checks a remote service status and updates the state
+     * 
+     * @title Check the status of a Remote Service
+     * @wiki Returns the status of a remoter service in a HTTP response code
+     * @param datacenterId identifier of the datacenter
+     * @param serviceType remote service type to check, must be one of the followings: {
+     *            virtualfactory, storagesystemmonitor, virtualsystemmonitor, nodecollector,
+     *            dhcpservice, bpmservice, appliancemanager }
+     * @param restBuilder a Context-injected object to create the links of the Dto
+     * @throws Exception
+     */
     @GET
     @Path(CHECK_RESOURCE)
     public void pingRemoteService(
@@ -95,6 +119,19 @@ public class RemoteServiceResource extends AbstractResource
         service.checkRemoteServiceStatus(rs.getDatacenter(), rs.getType(), rs.getUri(), true);
     }
 
+    /**
+     * Modifies a remote serivce.
+     * 
+     * @title Update an existing Remote Service
+     * @param datacenterId indentifier of the datacenter
+     * @param serviceType remote service type to modify, must be one of the followings: {
+     *            virtualfactory, storagesystemmonitor, virtualsystemmonitor, nodecollector,
+     *            dhcpservice, bpmservice, appliancemanager }
+     * @param remoteService remote service to modify
+     * @param restBuilder a Context-injected object to create the links of the Dto
+     * @return a {RemoteServiceDto} object with the modified remote service
+     * @throws Exception
+     */
     @PUT
     @Consumes(RemoteServiceDto.MEDIA_TYPE)
     @Produces(RemoteServiceDto.MEDIA_TYPE)
@@ -121,6 +158,15 @@ public class RemoteServiceResource extends AbstractResource
         return r;
     }
 
+    /**
+     * Deletes a remote serivce
+     * 
+     * @title Delete a Remote Service
+     * @param datacenterId identifier of the datacenter
+     * @param serviceType remote service type to delete, must be one of the followings: {
+     *            virtualfactory, storagesystemmonitor, virtualsystemmonitor, nodecollector,
+     *            dhcpservice, bpmservice, appliancemanager }
+     */
     @DELETE
     public void deleteRemoteService(
         @PathParam(DatacenterResource.DATACENTER) final Integer datacenterId,

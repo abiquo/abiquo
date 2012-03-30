@@ -73,6 +73,21 @@ public class VirtualMachineTemplatesResource extends AbstractResource
     @Autowired
     private InfrastructureService infrastructureService;
 
+    /**
+     * Returns all virtual machine templates
+     * 
+     * @title Retrieve all virtual machine templates
+     * @param enterpriseId identifier of the enterprise
+     * @param datacenterId identifier of the datacenter
+     * @param categoryName name of a catagory
+     * @param hypervisorTypeName type of an hypervisor
+     * @param virtualdatacenterId identifier of a virtual datacenter
+     * @param stateful boolean to include stateful templates
+     * @param imported boolean to include imported templates
+     * @param restBuilder a Context-injected object to create the links of the Dto
+     * @return a {virtualMachineTemplateDto} object with all virtual machine templates
+     * @throws Exception
+     */
     @GET
     @Produces(VirtualMachineTemplatesDto.MEDIA_TYPE)
     public VirtualMachineTemplatesDto getVirtualMachineTemplates(

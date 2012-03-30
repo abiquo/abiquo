@@ -69,6 +69,15 @@ public class CategoryResource extends AbstractResource
     @Autowired
     private CategoryService service;
 
+    /**
+     * Returns a category
+     * 
+     * @title Retrieve a category
+     * @param categoryId identifier of the category
+     * @param restBuilder a Context-injected object to create the links of the Dto
+     * @return a {CategoryDto} with the requested category
+     * @throws Exception
+     */
     @GET
     @Produces(CategoryDto.MEDIA_TYPE)
     public CategoryDto getCategory(@PathParam(CATEGORY) @NotNull @Min(1) final Integer categoryId,
@@ -78,6 +87,16 @@ public class CategoryResource extends AbstractResource
         return createTransferObject(category, restBuilder);
     }
 
+    /**
+     * Modifies a category
+     * 
+     * @title Modify a category
+     * @param categoryId identifier of the category
+     * @param categoryDto category to modify
+     * @param restBuilder a Context-injected object to create the links of the Dto
+     * @return a {CategoryDto} object with the modified category
+     * @throws Exception
+     */
     @PUT
     @Consumes(CategoryDto.MEDIA_TYPE)
     @Produces(CategoryDto.MEDIA_TYPE)
@@ -92,6 +111,12 @@ public class CategoryResource extends AbstractResource
         return createTransferObject(category, restBuilder);
     }
 
+    /**
+     * Deletes a category
+     * 
+     * @title Delete a category
+     * @param categoryId identifier of the category
+     */
     @DELETE
     public void deleteCategory(@PathParam(CATEGORY) final Integer categoryId)
     {

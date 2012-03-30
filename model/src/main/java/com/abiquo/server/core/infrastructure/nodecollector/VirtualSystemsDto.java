@@ -20,13 +20,11 @@
  */
 package com.abiquo.server.core.infrastructure.nodecollector;
 
+import java.util.ArrayList;
 import java.util.List;
 
-import javax.ws.rs.core.MediaType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
-
-import com.abiquo.model.transport.WrapperDto;
 
 /**
  * Represents a collection of {@link VirtualSystemDto}.
@@ -34,27 +32,15 @@ import com.abiquo.model.transport.WrapperDto;
  * @author ibarrera
  */
 @XmlRootElement(name = "vsc")
-public class VirtualSystemsDto extends WrapperDto<VirtualSystemDto>
+public class VirtualSystemsDto
 {
     /** Serial UID. */
     private static final long serialVersionUID = 1L;
+    protected List<VirtualSystemDto> collection = new ArrayList<VirtualSystemDto>();
 
-    @Override
     @XmlElement(name = "vms")
     public List<VirtualSystemDto> getCollection()
     {
         return collection;
-    }
-
-    @Override
-    public String getMediaType()
-    {
-        return MediaType.APPLICATION_XML;
-    }
-    
-    @Override
-    public String getBaseMediaType()
-    {
-        return MediaType.APPLICATION_XML;
     }
 }

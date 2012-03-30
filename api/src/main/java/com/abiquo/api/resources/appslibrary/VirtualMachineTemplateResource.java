@@ -54,8 +54,8 @@ public class VirtualMachineTemplateResource extends AbstractResource
 {
     public final static String VIRTUAL_MACHINE_TEMPLATE = "virtualmachinetemplate";
 
-    public final static String VIRTUAL_MACHINE_TEMPLATE_PARAM =
-        "{" + VIRTUAL_MACHINE_TEMPLATE + "}";
+    public final static String VIRTUAL_MACHINE_TEMPLATE_PARAM = "{" + VIRTUAL_MACHINE_TEMPLATE
+        + "}";
 
     @Autowired
     private VirtualMachineTemplateService vmtemplateService;
@@ -63,6 +63,17 @@ public class VirtualMachineTemplateResource extends AbstractResource
     @Autowired
     private InfrastructureService infrastructureService;
 
+    /**
+     * Returns a virtual machine template definition
+     * 
+     * @title Retrieve a virtual machine template definition
+     * @param enterpriseId identifier of the enterprise
+     * @param datacenterId identifier of the datacenter
+     * @param virtualMachineTemplateId identifier of the virtual machine template
+     * @param restBuilder a Context-injected object to create the links of the Dto
+     * @return a {VirtualMachineTemplateDto} object with the requested virtual machine template
+     * @throws Exception
+     */
     @GET
     @Produces(VirtualMachineTemplateDto.MEDIA_TYPE)
     public VirtualMachineTemplateDto getVirtualMachineTemplate(
@@ -82,6 +93,18 @@ public class VirtualMachineTemplateResource extends AbstractResource
         return createTransferObject(vmTemplate, enterpriseId, datacenterId, amUri, restBuilder);
     }
 
+    /**
+     * Modifies a virtual machine template
+     * 
+     * @title modify a vitual machine template
+     * @param enterpriseId identifier of the enterprise
+     * @param datacenterId identifier of the datacenter
+     * @param virtualMachineTemplateId identifier of the virtual machine template
+     * @param vmtemplateDto virtual machine template to modify
+     * @param restBuilder a Context-injected object to create the links of the Dto
+     * @return a {virtualMachineTemplateDto} object with the modified virtual machine template
+     * @throws Exception
+     */
     @PUT
     @Consumes(VirtualMachineTemplateDto.MEDIA_TYPE)
     @Produces(VirtualMachineTemplateDto.MEDIA_TYPE)
@@ -104,6 +127,15 @@ public class VirtualMachineTemplateResource extends AbstractResource
 
     }
 
+    /**
+     * Deletes a virtual machine template
+     * 
+     * @title Delete a virtual machine template
+     * @param enterpriseId identifier of the enterprise
+     * @param datacenterId identifier of the datacenter
+     * @param virtualMachineTemplateId identifier of the virtual machine template
+     * @param restBuilder a Context-injected object to create the links of the Dto
+     */
     @DELETE
     public void removeVirtualMachineTemplate(
         @PathParam(EnterpriseResource.ENTERPRISE) @NotNull @Min(1) final Integer enterpriseId,
@@ -159,7 +191,7 @@ public class VirtualMachineTemplateResource extends AbstractResource
         if (ovfid != null)
         {
             String href = AMClientResources.resolveTemplateUrl(amUri, enterpriseId, ovfid);
-            
+
             dto.addLink(new RESTLink("templatedefinition", ovfid));
             dto.addLink(new RESTLink("template", href));
             dto.addLink(new RESTLink("templatestatus", href + "?format=status"));

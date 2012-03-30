@@ -371,6 +371,9 @@ public class VirtualMachineResourceIT extends AbstractJpaGeneratorIT
             get(resolveVirtualMachineURI(vdc.getId(), vapp.getId(), vm.getId()), SYSADMIN,
                 SYSADMIN, VirtualMachineDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), Status.OK.getStatusCode());
+
+        response.toString();
+
         VirtualMachineDto vmDto = response.getEntity(VirtualMachineDto.class);
         assertLinkExist(vmDto,
             resolveVirtualMachineActionGetIPsURI(vdc.getId(), vapp.getId(), vm.getId()),
