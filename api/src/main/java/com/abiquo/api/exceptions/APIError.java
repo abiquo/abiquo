@@ -441,7 +441,8 @@ public enum APIError
         "Unexpected exception building the request to discovery manager"), NC_UNAVAILABLE_EXCEPTION(
         "NC-7", "The discovery manager is currently not available"), NC_VIRTUAL_MACHINE_NOT_FOUND(
         "NC-8", "The requested virtual machine was not found on the remote hypervisor"), NC_NOT_MANAGED_HOST(
-        "NC-9", "The requested host is not managed"),
+        "NC-9", "The requested host is not managed"), NC_INVALID_IP("NC-10",
+        "The IP format is invalid"),
 
     // STORAGE POOL
     MISSING_REQUIRED_QUERY_PARAMETER_IQN("SP-1", "Missing IQN query parameter"), CONFLICT_STORAGE_POOL(
