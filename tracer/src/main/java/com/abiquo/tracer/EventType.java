@@ -82,9 +82,11 @@ public enum EventType implements Serializable
         314, "REMOTE_SERVICES_CREATE", "Remote Service created"), REMOTE_SERVICES_UPDATE(315,
         "REMOTE_SERVICE_UPDATE", "Remote Service updated"), REMOTE_SERVICES_CHECK(316,
         "REMOTE_SERVICES_CHECK", "Remote service checked"), REMOTE_SERVICES_DELETE(317,
-        "REMOTE_SERVICES_DELETE", "Remote Service deleted"), RACK_RETRIEVAL(318, "RACK_RETRIEVAL",
-        "Retrieve Rack"), APPLIANCE_MANAGER_CONFIGURATION(319, "APPLIANCE_MANAGER_CONFIGURATION_",
-        "The appliance manager is not well configured"),
+        "REMOTE_SERVICES_DELETE", "Remote Service deleted"), REMOTE_SERVICES_ERROR(318,
+        "REMOTE_SERVICES_ERROR", "Remote Service error"), REMOTE_SERVICES_SUCCESS(319,
+        "REMOTE_SERVICES_SUCCESS", "Remote Services Successful Creation"), RACK_RETRIEVAL(320,
+        "RACK_RETRIEVAL", "Retrieve Rack"), APPLIANCE_MANAGER_CONFIGURATION(321,
+        "APPLIANCE_MANAGER_CONFIGURATION_", "The appliance manager is not well configured"),
 
     // Storage system-related events
     SSM_CREATE(400, "SSM_CREATE", "Storage System Manager created"), SSM_MODIFY(401, "SSM_MODIFY",
@@ -95,11 +97,12 @@ public enum EventType implements Serializable
         407, "VOLUME_MODIFY", "Volume modified"), VOLUME_DELETE(408, "VOLUME_DELETE",
         "Volume deleted"), VOLUME_ASSIGN(409, "VOLUME_ATTACHED", "Volume attached"), VOLUME_UNASSIGN(
         410, "VOLUME_DETACHED", "Volume detached"), VOLUME_ATTACH(411, "VOLUME_ATTACH",
-        "Volume attached"), VOLUME_DETACH(412, "VOLUME_DETACH", "Volume detached"), GET_INITIATOR_MAPPINGS(
-        413, "GET_INITIATOR_MAPPINGS", "Initiator mappings retrieved"), HARD_DISK_CREATE(414,
-        "HARD_DISK_CREATE", "Hard disk created"), HARD_DISK_DELETE(415, "HARD_DISK_DELETE",
-        "Hard disk deleted"), HARD_DISK_ASSIGN(416, "HARD_DISK_ASSIGN", "Hard disk assigned"), HARD_DISK_UNASSIGN(
-        417, "HARD_DISK_UNASSIGN", "Hard disk unassigned"),
+        "Volume attached"), VOLUME_DETACH(412, "VOLUME_DETACH", "Volume detached"), VOLUME_MOVED(
+        413, "VOLUME_MOVED", "Volume moved"), GET_INITIATOR_MAPPINGS(414, "GET_INITIATOR_MAPPINGS",
+        "Initiator mappings retrieved"), HARD_DISK_CREATE(415, "HARD_DISK_CREATE",
+        "Hard disk created"), HARD_DISK_DELETE(416, "HARD_DISK_DELETE", "Hard disk deleted"), HARD_DISK_ASSIGN(
+        417, "HARD_DISK_ASSIGN", "Hard disk assigned"), HARD_DISK_UNASSIGN(418,
+        "HARD_DISK_UNASSIGN", "Hard disk unassigned"),
 
     // Image-related events
     VI_DOWNLOAD(500, "VI_DOWNLOAD", "Virtual Image download from a Remote Repository"), VI_ADD(501,
@@ -185,7 +188,8 @@ public enum EventType implements Serializable
     // PRICING TEMPLATE
     PRICING_TEMPLATE_CREATED(1600, "PRICING_TEMPLATE_CREATED", "Pricing Template created"), PRICING_TEMPLATE_MODIFIED(
         1601, "PRICING_TEMPLATE_MODIFIED", "Pricing Template updated"), PRICING_TEMPLATE_DELETED(
-        1602, "PRICING_TEMPLATE_DELETED", "Pricing Template deleted"),
+        1602, "PRICING_TEMPLATE_DELETED", "Pricing Template deleted"), PRICING_TEMPLATE_ASSIGNED(
+        1603, "PRICING_TEMPLATE_ASSIGNED", "Pricing Template assigned"),
 
     // COSTCODE_CURRENCY
     COSTCODE_CURRENCY_CREATED(1900, "COSTCODE_CURRENCY_CREATED", "Cost Code -Currency created"), COSTCODE_CURRENCY_MODIFIED(
@@ -238,11 +242,10 @@ public enum EventType implements Serializable
         1700,
         "UCS_COMMUNICATION_PROBLEM",
         "There is a problem accessing to UCS. Might be due to several causes. Check that UCS is working, reacheable, and the credentials"), UCS_ASSOCIATE(
-        1701, "UCS_BLADE_ASSOCIATION", "Blade association with a Service Profile in UCS"), UCS_DISSOCIATE(
-        1702, "Blade disassociation with a Service Profile in UCS",
-        "Blade disassociation with a Service Profile in UCS"), UCS_DELETED(1703,
-        "SERVICE_PROFILE_DELETED", "Service Profile deletion in UCS"), UCS_BLADE_POWEROFF(1704,
-        "UCS_BLADE_POWER_OFF", "Blade powered off in UCS"), UCS_BLADE_POWERON(1705,
+        1701, "UCS_BLADE_ASSOCIATION", "Blade associated with a Service Profile in UCS"), UCS_DISASSOCIATE(
+        1702, "UCS_DISASSOCIATE", "Removed blade's association with UCS Service Profile"), UCS_DELETED(
+        1703, "SERVICE_PROFILE_DELETED", "Service Profile deletion in UCS"), UCS_BLADE_POWEROFF(
+        1704, "UCS_BLADE_POWER_OFF", "Blade powered off in UCS"), UCS_BLADE_POWERON(1705,
         "UCS_BLADE_POWER_ON", "Blade powered on in UCS");
 
     private final int event;

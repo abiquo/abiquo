@@ -60,6 +60,9 @@ public class TemplateDefinitionListResource extends AbstractResource
 
     public static final String TEMPLATE_DEFINITION_LIST_REPOSITORY_STATUS_PATH =
         "actions/repositoryStatus";
+    
+    public static final String TEMPLATE_DEFINITION_LIST_REPOSITORY_STATUS_REL =
+        "repositoryStatus";
 
     public static final String TEMPLATE_DEFINITION_LIST_REPOSITORY_STATUS_DATACENTER_QUERY_PARAM =
         "datacenterId";

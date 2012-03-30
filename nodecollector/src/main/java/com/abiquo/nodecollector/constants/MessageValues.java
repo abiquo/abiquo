@@ -161,7 +161,12 @@ public final class MessageValues
     /**
      * Message thrown by the <code>NoManagedException</code> in the ESXi code.
      */
-    public static final String NOMAN_ESXI_LIC =
+    public static final String NOMAN_ESXI_LIC = "ESXi host is in maintenance mode";
+
+    /**
+     * Message thrown by the <code>NoManagedException</code> in the ESXi code.
+     */
+    public static final String NOMAN_ESXI_MAINTENACNE =
         "The ESXi license is not valid to be managed by Abiquo. Please check if the license has expired or you are using an evaluation license";
 
     /**

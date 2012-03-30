@@ -73,6 +73,7 @@ import com.abiquo.api.resources.cloud.VirtualMachinesResource;
 import com.abiquo.api.resources.config.PrivilegeResource;
 import com.abiquo.api.resources.config.SystemPropertyResource;
 import com.abiquo.api.services.InfrastructureService;
+import com.abiquo.appliancemanager.transport.TemplatesStateDto;
 import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.model.rest.RESTLink;
 import com.abiquo.model.transport.AcceptedRequestDto;
@@ -316,6 +317,27 @@ public class RESTBuilder implements IRESTBuilder
             builder);
     }
 
+    protected RESTLink buildMachineRackLink(final AbiquoLinkBuilder builder,
+        final Map<String, String> params, final Boolean managedRack)
+    {
+        RESTLink link;
+
+        if (!managedRack)
+        {
+            link =
+                builder.buildRestLink(RackResource.class, RackResource.RACK, params,
+                    RackDto.BASE_MEDIA_TYPE);
+        }
+        else
+        {
+            link =
+                builder.buildRestLink(RackResource.class, RackResource.RACK, params,
+                    UcsRackDto.BASE_MEDIA_TYPE);
+        }
+
+        return link;
+    }
+
     public List<RESTLink> buildMachineLinks(final Integer datacenterId, final Integer rackId,
         final Boolean managedRack, final Enterprise enterprise, final MachineDto machine,
         final AbiquoLinkBuilder builder)
@@ -327,8 +349,7 @@ public class RESTBuilder implements IRESTBuilder
         params.put(RackResource.RACK, rackId.toString());
         params.put(MachineResource.MACHINE, machine.getId().toString());
 
-        links.add(builder.buildRestLink(RackResource.class, RackResource.RACK, params,
-            RackDto.BASE_MEDIA_TYPE));
+        links.add(buildMachineRackLink(builder, params, managedRack));
         links.add(builder.buildRestLink(MachineResource.class, REL_EDIT, params,
             MachineDto.BASE_MEDIA_TYPE));
         links.add(builder.buildRestLink(DatastoresResource.class,
@@ -580,6 +601,11 @@ public class RESTBuilder implements IRESTBuilder
 
         links.add(builder.buildRestLink(TemplateDefinitionListResource.class, REL_EDIT, params,
             TemplateDefinitionListDto.BASE_MEDIA_TYPE));
+
+        links.add(builder.buildRestLink(TemplateDefinitionListResource.class,
+            TemplateDefinitionListResource.TEMPLATE_DEFINITION_LIST_REPOSITORY_STATUS_PATH,
+            TemplateDefinitionListResource.TEMPLATE_DEFINITION_LIST_REPOSITORY_STATUS_REL, params,
+            TemplatesStateDto.BASE_MEDIA_TYPE));
 
         return links;
     }
@@ -1453,13 +1479,18 @@ public class RESTBuilder implements IRESTBuilder
     }
 
     @Override
-    public List<RESTLink> buildCategoryLinks(final CategoryDto categorydto)
+    public List<RESTLink> buildCategoryLinks(final Category category)
     {
         List<RESTLink> links = new ArrayList<RESTLink>();
         Map<String, String> params = new HashMap<String, String>();
-        params.put(CategoryResource.CATEGORY, categorydto.getId().toString());
-
+        params.put(CategoryResource.CATEGORY, category.getId().toString());
         AbiquoLinkBuilder builder = AbiquoLinkBuilder.createBuilder(linkProcessor);
+        if (category.getEnterprise() != null)
+        {
+            params.put(EnterpriseResource.ENTERPRISE, category.getEnterprise().getId().toString());
+            links.add(builder.buildRestLink(EnterpriseResource.class,
+                EnterpriseResource.ENTERPRISE, params, EnterpriseDto.BASE_MEDIA_TYPE));
+        }
         RESTLink editLink =
             builder.buildRestLink(CategoryResource.class, REL_EDIT, params,
                 CategoryDto.BASE_MEDIA_TYPE);

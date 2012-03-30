@@ -23,6 +23,7 @@ package com.abiquo.abiserver.pojo.virtualimage;
 
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualimage.CategoryHB;
 import com.abiquo.abiserver.pojo.IPojo;
+import com.abiquo.model.rest.RESTLink;
 import com.abiquo.server.core.appslibrary.CategoryDto;
 
 public class Category implements IPojo<CategoryHB>
@@ -36,6 +37,8 @@ public class Category implements IPojo<CategoryHB>
     private boolean isErasable;
 
     private boolean isDefault;
+
+    private int idEnterprise;
 
     /* ------------- Constructor ------------- */
     public Category()
@@ -112,6 +115,26 @@ public class Category implements IPojo<CategoryHB>
         category.setName(dto.getName());
         category.setIsErasable(dto.isErasable());
         category.setIsDefault(dto.isDefaultCategory());
+        RESTLink enterpriseLink = dto.searchLink("enterprise");
+        if (enterpriseLink != null)
+        {
+            category.setIdEnterprise(Integer.valueOf(enterpriseLink.getHref().substring(
+                enterpriseLink.getHref().lastIndexOf("/") + 1)));
+        }
+        else
+        {
+            category.setIdEnterprise(0);
+        }
         return category;
+    }
+
+    public void setIdEnterprise(final int idEnterprise)
+    {
+        this.idEnterprise = idEnterprise;
+    }
+
+    public int getIdEnterprise()
+    {
+        return idEnterprise;
     }
 }

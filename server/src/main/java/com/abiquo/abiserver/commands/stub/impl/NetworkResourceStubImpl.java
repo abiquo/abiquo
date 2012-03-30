@@ -34,7 +34,10 @@ import java.util.Set;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response.Status;
 
+import org.apache.log.util.LoggerOutputStream;
 import org.apache.wink.client.ClientResponse;
+
+import ch.qos.logback.classic.Logger;
 
 import com.abiquo.abiserver.business.hibernate.pojohb.user.UserHB;
 import com.abiquo.abiserver.commands.stub.AbstractAPIStub;
@@ -582,7 +585,7 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
         }
 
         result.setSuccess(Boolean.FALSE);
-        result.setMessage("Unknow exception. External networks not found.");
+        result.setMessage("Limits by enterprise and datacenter do not exist");
         return result;
     }
 
@@ -635,8 +638,8 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
             }
         }
 
-        result.setSuccess(Boolean.FALSE);
-        result.setMessage("Unknown exception. External networks not found.");
+        result.setSuccess(Boolean.TRUE);
+        result.setData(listOfNetworks);
         return result;
     }
 
@@ -841,7 +844,7 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
     @Override
     public BasicResult getListNetworkPoolByVirtualDatacenter(final Integer vdcId,
         final Integer offset, final Integer numElem, final String filterLike, final String orderBy,
-        final Boolean asc, String type) throws NetworkCommandException
+        final Boolean asc, String type, final Boolean all) throws NetworkCommandException
     {
         DataResult<ListResponse<IpPoolManagement>> dataResult =
             new DataResult<ListResponse<IpPoolManagement>>();
@@ -853,6 +856,7 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
         buildRequest.append("&limit=" + numElem);
         buildRequest.append("&by=" + transformOrderBy(orderBy));
         buildRequest.append("&asc=" + (asc ? "true" : "false"));
+        buildRequest.append("&all=" + (all ? "true" : "false"));
         if (type != null && type.equals("EXTERNAL"))
         {
             type = "EXTERNAL_UNMANAGED";
@@ -896,8 +900,8 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
     @Override
     public DataResult<ListResponse<IpPoolManagement>> getListNetworkPublicPoolByDatacenter(
         final Integer datacenterId, final Integer offset, final Integer numberOfNodes,
-        final String filterLike, final String orderBy, final Boolean asc, String type)
-        throws NetworkCommandException
+        final String filterLike, final String orderBy, final Boolean asc, String type,
+        final Boolean all) throws NetworkCommandException
     {
         DataResult<ListResponse<IpPoolManagement>> dataResult =
             new DataResult<ListResponse<IpPoolManagement>>();
@@ -908,6 +912,7 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
         buildRequest.append("&limit=" + numberOfNodes);
         buildRequest.append("&by=" + transformOrderBy(orderBy));
         buildRequest.append("&asc=" + (asc ? "true" : "false"));
+        buildRequest.append("&all=" + (all ? "true" : "false"));
         if (type.equals("EXTERNAL"))
         {
             type = "EXTERNAL_UNMANAGED";

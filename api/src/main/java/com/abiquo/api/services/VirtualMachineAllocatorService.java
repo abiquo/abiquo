@@ -34,6 +34,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.abiquo.api.exceptions.APIError;
+import com.abiquo.api.exceptions.ConflictException;
 import com.abiquo.model.enumerator.FitPolicy;
 import com.abiquo.model.enumerator.MachineState;
 import com.abiquo.model.transport.error.CommonError;
@@ -496,7 +497,9 @@ public class VirtualMachineAllocatorService extends DefaultApiService
 
     /**
      * We check how many empty machines are in a rack. Then we power on or off to fit the
-     * configuration. In 2.0 only in {@link UcsRack}.
+     * configuration. In 2.0 only in {@link UcsRack}. This method is not transactional since there
+     * is no need to perform rollback. All of the functions that made changes to the database are
+     * marked as REQUIRES_NEW.
      * 
      * @param targetMachine machine we are deploy void
      * @since 2.0
@@ -521,7 +524,7 @@ public class VirtualMachineAllocatorService extends DefaultApiService
         {
             LOG.debug("Not enough machines on rack: {} should be {} but there are {}",
                 new Object[] {rack.getId(), max, emptyMachinesOn});
-            Integer howMany = max - emptyMachinesOn;
+            int howMany = max - emptyMachinesOn;
             List<Machine> machines =
                 this.allocationService.getRandomMachinesToStartFromRack(rack.getId(), howMany);
             if (machines != null && !machines.isEmpty())
@@ -540,14 +543,13 @@ public class VirtualMachineAllocatorService extends DefaultApiService
             LOG.debug("Too many machines rack: {} should be {} but there are {}", new Object[] {
             rack.getId(), max, emptyMachinesOn});
 
-            Integer howMany = emptyMachinesOn - max;
-            List<Machine> machines =
-                this.allocationService.getRandomMachinesToShutDownFromRack(rack.getId(), howMany);
+            int howMany = emptyMachinesOn - max;
+            List<Machine> machines = this.allocationService.getAllEmptyOnMachines(rack.getId());
             if (machines != null && !machines.isEmpty())
             {
                 LOG.debug("Requesting {} machines to shut , retrieved {}", new Object[] {howMany,
                 machines.size()});
-                shutDownMachine(machines);
+                shutDownMachines(machines, howMany);
                 return;
             }
             LOG.debug("There are no machines available to shut down on rack: {}", rack.getId());
@@ -585,18 +587,36 @@ public class VirtualMachineAllocatorService extends DefaultApiService
 
     /**
      * There are special requirements for this method to be ok. Most of those prerequisites can not
-     * be satisfied by Abiquo. The machine must be associated with a Logic Server in UCS.
+     * be satisfied by Abiquo. The machine must be associated with a Logic Server in UCS. Since we
+     * do not persist the Logic Server we need to try to shutdown all.
      * 
-     * @see com.abiquo.scheduler.Allocator#shutDownMachine(java.util.List)
+     * @see com.abiquo.scheduler.Allocator#shutDownMachines(java.util.List)
      */
-    protected void shutDownMachine(final List<Machine> machines)
+    protected void shutDownMachines(final List<Machine> machines, int howMany)
     {
-        LOG.debug("Stopping {} machines", machines.size());
+        LOG.debug("Stopping {} machines", howMany);
         for (Machine machine : machines)
         {
+            // Since we don't know in advance which are associated we must try all of them
+            // Even if we precalculate since there is many options of changing the UCS actual status
+            // does not guarantees
+            if (howMany <= 0)
+            {
+                LOG.debug(
+                    "shutDownMachines UCS not machines need to shutdown, it should be 0 and is {}",
+                    howMany);
+                return;
+            }
             try
             {
                 infrastructureService.powerOff(machine.getId(), MachineState.HALTED_FOR_SAVE);
+                howMany--;
+            }
+            catch (ConflictException e)
+            {
+                LOG.error(
+                    "Could not power off the machine id {} name {} the error conflict error: {}: {}",
+                    new Object[] {machine.getId(), machine.getName(), e.getErrors(), e.getMessage()});
             }
             catch (Exception e)
             {
@@ -605,6 +625,12 @@ public class VirtualMachineAllocatorService extends DefaultApiService
                     new Object[] {machine.getId(), machine.getName(), e.getClass().getName(),
                     e.getMessage()});
             }
+        }
+        if (howMany > 0)
+        {
+            LOG.error(
+                "Could not power off all of the required machines, {} left to power off. Either empty or with service profile associated!",
+                howMany);
         }
     }
 }

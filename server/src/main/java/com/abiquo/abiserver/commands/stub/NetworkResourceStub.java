@@ -98,12 +98,12 @@ public interface NetworkResourceStub
         Boolean onlyAvailable, Boolean freeIps);
 
     public BasicResult getListNetworkPoolByVirtualDatacenter(Integer vdcId, Integer offset,
-        Integer numElem, String filterLike, String orderBy, Boolean asc, String type)
+        Integer numElem, String filterLike, String orderBy, Boolean asc, String type,  Boolean all)
         throws NetworkCommandException;
 
     public BasicResult getListNetworkPublicPoolByDatacenter(Integer datacenterId, Integer offset,
-        Integer numberOfNodes, String filterLike, String orderBy, Boolean asc, String type)
-        throws NetworkCommandException;
+        Integer numberOfNodes, String filterLike, String orderBy, Boolean asc, String type,
+        Boolean all) throws NetworkCommandException;
 
     public BasicResult getListNetworkPublicPoolByVlan(Integer datacenterId, Integer vlanId,
         Integer offset, Integer numberOfNodes, String filterLike, String orderBy, Boolean asc,

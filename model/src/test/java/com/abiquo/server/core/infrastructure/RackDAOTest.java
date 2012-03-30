@@ -208,7 +208,7 @@ public class RackDAOTest extends DefaultDAOTestBase<RackDAO, Rack>
 
         assertEquals(usedPorts.size(), 2);
     }
-        
+
     /**
      * Returns any machine that is in the rack in MANAGED.
      * 
@@ -247,7 +247,7 @@ public class RackDAOTest extends DefaultDAOTestBase<RackDAO, Rack>
     }
 
     /**
-     * Returns any machine that is in the rack in MANAGED.
+     * Returns any machine that is in the rack in HALTED_FOR_SAVE.
      * 
      * @param rackId rack.
      * @return Machine
@@ -288,5 +288,96 @@ public class RackDAOTest extends DefaultDAOTestBase<RackDAO, Rack>
         List<Machine> machines =
             createDaoForRollbackTransaction().getRandomMachinesToStartFromRack(ucsRack.getId(), 4);
         Assert.assertEquals(machines.size(), 4);
+    }
+
+    /**
+     * Returns any machine that is in the rack in HALTED_FOR_SAVE.
+     * 
+     * @param rackId rack.
+     * @return Machine
+     */
+    @Test
+    public void getAllMachinesToShutDownFromRack()
+    {
+
+        DatacenterGenerator generator = new DatacenterGenerator(getSeed());
+        UcsRackGenerator ucsRackGenerator = new UcsRackGenerator(getSeed());
+        MachineGenerator machineGenerator = new MachineGenerator(getSeed());
+        HypervisorGenerator hypervisorGenerator = new HypervisorGenerator(getSeed());
+        Datacenter datacenter = generator.createUniqueInstance();
+
+        UcsRack ucsRack = ucsRackGenerator.createInstance(datacenter);
+        ds().persistAll(datacenter, ucsRack);
+        for (int i = 0; i < 7; i++)
+        {
+            Machine machine = machineGenerator.createUniqueInstance();
+            machine.setState(MachineState.MANAGED);
+            machine.setRack(ucsRack);
+            machine.setBelongsToManagedRack(Boolean.TRUE);
+
+            machine.setDatacenter(datacenter);
+            Hypervisor visor = hypervisorGenerator.createUniqueInstance();
+            visor.setMachine(machine);
+            ds().persistAll(machine, visor);
+        }
+        Machine machine = machineGenerator.createUniqueInstance();
+        machine.setState(MachineState.PROVISIONED);
+        machine.setRack(ucsRack);
+        machine.setBelongsToManagedRack(Boolean.TRUE);
+
+        machine.setDatacenter(datacenter);
+        Hypervisor visor = hypervisorGenerator.createUniqueInstance();
+        visor.setMachine(machine);
+        ds().persistAll(machine, visor);
+        List<Machine> machines =
+            createDaoForRollbackTransaction().getAllMachinesToShutDownFromRack(ucsRack.getId());
+        Assert.assertEquals(machines.size(), 7);
+    }
+
+    /**
+     * Returns any machine that is in the rack in HALTED_FOR_SAVE. The first one must be the one
+     * with hypervisor.
+     * 
+     * @param rackId rack.
+     * @return Machine
+     */
+    @Test
+    public void getAllMachinesToShutDownFromRackCheckOrder()
+    {
+        DatacenterGenerator generator = new DatacenterGenerator(getSeed());
+        UcsRackGenerator ucsRackGenerator = new UcsRackGenerator(getSeed());
+        MachineGenerator machineGenerator = new MachineGenerator(getSeed());
+        HypervisorGenerator hypervisorGenerator = new HypervisorGenerator(getSeed());
+        Datacenter datacenter = generator.createUniqueInstance();
+
+        UcsRack ucsRack = ucsRackGenerator.createInstance(datacenter);
+        ds().persistAll(datacenter, ucsRack);
+
+        Machine machine = machineGenerator.createUniqueInstance();
+        machine.setState(MachineState.MANAGED);
+        machine.setRack(ucsRack);
+        machine.setBelongsToManagedRack(Boolean.TRUE);
+
+        machine.setDatacenter(datacenter);
+        Hypervisor visor = hypervisorGenerator.createUniqueInstance();
+        visor.setMachine(machine);
+        ds().persistAll(machine, visor);
+
+        Machine machine1 = machineGenerator.createUniqueInstance();
+        machine1.setState(MachineState.MANAGED);
+        machine1.setRack(ucsRack);
+        machine1.setBelongsToManagedRack(Boolean.TRUE);
+
+        machine1.setDatacenter(datacenter);
+        ds().persistAll(machine1);
+
+        List<Machine> machines =
+            createDaoForRollbackTransaction().getAllMachinesToShutDownFromRack(ucsRack.getId());
+        if (machines.isEmpty())
+        {
+            Assert.fail("The rack must contain 2 machines");
+        }
+        Machine m = machines.get(0);
+        assertEquals(m.getName(), machine.getName());
     }
 }

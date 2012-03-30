@@ -122,9 +122,12 @@ CREATE TABLE  `kinton`.`category` (
   `name` varchar(30) NOT NULL,
   `isErasable` int(1) unsigned NOT NULL default '1',
   `isDefault` int(1) unsigned NOT NULL default '0',
+  `idEnterprise` int(10) unsigned DEFAULT NULL,
   `version_c` int(11) default 0,
   PRIMARY KEY  (`idCategory`),
-  UNIQUE KEY (`name`)
+  KEY `category_enterprise_FK` (`idEnterprise`),
+  CONSTRAINT `category_enterprise_FK` FOREIGN KEY (`idEnterprise`) REFERENCES `enterprise` (`idEnterprise`),
+  UNIQUE KEY (`name`,`idEnterprise`)
 ) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8;
 
 --
@@ -133,10 +136,10 @@ CREATE TABLE  `kinton`.`category` (
 
 /*!40000 ALTER TABLE `category` DISABLE KEYS */;
 LOCK TABLES `category` WRITE;
-INSERT INTO `kinton`.`category` VALUES  (1,'Others',0,1,0),
- (2,'Database servers',1,0, 0),
- (4,'Applications servers',1,0,0),
- (5,'Web servers',1,0,0);
+INSERT INTO `kinton`.`category` VALUES  (1,'Others',0,1,null,0),
+ (2,'Database servers',1,0,null, 0),
+ (4,'Applications servers',1,0,null,0),
+ (5,'Web servers',1,0,null,0);
 UNLOCK TABLES;
 /*!40000 ALTER TABLE `category` ENABLE KEYS */;
 
@@ -877,7 +880,8 @@ INSERT INTO `privilege` VALUES
  (48,'USERS_DEFINE_AS_MANAGER',0),
  (49,'PRICING_VIEW',0),
  (50,'PRICING_MANAGE',0),
- (51,'USERS_MANAGE_CHEF_ENTERPRISE',0);
+ (51,'USERS_MANAGE_CHEF_ENTERPRISE',0),
+ (52,'MANAGE_HARD_DISKS',0);
 UNLOCK TABLES;
 /*!40000 ALTER TABLE `privilege` ENABLE KEYS */;
 
@@ -889,7 +893,7 @@ UNLOCK TABLES;
 LOCK TABLES `roles_privileges` WRITE;
 INSERT INTO `roles_privileges` VALUES
  (1,1,0),(1,2,0),(1,3,0),(1,4,0),(1,5,0),(1,6,0),(1,7,0),(1,8,0),(1,9,0),(1,10,0),(1,11,0),(1,12,0),(1,13,0),(1,14,0),(1,15,0),(1,16,0),(1,17,0),(1,18,0),(1,19,0),(1,20,0),(1,21,0),(1,22,0),(1,23,0),(1,24,0),(1,25,0),
- (1,26,0),(1,27,0),(1,28,0),(1,29,0),(1,30,0),(1,31,0),(1,32,0),(1,33,0),(1,34,0),(1,35,0),(1,36,0),(1,37,0),(1,38,0),(1,39,0),(1,40,0),(1,41,0),(1,42,0),(1,43,0),(1,44,0),(1,45,0),(1,47,0),(1,48,0),(1,49,0),(1,50,0),(1,51,0),
+ (1,26,0),(1,27,0),(1,28,0),(1,29,0),(1,30,0),(1,31,0),(1,32,0),(1,33,0),(1,34,0),(1,35,0),(1,36,0),(1,37,0),(1,38,0),(1,39,0),(1,40,0),(1,41,0),(1,42,0),(1,43,0),(1,44,0),(1,45,0),(1,47,0),(1,48,0),(1,49,0),(1,50,0),(1,51,0),(1,52,0),
  (3,3,0),(3,12,0),(3,13,0),(3,14,0),(3,15,0),(3,16,0),(3,17,0),(3,18,0),(3,19,0),(3,20,0),(3,21,0),(3,22,0),(3,23,0),(3,24,0),(3,25,0),(3,26,0),(3,27,0),(3,28,0),(3,29,0),(3,30,0),(3,32,0),(3,34,0),(3,43,0),(3,48,0),
 (2,12,0),(2,14,0),(2,17,0),(2,18,0),(2,19,0),(2,20,0),(2,21,0),(2,22,0),(2,23,0),(2,43,0);
 UNLOCK TABLES;
@@ -1403,6 +1407,7 @@ INSERT INTO `kinton`.`system_properties` (`name`, `value`, `description`) VALUES
  ("client.main.disableChangePassword","1","Allow (1) or deny (0) user to change their password"),
  ("client.logout.url","","Redirect to this URL after logout (empty -> login screen)"),
  ("client.main.allowLogout","1","Allow (1) or deny (0) user to logout"),
+ ("client.main.showHardDisk","1","Show (1) or hide (0) hard disk tab"),
  ("client.wiki.showHelp","1","Show (1) or hide (0) the help icon within the plateform"), 
  ("client.wiki.showDefaultHelp","0","Use (1) or not (0) the default help URL within the plateform"), 
  ("client.wiki.defaultURL","http://community.abiquo.com/display/ABI20/Abiquo+Documentation+Home","The default URL opened when not specific help URL is specified"),
@@ -1437,7 +1442,7 @@ INSERT INTO `kinton`.`system_properties` (`name`, `value`, `description`) VALUES
  ("client.wiki.user.createEnterprise","http://community.abiquo.com/display/ABI20/Manage+Enterprises#ManageEnterprises-CreatingorEditinganEnterprise","Enterprise creation wiki"),
  ("client.wiki.user.dataCenterLimits","http://community.abiquo.com/display/ABI20/Manage+Enterprises#ManageEnterprises-EdittheEnterprise%27sDatacenters","Datacenter Limits wiki"),
  ("client.wiki.user.createUser","http://community.abiquo.com/display/ABI20/Manage+Users#ManageUsers-CreatingorEditingaUser","User creation wiki"),
- ("client.wiki.user.createRole","http://community.abiquo.com/display/ABI20/Manage+Roles+and+Privileges","Role creation wiki"),
+ ("client.wiki.user.createRole","http://community.abiquo.com/display/ABI20/Manage+Roles+and+ges","Role creation wiki"),
  ("client.wiki.pricing.createCurrency","http://community.abiquo.com/display/ABI20/Pricing+View#PricingView-CurrenciesTab","Currency creation wiki"),
  ("client.wiki.pricing.createTemplate","http://community.abiquo.com/display/ABI20/Pricing+View#PricingView-PricingModelsTab","create pricing template wiki"),
  ("client.wiki.pricing.createCostCode","http://community.abiquo.com/display/ABI20/Pricing+View#PricingView-CostCodesTab","create pricing cost code wiki"),
