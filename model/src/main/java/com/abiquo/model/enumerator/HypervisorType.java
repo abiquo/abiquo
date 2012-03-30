@@ -31,6 +31,10 @@ import static com.abiquo.model.enumerator.DiskFormatType.VMWARE_COMPATIBLES;
 import static com.abiquo.model.enumerator.DiskFormatType.XENSERVER_COMPATIBLES;
 import static com.abiquo.model.enumerator.DiskFormatType.XEN_COMPATIBLES;
 
+import java.util.Set;
+
+import com.google.common.collect.Sets;
+
 public enum HypervisorType
 {
     VBOX(8889, VDI_FLAT, VBOX_COMPATIBLES), KVM(8889, VMDK_FLAT, KVM_COMPATIBLES), XEN_3(8889,
@@ -41,27 +45,27 @@ public enum HypervisorType
 
     public DiskFormatType baseFormat;
 
-    public DiskFormatType[] compatibilityTable;
+    public Set<DiskFormatType> compatibleFormats;
 
     public DiskFormatType instanceFormat;
 
     /* package */private final static int ID_MAX = 6;
 
     private HypervisorType(final int defaultPort, final DiskFormatType baseFormat,
-        final DiskFormatType[] compatibilityTable, final DiskFormatType instanceFormat)
+        final Set<DiskFormatType> compatibleFormats, final DiskFormatType instanceFormat)
     {
         this.defaultPort = defaultPort;
         this.baseFormat = baseFormat;
-        this.compatibilityTable = compatibilityTable;
+        this.compatibleFormats = compatibleFormats;
         this.instanceFormat = instanceFormat;
     }
 
     private HypervisorType(final int defaultPort, final DiskFormatType baseFormat,
-        final DiskFormatType[] compatibilityTable)
+        final Set<DiskFormatType> compatibleFormats)
     {
         this.defaultPort = defaultPort;
         this.baseFormat = baseFormat;
-        this.compatibilityTable = compatibilityTable;
+        this.compatibleFormats = compatibleFormats;
     }
 
     public int id()
@@ -81,14 +85,20 @@ public enum HypervisorType
 
     public boolean isCompatible(final DiskFormatType type)
     {
-        for (DiskFormatType compatible : compatibilityTable)
-        {
-            if (compatible == type)
-            {
-                return true;
-            }
-        }
-        return false;
+        return compatibleFormats.contains(type);
+    }
+
+    /**
+     * Performs the intersection between the hypervisor's {@link #compatibleFormats} and the set of
+     * {@link DiskFormatType} passed. Returns true if the intersection is not empty, then some of
+     * the passed {@link DiskFormatType} are compatible with the hypervisor.
+     * 
+     * @param types The set of {@link DiskFormatType} to consider.
+     * @return True if some of the passed {@link DiskFormatType} are compatible with the hypervisor.
+     */
+    public boolean isCompatible(final Set<DiskFormatType> types)
+    {
+        return !Sets.intersection(compatibleFormats, types).isEmpty();
     }
 
     public static HypervisorType fromId(final int id)
