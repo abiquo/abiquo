@@ -352,7 +352,8 @@ public enum APIError
         "Cannot change the user nick"), USER_PASSWORD_IS_NECESSARY("USER 11",
         "The field password is required"), USER_NAME_IS_NECESSARY("USER 12",
         "The field name is required"), USER_NICK_IS_NECESSARY("USER 13",
-        "The field nick (username) is required"),
+        "The field nick (username) is required"), USER_VDC_RESTRICTED("USER 14",
+        "Your enterprise didn't allowed you to manage this virtual datacenter"),
 
     // REMOTE SERVICE
     NOT_ASSIGNED_REMOTE_SERVICE_DATACENTER("RS-0",
@@ -753,8 +754,8 @@ public enum APIError
         // Outputs all errors in wiki table format
         for (APIError error : errors)
         {
-            System.out.println(String.format("| %s | %s | %s |", error.code, error.message, error
-                .name()));
+            System.out.println(String.format("| %s | %s | %s |", error.code, error.message,
+                error.name()));
         }
 
         System.out.println("\n ************ Flex client labels ************** \n");
