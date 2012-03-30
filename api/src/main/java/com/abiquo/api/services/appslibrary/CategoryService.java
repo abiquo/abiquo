@@ -241,11 +241,18 @@ public class CategoryService extends DefaultApiService
         }
         if (category.getEnterprise() != null)
         {
-            if (!securityService.hasPrivilege(Privileges.ENTERPRISE_ADMINISTER_ALL)
-                || !userService.getCurrentUser().getEnterprise().getId().equals(
-                    category.getEnterprise().getId()))
+            if (!userService.getCurrentUser().getEnterprise().getId().equals(
+                category.getEnterprise().getId()))
             {
                 // cannot remove local category of other enteprise
+                addConflictErrors(APIError.CATEGORY_NO_PRIVELIGES_TO_REMOVE);
+                flushErrors();
+            }
+        }
+        else
+        {
+            if (!securityService.hasPrivilege(Privileges.ENTERPRISE_ADMINISTER_ALL))
+            {
                 addConflictErrors(APIError.CATEGORY_NO_PRIVELIGES_TO_REMOVE);
                 flushErrors();
             }

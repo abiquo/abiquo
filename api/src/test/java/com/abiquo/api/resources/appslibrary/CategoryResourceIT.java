@@ -26,6 +26,9 @@ import static com.abiquo.api.common.Assert.assertLinkExist;
 import static com.abiquo.api.common.UriTestResolver.resolveCategoryURI;
 import static org.testng.Assert.assertEquals;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.ws.rs.core.Response.Status;
 
 import org.apache.wink.client.ClientResponse;
@@ -37,17 +40,41 @@ import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.resources.AbstractJpaGeneratorIT;
 import com.abiquo.server.core.appslibrary.Category;
 import com.abiquo.server.core.appslibrary.CategoryDto;
+import com.abiquo.server.core.enterprise.Enterprise;
+import com.abiquo.server.core.enterprise.Privilege;
+import com.abiquo.server.core.enterprise.Role;
+import com.abiquo.server.core.enterprise.User;
 
 public class CategoryResourceIT extends AbstractJpaGeneratorIT
 {
     protected Category category;
+
+    private Enterprise enterprise;
+
+    private static final String SYSADMIN = "sysadmin";
 
     @Override
     @BeforeMethod
     public void setup()
     {
         category = categoryGenerator.createUniqueInstance();
-        setup(category);
+        enterprise = enterpriseGenerator.createUniqueInstance();
+        Role role = roleGenerator.createInstanceSysAdmin();
+        User user = userGenerator.createInstance(enterprise, role, SYSADMIN, SYSADMIN);
+
+        List<Object> entitiesToSetup = new ArrayList<Object>();
+        entitiesToSetup.add(enterprise);
+
+        for (Privilege p : role.getPrivileges())
+        {
+            entitiesToSetup.add(p);
+        }
+        entitiesToSetup.add(role);
+        entitiesToSetup.add(user);
+
+        entitiesToSetup.add(category);
+
+        setup(entitiesToSetup.toArray());
     }
 
     @Test
@@ -126,7 +153,7 @@ public class CategoryResourceIT extends AbstractJpaGeneratorIT
     {
         String categoryURL = resolveCategoryURI(category.getId());
 
-        ClientResponse response = delete(categoryURL);
+        ClientResponse response = delete(categoryURL, SYSADMIN, SYSADMIN);
         assertEquals(response.getStatusCode(), 204);
 
         response = get(categoryURL, CategoryDto.MEDIA_TYPE);
