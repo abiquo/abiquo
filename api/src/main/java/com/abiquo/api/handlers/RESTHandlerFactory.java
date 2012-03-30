@@ -42,7 +42,7 @@ public class RESTHandlerFactory extends HandlersFactory
         listOfHandlers.add(new RESTHandler());
 
         // security
-        listOfHandlers.add(new VirtualDatacenterEnterpriseSecurityRequestHandler());
+        listOfHandlers.add(new CloudEnterpriseSecurityRequestHandler());
 
         return listOfHandlers;
     }

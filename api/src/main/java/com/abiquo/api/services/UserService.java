@@ -649,4 +649,19 @@ public class UserService extends DefaultApiService
     {
         return securityService;
     }
+
+    /**
+     * Check if a user has permissions to user a given virtual datacenter
+     * 
+     * @param username nick of the given User
+     * @param authtype authentication type of the given User
+     * @param privileges array of strings with all privileges names from the given User role
+     * @param idVdc identifier from virtual datacenter to check
+     * @return True if user is allowed to user the given virtual datacenter
+     */
+    public boolean isUserAllowedToUseVirtualDatacenter(final String username,
+        final String authtype, final String[] privileges, final Integer idVdc)
+    {
+        return repo.isUserAllowedToUseVirtualDatacenter(username, authtype, privileges, idVdc);
+    }
 }

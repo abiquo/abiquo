@@ -110,14 +110,14 @@ public class PrivateNetworksResourceIT extends AbstractJpaGeneratorIT
     @Test
     public void getPrivateNetworks()
     {
-        Resource resource = client.resource(resolvePrivateNetworksURI(vdc.getId()));
-
         vlan = vlanGenerator.createInstance(vdc.getNetwork(), rs, "255.255.255.0");
         VLANNetwork vlan2 = vlanGenerator.createInstance(vdc.getNetwork(), rs, "255.255.255.0");
 
         setup(vlan.getConfiguration(), vlan, vlan2.getConfiguration(), vlan2);
 
-        ClientResponse response = resource.accept(VLANNetworksDto.MEDIA_TYPE).get();
+        ClientResponse response =
+            get(resolvePrivateNetworksURI(vdc.getId()), "sysadmin", "sysadmin",
+                VLANNetworksDto.MEDIA_TYPE);
         assertEquals(200, response.getStatusCode());
         VLANNetworksDto entity = response.getEntity(VLANNetworksDto.class);
         assertNotNull(entity);
@@ -128,9 +128,10 @@ public class PrivateNetworksResourceIT extends AbstractJpaGeneratorIT
     @Test
     public void getPrivateNetworksListInvalidVDC() throws Exception
     {
-        Resource resource = client.resource(resolvePrivateNetworksURI(new Random().nextInt(1000)));
 
-        ClientResponse response = resource.accept(VLANNetworksDto.MEDIA_TYPE).get();
+        ClientResponse response =
+            get(resolvePrivateNetworksURI(new Random().nextInt(1000)), "sysadmin", "sysadmin",
+                VLANNetworksDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), Status.NOT_FOUND.getStatusCode());
     }
 
