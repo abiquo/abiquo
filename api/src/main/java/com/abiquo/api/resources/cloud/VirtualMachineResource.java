@@ -708,7 +708,8 @@ public class VirtualMachineResource extends AbstractResource
             .getVirtualMachine(), rack == null ? null : rack.getDatacenter().getId(), rack == null
             ? null : rack.getId(), machine == null ? null : machine.getId(), enterprise == null
             ? null : enterprise.getId(), user == null ? null : user.getId(), v.getVirtualMachine()
-            .isChefEnabled(), volumeIds, diskIds, ips, vdc.getHypervisorType()));
+            .isChefEnabled(), volumeIds, diskIds, ips, vdc.getHypervisorType(), v
+            .getVirtualAppliance()));
 
         TaskResourceUtils.addTasksLink(dto, dto.getEditLink());
 
@@ -772,7 +773,7 @@ public class VirtualMachineResource extends AbstractResource
         dto.addLinks(restBuilder.buildVirtualMachineAdminLinks(rack == null ? null : rack
             .getDatacenter().getId(), rack == null ? null : rack.getId(), machine == null ? null
             : machine.getId(), enterprise == null ? null : enterprise.getId(), user == null ? null
-            : user.getId(), vdc.getHypervisorType()));
+            : user.getId(), vdc.getHypervisorType(), null, v.getId()));
 
         final VirtualMachineTemplate vmtemplate = v.getVirtualMachineTemplate();
         if (vmtemplate.getRepository() != null)
@@ -843,7 +844,7 @@ public class VirtualMachineResource extends AbstractResource
             rack == null ? null : rack.getDatacenter().getId(), rack == null ? null : rack.getId(),
             machine == null ? null : machine.getId(),
             enterprise == null ? null : enterprise.getId(), user == null ? null : user.getId(),
-            v.isChefEnabled(), volumeIds, diskIds, ips, vdc.getHypervisorType()));
+            v.isChefEnabled(), volumeIds, diskIds, ips, vdc.getHypervisorType(), null));
 
         final VirtualMachineTemplate vmtemplate = v.getVirtualMachineTemplate();
         if (vmtemplate.getRepository() != null)

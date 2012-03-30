@@ -74,8 +74,11 @@ public class NonBlockingService
         try
         {
             infrastructureCommand =
-                (InfrastructureCommand) Thread.currentThread().getContextClassLoader().loadClass(
-                    "com.abiquo.abiserver.commands.impl.InfrastructureCommandPremiumImpl")
+                (InfrastructureCommand) Thread
+                    .currentThread()
+                    .getContextClassLoader()
+                    .loadClass(
+                        "com.abiquo.abiserver.commands.impl.InfrastructureCommandPremiumImpl")
                     .newInstance();
         }
         catch (Exception e)
@@ -86,8 +89,11 @@ public class NonBlockingService
         try
         {
             virtualAppCommand =
-                (VirtualApplianceCommand) Thread.currentThread().getContextClassLoader().loadClass(
-                    "com.abiquo.abiserver.commands.impl.VirtualApplianceCommandPremiumImpl")
+                (VirtualApplianceCommand) Thread
+                    .currentThread()
+                    .getContextClassLoader()
+                    .loadClass(
+                        "com.abiquo.abiserver.commands.impl.VirtualApplianceCommandPremiumImpl")
                     .newInstance();
         }
         catch (Exception e)
@@ -133,12 +139,36 @@ public class NonBlockingService
      * @param virtualMachine
      * @return A DataResult object, containing the new State for the virtualMachine
      */
+    public BasicResult startVirtualMachine(final UserSession session, final Integer datacenterId,
+        final Integer rackId, final Integer machineId, final VirtualMachine virtualMachine)
+    {
+        return proxyVirtualMachineResourceStub(session).editInfrastructureVirtualMachineState(
+            datacenterId, rackId, machineId, virtualMachine, VirtualMachineState.ON);
+    }
+
+    /**
+     * @param session
+     * @param virtualMachine
+     * @return A DataResult object, containing the new State for the virtualMachine
+     */
     public BasicResult pauseVirtualMachine(final UserSession session,
         final Integer virtualApplianceId, final Integer virtualDatacenterId,
         final VirtualMachine virtualMachine)
     {
         return proxyVirtualMachineResourceStub(session).editVirtualMachineState(
             virtualDatacenterId, virtualApplianceId, virtualMachine, VirtualMachineState.PAUSED);
+    }
+
+    /**
+     * @param session
+     * @param virtualMachine
+     * @return A DataResult object, containing the new State for the virtualMachine
+     */
+    public BasicResult pauseVirtualMachine(final UserSession session, final Integer datacenterId,
+        final Integer rackId, final Integer machineId, final VirtualMachine virtualMachine)
+    {
+        return proxyVirtualMachineResourceStub(session).editInfrastructureVirtualMachineState(
+            datacenterId, rackId, machineId, virtualMachine, VirtualMachineState.PAUSED);
     }
 
     /**
@@ -159,12 +189,37 @@ public class NonBlockingService
      * @param virtualMachine
      * @return A DataResult object, containing the new State for the virtualMachine
      */
+    public BasicResult rebootVirtualMachine(final UserSession session, final Integer datacenterId,
+        final Integer rackId, final Integer machineId, final VirtualMachine virtualMachine)
+    {
+        return proxyVirtualMachineResourceStub(session).rebootInfrastructureVirtualMachine(
+            datacenterId, rackId, machineId, virtualMachine);
+    }
+
+    /**
+     * @param session
+     * @param virtualMachine
+     * @return A DataResult object, containing the new State for the virtualMachine
+     */
     public BasicResult shutdownVirtualMachine(final UserSession session,
         final Integer virtualApplianceId, final Integer virtualDatacenterId,
         final VirtualMachine virtualMachine)
     {
         return proxyVirtualMachineResourceStub(session).editVirtualMachineState(
             virtualDatacenterId, virtualApplianceId, virtualMachine, VirtualMachineState.OFF);
+    }
+
+    /**
+     * @param session
+     * @param virtualMachine
+     * @return A DataResult object, containing the new State for the virtualMachine
+     */
+    public BasicResult shutdownVirtualMachine(final UserSession session,
+        final Integer datacenterId, final Integer rackId, final Integer machineId,
+        final VirtualMachine virtualMachine)
+    {
+        return proxyVirtualMachineResourceStub(session).editInfrastructureVirtualMachineState(
+            datacenterId, rackId, machineId, virtualMachine, VirtualMachineState.OFF);
     }
 
     /* ______________________________ VIRTUAL APPLIANCE _______________________________ */
