@@ -2099,7 +2099,7 @@ DROP TRIGGER IF EXISTS `kinton`.`datacenter_created`;
 DROP TRIGGER IF EXISTS `kinton`.`datacenter_deleted`;
 DROP TRIGGER IF EXISTS `kinton`.`virtualapp_created`;
 DROP TRIGGER IF EXISTS `kinton`.`virtualapp_deleted`;
-DROP TRIGGER IF EXISTS `kinton`.`update_virtualapp_update_stats`;
+DROP TRIGGER IF EXISTS kinton.update_virtualapp_update_stats;
 DROP TRIGGER IF EXISTS `kinton`.`enterprise_created`;
 DROP TRIGGER IF EXISTS `kinton`.`enterprise_deleted`;
 DROP TRIGGER IF EXISTS `kinton`.`enterprise_updated`;
@@ -2195,23 +2195,29 @@ CREATE TRIGGER `kinton`.`virtualapp_deleted` AFTER DELETE ON `kinton`.`virtualap
 --
 -- Fires: On an UPDATE for the 'virtualapp' table
 -- ******************************************************************************************
-CREATE TRIGGER `kinton`.`update_virtualapp_update_stats` AFTER UPDATE ON `kinton`.`virtualapp`
+CREATE TRIGGER kinton.update_virtualapp_update_stats AFTER UPDATE ON kinton.virtualapp
   FOR EACH ROW BEGIN
     DECLARE numVMachinesCreated INTEGER;
+    DECLARE vdcNameObj VARCHAR(45);
     IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN
     -- V2V: Vmachines moved between VDC
   IF NEW.idVirtualDataCenter != OLD.idVirtualDataCenter THEN
-      -- calculate vmachines total and running in this Vapp
-      SELECT IF (COUNT(*) IS NULL, 0, COUNT(*)) INTO numVMachinesCreated
-      FROM nodevirtualimage nvi, virtualmachine v, node n
-      WHERE nvi.idNode IS NOT NULL
-      AND v.idVM = nvi.idVM
-      AND n.idNode = nvi.idNode
-      AND n.idVirtualApp = NEW.idVirtualApp
-      AND v.state != "NOT_ALLOCATED" AND v.state != "UNKNOWN"
-      and v.idType = 1;
-      UPDATE IGNORE vdc_enterprise_stats SET vmCreated = vmCreated- numVMachinesCreated WHERE idVirtualDataCenter = OLD.idVirtualDataCenter;
-      UPDATE IGNORE vdc_enterprise_stats SET vmCreated = vmCreated+ numVMachinesCreated WHERE idVirtualDataCenter = NEW.idVirtualDataCenter;
+	-- calculate vmachines total and running in this Vapp
+	SELECT IF (COUNT(*) IS NULL, 0, COUNT(*)) INTO numVMachinesCreated
+	FROM nodevirtualimage nvi, virtualmachine v, node n
+	WHERE nvi.idNode IS NOT NULL
+	AND v.idVM = nvi.idVM
+	AND n.idNode = nvi.idNode
+	AND n.idVirtualApp = NEW.idVirtualApp
+	AND v.state != "NOT_ALLOCATED" AND v.state != "UNKNOWN"
+	and v.idType = 1;
+	UPDATE IGNORE vdc_enterprise_stats SET vmCreated = vmCreated- numVMachinesCreated WHERE idVirtualDataCenter = OLD.idVirtualDataCenter;
+	UPDATE IGNORE vdc_enterprise_stats SET vmCreated = vmCreated+ numVMachinesCreated WHERE idVirtualDataCenter = NEW.idVirtualDataCenter;
+	-- Changing VDC name in VAppStats
+	SELECT vdc.name INTO vdcNameObj
+	FROM virtualdatacenter vdc
+	WHERE vdc.idVirtualDataCenter = NEW.idVirtualDataCenter;
+	UPDATE IGNORE vapp_enterprise_stats SET vdcName = vdcNameObj WHERE idVirtualApp = NEW.idVirtualApp;
     END IF;
     -- Checks for changes
     IF OLD.name != NEW.name THEN
