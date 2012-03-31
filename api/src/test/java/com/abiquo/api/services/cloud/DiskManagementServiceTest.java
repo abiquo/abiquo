@@ -70,7 +70,6 @@ public class DiskManagementServiceTest extends AbstractUnitTest
     protected VirtualDatacenter vdc;
 
     protected VirtualMachine vm;
-    
 
     @BeforeMethod(groups = {STORAGE_UNIT_TESTS})
     public void setUp()
@@ -95,10 +94,11 @@ public class DiskManagementServiceTest extends AbstractUnitTest
         vm.setUser(u);
 
         // TODO vdc datacenter and virutal image datacenter ARE NOT THE SAME
-        setup(vdc.getDatacenter(), vdc, dclimit, vapp, vm.getVirtualMachineTemplate().getCategory(), vm
-            .getVirtualMachineTemplate().getRepository().getDatacenter(), vm.getVirtualMachineTemplate()
-            .getRepository(), vm.getVirtualMachineTemplate(), vm.getHypervisor().getMachine().getRack(), vm
-            .getHypervisor().getMachine(), vm.getHypervisor(), vm, nvi);
+        setup(vdc.getDatacenter(), vdc, dclimit, vapp,
+            vm.getVirtualMachineTemplate().getCategory(), vm.getVirtualMachineTemplate()
+                .getRepository().getDatacenter(), vm.getVirtualMachineTemplate().getRepository(),
+            vm.getVirtualMachineTemplate(), vm.getHypervisor().getMachine().getRack(), vm
+                .getHypervisor().getMachine(), vm.getHypervisor(), vm, nvi);
 
         SecurityContextHolder.getContext().setAuthentication(new BasicUserAuthentication());
     }
@@ -122,7 +122,7 @@ public class DiskManagementServiceTest extends AbstractUnitTest
 
         // Assert there is only one disk
         // create a new one
-        service.createHardDisk(vdc.getId(), 12000L);
+        service.createHardDisk(vdc.getId(), 12000L, true);
 
         // Assert disk has been created
         List<DiskManagement> disks = service.getListOfHardDisksByVirtualDatacenter(vdc.getId());
@@ -147,7 +147,7 @@ public class DiskManagementServiceTest extends AbstractUnitTest
 
         EntityManager em = getEntityManagerWithAnActiveTransaction();
         service = new StorageService(em);
-        service.createHardDisk(randomId, 100000L);
+        service.createHardDisk(randomId, 100000L, true);
     }
 
     /**
@@ -158,8 +158,7 @@ public class DiskManagementServiceTest extends AbstractUnitTest
     {
         EntityManager em = getEntityManagerWithAnActiveTransaction();
         service = new StorageService(em);
-
-        service.createHardDisk(vdc.getId(), -1L);
+        service.createHardDisk(vdc.getId(), -1L, true);
     }
 
     /**
@@ -170,8 +169,7 @@ public class DiskManagementServiceTest extends AbstractUnitTest
     {
         EntityManager em = getEntityManagerWithAnActiveTransaction();
         service = new StorageService(em);
-
-        service.createHardDisk(vdc.getId(), null);
+        service.createHardDisk(vdc.getId(), null, true);
     }
 
     /**
@@ -191,12 +189,11 @@ public class DiskManagementServiceTest extends AbstractUnitTest
         service.deleteHardDisk(vdc.getId(), inputDisk1.getId());
         // Assert disk has been created
         commitActiveTransaction(em);
-        
+
         em = getEntityManagerWithAnActiveTransaction();
         // assert it has been deleted.
         service = new StorageService(em);
         assertEquals(service.getListOfHardDisksByVirtualDatacenter(vdc.getId()).size(), 0);
-
 
     }
 
@@ -208,7 +205,7 @@ public class DiskManagementServiceTest extends AbstractUnitTest
     {
         DiskManagement inputDisk1 = diskGenerator.createInstance(vdc);
         setup(inputDisk1.getRasd(), inputDisk1);
-        
+
         Integer randomId;
         do
         {
@@ -243,7 +240,7 @@ public class DiskManagementServiceTest extends AbstractUnitTest
             randomId = new Random().nextInt(10000);
         }
         while (randomId.equals(inputDisk1.getId()));
-        
+
         EntityManager em = getEntityManagerWithAnActiveTransaction();
 
         try
@@ -268,7 +265,7 @@ public class DiskManagementServiceTest extends AbstractUnitTest
         EntityManager em = getEntityManagerWithAnActiveTransaction();
         vm.setState(VirtualMachineState.ON);
         update(vm);
-        
+
         DiskManagement disk = diskGenerator.createInstance(vdc);
         disk.setVirtualMachine(vm);
         setup(disk.getRasd(), disk);
@@ -281,9 +278,9 @@ public class DiskManagementServiceTest extends AbstractUnitTest
             service.deleteHardDisk(vdc.getId(), disk.getId());
         }
         finally
-        { 
+        {
             rollbackActiveTransaction(em);
-        } 
+        }
     }
 
     /**
@@ -361,7 +358,7 @@ public class DiskManagementServiceTest extends AbstractUnitTest
 
         service.registerHardDiskIntoVMInDatabase(vdc.getId(), vapp.getId(), vm.getId(), 100000);
     }
-    
+
     /**
      * Setup a couple of extra hard disks, and check they are retrieved ok.
      */
@@ -415,8 +412,9 @@ public class DiskManagementServiceTest extends AbstractUnitTest
         assertEquals(disk.getReadOnly(), Boolean.TRUE);
 
         // Assert its capacity is the same than the virtual image
-        assertEquals(disk.getSizeInMb(),
-            Long.valueOf(vm.getVirtualMachineTemplate().getDiskFileSize() / MEGABYTE));
+        assertEquals(disk.getSizeInMb(), Long.valueOf(vm.getVirtualMachineTemplate()
+            .getDiskFileSize()
+            / MEGABYTE));
 
         commitActiveTransaction(em);
     }
