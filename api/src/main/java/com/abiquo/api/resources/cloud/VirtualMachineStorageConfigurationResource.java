@@ -375,7 +375,9 @@ public class VirtualMachineStorageConfigurationResource extends AbstractResource
 
         try
         {
-            Object result = service.detachHardDisk(vdcId, vappId, vmId, diskId, originalState);
+            Boolean forceSoftLimits = true;
+            Object result =
+                service.detachHardDisk(vdcId, vappId, vmId, diskId, originalState, forceSoftLimits);
 
             // The attach method may return a Tarantino task identifier if the operation requires a
             // reconfigure. Otherwise it will return null.

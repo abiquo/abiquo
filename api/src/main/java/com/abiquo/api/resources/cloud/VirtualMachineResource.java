@@ -1034,7 +1034,7 @@ public class VirtualMachineResource extends AbstractResource
 
         link = link.replaceAll("action.*", "");
         link = link.replaceAll("(/)*$", "");
-        link = link.replaceAll("\\?force=true", "");
+        link = link.replaceAll("\\?force=(true|false)", "");
         link = link.concat(TaskResourceUtils.TASKS_PATH).concat("/").concat(taskId);
 
         // Build AcceptedRequestDto

@@ -285,7 +285,7 @@ public class StorageService extends DefaultApiService
      */
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public Object detachHardDisk(final Integer vdcId, final Integer vappId, final Integer vmId,
-        final Integer diskId, final VirtualMachineState originalState)
+        final Integer diskId, final VirtualMachineState originalState, final Boolean forceSoftLimits)
     {
         VirtualDatacenter vdc = getVirtualDatacenter(vdcId);
         VirtualAppliance vapp = getVirtualAppliance(vdc, vappId);
@@ -306,7 +306,8 @@ public class StorageService extends DefaultApiService
             if (currentDisk.getRasd().equals(disk.getRasd()))
             {
                 diskIterator.remove();
-                return vmService.reconfigureVirtualMachine(vdc, vapp, vm, newVm, originalState);
+                return vmService.reconfigureVirtualMachine(vdc, vapp, vm, newVm, originalState,
+                    forceSoftLimits);
             }
         }
 

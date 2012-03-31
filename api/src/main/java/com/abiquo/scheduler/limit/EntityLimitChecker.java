@@ -172,15 +172,15 @@ public abstract class EntityLimitChecker<T extends DefaultEntityWithLimits>
 
         int actualAndRequiredCpu = (int) (actualAllocated.getCpu() + required.getCpu());
         int actualAndRequiredRam = (int) (actualAllocated.getRamInMb() + required.getRam());
-        long actualAndRequiredHd = actualAllocated.getHdInMb();
+        // long actualAndRequiredHd = actualAllocated.getHdInMb();
         // This is because if we are attached an hd the limit is been checked when the disk has
         // created
         // instead if we are unattaching an hd we have to check, because it will be deleted after
         // that
-        if (checkHD || required.getHd() < 0)
+        if (checkHD)
         {
-            actualAndRequiredHd = actualAllocated.getHdInMb() + required.getHd();
-
+            long actualAndRequiredHd = actualAllocated.getHdInMb() + required.getHd();
+            limitStatus.put(LimitResource.HD, limits.checkHdStatus(actualAndRequiredHd));
         }
         long actualAndRequiredStorage = actualAllocated.getStorage() + required.getStorage();
         if (checkVLAN)// && required.getPublicVLAN() != 0)
@@ -201,7 +201,6 @@ public abstract class EntityLimitChecker<T extends DefaultEntityWithLimits>
         }
         limitStatus.put(LimitResource.CPU, limits.checkCpuStatus(actualAndRequiredCpu));
         limitStatus.put(LimitResource.RAM, limits.checkRamStatus(actualAndRequiredRam));
-        limitStatus.put(LimitResource.HD, limits.checkHdStatus(actualAndRequiredHd));
         limitStatus.put(LimitResource.STORAGE, limits.checkStorageStatus(actualAndRequiredStorage));
 
         return limitStatus;
