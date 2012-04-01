@@ -102,7 +102,7 @@ public abstract class EntityLimitChecker<T extends DefaultEntityWithLimits>
      */
     public void checkCurrentLimits(final T entity)
     {
-        checkLimits(entity, new VirtualMachineRequirementsEmpty(), true);
+        checkLimits(entity, new VirtualMachineRequirementsEmpty(), true, true);
     }
 
     /**
@@ -126,6 +126,13 @@ public abstract class EntityLimitChecker<T extends DefaultEntityWithLimits>
     }
 
     public void checkLimits(final T entity, final VirtualMachineRequirements required,
+        final boolean force, final boolean allLimits) throws LimitExceededException
+    {
+
+        checkLimits(entity, required, force, true, true, true, allLimits);
+    }
+
+    public void checkLimits(final T entity, final VirtualMachineRequirements required,
         final boolean force, final Boolean checkVLAN) throws LimitExceededException
     {
 
@@ -143,6 +150,13 @@ public abstract class EntityLimitChecker<T extends DefaultEntityWithLimits>
         final boolean force, final Boolean checkVLAN, final Boolean checkIPs, final Boolean checkHD)
         throws LimitExceededException
     {
+        checkLimits(entity, required, force, checkVLAN, checkIPs, true, false);
+    }
+
+    public void checkLimits(final T entity, final VirtualMachineRequirements required,
+        final boolean force, final Boolean checkVLAN, final Boolean checkIPs,
+        final Boolean checkHD, final Boolean allLimits) throws LimitExceededException
+    {
         if (allNoLimits(entity))
         {
             return;
@@ -152,7 +166,8 @@ public abstract class EntityLimitChecker<T extends DefaultEntityWithLimits>
 
         Map<LimitResource, LimitStatus> entityResourceStatus =
 
-        getResourcesLimit(entity, actualAllocated, required, checkVLAN, checkIPs, checkHD);
+            getResourcesLimit(entity, actualAllocated, required, checkVLAN, checkIPs, checkHD,
+                allLimits);
 
         entityResourceStatus = getFilterResourcesStatus(entityResourceStatus);
 
@@ -164,7 +179,8 @@ public abstract class EntityLimitChecker<T extends DefaultEntityWithLimits>
      */
     private Map<LimitResource, LimitStatus> getResourcesLimit(final T limits,
         final DefaultEntityCurrentUsed actualAllocated, final VirtualMachineRequirements required,
-        final Boolean checkVLAN, final Boolean checkIPs, final Boolean checkHD)
+        final Boolean checkVLAN, final Boolean checkIPs, final Boolean checkHD,
+        final Boolean allLimits)
     {
 
         Map<LimitResource, LimitStatus> limitStatus =
@@ -180,7 +196,10 @@ public abstract class EntityLimitChecker<T extends DefaultEntityWithLimits>
         {
             long actualAndRequiredHd = actualAllocated.getHdInMb() + required.getHd();
             limitStatus.put(LimitResource.HD, limits.checkHdStatus(actualAndRequiredHd));
-            return limitStatus;
+            if (!allLimits)
+            {
+                return limitStatus;
+            }
         }
         int actualAndRequiredCpu = (int) (actualAllocated.getCpu() + required.getCpu());
         int actualAndRequiredRam = (int) (actualAllocated.getRamInMb() + required.getRam());
