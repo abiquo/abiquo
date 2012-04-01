@@ -60,6 +60,15 @@ public class PrivilegeResource extends AbstractResource
     @Autowired
     SecurityService securityService;
 
+    /**
+     * Returns an specific privilege
+     * 
+     * @title Retrieve a privilege
+     * @param privilegeId identifier of the privilefe
+     * @param restBuilder a Context-injected object to create the links of the Dto
+     * @return a {PrivilegeDto} object with the requested privilege
+     * @throws Exception
+     */
     @GET
     @Produces(PrivilegeDto.MEDIA_TYPE)
     public PrivilegeDto getPrivilege(@PathParam(PRIVILEGE) final Integer privilegeId,

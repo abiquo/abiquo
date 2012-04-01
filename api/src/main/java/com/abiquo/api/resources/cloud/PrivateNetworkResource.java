@@ -65,6 +65,16 @@ public class PrivateNetworkResource extends AbstractResource
     @Autowired
     NetworkService service;
 
+    /**
+     * Returns a private network
+     * 
+     * @title Retrieve a private network
+     * @param virtualDatacenterId
+     * @param vlanId
+     * @param restBuilder
+     * @return
+     * @throws Exception
+     */
     @GET
     @Produces(VLANNetworkDto.MEDIA_TYPE)
     public VLANNetworkDto getPrivateNetwork(
@@ -79,6 +89,10 @@ public class PrivateNetworkResource extends AbstractResource
     /**
      * Updates a private network.
      * 
+     * @title Modify a private network
+     * @wiki Updates the information of a private network. Some fields of the entity Public Network
+     *       Data Model can never be edited. The list of 'editable' attributes are: gateway,
+     *       primaryDNS, secondaryDNS, sufixDNS, name.
      * @param vdcId identifier of the virtual datacenter.
      * @param vlanId identifier of the vlan.
      * @param dto object with the new data to modify
@@ -102,6 +116,11 @@ public class PrivateNetworkResource extends AbstractResource
     /**
      * Delete an existing private network.
      * 
+     * @title Delete a private network
+     * @wiki Deletes a Private Network. The application won't let you to delete if: any IP address
+     *       of the Private Network is used by any Virtual Machine or is the unique VLAN in the
+     *       Virtual Datacenter: Virtual Datacenter always must have a private VLAN or is the
+     *       Default VLAN: Use another VLAN to be the default one and then delete this VLAN.
      * @param vdcId identifier of the virtual datacenter.
      * @param vlanId identifier of the vlan
      * @param restBuilder Context-injected REST link builder.

@@ -383,7 +383,8 @@ public class AbstractAPIStub
             ErrorsDto errors = response.getEntity(ErrorsDto.class);
             result.setMessage(errors.toString());
             result.setErrorCode(errors.getCollection().get(0).getCode());
-            if (errors.getCollection().get(0).getCode().equals("SOFT_LIMIT_EXCEEDED"))
+            if (errors.getCollection().get(0).getCode().equals("SOFT_LIMIT_EXCEEDED")
+                || errors.getCollection().get(0).getCode().equals("LIMIT-2"))
             {
                 result.setResultCode(BasicResult.SOFT_LIMT_EXCEEDED);
                 // limit exceeded does not include the detail
@@ -1120,10 +1121,26 @@ public class AbstractAPIStub
 
     protected String createVirtualDatacenterDisksLink(final Integer vdcId)
     {
+
+        return createVirtualDatacenterDisksLink(vdcId, null);
+    }
+
+    protected String createVirtualDatacenterDisksLink(final Integer vdcId,
+        final Boolean forceSoftLimits)
+    {
         Map<String, String> params = new HashMap<String, String>();
         params.put("vdcid", vdcId.toString());
 
-        return resolveURI(apiUri, "cloud/virtualdatacenters/{vdcid}/disks", params);
+        String uri = resolveURI(apiUri, "cloud/virtualdatacenters/{vdcid}/disks", params);
+        Map<String, String[]> queryParams = new HashMap<String, String[]>();
+
+        if (forceSoftLimits != null)
+        {
+
+            queryParams.put("force", new String[] {forceSoftLimits.toString()});
+        }
+
+        return UriHelper.appendQueryParamsToPath(uri, queryParams, false);
     }
 
     protected String createVirtualDatacenterDiskLink(final Integer vdcId, final Integer diskId)
@@ -1138,32 +1155,15 @@ public class AbstractAPIStub
     protected String createVirtualMachineDisksLink(final Integer vdcId, final Integer vappId,
         final Integer vmId)
     {
-
-        return createVirtualMachineDisksLink(vdcId, vappId, vmId, null);
-    }
-
-    protected String createVirtualMachineDisksLink(final Integer vdcId, final Integer vappId,
-        final Integer vmId, final Boolean forceSoftLimits)
-    {
         Map<String, String> params = new HashMap<String, String>();
         params.put("vdcid", vdcId.toString());
         params.put("vappid", vappId.toString());
         params.put("vmid", vmId.toString());
 
-        String uri =
-            resolveURI(
-                apiUri,
-                "cloud/virtualdatacenters/{vdcid}/virtualappliances/{vappid}/virtualmachines/{vmid}/storage/disks/",
-                params);
-        Map<String, String[]> queryParams = new HashMap<String, String[]>();
-
-        if (forceSoftLimits != null)
-        {
-
-            queryParams.put("force", new String[] {forceSoftLimits.toString()});
-        }
-
-        return UriHelper.appendQueryParamsToPath(uri, queryParams, false);
+        return resolveURI(
+            apiUri,
+            "cloud/virtualdatacenters/{vdcid}/virtualappliances/{vappid}/virtualmachines/{vmid}/storage/disks/",
+            params);
     }
 
     protected String createVirtualMachineDiskLink(final Integer vdcId, final Integer vappId,

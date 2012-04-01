@@ -123,6 +123,18 @@ public class MachineResource extends AbstractResource
     @Autowired
     VirtualApplianceService vappService;
 
+    /**
+     * Returns a machine
+     * 
+     * @title Retrieve a Machine
+     * @param datacenterId identifier of the datacenter
+     * @param rackId identifier of the rack
+     * @param machineId identifier of the machine
+     * @param showCredentials boolean to indicate if the machine credentials will be returned
+     * @param restBuilder a Context-injected object to create the links of the Dto
+     * @return a {machineDto} object with the requested machines
+     * @throws Exception
+     */
     @GET
     @Produces(MachineDto.MEDIA_TYPE)
     public MachineDto getMachine(
@@ -148,6 +160,18 @@ public class MachineResource extends AbstractResource
         return dto;
     }
 
+    /**
+     * Modifies a machine
+     * 
+     * @title Update an existing Machine
+     * @param datacenterId idenfier of the datacenter
+     * @param rackId identifier of the rack
+     * @param machineId identifier of the machine
+     * @param machine machine to modify
+     * @param restBuilder a Context-injected object to create the links of the Dto
+     * @return a {MachineDto} objec with the modified machine
+     * @throws Exception
+     */
     @PUT
     @Consumes(MachineDto.MEDIA_TYPE)
     @Produces(MachineDto.MEDIA_TYPE)
@@ -178,6 +202,14 @@ public class MachineResource extends AbstractResource
         return createTransferObject(m, restBuilder);
     }
 
+    /**
+     * Deletes a machine.
+     * 
+     * @title Delete a Machine
+     * @param datacenterId identifier of the datacenter
+     * @param rackId identifier of the rack
+     * @param machineId identifier of the machine
+     */
     @DELETE
     public void deleteMachine(@PathParam(DatacenterResource.DATACENTER) final Integer datacenterId,
         @PathParam(RackResource.RACK) final Integer rackId,
@@ -188,8 +220,12 @@ public class MachineResource extends AbstractResource
     }
 
     /**
-     * Check the machine state and update it.
+     * Checks the machine state and updates it.
      * 
+     * @title Check Machine state
+     * @wiki This feature checks physical machine state using the discovery manager and returns it.
+     *       The sync query parameter allows you to update the database with the value of state
+     *       returned by the discovery manager.
      * @param datacenterId The ID of the datacenter where this remote service and machine are
      *            assigned.
      * @param ip The IP of the target cloud node.
@@ -197,7 +233,8 @@ public class MachineResource extends AbstractResource
      * @param user The hypervisor user.
      * @param password The hypervisor password.
      * @param port The hypervisor AIM port.
-     * @return The actual machine's state.
+     * @param restBuilder a Context-injected object to create the links of the Dto
+     * @return a {MachineStateDto} object with the actual machine's state.
      */
     @GET
     @Path(MACHINE_ACTION_CHECK)

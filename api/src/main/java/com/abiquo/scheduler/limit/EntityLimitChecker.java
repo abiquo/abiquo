@@ -169,19 +169,21 @@ public abstract class EntityLimitChecker<T extends DefaultEntityWithLimits>
 
         Map<LimitResource, LimitStatus> limitStatus =
             new HashMap<EntityLimitChecker.LimitResource, DefaultEntityWithLimits.LimitStatus>();
-
+        // Initialized in order to show GUI's popup values
+        limitStatus.put(LimitResource.CPU, LimitStatus.OK);
+        limitStatus.put(LimitResource.RAM, LimitStatus.OK);
+        limitStatus.put(LimitResource.STORAGE, LimitStatus.OK);
+        limitStatus.put(LimitResource.HD, LimitStatus.OK);
+        limitStatus.put(LimitResource.VLAN, LimitStatus.OK);
+        // limitStatus.put(LimitResource.PUBLICIP, LimitStatus.OK);
+        if (checkHD)
+        {
+            long actualAndRequiredHd = actualAllocated.getHdInMb() + required.getHd();
+            limitStatus.put(LimitResource.HD, limits.checkHdStatus(actualAndRequiredHd));
+            return limitStatus;
+        }
         int actualAndRequiredCpu = (int) (actualAllocated.getCpu() + required.getCpu());
         int actualAndRequiredRam = (int) (actualAllocated.getRamInMb() + required.getRam());
-        long actualAndRequiredHd = actualAllocated.getHdInMb();
-        // This is because if we are attached an hd the limit is been checked when the disk has
-        // created
-        // instead if we are unattaching an hd we have to check, because it will be deleted after
-        // that
-        if (checkHD || required.getHd() < 0)
-        {
-            actualAndRequiredHd = actualAllocated.getHdInMb() + required.getHd();
-
-        }
         long actualAndRequiredStorage = actualAllocated.getStorage() + required.getStorage();
         if (checkVLAN)// && required.getPublicVLAN() != 0)
         {
@@ -201,7 +203,6 @@ public abstract class EntityLimitChecker<T extends DefaultEntityWithLimits>
         }
         limitStatus.put(LimitResource.CPU, limits.checkCpuStatus(actualAndRequiredCpu));
         limitStatus.put(LimitResource.RAM, limits.checkRamStatus(actualAndRequiredRam));
-        limitStatus.put(LimitResource.HD, limits.checkHdStatus(actualAndRequiredHd));
         limitStatus.put(LimitResource.STORAGE, limits.checkStorageStatus(actualAndRequiredStorage));
 
         return limitStatus;

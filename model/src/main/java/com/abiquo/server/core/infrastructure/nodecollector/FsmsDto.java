@@ -99,7 +99,7 @@ public class FsmsDto extends WrapperDto<FsmDto>
     {
         return MediaType.APPLICATION_XML;
     }
-    
+
     @Override
     public String getBaseMediaType()
     {

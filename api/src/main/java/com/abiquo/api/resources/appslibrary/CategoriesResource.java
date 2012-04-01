@@ -63,6 +63,14 @@ public class CategoriesResource extends AbstractResource
     @Autowired
     private CategoryService service;
 
+    /**
+     * Returns all categories
+     * 
+     * @title Retrieve all categories
+     * @param restBuilder a Context-injected object to create the links of the Dto
+     * @return a {CategoriesDto} object with all categories
+     * @throws Exception
+     */
     @GET
     @Produces(CategoriesDto.MEDIA_TYPE)
     public CategoriesDto getCategory(
@@ -82,6 +90,14 @@ public class CategoriesResource extends AbstractResource
         return categories;
     }
 
+    /**
+     * Creates a category and returns it after creation
+     * 
+     * @param categoryDto category to create
+     * @param builder a Context-injected object to create the links of the Dto
+     * @return a {CategoryDto} with the created category
+     * @throws Exception
+     */
     @POST
     @Consumes(CategoryDto.MEDIA_TYPE)
     @Produces(CategoryDto.MEDIA_TYPE)

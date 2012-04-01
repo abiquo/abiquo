@@ -50,6 +50,10 @@ import com.abiquo.server.core.enterprise.RolesDto;
 import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.util.PagedList;
 
+/**
+ * @author scastro
+ * @wiki Roles Resource offers the functionality of managing the platform roles in a logical way.
+ */
 @Path(RolesResource.ROLES_PATH)
 @Controller
 @Workspace(workspaceTitle = "Abiquo administration workspace", collectionTitle = "Roles")
@@ -71,6 +75,20 @@ public class RolesResource extends AbstractResource
     @Context
     UriInfo uriInfo;
 
+    /**
+     * Return all roles of an enterprise
+     * 
+     * @title Retrieve a list of Roles
+     * @param enterpriseId identifier of the enterprise
+     * @param filter
+     * @param orderBy
+     * @param desc
+     * @param page
+     * @param numResults
+     * @param restBuilder a Context-injected object to create the links of the Dto
+     * @return a {RolesDto} object with all roles from an enterprise
+     * @throws Exception
+     */
     @GET
     @Produces(RolesDto.MEDIA_TYPE)
     public RolesDto getRoles(

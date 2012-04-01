@@ -41,6 +41,11 @@ import com.abiquo.server.core.enterprise.Privilege;
 import com.abiquo.server.core.enterprise.PrivilegeDto;
 import com.abiquo.server.core.enterprise.PrivilegesDto;
 
+/**
+ * @author scastro
+ * @wiki The Privilege resource is used to manage the permissions. This page describes the method
+ *       exposed to retrieve the privileges.
+ */
 @Path(PrivilegesResource.PRIVILEGES_PATH)
 @Controller
 @Workspace(workspaceTitle = "Abiquo configuration workspace", collectionTitle = "Privileges")
@@ -51,6 +56,14 @@ public class PrivilegesResource extends AbstractResource
     @Autowired
     private EnterpriseService service;
 
+    /**
+     * Returns all privileges from abiquo
+     * 
+     * @title Retrieve all privileges
+     * @param restBuilder a Context-injected object to create the links of the Dto
+     * @return a {PrivilegesDto} objec with all privileges from abiquo
+     * @throws Exception
+     */
     @GET
     @Produces(PrivilegesDto.MEDIA_TYPE)
     public PrivilegesDto getPrivileges(@Context final IRESTBuilder restBuilder) throws Exception

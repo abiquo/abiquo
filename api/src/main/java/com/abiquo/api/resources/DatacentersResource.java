@@ -60,7 +60,7 @@ import com.abiquo.server.core.infrastructure.RemoteServicesDto;
 @Workspace(workspaceTitle = "Abiquo administration workspace", collectionTitle = "Datacenters")
 public class DatacentersResource extends AbstractResource
 {
-    public static final String DATACENTERS_PATH = "admin/datacenters/";
+    public static final String DATACENTERS_PATH = "admin/datacenters";
 
     // TODO get allowed datacenters on DatacentersResourcePremium
 
@@ -76,6 +76,16 @@ public class DatacentersResource extends AbstractResource
     @Autowired
     private SecurityService securityService;
 
+    /**
+     * Returns all datacenters
+     * 
+     * @title Retrieve a list of Datacenters
+     * @param restBuilder a Context-injected object to create the links of the Dto
+     * @param idEnterprise identifier of an enterprise
+     * @param pricingId identifier of a pricing template
+     * @return a {DatacentersDto} object with all datacenters
+     * @throws Exception
+     */
     @GET
     @Produces(DatacentersDto.MEDIA_TYPE)
     public DatacentersDto getDatacenters(@Context final IRESTBuilder restBuilder,
@@ -110,6 +120,15 @@ public class DatacentersResource extends AbstractResource
         return datacenters;
     }
 
+    /**
+     * Returns all datacenters with own remote services
+     * 
+     * @title Retrieve a list of datacenters with their Remote Services
+     * @param restBuilder a Context-injected object to create the links of the Dto
+     * @param idEnterprise identifier of an enterprise
+     * @return a {DatacentersDto} object with all datacenters and own remote services
+     * @throws Exception
+     */
     @GET
     @Produces(DatacentersDto.RS_MEDIA_TYPE)
     public DatacentersDto getDatacentersWithRS(@Context final IRESTBuilder restBuilder,
@@ -148,6 +167,18 @@ public class DatacentersResource extends AbstractResource
         return datacenters;
     }
 
+    /**
+     * Creates a datacenter and returns it after creation
+     * 
+     * @title Create a new Datacenter
+     * @wiki A datacenter can be created with remote services if you send them in the dto. In this
+     *       case if the remote services return configuration errors, then the datacenter will be
+     *       created and the response will show the configuration errors.
+     * @param datacenterDto datacenter to create
+     * @param restBuilder a Context-injected object to create the links of the Dto
+     * @return a {DatacenterDto} object with the created datacenter
+     * @throws Exception
+     */
     @POST
     @Produces(DatacenterDto.MEDIA_TYPE)
     @Consumes(DatacenterDto.MEDIA_TYPE)

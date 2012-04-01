@@ -76,6 +76,9 @@ public class VirtualMachinesInfrastructureResource extends AbstractResource
     /**
      * Returns all the virtual machines deployed in a physical machine.
      * 
+     * @title Retrieve the list of virtual machines by machine's hypervisor
+     * @wiki Retrieve all the virtual machines deployed by abiquo in a physical machine. That means
+     *       that the virtual machine exist in the database and in the hypervisor.
      * @param datacenterId identifier of the datacenter.
      * @param rackId identifier of the rack.
      * @param machineId identifier of the machine.
@@ -107,6 +110,18 @@ public class VirtualMachinesInfrastructureResource extends AbstractResource
         return dto;
     }
 
+    /**
+     * Delete all virtual machines not managed by abiquo.
+     * 
+     * @title Delete virtual machines non managed by Abiquo by hypervisor's machine
+     * @wiki This action removes from our system the virtual machines that we don't manage but exist
+     *       into the hypervisor.
+     * @param datacenterId identifier of the datacenter
+     * @param rackId indetifier of the rack
+     * @param machineId indentifier of the machine
+     * @param restBuilder a Context-injected object to create the links of the Dto
+     * @throws Exception
+     */
     @DELETE
     public void deleteVirtualMachinesNotManaged(
         @PathParam(DatacenterResource.DATACENTER) @NotNull @Min(1) final Integer datacenterId,

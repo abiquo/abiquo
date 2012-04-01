@@ -60,7 +60,6 @@ import com.abiquo.scheduler.SchedulerLock;
 import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
 import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.cloud.NodeVirtualImage;
-import com.abiquo.server.core.cloud.VirtualApplianceDto;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineDto;
@@ -140,12 +139,14 @@ public class VirtualMachineResource extends AbstractResource
     private VirtualMachineLock vmLock;
 
     /**
-     * Return the virtual appliance if exists.
+     * Return the virtual machine if exists.
      * 
+     * @title Retrieve a virtual machine
      * @param vdcId identifier of the virtual datacenter.
      * @param vappId identifier of the virtual appliance.
+     * @param vmId identifier of the virtual machine
      * @param restBuilder to build the links
-     * @return the {@link VirtualApplianceDto} transfer object for the virtual appliance.
+     * @return the {@link VirtualMachineDto} transfer object for the virtual machine.
      * @throws Exception
      */
     @GET
@@ -164,6 +165,7 @@ public class VirtualMachineResource extends AbstractResource
     }
 
     /***
+     * @title Modify a virtual machine
      * @param vdcId VirtualDatacenter id
      * @param vappId VirtualAppliance id
      * @param vmId VirtualMachine id
@@ -208,6 +210,7 @@ public class VirtualMachineResource extends AbstractResource
     /**
      * Updates this virtual Machine Node information (e.g. name)
      * 
+     * @title Modify the virtual machine Node information
      * @param vdcId
      * @param vappId
      * @param vmId
@@ -235,6 +238,8 @@ public class VirtualMachineResource extends AbstractResource
     /**
      * Change the {@link VirtualMachineState} the virtual machine
      * 
+     * @title Change the state of a virtual machine
+     * @wiki The allowed states are: OFF, PAUSED, ON.
      * @param vdcId VirtualDatacenter id
      * @param vappId VirtualAppliance id
      * @param vmId VirtualMachine id
@@ -289,6 +294,7 @@ public class VirtualMachineResource extends AbstractResource
     /**
      * Retrieve the {@link VirtualMachineState} the virtual machine
      * 
+     * @title Retrieve the state of the virtual machine
      * @param vdcId VirtualDatacenter id
      * @param vappId VirtualAppliance id
      * @param vmId VirtualMachine id
@@ -352,6 +358,9 @@ public class VirtualMachineResource extends AbstractResource
      * <li><b>UNKNOWN</b></li>
      * </ul>
      * 
+     * @title Delete a virtual machine
+     * @wiki If the virtual machine exists in the hypervisor it will be removed from the hypervisor
+     *       as well.
      * @param vdcId VirtualDatacenter id
      * @param vappId VirtualAppliance id
      * @param vmId VirtualMachine id
@@ -400,12 +409,19 @@ public class VirtualMachineResource extends AbstractResource
      * <li>Enable the resource <code>Progress<code></li>
      * </ul>
      * 
+     * @title Deploy a virtual machine
+     * @wiki Deploys the virtual machine with the given options. There is also possible to do not
+     *       specify any options and assume the defaults. This call returns a 202 HTTP code
+     *       (accepted) and a URI where you can keep track of the deploy. The options are not
+     *       mandatory. The options are : -forceEnterpriseSoftLimits This flag forces a check on the
+     *       enterprise soft limits when calculating the available resources. If this check fails
+     *       the deploy won't be performed.
      * @param vdcId VirtualDatacenter id
      * @param vappId VirtualAppliance id
      * @param vmId VirtualMachine id
      * @param restBuilder injected restbuilder context parameter
-     * @param forceSoftLimits dto of options * @return a link where you can keep track of the
-     *            progress and a message.
+     * @param forceSoftLimits dto of options
+     * @return a link where you can keep track of the progress and a message.
      * @throws Exception
      */
     @POST
@@ -463,6 +479,13 @@ public class VirtualMachineResource extends AbstractResource
      * <li>Enable the resource <code>Progress<code></li>
      * </ul>
      * 
+     * @title Deploy a virtual machine
+     * @wiki Deploys the virtual machine with the given options. There is also possible to do not
+     *       specify any options and assume the defaults. This call returns a 202 HTTP code
+     *       (accepted) and a URI where you can keep track of the deploy. The options are not
+     *       mandatory. The options are : -forceEnterpriseSoftLimits This flag forces a check on the
+     *       enterprise soft limits when calculating the available resources. If this check fails
+     *       the deploy won't be performed.
      * @param vdcId VirtualDatacenter id
      * @param vappId VirtualAppliance id
      * @param vmId VirtualMachine id
@@ -497,6 +520,16 @@ public class VirtualMachineResource extends AbstractResource
      * <li>Enable the resource <code>Progress<code></li>
      * </ul>
      * 
+     * @title Undeploy the virtual machine
+     * @wiki Perform an undeploy. This means that after the call, the virtual machine in Abiquo will
+     *       be in the NOT_ALLOCATED state. If the undeploy is successful, the virtual machine will
+     *       be deleted from the hypervisor. If the virtual machine is in the ON state, Abiquo will
+     *       perform a power off before the deconfigure. You can also set the force undeploy
+     *       parameter in the virtual machine task entity. If this is set to true, the imported
+     *       virtual machines are also deleted. This call returns a 202 HTTP code (accepted) and a
+     *       URI where you can keep track of the undeploy. The possible option for an undeploy is
+     *       -forceUndeploy. If this flag is set to false we do not undeploy imported virtual
+     *       machines.
      * @param vdcId VirtualDatacenter id
      * @param vappId VirtualAppliance id
      * @param vmId VirtualMachine id
@@ -551,6 +584,10 @@ public class VirtualMachineResource extends AbstractResource
     /**
      * Snapshot a {@link VirtualMachine}.>
      * 
+     * @title Snapshot a virtual machine
+     * @wiki Instance the virtual machine with the given name. This call returns a 202 HTTP code
+     *       (accepted) and a URI where you can keep track of the deploy. The options are mandatory.
+     *       The options are : -instanceName The final name of the instance
      * @param vdcId VirtualDatacenter id
      * @param vappId VirtualAppliance id
      * @param vmId VirtualMachine id
@@ -843,12 +880,15 @@ public class VirtualMachineResource extends AbstractResource
     }
 
     /**
-     * Return the virtual appliance if exists.
+     * Return the virtual machine if exists.
      * 
+     * @title Retrieve a virtual machine with the node
      * @param vdcId identifier of the virtual datacenter.
      * @param vappId identifier of the virtual appliance.
+     * @param vmId identifier of the virtual machine
      * @param restBuilder to build the links
-     * @return the {@link VirtualApplianceDto} transfer object for the virtual appliance.
+     * @return the {@link VirtualMachineWithNodeDto} transfer object for the virtual machine with
+     *         the node.
      * @throws Exception
      */
     @GET
@@ -866,6 +906,19 @@ public class VirtualMachineResource extends AbstractResource
             .getIps());
     }
 
+    /**
+     * Returns all tasks for a machine
+     * 
+     * @title Retrive all tasks
+     * @wiki Displays the tasks on the virtual machine. Tasks are a set of jobs (operations on
+     *       hypervisors). Any of these tasks may still be in progress.
+     * @param vdcId identifier of the virtual datacenter
+     * @param vappId identifier of the virtual appliance
+     * @param vmId identifier of the virtual machine
+     * @param uriInfo
+     * @return a {TasksDto} with all tasks for the machine
+     * @throws Exception
+     */
     @GET
     @Produces(TasksDto.MEDIA_TYPE)
     @Path(TaskResourceUtils.TASKS_PATH)
@@ -881,6 +934,20 @@ public class VirtualMachineResource extends AbstractResource
         return TaskResourceUtils.transform(tasks, uriInfo);
     }
 
+    /**
+     * Returns a task for a virtual machine
+     * 
+     * @title Retrieve a task
+     * @wiki Displays a specific task on the virtual machine. Tasks are a set of jobs (operations on
+     *       hypervisors). Any of these tasks may still be in progress. Every task has a UUID.
+     * @param vdcId identifier of the virtual datacenter
+     * @param vappId identifier of the virtual appliance
+     * @param vmId identifier of the virtual machine
+     * @param taskId identifier of the task
+     * @param uriInfo
+     * @return a {TaksDto} with the task of the machine
+     * @throws Exception
+     */
     @GET
     @Produces(TaskDto.MEDIA_TYPE)
     @Path(TaskResourceUtils.TASK_PATH)
@@ -916,6 +983,7 @@ public class VirtualMachineResource extends AbstractResource
     /**
      * Reset a {@link VirtualMachine}.
      * 
+     * @title Reset a virtual machine
      * @param vdcId VirtualDatacenter id
      * @param vappId VirtualAppliance id
      * @param vmId VirtualMachine id
@@ -968,7 +1036,7 @@ public class VirtualMachineResource extends AbstractResource
 
         link = link.replaceAll("action.*", "");
         link = link.replaceAll("(/)*$", "");
-        link = link.replaceAll("\\?force=true", "");
+        link = link.replaceAll("\\?force=(true|false)", "");
         link = link.concat(TaskResourceUtils.TASKS_PATH).concat("/").concat(taskId);
 
         // Build AcceptedRequestDto

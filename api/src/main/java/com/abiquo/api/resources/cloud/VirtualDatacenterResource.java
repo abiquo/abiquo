@@ -107,6 +107,15 @@ public class VirtualDatacenterResource extends AbstractResource
     @Context
     UriInfo uriInfo;
 
+    /**
+     * Returns a virtual datacenter
+     * 
+     * @title Retireve a virtual datacenter
+     * @param id identifier of the virtual datacenter
+     * @param restBuilder a Context-injected object to create the links of the Dto
+     * @return a {VirtualDatacenterDto} object with the requested virtual datacenter
+     * @throws Exception
+     */
     @GET
     @Produces(VirtualDatacenterDto.MEDIA_TYPE)
     public VirtualDatacenterDto getVirtualDatacenter(
@@ -117,6 +126,16 @@ public class VirtualDatacenterResource extends AbstractResource
         return createTransferObject(vdc, restBuilder);
     }
 
+    /**
+     * Modifies a virtual datacenter
+     * 
+     * @title Modify a virtual datacenter
+     * @param id identifier of the virtual datacenter
+     * @param dto virtual datacenter to modify
+     * @param restBuilder a Context-injected object to create the links of the Dto
+     * @return a {VirtualDatacenterDto} with the modified virtual datacenter
+     * @throws Exception
+     */
     @PUT
     @Consumes(VirtualDatacenterDto.MEDIA_TYPE)
     @Produces(VirtualDatacenterDto.MEDIA_TYPE)
@@ -129,12 +148,33 @@ public class VirtualDatacenterResource extends AbstractResource
         return createTransferObject(vdc, restBuilder);
     }
 
+    /**
+     * Deletes a virtual datacenter
+     * 
+     * @title Delete a virtual datacenter
+     * @param id identifirer of the virtual datacenter
+     */
     @DELETE
     public void deleteVirtualDatacenter(@PathParam(VIRTUAL_DATACENTER) final Integer id)
     {
         service.deleteVirtualDatacenter(id);
     }
 
+    /**
+     * Returns all IPs from a virtual datacenter
+     * 
+     * @title Retrieve all Ips
+     * @param id identifier of the virtual datacenter
+     * @param startwith
+     * @param orderBy
+     * @param filter
+     * @param limit
+     * @param desc_or_asc
+     * @param type
+     * @param restBuilder a Context-injected object to create the links of the Dto
+     * @return a {IpsPoolManagementDto} with all ips from the virtual datacenter
+     * @throws Exception
+     */
     @SuppressWarnings("unchecked")
     @GET
     @Path(VirtualDatacenterResource.VIRTUAL_DATACENTER_GET_IPS_PATH)
@@ -173,6 +213,15 @@ public class VirtualDatacenterResource extends AbstractResource
         return ips;
     }
 
+    /**
+     * Returns the DHCP info from virtual datacenter.
+     * 
+     * @title Retrieve the DHCP info
+     * @param id identifier of the virtual datacenter
+     * @param restBuilder a Context-injected object to create the links of the Dto
+     * @return a {String} object with the DHCP info
+     * @throws Exception
+     */
     @GET
     @Produces(MediaType.TEXT_PLAIN)
     @Path(VirtualDatacenterResource.VIRTUAL_DATACENTER_DHCP_INFO_PATH)
@@ -218,6 +267,18 @@ public class VirtualDatacenterResource extends AbstractResource
 
     // ALERT! this method is @override in enterprise version, any change here
     // should be also changed in enterprise version.
+    /**
+     * Returns the default vlan from a virtual datacenter.
+     * 
+     * @title Retrieve the default vlan
+     * @wiki In the external networks resource you can set the default VLAN behavior by virtual
+     *       datacenter. This means that if you perform the get default VLAN request after you have
+     *       created the virtual datacenter, you will see the Enterprise-default VLAN.
+     * @param id identifier of the virtual datacenter
+     * @param restBuilder a Context-injected object to create the links of the Dto
+     * @return a {VLANNetworkDto} object with the default vlan of the virtual datacenter
+     * @throws Exception
+     */
     @GET
     @Path(VirtualDatacenterResource.DEFAULT_VLAN_PATH)
     @Produces(VLANNetworkDto.MEDIA_TYPE)
@@ -231,6 +292,15 @@ public class VirtualDatacenterResource extends AbstractResource
 
     // ALERT! this method is @override in enterprise version, any change here
     // should be also changed in enterprise version.
+    /**
+     * Changes the default vlan for a virtual datacenter
+     * 
+     * @title Changes the default vlan for a virtual datacenter
+     * @param id identifier of the virtual datacenter
+     * @param links link from new default vlan
+     * @param restBuilder a Context-injected object to create the links of the Dto
+     * @throws Exception
+     */
     @PUT
     @Path(VirtualDatacenterResource.DEFAULT_VLAN_PATH)
     @Consumes(LinksDto.MEDIA_TYPE)

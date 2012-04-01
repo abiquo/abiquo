@@ -82,6 +82,22 @@ public class VirtualMachineInfrastructureResource extends AbstractResource
     @Autowired
     private StorageService storageService;
 
+    /**
+     * Return a virtual machine deployed in the given physical machine.
+     * 
+     * @title Retrive a virtual machine deployed in a physical machine
+     * @wiki Returns the requested virtual machine that is deployed in a physical machine and is
+     *       actually managed by abiquo. That means that the virtual machine exist in the database
+     *       and in the hypervisor.
+     * @param datacenterId identifier of the datacenter
+     * @param rackId identifier of the rack
+     * @param machineId identifier of the machine
+     * @param vmId identifier of the requested virtual machine
+     * @param restBuilder a Context-injected object to create the links of the Dto
+     * @return the {VirtualMachineDto} object with the virtual machine deployed in the physical
+     *         machine
+     * @throws Exception
+     */
     @GET
     @Produces(VirtualMachineDto.MEDIA_TYPE)
     public VirtualMachineDto getInfrastructureVirtualMachine(
@@ -160,6 +176,7 @@ public class VirtualMachineInfrastructureResource extends AbstractResource
     /**
      * Get list of disks in a virtual machine
      * 
+     * @title Retrieve the list of hard disks of a virtual machine in the cloud infrastructure
      * @param datacenterId
      * @param rackId
      * @param machineId

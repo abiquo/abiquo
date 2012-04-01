@@ -52,6 +52,15 @@ public class HypervisorTypeResource extends AbstractResource
     @Autowired
     private HypervisorTypeService service;
 
+    /**
+     * Returns a hypervisor type
+     * 
+     * @title Retrive a hypervisor type
+     * @param hypervisorTypeId identifier of the hypervisor
+     * @param restBuilder a Context-injected object to create the links of the Dto
+     * @return a {HypervisorTypeDto} object with the requested hypervisor type
+     * @throws Exception
+     */
     @GET
     @Produces(HypervisorTypeDto.MEDIA_TYPE)
     public HypervisorTypeDto getHypervisorType(

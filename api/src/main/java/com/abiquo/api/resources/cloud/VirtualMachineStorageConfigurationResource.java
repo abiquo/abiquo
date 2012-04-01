@@ -51,14 +51,12 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
-import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 
 import org.apache.wink.common.annotations.Parent;
@@ -87,6 +85,14 @@ import com.abiquo.server.core.infrastructure.storage.DisksManagementDto;
  * </pre>
  * 
  * @author jdevesa@abiquo.com
+ * @wiki This resource is used to create/delete Hard Disks in a Virtual Machine. The way to create
+ *       Hard Disks is to attach an existent Hard Disk that is free to be used. There are only two
+ *       available Virtual Machine States to change the Hard Disks of a Virtual Machine:
+ *       NOT_ALLOCATED and OFF. If the machine is NOT_ALLOCATED, the response code will be 204 - NOT
+ *       CONTENT and the machine changes will be already committed. If the machine is OFF, abiquo
+ *       API will perform an asynchronous task. The response code will be 202 - ACCEPTED and in the
+ *       response body will be an URI link to know how the task is going on. The changes won't be
+ *       committed until the task is finished.
  */
 @Parent(VirtualMachineResource.class)
 @Controller
@@ -105,8 +111,6 @@ public class VirtualMachineStorageConfigurationResource extends AbstractResource
     /** Parameter to map the input values related to Disks. */
     public static final String DISK_PARAM = "{" + DISK + "}";
 
-    public static final String FORCE = "force";
-
     /** Autowired business logic service. */
     @Autowired
     protected StorageService service;
@@ -117,6 +121,8 @@ public class VirtualMachineStorageConfigurationResource extends AbstractResource
     /**
      * Returns all the defined disks in the virtual machine.
      * 
+     * @title Retrieve all hard disk
+     * @wiki Retrieve the list of Hard Disks attached to a Virtual Machine
      * @param vdcId identifier of the Virtual Datacenter.
      * @param vappId identifier of the Virtual Appliance.
      * @param vmId identifier of the Virtual Machine.
@@ -149,6 +155,9 @@ public class VirtualMachineStorageConfigurationResource extends AbstractResource
     /**
      * Attaches Hard Disks to be used by a Virtual Machine.
      * 
+     * @title Attach hard disks
+     * @wiki To create a Hard Disk we need to link to a free Hard Disk previously created in the
+     *       Virtual Datacenter . Please note the REL in the link we send. It must be "disk"
      * @param vdcId identifier of the Virtual Datacenter.
      * @param vappId identifier of the Virtual Appliance.
      * @param vmId identifier of the Virtual Machine.
@@ -167,16 +176,14 @@ public class VirtualMachineStorageConfigurationResource extends AbstractResource
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) @NotNull @Min(1) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) @NotNull @Min(1) final Integer vappId,
         @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) @NotNull @Min(1) final Integer vmId,
-        @QueryParam(FORCE) @DefaultValue("false") final Boolean force, final LinksDto hdRefs,
-        @Context final IRESTBuilder restBuilder) throws Exception
+        final LinksDto hdRefs, @Context final IRESTBuilder restBuilder) throws Exception
     {
         VirtualMachineState originalState =
             vmLock.lockVirtualMachineBeforeReconfiguring(vdcId, vappId, vmId);
 
         try
         {
-            Object result =
-                service.attachHardDisks(vdcId, vappId, vmId, hdRefs, originalState, force);
+            Object result = service.attachHardDisks(vdcId, vappId, vmId, hdRefs, originalState);
 
             // The attach method may return a Tarantino task identifier if the operation requires a
             // reconfigure. Otherwise it will return null.
@@ -203,6 +210,9 @@ public class VirtualMachineStorageConfigurationResource extends AbstractResource
     /**
      * Detach all hard disks from the virtual machine.
      * 
+     * @title Detach all hard disks
+     * @wiki Although most times you will detach a single hard disk, you have the option to detach
+     *       all of them with this function
      * @param vdcId The id of the virtual datacenter where the virtual machine belongs to.
      * @param vappId The id of the virtual appliance of the virtual machine.
      * @param vmId The id of the virtual machine.
@@ -252,6 +262,7 @@ public class VirtualMachineStorageConfigurationResource extends AbstractResource
     /**
      * Modify the hard disks of the virtual machine.
      * 
+     * @title Change hard disks
      * @param vdcId The id of the virtual datacenter where the virtual machine belongs to.
      * @param vappId The id of the virtual appliance of the virtual machine.
      * @param vmId The id of the virtual machine.
@@ -304,6 +315,7 @@ public class VirtualMachineStorageConfigurationResource extends AbstractResource
     /**
      * Returns a single disk according on its order in Virtual Machine
      * 
+     * @title Retrieve a hard disk
      * @param vdcId identifier of the Virtual Datacenter.
      * @param vappId identifier of the Virtual Appliance.
      * @param vmId identifier of the Virtual Machine.
@@ -331,6 +343,8 @@ public class VirtualMachineStorageConfigurationResource extends AbstractResource
     /**
      * Detach a hard disk from the virtual machine.
      * 
+     * @title Detach a single hard disks
+     * @wiki Detach a single Hard Disk from a Virtual Machine.
      * @param vdcId The id of the virtual datacenter where the virtual machine belongs to.
      * @param vappId The id of the virtual appliance of the virtual machine.
      * @param vmId The id of the virtual machine.
@@ -355,7 +369,9 @@ public class VirtualMachineStorageConfigurationResource extends AbstractResource
 
         try
         {
-            Object result = service.detachHardDisk(vdcId, vappId, vmId, diskId, originalState);
+            Boolean forceSoftLimits = true;
+            Object result =
+                service.detachHardDisk(vdcId, vappId, vmId, diskId, originalState, forceSoftLimits);
 
             // The attach method may return a Tarantino task identifier if the operation requires a
             // reconfigure. Otherwise it will return null.
