@@ -150,7 +150,7 @@ public abstract class EntityLimitChecker<T extends DefaultEntityWithLimits>
         final boolean force, final Boolean checkVLAN, final Boolean checkIPs, final Boolean checkHD)
         throws LimitExceededException
     {
-        checkLimits(entity, required, force, checkVLAN, checkIPs, true, false);
+        checkLimits(entity, required, force, checkVLAN, checkIPs, checkHD, false);
     }
 
     public void checkLimits(final T entity, final VirtualMachineRequirements required,
