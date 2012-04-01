@@ -169,7 +169,7 @@ public abstract class EntityLimitChecker<T extends DefaultEntityWithLimits>
 
         Map<LimitResource, LimitStatus> limitStatus =
             new HashMap<EntityLimitChecker.LimitResource, DefaultEntityWithLimits.LimitStatus>();
-        // Initialized in order to show GUI popup'values
+        // Initialized in order to show GUI's popup values
         limitStatus.put(LimitResource.CPU, LimitStatus.OK);
         limitStatus.put(LimitResource.RAM, LimitStatus.OK);
         limitStatus.put(LimitResource.STORAGE, LimitStatus.OK);
