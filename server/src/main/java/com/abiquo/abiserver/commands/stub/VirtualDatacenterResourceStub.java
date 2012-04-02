@@ -37,7 +37,7 @@ public interface VirtualDatacenterResourceStub
     public DataResult<VirtualDataCenter> createVirtualDatacenter(VirtualDataCenter vdc,
         String networkName, NetworkConfigurationHB netConfig, ResourceManager resourceManager);
 
-    public BasicResult updateVirtualDatacenter(VirtualDataCenter vdc,
+    public DataResult<VirtualDataCenter> updateVirtualDatacenter(VirtualDataCenter vdc,
         ResourceManager resourceManager);
 
     public BasicResult deleteVirtualDatacenter(VirtualDataCenter vdc,

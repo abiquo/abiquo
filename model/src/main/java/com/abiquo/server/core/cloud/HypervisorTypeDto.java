@@ -48,6 +48,8 @@ public class HypervisorTypeDto extends SingleResourceTransportDto
 
     private String name;
 
+    private String realName;
+
     public Integer getId()
     {
         return id;
@@ -96,6 +98,16 @@ public class HypervisorTypeDto extends SingleResourceTransportDto
     public void setName(final String name)
     {
         this.name = name;
+    }
+
+    public String getRealName()
+    {
+        return realName;
+    }
+
+    public void setRealName(final String realName)
+    {
+        this.realName = realName;
     }
 
     @Override
