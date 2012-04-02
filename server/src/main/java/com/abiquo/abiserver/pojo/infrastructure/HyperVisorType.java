@@ -30,6 +30,8 @@ public class HyperVisorType
 
     private String name;
 
+    private String friendlyName;
+
     private int defaultPort;
 
     private DiskFormatType baseFormat;
@@ -39,17 +41,18 @@ public class HyperVisorType
 
     }
 
-    public HyperVisorType(int id)
+    public HyperVisorType(final int id)
     {
         this(HypervisorType.fromId(id));
     }
 
-    public HyperVisorType(HypervisorType type)
+    public HyperVisorType(final HypervisorType type)
     {
         this.id = type.id();
         this.defaultPort = type.defaultPort;
         this.name = type.getValue();
         this.baseFormat = new DiskFormatType(type.baseFormat);
+        this.friendlyName = type.friendlyName;
     }
 
     public DiskFormatType getBaseFormat()
@@ -57,7 +60,7 @@ public class HyperVisorType
         return baseFormat;
     }
 
-    public void setBaseFormat(DiskFormatType baseFormat)
+    public void setBaseFormat(final DiskFormatType baseFormat)
     {
         this.baseFormat = baseFormat;
     }
@@ -67,7 +70,7 @@ public class HyperVisorType
         return id;
     }
 
-    public void setId(int id)
+    public void setId(final int id)
     {
         this.id = id;
     }
@@ -77,9 +80,19 @@ public class HyperVisorType
         return name;
     }
 
-    public void setName(String name)
+    public void setName(final String name)
     {
         this.name = name;
+    }
+
+    public String getFriendlyName()
+    {
+        return friendlyName;
+    }
+
+    public void setFriendlyName(final String friendlyName)
+    {
+        this.friendlyName = friendlyName;
     }
 
     public int getDefaultPort()
@@ -87,16 +100,17 @@ public class HyperVisorType
         return defaultPort;
     }
 
-    public void setDefaultPort(int defaultPort)
+    public void setDefaultPort(final int defaultPort)
     {
         this.defaultPort = defaultPort;
     }
 
-    public static HyperVisorType create(HypervisorType type, DiskFormatType baseFormat)
+    public static HyperVisorType create(final HypervisorType type, final DiskFormatType baseFormat)
     {
         HyperVisorType hyperVisorType = new HyperVisorType();
         hyperVisorType.setId(type.id());
         hyperVisorType.setName(type.name());
+        hyperVisorType.setFriendlyName(type.getFriendlyName());
         hyperVisorType.setDefaultPort(type.defaultPort);
         hyperVisorType.setBaseFormat(baseFormat);
 

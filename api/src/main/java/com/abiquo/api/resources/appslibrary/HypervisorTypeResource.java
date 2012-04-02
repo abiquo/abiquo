@@ -78,6 +78,7 @@ public class HypervisorTypeResource extends AbstractResource
         dto.setId(hypervisorType.id());
         dto.setBaseFormat(hypervisorType.baseFormat);
         dto.setName(hypervisorType.name());
+        dto.setRealName(hypervisorType.getFriendlyName());
         dto.setCompatibilityTable(hypervisorType.compatibilityTable);
         dto.setDefaultPort(hypervisorType.defaultPort);
         return dto;
