@@ -126,13 +126,14 @@ SELECT "STEP 9 REMOVING DEPRECATED TRIGGERS..." as " ";
 -- ######## SCHEMA: TRIGGERS RECREATED ####### --
 -- ########################################### --
 SELECT "STEP 10 UPDATING TRIGGERS..." as " ";
+
 DROP TRIGGER IF EXISTS kinton.create_nodevirtualimage_update_stats;
 DROP TRIGGER IF EXISTS kinton.delete_nodevirtualimage_update_stats;
 DROP TRIGGER IF EXISTS kinton.update_virtualmachine_update_stats;
+DROP TRIGGER IF EXISTS kinton.update_virtualapp_update_stats;
 DELIMITER |
 --
 SELECT "Recreating trigger create_nodevirtualimage_update_stats..." as " ";
-DROP TRIGGER IF EXISTS kinton.create_nodevirtualimage_update_stats;
 CREATE TRIGGER kinton.create_nodevirtualimage_update_stats AFTER INSERT ON kinton.nodevirtualimage
   FOR EACH ROW BEGIN
     DECLARE idDataCenterObj INTEGER;
@@ -460,9 +461,7 @@ CREATE TRIGGER kinton.update_virtualmachine_update_stats AFTER UPDATE ON kinton.
       END IF;
     END;
 |
-DELIMITER ;
-
-DROP TRIGGER IF EXISTS kinton.update_virtualapp_update_stats;
+SELECT "Recreating trigger update_virtualapp_update_stats..." as " ";
 CREATE TRIGGER kinton.update_virtualapp_update_stats AFTER UPDATE ON kinton.virtualapp
   FOR EACH ROW BEGIN
     DECLARE numVMachinesCreated INTEGER;
@@ -495,6 +494,8 @@ CREATE TRIGGER kinton.update_virtualapp_update_stats AFTER UPDATE ON kinton.virt
     END IF;
   END IF;
   END;
+|
+DELIMITER ;
 
 
 -- ############################################# -- 
