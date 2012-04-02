@@ -79,6 +79,7 @@ public class HypervisorTypeResource extends AbstractResource
         dto.setBaseFormat(hypervisorType.baseFormat);
         dto.setName(hypervisorType.name());
         dto.setCompatibilityTable(hypervisorType.compatibleFormats);
+        dto.setRealName(hypervisorType.getFriendlyName());
         dto.setDefaultPort(hypervisorType.defaultPort);
         return dto;
     }
