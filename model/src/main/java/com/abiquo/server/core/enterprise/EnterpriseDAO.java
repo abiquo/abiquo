@@ -247,6 +247,10 @@ class EnterpriseDAO extends DefaultDAOBase<Integer, Enterprise>
             // HA_DISABLED
             + " and vm.idEnterprise = :enterpriseId and vm.state != 'NOT_ALLOCATED' and vm.idHypervisor is not null";
 
+    private static final String SUM_EXTRA_HD_RESOURCES =
+        "select sum(r.limitResource) from rasd r, rasd_management rm, virtualdatacenter vdc where r.instanceID = rm.idResource "
+            + "and rm.idResourceType = '17' and rm.idVirtualDatacenter = vdc.idVirtualDatacenter and vdc.idEnterprise=:enterpriseId";
+
     public DefaultEntityCurrentUsed getEnterpriseResourceUsage(final int enterpriseId)
     {
         Object[] vmResources =
@@ -257,6 +261,11 @@ class EnterpriseDAO extends DefaultDAOBase<Integer, Enterprise>
         Long ram = vmResources[1] == null ? 0 : ((BigDecimal) vmResources[1]).longValue();
         Long hd = vmResources[2] == null ? 0 : ((BigDecimal) vmResources[2]).longValue();
 
+        BigDecimal extraHd =
+            (BigDecimal) getSession().createSQLQuery(SUM_EXTRA_HD_RESOURCES).setParameter(
+                "enterpriseId", enterpriseId).uniqueResult();
+        Long hdTot = extraHd == null ? hd : hd + extraHd.longValue() * 1024 * 1024;
+
         Long storage = getStorageUsage(enterpriseId) * 1024 * 1024; // Storage usage is stored in MB
         Long publiIp = getPublicIPUsage(enterpriseId);
         Long vlanCount = getVLANUsage(enterpriseId);
@@ -264,7 +273,7 @@ class EnterpriseDAO extends DefaultDAOBase<Integer, Enterprise>
         // TODO repository
 
         // XXX checking null resource utilization (if any resource allocated)
-        DefaultEntityCurrentUsed used = new DefaultEntityCurrentUsed(cpu.intValue(), ram, hd);
+        DefaultEntityCurrentUsed used = new DefaultEntityCurrentUsed(cpu.intValue(), ram, hdTot);
 
         used.setStorage(storage);
         used.setPublicIp(publiIp);
