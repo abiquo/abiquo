@@ -35,9 +35,9 @@ public enum AMError
     TEMPLATE_INVALID("TEMPLATE-INVALID", "Invalid OVF Document"), //
     TEMPLATE_INVALID_LOCATION("TEMPLATE-INVALID-LOC", "Invalid OVF URL"), //
     TEMPLATE_INVALID_MULTIPLE_DISKS("TEMPLATE-INVALID-MULTIPLE-DISK",
-        "OVF document contains no referenced disk or more than one."), TEMPLATE_INVALID_MULTIPLE_FILES(
+        "Invalid number of disks. The OVF document can only contain ONE referenced disk."), TEMPLATE_INVALID_MULTIPLE_FILES(
         "TEMPLATE-INVALID-MULTIPLE-FILE",
-        "OVF document contains no referenced file or more than one."), TEMPLATE_INVALID_DISK_REFERENCE(
+        "Invalid number of referenced files. The OVF document can only contain ONE referenced file."), TEMPLATE_INVALID_DISK_REFERENCE(
         "TEMPLATE-INVALID-DISK-REFRENCE",
         "Virtual Hardware Section contains no reference to the disk."), TEMPLATE_NOT_FOUND(
         "TEMPLATE-NOT-FOUND", "OVF Document not found in the Template Repository"), //
