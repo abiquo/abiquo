@@ -63,7 +63,7 @@ public interface StorageResourceStub
      * @return a BasicResult encapsulating the disk info.
      */
     public BasicResult createDiskIntoVirtualMachine(final Integer vdcId, final Integer vappId,
-        final Integer vmId, final Long diskSizeInMb);
+        final Integer vmId, final Long diskSizeInMb, final Boolean forceSoftLimits);
 
     /**
      * Requests to API to delete a disk into the virtual machine.

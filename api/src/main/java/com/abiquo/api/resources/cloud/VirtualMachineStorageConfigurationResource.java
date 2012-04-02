@@ -163,6 +163,7 @@ public class VirtualMachineStorageConfigurationResource extends AbstractResource
      * @param vmId identifier of the Virtual Machine.
      * @param hdRefs A list of links to the volumes to attach.
      * @param restBuilder a Context-injected object to create the links of the Dto
+     * @param force indicates if trace soft limit or not
      * @return the {@link DiskManagementDto} object that contains all the {@link DiskManagementDto}
      * @throws Exception any thrown exception. Moved to HTTP status code in the
      *             {@link APIExceptionMapper} exception mapper.
@@ -368,7 +369,9 @@ public class VirtualMachineStorageConfigurationResource extends AbstractResource
 
         try
         {
-            Object result = service.detachHardDisk(vdcId, vappId, vmId, diskId, originalState);
+            Boolean forceSoftLimits = true;
+            Object result =
+                service.detachHardDisk(vdcId, vappId, vmId, diskId, originalState, forceSoftLimits);
 
             // The attach method may return a Tarantino task identifier if the operation requires a
             // reconfigure. Otherwise it will return null.

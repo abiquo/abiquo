@@ -38,7 +38,7 @@ import com.abiquo.abiserver.pojo.result.BasicResult;
 public class StorageService
 {
     /** The stub used to connect to the API. */
-    private StorageResourceStub storageStub;
+    private final StorageResourceStub storageStub;
 
     /**
      * Default constructor. Initializes the stub object with its implementation.
@@ -115,10 +115,12 @@ public class StorageService
      * @return a BasicResult encapsulating the disk info.
      */
     public BasicResult createDiskIntoVirtualMachine(final UserSession userSession,
-        final Integer vdcId, final Integer vappId, final Integer vmId, final Long diskSizeInMb)
+        final Integer vdcId, final Integer vappId, final Integer vmId, final Long diskSizeInMb,
+        final Boolean forceSoftLimits)
     {
+
         return proxyStub(userSession).createDiskIntoVirtualMachine(vdcId, vappId, vmId,
-            diskSizeInMb);
+            diskSizeInMb, forceSoftLimits);
     }
 
     /**

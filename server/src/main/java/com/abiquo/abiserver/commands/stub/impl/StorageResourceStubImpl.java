@@ -111,11 +111,11 @@ public class StorageResourceStubImpl extends AbstractAPIStub implements StorageR
 
     @Override
     public BasicResult createDiskIntoVirtualMachine(final Integer vdcId, final Integer vappId,
-        final Integer vmId, final Long diskSizeInMb)
+        final Integer vmId, final Long diskSizeInMb, final Boolean forceSoftLimits)
     {
         DataResult<Disk> result = new DataResult<Disk>();
 
-        String uri = createVirtualDatacenterDisksLink(vdcId);
+        String uri = createVirtualDatacenterDisksLink(vdcId, forceSoftLimits);
         DiskManagementDto inputDto = new DiskManagementDto();
         inputDto.setSizeInMb(diskSizeInMb);
         ClientResponse response = post(uri, inputDto);
@@ -132,6 +132,7 @@ public class StorageResourceStubImpl extends AbstractAPIStub implements StorageR
             links.addLink(link);
 
             String vmUri = createVirtualMachineDisksLink(vdcId, vappId, vmId);
+
             response = post(vmUri, AcceptedRequestDto.MEDIA_TYPE, LinksDto.MEDIA_TYPE, links);
 
             if (response.getStatusCode() == 202 || response.getStatusCode() == 204)
@@ -141,7 +142,12 @@ public class StorageResourceStubImpl extends AbstractAPIStub implements StorageR
             }
             else
             {
+
                 populateErrors(response, result, "createDiskIntoVirtualMachine");
+                int diskId = diskDto.getIdFromLink("edit");
+                uri = createVirtualDatacenterDiskLink(vdcId, diskId);
+                response = delete(uri);
+
             }
         }
         else
