@@ -132,6 +132,7 @@ DROP TRIGGER IF EXISTS kinton.update_virtualmachine_update_stats;
 DELIMITER |
 --
 SELECT "Recreating trigger create_nodevirtualimage_update_stats..." as " ";
+DROP TRIGGER IF EXISTS kinton.create_nodevirtualimage_update_stats;
 CREATE TRIGGER kinton.create_nodevirtualimage_update_stats AFTER INSERT ON kinton.nodevirtualimage
   FOR EACH ROW BEGIN
     DECLARE idDataCenterObj INTEGER;
@@ -153,17 +154,20 @@ CREATE TRIGGER kinton.create_nodevirtualimage_update_stats AFTER INSERT ON kinto
       SELECT vm.idType, vm.state, vm.cpu, vm.ram, vm.hd INTO type, state, cpu, ram, hd
      FROM virtualmachine vm
 	WHERE vm.idVM = NEW.idVM;
-      --  -- INSERT INTO debug_msg (msg) VALUES (CONCAT('createNVI ', type, ' - ', state, ' - ', IFNULL(idDataCenterObj,'NULL'), ' - ',IFNULL(idVirtualAppObj,'NULL'), ' - ',IFNULL(idVirtualDataCenterObj,'NULL')));
+     -- INSERT INTO debug_msg (msg) VALUES (CONCAT('createNVI ', type, ' - ', state, ' - ', IFNULL(idDataCenterObj,'NULL'), ' - ',IFNULL(idVirtualAppObj,'NULL'), ' - ',IFNULL(idVirtualDataCenterObj,'NULL')));
     IF type=1 THEN
     	-- Imported !!!
-	IF state NOT IN ("NOT_ALLOCATED","UNKNOWN") THEN
-		UPDATE IGNORE cloud_usage_stats SET vMachinesTotal = vMachinesTotal+1
+		IF state NOT IN ("NOT_ALLOCATED","UNKNOWN") THEN
+			INSERT INTO debug_msg (msg) VALUES (CONCAT('CreateNVI deploy detected. Adding VM ', NEW.idVM));
+			UPDATE IGNORE cloud_usage_stats SET vMachinesTotal = vMachinesTotal+1
                 WHERE idDataCenter = idDataCenterObj;
                 UPDATE IGNORE vapp_enterprise_stats SET vmCreated = vmCreated+1
                 WHERE idVirtualApp = idVirtualAppObj;
                 UPDATE IGNORE vdc_enterprise_stats SET vmCreated = vmCreated+1
                 WHERE idVirtualDataCenter = idVirtualDataCenterObj;
+                END IF;
           IF state = "ON" THEN 	
+          	INSERT INTO debug_msg (msg) VALUES (CONCAT('CreateNVI deploy runningVM detected. Adding RUnning VM ', NEW.idVM));
 			UPDATE IGNORE vapp_enterprise_stats SET vmActive = vmActive+1
 		        WHERE idVirtualApp = idVirtualAppObj;
 		        UPDATE IGNORE vdc_enterprise_stats SET vmActive = vmActive+1
@@ -311,7 +315,7 @@ CREATE TRIGGER kinton.update_virtualmachine_update_stats AFTER UPDATE ON kinton.
         WHERE NEW.idVM = nvi.idVM
         AND nvi.idNode = n.idNode
         AND vapp.idVirtualApp = n.idVirtualApp;   
--- -- INSERT INTO debug_msg (msg) VALUES (CONCAT('update values ', IFNULL(idDataCenterObj,'NULL'), ' - ',IFNULL(idVirtualAppObj,'NULL'), ' - ',IFNULL(idVirtualDataCenterObj,'NULL'), ' - ',IFNULL(previousState,'NULL')));
+ -- INSERT INTO debug_msg (msg) VALUES (CONCAT('update values ', IFNULL(idDataCenterObj,'NULL'), ' - ',IFNULL(idVirtualAppObj,'NULL'), ' - ',IFNULL(idVirtualDataCenterObj,'NULL'), ' - ',IFNULL(previousState,'NULL')));
 	--
 	-- Imported VMs will be updated on create_node_virtual_image
 	-- Used Stats (vCpuUsed, vMemoryUsed, vStorageUsed) are updated from delete_nodevirtualimage_update_stats ON DELETE nodevirtualimage when updating the VApp
