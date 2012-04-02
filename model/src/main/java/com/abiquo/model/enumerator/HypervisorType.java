@@ -37,9 +37,10 @@ import com.google.common.collect.Sets;
 
 public enum HypervisorType
 {
-    VBOX(8889, VDI_FLAT, VBOX_COMPATIBLES), KVM(8889, VMDK_FLAT, KVM_COMPATIBLES), XEN_3(8889,
-        VMDK_FLAT, XEN_COMPATIBLES), VMX_04(443, VMDK_FLAT, VMWARE_COMPATIBLES, VMDK_FLAT), HYPERV_301(
-        5985, VHD_SPARSE, HYPERV_COMPATIBLES), XENSERVER(9363, VHD_SPARSE, XENSERVER_COMPATIBLES);
+    VBOX(8889, VDI_FLAT, VBOX_COMPATIBLES, "Virtual Box"), KVM(8889, VMDK_FLAT, KVM_COMPATIBLES,
+        "KVM"), XEN_3(8889, VMDK_FLAT, XEN_COMPATIBLES, "Xen"), VMX_04(443, VMDK_FLAT,
+        VMWARE_COMPATIBLES, VMDK_FLAT, "ESXi"), HYPERV_301(5985, VHD_SPARSE, HYPERV_COMPATIBLES,
+        "Hyper-V"), XENSERVER(9363, VHD_SPARSE, XENSERVER_COMPATIBLES, "Xen Server");
 
     public final int defaultPort;
 
@@ -49,23 +50,26 @@ public enum HypervisorType
 
     public DiskFormatType instanceFormat;
 
+    public String friendlyName;
+
     /* package */private final static int ID_MAX = 6;
 
     private HypervisorType(final int defaultPort, final DiskFormatType baseFormat,
-        final Set<DiskFormatType> compatibleFormats, final DiskFormatType instanceFormat)
+        final Set<DiskFormatType> compatibleFormats, final DiskFormatType instanceFormat, final String friendlyName)
     {
         this.defaultPort = defaultPort;
         this.baseFormat = baseFormat;
         this.compatibleFormats = compatibleFormats;
         this.instanceFormat = instanceFormat;
+        this.friendlyName = friendlyName;
     }
 
-    private HypervisorType(final int defaultPort, final DiskFormatType baseFormat,
-        final Set<DiskFormatType> compatibleFormats)
+    private HypervisorType(final int defaultPort, final DiskFormatType baseFormat, final Set<DiskFormatType> compatibleFormats, final String friendlyName)
     {
         this.defaultPort = defaultPort;
         this.baseFormat = baseFormat;
         this.compatibleFormats = compatibleFormats;
+        this.friendlyName = friendlyName;
     }
 
     public int id()
@@ -125,6 +129,11 @@ public enum HypervisorType
     public String getValue()
     {
         return name();
+    }
+
+    public String getFriendlyName()
+    {
+        return friendlyName;
     }
 
     public boolean requiresCredentials()
