@@ -126,8 +126,11 @@ SELECT "STEP 9 REMOVING DEPRECATED TRIGGERS..." as " ";
 -- ######## SCHEMA: TRIGGERS RECREATED ####### --
 -- ########################################### --
 SELECT "STEP 10 UPDATING TRIGGERS..." as " ";
-
 DROP TRIGGER IF EXISTS kinton.update_virtualapp_update_stats;
+
+DELIMITER |
+--
+SELECT "Recreating trigger update_virtualapp_update_stats..." as " ";
 CREATE TRIGGER kinton.update_virtualapp_update_stats AFTER UPDATE ON kinton.virtualapp
   FOR EACH ROW BEGIN
     DECLARE numVMachinesCreated INTEGER;
@@ -160,7 +163,8 @@ CREATE TRIGGER kinton.update_virtualapp_update_stats AFTER UPDATE ON kinton.virt
     END IF;
   END IF;
   END;
-
+|
+DELIMITER;
 
 -- ############################################# -- 
 -- ######## SCHEMA: PROCEDURES RECREATED ####### --
