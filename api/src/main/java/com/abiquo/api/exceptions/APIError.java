@@ -275,8 +275,8 @@ public enum APIError
         "The virtual machine cannot change to the required state"), VIRTUAL_MACHINE_REMOTE_SERVICE_ERROR(
         "VM-5", "The virtual machine cannot change state due to a communication problem"), VIRTUAL_MACHINE_PAUSE_UNSUPPORTED(
         "VM-6", "The virtual machine does not support the action PAUSE"), VIRTUAL_MACHINE_INVALID_STATE_DEPLOY(
-        "VM-7", "The allowed power states for Virtual Machines is NOT_ALLOCATED"), VIRTUAL_MACHINE_INVALID_STATE_DELETE(
-        "VM-8", "The allowed power states for Virtual Machines are UNKNOWN and NOT_ALLOCATED"), NON_EXISTENT_VIRTUAL_IMAGE(
+        "VM-7", "The allowed state for deploying Virtual Machines is NOT_ALLOCATED"), VIRTUAL_MACHINE_INVALID_STATE_DELETE(
+        "VM-8", "The allowed states for deleting Virtual Machines are UNKNOWN and NOT_ALLOCATED"), NON_EXISTENT_VIRTUAL_IMAGE(
         "VM-9", "The requested Virtual Machine Template does not exist"), VIRTUAL_MACHINE_EDIT_STATE(
         "VM-10",
         "The Virtual Machine is in a state that does not allow the request, therefore it cannot be modified"), VIRTUAL_MACHINE_UNALLOCATED_STATE(
@@ -304,14 +304,14 @@ public enum APIError
         "VM-24", "The resource is already used by another virtual machine"), VIRTUAL_MACHINE_INVALID_STATE_RESET(
         "VM-26", "The allowed power state for Reset Virtual Machines is ON"), VIRTUAL_MACHINE_INVALID_STATE_SNAPSHOT(
         "VM-27", "The allowed power state for Snapshot Virtual Machines is OFF"), VIRTUAL_MACHINE_RECONFIGURE_TEMPLATE_NOT_MANAGED(
-        "VM-28", "Cannot reconfigure to a non-managed virtual machine template"), VIRTUAL_MACHINE_RECONFIGURE_NOT_MANAGED(
+        "VM-28", "Cannot reconfigure a non-managed virtual machine template"), VIRTUAL_MACHINE_RECONFIGURE_NOT_MANAGED(
         "VM-29", "Cannot reconfigure the template of a non-managed virtual machine"), VIRTUAL_MACHINE_RECONFIGURE_TEMPLATE_NOT_SAME_MASTER(
         "VM-30",
         "Cannot reconfigure to change the virtual machine template to another master (only instances or persistent)"), VIRTUAL_MACHINE_RECONFIGURE_TEMPLATE_ATTACHED_PRESISTENT(
         "VM-31",
         "The persistent virtual machine template supplied for reconfigure is already attached to a virtual machine"), VIRTUAL_MACHINE_RECONFIGURE_TEMPLATE_IN_THE_HYPERVISOR(
         "VM-32",
-        "Cannot reconfigure the virual machine template once the virtual machine is present in the hypervisor"), VIRTUAL_MACHINE_IMPORTED_CAN_NOT_RECONFIGURE(
+        "Cannot reconfigure the virtual machine template when the virtual machine is present in the hypervisor"), VIRTUAL_MACHINE_IMPORTED_CAN_NOT_RECONFIGURE(
         "VM-33", "We do not currently allow imported virtual machines to be reconfigured"), VIRTUAL_MACHINE_IMPORTED_CAN_NOT_RECONFIGURE_FULLY(
         "VM-33", "Only 'cpu' and 'ram' can be reconfigured in imported virtual machines"), VIRTUAL_MACHINE_IMPORTED_WILL_BE_DELETED(
         "VM-44",
@@ -558,7 +558,7 @@ public enum APIError
         "VOL-27", "The volume is already detached"), VOLUME_DETACH_ERROR("VOL-28",
         "An unexpected error occurred while detaching the volume. Please contact the Administrator"), VOLUME_RECONFIGURE_ERROR(
         "VOL-29", "An unexpected error occurred while reconfiguring storage"), VOLUME_WRONG_NEW_VIRTUALDATACENTER(
-        "VOL-39", "The volume can only be moved between Virtual Datacenters of the same Datacenter"),
+        "VOL-39", "The volume can only be moved between Virtual Datacenters in the same Datacenter"),
 
     // SSM
     SSM_GET_POOLS_ERROR("SSM-1", "Could not get the storage pools on the target storage device"), SSM_GET_POOL_ERROR(
