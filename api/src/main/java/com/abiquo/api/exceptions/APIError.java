@@ -214,7 +214,7 @@ public enum APIError
 
     // NODE VIRTUAL IMAGE STATEFUL CONVERSION
     NON_EXISTENT_NODE_VIRTUALIMAGE_STATEFULCONVERSION("NVISC-0",
-        "The requested virtual image node for the persistent conversion does not exist"),
+        "The requested virtual machine node for the persistent conversion does not exist"),
 
     // RACK
     NOT_ASSIGNED_RACK_DATACENTER("RACK-0", "The rack is not assigned to the datacenter"), RACK_DUPLICATED_NAME(
@@ -297,7 +297,7 @@ public enum APIError
         "VM-19",
         "The virtual machine template has a compatible conversion but it is not ready (in progress or failed)"), VIRTUAL_MACHINE_MUST_BE_NON_MANAGED(
         "VM-20", "To perform this action, the virtual machine must be in NON_MANAGED state"), NODE_VIRTUAL_MACHINE_IMAGE_NOT_EXISTS(
-        "VM-21", "The node's virtual machine template does not exist"), VIRTUAL_MACHINE_ESXI_INCOMPATIBLE_DISK_CONTROLLER(
+        "VM-21", "The virtual machine node does not exist"), VIRTUAL_MACHINE_ESXI_INCOMPATIBLE_DISK_CONTROLLER(
         "VM-22", "ESXi hosts cannot deploy a VMDK sparse using a SCSI disk controller"), VIRTUAL_MACHINE_BACKUP_NOT_FOUND(
         "VM-23",
         "Cannot restore the original virtual machine (after a failed reconfigure); the original virtual machine info was not found"), RESOURCE_ALREADY_ASSIGNED_TO_A_VIRTUAL_MACHINE(
