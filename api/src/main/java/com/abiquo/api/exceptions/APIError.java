@@ -256,7 +256,7 @@ public enum APIError
     // NETWORK
     NETWORK_INVALID_CONFIGURATION("NET-0",
         "Invalid network configuration for the virtual datacenter"), NETWORK_WITHOUT_IPS("NET-8",
-        "This network does not have IP addresses"), NETWORK_IP_FROM_BIGGER_THAN_IP_TO("NET-9",
+        "This network has no IP addresses"), NETWORK_IP_FROM_BIGGER_THAN_IP_TO("NET-9",
         "Parameter IPFrom is greater than IPTo"), NETWORK_IP_FROM_ERROR("NET-10",
         "Parameter IPFrom is invalid"), NETWORK_IP_TO_ERROR("NET-11", "Parameter IPTo is invalid"), NETWORK_INVALID_CONFIGURATION_LINK(
         "NET-12", "Invalid link to configure the Virtual Machine's network"), NETWORK_LINK_INVALID_VDC(
@@ -360,8 +360,8 @@ public enum APIError
         "The remote service is not assigned to the datacenter"), WRONG_REMOTE_SERVICE_TYPE("RS-1",
         "Wrong remote service type"), NON_EXISTENT_REMOTE_SERVICE_TYPE("RS-2",
         "The remote service does not exist"), REMOTE_SERVICE_URL_ALREADY_EXISTS("RS-3",
-        "The remote service's URL already exists and cannot be duplicated"), REMOTE_SERVICE_MALFORMED_URL(
-        "RS-4", "The remote service's URL is not well formed"), REMOTE_SERVICE_POOL_ASIGNED("RS-5",
+        "The remote service URL already exists and cannot be duplicated"), REMOTE_SERVICE_MALFORMED_URL(
+        "RS-4", "The remote service URL is not well formed"), REMOTE_SERVICE_POOL_ASIGNED("RS-5",
         "This datacenter already has a storage pool assigned"), REMOTE_SERVICE_TYPE_EXISTS("RS-6",
         "This datacenter already has a remote service of that type"), REMOTE_SERVICE_CONNECTION_FAILED(
         "RS-7", "Failed connection to the remote service"), REMOTE_SERVICE_CANNOT_BE_CHECKED(
@@ -374,7 +374,7 @@ public enum APIError
         "RS-10",
         "Cannot delete a Virtual System Monitor or DHCP Service. There are virtual machines deployed."), REMOTE_SERVICE_WRONG_URL(
         "RS-11", "URL supplied is not valid"), REMOTE_SERVICE_DHCP_WRONG_URI("RS-12",
-        "The DHCP URI is invalid"), REMOTE_SERVICE_DATACENTER_UUID_NOT_FOUND("RS-13",
+        "The URI of the DHCP remote service is invalid"), REMOTE_SERVICE_DATACENTER_UUID_NOT_FOUND("RS-13",
         "The remote service does not have the *abiquo.datacenter.id* property set"), REMOTE_SERVICE_DATACENTER_UUID_INCONSISTENT(
         "RS-14",
         "The remote service is configured with a different datacenter UUID, please adjust the *abiquo.datacenter.id* property in the remote service."), REMOTE_SERVICE_UNDEFINED_PORT(
@@ -448,7 +448,7 @@ public enum APIError
 
     // STORAGE POOL
     MISSING_REQUIRED_QUERY_PARAMETER_IQN("SP-1", "Missing IQN query parameter"), CONFLICT_STORAGE_POOL(
-        "SP-2", "The id of the storage pool and the id of the object supplied must be the same"), NON_EXISTENT_STORAGE_POOL(
+        "SP-2", "The ID of the storage pool and the ID of the object supplied must be the same"), NON_EXISTENT_STORAGE_POOL(
         "SP-3", "The requested storage pool does not exist"), STORAGE_POOL_ERROR_MODIFYING("SP-4",
         "There was an unexpected error while modifying the storage pool"), STORAGE_POOLS_SYNC(
         "SP-5", "Could not get the storage pools from the target device"), STORAGE_POOL_SYNC(
@@ -613,7 +613,7 @@ public enum APIError
 
     // Parsing links
     LINKS_INVALID_LINK("LNK-0", "Invalid link. Check documentation"), LINKS_ONLY_ACCEPTS_ONE_LINK(
-        "LNK-1", "Number of links invalid: This resource only accepts a single link"), LINKS_VIRTUAL_MACHINE_TEMPLATE_NOT_FOUND(
+        "LNK-1", "Invalid number of links: This resource only accepts a single link"), LINKS_VIRTUAL_MACHINE_TEMPLATE_NOT_FOUND(
         "LNK-2", "Virtual Machine Template link with rel 'virtualmachinetemplate' is mandatory "), LINKS_VIRTUAL_MACHINE_TEMPLATE_INVALID_URI(
         "LNK-3", "Virtual Machine Template invalid link"),
 
