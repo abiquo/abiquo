@@ -244,7 +244,7 @@ public class NodecollectorServiceStub extends DefaultApiService
         catch (LoginException e)
         {
             logger.debug(e.getMessage());
-            addConflictErrors(APIError.NC_BAD_CREDENTIALS_TO_MACHINE);
+            addConflictErrors(APIError.NC_BAD_CONFIGURATION);
         }
         catch (ConnectionException e)
         {
