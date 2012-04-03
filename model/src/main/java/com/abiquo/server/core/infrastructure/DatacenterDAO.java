@@ -33,7 +33,6 @@ import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 
-import com.abiquo.server.core.cloud.VirtualMachineState;
 import com.abiquo.server.core.common.DefaultEntityCurrentUsed;
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
 import com.abiquo.server.core.enterprise.Enterprise;
@@ -87,30 +86,34 @@ public class DatacenterDAO extends DefaultDAOBase<Integer, Datacenter>
         final int enterpriseId)
     {
         Object[] vmResources =
-            (Object[]) getSession().createSQLQuery(SUM_VM_RESOURCES)
-                .setParameter("datacenterId", datacenterId)
-                .setParameter("enterpriseId", enterpriseId).uniqueResult();
+            (Object[]) getSession().createSQLQuery(SUM_VM_RESOURCES).setParameter("datacenterId",
+                datacenterId).setParameter("enterpriseId", enterpriseId).uniqueResult();
 
         Long cpu = vmResources[0] == null ? 0 : ((BigDecimal) vmResources[0]).longValue();
         Long ram = vmResources[1] == null ? 0 : ((BigDecimal) vmResources[1]).longValue();
         Long hd = vmResources[2] == null ? 0 : ((BigDecimal) vmResources[2]).longValue();
 
+        BigDecimal extraHd =
+            (BigDecimal) getSession().createSQLQuery(SUM_EXTRA_HD_RESOURCES).setParameter(
+                "datacenterId", datacenterId).uniqueResult();
+        Long hdTot = extraHd == null ? hd : hd + extraHd.longValue() * 1024 * 1024;
+
         BigDecimal storage =
-            (BigDecimal) getSession().createSQLQuery(SUM_STORAGE_RESOURCES)
-                .setParameter("datacenterId", datacenterId)
-                .setParameter("enterpriseId", enterpriseId).uniqueResult();
+            (BigDecimal) getSession().createSQLQuery(SUM_STORAGE_RESOURCES).setParameter(
+                "datacenterId", datacenterId).setParameter("enterpriseId", enterpriseId)
+                .uniqueResult();
 
         BigInteger publicIps =
-            (BigInteger) getSession().createSQLQuery(COUNT_IP_RESOURCES)
-                .setParameter("datacenterId", datacenterId)
-                .setParameter("enterpriseId", enterpriseId).uniqueResult();
+            (BigInteger) getSession().createSQLQuery(COUNT_IP_RESOURCES).setParameter(
+                "datacenterId", datacenterId).setParameter("enterpriseId", enterpriseId)
+                .uniqueResult();
 
         BigInteger vlan =
-            (BigInteger) getSession().createSQLQuery(COUNT_VLAN_RESOURCES)
-                .setParameter("datacenterId", datacenterId)
-                .setParameter("enterpriseId", enterpriseId).uniqueResult();
+            (BigInteger) getSession().createSQLQuery(COUNT_VLAN_RESOURCES).setParameter(
+                "datacenterId", datacenterId).setParameter("enterpriseId", enterpriseId)
+                .uniqueResult();
 
-        DefaultEntityCurrentUsed used = new DefaultEntityCurrentUsed(cpu.intValue(), ram, hd);
+        DefaultEntityCurrentUsed used = new DefaultEntityCurrentUsed(cpu.intValue(), ram, hdTot);
 
         // Storage usage is stored in MB
         used.setStorage(storage == null ? 0 : storage.longValue() * 1024 * 1024);
@@ -168,6 +171,10 @@ public class DatacenterDAO extends DefaultDAOBase<Integer, Datacenter>
             + " where hy.id = vm.idHypervisor and pm.idPhysicalMachine = hy.idPhysicalMachine "//
             // and pm.idState != 7" // not HA_DISABLED
             + " and pm.idDatacenter = :datacenterId and vm.idEnterprise = :enterpriseId and vm.state != 'NOT_ALLOCATED' and vm.idHypervisor is not null";
+
+    private static final String SUM_EXTRA_HD_RESOURCES =
+        "select sum(r.limitResource) from rasd r, rasd_management rm, virtualdatacenter vdc where r.instanceID = rm.idResource "
+            + "and rm.idResourceType = '17' and rm.idVirtualDatacenter = vdc.idVirtualDatacenter and vdc.idDatacenter=:datacenterId";
 
     private static final String SUM_STORAGE_RESOURCES =
         "select sum(r.limitResource) "

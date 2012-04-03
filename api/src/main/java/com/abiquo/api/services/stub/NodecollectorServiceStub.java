@@ -244,7 +244,7 @@ public class NodecollectorServiceStub extends DefaultApiService
         catch (LoginException e)
         {
             logger.debug(e.getMessage());
-            addConflictErrors(APIError.NC_BAD_CREDENTIALS_TO_MACHINE);
+            addConflictErrors(APIError.NC_BAD_CONFIGURATION);
         }
         catch (ConnectionException e)
         {
@@ -533,8 +533,15 @@ public class NodecollectorServiceStub extends DefaultApiService
         int cpus = (int) host.getCpu();
 
         Machine machine =
-            new Machine(datacenter, host.getName(), "", ram, 0, cpus, 0, transfromToState(host
-                .getStatus()), "");
+            new Machine(datacenter,
+                host.getName(),
+                "",
+                ram,
+                0,
+                cpus,
+                0,
+                transfromToState(host.getStatus()),
+                "");
 
         // Long totalStorage = 0L;
         String switches = "";

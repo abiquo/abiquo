@@ -98,8 +98,8 @@ public class VirtualDatacenterResourceStubImpl extends AbstractAPIStub implement
         vlanDto.setSufixDNS(netConfig.getSufixDNS());
 
         String datacenterLink =
-            URIResolver.resolveURI(apiUri, "admin/datacenters/{datacenter}", Collections
-                .singletonMap("datacenter", String.valueOf(vdc.getIdDataCenter())));
+            URIResolver.resolveURI(apiUri, "admin/datacenters/{datacenter}",
+                Collections.singletonMap("datacenter", String.valueOf(vdc.getIdDataCenter())));
 
         String enterpriseLink = createEnterpriseLink(vdc.getEnterprise().getId());
         URIResolver.resolveURI(apiUri, "cloud/virtualdatacenters", new HashMap<String, String>());
@@ -171,10 +171,10 @@ public class VirtualDatacenterResourceStubImpl extends AbstractAPIStub implement
      */
     @Override
     @SuppressWarnings("unchecked")
-    public BasicResult updateVirtualDatacenter(final VirtualDataCenter vdc,
+    public DataResult<VirtualDataCenter> updateVirtualDatacenter(final VirtualDataCenter vdc,
         final ResourceManager resourceManager)
     {
-        BasicResult basicResult = new BasicResult();
+        DataResult<VirtualDataCenter> dataResult = new DataResult<VirtualDataCenter>();
 
         String uri =
             URIResolver.resolveURI(apiUri, "cloud/virtualdatacenters/{virtualDatacenter}",
@@ -190,15 +190,19 @@ public class VirtualDatacenterResourceStubImpl extends AbstractAPIStub implement
 
         if (response.getStatusCode() != 200)
         {
-            populateErrors(response, basicResult, "updateVirtualDatacenter");
+            populateErrors(response, dataResult, "updateVirtualDatacenter");
         }
         else
         {
-            basicResult.setSuccess(true);
-            basicResult.setMessage(resourceManager.getMessage("editVirtualDataCenter.success"));
+            VirtualDatacenterDto vdcDto = response.getEntity(VirtualDatacenterDto.class);
+            vdc.setHyperType(new HyperVisorType(vdcDto.getHypervisorType()));
+            vdc.setName(vdcDto.getName());
+            dataResult.setData(vdc);
+            dataResult.setSuccess(true);
+            dataResult.setMessage(resourceManager.getMessage("editVirtualDataCenter.success"));
         }
 
-        return basicResult;
+        return dataResult;
     }
 
     /*

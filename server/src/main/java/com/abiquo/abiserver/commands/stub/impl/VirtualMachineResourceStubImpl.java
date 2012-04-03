@@ -201,7 +201,7 @@ public class VirtualMachineResourceStubImpl extends AbstractAPIStub implements
             createVirtualMachineResetUrl(virtualDatacenterId, virtualApplianceId, virtualMachine
                 .getId());
 
-        ClientResponse response = post(url, null);
+        ClientResponse response = post(url, null, AcceptedRequestDto.MEDIA_TYPE);
 
         if (response.getStatusCode() == Status.ACCEPTED.getStatusCode())
         {
@@ -244,14 +244,14 @@ public class VirtualMachineResourceStubImpl extends AbstractAPIStub implements
         {
             VirtualMachineDto vmDto = response.getEntity(VirtualMachineDto.class);
             String url = vmDto.searchLink("virtualmachine").getHref() + "/action/reset";
-            response = post(url, null);
+            response = post(url, null, AcceptedRequestDto.MEDIA_TYPE);
 
             if (response.getStatusCode() == Status.ACCEPTED.getStatusCode())
             {
                 result.setSuccess(true);
                 response = get(uri, VirtualMachinesDto.MEDIA_TYPE);
-                result.setData(new State(StateEnum.valueOf(response
-                    .getEntity(VirtualMachineDto.class).getState().name())));
+                result.setData(new State(StateEnum.valueOf(response.getEntity(
+                    VirtualMachineDto.class).getState().name())));
             }
             else
             {
@@ -289,8 +289,8 @@ public class VirtualMachineResourceStubImpl extends AbstractAPIStub implements
             {
                 result.setSuccess(true);
                 response = get(uri, VirtualMachinesDto.MEDIA_TYPE);
-                result.setData(new State(StateEnum.valueOf(response
-                    .getEntity(VirtualMachineDto.class).getState().name())));
+                result.setData(new State(StateEnum.valueOf(response.getEntity(
+                    VirtualMachineDto.class).getState().name())));
             }
             else
             {

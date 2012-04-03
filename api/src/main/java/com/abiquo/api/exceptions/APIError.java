@@ -43,7 +43,7 @@ public enum APIError
         "409-CONFLICT", "Conflict"), STATUS_HEADER_VERSION_MANDATORY("412-PRECONDITION FAILED",
         "Header 'X-abiquo-version' is mandatory"), STATUS_NOT_ACCEPTABLE_VERSION(
         "406-NOT ACCEPTABLE", "Invalid version parameter for 'Accept' header"), STATUS_UNSUPPORTED_MEDIA_TYPE_VERSION(
-        "415-UNSUPPORTED MEDIA TYPE", "Invalid version 'Content-type' "), STATUS_UNSUPPORTED_MEDIA_TYPE(
+        "415-UNSUPPORTED MEDIA TYPE", "Invalid 'Content-type' version"), STATUS_UNSUPPORTED_MEDIA_TYPE(
         "415-UNSUPPORTED MEDIA TYPE",
         "The Abiquo API currently only supports application/XML Media Type"), STATUS_INTERNAL_SERVER_ERROR(
         "500-INTERNAL SERVER ERROR", "Unexpected exception"), STATUS_UNPROVISIONED(
@@ -134,7 +134,7 @@ public enum APIError
         "VLAN-8", "The requested virtual network does not exist"), VLANS_AT_LEAST_ONE_DEFAULT_NETWORK(
         "VLAN-9", "There must be at least one default VLAN in each Virtual Datacenter"), VLANS_EDIT_INVALID_VALUES(
         "VLAN-10",
-        "Attributes 'address', 'mask' and 'tag' cannot be changed by the Edit process of private VLAN."), VLANS_DEFAULT_NETWORK_CAN_NOT_BE_DELETED(
+        "Attributes 'address', 'mask' and 'tag' cannot be changed when editing a private VLAN."), VLANS_DEFAULT_NETWORK_CAN_NOT_BE_DELETED(
         "VLAN-11", "The VLAN cannot be deleted because it is the Default VLAN of this Enterprise"), VLANS_WITH_USED_IPS_CAN_NOT_BE_DELETED(
         "VLAN-12", "Cannot delete a VLAN with IPs used by Virtual Machines"), VLANS_TAG_MANDATORY_FOR_PUBLIC_VLANS(
         "VLAN-13", "Field 'tag' is mandatory when you create Public VLANs"), VLANS_WITH_PURCHASED_IPS_CAN_NOT_BE_DELETED(
@@ -144,7 +144,7 @@ public enum APIError
         "The requested IP object does not exist"), VLANS_IP_EDIT_INVALID_VALUES("VLAN-18",
         "Only 'quarantine' and 'available' attributes can be modified when editing an IP"), VLANS_PUBLIC_EDIT_INVALID_VALUES(
         "VLAN-19",
-        "Attributes 'address' and 'mask' cannot be changed by the edit process of Public, External and Unmanaged Network."), VLANS_PUBLIC_IP_NOT_TO_BE_PURCHASED(
+        "Attributes 'address' and 'mask' cannot be changed when editing a Public, External or Unmanaged Network."), VLANS_PUBLIC_IP_NOT_TO_BE_PURCHASED(
         "VLAN-20", "The IP does not exist or is not available"), VLANS_PUBLIC_IP_NOT_PURCHASED(
         "VLAN-21", "The IP does not exist or is not purchased"), VLANS_PUBLIC_IP_BUSY("VLAN-22",
         "This IP address is currently used by a Virtual Machine. It cannot be released"), VLANS_PRIVATE_IP_INVALID_LINK(
@@ -159,7 +159,7 @@ public enum APIError
         "Every virtual machine should have at least one NIC"), VLANS_REORDER_NIC_INVALID_LINK(
         "VLAN-30", "Invalid link to reorder NICs on a Virtual Machine"), VLANS_REORDER_NIC_INVALID_LINK_VALUES(
         "VLAN-31",
-        "Invalid link values (virtualdatacenter, virtualappliance and/or virtualmachine identifiers) to reorder NICs on a Virtual Machine"), VLANS_IP_EDIT_NOT_AVAILABLE_PURCHASED(
+        "Invalid link values (virtualdatacenter, virtualappliance and/or virtualmachine identifiers) for reordering NICs on a Virtual Machine"), VLANS_IP_EDIT_NOT_AVAILABLE_PURCHASED(
         "VLAN-32", "Cannot set the IP as 'not available' while it is purchased by an Enterprise"), VLANS_PUBIC_IP_CAN_NOT_RELEASE(
         "VLAN-33", "Cannot release a Public IP while it is assigned to a Virtual Machine"), VLANS_NON_EXISTENT_CONFIGURATION(
         "VLAN-34", "The configuration does not exist"), VLANS_CAN_NOT_ASSIGN_TO_DEFAULT_ENTERPRISE(
@@ -171,9 +171,9 @@ public enum APIError
         "VLAN-38", "The IP address is already assigned to a Virtual Datacenter"), VLANS_WITH_IPS_ASSIGNED_TO_VDC(
         "VLAN-39", "Cannot delete a VLAN with IPs assigned to a Virtual Datacenter"), VLANS_EXTERNAL_VLAN_IN_ANOTHER_DATACENTER(
         "VLAN-40",
-        "The requested external VLAN belongs to another datacenter where the Virtual Datacenter is"), VLANS_INVALID_IP_FORMAT(
+        "The requested external VLAN belongs to a different datacenter, not the one where the Virtual Datacenter is"), VLANS_INVALID_IP_FORMAT(
         "VLAN-41", "IP format is invalid"), VLANS_IP_DOES_NOT_EXISTS("VLAN-42",
-        "The IP does not exists"), VLANS_CANNOT_DELETE_DEFAULT("VLAN-43",
+        "The IP does not exist"), VLANS_CANNOT_DELETE_DEFAULT("VLAN-43",
         "This is the default VLAN for the Virtual Datacenter and it cannot be deleted"), VLANS_EXTERNAL_VLAN_OF_ANOTHER_ENTERPRISE(
         "VLAN-42", "The external VLAN belongs to another enterprise"), VLANS_IP_NOT_AVAILABLE(
         "VLAN-43", "The IP address is not available to be used by a Virtual Machine"), VLANS_NON_EXISTENT_EXTERNAL_IP(
@@ -202,7 +202,7 @@ public enum APIError
         "VAPP-10",
         "The virtual appliance cannot be moved or copied because it contains virtual machine templates that are not compatible with the target hypervisor"), VIRTUALAPPLIANCE_COPY_PERSISTENT_VM(
         "VAPP-11",
-        "The virtual appliance cannot be copied since it contains persistent virtual machines templates"), VIRTUALAPPLIANCE_EMPTY(
+        "The virtual appliance cannot be copied because it contains persistent virtual machine templates"), VIRTUALAPPLIANCE_EMPTY(
         "VAPP-12", "The virtual appliance does not contain any virtual machines"), VIRTUALAPPLIANCE_INVALID_STATE_COPY(
         "VAPP-13",
         "The virtual appliance cannot be copied in this state. It should be NOT_DEPLOYED"),
@@ -214,7 +214,7 @@ public enum APIError
 
     // NODE VIRTUAL IMAGE STATEFUL CONVERSION
     NON_EXISTENT_NODE_VIRTUALIMAGE_STATEFULCONVERSION("NVISC-0",
-        "The requested node virtual image persistent conversion does not exist"),
+        "The requested virtual machine node for the persistent conversion does not exist"),
 
     // RACK
     NOT_ASSIGNED_RACK_DATACENTER("RACK-0", "The rack is not assigned to the datacenter"), RACK_DUPLICATED_NAME(
@@ -256,7 +256,7 @@ public enum APIError
     // NETWORK
     NETWORK_INVALID_CONFIGURATION("NET-0",
         "Invalid network configuration for the virtual datacenter"), NETWORK_WITHOUT_IPS("NET-8",
-        "This network does not have IP addresses"), NETWORK_IP_FROM_BIGGER_THAN_IP_TO("NET-9",
+        "This network has no IP addresses"), NETWORK_IP_FROM_BIGGER_THAN_IP_TO("NET-9",
         "Parameter IPFrom is greater than IPTo"), NETWORK_IP_FROM_ERROR("NET-10",
         "Parameter IPFrom is invalid"), NETWORK_IP_TO_ERROR("NET-11", "Parameter IPTo is invalid"), NETWORK_INVALID_CONFIGURATION_LINK(
         "NET-12", "Invalid link to configure the Virtual Machine's network"), NETWORK_LINK_INVALID_VDC(
@@ -270,25 +270,25 @@ public enum APIError
     VIRTUAL_MACHINE_WITHOUT_HYPERVISOR("VM-0",
         "The virtual machine does not have a hypervisor assigned"), NON_EXISTENT_VIRTUALMACHINE(
         "VM-1", "The requested virtual machine does not exist"), VIRTUAL_MACHINE_ALREADY_IN_PROGRESS(
-        "VM-2", "The virtual machine is already in progress"), VIRTUAL_MACHINE_NOT_DEPLOYED("VM-3",
+        "VM-2", "The virtual machine is already locked by another operation"), VIRTUAL_MACHINE_NOT_DEPLOYED("VM-3",
         "The virtual machine is not deployed"), VIRTUAL_MACHINE_STATE_CHANGE_ERROR("VM-4",
         "The virtual machine cannot change to the required state"), VIRTUAL_MACHINE_REMOTE_SERVICE_ERROR(
         "VM-5", "The virtual machine cannot change state due to a communication problem"), VIRTUAL_MACHINE_PAUSE_UNSUPPORTED(
         "VM-6", "The virtual machine does not support the action PAUSE"), VIRTUAL_MACHINE_INVALID_STATE_DEPLOY(
-        "VM-7", "The allowed power states for Virtual Machines is NOT_ALLOCATED"), VIRTUAL_MACHINE_INVALID_STATE_DELETE(
-        "VM-8", "The allowed power states for Virtual Machines are UNKNOWN and NOT_ALLOCATED"), NON_EXISTENT_VIRTUAL_IMAGE(
+        "VM-7", "The allowed state for deploying Virtual Machines is NOT_ALLOCATED"), VIRTUAL_MACHINE_INVALID_STATE_DELETE(
+        "VM-8", "The allowed states for deleting Virtual Machines are UNKNOWN and NOT_ALLOCATED"), NON_EXISTENT_VIRTUAL_IMAGE(
         "VM-9", "The requested Virtual Machine Template does not exist"), VIRTUAL_MACHINE_EDIT_STATE(
         "VM-10",
         "The Virtual Machine is in a state that does not allow the request, therefore it cannot be modified"), VIRTUAL_MACHINE_UNALLOCATED_STATE(
         "VM-11",
-        "The Virtual Machine is not in any Hypervisor. Therefore the change of the state cannot be applied"), VIRTUAL_MACHINE_INVALID_STATE_UNDEPLOY(
+        "The Virtual Machine is not in any Hypervisor. Therefore the change of state cannot be applied"), VIRTUAL_MACHINE_INVALID_STATE_UNDEPLOY(
         "VM-12",
         "The allowed power states for Virtual Machine deployment are ON, OFF, PAUSED, UNKNOWN  or ALLOCATED"), VIRTUAL_MACHINE_INCOHERENT_STATE(
         "VM-13",
-        "Virtual Machine configuration actions can only be performed when the Virtual Machine is NOT-DEPLOYED or POWER-OFF"), VIRTUAL_MACHINE_NETWORK_CONFIGURATION_CAN_NOT_BE_CHANGED(
+        "Virtual Machine configuration actions can only be performed when the Virtual Machine is NOT-ALLOCATED or OFF"), VIRTUAL_MACHINE_NETWORK_CONFIGURATION_CAN_NOT_BE_CHANGED(
         "VM-14",
         "Only the 'used' attribute of the Virtual Machine Network Configuration can be changed"), VIRTUAL_MACHINE_AT_LEAST_ONE_USED_CONFIGURATION(
-        "VM-15", "There should be at least one 'used' configuration in each Virtual Machine"), VIRTUAL_MACHINE_MACHINE_TEMPLATE_NOT_IN_DATACENTER(
+        "VM-15", "There should be at least one 'used' network configuration in each Virtual Machine"), VIRTUAL_MACHINE_MACHINE_TEMPLATE_NOT_IN_DATACENTER(
         "VM-16",
         "The virtual machine template supplied isn't available in the virtual appliance's datacenter"), VIRTUAL_MACHINE_MACHINE_TEMPLATE_NOT_ALLOWED(
         "VM-17", "The virtual machine template supplied cannot be used in the current enterprise"), VIRTUAL_MACHINE_IMAGE_NOT_COMPATIBLE(
@@ -297,21 +297,21 @@ public enum APIError
         "VM-19",
         "The virtual machine template has a compatible conversion but it is not ready (in progress or failed)"), VIRTUAL_MACHINE_MUST_BE_NON_MANAGED(
         "VM-20", "To perform this action, the virtual machine must be in NON_MANAGED state"), NODE_VIRTUAL_MACHINE_IMAGE_NOT_EXISTS(
-        "VM-21", "The node's virtual machine template does not exist"), VIRTUAL_MACHINE_ESXI_INCOMPATIBLE_DISK_CONTROLLER(
+        "VM-21", "The virtual machine node does not exist"), VIRTUAL_MACHINE_ESXI_INCOMPATIBLE_DISK_CONTROLLER(
         "VM-22", "ESXi hosts cannot deploy a VMDK sparse using a SCSI disk controller"), VIRTUAL_MACHINE_BACKUP_NOT_FOUND(
         "VM-23",
         "Cannot restore the original virtual machine (after a failed reconfigure); the original virtual machine info was not found"), RESOURCE_ALREADY_ASSIGNED_TO_A_VIRTUAL_MACHINE(
         "VM-24", "The resource is already used by another virtual machine"), VIRTUAL_MACHINE_INVALID_STATE_RESET(
         "VM-26", "The allowed power state for Reset Virtual Machines is ON"), VIRTUAL_MACHINE_INVALID_STATE_SNAPSHOT(
         "VM-27", "The allowed power state for Snapshot Virtual Machines is OFF"), VIRTUAL_MACHINE_RECONFIGURE_TEMPLATE_NOT_MANAGED(
-        "VM-28", "Cannot reconfigure to a non-managed virtual machine template"), VIRTUAL_MACHINE_RECONFIGURE_NOT_MANAGED(
+        "VM-28", "Cannot reconfigure a non-managed virtual machine template"), VIRTUAL_MACHINE_RECONFIGURE_NOT_MANAGED(
         "VM-29", "Cannot reconfigure the template of a non-managed virtual machine"), VIRTUAL_MACHINE_RECONFIGURE_TEMPLATE_NOT_SAME_MASTER(
         "VM-30",
         "Cannot reconfigure to change the virtual machine template to another master (only instances or persistent)"), VIRTUAL_MACHINE_RECONFIGURE_TEMPLATE_ATTACHED_PRESISTENT(
         "VM-31",
         "The persistent virtual machine template supplied for reconfigure is already attached to a virtual machine"), VIRTUAL_MACHINE_RECONFIGURE_TEMPLATE_IN_THE_HYPERVISOR(
         "VM-32",
-        "Cannot reconfigure the virual machine template once the virtual machine is present in the hypervisor"), VIRTUAL_MACHINE_IMPORTED_CAN_NOT_RECONFIGURE(
+        "Cannot reconfigure the virtual machine template when the virtual machine is present in the hypervisor"), VIRTUAL_MACHINE_IMPORTED_CAN_NOT_RECONFIGURE(
         "VM-33", "We do not currently allow imported virtual machines to be reconfigured"), VIRTUAL_MACHINE_IMPORTED_CAN_NOT_RECONFIGURE_FULLY(
         "VM-33", "Only 'cpu' and 'ram' can be reconfigured in imported virtual machines"), VIRTUAL_MACHINE_IMPORTED_WILL_BE_DELETED(
         "VM-44",
@@ -344,24 +344,24 @@ public enum APIError
         "USER-1", "Missing link to the role"), ROLE_PARAM_NOT_FOUND("USER-2",
         "Missing roles parameter"), USER_NON_EXISTENT("USER-3", "The requested user does not exist"), USER_DUPLICATED_NICK(
         "USER-4", "Duplicate username for user"), EMAIL_IS_INVALID("USER-5",
-        "The email isn't valid"), NOT_USER_CREACION_LDAP_MODE("USER-6",
-        "In Ldap mode cannot create user"), NOT_EDIT_USER_ROLE_LDAP_MODE("USER-7",
-        "In Ldap mode cannot modify user's role"), NOT_EDIT_USER_ENTERPRISE_LDAP_MODE("USER-8",
-        "In Ldap mode cannot modify user's enterprise"), USER_DELETING_HIMSELF("USER 9",
+        "The email is not valid"), NOT_USER_CREACION_LDAP_MODE("USER-6",
+        "In LDAP mode cannot create user"), NOT_EDIT_USER_ROLE_LDAP_MODE("USER-7",
+        "In LDAP mode cannot modify user's role"), NOT_EDIT_USER_ENTERPRISE_LDAP_MODE("USER-8",
+        "In LDAP mode cannot modify user's enterprise"), USER_DELETING_HIMSELF("USER 9",
         "The user cannot delete his own user account"), USER_NICK_CANNOT_BE_CHANGED("USER 10",
-        "Cannot change the user nick"), USER_PASSWORD_IS_NECESSARY("USER 11",
+        "Cannot change the user nick (username)"), USER_PASSWORD_IS_NECESSARY("USER 11",
         "The field password is required"), USER_NAME_IS_NECESSARY("USER 12",
         "The field name is required"), USER_NICK_IS_NECESSARY("USER 13",
         "The field nick (username) is required"), USER_VDC_RESTRICTED("USER 14",
-        "Your enterprise didn't allowed you to manage this virtual datacenter"),
+        "Your enterprise does not allow you to manage this virtual datacenter"),
 
     // REMOTE SERVICE
     NOT_ASSIGNED_REMOTE_SERVICE_DATACENTER("RS-0",
         "The remote service is not assigned to the datacenter"), WRONG_REMOTE_SERVICE_TYPE("RS-1",
         "Wrong remote service type"), NON_EXISTENT_REMOTE_SERVICE_TYPE("RS-2",
         "The remote service does not exist"), REMOTE_SERVICE_URL_ALREADY_EXISTS("RS-3",
-        "The remote service's URL already exists and cannot be duplicated"), REMOTE_SERVICE_MALFORMED_URL(
-        "RS-4", "The remote service's URL is not well formed"), REMOTE_SERVICE_POOL_ASIGNED("RS-5",
+        "The remote service URL already exists and cannot be duplicated"), REMOTE_SERVICE_MALFORMED_URL(
+        "RS-4", "The remote service URL is not well formed"), REMOTE_SERVICE_POOL_ASIGNED("RS-5",
         "This datacenter already has a storage pool assigned"), REMOTE_SERVICE_TYPE_EXISTS("RS-6",
         "This datacenter already has a remote service of that type"), REMOTE_SERVICE_CONNECTION_FAILED(
         "RS-7", "Failed connection to the remote service"), REMOTE_SERVICE_CANNOT_BE_CHECKED(
@@ -369,12 +369,12 @@ public enum APIError
         "AM-0",
         "The repository exported by the current appliance manager is being used in another datacenter"), APPLIANCE_MANAGER_REPOSITORY_IN_USE(
         "AM-1",
-        "The current repository holds virtual images being used on some virtual appliances, so it is not possible to remove this remote service. You can modify the appliance manager but only if the same repository is used."), REMOTE_SERVICE_STORAGE_REMOTE_WITH_POOLS(
+        "The current repository holds virtual machine templates being used in some virtual appliances so it is not possible to remove this remote service. You can change the appliance manager but only if the same repository is used."), REMOTE_SERVICE_STORAGE_REMOTE_WITH_POOLS(
         "RS-9", "Cannot delete a storage manager with associated storage pools"), REMOTE_SERVICE_IS_BEING_USED(
         "RS-10",
         "Cannot delete a Virtual System Monitor or DHCP Service. There are virtual machines deployed."), REMOTE_SERVICE_WRONG_URL(
         "RS-11", "URL supplied is not valid"), REMOTE_SERVICE_DHCP_WRONG_URI("RS-12",
-        "The DHCP URI is invalid"), REMOTE_SERVICE_DATACENTER_UUID_NOT_FOUND("RS-13",
+        "The URI of the DHCP remote service is invalid"), REMOTE_SERVICE_DATACENTER_UUID_NOT_FOUND("RS-13",
         "The remote service does not have the *abiquo.datacenter.id* property set"), REMOTE_SERVICE_DATACENTER_UUID_INCONSISTENT(
         "RS-14",
         "The remote service is configured with a different datacenter UUID, please adjust the *abiquo.datacenter.id* property in the remote service."), REMOTE_SERVICE_UNDEFINED_PORT(
@@ -386,7 +386,7 @@ public enum APIError
     //
     AM_CLIENT("AM-0", "Failed Appliance Manager communication"), AM_TIMEOUT("AM-1",
         "Timeout during Appliance Manager communication"), AM_UNAVAILABE("AM-2",
-        "AM service unavailable, check the URL service."), AM_FAILED_REQUEST("AM-3",
+        "AM service unavailable; please check the URL of the service."), AM_FAILED_REQUEST("AM-3",
         "Failed Appliance Manager request."),
 
     // OVF PACKAGE LIST
@@ -419,14 +419,14 @@ public enum APIError
         "VIMAGE-2",
         "Invalid Virtual Machine Template identifier in the Virtual Machine Template link"), INVALID_DATACENTER_RESPOSITORY_LINK(
         "VIMAGE-3", "Invalid Datacenter Repository identifier in the Datacenter Repository link"), VMTEMPLATE_ENTERPRISE_CANNOT_BE_CHANGED(
-        "VIMAGE-4", "Change in Enterprise of the Virtual Machine Template is not allowed"), VMTEMPLATE_DATACENTER_REPOSITORY_CANNOT_BE_CHANGED(
-        "VIMAGE-5", "Change in Datacenter Repository of a Virtual Machine Template is not allowed"), VMTEMPLATE_MASTER_TEMPLATE_CANNOT_BE_CHANGED(
+        "VIMAGE-4", "Changing the Enterprise of the Virtual Machine Template is not allowed"), VMTEMPLATE_DATACENTER_REPOSITORY_CANNOT_BE_CHANGED(
+        "VIMAGE-5", "Changing the Datacenter Repository of a Virtual Machine Template is not allowed"), VMTEMPLATE_MASTER_TEMPLATE_CANNOT_BE_CHANGED(
         "VIMAGE-6", "Master Template of a Virtual Machine Template cannot be changed"), VMTEMPLATE_MASTER_TEMPLATE_CANNOT_BE_DELETED(
         "VIMAGE-7",
         "The requested virtual machine template is a master template; master templates cannot be deleted"), VMTEMPLATE_STATEFUL_TEMPLATE_CANNOT_BE_DELETED(
         "VIMAGE-8", "Cannot delete a persistent image"), VMTEMPLATE_SHARED_TEMPLATE_FROM_OTHER_ENTERPRISE(
         "VIMAGE-9",
-        "Cannot delete the requested shared virtual machine template, because it belongs to another enterprise"), VMTEMPLATE_TEMPLATE_USED_BY_VIRTUAL_MACHINES_CANNOT_BE_DELETED(
+        "Cannot delete the requested shared virtual machine template because it belongs to another enterprise"), VMTEMPLATE_TEMPLATE_USED_BY_VIRTUAL_MACHINES_CANNOT_BE_DELETED(
         "VIMAGE-10",
         "The Virtual Machine Template is being used by Virtual Machines and cannot be deleted"), VMTEMPLATE_TEMPLATE_USED_BY_VIRTUAL_MACHINES_CANNOT_BE_UNSHARED(
         "VIMAGE-11",
@@ -444,11 +444,13 @@ public enum APIError
         "NC-7", "The discovery manager is currently not available"), NC_VIRTUAL_MACHINE_NOT_FOUND(
         "NC-8", "The requested virtual machine was not found on the remote hypervisor"), NC_NOT_MANAGED_HOST(
         "NC-9", "The requested host is not managed"), NC_INVALID_IP("NC-10",
-        "The IP format is invalid"),
+        "The IP format is invalid"), NC_BAD_CONFIGURATION(
+        "NC-10",
+        "Access is denied, please check whether the [domain-username-password] are correct. Also, if not already done please check the GETTING STARTED and FAQ sections in readme.htm. They provide information on how to correctly configure the Windows machine for DCOM access, so as to avoid such exceptions. "),
 
     // STORAGE POOL
     MISSING_REQUIRED_QUERY_PARAMETER_IQN("SP-1", "Missing IQN query parameter"), CONFLICT_STORAGE_POOL(
-        "SP-2", "The id of the storage pool and the id of the object supplied must be the same"), NON_EXISTENT_STORAGE_POOL(
+        "SP-2", "The ID of the storage pool and the ID of the object supplied must be the same"), NON_EXISTENT_STORAGE_POOL(
         "SP-3", "The requested storage pool does not exist"), STORAGE_POOL_ERROR_MODIFYING("SP-4",
         "There was an unexpected error while modifying the storage pool"), STORAGE_POOLS_SYNC(
         "SP-5", "Could not get the storage pools from the target device"), STORAGE_POOL_SYNC(
@@ -499,26 +501,26 @@ public enum APIError
         "The license is already being used"),
 
     // TIERS
-    NON_EXISTENT_TIER("TIER-0", "The requested tier does not exist"), NULL_TIER("TIER-1",
+    NON_EXISTENT_TIER("TIER-0", "The requested storage tier does not exist"), NULL_TIER("TIER-1",
         "Embedded tier of the StoragePool cannot be null"), MISSING_TIER_LINK("TIER-2",
-        "Missing link to the tier"), TIER_PARAM_NOT_FOUND("TIER-3", "Missing tiers parameter"), TIER_LINK_DATACENTER_PARAM_NOT_FOUND(
-        "TIER-4", "Datacenter parameter in tier link not found"), TIER_LINK_DATACENTER_DIFFERENT(
+        "Missing link to the storage tier"), TIER_PARAM_NOT_FOUND("TIER-3", "Missing storage tier parameter"), TIER_LINK_DATACENTER_PARAM_NOT_FOUND(
+        "TIER-4", "Datacenter parameter in storage tier link not found"), TIER_LINK_DATACENTER_DIFFERENT(
         "TIER-5",
-        "The Tier's datacenter is not the same datacenter where you want to create the StoragePool"), TIER_CONFLICT_DISABLING_TIER(
+        "The storage tier is not in the same datacenter where you are trying to create the StoragePool"), TIER_CONFLICT_DISABLING_TIER(
         "TIER-6", "Cannot disable a tier with associated storage pools"), TIER_DISABLED("TIER-7",
-        "The requested tier is disabled"), TIER_LINK_VIRTUALDATACENTER_PARAM_NOT_FOUND("TIER-8",
-        "VirtualDatacenter parameter was not found in tier link"), TIER_LINK_VIRTUALDATACENTER_DIFFERENT(
-        "TIER-9", "The Tier's virtualdatacenter link does not match the virtualdatacenter supplied"),
+        "The requested storage tier is disabled"), TIER_LINK_VIRTUALDATACENTER_PARAM_NOT_FOUND("TIER-8",
+        "VirtualDatacenter parameter was not found in storage tier link"), TIER_LINK_VIRTUALDATACENTER_DIFFERENT(
+        "TIER-9", "The storage tier's virtualdatacenter link does not match the virtualdatacenter supplied"),
 
     // DEVICES
     NON_EXISTENT_DEVICE("DEVICE-0", "The requested device does not exist"), DEVICE_DUPLICATED(
         "DEVICE-1", "Duplicate Storage Device"),
 
     // STATISTICS
-    NON_EXISTENT_STATS("STATS-0", "Non-existent statistical data"), NON_EXISTENT_STATS_FOR_DATACENTER(
-        "STATS-1", "Non-existent statistical data for the requested datacenter"), NON_EXISTENT_STATS_FOR_DCLIMITS(
-        "STATS-2", "Non-existent statistical data for the requested enterprise in this datacenter"), NON_EXISTENT_STATS_FOR_ENTERPRISE(
-        "STATS-3", "Non-existent statistical data for the requested enterprise"), NODECOLLECTOR_ERROR(
+    NON_EXISTENT_STATS("STATS-0", "No statistical data found"), NON_EXISTENT_STATS_FOR_DATACENTER(
+        "STATS-1", "No statistical data found for the requested datacenter"), NON_EXISTENT_STATS_FOR_DCLIMITS(
+        "STATS-2", "No statistical data found for the requested enterprise in this datacenter"), NON_EXISTENT_STATS_FOR_ENTERPRISE(
+        "STATS-3", "No statistical data found for the requested enterprise"), NODECOLLECTOR_ERROR(
         "NODECOLLECTOR-1", "Nodecollector has raised an error"),
 
     // QUERY PAGGING STANDARD ERRORS
@@ -558,17 +560,17 @@ public enum APIError
         "VOL-27", "The volume is already detached"), VOLUME_DETACH_ERROR("VOL-28",
         "An unexpected error occurred while detaching the volume. Please contact the Administrator"), VOLUME_RECONFIGURE_ERROR(
         "VOL-29", "An unexpected error occurred while reconfiguring storage"), VOLUME_WRONG_NEW_VIRTUALDATACENTER(
-        "VOL-39", "The volume can only be moved between Virtual Datacenters of the same Datacenter"),
+        "VOL-39", "The volume can only be moved between Virtual Datacenters in the same Datacenter"),
 
     // SSM
-    SSM_GET_POOLS_ERROR("SSM-1", "Could not get the storage pools in the target storage device"), SSM_GET_POOL_ERROR(
-        "SSM-2", "Could not get the given storage pool in the target storage device"), SSM_GET_VOLUMES_ERROR(
+    SSM_GET_POOLS_ERROR("SSM-1", "Could not get the storage pools on the target storage device"), SSM_GET_POOL_ERROR(
+        "SSM-2", "Could not get the given storage pool on the target storage device"), SSM_GET_VOLUMES_ERROR(
         "SSM-3", "Could not get the volumes in the given storage pool"), SSM_GET_VOLUME_ERROR(
         "SSM-4", "Could not get the given volume in the given storage pool"), SSM_CREATE_VOLUME_ERROR(
-        "SSM-5", "Could not create the volume in the target storage device"), SSM_DELETE_VOLUME_ERROR(
+        "SSM-5", "Could not create the volume on the target storage device"), SSM_DELETE_VOLUME_ERROR(
         "SSM-6", "Could not delete the volume from the target storage device"), SSM_UPDATE_ERROR(
-        "SSM-7", "Could not update the volume in the target storage devide"), SSM_ADD_INITIATOR_ERROR(
-        "SSM-8", "Could not add the given iSCSI initiator in the target storage device"), SSM_REMOVE_INITIATOR_ERROR(
+        "SSM-7", "Could not update the volume on the target storage devide"), SSM_ADD_INITIATOR_ERROR(
+        "SSM-8", "Could not add the given iSCSI initiator on the target storage device"), SSM_REMOVE_INITIATOR_ERROR(
         "SSM-9", "Could not remove the given iSCSI initiator from the target storage device"),
 
     // RULES
@@ -605,28 +607,28 @@ public enum APIError
             + "Please verify the credentials"), CHEF_INVALID_ENTERPRISE("CHEF-8",
         "The enterprise is not configured to use Chef"), CHEF_INVALID_VIRTUALMACHINE("CHEF-9",
         "The virtual machine cannot use Chef. "
-            + "Please, verify that the image is Chef enabled and the Enterprise can use Chef"), CHEF_INVALID_VALIDATOR_KEY(
+            + "Please verify that the image is Chef enabled and the Enterprise can use Chef"), CHEF_INVALID_VALIDATOR_KEY(
         "CHEF-10",
-        "The provided validator certificate is not a valid private key. Please verify the key format."), CHEF_INVALID_CLIENT_KEY(
+        "The validator certificate supplied is not a valid private key. Please verify the key format."), CHEF_INVALID_CLIENT_KEY(
         "CHEF-11",
-        "The provided admin certificate is not a valid private key. Please verify the key format."),
+        "The admin certificate supplied is not a valid private key. Please verify the key format."),
 
     // Parsing links
     LINKS_INVALID_LINK("LNK-0", "Invalid link. Check documentation"), LINKS_ONLY_ACCEPTS_ONE_LINK(
-        "LNK-1", "Number of links invalid: This resource only accepts a single link"), LINKS_VIRTUAL_MACHINE_TEMPLATE_NOT_FOUND(
+        "LNK-1", "Invalid number of links: This resource only accepts a single link"), LINKS_VIRTUAL_MACHINE_TEMPLATE_NOT_FOUND(
         "LNK-2", "Virtual Machine Template link with rel 'virtualmachinetemplate' is mandatory "), LINKS_VIRTUAL_MACHINE_TEMPLATE_INVALID_URI(
         "LNK-3", "Virtual Machine Template invalid link"),
 
     // CATEGORY
     NON_EXISTENT_CATEGORY("CATEGORY-1", "The requested category does not exist"), CATEGORY_DUPLICATED_NAME(
-        "CATEGORY-2", "Duplicated name for the category."), CATEGORY_NOT_ERASABLE("CATEGORY-3",
+        "CATEGORY-2", "A category with this name already exists."), CATEGORY_NOT_ERASABLE("CATEGORY-3",
         "This category cannot be deleted"), INVALID_CATEGORY_LINK("CATEGORY-4",
         "Invalid Category identifier in the Category link"), CATEGORY_CANNOT_BE_NULL("CATEGORY-5",
         "Category name cannot be null"), CATEGORY_CANNOT_MOVE_LOCAL("CATEGORY-6",
-        "Cannot move a local category to other enterprise."), CATEGORY_NO_PRIVELIGES_TO_CREATE_GLOBAL(
-        "CATEGORY-7", "Current User does not have enough privileges to create a global category."), CATEGORY_CANNOT_CHANGE_TO_LOCAL(
+        "Cannot move a local category to another enterprise."), CATEGORY_NO_PRIVELIGES_TO_CREATE_GLOBAL(
+        "CATEGORY-7", "Current user does not have enough privileges to create a global category."), CATEGORY_CANNOT_CHANGE_TO_LOCAL(
         "CATEGORY-8", "Cannot change a global category to a local category."), CATEGORY_NO_PRIVELIGES_TO_REMOVE(
-        "CATEGORY-9", "Current User does not have enough privileges to remove category."),
+        "CATEGORY-9", "Current user does not have enough privileges to remove this category."),
     // ICONS
     ICON_DUPLICATED_PATH("ICON-1", "Duplicate path for an icon"), NON_EXISTENT_ICON("ICON-2",
         "The requested icon does not exist"), NON_EXISENT_ICON_WITH_PATH("ICON-3",

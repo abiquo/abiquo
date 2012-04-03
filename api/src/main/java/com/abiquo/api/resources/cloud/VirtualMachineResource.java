@@ -120,6 +120,8 @@ public class VirtualMachineResource extends AbstractResource
 
     public static final String VIRTUAL_MACHINE_ACTION_UNDEPLOY_REL = "undeploy";
 
+    public static final String VIRTUAL_MACHINE_ACTION_RESET_REL = "reset";
+
     public static final String FORCE_UNDEPLOY = "force";
 
     public static final String FORCE = "force";
