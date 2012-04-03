@@ -277,5 +277,5 @@ public class UserDAO extends DefaultDAOBase<Integer, User>
     }
 
     private static final String USER_ALLOWED_VDC_SQL =
-        "select 1 from user u where u.user = :username and u.authType = :authtype and (('ENTERPRISE_ADMINISTER_ALL' in (:privileges) or 'USERS_MANAGE_OTHER_ENTERPRISES' in (:privileges)) or u.idEnterprise = (select vdc.idEnterprise from virtualdatacenter vdc where vdc.idVirtualDatacenter = :idvdc and (u.availableVirtualDatacenters is null or u.availableVirtualDatacenters = '' or u.availableVirtualDatacenters REGEXP CONCAT('.*[,]?',:idvdc,'($|[,].*$)'))))";
+        "select 1 from user u where u.user = :username and u.authType = :authtype and (('ENTERPRISE_ADMINISTER_ALL' in (:privileges) or 'USERS_MANAGE_OTHER_ENTERPRISES' in (:privileges)) or u.idEnterprise = (select vdc.idEnterprise from virtualdatacenter vdc where vdc.idVirtualDatacenter = :idvdc and (u.availableVirtualDatacenters is null or u.availableVirtualDatacenters REGEXP CONCAT('.*[,]?',:idvdc,'($|[,].*$)'))))";
 }
