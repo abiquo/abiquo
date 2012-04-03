@@ -444,7 +444,9 @@ public enum APIError
         "NC-7", "The discovery manager is currently not available"), NC_VIRTUAL_MACHINE_NOT_FOUND(
         "NC-8", "The requested virtual machine was not found on the remote hypervisor"), NC_NOT_MANAGED_HOST(
         "NC-9", "The requested host is not managed"), NC_INVALID_IP("NC-10",
-        "The IP format is invalid"),
+        "The IP format is invalid"), NC_BAD_CONFIGURATION(
+        "NC-10",
+        "Access is denied, please check whether the [domain-username-password] are correct. Also, if not already done please check the GETTING STARTED and FAQ sections in readme.htm. They provide information on how to correctly configure the Windows machine for DCOM access, so as to avoid such exceptions. "),
 
     // STORAGE POOL
     MISSING_REQUIRED_QUERY_PARAMETER_IQN("SP-1", "Missing IQN query parameter"), CONFLICT_STORAGE_POOL(
