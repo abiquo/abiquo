@@ -63,8 +63,8 @@ import com.abiquo.server.core.enterprise.EnterpriseRep;
 import com.abiquo.server.core.enterprise.Privilege;
 import com.abiquo.server.core.enterprise.Role;
 import com.abiquo.server.core.enterprise.User;
-import com.abiquo.server.core.enterprise.User.AuthType;
 import com.abiquo.server.core.enterprise.UserDto;
+import com.abiquo.server.core.enterprise.User.AuthType;
 import com.abiquo.tracer.ComponentType;
 import com.abiquo.tracer.EventType;
 import com.abiquo.tracer.SeverityType;
@@ -171,7 +171,8 @@ public class UserService extends DefaultApiService
         }
 
         Collection<User> users =
-            repo.findUsersByEnterprise(enterprise, filter, order, desc, connected, page, numResults);
+            repo
+                .findUsersByEnterprise(enterprise, filter, order, desc, connected, page, numResults);
 
         // Refresh all entities to avioid lazys
         for (User u : users)
@@ -218,16 +219,13 @@ public class UserService extends DefaultApiService
         }
 
         User user =
-            enterprise.createUser(role, dto.getName(), dto.getSurname(), dto.getEmail(),
-                dto.getNick(), encrypt(dto.getPassword()), dto.getLocale());
+            enterprise.createUser(role, dto.getName(), dto.getSurname(), dto.getEmail(), dto
+                .getNick(), encrypt(dto.getPassword()), dto.getLocale());
         user.setActive(dto.isActive() ? 1 : 0);
         user.setDescription(dto.getDescription());
         validate(user);
-        if (securityService.hasPrivilege(Privileges.USERS_PROHIBIT_VDC_RESTRICTION, user))
-        {
-            user.setAvailableVirtualDatacenters(null);
-        }
-        else
+        if (!securityService.hasPrivilege(Privileges.USERS_PROHIBIT_VDC_RESTRICTION, user)
+            && !StringUtils.isBlank(dto.getAvailableVirtualDatacenters()))
         {
             user.setAvailableVirtualDatacenters(dto.getAvailableVirtualDatacenters());
         }
@@ -251,9 +249,8 @@ public class UserService extends DefaultApiService
         repo.insertUser(user);
 
         tracer
-            .log(SeverityType.INFO, ComponentType.USER, EventType.USER_CREATE, "user.created",
-                user.getName(), enterprise.getName(), user.getName(), user.getSurname(),
-                user.getRole());
+            .log(SeverityType.INFO, ComponentType.USER, EventType.USER_CREATE, "user.created", user
+                .getName(), enterprise.getName(), user.getName(), user.getSurname(), user.getRole());
 
         return user;
     }
@@ -327,16 +324,10 @@ public class UserService extends DefaultApiService
         }
         old.setDescription(user.getDescription());
 
-        if (securityService.hasPrivilege(Privileges.USERS_PROHIBIT_VDC_RESTRICTION, old))
+        if (!securityService.hasPrivilege(Privileges.USERS_PROHIBIT_VDC_RESTRICTION, old)
+            && !StringUtils.isBlank(old.getAvailableVirtualDatacenters()))
         {
-            user.setAvailableVirtualDatacenters(null);
-        }
-        else
-        {
-            if (user.getAvailableVirtualDatacenters() != null)
-            {
-                old.setAvailableVirtualDatacenters(user.getAvailableVirtualDatacenters());
-            }
+            user.setAvailableVirtualDatacenters(old.getAvailableVirtualDatacenters());
         }
 
         if (!emailIsValid(user.getEmail()))
@@ -400,8 +391,8 @@ public class UserService extends DefaultApiService
         updateUser(old);
 
         tracer.log(SeverityType.INFO, ComponentType.USER, EventType.USER_MODIFY, "user.modified",
-            old.getName(), old.getEnterprise().getName(), old.getName(), old.getSurname(),
-            old.getRole());
+            old.getName(), old.getEnterprise().getName(), old.getName(), old.getSurname(), old
+                .getRole());
 
         return old;
     }
@@ -441,8 +432,8 @@ public class UserService extends DefaultApiService
         repo.removeUser(user);
 
         tracer.log(SeverityType.INFO, ComponentType.USER, EventType.USER_DELETE, "user.deleted",
-            user.getName(), user.getEnterprise().getName(), user.getName(), user.getSurname(),
-            user.getRole());
+            user.getName(), user.getEnterprise().getName(), user.getName(), user.getSurname(), user
+                .getRole());
     }
 
     public boolean isAssignedTo(final Integer enterpriseId, final Integer userId)
