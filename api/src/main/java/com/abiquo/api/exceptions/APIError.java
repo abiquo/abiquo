@@ -159,7 +159,7 @@ public enum APIError
         "Every virtual machine should have at least one NIC"), VLANS_REORDER_NIC_INVALID_LINK(
         "VLAN-30", "Invalid link to reorder NICs on a Virtual Machine"), VLANS_REORDER_NIC_INVALID_LINK_VALUES(
         "VLAN-31",
-        "Invalid link values (virtualdatacenter, virtualappliance and/or virtualmachine identifiers) to reorder NICs on a Virtual Machine"), VLANS_IP_EDIT_NOT_AVAILABLE_PURCHASED(
+        "Invalid link values (virtualdatacenter, virtualappliance and/or virtualmachine identifiers) for reordering NICs on a Virtual Machine"), VLANS_IP_EDIT_NOT_AVAILABLE_PURCHASED(
         "VLAN-32", "Cannot set the IP as 'not available' while it is purchased by an Enterprise"), VLANS_PUBIC_IP_CAN_NOT_RELEASE(
         "VLAN-33", "Cannot release a Public IP while it is assigned to a Virtual Machine"), VLANS_NON_EXISTENT_CONFIGURATION(
         "VLAN-34", "The configuration does not exist"), VLANS_CAN_NOT_ASSIGN_TO_DEFAULT_ENTERPRISE(
@@ -171,9 +171,9 @@ public enum APIError
         "VLAN-38", "The IP address is already assigned to a Virtual Datacenter"), VLANS_WITH_IPS_ASSIGNED_TO_VDC(
         "VLAN-39", "Cannot delete a VLAN with IPs assigned to a Virtual Datacenter"), VLANS_EXTERNAL_VLAN_IN_ANOTHER_DATACENTER(
         "VLAN-40",
-        "The requested external VLAN belongs to another datacenter where the Virtual Datacenter is"), VLANS_INVALID_IP_FORMAT(
+        "The requested external VLAN belongs to a different datacenter, not the one where the Virtual Datacenter is"), VLANS_INVALID_IP_FORMAT(
         "VLAN-41", "IP format is invalid"), VLANS_IP_DOES_NOT_EXISTS("VLAN-42",
-        "The IP does not exists"), VLANS_CANNOT_DELETE_DEFAULT("VLAN-43",
+        "The IP does not exist"), VLANS_CANNOT_DELETE_DEFAULT("VLAN-43",
         "This is the default VLAN for the Virtual Datacenter and it cannot be deleted"), VLANS_EXTERNAL_VLAN_OF_ANOTHER_ENTERPRISE(
         "VLAN-42", "The external VLAN belongs to another enterprise"), VLANS_IP_NOT_AVAILABLE(
         "VLAN-43", "The IP address is not available to be used by a Virtual Machine"), VLANS_NON_EXISTENT_EXTERNAL_IP(
@@ -270,7 +270,7 @@ public enum APIError
     VIRTUAL_MACHINE_WITHOUT_HYPERVISOR("VM-0",
         "The virtual machine does not have a hypervisor assigned"), NON_EXISTENT_VIRTUALMACHINE(
         "VM-1", "The requested virtual machine does not exist"), VIRTUAL_MACHINE_ALREADY_IN_PROGRESS(
-        "VM-2", "The virtual machine is already in progress"), VIRTUAL_MACHINE_NOT_DEPLOYED("VM-3",
+        "VM-2", "The virtual machine is already locked by another operation"), VIRTUAL_MACHINE_NOT_DEPLOYED("VM-3",
         "The virtual machine is not deployed"), VIRTUAL_MACHINE_STATE_CHANGE_ERROR("VM-4",
         "The virtual machine cannot change to the required state"), VIRTUAL_MACHINE_REMOTE_SERVICE_ERROR(
         "VM-5", "The virtual machine cannot change state due to a communication problem"), VIRTUAL_MACHINE_PAUSE_UNSUPPORTED(
@@ -281,14 +281,14 @@ public enum APIError
         "VM-10",
         "The Virtual Machine is in a state that does not allow the request, therefore it cannot be modified"), VIRTUAL_MACHINE_UNALLOCATED_STATE(
         "VM-11",
-        "The Virtual Machine is not in any Hypervisor. Therefore the change of the state cannot be applied"), VIRTUAL_MACHINE_INVALID_STATE_UNDEPLOY(
+        "The Virtual Machine is not in any Hypervisor. Therefore the change of state cannot be applied"), VIRTUAL_MACHINE_INVALID_STATE_UNDEPLOY(
         "VM-12",
         "The allowed power states for Virtual Machine deployment are ON, OFF, PAUSED, UNKNOWN  or ALLOCATED"), VIRTUAL_MACHINE_INCOHERENT_STATE(
         "VM-13",
-        "Virtual Machine configuration actions can only be performed when the Virtual Machine is NOT-DEPLOYED or POWER-OFF"), VIRTUAL_MACHINE_NETWORK_CONFIGURATION_CAN_NOT_BE_CHANGED(
+        "Virtual Machine configuration actions can only be performed when the Virtual Machine is NOT-ALLOCATED or OFF"), VIRTUAL_MACHINE_NETWORK_CONFIGURATION_CAN_NOT_BE_CHANGED(
         "VM-14",
         "Only the 'used' attribute of the Virtual Machine Network Configuration can be changed"), VIRTUAL_MACHINE_AT_LEAST_ONE_USED_CONFIGURATION(
-        "VM-15", "There should be at least one 'used' configuration in each Virtual Machine"), VIRTUAL_MACHINE_MACHINE_TEMPLATE_NOT_IN_DATACENTER(
+        "VM-15", "There should be at least one 'used' network configuration in each Virtual Machine"), VIRTUAL_MACHINE_MACHINE_TEMPLATE_NOT_IN_DATACENTER(
         "VM-16",
         "The virtual machine template supplied isn't available in the virtual appliance's datacenter"), VIRTUAL_MACHINE_MACHINE_TEMPLATE_NOT_ALLOWED(
         "VM-17", "The virtual machine template supplied cannot be used in the current enterprise"), VIRTUAL_MACHINE_IMAGE_NOT_COMPATIBLE(
