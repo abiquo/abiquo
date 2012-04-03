@@ -134,7 +134,7 @@ public enum APIError
         "VLAN-8", "The requested virtual network does not exist"), VLANS_AT_LEAST_ONE_DEFAULT_NETWORK(
         "VLAN-9", "There must be at least one default VLAN in each Virtual Datacenter"), VLANS_EDIT_INVALID_VALUES(
         "VLAN-10",
-        "Attributes 'address', 'mask' and 'tag' cannot be changed by the Edit process of private VLAN."), VLANS_DEFAULT_NETWORK_CAN_NOT_BE_DELETED(
+        "Attributes 'address', 'mask' and 'tag' cannot be changed when editing a private VLAN."), VLANS_DEFAULT_NETWORK_CAN_NOT_BE_DELETED(
         "VLAN-11", "The VLAN cannot be deleted because it is the Default VLAN of this Enterprise"), VLANS_WITH_USED_IPS_CAN_NOT_BE_DELETED(
         "VLAN-12", "Cannot delete a VLAN with IPs used by Virtual Machines"), VLANS_TAG_MANDATORY_FOR_PUBLIC_VLANS(
         "VLAN-13", "Field 'tag' is mandatory when you create Public VLANs"), VLANS_WITH_PURCHASED_IPS_CAN_NOT_BE_DELETED(
@@ -144,7 +144,7 @@ public enum APIError
         "The requested IP object does not exist"), VLANS_IP_EDIT_INVALID_VALUES("VLAN-18",
         "Only 'quarantine' and 'available' attributes can be modified when editing an IP"), VLANS_PUBLIC_EDIT_INVALID_VALUES(
         "VLAN-19",
-        "Attributes 'address' and 'mask' cannot be changed by the edit process of Public, External and Unmanaged Network."), VLANS_PUBLIC_IP_NOT_TO_BE_PURCHASED(
+        "Attributes 'address' and 'mask' cannot be changed when editing a Public, External or Unmanaged Network."), VLANS_PUBLIC_IP_NOT_TO_BE_PURCHASED(
         "VLAN-20", "The IP does not exist or is not available"), VLANS_PUBLIC_IP_NOT_PURCHASED(
         "VLAN-21", "The IP does not exist or is not purchased"), VLANS_PUBLIC_IP_BUSY("VLAN-22",
         "This IP address is currently used by a Virtual Machine. It cannot be released"), VLANS_PRIVATE_IP_INVALID_LINK(
@@ -202,7 +202,7 @@ public enum APIError
         "VAPP-10",
         "The virtual appliance cannot be moved or copied because it contains virtual machine templates that are not compatible with the target hypervisor"), VIRTUALAPPLIANCE_COPY_PERSISTENT_VM(
         "VAPP-11",
-        "The virtual appliance cannot be copied since it contains persistent virtual machines templates"), VIRTUALAPPLIANCE_EMPTY(
+        "The virtual appliance cannot be copied because it contains persistent virtual machine templates"), VIRTUALAPPLIANCE_EMPTY(
         "VAPP-12", "The virtual appliance does not contain any virtual machines"), VIRTUALAPPLIANCE_INVALID_STATE_COPY(
         "VAPP-13",
         "The virtual appliance cannot be copied in this state. It should be NOT_DEPLOYED"),
@@ -419,14 +419,14 @@ public enum APIError
         "VIMAGE-2",
         "Invalid Virtual Machine Template identifier in the Virtual Machine Template link"), INVALID_DATACENTER_RESPOSITORY_LINK(
         "VIMAGE-3", "Invalid Datacenter Repository identifier in the Datacenter Repository link"), VMTEMPLATE_ENTERPRISE_CANNOT_BE_CHANGED(
-        "VIMAGE-4", "Change in Enterprise of the Virtual Machine Template is not allowed"), VMTEMPLATE_DATACENTER_REPOSITORY_CANNOT_BE_CHANGED(
-        "VIMAGE-5", "Change in Datacenter Repository of a Virtual Machine Template is not allowed"), VMTEMPLATE_MASTER_TEMPLATE_CANNOT_BE_CHANGED(
+        "VIMAGE-4", "Changing the Enterprise of the Virtual Machine Template is not allowed"), VMTEMPLATE_DATACENTER_REPOSITORY_CANNOT_BE_CHANGED(
+        "VIMAGE-5", "Changing the Datacenter Repository of a Virtual Machine Template is not allowed"), VMTEMPLATE_MASTER_TEMPLATE_CANNOT_BE_CHANGED(
         "VIMAGE-6", "Master Template of a Virtual Machine Template cannot be changed"), VMTEMPLATE_MASTER_TEMPLATE_CANNOT_BE_DELETED(
         "VIMAGE-7",
         "The requested virtual machine template is a master template; master templates cannot be deleted"), VMTEMPLATE_STATEFUL_TEMPLATE_CANNOT_BE_DELETED(
         "VIMAGE-8", "Cannot delete a persistent image"), VMTEMPLATE_SHARED_TEMPLATE_FROM_OTHER_ENTERPRISE(
         "VIMAGE-9",
-        "Cannot delete the requested shared virtual machine template, because it belongs to another enterprise"), VMTEMPLATE_TEMPLATE_USED_BY_VIRTUAL_MACHINES_CANNOT_BE_DELETED(
+        "Cannot delete the requested shared virtual machine template because it belongs to another enterprise"), VMTEMPLATE_TEMPLATE_USED_BY_VIRTUAL_MACHINES_CANNOT_BE_DELETED(
         "VIMAGE-10",
         "The Virtual Machine Template is being used by Virtual Machines and cannot be deleted"), VMTEMPLATE_TEMPLATE_USED_BY_VIRTUAL_MACHINES_CANNOT_BE_UNSHARED(
         "VIMAGE-11",
