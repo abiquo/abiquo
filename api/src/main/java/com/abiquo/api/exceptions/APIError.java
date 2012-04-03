@@ -344,16 +344,16 @@ public enum APIError
         "USER-1", "Missing link to the role"), ROLE_PARAM_NOT_FOUND("USER-2",
         "Missing roles parameter"), USER_NON_EXISTENT("USER-3", "The requested user does not exist"), USER_DUPLICATED_NICK(
         "USER-4", "Duplicate username for user"), EMAIL_IS_INVALID("USER-5",
-        "The email isn't valid"), NOT_USER_CREACION_LDAP_MODE("USER-6",
-        "In Ldap mode cannot create user"), NOT_EDIT_USER_ROLE_LDAP_MODE("USER-7",
-        "In Ldap mode cannot modify user's role"), NOT_EDIT_USER_ENTERPRISE_LDAP_MODE("USER-8",
-        "In Ldap mode cannot modify user's enterprise"), USER_DELETING_HIMSELF("USER 9",
+        "The email is not valid"), NOT_USER_CREACION_LDAP_MODE("USER-6",
+        "In LDAP mode cannot create user"), NOT_EDIT_USER_ROLE_LDAP_MODE("USER-7",
+        "In LDAP mode cannot modify user's role"), NOT_EDIT_USER_ENTERPRISE_LDAP_MODE("USER-8",
+        "In LDAP mode cannot modify user's enterprise"), USER_DELETING_HIMSELF("USER 9",
         "The user cannot delete his own user account"), USER_NICK_CANNOT_BE_CHANGED("USER 10",
-        "Cannot change the user nick"), USER_PASSWORD_IS_NECESSARY("USER 11",
+        "Cannot change the user nick (username)"), USER_PASSWORD_IS_NECESSARY("USER 11",
         "The field password is required"), USER_NAME_IS_NECESSARY("USER 12",
         "The field name is required"), USER_NICK_IS_NECESSARY("USER 13",
         "The field nick (username) is required"), USER_VDC_RESTRICTED("USER 14",
-        "Your enterprise didn't allowed you to manage this virtual datacenter"),
+        "Your enterprise does not allow you to manage this virtual datacenter"),
 
     // REMOTE SERVICE
     NOT_ASSIGNED_REMOTE_SERVICE_DATACENTER("RS-0",
@@ -502,13 +502,13 @@ public enum APIError
     NON_EXISTENT_TIER("TIER-0", "The requested storage tier does not exist"), NULL_TIER("TIER-1",
         "Embedded tier of the StoragePool cannot be null"), MISSING_TIER_LINK("TIER-2",
         "Missing link to the storage tier"), TIER_PARAM_NOT_FOUND("TIER-3", "Missing storage tier parameter"), TIER_LINK_DATACENTER_PARAM_NOT_FOUND(
-        "TIER-4", "Datacenter parameter in tier link not found"), TIER_LINK_DATACENTER_DIFFERENT(
+        "TIER-4", "Datacenter parameter in storage tier link not found"), TIER_LINK_DATACENTER_DIFFERENT(
         "TIER-5",
-        "The Tier's datacenter is not the same datacenter where you want to create the StoragePool"), TIER_CONFLICT_DISABLING_TIER(
+        "The storage tier is not in the same datacenter where you are trying to create the StoragePool"), TIER_CONFLICT_DISABLING_TIER(
         "TIER-6", "Cannot disable a tier with associated storage pools"), TIER_DISABLED("TIER-7",
-        "The requested tier is disabled"), TIER_LINK_VIRTUALDATACENTER_PARAM_NOT_FOUND("TIER-8",
-        "VirtualDatacenter parameter was not found in tier link"), TIER_LINK_VIRTUALDATACENTER_DIFFERENT(
-        "TIER-9", "The Tier's virtualdatacenter link does not match the virtualdatacenter supplied"),
+        "The requested storage tier is disabled"), TIER_LINK_VIRTUALDATACENTER_PARAM_NOT_FOUND("TIER-8",
+        "VirtualDatacenter parameter was not found in storage tier link"), TIER_LINK_VIRTUALDATACENTER_DIFFERENT(
+        "TIER-9", "The storage tier's virtualdatacenter link does not match the virtualdatacenter supplied"),
 
     // DEVICES
     NON_EXISTENT_DEVICE("DEVICE-0", "The requested device does not exist"), DEVICE_DUPLICATED(
