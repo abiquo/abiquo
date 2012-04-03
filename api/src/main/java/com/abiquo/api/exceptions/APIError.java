@@ -515,10 +515,10 @@ public enum APIError
         "DEVICE-1", "Duplicate Storage Device"),
 
     // STATISTICS
-    NON_EXISTENT_STATS("STATS-0", "Non-existent statistical data"), NON_EXISTENT_STATS_FOR_DATACENTER(
-        "STATS-1", "Non-existent statistical data for the requested datacenter"), NON_EXISTENT_STATS_FOR_DCLIMITS(
-        "STATS-2", "Non-existent statistical data for the requested enterprise in this datacenter"), NON_EXISTENT_STATS_FOR_ENTERPRISE(
-        "STATS-3", "Non-existent statistical data for the requested enterprise"), NODECOLLECTOR_ERROR(
+    NON_EXISTENT_STATS("STATS-0", "No statistical data found"), NON_EXISTENT_STATS_FOR_DATACENTER(
+        "STATS-1", "No statistical data found for the requested datacenter"), NON_EXISTENT_STATS_FOR_DCLIMITS(
+        "STATS-2", "No statistical data found for the requested enterprise in this datacenter"), NON_EXISTENT_STATS_FOR_ENTERPRISE(
+        "STATS-3", "No statistical data found for the requested enterprise"), NODECOLLECTOR_ERROR(
         "NODECOLLECTOR-1", "Nodecollector has raised an error"),
 
     // QUERY PAGGING STANDARD ERRORS
