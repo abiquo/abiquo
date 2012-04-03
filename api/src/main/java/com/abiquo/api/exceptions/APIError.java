@@ -499,9 +499,9 @@ public enum APIError
         "The license is already being used"),
 
     // TIERS
-    NON_EXISTENT_TIER("TIER-0", "The requested tier does not exist"), NULL_TIER("TIER-1",
+    NON_EXISTENT_TIER("TIER-0", "The requested storage tier does not exist"), NULL_TIER("TIER-1",
         "Embedded tier of the StoragePool cannot be null"), MISSING_TIER_LINK("TIER-2",
-        "Missing link to the tier"), TIER_PARAM_NOT_FOUND("TIER-3", "Missing tiers parameter"), TIER_LINK_DATACENTER_PARAM_NOT_FOUND(
+        "Missing link to the storage tier"), TIER_PARAM_NOT_FOUND("TIER-3", "Missing storage tier parameter"), TIER_LINK_DATACENTER_PARAM_NOT_FOUND(
         "TIER-4", "Datacenter parameter in tier link not found"), TIER_LINK_DATACENTER_DIFFERENT(
         "TIER-5",
         "The Tier's datacenter is not the same datacenter where you want to create the StoragePool"), TIER_CONFLICT_DISABLING_TIER(
@@ -561,14 +561,14 @@ public enum APIError
         "VOL-39", "The volume can only be moved between Virtual Datacenters of the same Datacenter"),
 
     // SSM
-    SSM_GET_POOLS_ERROR("SSM-1", "Could not get the storage pools in the target storage device"), SSM_GET_POOL_ERROR(
-        "SSM-2", "Could not get the given storage pool in the target storage device"), SSM_GET_VOLUMES_ERROR(
+    SSM_GET_POOLS_ERROR("SSM-1", "Could not get the storage pools on the target storage device"), SSM_GET_POOL_ERROR(
+        "SSM-2", "Could not get the given storage pool on the target storage device"), SSM_GET_VOLUMES_ERROR(
         "SSM-3", "Could not get the volumes in the given storage pool"), SSM_GET_VOLUME_ERROR(
         "SSM-4", "Could not get the given volume in the given storage pool"), SSM_CREATE_VOLUME_ERROR(
-        "SSM-5", "Could not create the volume in the target storage device"), SSM_DELETE_VOLUME_ERROR(
+        "SSM-5", "Could not create the volume on the target storage device"), SSM_DELETE_VOLUME_ERROR(
         "SSM-6", "Could not delete the volume from the target storage device"), SSM_UPDATE_ERROR(
-        "SSM-7", "Could not update the volume in the target storage devide"), SSM_ADD_INITIATOR_ERROR(
-        "SSM-8", "Could not add the given iSCSI initiator in the target storage device"), SSM_REMOVE_INITIATOR_ERROR(
+        "SSM-7", "Could not update the volume on the target storage devide"), SSM_ADD_INITIATOR_ERROR(
+        "SSM-8", "Could not add the given iSCSI initiator on the target storage device"), SSM_REMOVE_INITIATOR_ERROR(
         "SSM-9", "Could not remove the given iSCSI initiator from the target storage device"),
 
     // RULES
