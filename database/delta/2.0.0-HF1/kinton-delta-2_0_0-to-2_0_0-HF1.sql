@@ -158,7 +158,7 @@ CREATE TRIGGER kinton.create_nodevirtualimage_update_stats AFTER INSERT ON kinto
     IF type=1 THEN
     	-- Imported !!!
 		IF state NOT IN ("NOT_ALLOCATED","UNKNOWN") THEN
-			INSERT INTO debug_msg (msg) VALUES (CONCAT('CreateNVI deploy detected. Adding VM ', NEW.idVM));
+			-- INSERT INTO debug_msg (msg) VALUES (CONCAT('CreateNVI deploy detected. Adding VM ', NEW.idVM));
 			UPDATE IGNORE cloud_usage_stats SET vMachinesTotal = vMachinesTotal+1
                 WHERE idDataCenter = idDataCenterObj;
                 UPDATE IGNORE vapp_enterprise_stats SET vmCreated = vmCreated+1
@@ -167,7 +167,7 @@ CREATE TRIGGER kinton.create_nodevirtualimage_update_stats AFTER INSERT ON kinto
                 WHERE idVirtualDataCenter = idVirtualDataCenterObj;
                 END IF;
           IF state = "ON" THEN 	
-          	INSERT INTO debug_msg (msg) VALUES (CONCAT('CreateNVI deploy runningVM detected. Adding RUnning VM ', NEW.idVM));
+          	-- INSERT INTO debug_msg (msg) VALUES (CONCAT('CreateNVI deploy runningVM detected. Adding RUnning VM ', NEW.idVM));
 			UPDATE IGNORE vapp_enterprise_stats SET vmActive = vmActive+1
 		        WHERE idVirtualApp = idVirtualAppObj;
 		        UPDATE IGNORE vdc_enterprise_stats SET vmActive = vmActive+1
