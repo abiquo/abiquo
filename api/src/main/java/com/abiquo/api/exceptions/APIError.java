@@ -43,7 +43,7 @@ public enum APIError
         "409-CONFLICT", "Conflict"), STATUS_HEADER_VERSION_MANDATORY("412-PRECONDITION FAILED",
         "Header 'X-abiquo-version' is mandatory"), STATUS_NOT_ACCEPTABLE_VERSION(
         "406-NOT ACCEPTABLE", "Invalid version parameter for 'Accept' header"), STATUS_UNSUPPORTED_MEDIA_TYPE_VERSION(
-        "415-UNSUPPORTED MEDIA TYPE", "Invalid version 'Content-type' "), STATUS_UNSUPPORTED_MEDIA_TYPE(
+        "415-UNSUPPORTED MEDIA TYPE", "Invalid 'Content-type' version"), STATUS_UNSUPPORTED_MEDIA_TYPE(
         "415-UNSUPPORTED MEDIA TYPE",
         "The Abiquo API currently only supports application/XML Media Type"), STATUS_INTERNAL_SERVER_ERROR(
         "500-INTERNAL SERVER ERROR", "Unexpected exception"), STATUS_UNPROVISIONED(
@@ -256,7 +256,7 @@ public enum APIError
     // NETWORK
     NETWORK_INVALID_CONFIGURATION("NET-0",
         "Invalid network configuration for the virtual datacenter"), NETWORK_WITHOUT_IPS("NET-8",
-        "This network does not have IP addresses"), NETWORK_IP_FROM_BIGGER_THAN_IP_TO("NET-9",
+        "This network has no IP addresses"), NETWORK_IP_FROM_BIGGER_THAN_IP_TO("NET-9",
         "Parameter IPFrom is greater than IPTo"), NETWORK_IP_FROM_ERROR("NET-10",
         "Parameter IPFrom is invalid"), NETWORK_IP_TO_ERROR("NET-11", "Parameter IPTo is invalid"), NETWORK_INVALID_CONFIGURATION_LINK(
         "NET-12", "Invalid link to configure the Virtual Machine's network"), NETWORK_LINK_INVALID_VDC(
@@ -360,8 +360,8 @@ public enum APIError
         "The remote service is not assigned to the datacenter"), WRONG_REMOTE_SERVICE_TYPE("RS-1",
         "Wrong remote service type"), NON_EXISTENT_REMOTE_SERVICE_TYPE("RS-2",
         "The remote service does not exist"), REMOTE_SERVICE_URL_ALREADY_EXISTS("RS-3",
-        "The remote service's URL already exists and cannot be duplicated"), REMOTE_SERVICE_MALFORMED_URL(
-        "RS-4", "The remote service's URL is not well formed"), REMOTE_SERVICE_POOL_ASIGNED("RS-5",
+        "The remote service URL already exists and cannot be duplicated"), REMOTE_SERVICE_MALFORMED_URL(
+        "RS-4", "The remote service URL is not well formed"), REMOTE_SERVICE_POOL_ASIGNED("RS-5",
         "This datacenter already has a storage pool assigned"), REMOTE_SERVICE_TYPE_EXISTS("RS-6",
         "This datacenter already has a remote service of that type"), REMOTE_SERVICE_CONNECTION_FAILED(
         "RS-7", "Failed connection to the remote service"), REMOTE_SERVICE_CANNOT_BE_CHECKED(
@@ -369,12 +369,12 @@ public enum APIError
         "AM-0",
         "The repository exported by the current appliance manager is being used in another datacenter"), APPLIANCE_MANAGER_REPOSITORY_IN_USE(
         "AM-1",
-        "The current repository holds virtual images being used on some virtual appliances, so it is not possible to remove this remote service. You can modify the appliance manager but only if the same repository is used."), REMOTE_SERVICE_STORAGE_REMOTE_WITH_POOLS(
+        "The current repository holds virtual machine templates being used in some virtual appliances, so it is not possible to remove this remote service. You can change the appliance manager but only if the same repository is used."), REMOTE_SERVICE_STORAGE_REMOTE_WITH_POOLS(
         "RS-9", "Cannot delete a storage manager with associated storage pools"), REMOTE_SERVICE_IS_BEING_USED(
         "RS-10",
         "Cannot delete a Virtual System Monitor or DHCP Service. There are virtual machines deployed."), REMOTE_SERVICE_WRONG_URL(
         "RS-11", "URL supplied is not valid"), REMOTE_SERVICE_DHCP_WRONG_URI("RS-12",
-        "The DHCP URI is invalid"), REMOTE_SERVICE_DATACENTER_UUID_NOT_FOUND("RS-13",
+        "The URI of the DHCP remote service is invalid"), REMOTE_SERVICE_DATACENTER_UUID_NOT_FOUND("RS-13",
         "The remote service does not have the *abiquo.datacenter.id* property set"), REMOTE_SERVICE_DATACENTER_UUID_INCONSISTENT(
         "RS-14",
         "The remote service is configured with a different datacenter UUID, please adjust the *abiquo.datacenter.id* property in the remote service."), REMOTE_SERVICE_UNDEFINED_PORT(
@@ -386,7 +386,7 @@ public enum APIError
     //
     AM_CLIENT("AM-0", "Failed Appliance Manager communication"), AM_TIMEOUT("AM-1",
         "Timeout during Appliance Manager communication"), AM_UNAVAILABE("AM-2",
-        "AM service unavailable, check the URL service."), AM_FAILED_REQUEST("AM-3",
+        "AM service unavailable; please check the URL of the service."), AM_FAILED_REQUEST("AM-3",
         "Failed Appliance Manager request."),
 
     // OVF PACKAGE LIST
@@ -448,7 +448,7 @@ public enum APIError
 
     // STORAGE POOL
     MISSING_REQUIRED_QUERY_PARAMETER_IQN("SP-1", "Missing IQN query parameter"), CONFLICT_STORAGE_POOL(
-        "SP-2", "The id of the storage pool and the id of the object supplied must be the same"), NON_EXISTENT_STORAGE_POOL(
+        "SP-2", "The ID of the storage pool and the ID of the object supplied must be the same"), NON_EXISTENT_STORAGE_POOL(
         "SP-3", "The requested storage pool does not exist"), STORAGE_POOL_ERROR_MODIFYING("SP-4",
         "There was an unexpected error while modifying the storage pool"), STORAGE_POOLS_SYNC(
         "SP-5", "Could not get the storage pools from the target device"), STORAGE_POOL_SYNC(
@@ -499,9 +499,9 @@ public enum APIError
         "The license is already being used"),
 
     // TIERS
-    NON_EXISTENT_TIER("TIER-0", "The requested tier does not exist"), NULL_TIER("TIER-1",
+    NON_EXISTENT_TIER("TIER-0", "The requested storage tier does not exist"), NULL_TIER("TIER-1",
         "Embedded tier of the StoragePool cannot be null"), MISSING_TIER_LINK("TIER-2",
-        "Missing link to the tier"), TIER_PARAM_NOT_FOUND("TIER-3", "Missing tiers parameter"), TIER_LINK_DATACENTER_PARAM_NOT_FOUND(
+        "Missing link to the storage tier"), TIER_PARAM_NOT_FOUND("TIER-3", "Missing storage tier parameter"), TIER_LINK_DATACENTER_PARAM_NOT_FOUND(
         "TIER-4", "Datacenter parameter in tier link not found"), TIER_LINK_DATACENTER_DIFFERENT(
         "TIER-5",
         "The Tier's datacenter is not the same datacenter where you want to create the StoragePool"), TIER_CONFLICT_DISABLING_TIER(
@@ -561,14 +561,14 @@ public enum APIError
         "VOL-39", "The volume can only be moved between Virtual Datacenters of the same Datacenter"),
 
     // SSM
-    SSM_GET_POOLS_ERROR("SSM-1", "Could not get the storage pools in the target storage device"), SSM_GET_POOL_ERROR(
-        "SSM-2", "Could not get the given storage pool in the target storage device"), SSM_GET_VOLUMES_ERROR(
+    SSM_GET_POOLS_ERROR("SSM-1", "Could not get the storage pools on the target storage device"), SSM_GET_POOL_ERROR(
+        "SSM-2", "Could not get the given storage pool on the target storage device"), SSM_GET_VOLUMES_ERROR(
         "SSM-3", "Could not get the volumes in the given storage pool"), SSM_GET_VOLUME_ERROR(
         "SSM-4", "Could not get the given volume in the given storage pool"), SSM_CREATE_VOLUME_ERROR(
-        "SSM-5", "Could not create the volume in the target storage device"), SSM_DELETE_VOLUME_ERROR(
+        "SSM-5", "Could not create the volume on the target storage device"), SSM_DELETE_VOLUME_ERROR(
         "SSM-6", "Could not delete the volume from the target storage device"), SSM_UPDATE_ERROR(
-        "SSM-7", "Could not update the volume in the target storage devide"), SSM_ADD_INITIATOR_ERROR(
-        "SSM-8", "Could not add the given iSCSI initiator in the target storage device"), SSM_REMOVE_INITIATOR_ERROR(
+        "SSM-7", "Could not update the volume on the target storage devide"), SSM_ADD_INITIATOR_ERROR(
+        "SSM-8", "Could not add the given iSCSI initiator on the target storage device"), SSM_REMOVE_INITIATOR_ERROR(
         "SSM-9", "Could not remove the given iSCSI initiator from the target storage device"),
 
     // RULES
@@ -605,28 +605,28 @@ public enum APIError
             + "Please verify the credentials"), CHEF_INVALID_ENTERPRISE("CHEF-8",
         "The enterprise is not configured to use Chef"), CHEF_INVALID_VIRTUALMACHINE("CHEF-9",
         "The virtual machine cannot use Chef. "
-            + "Please, verify that the image is Chef enabled and the Enterprise can use Chef"), CHEF_INVALID_VALIDATOR_KEY(
+            + "Please verify that the image is Chef enabled and the Enterprise can use Chef"), CHEF_INVALID_VALIDATOR_KEY(
         "CHEF-10",
-        "The provided validator certificate is not a valid private key. Please verify the key format."), CHEF_INVALID_CLIENT_KEY(
+        "The validator certificate supplied is not a valid private key. Please verify the key format."), CHEF_INVALID_CLIENT_KEY(
         "CHEF-11",
-        "The provided admin certificate is not a valid private key. Please verify the key format."),
+        "The admin certificate supplied is not a valid private key. Please verify the key format."),
 
     // Parsing links
     LINKS_INVALID_LINK("LNK-0", "Invalid link. Check documentation"), LINKS_ONLY_ACCEPTS_ONE_LINK(
-        "LNK-1", "Number of links invalid: This resource only accepts a single link"), LINKS_VIRTUAL_MACHINE_TEMPLATE_NOT_FOUND(
+        "LNK-1", "Invalid number of links: This resource only accepts a single link"), LINKS_VIRTUAL_MACHINE_TEMPLATE_NOT_FOUND(
         "LNK-2", "Virtual Machine Template link with rel 'virtualmachinetemplate' is mandatory "), LINKS_VIRTUAL_MACHINE_TEMPLATE_INVALID_URI(
         "LNK-3", "Virtual Machine Template invalid link"),
 
     // CATEGORY
     NON_EXISTENT_CATEGORY("CATEGORY-1", "The requested category does not exist"), CATEGORY_DUPLICATED_NAME(
-        "CATEGORY-2", "Duplicated name for the category."), CATEGORY_NOT_ERASABLE("CATEGORY-3",
+        "CATEGORY-2", "A category with this name already exists."), CATEGORY_NOT_ERASABLE("CATEGORY-3",
         "This category cannot be deleted"), INVALID_CATEGORY_LINK("CATEGORY-4",
         "Invalid Category identifier in the Category link"), CATEGORY_CANNOT_BE_NULL("CATEGORY-5",
         "Category name cannot be null"), CATEGORY_CANNOT_MOVE_LOCAL("CATEGORY-6",
-        "Cannot move a local category to other enterprise."), CATEGORY_NO_PRIVELIGES_TO_CREATE_GLOBAL(
-        "CATEGORY-7", "Current User does not have enough privileges to create a global category."), CATEGORY_CANNOT_CHANGE_TO_LOCAL(
+        "Cannot move a local category to another enterprise."), CATEGORY_NO_PRIVELIGES_TO_CREATE_GLOBAL(
+        "CATEGORY-7", "Current user does not have enough privileges to create a global category."), CATEGORY_CANNOT_CHANGE_TO_LOCAL(
         "CATEGORY-8", "Cannot change a global category to a local category."), CATEGORY_NO_PRIVELIGES_TO_REMOVE(
-        "CATEGORY-9", "Current User does not have enough privileges to remove category."),
+        "CATEGORY-9", "Current user does not have enough privileges to remove this category."),
     // ICONS
     ICON_DUPLICATED_PATH("ICON-1", "Duplicate path for an icon"), NON_EXISTENT_ICON("ICON-2",
         "The requested icon does not exist"), NON_EXISENT_ICON_WITH_PATH("ICON-3",
