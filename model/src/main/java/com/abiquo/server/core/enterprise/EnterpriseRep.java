@@ -498,4 +498,10 @@ public class EnterpriseRep extends DefaultRepBase
     {
         return userDAO.isUserAllowedToUseVirtualDatacenter(username, authtype, privileges, idVdc);
     }
+
+    public boolean isUserAllowedToEnterprise(final String username, final String authtype,
+        final String[] privileges, final Integer idEnterprise)
+    {
+        return userDAO.isUserAllowedToEnterprise(username, authtype, privileges, idEnterprise);
+    }
 }
