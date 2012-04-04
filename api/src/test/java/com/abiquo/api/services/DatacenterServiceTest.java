@@ -119,8 +119,8 @@ public class DatacenterServiceTest extends AbstractJpaGeneratorIT
         catch (ConflictException e)
         {
             CommonError ce = e.getErrors().iterator().next();
-            assertEquals(ce.getCode(), APIError.NC_BAD_CONFIGURATION.getCode());
-            assertEquals(ce.getMessage(), APIError.NC_BAD_CONFIGURATION.getMessage());
+            assertEquals(ce.getCode(), APIError.NC_BAD_CREDENTIALS_TO_MACHINE.getCode());
+            assertEquals(ce.getMessage(), APIError.NC_BAD_CREDENTIALS_TO_MACHINE.getMessage());
             return;
         }
 
