@@ -43,22 +43,20 @@ import com.abiquo.server.core.appslibrary.CategoryDto;
 public class AppsLibraryService
 {
 
-    private final static boolean REPOSITORY_INCLUDE_USAGE = true;
-
     public AppsLibraryService()
     {
     }
 
     public DataResult<Repository> getDatacenterRepository(final UserSession userSession,
-        final Integer idDatacenter, final Integer idEnterprise, final Boolean refresh)
+        final Integer idDatacenter, final Integer idEnterprise, final Boolean refresh,
+        final Boolean includeUsage)
     {
         DatacenterRepositoryResourceStub dcRepoStub =
             APIStubFactory.getInstance(userSession, new DatacenterRepositoryResourceStubImpl(),
                 DatacenterRepositoryResourceStub.class);
 
         // refresh content and get
-        return dcRepoStub.getRepository(idDatacenter, idEnterprise, refresh,
-            REPOSITORY_INCLUDE_USAGE);
+        return dcRepoStub.getRepository(idDatacenter, idEnterprise, refresh, includeUsage);
     }
 
     /** Virtual images */

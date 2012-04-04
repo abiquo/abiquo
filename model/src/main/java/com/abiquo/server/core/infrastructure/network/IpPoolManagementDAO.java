@@ -1166,7 +1166,7 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
     {
         if (onlyAvailable)
         {
-            return " AND vm is null AND ip.quarantine = 0 ";
+            return " AND vm is null ";
         }
         else
         {
