@@ -143,6 +143,20 @@ LOCK TABLES `alerts` WRITE;
 INSERT INTO alerts (id, type, value, tstamp) values ("1", "REGISTER", "LATER", date_sub(now(), INTERVAL 4 DAY)), ("2", "HEARTBEAT", "YES", date_sub(now(), INTERVAL 4 DAY));
 UNLOCK TABLES;
 
+
+LOCK TABLES cloud_usage_stats WRITE;
+INSERT INTO cloud_usage_stats (idDataCenter,serversTotal,serversRunning,storageTotal,storageReserved,storageUsed,publicIPsTotal,publicIPsReserved,publicIPsUsed,vlanReserved,vlanUsed,vMachinesTotal,vMachinesRunning,vCpuTotal,vCpuReserved,vCpuUsed,vMemoryTotal,vMemoryReserved,vMemoryUsed,vStorageReserved,vStorageUsed,vStorageTotal,numUsersCreated,numVDCCreated,numEnterprisesCreated) VALUES (-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0);
+UNLOCK TABLES;
+
+INSERT IGNORE INTO enterprise_resources_stats (idEnterprise,vCpuReserved,vCpuUsed,memoryReserved,memoryUsed,localStorageReserved,localStorageUsed) VALUES (1 ,0,0,0,0,0,0);
+--
+UPDATE IGNORE cloud_usage_stats SET numEnterprisesCreated = numEnterprisesCreated+1 WHERE idDataCenter = -1;
+UPDATE IGNORE cloud_usage_stats SET numUsersCreated = numUsersCreated+2 WHERE idDataCenter = -1;
+-- myLocalMachine
+
+
+
+
 /*!40000 ALTER TABLE `system_properties` DISABLE KEYS */;
 LOCK TABLES `system_properties` WRITE;
 INSERT INTO `kinton`.`system_properties` (`name`, `value`, `description`) VALUES
@@ -236,15 +250,10 @@ UNLOCK TABLES;
 
 
 
-INSERT IGNORE INTO enterprise_resources_stats (idEnterprise,vCpuReserved,vCpuUsed,memoryReserved,memoryUsed,localStorageReserved,localStorageUsed) VALUES (1 ,0,0,0,0,0,0);
---
-UPDATE IGNORE cloud_usage_stats SET numEnterprisesCreated = numEnterprisesCreated+1 WHERE idDataCenter = -1;
-UPDATE IGNORE cloud_usage_stats SET numUsersCreated = numUsersCreated+2 WHERE idDataCenter = -1;
--- myLocalMachine
-
 
 --
 -- Checks ALL Tables in DB and adds the 'version_c' column required for Hibernate Persistence 
 --
+
 
 
