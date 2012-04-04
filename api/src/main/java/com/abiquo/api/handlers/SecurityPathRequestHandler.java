@@ -71,7 +71,7 @@ public class SecurityPathRequestHandler implements RequestHandler
      */
     public boolean matches(final String path)
     {
-        return true;
+        return false;
     }
 
     /**
@@ -88,7 +88,7 @@ public class SecurityPathRequestHandler implements RequestHandler
             if (handler.matches(path))
             {
                 handler.handleRequest(context, chain);
-                break;
+                return;
             }
         }
         // if no handler match we must continue
