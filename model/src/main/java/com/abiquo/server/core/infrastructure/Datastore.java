@@ -54,6 +54,7 @@ import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 
+import org.apache.commons.lang.builder.EqualsBuilder;
 import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.Range;
 
@@ -305,5 +306,24 @@ public class Datastore extends DefaultEntityBase
         setName(name);
         setDirectory(directory);
         addToMachines(machine);
+    }
+
+    /**
+     * Two datastores are the same if their UUIDs are the same.
+     */
+    @Override
+    public boolean equals(final Object obj)
+    {
+        if (obj instanceof Datastore == false)
+        {
+            return false;
+        }
+        if (this == obj)
+        {
+            return true;
+        }
+        Datastore rhs = (Datastore) obj;
+        return new EqualsBuilder().append(this.getDatastoreUUID(), rhs.getDatastoreUUID())
+            .isEquals();
     }
 }
