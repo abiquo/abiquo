@@ -99,11 +99,7 @@ public class NetworkResolver
         tokenizer.nextToken();
 
         firstElement.add(String.valueOf(firstOctet));
-
-        // Second element of the list of lists
-        secondElement.addAll(defineSecondList(firstOctet, tokenizer.nextToken()));
-
-        // Third and fourth element of the list token depends on absolutly the mask
+        secondElement.addAll(defineListFromMask(tokenizer.nextToken()));
         thirdElement.addAll(defineListFromMask(tokenizer.nextToken()));
         fourthElement.addAll(defineListFromMask(tokenizer.nextToken()));
 
