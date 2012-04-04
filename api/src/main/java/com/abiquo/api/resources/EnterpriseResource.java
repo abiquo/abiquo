@@ -147,7 +147,7 @@ public class EnterpriseResource extends AbstractResource
     public EnterpriseDto getEnterprise(@PathParam(ENTERPRISE) final Integer enterpriseId,
         @Context final IRESTBuilder restBuilder) throws Exception
     {
-        if (!securityService.hasPrivilege(Privileges.USERS_VIEW))
+        if (!securityService.hasPrivilege(Privileges.USERS_MANAGE_OTHER_ENTERPRISES))
         {
             User currentUser = userService.getCurrentUser();
             if (currentUser.getEnterprise().getId().equals(enterpriseId))
@@ -165,9 +165,8 @@ public class EnterpriseResource extends AbstractResource
             else
             {
                 // throws access denied exception
-                securityService.requirePrivilege(Privileges.USERS_VIEW);
+                securityService.requirePrivilege(Privileges.USERS_MANAGE_OTHER_ENTERPRISES);
             }
-
         }
 
         Enterprise enterprise = service.getEnterprise(enterpriseId);

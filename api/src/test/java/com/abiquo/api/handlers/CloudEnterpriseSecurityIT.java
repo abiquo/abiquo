@@ -53,7 +53,7 @@ import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.testng.TestConfig;
 
-@Test(groups = {TestConfig.CLOUD_SECURITY_INTEGRATION_TESTS})
+@Test(groups = {TestConfig.SECURITY_HANDLERS_INTEGRATION_TESTS})
 public class CloudEnterpriseSecurityIT extends AbstractJpaGeneratorIT
 {
     private final String USER = "simpleuser";
@@ -75,16 +75,6 @@ public class CloudEnterpriseSecurityIT extends AbstractJpaGeneratorIT
     private VirtualMachine sysadminVM;
 
     private VirtualMachine userVM;
-
-    @Test(enabled = true, groups = {TestConfig.CLOUD_SECURITY_INTEGRATION_TESTS})
-    public void userGetsVirtualMachineOtherEnterprise()
-    {
-        ClientResponse response =
-            get(resolveVirtualMachinesURI(sysadminVdc.getId(), sysadminVapp.getId()).concat("/")
-                .concat(sysadminVM.getId().toString()), USER, USER, VirtualMachineDto.MEDIA_TYPE);
-
-        assertEquals(response.getStatusCode(), Status.NOT_FOUND.getStatusCode());
-    }
 
     @BeforeMethod
     public void setupSyasdminEnvironment()
@@ -134,7 +124,7 @@ public class CloudEnterpriseSecurityIT extends AbstractJpaGeneratorIT
     // ----------------- //
     // VIRTUALDATACENTERS LIST
     // ----------------- //
-    @Test(groups = {TestConfig.CLOUD_SECURITY_INTEGRATION_TESTS})
+    @Test(groups = {TestConfig.SECURITY_HANDLERS_INTEGRATION_TESTS})
     public void sysadminGetsVirtualDatacenters()
     {
         ClientResponse response =
@@ -147,7 +137,7 @@ public class CloudEnterpriseSecurityIT extends AbstractJpaGeneratorIT
         assertEquals(sysadminVdc.getId(), vdcs.getCollection().get(0).getId());
     }
 
-    @Test(groups = {TestConfig.CLOUD_SECURITY_INTEGRATION_TESTS})
+    @Test(groups = {TestConfig.SECURITY_HANDLERS_INTEGRATION_TESTS})
     public void userGetsVirtualDatacenters()
     {
         ClientResponse response =
@@ -162,7 +152,7 @@ public class CloudEnterpriseSecurityIT extends AbstractJpaGeneratorIT
     // ----------------- //
     // VIRTUALDATACENTER
     // ----------------- //
-    @Test(groups = {TestConfig.CLOUD_SECURITY_INTEGRATION_TESTS})
+    @Test(groups = {TestConfig.SECURITY_HANDLERS_INTEGRATION_TESTS})
     public void sysadminGetsVirtualDatacenterOtherEnterprise()
     {
         ClientResponse response =
@@ -173,7 +163,7 @@ public class CloudEnterpriseSecurityIT extends AbstractJpaGeneratorIT
         assertEquals(response.getEntity(VirtualDatacenterDto.class).getId(), userVdc.getId());
     }
 
-    @Test(groups = {TestConfig.CLOUD_SECURITY_INTEGRATION_TESTS})
+    @Test(groups = {TestConfig.SECURITY_HANDLERS_INTEGRATION_TESTS})
     public void userGetsVirtualDatacenterOtherEnterprise()
     {
         ClientResponse response =
@@ -183,7 +173,7 @@ public class CloudEnterpriseSecurityIT extends AbstractJpaGeneratorIT
         assertEquals(response.getStatusCode(), Status.NOT_FOUND.getStatusCode());
     }
 
-    @Test(groups = {TestConfig.CLOUD_SECURITY_INTEGRATION_TESTS})
+    @Test(groups = {TestConfig.SECURITY_HANDLERS_INTEGRATION_TESTS})
     public void sysadminGetsVirtualDatacenterNOTExists()
     {
         ClientResponse response =
@@ -193,7 +183,7 @@ public class CloudEnterpriseSecurityIT extends AbstractJpaGeneratorIT
         assertEquals(response.getStatusCode(), Status.NOT_FOUND.getStatusCode());
     }
 
-    @Test(groups = {TestConfig.CLOUD_SECURITY_INTEGRATION_TESTS})
+    @Test(groups = {TestConfig.SECURITY_HANDLERS_INTEGRATION_TESTS})
     public void userGetsVirtualDatacenterNOTExists()
     {
         ClientResponse response =
@@ -206,7 +196,7 @@ public class CloudEnterpriseSecurityIT extends AbstractJpaGeneratorIT
     // ----------------- //
     // VIRTUAL APPLIANCE
     // ----------------- //
-    @Test(groups = {TestConfig.CLOUD_SECURITY_INTEGRATION_TESTS})
+    @Test(groups = {TestConfig.SECURITY_HANDLERS_INTEGRATION_TESTS})
     public void sysadminGetsVirtualApplianceOtherEnterprise()
     {
         ClientResponse response =
@@ -217,7 +207,7 @@ public class CloudEnterpriseSecurityIT extends AbstractJpaGeneratorIT
         assertEquals(response.getEntity(VirtualApplianceDto.class).getId(), userVapp.getId());
     }
 
-    @Test(groups = {TestConfig.CLOUD_SECURITY_INTEGRATION_TESTS})
+    @Test(groups = {TestConfig.SECURITY_HANDLERS_INTEGRATION_TESTS})
     public void userGetsVirtualApplianceOwnEnterprise()
     {
         ClientResponse response =
@@ -228,7 +218,7 @@ public class CloudEnterpriseSecurityIT extends AbstractJpaGeneratorIT
         assertEquals(response.getEntity(VirtualApplianceDto.class).getId(), userVapp.getId());
     }
 
-    @Test(groups = {TestConfig.CLOUD_SECURITY_INTEGRATION_TESTS})
+    @Test(groups = {TestConfig.SECURITY_HANDLERS_INTEGRATION_TESTS})
     public void userGetsVirtualApplianceOtherEnterprise()
     {
         ClientResponse response =
@@ -241,7 +231,7 @@ public class CloudEnterpriseSecurityIT extends AbstractJpaGeneratorIT
     // ----------------- //
     // VIRTUAL MACHINE
     // ----------------- //
-    @Test(groups = {TestConfig.CLOUD_SECURITY_INTEGRATION_TESTS})
+    @Test(groups = {TestConfig.SECURITY_HANDLERS_INTEGRATION_TESTS})
     public void sysadminGetsVirtualMachineOtherEnterprise()
     {
         ClientResponse response =
@@ -252,7 +242,7 @@ public class CloudEnterpriseSecurityIT extends AbstractJpaGeneratorIT
         assertEquals(response.getEntity(VirtualMachineDto.class).getId(), userVM.getId());
     }
 
-    @Test(groups = {TestConfig.CLOUD_SECURITY_INTEGRATION_TESTS})
+    @Test(groups = {TestConfig.SECURITY_HANDLERS_INTEGRATION_TESTS})
     public void userGetsVirtualMachineOwnEnterprise()
     {
         ClientResponse response =
@@ -261,6 +251,16 @@ public class CloudEnterpriseSecurityIT extends AbstractJpaGeneratorIT
 
         assertEquals(response.getStatusCode(), Status.OK.getStatusCode());
         assertEquals(response.getEntity(VirtualMachineDto.class).getId(), userVM.getId());
+    }
+
+    @Test(groups = {TestConfig.SECURITY_HANDLERS_INTEGRATION_TESTS})
+    public void userGetsVirtualMachineOtherEnterprise()
+    {
+        ClientResponse response =
+            get(resolveVirtualMachinesURI(sysadminVdc.getId(), sysadminVapp.getId()).concat("/")
+                .concat(sysadminVM.getId().toString()), USER, USER, VirtualMachineDto.MEDIA_TYPE);
+
+        assertEquals(response.getStatusCode(), Status.NOT_FOUND.getStatusCode());
     }
 
 }

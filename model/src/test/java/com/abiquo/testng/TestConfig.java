@@ -57,7 +57,7 @@ public class TestConfig
     public static final String EDIT_VM_INTEGRATION_TESTS = "it-editvm";
 
     /** TestNG group for the cloud enterprise security. */
-    public static final String CLOUD_SECURITY_INTEGRATION_TESTS = "it-cloudsecurity";
+    public static final String SECURITY_HANDLERS_INTEGRATION_TESTS = "it-securityhandlers";
 
     /** TestNG group for all unit tests. */
     public static final String ALL_UNIT_TESTS = "test-all";

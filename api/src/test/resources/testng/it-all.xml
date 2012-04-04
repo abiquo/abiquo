@@ -14,7 +14,7 @@
 				<include name="it-all" />				
 				<exclude name="it-am"/>	
 				<include name="it-editvm" />
-				<include name="it-cloudsecurity" />
+				<include name="it-securityhandlers" />
 			</run>
 		</groups>
 		<packages>
