@@ -102,7 +102,7 @@ public abstract class AbstractLibvirtCollector extends AbstractCollector
         {
             final NodeInfo nodeInfo = connection.nodeInfo();
             hostInfo.setName(connection.getHostName());
-            hostInfo.setCpu(Long.valueOf(nodeInfo.cpus));
+            hostInfo.setCpu(Long.valueOf(nodeInfo.cores));
             hostInfo.setRam(nodeInfo.memory * KBYTE);
             hostInfo.setHypervisor(getHypervisorType().getValue());
             hostInfo.setVersion(String.valueOf(connection.getVersion()));
