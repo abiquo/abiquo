@@ -59,14 +59,29 @@ public class RemoteServicesResourceStubImpl extends AbstractAPIStub implements
                 getApiClient().getAdministrationService().getDatacenter(
                     remoteService.getIdDataCenter());
             org.jclouds.abiquo.domain.infrastructure.RemoteService rs =
-                org.jclouds.abiquo.domain.infrastructure.RemoteService.builder(getApiClient(), dc)
-                    .ip(remoteService.getDomainName()).type(
+                org.jclouds.abiquo.domain.infrastructure.RemoteService
+                    .builder(getApiClient(), dc)
+                    .ip(remoteService.getDomainName())
+                    .type(
                         RemoteServiceType
-                            .valueOf(remoteService.getRemoteServiceType().getValueOf())).port(
-                        remoteService.getPort()).build();
+                            .valueOf(remoteService.getRemoteServiceType().getValueOf()))
+                    .port(remoteService.getPort()).build();
             rs.save();
+
             result.setData(RemoteService.create(rs.unwrap(), remoteService.getIdDataCenter()));
             result.setSuccess(Boolean.TRUE);
+
+            // ApplianceManager with errors isn't added
+            if (rs.getType() == RemoteServiceType.APPLIANCE_MANAGER)
+            {
+                boolean amError = !rs.unwrap().getConfigurationErrors().isEmpty();
+                if (amError)
+                {
+                    result.setSuccess(Boolean.FALSE);
+                    result.setData(null);
+                    result.setMessage(rs.unwrap().getConfigurationErrors().toString());
+                }
+            }
         }
         catch (Exception ex)
         {
