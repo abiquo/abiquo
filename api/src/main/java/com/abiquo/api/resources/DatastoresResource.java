@@ -44,6 +44,8 @@ package com.abiquo.api.resources;
 
 import java.util.List;
 
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -76,6 +78,10 @@ import com.abiquo.server.core.infrastructure.DatastoresDto;
 public class DatastoresResource extends AbstractResource
 {
     public static final String DATASTORES_PATH = "datastores";
+
+    public static final String REFRESH_ACTION_PATH = "action/refresh";
+
+    public static final String REFRESH_ACTION_REL = "refresh";
 
     @Autowired
     DatastoreService service;
@@ -159,4 +165,16 @@ public class DatastoresResource extends AbstractResource
 
         return dto;
     }
+
+    @Path(DatastoresResource.REFRESH_ACTION_PATH)
+    @GET
+    public void refreshDatastores(
+        @PathParam(DatacenterResource.DATACENTER) @NotNull @Min(1) final Integer datacenterId,
+        @PathParam(RackResource.RACK) final Integer rackId,
+        @PathParam(MachineResource.MACHINE) final Integer machineId,
+        @Context final IRESTBuilder restBuilder) throws Exception
+    {
+        service.refreshDatastores(datacenterId, rackId, machineId);
+    }
+
 }
