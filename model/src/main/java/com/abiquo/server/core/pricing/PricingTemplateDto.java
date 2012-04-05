@@ -28,14 +28,14 @@ import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.abiquo.model.transport.SingleResourceTransportDto;
-import com.abiquo.server.core.infrastructure.DatacenterDto;
 
 @XmlRootElement(name = "pricingTemplate")
 public class PricingTemplateDto extends SingleResourceTransportDto
 {
     private static final long serialVersionUID = -6898276066732200634L;
-    
+
     public static final String BASE_MEDIA_TYPE = "application/vnd.abiquo.pricingtemplate+xml";
+
     public static final String MEDIA_TYPE = BASE_MEDIA_TYPE + "; version=" + API_VERSION;
 
     public PricingTemplateDto()
@@ -46,7 +46,7 @@ public class PricingTemplateDto extends SingleResourceTransportDto
         final BigDecimal standingChargePeriod, final BigDecimal vlan, final Integer chargingPeriod,
         final BigDecimal minimumChargePeriod, final boolean showChangesBefore,
         final Integer minimumCharge, final BigDecimal publicIp, final BigDecimal vCpu,
-        final BigDecimal memoryMB, final boolean defaultTemplate, final String description)
+        final BigDecimal memoryGB, final boolean defaultTemplate, final String description)
     {
         this.name = name;
         this.hdGB = hdGb;
@@ -58,7 +58,7 @@ public class PricingTemplateDto extends SingleResourceTransportDto
         this.minimumCharge = minimumCharge;
         this.publicIp = publicIp;
         this.vcpu = vCpu;
-        this.memoryMB = memoryMB;
+        this.memoryGB = memoryGB;
         this.defaultTemplate = defaultTemplate;
         this.description = description;
         this.lastUpdate = new Date();
@@ -234,16 +234,16 @@ public class PricingTemplateDto extends SingleResourceTransportDto
         this.publicIp = publicIp;
     }
 
-    private BigDecimal memoryMB;
+    private BigDecimal memoryGB;
 
-    public BigDecimal getMemoryMB()
+    public BigDecimal getMemoryGB()
     {
-        return memoryMB;
+        return memoryGB;
     }
 
-    public void setMemoryMB(final BigDecimal memoryMB)
+    public void setMemoryGB(final BigDecimal memoryGB)
     {
-        this.memoryMB = memoryMB;
+        this.memoryGB = memoryGB;
     }
 
     private Date lastUpdate;
@@ -281,7 +281,7 @@ public class PricingTemplateDto extends SingleResourceTransportDto
     {
         this.defaultTemplate = defaultTemplate;
     }
-    
+
     @Override
     public String getMediaType()
     {
