@@ -32,7 +32,7 @@
 	<listener>
 		<listener-class>com.abiquo.api.web.listener.AmqpConsumerContextListener</listener-class>
 	</listener>
-
+    
 	<filter>
 		<filter-name>securedURLRewrite</filter-name>
 		<filter-class>com.abiquo.api.web.filters.SecuredURLRewriteFilter</filter-class>

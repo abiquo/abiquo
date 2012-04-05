@@ -21,7 +21,6 @@
 
 package com.abiquo.api.resources.appslibrary;
 
-import static com.abiquo.api.resources.appslibrary.CategoryResource.createPersistenceObject;
 import static com.abiquo.api.resources.appslibrary.CategoryResource.createTransferObject;
 
 import java.util.Collection;
@@ -31,6 +30,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 
 import org.apache.wink.common.annotations.Workspace;
@@ -56,16 +56,30 @@ public class CategoriesResource extends AbstractResource
 
     public static final String CATEGORIES_PATH = "config/categories";
 
+    public final static String CATEGORIES_OF_ENTERPRISE_QUERYPARAM = "idEnterprise";
+
     // TODO get allowed categories
 
     @Autowired
     private CategoryService service;
 
+    /**
+     * Returns all categories
+     * 
+     * @title Retrieve all categories
+     * @param restBuilder a Context-injected object to create the links of the Dto
+     * @return a {CategoriesDto} object with all categories
+     * @throws Exception
+     */
     @GET
     @Produces(CategoriesDto.MEDIA_TYPE)
-    public CategoriesDto getCategory(@Context final IRESTBuilder restBuilder) throws Exception
+    public CategoriesDto getCategory(
+        @QueryParam(CATEGORIES_OF_ENTERPRISE_QUERYPARAM) final Integer idEnterprise,
+        @Context final IRESTBuilder restBuilder) throws Exception
     {
-        Collection<Category> all = service.getCategories();
+        Collection<Category> all =
+            idEnterprise == null ? service.getCategories(0, false) : service.getCategories(
+                idEnterprise, false);
 
         CategoriesDto categories = new CategoriesDto();
         for (Category c : all)
@@ -76,18 +90,22 @@ public class CategoriesResource extends AbstractResource
         return categories;
     }
 
+    /**
+     * Creates a category and returns it after creation
+     * 
+     * @param categoryDto category to create
+     * @param builder a Context-injected object to create the links of the Dto
+     * @return a {CategoryDto} with the created category
+     * @throws Exception
+     */
     @POST
     @Consumes(CategoryDto.MEDIA_TYPE)
     @Produces(CategoryDto.MEDIA_TYPE)
     public CategoryDto postCategory(final CategoryDto categoryDto,
         @Context final IRESTBuilder builder) throws Exception
     {
-        Category category = createPersistenceObject(categoryDto);
-
-        LOGGER.info("Adding new category: {}", category.getName());
-
-        Category cat = service.addCategory(category);
-
+        LOGGER.info("Adding new category: {}", categoryDto.getName());
+        Category cat = service.addCategory(categoryDto);
         return createTransferObject(cat, builder);
     }
 

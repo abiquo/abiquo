@@ -135,8 +135,8 @@ public class AbstractAPIStub
             props.put("jclouds.timeouts.CloudClient.replaceVolumes", "90000");
 
             context =
-                new AbiquoContextFactory().createContext(token,
-                    ImmutableSet.<Module> of(new NullLoggingModule()), props);
+                new AbiquoContextFactory().createContext(token, ImmutableSet
+                    .<Module> of(new NullLoggingModule()), props);
         }
 
         return context;
@@ -357,12 +357,31 @@ public class AbstractAPIStub
             result.setResultCode(BasicResult.NOT_AUTHORIZED);
             throw new UserSessionException(result);
         }
+        else if (response.getStatusCode() == 406)
+        {
+            ErrorManager.getInstance(AbiCloudConstants.ERROR_PREFIX).reportError(
+                new ResourceManager(BasicCommand.class), result,
+                "onFaultAuthorization.noPermission", methodName);
+            result.setMessage(StringUtils.isBlank(message) ? response.getMessage() : message);
+            result.setResultCode(BasicResult.NOT_AUTHORIZED);
+            throw new UserSessionException(result);
+        }
+        else if (response.getStatusCode() == 415)
+        {
+            ErrorManager.getInstance(AbiCloudConstants.ERROR_PREFIX).reportError(
+                new ResourceManager(BasicCommand.class), result,
+                "onFaultAuthorization.noPermission", methodName);
+            result.setMessage(StringUtils.isBlank(message) ? response.getMessage() : message);
+            result.setResultCode(BasicResult.NOT_AUTHORIZED);
+            throw new UserSessionException(result);
+        }
         else
         {
             ErrorsDto errors = response.getEntity(ErrorsDto.class);
             result.setMessage(errors.toString());
             result.setErrorCode(errors.getCollection().get(0).getCode());
-            if (errors.getCollection().get(0).getCode().equals("SOFT_LIMIT_EXCEEDED"))
+            if (errors.getCollection().get(0).getCode().equals("SOFT_LIMIT_EXCEEDED")
+                || errors.getCollection().get(0).getCode().equals("LIMIT-2"))
             {
                 result.setResultCode(BasicResult.SOFT_LIMT_EXCEEDED);
                 // limit exceeded does not include the detail
@@ -488,8 +507,8 @@ public class AbstractAPIStub
 
     protected String createEnterpriseLink(final int enterpriseId)
     {
-        return URIResolver.resolveURI(apiUri, "admin/enterprises/{enterprise}",
-            Collections.singletonMap("enterprise", valueOf(enterpriseId)));
+        return URIResolver.resolveURI(apiUri, "admin/enterprises/{enterprise}", Collections
+            .singletonMap("enterprise", valueOf(enterpriseId)));
     }
 
     protected String createEnterpriseIPsLink(final int enterpriseId)
@@ -607,8 +626,8 @@ public class AbstractAPIStub
 
     protected String createRoleLink(final int roleId)
     {
-        return URIResolver.resolveURI(apiUri, "admin/roles/{role}",
-            Collections.singletonMap("role", valueOf(roleId)));
+        return URIResolver.resolveURI(apiUri, "admin/roles/{role}", Collections.singletonMap(
+            "role", valueOf(roleId)));
     }
 
     protected String createRolesLink()
@@ -635,8 +654,8 @@ public class AbstractAPIStub
 
     protected String createPrivilegeLink(final int privilegeId)
     {
-        return URIResolver.resolveURI(apiUri, "config/privileges/{privilege}",
-            Collections.singletonMap("privilege", valueOf(privilegeId)));
+        return URIResolver.resolveURI(apiUri, "config/privileges/{privilege}", Collections
+            .singletonMap("privilege", valueOf(privilegeId)));
     }
 
     protected String createRoleActionGetPrivilegesURI(final Integer entId)
@@ -668,8 +687,8 @@ public class AbstractAPIStub
 
     protected String createRoleLdapLink(final int roleLdapId)
     {
-        return URIResolver.resolveURI(apiUri, "admin/rolesldap/{roleldap}",
-            Collections.singletonMap("roleldap", valueOf(roleLdapId)));
+        return URIResolver.resolveURI(apiUri, "admin/rolesldap/{roleldap}", Collections
+            .singletonMap("roleldap", valueOf(roleLdapId)));
     }
 
     protected String createUsersLink(final String enterpriseId)
@@ -681,8 +700,8 @@ public class AbstractAPIStub
         final Integer numResults)
     {
         String uri =
-            URIResolver.resolveURI(apiUri, "admin/enterprises/{enterprise}/users",
-                Collections.singletonMap("enterprise", enterpriseId));
+            URIResolver.resolveURI(apiUri, "admin/enterprises/{enterprise}/users", Collections
+                .singletonMap("enterprise", enterpriseId));
 
         Map<String, String[]> queryParams = new HashMap<String, String[]>();
         if (offset != null && numResults != null)
@@ -759,8 +778,8 @@ public class AbstractAPIStub
     {
         String uri =
             URIResolver.resolveURI(apiUri,
-                "admin/enterprises/{enterprise}/appslib/templateDefinitions",
-                Collections.singletonMap("enterprise", enterpriseId));
+                "admin/enterprises/{enterprise}/appslib/templateDefinitions", Collections
+                    .singletonMap("enterprise", enterpriseId));
         return uri;
     }
 
@@ -1084,10 +1103,26 @@ public class AbstractAPIStub
 
     protected String createVirtualDatacenterDisksLink(final Integer vdcId)
     {
+
+        return createVirtualDatacenterDisksLink(vdcId, null);
+    }
+
+    protected String createVirtualDatacenterDisksLink(final Integer vdcId,
+        final Boolean forceSoftLimits)
+    {
         Map<String, String> params = new HashMap<String, String>();
         params.put("vdcid", vdcId.toString());
 
-        return resolveURI(apiUri, "cloud/virtualdatacenters/{vdcid}/disks", params);
+        String uri = resolveURI(apiUri, "cloud/virtualdatacenters/{vdcid}/disks", params);
+        Map<String, String[]> queryParams = new HashMap<String, String[]>();
+
+        if (forceSoftLimits != null)
+        {
+
+            queryParams.put("force", new String[] {forceSoftLimits.toString()});
+        }
+
+        return UriHelper.appendQueryParamsToPath(uri, queryParams, false);
     }
 
     protected String createVirtualDatacenterDiskLink(final Integer vdcId, final Integer diskId)
@@ -1197,6 +1232,20 @@ public class AbstractAPIStub
 
         return resolveURI(apiUri,
             "admin/datacenters/{datacenter}/racks/{rack}/machines/{machine}/virtualmachines",
+            params);
+    }
+
+    protected String createMachineLinkVm(final Integer datacenterId, final Integer rackId,
+        final Integer machineId, final Integer vmId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("datacenter", datacenterId.toString());
+        params.put("rack", rackId.toString());
+        params.put("machine", machineId.toString());
+        params.put("vm", vmId.toString());
+
+        return resolveURI(apiUri,
+            "admin/datacenters/{datacenter}/racks/{rack}/machines/{machine}/virtualmachines/{vm}",
             params);
     }
 
@@ -1705,8 +1754,8 @@ public class AbstractAPIStub
 
     protected String createCurrencyLink(final int currencyId)
     {
-        return URIResolver.resolveURI(apiUri, "config/currencies/{currency}",
-            Collections.singletonMap("currency", valueOf(currencyId)));
+        return URIResolver.resolveURI(apiUri, "config/currencies/{currency}", Collections
+            .singletonMap("currency", valueOf(currencyId)));
     }
 
     protected String createPricingTemplateLink(final int templateId)
@@ -1780,16 +1829,16 @@ public class AbstractAPIStub
 
     protected String createCostCodeLink(final int costCodeId)
     {
-        return URIResolver.resolveURI(apiUri, "config/costcodes/{costcode}",
-            Collections.singletonMap("costcode", valueOf(costCodeId)));
+        return URIResolver.resolveURI(apiUri, "config/costcodes/{costcode}", Collections
+            .singletonMap("costcode", valueOf(costCodeId)));
     }
 
     protected String createCostCodeCurrenciesLink(final String costCodeId, Integer offset,
         final Integer numResults)
     {
         String uri =
-            URIResolver.resolveURI(apiUri, "config/costcodes/{costcode}/currencies",
-                Collections.singletonMap("costcode", valueOf(costCodeId)));
+            URIResolver.resolveURI(apiUri, "config/costcodes/{costcode}/currencies", Collections
+                .singletonMap("costcode", valueOf(costCodeId)));
 
         Map<String, String[]> queryParams = new HashMap<String, String[]>();
         if (offset != null && numResults != null)

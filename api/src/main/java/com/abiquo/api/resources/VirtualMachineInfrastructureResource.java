@@ -45,6 +45,7 @@ import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.model.rest.RESTLink;
 import com.abiquo.model.util.ModelTransformer;
 import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
+import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineDto;
 import com.abiquo.server.core.infrastructure.storage.DiskManagement;
@@ -81,6 +82,22 @@ public class VirtualMachineInfrastructureResource extends AbstractResource
     @Autowired
     private StorageService storageService;
 
+    /**
+     * Return a virtual machine deployed in the given physical machine.
+     * 
+     * @title Retrive a virtual machine deployed in a physical machine
+     * @wiki Returns the requested virtual machine that is deployed in a physical machine and is
+     *       actually managed by abiquo. That means that the virtual machine exist in the database
+     *       and in the hypervisor.
+     * @param datacenterId identifier of the datacenter
+     * @param rackId identifier of the rack
+     * @param machineId identifier of the machine
+     * @param vmId identifier of the requested virtual machine
+     * @param restBuilder a Context-injected object to create the links of the Dto
+     * @return the {VirtualMachineDto} object with the virtual machine deployed in the physical
+     *         machine
+     * @throws Exception
+     */
     @GET
     @Produces(VirtualMachineDto.MEDIA_TYPE)
     public VirtualMachineDto getInfrastructureVirtualMachine(
@@ -93,7 +110,9 @@ public class VirtualMachineInfrastructureResource extends AbstractResource
         VirtualMachine vm =
             service.getVirtualMachineFromInfrastructure(datacenterId, rackId, machineId, vmId);
 
-        return createTransferObject(datacenterId, rackId, machineId, vm, restBuilder);
+        VirtualAppliance vapp = service.getVirtualApplianceFromVirtualMachineHelper(vm);
+
+        return createTransferObject(datacenterId, rackId, machineId, vm, vapp, restBuilder);
     }
 
     /**
@@ -107,7 +126,7 @@ public class VirtualMachineInfrastructureResource extends AbstractResource
      */
     public static VirtualMachineDto createTransferObject(final Integer datacenterId,
         final Integer rackId, final Integer machineId, final VirtualMachine vm,
-        final IRESTBuilder restBuilder) throws Exception
+        final VirtualAppliance vapp, final IRESTBuilder restBuilder) throws Exception
     {
         // TODO: Try with enterprise and user != null
         VirtualMachineDto vmDto =
@@ -132,7 +151,7 @@ public class VirtualMachineInfrastructureResource extends AbstractResource
             userId = vm.getUser().getId();
         }
         vmDto.setLinks(restBuilder.buildVirtualMachineAdminLinks(datacenterId, rackId, machineId,
-            enterpriseId, userId, vm.getHypervisor().getType()));
+            enterpriseId, userId, vm.getHypervisor().getType(), vapp, vm.getId()));
 
         final VirtualMachineTemplate vmtemplate = vm.getVirtualMachineTemplate();
         if (vmtemplate != null)
@@ -157,6 +176,7 @@ public class VirtualMachineInfrastructureResource extends AbstractResource
     /**
      * Get list of disks in a virtual machine
      * 
+     * @title Retrieve the list of hard disks of a virtual machine in the cloud infrastructure
      * @param datacenterId
      * @param rackId
      * @param machineId

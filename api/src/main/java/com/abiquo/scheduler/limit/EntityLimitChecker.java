@@ -102,7 +102,7 @@ public abstract class EntityLimitChecker<T extends DefaultEntityWithLimits>
      */
     public void checkCurrentLimits(final T entity)
     {
-        checkLimits(entity, new VirtualMachineRequirementsEmpty(), true);
+        checkLimits(entity, new VirtualMachineRequirementsEmpty(), true, true);
     }
 
     /**
@@ -122,19 +122,40 @@ public abstract class EntityLimitChecker<T extends DefaultEntityWithLimits>
         final boolean force) throws LimitExceededException
     {
 
-        checkLimits(entity, required, force, true, true);
+        checkLimits(entity, required, force, true, true, true);
+    }
+
+    public void checkLimits(final T entity, final VirtualMachineRequirements required,
+        final boolean force, final boolean allLimits) throws LimitExceededException
+    {
+
+        checkLimits(entity, required, force, true, true, true, allLimits);
     }
 
     public void checkLimits(final T entity, final VirtualMachineRequirements required,
         final boolean force, final Boolean checkVLAN) throws LimitExceededException
     {
 
-        checkLimits(entity, required, force, checkVLAN, false);
+        checkLimits(entity, required, force, checkVLAN, false, true);
     }
 
     public void checkLimits(final T entity, final VirtualMachineRequirements required,
         final boolean force, final Boolean checkVLAN, final Boolean checkIPs)
         throws LimitExceededException
+    {
+        checkLimits(entity, required, force, checkVLAN, checkIPs, true);
+    }
+
+    public void checkLimits(final T entity, final VirtualMachineRequirements required,
+        final boolean force, final Boolean checkVLAN, final Boolean checkIPs, final Boolean checkHD)
+        throws LimitExceededException
+    {
+        checkLimits(entity, required, force, checkVLAN, checkIPs, checkHD, false);
+    }
+
+    public void checkLimits(final T entity, final VirtualMachineRequirements required,
+        final boolean force, final Boolean checkVLAN, final Boolean checkIPs,
+        final Boolean checkHD, final Boolean allLimits) throws LimitExceededException
     {
         if (allNoLimits(entity))
         {
@@ -145,7 +166,8 @@ public abstract class EntityLimitChecker<T extends DefaultEntityWithLimits>
 
         Map<LimitResource, LimitStatus> entityResourceStatus =
 
-        getResourcesLimit(entity, actualAllocated, required, checkVLAN, checkIPs);
+            getResourcesLimit(entity, actualAllocated, required, checkVLAN, checkIPs, checkHD,
+                allLimits);
 
         entityResourceStatus = getFilterResourcesStatus(entityResourceStatus);
 
@@ -157,15 +179,30 @@ public abstract class EntityLimitChecker<T extends DefaultEntityWithLimits>
      */
     private Map<LimitResource, LimitStatus> getResourcesLimit(final T limits,
         final DefaultEntityCurrentUsed actualAllocated, final VirtualMachineRequirements required,
-        final Boolean checkVLAN, final Boolean checkIPs)
+        final Boolean checkVLAN, final Boolean checkIPs, final Boolean checkHD,
+        final Boolean allLimits)
     {
 
         Map<LimitResource, LimitStatus> limitStatus =
             new HashMap<EntityLimitChecker.LimitResource, DefaultEntityWithLimits.LimitStatus>();
-
+        // Initialized in order to show GUI's popup values
+        limitStatus.put(LimitResource.CPU, LimitStatus.OK);
+        limitStatus.put(LimitResource.RAM, LimitStatus.OK);
+        limitStatus.put(LimitResource.STORAGE, LimitStatus.OK);
+        limitStatus.put(LimitResource.HD, LimitStatus.OK);
+        limitStatus.put(LimitResource.VLAN, LimitStatus.OK);
+        // limitStatus.put(LimitResource.PUBLICIP, LimitStatus.OK);
+        if (checkHD)
+        {
+            long actualAndRequiredHd = actualAllocated.getHdInMb() + required.getHd();
+            limitStatus.put(LimitResource.HD, limits.checkHdStatus(actualAndRequiredHd));
+            if (!allLimits)
+            {
+                return limitStatus;
+            }
+        }
         int actualAndRequiredCpu = (int) (actualAllocated.getCpu() + required.getCpu());
         int actualAndRequiredRam = (int) (actualAllocated.getRamInMb() + required.getRam());
-        long actualAndRequiredHd = actualAllocated.getHdInMb() + required.getHd();
         long actualAndRequiredStorage = actualAllocated.getStorage() + required.getStorage();
         if (checkVLAN)// && required.getPublicVLAN() != 0)
         {
@@ -185,7 +222,6 @@ public abstract class EntityLimitChecker<T extends DefaultEntityWithLimits>
         }
         limitStatus.put(LimitResource.CPU, limits.checkCpuStatus(actualAndRequiredCpu));
         limitStatus.put(LimitResource.RAM, limits.checkRamStatus(actualAndRequiredRam));
-        limitStatus.put(LimitResource.HD, limits.checkHdStatus(actualAndRequiredHd));
         limitStatus.put(LimitResource.STORAGE, limits.checkStorageStatus(actualAndRequiredStorage));
 
         return limitStatus;

@@ -23,13 +23,18 @@ package com.abiquo.server.core.enterprise;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.EntityManager;
 
+import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import com.abiquo.model.enumerator.Privileges;
+import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.common.persistence.DefaultDAOTestBase;
 import com.abiquo.server.core.common.persistence.TestDataAccessManager;
 import com.softwarementors.bzngine.engines.jpa.test.configuration.EntityManagerFactoryForTesting;
@@ -118,7 +123,7 @@ public class UserDAOTest extends DefaultDAOTestBase<UserDAO, User>
         UserDAO dao = createDaoForRollbackTransaction();
 
         User user = dao.getAbiquoUserByLogin(user1.getNick());
-        AssertEx.assertNotNull(user);
+        Assert.assertNotNull(user);
     }
 
     @Test
@@ -138,7 +143,7 @@ public class UserDAOTest extends DefaultDAOTestBase<UserDAO, User>
         UserDAO dao = createDaoForRollbackTransaction();
 
         User user = dao.getUserByAuth(user1.getNick(), User.AuthType.ABIQUO);
-        AssertEx.assertNotNull(user);
+        Assert.assertNotNull(user);
     }
 
     @Test
@@ -158,6 +163,262 @@ public class UserDAOTest extends DefaultDAOTestBase<UserDAO, User>
         UserDAO dao = createDaoForRollbackTransaction();
 
         boolean already = dao.existAnyUserWithNickAndAuth(user1.getNick(), User.AuthType.ABIQUO);
-        AssertEx.assertTrue(already);
+        Assert.assertTrue(already);
+    }
+
+    @Test
+    public void sysadminUserIsAllowedToUseOwnVDC()
+    {
+        Map<String, Object> map = setupSysadminUser();
+        User user = (User) map.get("sysadmin");
+        String[] ps = (String[]) map.get("sysadmin.privileges");
+        VirtualDatacenter vdc = (VirtualDatacenter) map.get("sysadmin.virtualdatacenter");
+
+        UserDAO dao = createDaoForRollbackTransaction();
+
+        boolean isAllowed =
+            dao.isUserAllowedToUseVirtualDatacenter(user.getNick(), user.getAuthType().name(), ps,
+                vdc.getId());
+        Assert.assertTrue(isAllowed);
+    }
+
+    @Test
+    public void userIsAllowedToUseOwnVDC()
+    {
+        Map<String, Object> map = setupNormalUser(null);
+        User user = (User) map.get("user");
+        String[] ps = (String[]) map.get("user.privileges");
+        VirtualDatacenter vdc = (VirtualDatacenter) map.get("user.virtualdatacenter");
+
+        UserDAO dao = createDaoForRollbackTransaction();
+
+        boolean isAllowed =
+            dao.isUserAllowedToUseVirtualDatacenter(user.getNick(), user.getAuthType().name(), ps,
+                vdc.getId());
+        Assert.assertTrue(isAllowed);
+    }
+
+    @Test
+    public void sysadminIsAllowedToUseOtherEnterpriseVDC()
+    {
+        Map<String, Object> map = setupSysadminUserAndNormalUser(null);
+        User user = (User) map.get("sysadmin");
+        String[] ps = (String[]) map.get("sysadmin.privileges");
+        VirtualDatacenter vdc = (VirtualDatacenter) map.get("user.virtualdatacenter");
+
+        UserDAO dao = createDaoForRollbackTransaction();
+
+        boolean isAllowed =
+            dao.isUserAllowedToUseVirtualDatacenter(user.getNick(), user.getAuthType().name(), ps,
+                vdc.getId());
+        Assert.assertTrue(isAllowed);
+    }
+
+    @Test
+    public void userIsNOTAllowedToUserOtherEnterpriseVDC()
+    {
+        Map<String, Object> map = setupSysadminUserAndNormalUser(null);
+        User user = (User) map.get("user");
+        String[] ps = (String[]) map.get("user.privileges");
+        VirtualDatacenter vdc = (VirtualDatacenter) map.get("sysadmin.virtualdatacenter");
+
+        UserDAO dao = createDaoForRollbackTransaction();
+
+        boolean isAllowed =
+            dao.isUserAllowedToUseVirtualDatacenter(user.getNick(), user.getAuthType().name(), ps,
+                vdc.getId());
+        Assert.assertFalse(isAllowed);
+    }
+
+    @Test
+    public void userIsNOTAllowedToUserOwnEnterpriseVDCRestricted()
+    {
+        Map<String, Object> map = setupSysadminUserAndNormalUser(true);
+        User user = (User) map.get("user");
+        String[] ps = (String[]) map.get("user.privileges");
+        VirtualDatacenter vdc = (VirtualDatacenter) map.get("user.virtualdatacenter");
+
+        UserDAO dao = createDaoForRollbackTransaction();
+
+        boolean isAllowed =
+            dao.isUserAllowedToUseVirtualDatacenter(user.getNick(), user.getAuthType().name(), ps,
+                vdc.getId());
+        Assert.assertFalse(isAllowed);
+    }
+
+    @Test
+    public void userIsAllowedToUserOwnEnterpriseVDCRestricted()
+    {
+        Map<String, Object> map = setupSysadminUserAndNormalUser(false);
+        User user = (User) map.get("user");
+        String[] ps = (String[]) map.get("user.privileges");
+        VirtualDatacenter vdc = (VirtualDatacenter) map.get("user.virtualdatacenter");
+
+        UserDAO dao = createDaoForRollbackTransaction();
+
+        boolean isAllowed =
+            dao.isUserAllowedToUseVirtualDatacenter(user.getNick(), user.getAuthType().name(), ps,
+                vdc.getId());
+        Assert.assertTrue(isAllowed);
+    }
+
+    // ENT
+    @Test
+    public void sysadminUserIsAllowedToOwnEnterprise()
+    {
+        Map<String, Object> map = setupSysadminUser();
+        User user = (User) map.get("sysadmin");
+        String[] ps = (String[]) map.get("sysadmin.privileges");
+        Enterprise ent = (Enterprise) map.get("sysadmin.enterprise");
+
+        UserDAO dao = createDaoForRollbackTransaction();
+
+        boolean isAllowed =
+            dao.isUserAllowedToEnterprise(user.getNick(), user.getAuthType().name(), ps,
+                ent.getId());
+        Assert.assertTrue(isAllowed);
+    }
+
+    @Test
+    public void userIsAllowedToUseOwnEnterprise()
+    {
+        Map<String, Object> map = setupNormalUser(null);
+        User user = (User) map.get("user");
+        String[] ps = (String[]) map.get("user.privileges");
+        Enterprise ent = (Enterprise) map.get("user.enterprise");
+
+        UserDAO dao = createDaoForRollbackTransaction();
+
+        boolean isAllowed =
+            dao.isUserAllowedToEnterprise(user.getNick(), user.getAuthType().name(), ps,
+                ent.getId());
+        Assert.assertTrue(isAllowed);
+    }
+
+    @Test
+    public void sysadminIsAllowedToUseOtherEnterprise()
+    {
+        Map<String, Object> map = setupSysadminUserAndNormalUser(null);
+        User user = (User) map.get("sysadmin");
+        String[] ps = (String[]) map.get("sysadmin.privileges");
+        Enterprise ent = (Enterprise) map.get("user.enterprise");
+
+        UserDAO dao = createDaoForRollbackTransaction();
+
+        boolean isAllowed =
+            dao.isUserAllowedToEnterprise(user.getNick(), user.getAuthType().name(), ps,
+                ent.getId());
+        Assert.assertTrue(isAllowed);
+    }
+
+    @Test
+    public void userIsNOTAllowedToUserOtherEnterprise()
+    {
+        Map<String, Object> map = setupSysadminUserAndNormalUser(null);
+        User user = (User) map.get("user");
+        String[] ps = (String[]) map.get("user.privileges");
+        Enterprise ent = (Enterprise) map.get("sysadmin.enterprise");
+
+        UserDAO dao = createDaoForRollbackTransaction();
+
+        boolean isAllowed =
+            dao.isUserAllowedToEnterprise(user.getNick(), user.getAuthType().name(), ps,
+                ent.getId());
+        Assert.assertFalse(isAllowed);
+    }
+
+    // ----------------------- //
+    // Private usefull methods //
+    // ----------------------- //
+    private Map<String, Object> setupSysadminUser()
+    {
+        Map<String, Object> map = new HashMap<String, Object>();
+
+        // sysadmin
+        User sysadmin = eg().createInstance(User.AuthType.ABIQUO);
+        VirtualDatacenter sysadminVdc =
+            eg().virtualDatacenterGenerator.createInstance(sysadmin.getEnterprise());
+        List<Object> sysadminEntitiesToPersist = new ArrayList<Object>();
+        List<Privilege> sysadminPrivileges = sysadmin.getRole().getPrivileges();
+
+        sysadminEntitiesToPersist.add(sysadmin.getEnterprise());
+        String[] sysadminPrivs = new String[sysadminPrivileges.size()];
+        for (int i = 0; i < sysadminPrivileges.size(); i++)
+        {
+            Privilege p = sysadminPrivileges.get(i);
+            sysadminEntitiesToPersist.add(p);
+            sysadminPrivs[i] = p.getName();
+        }
+        sysadminEntitiesToPersist.add(sysadmin.getRole());
+        sysadminEntitiesToPersist.add(sysadmin);
+        eg().virtualDatacenterGenerator.addAuxiliaryEntitiesToPersist(sysadminVdc,
+            sysadminEntitiesToPersist);
+        sysadminEntitiesToPersist.add(sysadminVdc);
+        ds().persistAll(sysadminEntitiesToPersist.toArray());
+
+        map.put("sysadmin", sysadmin);
+        map.put("sysadmin.virtualdatacenter", sysadminVdc);
+        map.put("sysadmin.privileges", sysadminPrivs);
+        map.put("sysadmin.enterprise", sysadmin.getEnterprise());
+
+        return map;
+    }
+
+    private Map<String, Object> setupNormalUser(final Boolean restrictVdc)
+    {
+        Map<String, Object> map = new HashMap<String, Object>();
+        // user
+        Role userRole = eg().roleGenerator.createInstance(Privileges.simpleRole());
+        User user = eg().createInstance(User.AuthType.ABIQUO, userRole);
+        VirtualDatacenter userVdc =
+            eg().virtualDatacenterGenerator.createInstance(user.getEnterprise());
+
+        List<Object> userEntitiesToPersist = new ArrayList<Object>();
+        List<Privilege> userPrivileges = user.getRole().getPrivileges();
+        userEntitiesToPersist.add(user.getEnterprise());
+        eg().virtualDatacenterGenerator.addAuxiliaryEntitiesToPersist(userVdc,
+            userEntitiesToPersist);
+        userEntitiesToPersist.add(userVdc);
+        ds().persistAll(userEntitiesToPersist.toArray());
+
+        if (restrictVdc != null)
+        {
+            if (restrictVdc)
+            {
+                // not allowed
+                user.setAvailableVirtualDatacenters(userVdc.getId() - 1 + "," + userVdc.getId() + 1);
+            }
+            else
+            {
+                // allowed
+                user.setAvailableVirtualDatacenters(userVdc.getId() - 1 + "," + userVdc.getId());
+            }
+        }
+
+        userEntitiesToPersist = new ArrayList<Object>();
+        String[] userPrivs = new String[userPrivileges.size()];
+        for (int i = 0; i < userPrivileges.size(); i++)
+        {
+            Privilege p = userPrivileges.get(i);
+            userEntitiesToPersist.add(p);
+            userPrivs[i] = p.getName();
+        }
+        userEntitiesToPersist.add(user.getRole());
+        userEntitiesToPersist.add(user);
+        ds().persistAll(userEntitiesToPersist.toArray());
+
+        map.put("user", user);
+        map.put("user.virtualdatacenter", userVdc);
+        map.put("user.privileges", userPrivs);
+        map.put("user.enterprise", user.getEnterprise());
+        return map;
+
+    }
+
+    private Map<String, Object> setupSysadminUserAndNormalUser(final Boolean restrictVdc)
+    {
+        Map<String, Object> map = setupSysadminUser();
+        map.putAll(setupNormalUser(restrictVdc));
+        return map;
     }
 }

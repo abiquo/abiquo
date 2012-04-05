@@ -37,6 +37,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.UriInfo;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.wink.common.annotations.Parent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,14 +50,12 @@ import com.abiquo.api.resources.cloud.IpAddressesResource;
 import com.abiquo.api.resources.cloud.VirtualApplianceResource;
 import com.abiquo.api.resources.cloud.VirtualDatacenterResource;
 import com.abiquo.api.resources.cloud.VirtualMachineResource;
-import com.abiquo.api.services.DatacenterService;
 import com.abiquo.api.services.EnterpriseService;
 import com.abiquo.api.services.NetworkService;
 import com.abiquo.api.services.UserService;
 import com.abiquo.api.services.appslibrary.VirtualMachineTemplateService;
 import com.abiquo.api.services.cloud.VirtualApplianceService;
 import com.abiquo.api.services.cloud.VirtualDatacenterService;
-import com.abiquo.api.services.cloud.VirtualMachineService;
 import com.abiquo.api.spring.security.SecurityService;
 import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.model.enumerator.Privileges;
@@ -74,6 +73,8 @@ import com.abiquo.server.core.enterprise.EnterpriseDto;
 import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
 import com.abiquo.server.core.infrastructure.network.IpsPoolManagementDto;
+import com.abiquo.server.core.task.Task;
+import com.abiquo.server.core.task.TasksDto;
 import com.abiquo.server.core.util.FilterOptions;
 import com.abiquo.server.core.util.PagedList;
 
@@ -111,12 +112,6 @@ public class EnterpriseResource extends AbstractResource
     private NetworkService netService;
 
     @Autowired
-    private VirtualMachineService vmService;
-
-    @Autowired
-    private DatacenterService dcService;
-
-    @Autowired
     private VirtualDatacenterService vdcService;
 
     @Autowired
@@ -134,12 +129,21 @@ public class EnterpriseResource extends AbstractResource
     @Autowired
     private SecurityService securityService;
 
+    /**
+     * Returns an enterprise.
+     * 
+     * @title Retrieve an Enterprise
+     * @param enterpriseId identifier of an enterprise
+     * @param restBuilder a Context-injected object to create the links of the Dto
+     * @return an {EntepriseDto} object with the requested enterprise
+     * @throws Exception
+     */
     @GET
     @Produces(EnterpriseDto.MEDIA_TYPE)
     public EnterpriseDto getEnterprise(@PathParam(ENTERPRISE) final Integer enterpriseId,
         @Context final IRESTBuilder restBuilder) throws Exception
     {
-        if (!securityService.hasPrivilege(Privileges.USERS_VIEW))
+        if (!securityService.hasPrivilege(Privileges.USERS_MANAGE_OTHER_ENTERPRISES))
         {
             User currentUser = userService.getCurrentUser();
             if (currentUser.getEnterprise().getId().equals(enterpriseId))
@@ -157,9 +161,8 @@ public class EnterpriseResource extends AbstractResource
             else
             {
                 // throws access denied exception
-                securityService.requirePrivilege(Privileges.USERS_VIEW);
+                securityService.requirePrivilege(Privileges.USERS_MANAGE_OTHER_ENTERPRISES);
             }
-
         }
 
         Enterprise enterprise = service.getEnterprise(enterpriseId);
@@ -167,6 +170,16 @@ public class EnterpriseResource extends AbstractResource
         return createTransferObject(enterprise, restBuilder);
     }
 
+    /**
+     * Modifies an enterprise
+     * 
+     * @title Update an existing enteprise
+     * @param enterprise enterprise to modify
+     * @param enterpriseId identifier of the enterprise
+     * @param restBuilder a Context-injected object to create the links of the Dto
+     * @return an {EnterpriseDto} object with the modified enterprise
+     * @throws Exception
+     */
     @PUT
     @Produces(EnterpriseDto.MEDIA_TYPE)
     public EnterpriseDto modifyEnterprise(final EnterpriseDto enterprise,
@@ -178,12 +191,32 @@ public class EnterpriseResource extends AbstractResource
         return createTransferObject(e, restBuilder);
     }
 
+    /**
+     * Deletes an enteprise.
+     * 
+     * @title Delete an existing Enterprise
+     * @param enterpriseId identifier of the enterprise
+     */
     @DELETE
     public void deleteEnterprise(@PathParam(ENTERPRISE) final Integer enterpriseId)
     {
         service.removeEnterprise(enterpriseId);
     }
 
+    /**
+     * Returns all ips from an enterprise
+     * 
+     * @title Retrieve the list of private IPs created by an Enterprise
+     * @param id identifier of the enterprise
+     * @param startwith
+     * @param orderBy
+     * @param filter
+     * @param limit
+     * @param desc_or_asc
+     * @param restBuilder a Context-injected object to create the links of the Dto
+     * @return an {IpsPoolManagementDto} with all ips from an enterprise
+     * @throws Exception
+     */
     @SuppressWarnings("unchecked")
     @GET
     @Path(EnterpriseResource.ENTERPRISE_ACTION_GET_IPS_PATH)
@@ -225,6 +258,7 @@ public class EnterpriseResource extends AbstractResource
     /**
      * Retrieves the list Of Virtual machines defined into an enterprise.
      * 
+     * @title Retrieve a list of virtual machines by an Enterprise
      * @param enterpriseId identifier of the enterprise
      * @param restBuilder {@linnk IRESTBuilder} object injected by context
      * @return the {@link VirtualMachinesDto} object. A {@link VirtualMachineDto} wrapper.
@@ -258,6 +292,7 @@ public class EnterpriseResource extends AbstractResource
     /**
      * Retrieves the list Of icons urls used in virtual images of an enterprise
      * 
+     * @title Retrive a list of icons of an Enterprise
      * @param enterpriseId identifier of the enterprise
      * @param restBuilder {@link IRESTBuilder} object injected by context
      * @return the list of String
@@ -280,6 +315,7 @@ public class EnterpriseResource extends AbstractResource
     /**
      * Retrieves the list Of Virtual datacenters defined into an enterprise.
      * 
+     * @title Retrieve a list of vitual datacenters by an Enterprise
      * @param enterpriseId identifier of the enterprise
      * @param restBuilder {@linnk IRESTBuilder} object injected by context
      * @return the {@link VirtualDatacentersDto} object. A {@link VirtualDatacenterDto} wrapper.
@@ -310,13 +346,20 @@ public class EnterpriseResource extends AbstractResource
             vdcs.add(VirtualDatacenterResource.createTransferObject(d, restBuilder));
         }
 
-        return vdcs;
+        if (!all.isEmpty())
+        {
+            vdcs.setTotalSize(((PagedList< ? >) all).getTotalResults());
+            vdcs.addLinks(restBuilder.buildPaggingLinks(uriInfo.getAbsolutePath().toString(),
+                (PagedList< ? >) all));
+        }
 
+        return vdcs;
     }
 
     /**
      * Retrieves the list Of Virtual appliances defined into an enterprise.
      * 
+     * @title Retrieve the list of virtual appliances by an Enterprise
      * @param enterpriseId identifier of the enterprise
      * @param restBuilder {@linnk IRESTBuilder} object injected by context
      * @return the {@link VirtualAppliancesDto} object. A {@link VirtualApplianceDto} wrapper.
@@ -332,7 +375,8 @@ public class EnterpriseResource extends AbstractResource
         @QueryParam(BY) @DefaultValue("name") final String orderBy,
         @QueryParam(FILTER) @DefaultValue("") final String filter,
         @QueryParam(ASC) @DefaultValue("true") final Boolean asc,
-        @Context final IRESTBuilder restBuilder) throws Exception
+        @QueryParam(value = "expand") final String expand, @Context final IRESTBuilder restBuilder)
+        throws Exception
     {
         FilterOptions filterOptions = new FilterOptions(startwith, limit, filter, orderBy, asc);
 
@@ -344,8 +388,13 @@ public class EnterpriseResource extends AbstractResource
         {
             for (VirtualAppliance vapp : all)
             {
-                vappsDtos.getCollection().add(
-                    VirtualApplianceResource.createTransferObject(vapp, restBuilder));
+                VirtualApplianceDto dto =
+                    VirtualApplianceResource.createTransferObject(vapp, restBuilder);
+                if (!StringUtils.isBlank(expand))
+                {
+                    this.expandNodes(expand, uriInfo, vapp, dto);
+                }
+                vappsDtos.getCollection().add(dto);
             }
         }
 
@@ -355,6 +404,29 @@ public class EnterpriseResource extends AbstractResource
         }
 
         return vappsDtos;
+    }
+
+    private void expandNodes(final String expand, final UriInfo uriInfo,
+        final VirtualAppliance app, final VirtualApplianceDto dto)
+    {
+        String[] expands = StringUtils.split(expand, ",");
+        if (expands != null)
+        {
+            for (String e : expands)
+            {
+                if ("last_task".equalsIgnoreCase(e))
+                {
+                    List<Task> lastTasks =
+                        vappService.getAllNodesLastTask(app.getVirtualDatacenter().getId(),
+                            app.getId());
+                    if (lastTasks != null && !lastTasks.isEmpty())
+                    {
+                        TasksDto t = TaskResourceUtils.transform(lastTasks, uriInfo);
+                        dto.setLastTasks(t);
+                    }
+                }
+            }
+        }
     }
 
     private static EnterpriseDto addLinks(final IRESTBuilder restBuilder,

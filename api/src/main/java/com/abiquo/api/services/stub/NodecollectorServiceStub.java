@@ -21,6 +21,8 @@
 
 package com.abiquo.api.services.stub;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -44,6 +46,7 @@ import com.abiquo.nodecollector.exception.CannotExecuteException;
 import com.abiquo.nodecollector.exception.CollectorException;
 import com.abiquo.nodecollector.exception.ConnectionException;
 import com.abiquo.nodecollector.exception.LoginException;
+import com.abiquo.nodecollector.exception.NoManagedException;
 import com.abiquo.nodecollector.exception.ServiceUnavailableException;
 import com.abiquo.nodecollector.exception.UnprovisionedException;
 import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
@@ -97,6 +100,7 @@ public class NodecollectorServiceStub extends DefaultApiService
     {
         NodeCollectorRESTClient restCli = initializeRESTClient(nodecollector);
 
+        checkIPformat(hypervisorIp);
         try
         {
             return restCli.getRemoteHypervisorType(hypervisorIp);
@@ -130,12 +134,30 @@ public class NodecollectorServiceStub extends DefaultApiService
         catch (CannotExecuteException e)
         {
             addConflictErrors(new CommonError(APIError.STATUS_CONFLICT.getCode(), e.getMessage()));
-            flushErrors();
+        }
+        catch (NoManagedException e)
+        {
+            addConflictErrors(new CommonError(APIError.NC_NOT_MANAGED_HOST.getCode(),
+                e.getMessage()));
         }
 
         flushErrors();
 
         return null;
+
+    }
+
+    private void checkIPformat(final String hypervisorIp)
+    {
+        try
+        {
+            InetAddress addr = InetAddress.getByName(hypervisorIp);
+        }
+        catch (UnknownHostException e)
+        {
+            addConflictErrors(APIError.NC_INVALID_IP);
+            flushErrors();
+        }
 
     }
 
@@ -222,6 +244,14 @@ public class NodecollectorServiceStub extends DefaultApiService
         catch (LoginException e)
         {
             logger.debug(e.getMessage());
+            if (hypType == HypervisorType.HYPERV_301)
+            {
+                // Hyper-V is the only hypervisor that returns the same message for bad credentials
+                // that bad configuration. We must add this extra info to the user.
+                logger.debug("hyperv");
+                addConflictErrors(APIError.NC_BAD_CONFIGURATION);
+                flushErrors();
+            }
             addConflictErrors(APIError.NC_BAD_CREDENTIALS_TO_MACHINE);
         }
         catch (ConnectionException e)
@@ -247,7 +277,11 @@ public class NodecollectorServiceStub extends DefaultApiService
         catch (CannotExecuteException e)
         {
             addConflictErrors(new CommonError(APIError.STATUS_CONFLICT.getCode(), e.getMessage()));
-            flushErrors();
+        }
+        catch (NoManagedException e)
+        {
+            addConflictErrors(new CommonError(APIError.NC_NOT_MANAGED_HOST.getCode(),
+                e.getMessage()));
         }
 
         flushErrors();
@@ -316,7 +350,11 @@ public class NodecollectorServiceStub extends DefaultApiService
         catch (CannotExecuteException e)
         {
             addConflictErrors(new CommonError(APIError.STATUS_CONFLICT.getCode(), e.getMessage()));
-            flushErrors();
+        }
+        catch (NoManagedException e)
+        {
+            addConflictErrors(new CommonError(APIError.NC_NOT_MANAGED_HOST.getCode(),
+                e.getMessage()));
         }
 
         flushErrors();
@@ -378,7 +416,11 @@ public class NodecollectorServiceStub extends DefaultApiService
         catch (CannotExecuteException e)
         {
             addConflictErrors(new CommonError(APIError.STATUS_CONFLICT.getCode(), e.getMessage()));
-            flushErrors();
+        }
+        catch (NoManagedException e)
+        {
+            addConflictErrors(new CommonError(APIError.NC_NOT_MANAGED_HOST.getCode(),
+                e.getMessage()));
         }
 
         flushErrors();
@@ -443,7 +485,11 @@ public class NodecollectorServiceStub extends DefaultApiService
         catch (CannotExecuteException e)
         {
             addConflictErrors(new CommonError(APIError.STATUS_CONFLICT.getCode(), e.getMessage()));
-            flushErrors();
+        }
+        catch (NoManagedException e)
+        {
+            addConflictErrors(new CommonError(APIError.NC_NOT_MANAGED_HOST.getCode(),
+                e.getMessage()));
         }
 
         flushErrors();
@@ -584,7 +630,13 @@ public class NodecollectorServiceStub extends DefaultApiService
 
         for (VirtualSystemDto vs : vsc.getVirtualSystems())
         {
-            vms.add(transportVSToVM(vs));
+            VirtualMachine vm = transportVSToVM(vs);
+            // ABICLOUDPREMIUM-3405: abiquo cannot manage virtual machines without primary disk. So
+            // we skip them.
+            if (vm.getVirtualMachineTemplate() != null)
+            {
+                vms.add(vm);
+            }
 
         }
 
@@ -633,7 +685,7 @@ public class NodecollectorServiceStub extends DefaultApiService
                 }
 
                 VirtualMachineTemplate vi = new VirtualMachineTemplate(); // XXX this is not stored
-                                                                          // in the DDBB
+                // in the DDBB
                 VirtualDiskEnumType diskFormatType =
                     VirtualDiskEnumType.fromValue(rt.getResourceSubType().toString());
                 vi.setDiskFormatType(DiskFormatType.fromURI(diskFormatType.value()));

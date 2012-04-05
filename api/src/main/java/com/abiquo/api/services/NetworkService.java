@@ -43,6 +43,7 @@ import com.abiquo.api.services.cloud.VirtualMachineService;
 import com.abiquo.api.tracer.TracerLogger;
 import com.abiquo.model.enumerator.NetworkType;
 import com.abiquo.model.transport.LinksDto;
+import com.abiquo.model.transport.error.CommonError;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualDatacenterRep;
@@ -88,9 +89,8 @@ public class NetworkService extends DefaultApiService
     {
         // create the Rasd object.
         Rasd rasd =
-            new Rasd(UUID.randomUUID().toString(),
-                IpPoolManagement.DEFAULT_RESOURCE_NAME,
-                Integer.valueOf(IpPoolManagement.DISCRIMINATOR));
+            new Rasd(UUID.randomUUID().toString(), IpPoolManagement.DEFAULT_RESOURCE_NAME, Integer
+                .valueOf(IpPoolManagement.DISCRIMINATOR));
 
         rasd.setDescription(IpPoolManagement.DEFAULT_RESOURCE_DESCRIPTION);
         rasd.setConnection("");
@@ -166,11 +166,8 @@ public class NetworkService extends DefaultApiService
     public DhcpOption addDhcpOption(final DhcpOptionDto dto)
     {
         DhcpOption opt =
-            new DhcpOption(dto.getOption(),
-                dto.getGateway(),
-                dto.getNetworkAddress(),
-                dto.getMask(),
-                dto.getNetmask());
+            new DhcpOption(dto.getOption(), dto.getGateway(), dto.getNetworkAddress(), dto
+                .getMask(), dto.getNetmask());
 
         if (!opt.isValid())
         {
@@ -203,9 +200,7 @@ public class NetworkService extends DefaultApiService
         {
             case INTERNAL:
                 // find next available IP to use.
-                ip =
-                    repo.findNextIpAvailable(vlan.getId(), vlan
-                        .getConfiguration().getGateway());
+                ip = repo.findNextIpAvailable(vlan.getId(), vlan.getConfiguration().getGateway());
 
                 break;
 
@@ -221,7 +216,8 @@ public class NetworkService extends DefaultApiService
 
             default:
                 ip =
-                    repo.findNextExternalIpAvailable(vlan.getId(), vlan.getConfiguration().getGateway());
+                    repo.findNextExternalIpAvailable(vlan.getId(), vlan.getConfiguration()
+                        .getGateway());
                 ip.setVirtualDatacenter(vdc);
                 ip.setMac(IPNetworkRang.requestRandomMacAddress(vdc.getHypervisorType()));
                 ip.setName(ip.getMac() + "_host");
@@ -230,12 +226,12 @@ public class NetworkService extends DefaultApiService
         Rasd rasd = createRasdEntity(vm, ip);
 
         repo.insertRasd(rasd);
-            
+
         ip.setRasd(rasd);
         ip.attach(0, vm, vapp);
 
         repo.updateIpManagement(ip);
-            
+
         vm.setNetworkConfiguration(vlan.getConfiguration());
         repo.updateVirtualMachine(vm);
 
@@ -267,9 +263,27 @@ public class NetworkService extends DefaultApiService
         VirtualMachine newvm = vmService.duplicateVirtualMachineObject(oldvm);
         List<IpPoolManagement> ips = vmService.getNICsFromDto(vdc, nicRefs);
 
+        checkIps(ips);
+
         newvm.getIps().addAll(ips);
 
         return vmService.reconfigureVirtualMachine(vdc, vapp, oldvm, newvm, originalState);
+    }
+
+    private void checkIps(final List<IpPoolManagement> ips)
+    {
+        for (IpPoolManagement ip : ips)
+        {
+            if (ip.getQuarantine())
+            {
+                LOGGER.debug("Cannot attach ip " + ip.toString()
+                    + " to a virtual machine because the ip is in quarantine");
+                addConflictErrors(new CommonError(APIError.VLANS_IP_IS_IN_QUARANTINE.getCode(),
+                    String.format(APIError.VLANS_IP_IS_IN_QUARANTINE.getMessage(), ip.getIp())));
+                flushErrors();
+            }
+        }
+
     }
 
     /**
@@ -370,8 +384,9 @@ public class NetworkService extends DefaultApiService
         // once we have validated we have IPs in all IP parameters (isValid() method), we should
         // ensure they are
         // actually PRIVATE IPs. Also check if the gateway is in the range, and
-        checkAddressAndMaskCoherency(IPAddress.newIPAddress(newVlan.getConfiguration()
-            .getAddress()), newVlan.getConfiguration().getMask());
+        checkAddressAndMaskCoherency(IPAddress
+            .newIPAddress(newVlan.getConfiguration().getAddress()), newVlan.getConfiguration()
+            .getMask());
 
         List<DhcpOption> opts = new ArrayList<DhcpOption>(newVlan.getDhcpOption());
         for (DhcpOption dhcpOption : newVlan.getDhcpOption())
@@ -587,8 +602,8 @@ public class NetworkService extends DefaultApiService
         {
             // needed for REST links.
             DatacenterLimits dl =
-                datacenterRepo.findDatacenterLimits(ip.getVlanNetwork().getEnterprise(),
-                    vdc.getDatacenter());
+                datacenterRepo.findDatacenterLimits(ip.getVlanNetwork().getEnterprise(), vdc
+                    .getDatacenter());
             ip.getVlanNetwork().setLimitId(dl.getId());
         }
 
@@ -604,12 +619,13 @@ public class NetworkService extends DefaultApiService
      * @param ipId identifier of the {@link IpPoolManagement} object to retrieve.
      * @return the found object.
      */
-    public IpPoolManagement getIpPoolManagementByVlan(Integer vdcId, Integer vlanId, Integer ipId)
+    public IpPoolManagement getIpPoolManagementByVlan(final Integer vdcId, final Integer vlanId,
+        final Integer ipId)
     {
         VirtualDatacenter vdc = getVirtualDatacenter(vdcId);
         VLANNetwork vlan = getPrivateVlan(vdc, vlanId);
         IpPoolManagement ip = repo.findIp(vlan, ipId);
-        
+
         if (ip == null)
         {
             addNotFoundErrors(APIError.NON_EXISTENT_IP);
@@ -617,8 +633,8 @@ public class NetworkService extends DefaultApiService
         }
 
         LOGGER.debug("Returning the private Ip Address with id '" + ip.getId() + "'.");
-        
-        return ip;       
+
+        return ip;
     }
 
     /**
@@ -666,7 +682,7 @@ public class NetworkService extends DefaultApiService
     @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
     public List<IpPoolManagement> getListIpPoolManagementByVdc(final Integer vdcId,
         final Integer firstElem, final Integer numElem, final String has, final String orderBy,
-        final Boolean asc, final String type)
+        final Boolean asc, final String type, final Boolean all)
     {
         // Check if the orderBy element is actually one of the available ones
         IpPoolManagement.OrderByEnum orderByEnum = IpPoolManagement.OrderByEnum.fromValue(orderBy);
@@ -705,7 +721,7 @@ public class NetworkService extends DefaultApiService
             // get the enterprise and datacenter and get the external and unmanaged ips
             List<IpPoolManagement> ips =
                 repo.findPublicIpsByEnterprise(vdc.getDatacenter().getId(), vdc.getEnterprise()
-                    .getId(), firstElem, numElem, has, orderByEnum, asc, netType);
+                    .getId(), firstElem, numElem, has, orderByEnum, asc, netType, all);
             LOGGER
                 .debug("Returning the list of external and unmanaged IPs used by VirtualDatacenter '"
                     + vdc.getName() + "'.");
@@ -721,7 +737,7 @@ public class NetworkService extends DefaultApiService
         }
 
     }
-    
+
     /**
      * Asks for all the Private IPs managed by a Virtual Appliance.
      * 
@@ -762,8 +778,8 @@ public class NetworkService extends DefaultApiService
             {
                 // needed for REST links.
                 DatacenterLimits dl =
-                    datacenterRepo.findDatacenterLimits(ip.getVlanNetwork().getEnterprise(),
-                        vdc.getDatacenter());
+                    datacenterRepo.findDatacenterLimits(ip.getVlanNetwork().getEnterprise(), vdc
+                        .getDatacenter());
                 ip.getVlanNetwork().setLimitId(dl.getId());
             }
         }
@@ -792,9 +808,9 @@ public class NetworkService extends DefaultApiService
             // since we don't manage NICs in imported Virtual Machines, return an empty lise
             return new ArrayList<IpPoolManagement>();
         }
-        
+
         VirtualDatacenter vdc = vapp.getVirtualDatacenter();
-        
+
         List<IpPoolManagement> ips = repo.findIpsByVirtualMachine(vm);
 
         for (IpPoolManagement ip : ips)
@@ -804,8 +820,8 @@ public class NetworkService extends DefaultApiService
             {
                 // needed for REST links.
                 DatacenterLimits dl =
-                    datacenterRepo.findDatacenterLimits(ip.getVlanNetwork().getEnterprise(),
-                        vdc.getDatacenter());
+                    datacenterRepo.findDatacenterLimits(ip.getVlanNetwork().getEnterprise(), vdc
+                        .getDatacenter());
                 ip.getVlanNetwork().setLimitId(dl.getId());
             }
         }
@@ -917,8 +933,8 @@ public class NetworkService extends DefaultApiService
         IpPoolManagement resultIp = ips.get(0);
         for (IpPoolManagement ip : ips)
         {
-            if (ip.getVlanNetwork().getConfiguration().getId()
-                .equals(vm.getNetworkConfiguration().getId()))
+            if (ip.getVlanNetwork().getConfiguration().getId().equals(
+                vm.getNetworkConfiguration().getId()))
             {
                 resultIp = ip;
                 break;
@@ -931,8 +947,8 @@ public class NetworkService extends DefaultApiService
         vmconfig.setPrimaryDNS(vlan.getConfiguration().getPrimaryDNS());
         vmconfig.setSecondaryDNS(vlan.getConfiguration().getSecondaryDNS());
         vmconfig.setSuffixDNS(vlan.getConfiguration().getSufixDNS());
-        vmconfig.setUsed(vlan.getConfiguration().getId()
-            .equals(vm.getNetworkConfiguration().getId()));
+        vmconfig.setUsed(vlan.getConfiguration().getId().equals(
+            vm.getNetworkConfiguration().getId()));
         vmconfig.setId(vlan.getConfiguration().getId());
 
         LOGGER
@@ -1138,24 +1154,24 @@ public class NetworkService extends DefaultApiService
         userService.checkCurrentEnterpriseForPostMethods(vdc.getEnterprise());
 
         // Values 'address', 'mask', and 'tag' can not be changed by the edit process
-        if (!oldNetwork.getConfiguration().getAddress()
-            .equalsIgnoreCase(newNetwork.getConfiguration().getAddress())
-            || !oldNetwork.getConfiguration().getMask()
-                .equals(newNetwork.getConfiguration().getMask())
-            || (oldNetwork.getTag() == null
-            && newNetwork.getTag() != null)
-            || (oldNetwork.getTag() != null
-            && newNetwork.getTag() == null)
-            || (oldNetwork.getTag() != null
-            && newNetwork.getTag() != null && !oldNetwork.getTag().equals(newNetwork.getTag())))
+        if (!oldNetwork.getConfiguration().getAddress().equalsIgnoreCase(
+            newNetwork.getConfiguration().getAddress())
+            || !oldNetwork.getConfiguration().getMask().equals(
+                newNetwork.getConfiguration().getMask())
+            || oldNetwork.getTag() == null
+            && newNetwork.getTag() != null
+            || oldNetwork.getTag() != null
+            && newNetwork.getTag() == null
+            || oldNetwork.getTag() != null
+            && newNetwork.getTag() != null && !oldNetwork.getTag().equals(newNetwork.getTag()))
         {
             addConflictErrors(APIError.VLANS_EDIT_INVALID_VALUES);
             flushErrors();
         }
 
         // Check the new gateway is inside the range of IPs.
-        if (!newNetwork.getConfiguration().getGateway()
-            .equalsIgnoreCase(oldNetwork.getConfiguration().getGateway()))
+        if (!newNetwork.getConfiguration().getGateway().equalsIgnoreCase(
+            oldNetwork.getConfiguration().getGateway()))
         {
             IPAddress networkIP =
                 IPAddress.newIPAddress(newNetwork.getConfiguration().getAddress());
@@ -1257,8 +1273,7 @@ public class NetworkService extends DefaultApiService
      * @throws NetworkCommandException if the values are not coherent into a public or private
      *             network environment.
      */
-    protected void checkAddressAndMaskCoherency(final IPAddress netAddress,
-        final Integer netmask)
+    protected void checkAddressAndMaskCoherency(final IPAddress netAddress, final Integer netmask)
     {
 
         // Parse the correct IP. (avoid 127.00.00.01), for instance

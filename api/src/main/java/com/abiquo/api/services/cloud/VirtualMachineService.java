@@ -26,8 +26,10 @@ import static com.abiquo.api.util.URIResolver.buildPath;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import javax.persistence.EntityManager;
@@ -96,12 +98,12 @@ import com.abiquo.server.core.cloud.VirtualApplianceRep;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualDatacenterRep;
 import com.abiquo.server.core.cloud.VirtualMachine;
-import com.abiquo.server.core.cloud.VirtualMachine.OrderByEnum;
 import com.abiquo.server.core.cloud.VirtualMachineDto;
 import com.abiquo.server.core.cloud.VirtualMachineRep;
 import com.abiquo.server.core.cloud.VirtualMachineState;
 import com.abiquo.server.core.cloud.VirtualMachineStateTransition;
 import com.abiquo.server.core.cloud.VirtualMachineWithNodeDto;
+import com.abiquo.server.core.cloud.VirtualMachine.OrderByEnum;
 import com.abiquo.server.core.enterprise.DatacenterLimits;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.EnterpriseRep;
@@ -114,8 +116,12 @@ import com.abiquo.server.core.infrastructure.management.RasdDAO;
 import com.abiquo.server.core.infrastructure.management.RasdManagement;
 import com.abiquo.server.core.infrastructure.management.RasdManagementDAO;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
+import com.abiquo.server.core.infrastructure.network.IpPoolManagementDAO;
+import com.abiquo.server.core.infrastructure.network.NetworkAssignment;
+import com.abiquo.server.core.infrastructure.network.NetworkAssignmentDAO;
 import com.abiquo.server.core.infrastructure.network.NetworkConfiguration;
 import com.abiquo.server.core.infrastructure.network.VLANNetwork;
+import com.abiquo.server.core.infrastructure.network.VLANNetworkDAO;
 import com.abiquo.server.core.infrastructure.storage.DiskManagement;
 import com.abiquo.server.core.infrastructure.storage.StorageRep;
 import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
@@ -187,6 +193,15 @@ public class VirtualMachineService extends DefaultApiService
     @Autowired
     private AMServiceStub amService;
 
+    @Autowired
+    private IpPoolManagementDAO ipPoolManDao;
+
+    @Autowired
+    private NetworkAssignmentDAO netAssignDao;
+
+    @Autowired
+    private VLANNetworkDAO vlanNetworkDao;
+
     public VirtualMachineService()
     {
 
@@ -210,6 +225,8 @@ public class VirtualMachineService extends DefaultApiService
         this.storageRep = new StorageRep(em);
         this.jobCreator = new TarantinoJobCreator(em);
         this.ipService = new NetworkService(em);
+        this.ipPoolManDao = new IpPoolManagementDAO(em);
+        this.vlanNetworkDao = new VLANNetworkDAO(em);
         this.tracer = new TracerLogger();
     }
 
@@ -288,8 +305,8 @@ public class VirtualMachineService extends DefaultApiService
             {
                 // needed for REST links.
                 DatacenterLimits dl =
-                    infRep.findDatacenterLimits(ip.getVlanNetwork().getEnterprise(),
-                        vdc.getDatacenter());
+                    infRep.findDatacenterLimits(ip.getVlanNetwork().getEnterprise(), vdc
+                        .getDatacenter());
                 ip.getVlanNetwork().setLimitId(dl.getId());
             }
         }
@@ -346,12 +363,14 @@ public class VirtualMachineService extends DefaultApiService
      * @param vdcId identifier of the {@link VirtualDatacenter}
      * @param vappId identifier of the {@link VirtualAppliance}
      * @param vmId identifier of the {@link VirtualMachine}
+     * @param forceSoftLimits
      * @param dto input {@link VirtualMachineDto} object with all its links.
      * @return the link to the asnyncronous task.
      */
     @Transactional(propagation = Propagation.REQUIRED)
     public String reconfigureVirtualMachine(final Integer vdcId, final Integer vappId,
-        final Integer vmId, final VirtualMachineDto dto, final VirtualMachineState originalState)
+        final Integer vmId, final VirtualMachineDto dto, final VirtualMachineState originalState,
+        final Boolean forceSoftLimits)
     {
         VirtualDatacenter vdc = getVirtualDatacenter(vdcId);
         // We need to operate with concrete and this also check that the VirtualMachine belongs to
@@ -381,7 +400,7 @@ public class VirtualMachineService extends DefaultApiService
         newvm.setHypervisor(virtualMachine.getHypervisor());
 
         return reconfigureVirtualMachine(vdc, virtualAppliance, virtualMachine, newvm,
-            originalState);
+            originalState, forceSoftLimits);
     }
 
     /**
@@ -425,6 +444,7 @@ public class VirtualMachineService extends DefaultApiService
      * @param vapp {@link VirtualAppliance} object where the virtual machine to reconfigure belongs
      *            to.
      * @param newValues {@link VirtualMachine} exactly as we want to be after the reconfigure.
+     * @param forceSoftLimits param if true does not trace the soft limit
      * @return a String containing the URI where to check the progress.
      */
     @Transactional(propagation = Propagation.REQUIRED)
@@ -432,9 +452,16 @@ public class VirtualMachineService extends DefaultApiService
         final VirtualAppliance vapp, final VirtualMachine vm, final VirtualMachine newValues,
         final VirtualMachineState originalState)
     {
+        return reconfigureVirtualMachine(vdc, vapp, vm, newValues, originalState, false);
+    }
 
-        if (checkReconfigureTemplate(vm.getVirtualMachineTemplate(),
-            newValues.getVirtualMachineTemplate()))
+    public String reconfigureVirtualMachine(final VirtualDatacenter vdc,
+        final VirtualAppliance vapp, final VirtualMachine vm, final VirtualMachine newValues,
+        final VirtualMachineState originalState, final Boolean forceSoftLimits)
+    {
+
+        if (checkReconfigureTemplate(vm.getVirtualMachineTemplate(), newValues
+            .getVirtualMachineTemplate()))
         {
             if (vm.isCaptured())
             {
@@ -484,7 +511,8 @@ public class VirtualMachineService extends DefaultApiService
                     .debug("Updating the hardware needs in DB for virtual machine {}", vm.getId());
                 VirtualMachineRequirements requirements =
                     vmRequirements.createVirtualMachineRequirements(vm, newValues);
-                vmAllocatorService.checkAllocate(vapp.getId(), newValues, requirements, false);
+                vmAllocatorService.checkAllocate(vapp.getId(), newValues, requirements,
+                    forceSoftLimits);
 
                 LOGGER
                     .debug("Creating the temporary register in Virtual Machine for rollback purposes");
@@ -778,8 +806,8 @@ public class VirtualMachineService extends DefaultApiService
         }
         else
         {
-            return !old.getNetworkConfiguration().getId()
-                .equals(vmnew.getNetworkConfiguration().getId());
+            return !old.getNetworkConfiguration().getId().equals(
+                vmnew.getNetworkConfiguration().getId());
         }
     }
 
@@ -988,8 +1016,8 @@ public class VirtualMachineService extends DefaultApiService
 
         // Does it has volumes? PREMIUM
         detachVolumesFromVirtualMachine(virtualMachine);
-        LOGGER.debug("Detached the virtual machine's volumes with UUID {}",
-            virtualMachine.getUuid());
+        LOGGER.debug("Detached the virtual machine's volumes with UUID {}", virtualMachine
+            .getUuid());
 
         detachVirtualMachineIPs(virtualMachine);
 
@@ -1017,8 +1045,8 @@ public class VirtualMachineService extends DefaultApiService
 
         // Does it has volumes? PREMIUM
         detachVolumesFromVirtualMachine(virtualMachine);
-        LOGGER.debug("Detached the virtual machine's volumes with UUID {}",
-            virtualMachine.getUuid());
+        LOGGER.debug("Detached the virtual machine's volumes with UUID {}", virtualMachine
+            .getUuid());
 
         detachVirtualMachineIPs(virtualMachine);
 
@@ -1101,10 +1129,10 @@ public class VirtualMachineService extends DefaultApiService
         if (virtualMachine.getVirtualMachineTemplate().isStateful())
         {
             LOGGER.debug("Attaching virtual machine template volume");
-            virtualMachine.getVirtualMachineTemplate().getVolume()
-                .attach(0, virtualMachine, virtualAppliance);
-            virtualMachine.getVirtualMachineTemplate().getVolume()
-                .setVirtualAppliance(virtualAppliance);
+            virtualMachine.getVirtualMachineTemplate().getVolume().attach(0, virtualMachine,
+                virtualAppliance);
+            virtualMachine.getVirtualMachineTemplate().getVolume().setVirtualAppliance(
+                virtualAppliance);
             virtualMachine.getVirtualMachineTemplate().getVolume()
                 .setVirtualMachine(virtualMachine);
         }
@@ -1157,8 +1185,8 @@ public class VirtualMachineService extends DefaultApiService
         {
             vmachine.setEthernetDriverType(vmtemplate.getEthernetDriverType());
 
-            LOGGER.debug("VirtualMachine {} will use specific EthernetDriver {}",
-                vmachine.getName(), vmtemplate.getEthernetDriverType().name());
+            LOGGER.debug("VirtualMachine {} will use specific EthernetDriver {}", vmachine
+                .getName(), vmtemplate.getEthernetDriverType().name());
         }
 
         if (vmachine.getCpu() == 0)
@@ -1231,8 +1259,8 @@ public class VirtualMachineService extends DefaultApiService
     protected void createNodeVirtualImage(final VirtualMachine virtualMachine,
         final VirtualAppliance virtualAppliance, final String name)
     {
-        LOGGER.debug("Create node virtual image with name virtual machine: {}",
-            virtualMachine.getName());
+        LOGGER.debug("Create node virtual image with name virtual machine: {}", virtualMachine
+            .getName());
         NodeVirtualImage nodeVirtualImage =
             new NodeVirtualImage(name,
                 virtualAppliance,
@@ -1569,8 +1597,8 @@ public class VirtualMachineService extends DefaultApiService
 
             // For the Admin to know all errors
             tracer.systemLog(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
-                EventType.VM_UNDEPLOY, "virtualMachine.undeployError", e.toString(),
-                virtualMachine.getName(), e.getMessage());
+                EventType.VM_UNDEPLOY, "virtualMachine.undeployError", e.toString(), virtualMachine
+                    .getName(), e.getMessage());
             LOGGER
                 .error(
                     "Error undeploying setting the virtual machine to UNKNOWN virtual machine name {}: {}",
@@ -1642,8 +1670,8 @@ public class VirtualMachineService extends DefaultApiService
 
             // For the Admin to know all errors
             tracer.systemLog(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
-                EventType.VM_UNDEPLOY, "virtualMachine.undeployError", e.toString(),
-                virtualMachine.getName(), e.getMessage());
+                EventType.VM_UNDEPLOY, "virtualMachine.undeployError", e.toString(), virtualMachine
+                    .getName(), e.getMessage());
             LOGGER
                 .error(
                     "Error undeploying setting the virtual machine to UNKNOWN virtual machine name {}: {}",
@@ -1701,8 +1729,8 @@ public class VirtualMachineService extends DefaultApiService
 
             // For the Admin to know all errors
             tracer.systemLog(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
-                EventType.VM_UNDEPLOY, "virtualMachine.undeployError", e.toString(),
-                virtualMachine.getName(), e.getMessage());
+                EventType.VM_UNDEPLOY, "virtualMachine.undeployError", e.toString(), virtualMachine
+                    .getName(), e.getMessage());
             LOGGER
                 .error(
                     "Error undeploying setting the virtual machine to UNKNOWN virtual machine name {}: {}",
@@ -1782,8 +1810,8 @@ public class VirtualMachineService extends DefaultApiService
 
             tracer
                 .systemError(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
-                    EventType.VM_INSTANCE, e, "virtualMachine.instanceFailed",
-                    virtualMachine.getName());
+                    EventType.VM_INSTANCE, e, "virtualMachine.instanceFailed", virtualMachine
+                        .getName());
 
             throw e;
         }
@@ -1794,8 +1822,8 @@ public class VirtualMachineService extends DefaultApiService
 
             tracer
                 .systemError(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
-                    EventType.VM_INSTANCE, e, "virtualMachine.instanceFailed",
-                    virtualMachine.getName());
+                    EventType.VM_INSTANCE, e, "virtualMachine.instanceFailed", virtualMachine
+                        .getName());
 
             addUnexpectedErrors(APIError.STATUS_INTERNAL_SERVER_ERROR);
             flushErrors();
@@ -1934,8 +1962,8 @@ public class VirtualMachineService extends DefaultApiService
                 "virtualMachine.resetVirtualMachineError", virtualMachine.getName());
 
             tracer.systemError(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
-                EventType.VM_DEPLOY, ex, "virtualMachine.resetVirtualMachineError",
-                virtualMachine.getName());
+                EventType.VM_DEPLOY, ex, "virtualMachine.resetVirtualMachineError", virtualMachine
+                    .getName());
 
             addUnexpectedErrors(APIError.STATUS_INTERNAL_SERVER_ERROR);
             flushErrors();
@@ -1960,8 +1988,8 @@ public class VirtualMachineService extends DefaultApiService
         for (RemoteService r : remoteServicesByDatacenter)
         {
             ErrorsDto checkRemoteServiceStatus =
-                remoteServiceService.checkRemoteServiceStatus(r.getDatacenter(), r.getType(),
-                    r.getUri());
+                remoteServiceService.checkRemoteServiceStatus(r.getDatacenter(), r.getType(), r
+                    .getUri());
             errors.addAll(checkRemoteServiceStatus);
         }
 
@@ -2001,8 +2029,8 @@ public class VirtualMachineService extends DefaultApiService
             {
                 // needed for REST links.
                 DatacenterLimits dl =
-                    infRep.findDatacenterLimits(ip.getVlanNetwork().getEnterprise(),
-                        vdc.getDatacenter());
+                    infRep.findDatacenterLimits(ip.getVlanNetwork().getEnterprise(), vdc
+                        .getDatacenter());
                 ip.getVlanNetwork().setLimitId(dl.getId());
             }
         }
@@ -2118,10 +2146,16 @@ public class VirtualMachineService extends DefaultApiService
                     if (resource instanceof DiskManagement)
                     {
                         vdcRep.updateDisk((DiskManagement) resource);
+                        tracer.log(SeverityType.INFO, ComponentType.STORAGE_DEVICE,
+                            EventType.HARD_DISK_ASSIGN, "hardDisk.assigned", resource.getRasd()
+                                .getLimit(), vm.getName());
                     }
                     else
                     {
                         storageRep.updateVolume((VolumeManagement) resource);
+                        tracer.log(SeverityType.INFO, ComponentType.VOLUME,
+                            EventType.VOLUME_ATTACH, "volume.attached", resource.getRasd()
+                                .getElementName(), resource.getRasd().getLimit(), vm.getName());
                     }
                 }
             }
@@ -2148,6 +2182,8 @@ public class VirtualMachineService extends DefaultApiService
         // The function #getStorageFreeAttachmentSlot do the work. However, it only takes
         // the information from database, and we need to have a list of integers of the
         // already assigned slots before in the loop. 'blackList' stores them.
+        List<IpPoolManagement> ipPoolList = removeRepetedResources(resources);
+
         for (IpPoolManagement ip : resources)
         {
             boolean allocated = allocateResource(vm, vapp, ip, getFreeAttachmentSlot(blackList));
@@ -2173,8 +2209,33 @@ public class VirtualMachineService extends DefaultApiService
 
                 // if it is new allocated, we set the integer into the 'blacklisted' list.
                 blackList.add(ip.getSequence());
+                tracer.log(SeverityType.INFO, ComponentType.NETWORK,
+                    EventType.NIC_ASSIGNED_VIRTUAL_MACHINE, "nic.attached", vm.getName(), ip
+                        .getIp(), ip.getVlanNetwork().getName());
             }
         }
+    }
+
+    private List<IpPoolManagement> removeRepetedResources(final List<IpPoolManagement> resources)
+    {
+        Map ipMap = new HashMap();
+
+        for (IpPoolManagement ip : resources)
+        {
+            ipMap.put(ip.getIp(), ip);
+        }
+
+        if (resources.size() > ipMap.size())
+        {
+            String errorCode = APIError.RESOURCES_ALREADY_ASSIGNED.getCode();
+            String message = APIError.RESOURCES_ALREADY_ASSIGNED.getMessage();
+            CommonError error = new CommonError(errorCode, message);
+            addNotFoundErrors(error);
+            flushErrors();
+        }
+
+        return new ArrayList<IpPoolManagement>(ipMap.values());
+
     }
 
     /**
@@ -2230,6 +2291,9 @@ public class VirtualMachineService extends DefaultApiService
                         ip.setVirtualDatacenter(null);
                     }
                     vdcRep.updateIpManagement(ip);
+                    tracer.log(SeverityType.INFO, ComponentType.NETWORK,
+                        EventType.NIC_ASSIGNED_VIRTUAL_MACHINE, "nic.released", oldVm.getName(), ip
+                            .getIp(), ip.getVlanNetwork().getName());
                 }
 
                 // if the dellocated ip is the one with the default configuration,
@@ -2273,6 +2337,9 @@ public class VirtualMachineService extends DefaultApiService
                 {
                     vdcRep.deleteRasd(disk.getRasd());
                     rasdDao.remove(disk);
+                    tracer.log(SeverityType.INFO, ComponentType.STORAGE_DEVICE,
+                        EventType.HARD_DISK_ASSIGN, "hardDisk.released", disk.getSizeInMb(), oldVm
+                            .getName());
                 }
                 else
                 {
@@ -2317,6 +2384,8 @@ public class VirtualMachineService extends DefaultApiService
                     }
                     vol.detach();
                     storageRep.updateVolume(vol);
+                    tracer.log(SeverityType.INFO, ComponentType.VOLUME, EventType.VOLUME_DETACH,
+                        "volume.detached", vol.getName(), vol.getSizeInMB(), oldVm.getName());
                 }
                 else
                 {
@@ -2818,10 +2887,57 @@ public class VirtualMachineService extends DefaultApiService
         {
             rasdDao.enableTemporalOnlyFilter();
 
+            List<RasdManagement> rasds = backUpVm.getRasdManagements();
+
+            // First of all, we have to release the VLAN tags if it is needed.
+            // This is not a very optimal algorithm, since we traverse again the Rasds later,
+            // but we need to know the id
+            // of the virtual machine before to delete the entity to know if we can to release the
+            // TAG.
+            for (RasdManagement rollbackRasd : rasds)
+            {
+                if (rollbackRasd instanceof IpPoolManagement)
+                {
+
+                    IpPoolManagement originalRasd =
+                        (IpPoolManagement) rasdDao.findById(rollbackRasd.getTemporal());
+
+                    if (!originalRasd.isAttached())
+                    {
+                        // check if it was the last IP of the VLAN, and release the VLAN
+                        // tag.
+                        VLANNetwork vlanNetwork = originalRasd.getVlanNetwork();
+
+                        final boolean assigned =
+                            ipPoolManDao.isVlanAssignedToDifferentVM(backUpVm.getId(), vlanNetwork);
+
+                        if (!assigned)
+                        {
+                            if (vlanNetwork.getType().equals(NetworkType.INTERNAL))
+                            {
+                                vlanNetwork.setTag(null);
+                            }
+
+                            NetworkAssignment na = netAssignDao.findByVlanNetwork(vlanNetwork);
+
+                            if (na != null)
+                            {
+                                netAssignDao.remove(na);
+                            }
+                        }
+                    }
+                }
+            }
+
+            /*
+             * CAUTION! We need this flush exactly here. Otherwise it tries to set teh
+             * vlanNetwork.setTag(null) after to delete the related IpPoolManagement (that will be
+             * deleted in the next loop) and it raises an UnknowEntityException.
+             */
+            vlanNetworkDao.flush();
+
             // we need to first delete the vm (as it updates the rasd_man)
             repo.deleteVirtualMachine(backUpVm);
-
-            List<RasdManagement> rasds = backUpVm.getRasdManagements();
 
             for (RasdManagement rollbackRasd : rasds)
             {

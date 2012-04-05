@@ -138,7 +138,8 @@ public class StorageService extends DefaultApiService
 
         newvm.getDisks().addAll(disks);
 
-        return vmService.reconfigureVirtualMachine(vdc, vapp, oldvm, newvm, originalState);
+        // softlimits already checked when created the hd
+        return vmService.reconfigureVirtualMachine(vdc, vapp, oldvm, newvm, originalState, true);
     }
 
     /**
@@ -178,7 +179,8 @@ public class StorageService extends DefaultApiService
      * @return {@link DiskManagement} instance created.
      */
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public DiskManagement createHardDisk(final Integer vdcId, final Long sizeInMb)
+    public DiskManagement createHardDisk(final Integer vdcId, final Long sizeInMb,
+        final Boolean forceSoftLimits)
     {
         VirtualDatacenter vdc = getVirtualDatacenter(vdcId);
 
@@ -201,7 +203,7 @@ public class StorageService extends DefaultApiService
         }
 
         // check the limits.
-        checkStorageLimits(vdc, sizeInMb);
+        checkStorageLimits(vdc, sizeInMb, forceSoftLimits);
 
         DiskManagement disk = new DiskManagement(vdc, sizeInMb);
         validate(disk);
@@ -283,7 +285,7 @@ public class StorageService extends DefaultApiService
      */
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public Object detachHardDisk(final Integer vdcId, final Integer vappId, final Integer vmId,
-        final Integer diskId, final VirtualMachineState originalState)
+        final Integer diskId, final VirtualMachineState originalState, final Boolean forceSoftLimits)
     {
         VirtualDatacenter vdc = getVirtualDatacenter(vdcId);
         VirtualAppliance vapp = getVirtualAppliance(vdc, vappId);
@@ -304,7 +306,8 @@ public class StorageService extends DefaultApiService
             if (currentDisk.getRasd().equals(disk.getRasd()))
             {
                 diskIterator.remove();
-                return vmService.reconfigureVirtualMachine(vdc, vapp, vm, newVm, originalState);
+                return vmService.reconfigureVirtualMachine(vdc, vapp, vm, newVm, originalState,
+                    forceSoftLimits);
             }
         }
 
@@ -492,8 +495,8 @@ public class StorageService extends DefaultApiService
         if (tracer != null)
         {
             tracer.log(SeverityType.INFO, ComponentType.VIRTUAL_MACHINE,
-                EventType.HARD_DISK_ASSIGN, "hardDisk.assigned", createdDisk.getId(),
-                createdDisk.getSizeInMb(), vm.getName());
+                EventType.HARD_DISK_ASSIGN, "hardDisk.assigned", createdDisk.getId(), createdDisk
+                    .getSizeInMb(), vm.getName());
         }
 
         return createdDisk;
@@ -555,14 +558,15 @@ public class StorageService extends DefaultApiService
      * @param vdc object {@link VirtualDatacenter}
      * @param sizeInMB new size we want to add as a resource.
      */
-    protected void checkStorageLimits(final VirtualDatacenter vdc, final long sizeInMB)
+    protected void checkStorageLimits(final VirtualDatacenter vdc, final long sizeInMB,
+        final Boolean forceSoftLimits)
     {
         // Must use the enterprise from VDC. When creating iSCSI volumes will be the cloud admin
         // creating volumes in other enterprises VDC
         Enterprise enterprise = vdc.getEnterprise();
 
-        LOGGER.debug("Checking limits for enterprise {} to a locate a volume of {}MB",
-            enterprise.getName(), sizeInMB);
+        LOGGER.debug("Checking limits for enterprise {} to a locate a volume of {}MB", enterprise
+            .getName(), sizeInMB);
 
         DatacenterLimits dcLimits =
             datacenterRepo.findDatacenterLimits(enterprise, vdc.getDatacenter());
@@ -578,7 +582,7 @@ public class StorageService extends DefaultApiService
 
         try
         {
-            enterpriseLimitChecker.checkLimits(enterprise, requirements, true);
+            enterpriseLimitChecker.checkLimits(enterprise, requirements, forceSoftLimits);
         }
         catch (LimitExceededException ex)
         {

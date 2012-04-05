@@ -122,9 +122,12 @@ CREATE TABLE  `kinton`.`category` (
   `name` varchar(30) NOT NULL,
   `isErasable` int(1) unsigned NOT NULL default '1',
   `isDefault` int(1) unsigned NOT NULL default '0',
+  `idEnterprise` int(10) unsigned DEFAULT NULL,
   `version_c` int(11) default 0,
   PRIMARY KEY  (`idCategory`),
-  UNIQUE KEY (`name`)
+  KEY `category_enterprise_FK` (`idEnterprise`),
+  CONSTRAINT `category_enterprise_FK` FOREIGN KEY (`idEnterprise`) REFERENCES `enterprise` (`idEnterprise`),
+  UNIQUE KEY (`name`,`idEnterprise`)
 ) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8;
 
 --
@@ -133,10 +136,10 @@ CREATE TABLE  `kinton`.`category` (
 
 /*!40000 ALTER TABLE `category` DISABLE KEYS */;
 LOCK TABLES `category` WRITE;
-INSERT INTO `kinton`.`category` VALUES  (1,'Others',0,1,0),
- (2,'Database servers',1,0, 0),
- (4,'Applications servers',1,0,0),
- (5,'Web servers',1,0,0);
+INSERT INTO `kinton`.`category` VALUES  (1,'Others',0,1,null,0),
+ (2,'Database servers',1,0,null, 0),
+ (4,'Applications servers',1,0,null,0),
+ (5,'Web servers',1,0,null,0);
 UNLOCK TABLES;
 /*!40000 ALTER TABLE `category` ENABLE KEYS */;
 
@@ -877,7 +880,8 @@ INSERT INTO `privilege` VALUES
  (48,'USERS_DEFINE_AS_MANAGER',0),
  (49,'PRICING_VIEW',0),
  (50,'PRICING_MANAGE',0),
- (51,'USERS_MANAGE_CHEF_ENTERPRISE',0);
+ (51,'USERS_MANAGE_CHEF_ENTERPRISE',0),
+ (52,'MANAGE_HARD_DISKS',0);
 UNLOCK TABLES;
 /*!40000 ALTER TABLE `privilege` ENABLE KEYS */;
 
@@ -889,7 +893,7 @@ UNLOCK TABLES;
 LOCK TABLES `roles_privileges` WRITE;
 INSERT INTO `roles_privileges` VALUES
  (1,1,0),(1,2,0),(1,3,0),(1,4,0),(1,5,0),(1,6,0),(1,7,0),(1,8,0),(1,9,0),(1,10,0),(1,11,0),(1,12,0),(1,13,0),(1,14,0),(1,15,0),(1,16,0),(1,17,0),(1,18,0),(1,19,0),(1,20,0),(1,21,0),(1,22,0),(1,23,0),(1,24,0),(1,25,0),
- (1,26,0),(1,27,0),(1,28,0),(1,29,0),(1,30,0),(1,31,0),(1,32,0),(1,33,0),(1,34,0),(1,35,0),(1,36,0),(1,37,0),(1,38,0),(1,39,0),(1,40,0),(1,41,0),(1,42,0),(1,43,0),(1,44,0),(1,45,0),(1,47,0),(1,48,0),(1,49,0),(1,50,0),(1,51,0),
+ (1,26,0),(1,27,0),(1,28,0),(1,29,0),(1,30,0),(1,31,0),(1,32,0),(1,33,0),(1,34,0),(1,35,0),(1,36,0),(1,37,0),(1,38,0),(1,39,0),(1,40,0),(1,41,0),(1,42,0),(1,43,0),(1,44,0),(1,45,0),(1,47,0),(1,48,0),(1,49,0),(1,50,0),(1,51,0),(1,52,0),
  (3,3,0),(3,12,0),(3,13,0),(3,14,0),(3,15,0),(3,16,0),(3,17,0),(3,18,0),(3,19,0),(3,20,0),(3,21,0),(3,22,0),(3,23,0),(3,24,0),(3,25,0),(3,26,0),(3,27,0),(3,28,0),(3,29,0),(3,30,0),(3,32,0),(3,34,0),(3,43,0),(3,48,0),
 (2,12,0),(2,14,0),(2,17,0),(2,18,0),(2,19,0),(2,20,0),(2,21,0),(2,22,0),(2,23,0),(2,43,0);
 UNLOCK TABLES;
@@ -1403,6 +1407,7 @@ INSERT INTO `kinton`.`system_properties` (`name`, `value`, `description`) VALUES
  ("client.main.disableChangePassword","1","Allow (1) or deny (0) user to change their password"),
  ("client.logout.url","","Redirect to this URL after logout (empty -> login screen)"),
  ("client.main.allowLogout","1","Allow (1) or deny (0) user to logout"),
+ ("client.main.showHardDisk","1","Show (1) or hide (0) hard disk tab"),
  ("client.wiki.showHelp","1","Show (1) or hide (0) the help icon within the plateform"), 
  ("client.wiki.showDefaultHelp","0","Use (1) or not (0) the default help URL within the plateform"), 
  ("client.wiki.defaultURL","http://community.abiquo.com/display/ABI20/Abiquo+Documentation+Home","The default URL opened when not specific help URL is specified"),
@@ -1437,7 +1442,7 @@ INSERT INTO `kinton`.`system_properties` (`name`, `value`, `description`) VALUES
  ("client.wiki.user.createEnterprise","http://community.abiquo.com/display/ABI20/Manage+Enterprises#ManageEnterprises-CreatingorEditinganEnterprise","Enterprise creation wiki"),
  ("client.wiki.user.dataCenterLimits","http://community.abiquo.com/display/ABI20/Manage+Enterprises#ManageEnterprises-EdittheEnterprise%27sDatacenters","Datacenter Limits wiki"),
  ("client.wiki.user.createUser","http://community.abiquo.com/display/ABI20/Manage+Users#ManageUsers-CreatingorEditingaUser","User creation wiki"),
- ("client.wiki.user.createRole","http://community.abiquo.com/display/ABI20/Manage+Roles+and+Privileges","Role creation wiki"),
+ ("client.wiki.user.createRole","http://community.abiquo.com/display/ABI20/Manage+Roles+and+ges","Role creation wiki"),
  ("client.wiki.pricing.createCurrency","http://community.abiquo.com/display/ABI20/Pricing+View#PricingView-CurrenciesTab","Currency creation wiki"),
  ("client.wiki.pricing.createTemplate","http://community.abiquo.com/display/ABI20/Pricing+View#PricingView-PricingModelsTab","create pricing template wiki"),
  ("client.wiki.pricing.createCostCode","http://community.abiquo.com/display/ABI20/Pricing+View#PricingView-CostCodesTab","create pricing cost code wiki"),
@@ -2090,7 +2095,7 @@ DROP TRIGGER IF EXISTS `kinton`.`datacenter_created`;
 DROP TRIGGER IF EXISTS `kinton`.`datacenter_deleted`;
 DROP TRIGGER IF EXISTS `kinton`.`virtualapp_created`;
 DROP TRIGGER IF EXISTS `kinton`.`virtualapp_deleted`;
-DROP TRIGGER IF EXISTS `kinton`.`update_virtualapp_update_stats`;
+DROP TRIGGER IF EXISTS kinton.update_virtualapp_update_stats;
 DROP TRIGGER IF EXISTS `kinton`.`enterprise_created`;
 DROP TRIGGER IF EXISTS `kinton`.`enterprise_deleted`;
 DROP TRIGGER IF EXISTS `kinton`.`enterprise_updated`;
@@ -2103,7 +2108,7 @@ DROP TRIGGER IF EXISTS `kinton`.`delete_datastore_update_stats`;
 DROP TRIGGER IF EXISTS kinton.create_virtualmachine_update_stats;
 DROP TRIGGER IF EXISTS kinton.update_virtualmachine_update_stats;
 DROP TRIGGER IF EXISTS kinton.delete_virtualmachine_update_stats;
-DROP TRIGGER IF EXISTS `kinton`.`create_nodevirtualimage_update_stats`;
+DROP TRIGGER IF EXISTS kinton.create_nodevirtualimage_update_stats;
 DROP TRIGGER IF EXISTS kinton.delete_nodevirtualimage_update_stats;
 DROP TRIGGER IF EXISTS `kinton`.`virtualdatacenter_created`;
 DROP TRIGGER IF EXISTS `kinton`.`virtualdatacenter_updated`;
@@ -2186,23 +2191,29 @@ CREATE TRIGGER `kinton`.`virtualapp_deleted` AFTER DELETE ON `kinton`.`virtualap
 --
 -- Fires: On an UPDATE for the 'virtualapp' table
 -- ******************************************************************************************
-CREATE TRIGGER `kinton`.`update_virtualapp_update_stats` AFTER UPDATE ON `kinton`.`virtualapp`
+CREATE TRIGGER kinton.update_virtualapp_update_stats AFTER UPDATE ON kinton.virtualapp
   FOR EACH ROW BEGIN
     DECLARE numVMachinesCreated INTEGER;
+    DECLARE vdcNameObj VARCHAR(45);
     IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN
     -- V2V: Vmachines moved between VDC
   IF NEW.idVirtualDataCenter != OLD.idVirtualDataCenter THEN
-      -- calculate vmachines total and running in this Vapp
-      SELECT IF (COUNT(*) IS NULL, 0, COUNT(*)) INTO numVMachinesCreated
-      FROM nodevirtualimage nvi, virtualmachine v, node n
-      WHERE nvi.idNode IS NOT NULL
-      AND v.idVM = nvi.idVM
-      AND n.idNode = nvi.idNode
-      AND n.idVirtualApp = NEW.idVirtualApp
-      AND v.state != "NOT_ALLOCATED" AND v.state != "UNKNOWN"
-      and v.idType = 1;
-      UPDATE IGNORE vdc_enterprise_stats SET vmCreated = vmCreated- numVMachinesCreated WHERE idVirtualDataCenter = OLD.idVirtualDataCenter;
-      UPDATE IGNORE vdc_enterprise_stats SET vmCreated = vmCreated+ numVMachinesCreated WHERE idVirtualDataCenter = NEW.idVirtualDataCenter;
+	-- calculate vmachines total and running in this Vapp
+	SELECT IF (COUNT(*) IS NULL, 0, COUNT(*)) INTO numVMachinesCreated
+	FROM nodevirtualimage nvi, virtualmachine v, node n
+	WHERE nvi.idNode IS NOT NULL
+	AND v.idVM = nvi.idVM
+	AND n.idNode = nvi.idNode
+	AND n.idVirtualApp = NEW.idVirtualApp
+	AND v.state != "NOT_ALLOCATED" AND v.state != "UNKNOWN"
+	and v.idType = 1;
+	UPDATE IGNORE vdc_enterprise_stats SET vmCreated = vmCreated- numVMachinesCreated WHERE idVirtualDataCenter = OLD.idVirtualDataCenter;
+	UPDATE IGNORE vdc_enterprise_stats SET vmCreated = vmCreated+ numVMachinesCreated WHERE idVirtualDataCenter = NEW.idVirtualDataCenter;
+	-- Changing VDC name in VAppStats
+	SELECT vdc.name INTO vdcNameObj
+	FROM virtualdatacenter vdc
+	WHERE vdc.idVirtualDataCenter = NEW.idVirtualDataCenter;
+	UPDATE IGNORE vapp_enterprise_stats SET vdcName = vdcNameObj WHERE idVirtualApp = NEW.idVirtualApp;
     END IF;
     -- Checks for changes
     IF OLD.name != NEW.name THEN
@@ -2542,7 +2553,7 @@ CREATE TRIGGER kinton.update_virtualmachine_update_stats AFTER UPDATE ON kinton.
 	SELECT vmts.previousState INTO previousState
         FROM virtualmachinetrackedstate vmts
 	WHERE vmts.idVM = NEW.idVM;
-	-- -- INSERT INTO debug_msg (msg) VALUES (CONCAT('UPDATE: ', NEW.idVM, ' - ', OLD.idType, ' - ', NEW.idType, ' - ', OLD.state, ' - ', NEW.state, ' - ', previousState));	
+	-- INSERT INTO debug_msg (msg) VALUES (CONCAT('UpdateVM ', NEW.idVM, ' - ', OLD.idType, ' - ', NEW.idType, ' - ', OLD.state, ' - NEW.state: ', NEW.state, ' - previousState: ', previousState));	
         --  Updating enterprise_resources_stats: VCPU Used, Memory Used, Local Storage Used
         IF OLD.idHypervisor IS NULL OR (OLD.idHypervisor != NEW.idHypervisor) THEN
             SELECT pm.idDataCenter INTO idDataCenterObj
@@ -2561,23 +2572,30 @@ CREATE TRIGGER kinton.update_virtualmachine_update_stats AFTER UPDATE ON kinton.
         WHERE NEW.idVM = nvi.idVM
         AND nvi.idNode = n.idNode
         AND vapp.idVirtualApp = n.idVirtualApp;   
--- -- INSERT INTO debug_msg (msg) VALUES (CONCAT('update values ', IFNULL(idDataCenterObj,'NULL'), ' - ',IFNULL(idVirtualAppObj,'NULL'), ' - ',IFNULL(idVirtualDataCenterObj,'NULL'), ' - ',IFNULL(previousState,'NULL')));
+-- INSERT INTO debug_msg (msg) VALUES (CONCAT('update values ', IFNULL(idDataCenterObj,'NULL'), ' - ',IFNULL(idVirtualAppObj,'NULL'), ' - ',IFNULL(idVirtualDataCenterObj,'NULL'), ' - ',IFNULL(previousState,'NULL')));
 	--
 	-- Imported VMs will be updated on create_node_virtual_image
 	-- Used Stats (vCpuUsed, vMemoryUsed, vStorageUsed) are updated from delete_nodevirtualimage_update_stats ON DELETE nodevirtualimage when updating the VApp
 	-- Main case: an imported VM changes its state (from LOCKED to ...)
+	-- TODO: Create SQLProcedures to update stats. Code is repeated here
 	IF NEW.idType = 1 AND (NEW.state != OLD.state) THEN
-            IF NEW.state = "ON" AND previousState != "ON" THEN 
-                -- New Active		
-                UPDATE IGNORE vapp_enterprise_stats SET vmActive = vmActive+1
+		IF previousState IN ("NOT_ALLOCATED") AND NEW.state IN ("ON") THEN
+			-- INSERT INTO debug_msg (msg) VALUES (CONCAT('UpdateVMStats DEPLOY+POWERON event detected for Running machine. Updating (+1) VMachinesTotal & VMachinesRunning VM from Stats', NEW.idVM));
+			UPDATE IGNORE vapp_enterprise_stats SET vmCreated = vmCreated+1
+                WHERE idVirtualApp = idVirtualAppObj;
+                UPDATE IGNORE vdc_enterprise_stats SET vmCreated = vmCreated+1
+                WHERE idVirtualDataCenter = idVirtualDataCenterObj;
+                UPDATE IGNORE cloud_usage_stats SET vMachinesTotal = vMachinesTotal+1
+                WHERE idDataCenter = idDataCenterObj;
+			UPDATE IGNORE vapp_enterprise_stats SET vmActive = vmActive+1
                 WHERE idVirtualApp = idVirtualAppObj;
                 UPDATE IGNORE vdc_enterprise_stats SET vmActive = vmActive+1
                 WHERE idVirtualDataCenter = idVirtualDataCenterObj;
                 UPDATE IGNORE cloud_usage_stats SET vMachinesRunning = vMachinesRunning+1
                 WHERE idDataCenter = idDataCenterObj;       
-		SELECT IFNULL(SUM(limitResource),0) * 1048576 INTO extraHDSize 
-		FROM rasd_management rm, rasd r 
-		WHERE rm.idResource = r.instanceID AND rm.idVM = NEW.idVM AND rm.idResourceType=17;    
+			SELECT IFNULL(SUM(limitResource),0) * 1048576 INTO extraHDSize 
+			FROM rasd_management rm, rasd r 
+			WHERE rm.idResource = r.instanceID AND rm.idVM = NEW.idVM AND rm.idResourceType=17;    
 		-- INSERT INTO debug_msg (msg) VALUES (CONCAT('NEW ExtraHDs added ', extraHDSize));
                 UPDATE IGNORE enterprise_resources_stats 
                     SET vCpuUsed = vCpuUsed + NEW.cpu,
@@ -2594,34 +2612,97 @@ CREATE TRIGGER kinton.update_virtualmachine_update_stats AFTER UPDATE ON kinton.
                     memoryUsed = memoryUsed + NEW.ram,
                     localStorageUsed = localStorageUsed + NEW.hd + extraHDSize
                 WHERE idVirtualDataCenter = idVirtualDataCenterObj;		
-	    ELSEIF (NEW.state IN ("PAUSED","OFF","NOT_ALLOCATED") AND previousState = "ON") THEN
-                -- When Undeploying a full Vapp
-                UPDATE IGNORE vapp_enterprise_stats SET vmActive = vmActive-1
+		ELSEIF previousState IN ("ON","PAUSED","OFF") AND NEW.state IN ("NOT_ALLOCATED") THEN
+			-- INSERT INTO debug_msg (msg) VALUES (CONCAT('UpdateVMStats UNDEPLOY event detected. Updating (-1) VMachinesTotal VM from Stats', NEW.idVM));
+			UPDATE IGNORE vapp_enterprise_stats SET vmCreated = vmCreated-1
                 WHERE idVirtualApp = idVirtualAppObj;
-                UPDATE IGNORE vdc_enterprise_stats SET vmActive = vmActive-1
+                UPDATE IGNORE vdc_enterprise_stats SET vmCreated = vmCreated-1
                 WHERE idVirtualDataCenter = idVirtualDataCenterObj;
-                UPDATE IGNORE cloud_usage_stats SET vMachinesRunning = vMachinesRunning-1
+                UPDATE IGNORE cloud_usage_stats SET vMachinesTotal = vMachinesTotal-1
                 WHERE idDataCenter = idDataCenterObj;
-		SELECT IFNULL(SUM(limitResource),0) * 1048576 INTO extraHDSize 
-		FROM rasd_management rm, rasd r 
-		WHERE rm.idResource = r.instanceID AND rm.idVM = NEW.idVM AND rm.idResourceType=17;    
-		-- INSERT INTO debug_msg (msg) VALUES (CONCAT('NEW ExtraHDs removed ', extraHDSize));
+			IF previousState IN ("ON") THEN
+				-- INSERT INTO debug_msg (msg) VALUES (CONCAT('UpdateVMStats UNDEPLOY event detected for Running machine. Updating (-1) VMachinesRunning VM from Stats', NEW.idVM));
+				UPDATE IGNORE vapp_enterprise_stats SET vmActive = vmActive-1
+	                WHERE idVirtualApp = idVirtualAppObj;
+	                UPDATE IGNORE vdc_enterprise_stats SET vmActive = vmActive-1
+	                WHERE idVirtualDataCenter = idVirtualDataCenterObj;
+	                UPDATE IGNORE cloud_usage_stats SET vMachinesRunning = vMachinesRunning-1
+	                WHERE idDataCenter = idDataCenterObj;
+				SELECT IFNULL(SUM(limitResource),0) * 1048576 INTO extraHDSize 
+				FROM rasd_management rm, rasd r 
+				WHERE rm.idResource = r.instanceID AND rm.idVM = NEW.idVM AND rm.idResourceType=17;    
+			-- INSERT INTO debug_msg (msg) VALUES (CONCAT('NEW ExtraHDs removed ', extraHDSize));
+	                UPDATE IGNORE enterprise_resources_stats 
+	                    SET vCpuUsed = vCpuUsed - NEW.cpu,
+	                        memoryUsed = memoryUsed - NEW.ram,
+	                        localStorageUsed = localStorageUsed - NEW.hd - extraHDSize
+	                WHERE idEnterprise = NEW.idEnterprise;
+	                UPDATE IGNORE dc_enterprise_stats 
+	                SET     vCpuUsed = vCpuUsed - NEW.cpu,
+	                    memoryUsed = memoryUsed - NEW.ram,
+	                    localStorageUsed = localStorageUsed - NEW.hd - extraHDSize
+	                WHERE idEnterprise = NEW.idEnterprise AND idDataCenter = idDataCenterObj;
+	                UPDATE IGNORE vdc_enterprise_stats 
+	                SET     vCpuUsed = vCpuUsed - NEW.cpu,
+	                    memoryUsed = memoryUsed - NEW.ram,
+	                    localStorageUsed = localStorageUsed - NEW.hd - extraHDSize
+	                WHERE idVirtualDataCenter = idVirtualDataCenterObj; 		
+			END IF;
+		ELSEIF previousState IN ("OFF","PAUSED","UNKNOWN") AND NEW.state IN ("ON") THEN
+			-- INSERT INTO debug_msg (msg) VALUES (CONCAT('UpdateVMStats POWERON/RESUME/UNKNOWN event detected. Updating (+1) VMachinesRunning VM from Stats', NEW.idVM));
+			UPDATE IGNORE vapp_enterprise_stats SET vmActive = vmActive+1
+                WHERE idVirtualApp = idVirtualAppObj;
+                UPDATE IGNORE vdc_enterprise_stats SET vmActive = vmActive+1
+                WHERE idVirtualDataCenter = idVirtualDataCenterObj;
+                UPDATE IGNORE cloud_usage_stats SET vMachinesRunning = vMachinesRunning+1
+                WHERE idDataCenter = idDataCenterObj;       
+			SELECT IFNULL(SUM(limitResource),0) * 1048576 INTO extraHDSize 
+			FROM rasd_management rm, rasd r 
+			WHERE rm.idResource = r.instanceID AND rm.idVM = NEW.idVM AND rm.idResourceType=17;    
+			-- INSERT INTO debug_msg (msg) VALUES (CONCAT('NEW ExtraHDs added ', extraHDSize));
                 UPDATE IGNORE enterprise_resources_stats 
-                    SET vCpuUsed = vCpuUsed - NEW.cpu,
-                        memoryUsed = memoryUsed - NEW.ram,
-                        localStorageUsed = localStorageUsed - NEW.hd - extraHDSize
+                    SET vCpuUsed = vCpuUsed + NEW.cpu,
+                        memoryUsed = memoryUsed + NEW.ram,
+                        localStorageUsed = localStorageUsed + NEW.hd + extraHDSize
                 WHERE idEnterprise = NEW.idEnterprise;
                 UPDATE IGNORE dc_enterprise_stats 
-                SET     vCpuUsed = vCpuUsed - NEW.cpu,
-                    memoryUsed = memoryUsed - NEW.ram,
-                    localStorageUsed = localStorageUsed - NEW.hd - extraHDSize
+                SET     vCpuUsed = vCpuUsed + NEW.cpu,
+                    memoryUsed = memoryUsed + NEW.ram,
+                    localStorageUsed = localStorageUsed + NEW.hd + extraHDSize
                 WHERE idEnterprise = NEW.idEnterprise AND idDataCenter = idDataCenterObj;
                 UPDATE IGNORE vdc_enterprise_stats 
-                SET     vCpuUsed = vCpuUsed - NEW.cpu,
-                    memoryUsed = memoryUsed - NEW.ram,
-                    localStorageUsed = localStorageUsed - NEW.hd - extraHDSize
-                WHERE idVirtualDataCenter = idVirtualDataCenterObj; 		
-            END IF;
+                SET     vCpuUsed = vCpuUsed + NEW.cpu,
+                    memoryUsed = memoryUsed + NEW.ram,
+                    localStorageUsed = localStorageUsed + NEW.hd + extraHDSize
+                WHERE idVirtualDataCenter = idVirtualDataCenterObj;		
+		ELSEIF previousState IN ("ON")  AND NEW.state IN ("OFF","PAUSED","UNKNOWN") THEN
+			-- INSERT INTO debug_msg (msg) VALUES (CONCAT('UpdateVMStats POWEROFF/PAUSE/UNKNOWN event detected. Updating (-1) VMachinesRunning VM from Stats', NEW.idVM));
+			UPDATE IGNORE vapp_enterprise_stats SET vmActive = vmActive-1
+	                WHERE idVirtualApp = idVirtualAppObj;
+	                UPDATE IGNORE vdc_enterprise_stats SET vmActive = vmActive-1
+	                WHERE idVirtualDataCenter = idVirtualDataCenterObj;
+	                UPDATE IGNORE cloud_usage_stats SET vMachinesRunning = vMachinesRunning-1
+	                WHERE idDataCenter = idDataCenterObj;
+				SELECT IFNULL(SUM(limitResource),0) * 1048576 INTO extraHDSize 
+				FROM rasd_management rm, rasd r 
+				WHERE rm.idResource = r.instanceID AND rm.idVM = NEW.idVM AND rm.idResourceType=17;    
+			-- INSERT INTO debug_msg (msg) VALUES (CONCAT('NEW ExtraHDs removed ', extraHDSize));
+	                UPDATE IGNORE enterprise_resources_stats 
+	                    SET vCpuUsed = vCpuUsed - NEW.cpu,
+	                        memoryUsed = memoryUsed - NEW.ram,
+	                        localStorageUsed = localStorageUsed - NEW.hd - extraHDSize
+	                WHERE idEnterprise = NEW.idEnterprise;
+	                UPDATE IGNORE dc_enterprise_stats 
+	                SET     vCpuUsed = vCpuUsed - NEW.cpu,
+	                    memoryUsed = memoryUsed - NEW.ram,
+	                    localStorageUsed = localStorageUsed - NEW.hd - extraHDSize
+	                WHERE idEnterprise = NEW.idEnterprise AND idDataCenter = idDataCenterObj;
+	                UPDATE IGNORE vdc_enterprise_stats 
+	                SET     vCpuUsed = vCpuUsed - NEW.cpu,
+	                    memoryUsed = memoryUsed - NEW.ram,
+	                    localStorageUsed = localStorageUsed - NEW.hd - extraHDSize
+	                WHERE idVirtualDataCenter = idVirtualDataCenterObj;
+		END IF;
         END IF;
         --
         SELECT IF(vi.cost_code IS NULL, 0, vi.cost_code) INTO costCodeObj
@@ -2635,7 +2716,6 @@ CREATE TRIGGER kinton.update_virtualmachine_update_stats AFTER UPDATE ON kinton.
 	    END IF;
       END IF;
     END;
-
 --
 -- ******************************************************************************************
 -- Description:
@@ -2648,6 +2728,7 @@ CREATE TRIGGER kinton.update_virtualmachine_update_stats AFTER UPDATE ON kinton.
 -- ******************************************************************************************
 --
 |
+DROP TRIGGER IF EXISTS kinton.create_nodevirtualimage_update_stats;
 CREATE TRIGGER kinton.create_nodevirtualimage_update_stats AFTER INSERT ON kinton.nodevirtualimage
   FOR EACH ROW BEGIN
     DECLARE idDataCenterObj INTEGER;
@@ -2669,16 +2750,20 @@ CREATE TRIGGER kinton.create_nodevirtualimage_update_stats AFTER INSERT ON kinto
       SELECT vm.idType, vm.state, vm.cpu, vm.ram, vm.hd INTO type, state, cpu, ram, hd
      FROM virtualmachine vm
 	WHERE vm.idVM = NEW.idVM;
-      --  INSERT INTO debug_msg (msg) VALUES (CONCAT('createNVI ', type, ' - ', state, ' - ', IFNULL(idDataCenterObj,'NULL'), ' - ',IFNULL(idVirtualAppObj,'NULL'), ' - ',IFNULL(idVirtualDataCenterObj,'NULL')));
+     -- INSERT INTO debug_msg (msg) VALUES (CONCAT('createNVI ', type, ' - ', state, ' - ', IFNULL(idDataCenterObj,'NULL'), ' - ',IFNULL(idVirtualAppObj,'NULL'), ' - ',IFNULL(idVirtualDataCenterObj,'NULL')));
     IF type=1 THEN
     	-- Imported !!!
-		UPDATE IGNORE cloud_usage_stats SET vMachinesTotal = vMachinesTotal+1
+		IF state NOT IN ("NOT_ALLOCATED","UNKNOWN") THEN
+			-- INSERT INTO debug_msg (msg) VALUES (CONCAT('CreateNVI deploy detected. Adding VM ', NEW.idVM));
+			UPDATE IGNORE cloud_usage_stats SET vMachinesTotal = vMachinesTotal+1
                 WHERE idDataCenter = idDataCenterObj;
                 UPDATE IGNORE vapp_enterprise_stats SET vmCreated = vmCreated+1
                 WHERE idVirtualApp = idVirtualAppObj;
                 UPDATE IGNORE vdc_enterprise_stats SET vmCreated = vmCreated+1
                 WHERE idVirtualDataCenter = idVirtualDataCenterObj;
+                END IF;
           IF state = "ON" THEN 	
+          	-- INSERT INTO debug_msg (msg) VALUES (CONCAT('CreateNVI deploy runningVM detected. Adding RUnning VM ', NEW.idVM));
 			UPDATE IGNORE vapp_enterprise_stats SET vmActive = vmActive+1
 		        WHERE idVirtualApp = idVirtualAppObj;
 		        UPDATE IGNORE vdc_enterprise_stats SET vmActive = vmActive+1
@@ -2753,7 +2838,7 @@ CREATE TRIGGER kinton.delete_nodevirtualimage_update_stats AFTER DELETE ON kinto
 -- INSERT INTO debug_msg (msg) VALUES (CONCAT('deleteNVI values', IFNULL(cpu,'NULL'), ' - ',IFNULL(ram,'NULL'), ' - ',IFNULL(hd,'NULL')));						
     --
     IF type = 1 THEN
-      IF previousState != "NOT_ALLOCATED" OR previousState != "UNKNOWN" THEN      
+      IF state NOT IN ("NOT_ALLOCATED","UNKNOWN") THEN      
         UPDATE IGNORE cloud_usage_stats SET vMachinesTotal = vMachinesTotal-1
           WHERE idDataCenter = idDataCenterObj;
         UPDATE IGNORE vapp_enterprise_stats SET vmCreated = vmCreated-1

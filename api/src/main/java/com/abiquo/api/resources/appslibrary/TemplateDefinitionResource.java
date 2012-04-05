@@ -31,7 +31,6 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
 
 import org.apache.wink.common.annotations.Parent;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,6 +45,11 @@ import com.abiquo.appliancemanager.transport.TemplateStateDto;
 import com.abiquo.server.core.appslibrary.TemplateDefinition;
 import com.abiquo.server.core.appslibrary.TemplateDefinitionDto;
 
+/**
+ * Template Definitions are a summarized version of the OVF format OVF Envelope.
+ * 
+ * @author apuig@abiquo.com
+ */
 @Parent(TemplateDefinitionsResource.class)
 @Path(TemplateDefinitionResource.TEMPLATE_DEFINITION_PARAM)
 @Controller
@@ -76,6 +80,16 @@ public class TemplateDefinitionResource extends AbstractResource
     @Autowired
     private AppsLibraryTransformer transformer;
 
+    /**
+     * Returns a template definition
+     * 
+     * @title Retrieve a template definition
+     * @param idEnterprise identifier of the enterprise
+     * @param templateDefinitionId identifier of the template definition
+     * @param restBuilder a Context-injected object to create the links of the Dto
+     * @return a {TemplateDefinitionDto} object with the requested template definition
+     * @throws Exception
+     */
     @GET
     @Produces(TemplateDefinitionDto.MEDIA_TYPE)
     public TemplateDefinitionDto getTemplateDefinition(
@@ -88,6 +102,17 @@ public class TemplateDefinitionResource extends AbstractResource
         return transformer.createTransferObject(templateDef, restBuilder);
     }
 
+    /**
+     * Returns the state of a template definition
+     * 
+     * @title Retrieve the state of a template definition
+     * @param templateDefId identifier of the template definition
+     * @param idEnterprise identifier of the enterprise
+     * @param datacenterId identifier of the datacenter
+     * @param restBuilder a Context-injected object to create the links of the Dto
+     * @return a {TemplateStateDto} object with the state of the template definition
+     * @throws Exception
+     */
     @GET
     @Path(TEMPLATE_DEFINITION_REPOSITORY_STATUS_PATH)
     @Produces(TemplateStateDto.MEDIA_TYPE)
@@ -101,6 +126,17 @@ public class TemplateDefinitionResource extends AbstractResource
         return service.getTemplateState(templateDefId, datacenterId, idEnterprise);
     }
 
+    /**
+     * Modifies a template definition
+     * 
+     * @title Modify a template definition
+     * @param templateDef template definition to modify
+     * @param templateDefId identifier of the template definition
+     * @param idEnterprise identifier of the enterprise
+     * @param restBuilder a Context-injected object to create the links of the Dto
+     * @return a {TemplateDefinitionDto} with the modified template definition
+     * @throws Exception
+     */
     @PUT
     @Consumes(TemplateDefinitionDto.MEDIA_TYPE)
     @Produces(TemplateDefinitionDto.MEDIA_TYPE)
@@ -109,13 +145,22 @@ public class TemplateDefinitionResource extends AbstractResource
         @PathParam(EnterpriseResource.ENTERPRISE) final Integer idEnterprise,
         @Context final IRESTBuilder restBuilder) throws Exception
     {
-        TemplateDefinition d = transformer.createPersistenceObject(templateDef);
+        TemplateDefinition d = transformer.createPersistenceObject(templateDef, true);
 
         d = service.updateTemplateDefinition(templateDefId, d, idEnterprise);
 
         return transformer.createTransferObject(d, restBuilder);
     }
 
+    /**
+     * Deletes a template definition
+     * 
+     * @title Delete a template definition
+     * @wiki If the current Template Definition being deleted is used on some Template Definition
+     *       List then the list is updated to exclude the deleted Template Definition.
+     * @param idEnterprise identifier of the enterprise
+     * @param templateDefId identifier of the template definition
+     */
     @DELETE
     public void deleteTemplateDefinition(
         @PathParam(EnterpriseResource.ENTERPRISE) final Integer idEnterprise,
@@ -126,6 +171,8 @@ public class TemplateDefinitionResource extends AbstractResource
 
     /**
      * TODO use the datacenter URI on the post
+     * 
+     * @title Install a template on the datacenter repository
      */
     @POST
     @Path(TemplateDefinitionResource.TEMPLATE_DEFINITION_INSTALL_ACTION_PATH)
@@ -141,6 +188,8 @@ public class TemplateDefinitionResource extends AbstractResource
 
     /**
      * TODO use the datacenter URI on the post
+     * 
+     * @title Uninstall a template from the datacenter repository
      */
     @POST
     @Path(TemplateDefinitionResource.TEMPLATE_DEFINITION_UN_INSTALL_ACTION_PATH)

@@ -492,4 +492,16 @@ public class EnterpriseRep extends DefaultRepBase
     {
         return enterpriseDAO.existAnyEnterpriseWithPricingTemplate(pricingTemplate);
     }
+
+    public boolean isUserAllowedToUseVirtualDatacenter(final String username,
+        final String authtype, final String[] privileges, final Integer idVdc)
+    {
+        return userDAO.isUserAllowedToUseVirtualDatacenter(username, authtype, privileges, idVdc);
+    }
+
+    public boolean isUserAllowedToEnterprise(final String username, final String authtype,
+        final String[] privileges, final Integer idEnterprise)
+    {
+        return userDAO.isUserAllowedToEnterprise(username, authtype, privileges, idEnterprise);
+    }
 }

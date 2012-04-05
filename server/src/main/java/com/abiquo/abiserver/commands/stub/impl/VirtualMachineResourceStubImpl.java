@@ -39,6 +39,7 @@ import com.abiquo.model.transport.AcceptedRequestDto;
 import com.abiquo.server.core.cloud.VirtualMachineDto;
 import com.abiquo.server.core.cloud.VirtualMachineState;
 import com.abiquo.server.core.cloud.VirtualMachineStateDto;
+import com.abiquo.server.core.cloud.VirtualMachinesDto;
 import com.abiquo.util.URIResolver;
 
 public class VirtualMachineResourceStubImpl extends AbstractAPIStub implements
@@ -51,7 +52,7 @@ public class VirtualMachineResourceStubImpl extends AbstractAPIStub implements
 
     @Override
     public BasicResult updateVirtualMachine(final Integer virtualDatacenterId,
-        final Integer virtualApplianceId, final VirtualMachine virtualMachine)
+        final Integer virtualApplianceId, final VirtualMachine virtualMachine, final boolean force)
     {
 
         BasicResult result = new BasicResult();
@@ -77,7 +78,7 @@ public class VirtualMachineResourceStubImpl extends AbstractAPIStub implements
                 vm.setPassword(virtualMachine.getPassword());
 
                 // Here we actually perform the request to create the virtual machine
-                vm.update();
+                vm.update(force);
             }
             // else all updated
 
@@ -133,8 +134,8 @@ public class VirtualMachineResourceStubImpl extends AbstractAPIStub implements
     {
         BasicResult result = new BasicResult();
         String vmachineUrl =
-            resolveVirtualMachineUrl(virtualDatacenterId, virtualApplianceId,
-                virtualMachine.getId());
+            resolveVirtualMachineUrl(virtualDatacenterId, virtualApplianceId, virtualMachine
+                .getId());
 
         ClientResponse response = delete(vmachineUrl);
 
@@ -197,10 +198,10 @@ public class VirtualMachineResourceStubImpl extends AbstractAPIStub implements
     {
         DataResult result = new DataResult();
         String url =
-            createVirtualMachineResetUrl(virtualDatacenterId, virtualApplianceId,
-                virtualMachine.getId());
+            createVirtualMachineResetUrl(virtualDatacenterId, virtualApplianceId, virtualMachine
+                .getId());
 
-        ClientResponse response = post(url, null);
+        ClientResponse response = post(url, null, AcceptedRequestDto.MEDIA_TYPE);
 
         if (response.getStatusCode() == Status.ACCEPTED.getStatusCode())
         {
@@ -225,6 +226,80 @@ public class VirtualMachineResourceStubImpl extends AbstractAPIStub implements
         else
         {
             populateErrors(response, result, "rebootVirtualMachine");
+        }
+
+        return result;
+    }
+
+    @Override
+    public BasicResult rebootInfrastructureVirtualMachine(final Integer datacenterId,
+        final Integer rackId, final Integer machineId, final VirtualMachine virtualMachine)
+    {
+        String uri = createMachineLinkVm(datacenterId, rackId, machineId, virtualMachine.getId());
+
+        DataResult result = new DataResult();
+
+        ClientResponse response = get(uri, VirtualMachineDto.MEDIA_TYPE);
+        if (response.getStatusCode() == 200)
+        {
+            VirtualMachineDto vmDto = response.getEntity(VirtualMachineDto.class);
+            String url = vmDto.searchLink("virtualmachine").getHref() + "/action/reset";
+            response = post(url, null, AcceptedRequestDto.MEDIA_TYPE);
+
+            if (response.getStatusCode() == Status.ACCEPTED.getStatusCode())
+            {
+                result.setSuccess(true);
+                response = get(uri, VirtualMachinesDto.MEDIA_TYPE);
+                result.setData(new State(StateEnum.valueOf(response.getEntity(
+                    VirtualMachineDto.class).getState().name())));
+            }
+            else
+            {
+                populateErrors(response, result, "editVirtualMachineState");
+            }
+        }
+        else
+        {
+            populateErrors(response, result, "editInfrastructureVirtualMachineState");
+        }
+
+        return result;
+    }
+
+    @Override
+    public BasicResult editInfrastructureVirtualMachineState(final Integer datacenterId,
+        final Integer rackId, final Integer machineId, final VirtualMachine virtualMachine,
+        final VirtualMachineState off)
+    {
+        String uri = createMachineLinkVm(datacenterId, rackId, machineId, virtualMachine.getId());
+
+        DataResult result = new DataResult();
+
+        ClientResponse response = get(uri, VirtualMachineDto.MEDIA_TYPE);
+        if (response.getStatusCode() == 200)
+        {
+            VirtualMachineDto vmDto = response.getEntity(VirtualMachineDto.class);
+            String url = vmDto.searchLink("virtualmachine").getHref() + "/state";
+            VirtualMachineStateDto dto = new VirtualMachineStateDto();
+            dto.setState(off);
+            response =
+                put(url, dto, AcceptedRequestDto.MEDIA_TYPE, VirtualMachineStateDto.MEDIA_TYPE);
+
+            if (response.getStatusCode() == Status.ACCEPTED.getStatusCode())
+            {
+                result.setSuccess(true);
+                response = get(uri, VirtualMachinesDto.MEDIA_TYPE);
+                result.setData(new State(StateEnum.valueOf(response.getEntity(
+                    VirtualMachineDto.class).getState().name())));
+            }
+            else
+            {
+                populateErrors(response, result, "editVirtualMachineState");
+            }
+        }
+        else
+        {
+            populateErrors(response, result, "editInfrastructureVirtualMachineState");
         }
 
         return result;

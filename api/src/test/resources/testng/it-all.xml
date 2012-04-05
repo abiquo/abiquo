@@ -13,7 +13,8 @@
 				<include name="it-appslibrary" />
 				<include name="it-all" />				
 				<exclude name="it-am"/>	
-				<include name="it-editvm" />			
+				<include name="it-editvm" />
+				<include name="it-securityhandlers" />
 			</run>
 		</groups>
 		<packages>

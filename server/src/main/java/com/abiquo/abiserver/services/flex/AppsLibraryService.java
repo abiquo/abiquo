@@ -43,22 +43,20 @@ import com.abiquo.server.core.appslibrary.CategoryDto;
 public class AppsLibraryService
 {
 
-    private final static boolean REPOSITORY_INCLUDE_USAGE = true;
-
     public AppsLibraryService()
     {
     }
 
     public DataResult<Repository> getDatacenterRepository(final UserSession userSession,
-        final Integer idDatacenter, final Integer idEnterprise, final Boolean refresh)
+        final Integer idDatacenter, final Integer idEnterprise, final Boolean refresh,
+        final Boolean includeUsage)
     {
         DatacenterRepositoryResourceStub dcRepoStub =
             APIStubFactory.getInstance(userSession, new DatacenterRepositoryResourceStubImpl(),
                 DatacenterRepositoryResourceStub.class);
 
         // refresh content and get
-        return dcRepoStub.getRepository(idDatacenter, idEnterprise, refresh,
-            REPOSITORY_INCLUDE_USAGE);
+        return dcRepoStub.getRepository(idDatacenter, idEnterprise, refresh, includeUsage);
     }
 
     /** Virtual images */
@@ -278,19 +276,21 @@ public class AppsLibraryService
      * CATEGORY
      */
 
-    public DataResult<List<Category>> getCategories(final UserSession userSession)
+    public DataResult<List<Category>> getCategories(final UserSession userSession,
+        final Integer idEnterprise)
     {
-        return proxyStub(userSession).getCategories();
+        return proxyStub(userSession).getCategories(idEnterprise);
     }
 
     public DataResult<Category> createCategory(final UserSession userSession,
-        final String categoryName)
+        final String categoryName, final Integer idEnterprise)
     {
         CategoryDto categoryDto = new CategoryDto();
         categoryDto.setName(categoryName);
         categoryDto.setDefaultCategory(false);
         categoryDto.setErasable(true);
-        return proxyStub(userSession).createCategory(categoryDto);
+
+        return proxyStub(userSession).createCategory(categoryDto, idEnterprise);
     }
 
     public BasicResult deleteCategory(final UserSession userSession, final Integer idCategory)

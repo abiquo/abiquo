@@ -53,6 +53,15 @@ public class SystemPropertyResource extends AbstractResource
     @Autowired
     private SystemPropertyService service;
 
+    /**
+     * Returns a system property
+     * 
+     * @title Retrieve a system property
+     * @param propertyId identifier of the system property
+     * @param restBuilder a Context-injected object to create the links of the Dto
+     * @return a {SystemPropertyDto} object with the requested system property
+     * @throws Exception
+     */
     @GET
     @Produces(SystemPropertyDto.MEDIA_TYPE)
     public SystemPropertyDto getSystemProperty(
@@ -63,6 +72,16 @@ public class SystemPropertyResource extends AbstractResource
         return createTransferObject(property, restBuilder);
     }
 
+    /**
+     * Modifies a system property
+     * 
+     * @title Modify a system property
+     * @param systemProperty system property to modify
+     * @param propertyId identifier of the system property
+     * @param restBuilder a Context-injected object to create the links of the Dto
+     * @return a {SystemPropertyDto} with the modified system property
+     * @throws Exception
+     */
     @PUT
     @Consumes(SystemPropertyDto.MEDIA_TYPE)
     @Produces(SystemPropertyDto.MEDIA_TYPE)
@@ -77,6 +96,12 @@ public class SystemPropertyResource extends AbstractResource
         return createTransferObject(property, restBuilder);
     }
 
+    /**
+     * Deletes a system property
+     * 
+     * @title Delete a system property
+     * @param propertyId identifier of the system property
+     */
     @DELETE
     public void deleteSystemProperty(@PathParam(SYSTEM_PROPERTY) final Integer propertyId)
     {

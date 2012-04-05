@@ -82,6 +82,15 @@ public class RoleResource extends AbstractResource
     @Autowired
     SecurityService securityService;
 
+    /**
+     * Returns a role
+     * 
+     * @title Retrieve a Role
+     * @param roleId identifier of the role
+     * @param restBuilder a Context-injected object to create the links of the Dto
+     * @return a {RoleDto} object with the requested role
+     * @throws Exception
+     */
     @GET
     @Produces(RoleDto.MEDIA_TYPE)
     public RoleDto getRole(@PathParam(ROLE) final Integer roleId,
@@ -115,8 +124,9 @@ public class RoleResource extends AbstractResource
     }
 
     /**
-     * Retrieves the list Of links to Privileges realteds with a role.
+     * Retrieves the list of links to Privileges relateds with a role.
      * 
+     * @title Retrieve a list of links to Privileges from a Role
      * @param roleId identifier of the role
      * @param restBuilder {@linnk IRESTBuilder} object injected by context
      * @return the {@link PrivilegesDto} object. A {@link PrivilegesDto} wrapper.
@@ -147,8 +157,9 @@ public class RoleResource extends AbstractResource
     }
 
     /**
-     * Retrieves the list Of Privileges realteds with a role.
+     * Retrieves the list of Privileges relateds with a role.
      * 
+     * @title Retrieve a list of Privileges from a Role
      * @param roleId identifier of the role
      * @param restBuilder {@linnk IRESTBuilder} object injected by context
      * @return the {@link PrivilegesDto} object. A {@link PrivilegesDto} wrapper.

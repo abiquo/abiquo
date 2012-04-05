@@ -37,6 +37,7 @@ import com.abiquo.abiserver.commands.stub.AbstractAPIStub;
 import com.abiquo.abiserver.commands.stub.VirtualDatacenterResourceStub;
 import com.abiquo.abiserver.persistence.DAOFactory;
 import com.abiquo.abiserver.persistence.hibernate.HibernateDAOFactory;
+import com.abiquo.abiserver.pojo.infrastructure.HyperVisorType;
 import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.result.DataResult;
 import com.abiquo.abiserver.pojo.result.ListRequest;
@@ -170,10 +171,10 @@ public class VirtualDatacenterResourceStubImpl extends AbstractAPIStub implement
      */
     @Override
     @SuppressWarnings("unchecked")
-    public BasicResult updateVirtualDatacenter(final VirtualDataCenter vdc,
+    public DataResult<VirtualDataCenter> updateVirtualDatacenter(final VirtualDataCenter vdc,
         final ResourceManager resourceManager)
     {
-        BasicResult basicResult = new BasicResult();
+        DataResult<VirtualDataCenter> dataResult = new DataResult<VirtualDataCenter>();
 
         String uri =
             URIResolver.resolveURI(apiUri, "cloud/virtualdatacenters/{virtualDatacenter}",
@@ -189,15 +190,19 @@ public class VirtualDatacenterResourceStubImpl extends AbstractAPIStub implement
 
         if (response.getStatusCode() != 200)
         {
-            populateErrors(response, basicResult, "updateVirtualDatacenter");
+            populateErrors(response, dataResult, "updateVirtualDatacenter");
         }
         else
         {
-            basicResult.setSuccess(true);
-            basicResult.setMessage(resourceManager.getMessage("editVirtualDataCenter.success"));
+            VirtualDatacenterDto vdcDto = response.getEntity(VirtualDatacenterDto.class);
+            vdc.setHyperType(new HyperVisorType(vdcDto.getHypervisorType()));
+            vdc.setName(vdcDto.getName());
+            dataResult.setData(vdc);
+            dataResult.setSuccess(true);
+            dataResult.setMessage(resourceManager.getMessage("editVirtualDataCenter.success"));
         }
 
-        return basicResult;
+        return dataResult;
     }
 
     /*
@@ -254,6 +259,10 @@ public class VirtualDatacenterResourceStubImpl extends AbstractAPIStub implement
 
             for (VirtualDatacenterDto vdc : dto.getCollection())
             {
+                int datacenterId =
+                    URIResolver.getLinkId(vdc.searchLink("datacenter"), "admin/datacenters",
+                        "{datacenter}", "datacenter");
+
                 // TODO set all limits
                 ResourceAllocationLimit limits = new ResourceAllocationLimit();
 
@@ -266,6 +275,8 @@ public class VirtualDatacenterResourceStubImpl extends AbstractAPIStub implement
                 pojo.setId(vdc.getId());
                 pojo.setName(vdc.getName());
                 pojo.setLimits(limits);
+                pojo.setIdDataCenter(datacenterId);
+                pojo.setHyperType(new HyperVisorType(vdc.getHypervisorType()));
 
                 collection.add(pojo);
             }

@@ -67,7 +67,7 @@ import com.abiquo.server.core.infrastructure.DatastoreDto;
 @Parent(DatastoresResource.class)
 @Controller
 @Path(DatastoreResource.DATASTORE_PATH)
-public class DatastoreResource
+public class DatastoreResource extends AbstractResource
 {
     public static final String DATASTORE = "datastore";
 
@@ -76,13 +76,25 @@ public class DatastoreResource
     @Autowired
     DatastoreService service;
 
+    /**
+     * Returns a datastore from a machine
+     * 
+     * @title Retrieve a datastore
+     * @param datacenterId identifier of the datacenter
+     * @param rackId identifier of the rack
+     * @param machineId identifier of the machine
+     * @param datastoreId identifier of the datastore
+     * @param restBuilder a Context-injected object to create the links of the Dto
+     * @return a {DatastoreDto} object with the requested datastore
+     * @throws Exception
+     */
     @GET
     @Produces(DatastoreDto.MEDIA_TYPE)
     public DatastoreDto getDatastore(
-        @PathParam(DatacenterResource.DATACENTER) Integer datacenterId,
-        @PathParam(RackResource.RACK) Integer rackId,
-        @PathParam(MachineResource.MACHINE) Integer machineId,
-        @PathParam(DATASTORE) Integer datastoreId, @Context IRESTBuilder restBuilder)
+        @PathParam(DatacenterResource.DATACENTER) final Integer datacenterId,
+        @PathParam(RackResource.RACK) final Integer rackId,
+        @PathParam(MachineResource.MACHINE) final Integer machineId,
+        @PathParam(DATASTORE) final Integer datastoreId, @Context final IRESTBuilder restBuilder)
         throws Exception
     {
         validatePathParameters(datacenterId, rackId, machineId, datastoreId);
@@ -92,15 +104,28 @@ public class DatastoreResource
         return createTransferObject(ds, datacenterId, rackId, machineId, restBuilder);
     }
 
+    /**
+     * Modifies a datastore
+     * 
+     * @title Updates a Datastore
+     * @param datacenterId identifier of the datacenter
+     * @param rackId identifier of the rack
+     * @param machineId identifier of the machine
+     * @param datastoreId identifier of the datastore
+     * @param dto datastore to modify
+     * @param restBuilder a Context-injected object to create the links of the Dto
+     * @return a {DatastoreDto} with the modified datastore
+     * @throws Exception
+     */
     @PUT
     @Consumes(DatastoreDto.MEDIA_TYPE)
     @Produces(DatastoreDto.MEDIA_TYPE)
     public DatastoreDto updateDatastore(
-        @PathParam(DatacenterResource.DATACENTER) Integer datacenterId,
-        @PathParam(RackResource.RACK) Integer rackId,
-        @PathParam(MachineResource.MACHINE) Integer machineId,
-        @PathParam(DATASTORE) Integer datastoreId, DatastoreDto dto,
-        @Context IRESTBuilder restBuilder) throws Exception
+        @PathParam(DatacenterResource.DATACENTER) final Integer datacenterId,
+        @PathParam(RackResource.RACK) final Integer rackId,
+        @PathParam(MachineResource.MACHINE) final Integer machineId,
+        @PathParam(DATASTORE) final Integer datastoreId, final DatastoreDto dto,
+        @Context final IRESTBuilder restBuilder) throws Exception
     {
         validatePathParameters(datacenterId, rackId, machineId, datastoreId);
 
@@ -110,7 +135,7 @@ public class DatastoreResource
     }
 
     private void validatePathParameters(final Integer datacenterId, final Integer rackId,
-        final Integer machineId, Integer datastoreId) throws NotFoundException
+        final Integer machineId, final Integer datastoreId) throws NotFoundException
     {
         if (!service.isAssignedTo(datacenterId, rackId, machineId, datastoreId))
         {
@@ -119,7 +144,7 @@ public class DatastoreResource
     }
 
     // Create the persistence object.
-    public static Datastore createPersistenceObject(DatastoreDto dto) throws Exception
+    public static Datastore createPersistenceObject(final DatastoreDto dto) throws Exception
     {
         return ModelTransformer.persistenceFromTransport(Datastore.class, dto);
     }

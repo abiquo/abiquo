@@ -31,13 +31,10 @@ package com.abiquo.server.core.infrastructure.nodecollector;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.ws.rs.core.MediaType;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
-
-import com.abiquo.model.transport.WrapperDto;
 
 /**
  * Wrapper class to get a list of Organizations.
@@ -60,7 +57,7 @@ import com.abiquo.model.transport.WrapperDto;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "organizations")
-public class OrganizationsDto extends WrapperDto<OrganizationDto>
+public class OrganizationsDto
 {
 
     /**
@@ -68,6 +65,8 @@ public class OrganizationsDto extends WrapperDto<OrganizationDto>
      */
     private static final long serialVersionUID = 5643469409057556537L;
 
+    protected List<OrganizationDto> collection = new ArrayList<OrganizationDto>();
+    
     /**
      * Gets the value of the host property.
      * <p>
@@ -83,7 +82,6 @@ public class OrganizationsDto extends WrapperDto<OrganizationDto>
      * <p>
      * Objects of the following type(s) are allowed in the list {@link OrganizationDto }
      */
-    @Override
     @XmlElement(name = "organization")
     public List<OrganizationDto> getCollection()
     {
@@ -92,17 +90,5 @@ public class OrganizationsDto extends WrapperDto<OrganizationDto>
             collection = new ArrayList<OrganizationDto>();
         }
         return this.collection;
-    }
-
-    @Override
-    public String getMediaType()
-    {
-        return MediaType.APPLICATION_XML;
-    }
-    
-    @Override
-    public String getBaseMediaType()
-    {
-        return MediaType.APPLICATION_XML;
     }
 }

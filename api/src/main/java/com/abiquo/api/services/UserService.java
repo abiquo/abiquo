@@ -140,7 +140,7 @@ public class UserService extends DefaultApiService
             // [ABICLOUDPREMIUM-1310] Cloud admin can view all. Enterprise admin and users can only
             // view their enterprise: check that the provided id corresponds to their enterprise,
             // and fail if the id is invalid
-            checkCurrentEnterprise(enterprise);
+            checkCurrentEnterpriseForUsers(enterprise);
         }
         else
         {
@@ -224,11 +224,8 @@ public class UserService extends DefaultApiService
         user.setActive(dto.isActive() ? 1 : 0);
         user.setDescription(dto.getDescription());
         validate(user);
-        if (securityService.hasPrivilege(Privileges.USERS_PROHIBIT_VDC_RESTRICTION, user))
-        {
-            user.setAvailableVirtualDatacenters(null);
-        }
-        else
+        if (!securityService.hasPrivilege(Privileges.USERS_PROHIBIT_VDC_RESTRICTION, user)
+            && !StringUtils.isBlank(dto.getAvailableVirtualDatacenters()))
         {
             user.setAvailableVirtualDatacenters(dto.getAvailableVirtualDatacenters());
         }
@@ -327,16 +324,10 @@ public class UserService extends DefaultApiService
         }
         old.setDescription(user.getDescription());
 
-        if (securityService.hasPrivilege(Privileges.USERS_PROHIBIT_VDC_RESTRICTION, old))
+        if (!securityService.hasPrivilege(Privileges.USERS_PROHIBIT_VDC_RESTRICTION, old)
+            && !StringUtils.isBlank(old.getAvailableVirtualDatacenters()))
         {
-            user.setAvailableVirtualDatacenters(null);
-        }
-        else
-        {
-            if (user.getAvailableVirtualDatacenters() != null)
-            {
-                old.setAvailableVirtualDatacenters(user.getAvailableVirtualDatacenters());
-            }
+            user.setAvailableVirtualDatacenters(old.getAvailableVirtualDatacenters());
         }
 
         if (!emailIsValid(user.getEmail()))
@@ -587,6 +578,18 @@ public class UserService extends DefaultApiService
         }
     }
 
+    public void checkCurrentEnterpriseForUsers(final Enterprise enterprise)
+    {
+        User user = getCurrentUser();
+        boolean sameEnterprise = enterprise.getId().equals(user.getEnterprise().getId());
+
+        if (!sameEnterprise
+            && !securityService.hasPrivilege(Privileges.USERS_MANAGE_OTHER_ENTERPRISES))
+        {
+            throw new AccessDeniedException("Missing privilege to get info from other enterprises");
+        }
+    }
+
     public void checkCurrentEnterpriseForPostMethods(final Enterprise enterprise)
     {
         User user = getCurrentUser();
@@ -643,5 +646,40 @@ public class UserService extends DefaultApiService
         messageDigest.update(toEncrypt.getBytes(Charset.forName("UTF8")));
         final byte[] resultByte = messageDigest.digest();
         return new String(Hex.encodeHex(resultByte));
+    }
+
+    public SecurityService getSecurityService()
+    {
+        return securityService;
+    }
+
+    /**
+     * Check if a user has permissions to use the given virtual datacenter
+     * 
+     * @param username nick of the given User
+     * @param authtype authentication type of the given User
+     * @param privileges array of strings with all privileges names from the given User role
+     * @param idVdc identifier from virtual datacenter to check
+     * @return True if user is allowed to user the given virtual datacenter
+     */
+    public boolean isUserAllowedToUseVirtualDatacenter(final String username,
+        final String authtype, final String[] privileges, final Integer idVdc)
+    {
+        return repo.isUserAllowedToUseVirtualDatacenter(username, authtype, privileges, idVdc);
+    }
+
+    /**
+     * Check if a user has permissions to use or see the given enterprise
+     * 
+     * @param username nick of the given User
+     * @param authtype authentication type of the given User
+     * @param privileges array of strings with all privileges names from the given User role
+     * @param idEnteprise identifier from enterprise to check
+     * @return True if user is allowed to use or see the given enterprise
+     */
+    public boolean isUserAllowedToEnterprise(final String username, final String authtype,
+        final String[] privileges, final Integer idEnterprise)
+    {
+        return repo.isUserAllowedToEnterprise(username, authtype, privileges, idEnterprise);
     }
 }

@@ -221,7 +221,8 @@ public class EnterpriseResourceIT extends AbstractJpaGeneratorIT
 
         String validURI = resolveEnterpriseActionGetIPsURI(vdc.getEnterprise().getId());
 
-        ClientResponse response = get(validURI, IpsPoolManagementDto.MEDIA_TYPE);
+        ClientResponse response =
+            get(validURI, "sysadmin", "sysadmin", IpsPoolManagementDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), Status.OK.getStatusCode());
 
         IpsPoolManagementDto entity = response.getEntity(IpsPoolManagementDto.class);
@@ -251,7 +252,8 @@ public class EnterpriseResourceIT extends AbstractJpaGeneratorIT
 
         validURI = validURI + "?by=ip";
 
-        ClientResponse response = get(validURI, IpsPoolManagementDto.MEDIA_TYPE);
+        ClientResponse response =
+            get(validURI, "sysadmin", "sysadmin", IpsPoolManagementDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), Status.OK.getStatusCode());
     }
 
@@ -268,7 +270,8 @@ public class EnterpriseResourceIT extends AbstractJpaGeneratorIT
 
         validURI = validURI + "?by=quarantine";
 
-        ClientResponse response = get(validURI, IpsPoolManagementDto.MEDIA_TYPE);
+        ClientResponse response =
+            get(validURI, "sysadmin", "sysadmin", IpsPoolManagementDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), Status.OK.getStatusCode());
     }
 
@@ -284,7 +287,8 @@ public class EnterpriseResourceIT extends AbstractJpaGeneratorIT
 
         validURI = validURI + "?by=mac";
 
-        ClientResponse response = get(validURI, IpsPoolManagementDto.MEDIA_TYPE);
+        ClientResponse response =
+            get(validURI, "sysadmin", "sysadmin", IpsPoolManagementDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), Status.OK.getStatusCode());
     }
 
@@ -300,7 +304,8 @@ public class EnterpriseResourceIT extends AbstractJpaGeneratorIT
         String validURI = resolveEnterpriseActionGetIPsURI(vdc.getEnterprise().getId());
 
         validURI = validURI + "?by=lease";
-        ClientResponse response = get(validURI, IpsPoolManagementDto.MEDIA_TYPE);
+        ClientResponse response =
+            get(validURI, "sysadmin", "sysadmin", IpsPoolManagementDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), Status.OK.getStatusCode());
     }
 
@@ -316,7 +321,8 @@ public class EnterpriseResourceIT extends AbstractJpaGeneratorIT
 
         validURI = validURI + "?by=vlan";
 
-        ClientResponse response = get(validURI, IpsPoolManagementDto.MEDIA_TYPE);
+        ClientResponse response =
+            get(validURI, "sysadmin", "sysadmin", IpsPoolManagementDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), Status.OK.getStatusCode());
     }
 
@@ -333,7 +339,8 @@ public class EnterpriseResourceIT extends AbstractJpaGeneratorIT
 
         validURI = validURI + "?by=virtualdatacenter";
 
-        ClientResponse response = get(validURI, IpsPoolManagementDto.MEDIA_TYPE);
+        ClientResponse response =
+            get(validURI, "sysadmin", "sysadmin", IpsPoolManagementDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), Status.OK.getStatusCode());
     }
 
@@ -350,7 +357,8 @@ public class EnterpriseResourceIT extends AbstractJpaGeneratorIT
 
         validURI = validURI + "?by=" + Integer.valueOf(new Random().nextInt());
 
-        ClientResponse response = get(validURI, IpsPoolManagementDto.MEDIA_TYPE);
+        ClientResponse response =
+            get(validURI, "sysadmin", "sysadmin", IpsPoolManagementDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), Status.BAD_REQUEST.getStatusCode());
     }
 
@@ -367,7 +375,8 @@ public class EnterpriseResourceIT extends AbstractJpaGeneratorIT
 
         validURI = validURI + "?by=virtualmachine";
 
-        ClientResponse response = get(validURI, IpsPoolManagementDto.MEDIA_TYPE);
+        ClientResponse response =
+            get(validURI, "sysadmin", "sysadmin", IpsPoolManagementDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), Status.OK.getStatusCode());
     }
 
@@ -384,7 +393,8 @@ public class EnterpriseResourceIT extends AbstractJpaGeneratorIT
 
         validURI = validURI + "?by=virtualappliance";
 
-        ClientResponse response = get(validURI, IpsPoolManagementDto.MEDIA_TYPE);
+        ClientResponse response =
+            get(validURI, "sysadmin", "sysadmin", IpsPoolManagementDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), Status.OK.getStatusCode());
     }
 
@@ -398,7 +408,7 @@ public class EnterpriseResourceIT extends AbstractJpaGeneratorIT
         setup(enterprise);
 
         ClientResponse response =
-            get(resolveEnterpriseActionGetIPsURI(enterprise.getId()),
+            get(resolveEnterpriseActionGetIPsURI(enterprise.getId()), "sysadmin", "sysadmin",
                 IpsPoolManagementDto.MEDIA_TYPE);
         assertEquals(response.getStatusCode(), Status.OK.getStatusCode());
         IpsPoolManagementDto ips = response.getEntity(IpsPoolManagementDto.class);
