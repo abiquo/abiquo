@@ -334,7 +334,7 @@ public class VirtualApplianceService extends DefaultApiService
         logger.debug("Created virtual appliance with name {} !", dto.getName());
 
         tracer.log(SeverityType.INFO, ComponentType.VIRTUAL_APPLIANCE, EventType.VAPP_CREATE,
-            "virtualAppliance.create", dto.getName());
+            "virtualAppliance.created", dto.getName());
 
         return vapp;
     }
