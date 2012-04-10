@@ -391,7 +391,8 @@ public enum APIError
     AM_CLIENT("AM-0", "Failed Appliance Manager communication"), AM_TIMEOUT("AM-1",
         "Timeout during Appliance Manager communication"), AM_UNAVAILABE("AM-2",
         "AM service unavailable; please check the URL of the service."), AM_FAILED_REQUEST("AM-3",
-        "Failed Appliance Manager request."),
+        "Failed Appliance Manager request. "
+            + "It is possible that the repositoryLocation property is not correct, NFS is not available or NFS privileges do not allow access to the server."),
 
     // OVF PACKAGE LIST
     TEMPLATE_DEFINITION_LIST_NAME_ALREADY_EXIST("OVF-PACKAGE-LIST-0",

@@ -90,16 +90,24 @@ BEGIN
         INSERT INTO kinton.system_properties (name, value, description) VALUES ('client.main.showHardDisk','1','Show (1) or hide (0) hard disk tab');
     END IF;
 
-    -- New Privilege
+    -- New Privileges
     SELECT COUNT(*) INTO @existsCount FROM kinton.privilege WHERE idPrivilege='52' AND name='MANAGE_HARD_DISKS';
     IF @existsCount = 0 THEN 
         INSERT INTO kinton.privilege VALUES (52,'MANAGE_HARD_DISKS',0);
     END IF;
+    SELECT COUNT(*) INTO @existsCount FROM kinton.privilege WHERE idPrivilege='53' AND name='APPLIB_MANAGE_GLOBAL_CATEGORIES';
+    IF @existsCount = 0 THEN 
+        INSERT INTO kinton.privilege VALUES (53,'APPLIB_MANAGE_GLOBAL_CATEGORIES',0);
+    END IF;
 
-    -- Assign New Privilege to Cloud Admin
+    -- Assign New Privileges to Cloud Admin
     SELECT COUNT(*) INTO @existsCount FROM kinton.roles_privileges WHERE idRole='1' AND idPrivilege='52';
     IF @existsCount = 0 THEN 
         INSERT INTO kinton.roles_privileges VALUES (1,52,0);
+    END IF;
+     SELECT COUNT(*) INTO @existsCount FROM kinton.roles_privileges WHERE idRole='1' AND idPrivilege='53';
+    IF @existsCount = 0 THEN 
+        INSERT INTO kinton.roles_privileges VALUES (1,53,0);
     END IF;
 
 
