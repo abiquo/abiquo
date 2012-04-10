@@ -4618,7 +4618,7 @@ UNLOCK TABLES;
 --  
 
 CREATE TABLE `kinton`.`costCode` (
-  `idCostCode` int(10) NOT NULL AUTO_INCREMENT ,
+  `idCostCode` int(10) UNSIGNED NOT NULL AUTO_INCREMENT ,
    `name` varchar(20) NOT NULL ,
   `description` varchar(100) NOT NULL ,
   `version_c` int(11) default 0,
@@ -4665,24 +4665,29 @@ CREATE TABLE `kinton`.`pricingCostCode` (
   `idCostCode` int(10) UNSIGNED NOT NULL,
   `price` DECIMAL(20,5) NOT NULL default 0,
   `version_c` int(11) default 0,
-  PRIMARY KEY (`idPricingCostCode`) 
-  ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;  
+  PRIMARY KEY (`idPricingCostCode`),
+  KEY `pricingCostCode_FK1` (`idCostCode`),
+  KEY `pricingCostCode_FK2` (`idPricingTemplate`),
+  CONSTRAINT `pricingCostCode_FK1` FOREIGN KEY (`idCostCode`) REFERENCES `costCode` (`idCostCode`) ON DELETE CASCADE,
+  CONSTRAINT `pricingCostCode_FK2` FOREIGN KEY (`idPricingTemplate`) REFERENCES `pricingTemplate` (`idPricingTemplate`) ON DELETE CASCADE
+  )ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;  
   
  
 --
 -- Table `kinton`.`costCodeCurrency`
 -- 
 
-DROP TABLE IF EXISTS `kinton`.`costCodeCurrency`;
 CREATE TABLE  `kinton`.`costCodeCurrency` (
   `idCostCodeCurrency` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `idCostCode` int(10) unsigned,
   `idCurrency` int(10) unsigned,
   `price` DECIMAL(20,5) NOT NULL default 0,
   `version_c` integer NOT NULL DEFAULT 1,
-  PRIMARY KEY (`idCostCodeCurrency`)
-  -- CONSTRAINT `idCostCode_FK` FOREIGN KEY (`idCostCode`) REFERENCES `costCode` (`idCostCode`),
-  -- CONSTRAINT `idCurrency_FK` FOREIGN KEY (`idCurrency`) REFERENCES `currency` (`idCurrency`)
+  PRIMARY KEY (`idCostCodeCurrency`),
+  KEY `idCostCode_FK` (`idCostCode`),
+  KEY `idCurrency_FK`  (`idCurrency`),
+  CONSTRAINT `idCostCode_FK` FOREIGN KEY (`idCostCode`) REFERENCES `kinton`.`costCode` (`idCostCode`) ON DELETE CASCADE,
+  CONSTRAINT `idCurrency_FK` FOREIGN KEY (`idCurrency`) REFERENCES `kinton`.`currency` (`idCurrency`) ON DELETE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
  
  
@@ -4697,7 +4702,11 @@ CREATE TABLE `kinton`.`pricingTier` (
   `idTier` int(10) UNSIGNED NOT NULL,
   `price`  DECIMAL(20,5) NOT NULL default 0,
   `version_c` int(11) default 0,
-  PRIMARY KEY (`idPricingTier`) 
+  PRIMARY KEY (`idPricingTier`),
+  KEY `pricingTier_FK1` (`idTier`),
+  KEY `pricingTier_FK2`  (`idPricingTemplate`),
+  CONSTRAINT `pricingTier_FK1` FOREIGN KEY (`idTier`) REFERENCES `kinton`.`tier` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `pricingTier_FK2` FOREIGN KEY (`idPricingTemplate`) REFERENCES `kinton`.`pricingTemplate` (`idPricingTemplate`) ON DELETE CASCADE
   ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;    
   
 -- ADD THE COLUMN ID_PRICING TO ENTERPRISE --
