@@ -88,8 +88,7 @@ public class CategoryService extends DefaultApiService
         if (idEnterprise != 0)
         {
             Enterprise enterprise = enterpriseService.getEnterprise(Integer.valueOf(idEnterprise));
-            if ((!securityService.hasPrivilege(Privileges.ENTERPRISE_ADMINISTER_ALL) || !userService
-                .getCurrentUser().getEnterprise().getId().equals(idEnterprise))
+            if (!userService.getCurrentUser().getEnterprise().getId().equals(idEnterprise)
                 && !onlyLocal)
             {
                 // return only global categories
@@ -152,7 +151,7 @@ public class CategoryService extends DefaultApiService
         }
         else
         {
-            if (!securityService.hasPrivilege(Privileges.ENTERPRISE_ADMINISTER_ALL))
+            if (!securityService.hasPrivilege(Privileges.APPLIB_MANAGE_GLOBAL_CATEGORIES))
             {
                 addConflictErrors(APIError.CATEGORY_NO_PRIVELIGES_TO_CREATE_GLOBAL);
                 flushErrors();
@@ -190,7 +189,7 @@ public class CategoryService extends DefaultApiService
             }
             else
             {
-                if (!securityService.hasPrivilege(Privileges.ENTERPRISE_ADMINISTER_ALL))
+                if (!securityService.hasPrivilege(Privileges.APPLIB_MANAGE_GLOBAL_CATEGORIES))
                 {
                     addConflictErrors(APIError.CATEGORY_NO_PRIVELIGES_TO_CREATE_GLOBAL);
                     flushErrors();
@@ -251,7 +250,7 @@ public class CategoryService extends DefaultApiService
         }
         else
         {
-            if (!securityService.hasPrivilege(Privileges.ENTERPRISE_ADMINISTER_ALL))
+            if (!securityService.hasPrivilege(Privileges.APPLIB_MANAGE_GLOBAL_CATEGORIES))
             {
                 addConflictErrors(APIError.CATEGORY_NO_PRIVELIGES_TO_REMOVE);
                 flushErrors();
