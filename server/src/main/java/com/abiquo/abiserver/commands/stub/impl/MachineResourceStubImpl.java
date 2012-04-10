@@ -55,8 +55,8 @@ import com.abiquo.server.core.appslibrary.VirtualMachineTemplateDto;
 import com.abiquo.server.core.cloud.VirtualMachineDto;
 import com.abiquo.server.core.cloud.VirtualMachinesDto;
 import com.abiquo.server.core.enterprise.EnterpriseDto;
-import com.abiquo.server.core.enterprise.UserDto;
 import com.abiquo.server.core.enterprise.User.AuthType;
+import com.abiquo.server.core.enterprise.UserDto;
 import com.abiquo.server.core.infrastructure.MachineDto;
 
 public class MachineResourceStubImpl extends AbstractAPIStub implements MachineResourceStub
@@ -397,5 +397,26 @@ public class MachineResourceStubImpl extends AbstractAPIStub implements MachineR
     {
         // PREMIUM
         return null;
+    }
+
+    @Override
+    public BasicResult refreshDatastores(final Integer datacenterId, final Integer rackId,
+        final Integer machineId)
+    {
+        String uri = createDatastoresRefreshLink(datacenterId, rackId, machineId);
+
+        BasicResult result = new BasicResult();
+
+        ClientResponse response = get(uri, null);
+        if (response.getStatusCode() == Status.NO_CONTENT.getStatusCode())
+        {
+            result.setSuccess(Boolean.TRUE);
+        }
+        else
+        {
+            populateErrors(response, result, "refreshDatastores");
+        }
+
+        return result;
     }
 }
