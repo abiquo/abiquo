@@ -56,6 +56,14 @@ BEGIN
 		ALTER TABLE kinton.category ADD CONSTRAINT category_enterprise_FK FOREIGN KEY category_enterprise_FK (idEnterprise) REFERENCES enterprise (idEnterprise) ON DELETE CASCADE ON UPDATE NO ACTION;
 	END IF;
 
+    IF EXISTS (SELECT * FROM information_schema.table_constraints WHERE table_schema= 'kinton' AND table_name='category' AND constraint_name='name') THEN
+		ALTER TABLE `kinton`.`category` DROP INDEX `name`;
+	END IF;
+
+    IF NOT EXISTS (SELECT * FROM information_schema.table_constraints WHERE table_schema= 'kinton' AND table_name='category' AND constraint_name='name') THEN
+		ALTER TABLE `kinton`.`category` ADD UNIQUE INDEX `name`(`name`, `idEnterprise`) using BTREE;
+	END IF;
+
     -- ########################################################## --    
         -- ######## DATA: NEW DATA (INSERTS, UPDATES, DELETES ####### --
     -- ########################################################## --
