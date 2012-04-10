@@ -35,7 +35,7 @@ public class Job extends RedisEntityBase
 
     public enum JobType
     {
-        CONFIGURE, DECONFIGURE, RECONFIGURE, POWER_ON, POWER_OFF, PAUSE, RESUME, RESET, SNAPSHOT
+        CONFIGURE, DECONFIGURE, RECONFIGURE, POWER_ON, POWER_OFF, PAUSE, RESUME, RESET, SNAPSHOT, REFRESH
     }
 
     protected String id;

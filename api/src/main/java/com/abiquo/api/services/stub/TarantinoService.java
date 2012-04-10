@@ -847,6 +847,43 @@ public class TarantinoService extends DefaultApiService
     }
 
     /**
+     * Refresh the resources of the given virtual machine.
+     * 
+     * @param virtualMachine The virtual machine.
+     * @return The {@link Task} UUID for progress tracking
+     */
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
+    public String refreshVirtualMachineResources(final VirtualMachine virtualMachine,
+        final VirtualAppliance virtualAppliance)
+    {
+        Datacenter datacenter = virtualMachine.getHypervisor().getMachine().getDatacenter();
+
+        // Build the job sequence
+        VirtualMachineDescriptionBuilder definitionBuilder =
+            jobCreator.toTarantinoDto(virtualMachine, virtualAppliance);
+        VirtualMachineDefinition definition = definitionBuilder.build();
+
+        HypervisorConnection connection =
+            jobCreator.hypervisorConnectionConfiguration(virtualMachine.getHypervisor());
+
+        DatacenterTaskBuilder builder =
+            new DatacenterTaskBuilder(definition, connection, userService.getCurrentUser()
+                .getNick());
+        builder.addRefreshResources();
+
+        // Build redis task
+        Task redisTask =
+            builder.buildAsyncTask(String.valueOf(virtualMachine.getId()), TaskType.REFRESH);
+
+        // Build tarantino task
+        DatacenterTasks tarantinoTask = builder.buildTarantinoTask();
+
+        // Add Redis task for progress tracking and send the tarantino task
+        return unsubscribeVirtualMachineAndEnqueueTask(virtualMachine, redisTask, tarantinoTask,
+            EventType.VM_REFRESH_RESOURCES);
+    }
+
+    /**
      * Creates and sends the DTOs for an instance of type {@link SnapshotType#FROM_STATEFUL_DISK}.
      * 
      * @param virtualAppliance The {@link VirtualAppliance} where the {@link VirtualMachine} is

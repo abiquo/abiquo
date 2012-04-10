@@ -56,13 +56,13 @@ public class TarantinoServiceMock extends TarantinoService
         mock = mockTarantinoService(TarantinoService.class);
     }
 
-    public TarantinoServiceMock(EntityManager em)
+    public TarantinoServiceMock(final EntityManager em)
     {
         super(em);
         mock = mockTarantinoService(TarantinoService.class);
     }
 
-    public static <T extends TarantinoService> T mockTarantinoService(Class<T> mockClass)
+    public static <T extends TarantinoService> T mockTarantinoService(final Class<T> mockClass)
     {
         T mock = mock(mockClass);
 
@@ -70,8 +70,7 @@ public class TarantinoServiceMock extends TarantinoService
             randomTaskId());
         when(mock.deployVirtualMachine(anyVM(), anyDesc())).thenReturn(randomTaskId());
         when(mock.deployVirtualMachineHA(anyVM(), anyDesc(), anyBoolean(), anyExtraData()))
-            .thenReturn(
-            randomTaskId());
+            .thenReturn(randomTaskId());
         when(mock.reconfigureVirtualMachine(anyVM(), anyDesc(), anyDesc())).thenReturn(
             randomTaskId());
         when(mock.snapshotVirtualMachine(anyVirtualAppliance(), anyVM(), anyState(), anyString()))
@@ -86,6 +85,8 @@ public class TarantinoServiceMock extends TarantinoService
             .thenReturn(randomTaskId());
         when(mock.undeployVirtualMachineHA(anyVM(), anyDesc(), anyState(), anyHypervisor()))
             .thenReturn(randomTaskId());
+        when(mock.refreshVirtualMachineResources(anyVM(), anyVirtualAppliance())).thenReturn(
+            randomTaskId());
 
         return mock;
     }
@@ -122,6 +123,7 @@ public class TarantinoServiceMock extends TarantinoService
         return (Hypervisor) any();
     }
 
+    @SuppressWarnings("unchecked")
     private static Map<String, String> anyExtraData()
     {
         return (Map<String, String>) any();
@@ -134,77 +136,89 @@ public class TarantinoServiceMock extends TarantinoService
 
     // Delegate methods
 
-    public String deployVirtualMachine(VirtualMachine virtualMachine,
-        VirtualMachineDescriptionBuilder virtualMachineDesciptionBuilder)
+    @Override
+    public String deployVirtualMachine(final VirtualMachine virtualMachine,
+        final VirtualMachineDescriptionBuilder virtualMachineDesciptionBuilder)
     {
         return mock.deployVirtualMachine(virtualMachine, virtualMachineDesciptionBuilder);
     }
 
-    public String reconfigureVirtualMachine(VirtualMachine vm,
-        VirtualMachineDescriptionBuilder originalConfig, VirtualMachineDescriptionBuilder newConfig)
+    @Override
+    public String reconfigureVirtualMachine(final VirtualMachine vm,
+        final VirtualMachineDescriptionBuilder originalConfig,
+        final VirtualMachineDescriptionBuilder newConfig)
     {
         return mock.reconfigureVirtualMachine(vm, originalConfig, newConfig);
     }
 
-    public String deployVirtualMachineHA(VirtualMachine virtualMachine,
-        VirtualMachineDescriptionBuilder virtualMachineDesciptionBuilder, boolean originalVMStateON)
-    {
-        return mock.deployVirtualMachineHA(virtualMachine, virtualMachineDesciptionBuilder,
-            originalVMStateON, null);
-    }
-
-    public String undeployVirtualMachine(VirtualMachine virtualMachine,
-        VirtualMachineDescriptionBuilder virtualMachineDesciptionBuilder,
-        VirtualMachineState currentState)
+    @Override
+    public String undeployVirtualMachine(final VirtualMachine virtualMachine,
+        final VirtualMachineDescriptionBuilder virtualMachineDesciptionBuilder,
+        final VirtualMachineState currentState)
     {
         return mock.undeployVirtualMachine(virtualMachine, virtualMachineDesciptionBuilder,
             currentState);
     }
 
-    public String undeployVirtualMachineHA(VirtualMachine virtualMachine,
-        VirtualMachineDescriptionBuilder virtualMachineDesciptionBuilder,
-        VirtualMachineState currentState, Hypervisor originalHypervisor)
+    @Override
+    public String undeployVirtualMachineHA(final VirtualMachine virtualMachine,
+        final VirtualMachineDescriptionBuilder virtualMachineDesciptionBuilder,
+        final VirtualMachineState currentState, final Hypervisor originalHypervisor)
     {
         return mock.undeployVirtualMachineHA(virtualMachine, virtualMachineDesciptionBuilder,
             currentState, originalHypervisor);
     }
 
-    public String undeployVirtualMachineAndDelete(VirtualMachine virtualMachine,
-        VirtualMachineDescriptionBuilder virtualMachineDesciptionBuilder,
-        VirtualMachineState currentState)
+    @Override
+    public String undeployVirtualMachineAndDelete(final VirtualMachine virtualMachine,
+        final VirtualMachineDescriptionBuilder virtualMachineDesciptionBuilder,
+        final VirtualMachineState currentState)
     {
         return mock.undeployVirtualMachineAndDelete(virtualMachine,
             virtualMachineDesciptionBuilder, currentState);
     }
 
-    public String applyVirtualMachineState(VirtualMachine virtualMachine,
-        VirtualMachineDescriptionBuilder virtualMachineDesciptionBuilder,
-        VirtualMachineStateTransition machineStateTransition)
+    @Override
+    public String applyVirtualMachineState(final VirtualMachine virtualMachine,
+        final VirtualMachineDescriptionBuilder virtualMachineDesciptionBuilder,
+        final VirtualMachineStateTransition machineStateTransition)
     {
         return mock.applyVirtualMachineState(virtualMachine, virtualMachineDesciptionBuilder,
             machineStateTransition);
     }
 
-    public String snapshotVirtualMachine(VirtualAppliance virtualAppliance,
-        VirtualMachine virtualMachine, VirtualMachineState originalState, String snapshotName)
+    @Override
+    public String snapshotVirtualMachine(final VirtualAppliance virtualAppliance,
+        final VirtualMachine virtualMachine, final VirtualMachineState originalState,
+        final String snapshotName)
     {
         return mock.snapshotVirtualMachine(virtualAppliance, virtualMachine, originalState,
             snapshotName);
     }
 
-    public String snapshotVirtualMachine(VirtualAppliance virtualAppliance,
-        VirtualMachine virtualMachine, VirtualMachineState originalState, String snapshotName,
-        String snapshotPath, String snapshotFilename)
+    @Override
+    public String snapshotVirtualMachine(final VirtualAppliance virtualAppliance,
+        final VirtualMachine virtualMachine, final VirtualMachineState originalState,
+        final String snapshotName, final String snapshotPath, final String snapshotFilename)
     {
         return mock.snapshotVirtualMachine(virtualAppliance, virtualMachine, originalState,
             snapshotName, snapshotPath, snapshotFilename);
     }
 
-    public String instanceStatefulVirtualMachine(VirtualAppliance virtualAppliance,
-        VirtualMachine virtualMachine, VirtualMachineState originalState, String snapshotName)
+    @Override
+    public String instanceStatefulVirtualMachine(final VirtualAppliance virtualAppliance,
+        final VirtualMachine virtualMachine, final VirtualMachineState originalState,
+        final String snapshotName)
     {
         return mock.instanceStatefulVirtualMachine(virtualAppliance, virtualMachine, originalState,
             snapshotName);
+    }
+
+    @Override
+    public String refreshVirtualMachineResources(final VirtualMachine virtualMachine,
+        final VirtualAppliance virtualAppliance)
+    {
+        return mock.refreshVirtualMachineResources(virtualMachine, virtualAppliance);
     }
 
 }
