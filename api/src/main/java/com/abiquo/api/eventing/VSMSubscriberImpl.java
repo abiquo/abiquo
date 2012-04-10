@@ -38,7 +38,6 @@ import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineDAO;
 import com.abiquo.server.core.cloud.VirtualMachineRep;
-import com.abiquo.server.core.cloud.VirtualMachineState;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.InfrastructureRep;
 import com.abiquo.server.core.infrastructure.RemoteService;
@@ -111,10 +110,10 @@ public class VSMSubscriberImpl implements VSMSubscriber
                     vMachineDAO.findVirtualMachinesByDatacenter(datacenter.getId());
                 for (VirtualMachine vMachine : vMachines)
                 {
-                    if (vMachine.isDeployed()
-                        && !vMachine.getState().equals(VirtualMachineState.LOCKED))
+                    if (vMachine.getState().existsInHypervisor())
                     {
-                        LOGGER.info("Refreshing subscription for virtual machine '" + vMachine.getName() + '"');
+                        LOGGER.info("Refreshing subscription for virtual machine '"
+                            + vMachine.getName() + '"');
                         vsmStub.subscribe(remoteService, vMachine, Boolean.FALSE);
                     }
                 }
