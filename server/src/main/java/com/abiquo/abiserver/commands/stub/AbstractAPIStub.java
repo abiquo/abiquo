@@ -1199,10 +1199,16 @@ public class AbstractAPIStub
             params);
     }
 
+    protected String createDatastoresLink(final Integer datacenterId, final Integer rackId,
+        final Integer machineId)
+    {
+        return createMachineLink(datacenterId, rackId, machineId) + "/datastores";
+    }
+
     protected String createDatastoresRefreshLink(final Integer datacenterId, final Integer rackId,
         final Integer machineId)
     {
-        return createMachineLink(datacenterId, rackId, machineId) + "/datastores/action/refresh";
+        return createDatastoresLink(datacenterId, rackId, machineId) + "/action/refresh";
     }
 
     protected String createMachineLinkPowerOn(final Integer datacenterId, final Integer rackId,
