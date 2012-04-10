@@ -37,8 +37,6 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 
-import com.abiquo.model.transport.WrapperDto;
-
 /**
  * Wrapper class to get a list of State Machines.
  * <p>
@@ -60,13 +58,17 @@ import com.abiquo.model.transport.WrapperDto;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "fsms")
-public class FsmsDto extends WrapperDto<FsmDto>
+public class FsmsDto
 {
 
     /**
      * 
      */
     private static final long serialVersionUID = 5643469409057556537L;
+
+    private List<FsmDto> collection = new ArrayList<FsmDto>();
+
+    private int totalSize;
 
     /**
      * Gets the value of the host property.
@@ -83,7 +85,6 @@ public class FsmsDto extends WrapperDto<FsmDto>
      * <p>
      * Objects of the following type(s) are allowed in the list {@link FsmDto }
      */
-    @Override
     @XmlElement(name = "fsm")
     public List<FsmDto> getCollection()
     {
@@ -94,13 +95,31 @@ public class FsmsDto extends WrapperDto<FsmDto>
         return this.collection;
     }
 
-    @Override
+    public void add(final FsmDto element)
+    {
+        collection.add(element);
+    }
+
+    public boolean isEmpty()
+    {
+        return collection.isEmpty();
+    }
+
+    public void setTotalSize(final Integer totalSize)
+    {
+        this.totalSize = totalSize;
+    }
+
+    public Integer getTotalSize()
+    {
+        return totalSize;
+    }
+
     public String getMediaType()
     {
         return MediaType.APPLICATION_XML;
     }
 
-    @Override
     public String getBaseMediaType()
     {
         return MediaType.APPLICATION_XML;
