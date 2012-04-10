@@ -58,7 +58,8 @@ public enum APIError
         "Invalid credentials"), INVALID_LINK("GEN-6", "Invalid link reference"), WHITE_NAME(
         "GEN-7", "The property 'name' must not have whitespace at the beginning or the end"), WHITE_SYMBOL(
         "GEN-8", "The property 'symbol' must not have whitespace at the beginning or the end"), WHITE_DESCRIPTION(
-        "GEN-9", "The property 'description' must not have whitespace at the beginning or the end"),
+        "GEN-9", "The property 'description' must not have whitespace at the beginning or the end"), REQUIRED_ID(
+        "GEN-10", "Identifier is required"),
 
     // INVALID_IP("GEN-4", "Invalid IP"),
     INVALID_PRIVATE_NETWORK_TYPE("GEN-6", "Invalid private network type"), INTERNAL_SERVER_ERROR(
