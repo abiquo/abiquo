@@ -87,7 +87,10 @@ public enum Privileges
     PRICING_MANAGE,
 
     // EVENTS
-    EVENTLOG_VIEW_ENTERPRISE;
+    EVENTLOG_VIEW_ENTERPRISE,
+
+    // GLOBAL CATEGORIES
+    APPLIB_MANAGE_GLOBAL_CATEGORIES;
 
     public static Privileges[] simpleRole()
     {

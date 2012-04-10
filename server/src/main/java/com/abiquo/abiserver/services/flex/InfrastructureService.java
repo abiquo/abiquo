@@ -72,8 +72,11 @@ public class InfrastructureService
         try
         {
             infrastructureCommand =
-                (InfrastructureCommand) Thread.currentThread().getContextClassLoader().loadClass(
-                    "com.abiquo.abiserver.commands.impl.InfrastructureCommandPremiumImpl")
+                (InfrastructureCommand) Thread
+                    .currentThread()
+                    .getContextClassLoader()
+                    .loadClass(
+                        "com.abiquo.abiserver.commands.impl.InfrastructureCommandPremiumImpl")
                     .newInstance();
         }
         catch (Exception e)
@@ -582,5 +585,11 @@ public class InfrastructureService
         final PhysicalMachine machine)
     {
         return proxyMachineStub(userSession).deleteNotManagedVirtualMachines(machine);
+    }
+
+    public BasicResult refreshDatastores(final UserSession session, final Integer datacenterId,
+        final Integer rackId, final Integer machineId)
+    {
+        return proxyMachineStub(session).refreshDatastores(datacenterId, rackId, machineId);
     }
 }

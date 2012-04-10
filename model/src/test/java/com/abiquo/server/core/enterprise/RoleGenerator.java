@@ -73,7 +73,8 @@ public class RoleGenerator extends DefaultEntityGenerator<Role>
         Privilege p13 = new Privilege(Privileges.PRICING_VIEW);
         Privilege p14 = new Privilege(Privileges.PRICING_MANAGE);
         Privilege p15 = new Privilege(Privileges.VDC_MANAGE_VAPP);
-        return createInstance(p1, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15);
+        Privilege p16 = new Privilege(Privileges.APPLIB_MANAGE_GLOBAL_CATEGORIES);
+        return createInstance(p1, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16);
     }
 
     public Role createInstanceSysAdmin(final String name)
