@@ -58,7 +58,8 @@ public enum APIError
         "Invalid credentials"), INVALID_LINK("GEN-6", "Invalid link reference"), WHITE_NAME(
         "GEN-7", "The property 'name' must not have whitespace at the beginning or the end"), WHITE_SYMBOL(
         "GEN-8", "The property 'symbol' must not have whitespace at the beginning or the end"), WHITE_DESCRIPTION(
-        "GEN-9", "The property 'description' must not have whitespace at the beginning or the end"),
+        "GEN-9", "The property 'description' must not have whitespace at the beginning or the end"), REQUIRED_ID(
+        "GEN-10", "Identifier is required"),
 
     // INVALID_IP("GEN-4", "Invalid IP"),
     INVALID_PRIVATE_NETWORK_TYPE("GEN-6", "Invalid private network type"), INTERNAL_SERVER_ERROR(
@@ -389,7 +390,8 @@ public enum APIError
     AM_CLIENT("AM-0", "Failed Appliance Manager communication"), AM_TIMEOUT("AM-1",
         "Timeout during Appliance Manager communication"), AM_UNAVAILABE("AM-2",
         "AM service unavailable; please check the URL of the service."), AM_FAILED_REQUEST("AM-3",
-        "Failed Appliance Manager request."),
+        "Failed Appliance Manager request. "
+            + "It is possible that the repositoryLocation property is not correct, NFS is not available or NFS privileges do not allow access to the server."),
 
     // OVF PACKAGE LIST
     TEMPLATE_DEFINITION_LIST_NAME_ALREADY_EXIST("OVF-PACKAGE-LIST-0",

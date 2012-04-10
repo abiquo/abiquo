@@ -156,6 +156,11 @@ public class RackResource extends AbstractResource
         @PathParam(RACK) @NotNull @Min(1) final Integer rackId, final RackDto rackDto,
         @Context final IRESTBuilder restBuilder) throws Exception
     {
+        if (rackDto.getId() == null)
+        {
+            throw new BadRequestException(APIError.REQUIRED_ID);
+        }
+
         // Check the parameter id of the rack has the same id than the rackId.
         if (!rackDto.getId().equals(rackId))
         {
