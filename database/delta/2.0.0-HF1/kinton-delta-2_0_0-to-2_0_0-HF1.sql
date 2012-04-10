@@ -84,6 +84,18 @@ BEGIN
         INSERT INTO kinton.roles_privileges VALUES (1,51,0);
     END IF;
 
+    -- GLOBAL CATEGORY --
+    SELECT COUNT(*) INTO @existsCount FROM kinton.privilege WHERE idPrivilege='53' AND name='APPLIB_MANAGE_GLOBAL_CATEGORIES';
+    IF @existsCount = 0 THEN 
+        INSERT INTO kinton.privilege VALUES (53,'APPLIB_MANAGE_GLOBAL_CATEGORIES',0);
+    END IF;
+
+    -- GLOBAL CATEGORY Privilege for cloud admin
+    SELECT COUNT(*) INTO @existsCount FROM kinton.roles_privileges WHERE idRole='1' AND idPrivilege='53';
+    IF @existsCount = 0 THEN 
+        INSERT INTO kinton.roles_privileges VALUES (1,53,0);
+    END IF;
+
     -- New System Properties
     SELECT COUNT(*) INTO @existsCount FROM kinton.system_properties WHERE name='client.main.showHardDisk' AND value='1' AND description='Show (1) or hide (0) hard disk tab';
     IF @existsCount = 0 THEN 

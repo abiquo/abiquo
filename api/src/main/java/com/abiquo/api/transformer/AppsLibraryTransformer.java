@@ -169,7 +169,7 @@ public class AppsLibraryTransformer extends DefaultApiService
                 {
 
                     category = new Category(categoryLink.getTitle());
-                    if (!securityService.hasPrivilege(Privileges.ENTERPRISE_ADMINISTER_ALL))
+                    if (!securityService.hasPrivilege(Privileges.APPLIB_MANAGE_GLOBAL_CATEGORIES))
                     {
                         User currentuser = userService.getCurrentUser();
                         category.setEnterprise(currentuser.getEnterprise());
