@@ -372,20 +372,20 @@ public enum APIError
         "AM-0",
         "The repository exported by the current appliance manager is being used in another datacenter"), APPLIANCE_MANAGER_REPOSITORY_IN_USE(
         "AM-1",
-        "The current repository holds virtual images being used on some virtual appliances, so it is not possible to remove this remote service. You can modify the appliance manager but only if the same repository is used."), REMOTE_SERVICE_STORAGE_REMOTE_WITH_POOLS(
+        "The current repository holds virtual images being used in some virtual appliances, so it is not possible to remove this remote service. You can change the appliance manager but only if the same repository is used."), REMOTE_SERVICE_STORAGE_REMOTE_WITH_POOLS(
         "RS-9", "Cannot delete a storage manager with associated storage pools"), REMOTE_SERVICE_DHCP_IS_BEING_USED(
         "RS-10", "Cannot delete a DHCP Service. There are virtual machines deployed."), REMOTE_SERVICE_VSM_IS_BEING_USED(
         "RS-11",
         "Cannot delete a Virtual System Monitor Service. There are virtual machines deployed."), REMOTE_SERVICE_WRONG_URL(
-        "RS-12", "URL supplied is not valid"), REMOTE_SERVICE_DHCP_WRONG_URI("RS-13",
-        "The DHCP URI is invalid"), REMOTE_SERVICE_DATACENTER_UUID_NOT_FOUND("RS-14",
+        "RS-12", "The URL supplied is not valid"), REMOTE_SERVICE_DHCP_WRONG_URI("RS-13",
+        "The URI of the DHCP service is invalid"), REMOTE_SERVICE_DATACENTER_UUID_NOT_FOUND("RS-14",
         "The remote service does not have the *abiquo.datacenter.id* property set"), REMOTE_SERVICE_DATACENTER_UUID_INCONSISTENT(
         "RS-15",
-        "The remote service is configured with a different datacenter UUID, please adjust the *abiquo.datacenter.id* property in the remote service."), REMOTE_SERVICE_UNDEFINED_PORT(
-        "RS-16", "A port must be defined in the uri"), REMOTE_SERVICE_NON_POOLABLE("RS-17",
-        "The provided remote service can not be used in for a remote service client pool"), REMOTE_SERVICE_ERROR_BORROWING(
+        "The remote service is configured with a different datacenter UUID, please adjust the *abiquo.datacenter.id* property of the remote service."), REMOTE_SERVICE_UNDEFINED_PORT(
+        "RS-16", "A port must be defined in the URI"), REMOTE_SERVICE_NON_POOLABLE("RS-17",
+        "The remote service indicated cannot be used in a remote service client pool"), REMOTE_SERVICE_ERROR_BORROWING(
         "RS-18",
-        "An unexpected error occured while getting the remote service client from the client pool"), APPLIANCE_MANAGER_CALL(
+        "An unexpected error occurred while getting the remote service client from the client pool"), APPLIANCE_MANAGER_CALL(
         "AM-2", "Failed Appliance Manager communication"),
     //
     AM_CLIENT("AM-0", "Failed Appliance Manager communication"), AM_TIMEOUT("AM-1",

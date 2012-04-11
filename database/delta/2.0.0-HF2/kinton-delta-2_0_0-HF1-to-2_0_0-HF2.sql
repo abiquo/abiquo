@@ -23,7 +23,7 @@ DELIMITER |
 CREATE PROCEDURE kinton.delta_2_0_0HF1_to_2_0_0HF2() 
 BEGIN
 
-	-- ##################################### -- 
+    -- ##################################### -- 
     -- ######## SCHEMA: TABLES ADDED ####### --
     -- ##################################### --     
     SELECT "STEP 2 CREATING NEW TABLES..." as " ";
@@ -41,6 +41,11 @@ BEGIN
 
     ALTER TABLE `kinton`.`costCode` CHANGE COLUMN `idCostCode` `idCostCode` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT;    
     
+    IF EXISTS (SELECT * FROM information_schema.columns WHERE table_schema= 'kinton' AND table_name='pricingTemplate' AND column_name='memoryMB') THEN
+    ALTER TABLE kinton.pricingTemplate ADD COLUMN memoryGB DECIMAL(20,5) DEFAULT 0 AFTER vcpu;
+    UPDATE  kinton.pricingTemplate SET memoryGB = memoryMB/1024;
+         ALTER TABLE kinton.pricingTemplate drop COLUMN memoryMB;
+    END IF;
 
     -- ############################################ --  
     -- ######## SCHEMA: CONSTRAINTS MODIFIED ###### --
