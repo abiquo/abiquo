@@ -95,7 +95,7 @@ public class PricingTemplateGenerator extends DefaultEntityGenerator<PricingTemp
         final PricingPeriod minimumCharge = PricingPeriod.WEEK;
         final BigDecimal publicIp = seed;
         final BigDecimal vCpu = seed;
-        final BigDecimal memoryMb = seed;
+        final BigDecimal memoryGB = seed;
         final String description = newString(nextSeed(), 0, 255);
 
         PricingTemplate pricingTemplate =
@@ -110,7 +110,7 @@ public class PricingTemplateGenerator extends DefaultEntityGenerator<PricingTemp
                 currency,
                 publicIp,
                 vCpu,
-                memoryMb,
+                memoryGB,
                 false,
                 description);
 
