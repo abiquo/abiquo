@@ -34,6 +34,7 @@ import org.apache.wink.common.internal.utils.UriHelper;
 import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.StateEnum;
 import com.abiquo.abiserver.commands.stub.AbstractAPIStub;
 import com.abiquo.abiserver.commands.stub.MachineResourceStub;
+import com.abiquo.abiserver.pojo.infrastructure.Datastore;
 import com.abiquo.abiserver.pojo.infrastructure.HyperVisor;
 import com.abiquo.abiserver.pojo.infrastructure.HyperVisorType;
 import com.abiquo.abiserver.pojo.infrastructure.HypervisorRemoteAccessInfo;
@@ -55,8 +56,10 @@ import com.abiquo.server.core.appslibrary.VirtualMachineTemplateDto;
 import com.abiquo.server.core.cloud.VirtualMachineDto;
 import com.abiquo.server.core.cloud.VirtualMachinesDto;
 import com.abiquo.server.core.enterprise.EnterpriseDto;
-import com.abiquo.server.core.enterprise.UserDto;
 import com.abiquo.server.core.enterprise.User.AuthType;
+import com.abiquo.server.core.enterprise.UserDto;
+import com.abiquo.server.core.infrastructure.DatastoreDto;
+import com.abiquo.server.core.infrastructure.DatastoresDto;
 import com.abiquo.server.core.infrastructure.MachineDto;
 
 public class MachineResourceStubImpl extends AbstractAPIStub implements MachineResourceStub
@@ -397,5 +400,45 @@ public class MachineResourceStubImpl extends AbstractAPIStub implements MachineR
     {
         // PREMIUM
         return null;
+    }
+
+    @Override
+    public BasicResult refreshDatastores(final Integer datacenterId, final Integer rackId,
+        final Integer machineId)
+    {
+        String uri = createDatastoresRefreshLink(datacenterId, rackId, machineId);
+
+        DataResult<List<Datastore>> result = new DataResult<List<Datastore>>();
+
+        ClientResponse response = get(uri, null);
+        if (response.getStatusCode() == Status.NO_CONTENT.getStatusCode())
+        {
+            uri = createDatastoresLink(datacenterId, rackId, machineId);
+            response = get(uri, DatastoresDto.MEDIA_TYPE);
+
+            if (response.getStatusCode() == Status.OK.getStatusCode())
+            {
+                DatastoresDto dssDto = response.getEntity(DatastoresDto.class);
+                List<Datastore> dss = new ArrayList<Datastore>();
+                for (DatastoreDto dsDto : dssDto.getCollection())
+                {
+                    dss.add(Datastore.fromDto(dsDto));
+                }
+
+                result.setSuccess(Boolean.TRUE);
+                result.setData(dss);
+            }
+            else
+            {
+                populateErrors(response, result, "refreshDatastores");
+            }
+
+        }
+        else
+        {
+            populateErrors(response, result, "refreshDatastores");
+        }
+
+        return result;
     }
 }

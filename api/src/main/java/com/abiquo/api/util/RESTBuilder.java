@@ -160,6 +160,7 @@ import com.abiquo.server.core.scheduler.FitPolicyRule;
 import com.abiquo.server.core.scheduler.FitPolicyRuleDto;
 import com.abiquo.server.core.scheduler.MachineLoadRule;
 import com.abiquo.server.core.scheduler.MachineLoadRuleDto;
+import com.abiquo.server.core.task.TaskDto;
 import com.abiquo.server.core.task.TasksDto;
 import com.abiquo.server.core.util.PagedList;
 
@@ -927,6 +928,11 @@ public class RESTBuilder implements IRESTBuilder
             AcceptedRequestDto.BASE_MEDIA_TYPE));
 
         links.add(builder.buildRestLink(VirtualMachineResource.class,
+            VirtualMachineResource.VIRTUAL_MACHINE_ACTION_RESET,
+            VirtualMachineResource.VIRTUAL_MACHINE_ACTION_RESET_REL, params,
+            AcceptedRequestDto.BASE_MEDIA_TYPE));
+
+        links.add(builder.buildRestLink(VirtualMachineResource.class,
             VirtualMachineResource.VIRTUAL_MACHINE_ACTION_SNAPSHOT,
             VirtualMachineResource.VIRTUAL_MACHINE_ACTION_SNAPSHOT_REL, params,
             AcceptedRequestDto.BASE_MEDIA_TYPE));
@@ -1601,17 +1607,17 @@ public class RESTBuilder implements IRESTBuilder
     }
 
     @Override
-    public RESTLink buildVirtualMachineTasksLink(final Integer vdc, final Integer vapp,
-        final Integer vm)
+    public RESTLink buildVirtualMachineTaskLink(final Integer vdc, final Integer vapp,
+        final Integer vm, final String taskId)
     {
         AbiquoLinkBuilder builder = AbiquoLinkBuilder.createBuilder(linkProcessor);
         Map<String, String> params = new HashMap<String, String>();
         params.put(VirtualDatacenterResource.VIRTUAL_DATACENTER, String.valueOf(vdc));
         params.put(VirtualApplianceResource.VIRTUAL_APPLIANCE, String.valueOf(vapp));
         params.put(VirtualMachineResource.VIRTUAL_MACHINE, String.valueOf(vm));
+        params.put(TaskResourceUtils.TASK, taskId);
 
-        return builder.buildRestLink(VirtualMachineResource.class, "tasks", params,
-            VirtualMachineDto.BASE_MEDIA_TYPE);
-
+        return builder.buildRestLink(VirtualMachineResource.class, TaskResourceUtils.TASK_PATH,
+            TaskResourceUtils.SELF_REL, params, TaskDto.MEDIA_TYPE);
     }
 }

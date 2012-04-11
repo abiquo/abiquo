@@ -55,8 +55,8 @@ import com.abiquo.server.core.infrastructure.RemoteService;
 import com.abiquo.server.core.util.network.IPAddress;
 
 /**
- * Test the functionality you can execute from {@link DatacenterResourceIT} but from the
- * service layer.
+ * Test the functionality you can execute from {@link DatacenterResourceIT} but from the service
+ * layer.
  * 
  * @author jdevesa@abiquo.com
  */
@@ -83,8 +83,8 @@ public class DatacenterServiceTest extends AbstractJpaGeneratorIT
 
     /**
      * Test the discover machine functionality for a correct behaviour. As you see, here we use the
-     * {@link NodecollectorServiceStubMock} mock class. Because we don't test the
-     * nodecollector behaviour, but the service behaviour in front of a correct response.
+     * {@link NodecollectorServiceStubMock} mock class. Because we don't test the nodecollector
+     * behaviour, but the service behaviour in front of a correct response.
      * 
      * @throws Exception
      */
@@ -138,8 +138,8 @@ public class DatacenterServiceTest extends AbstractJpaGeneratorIT
     {
         try
         {
-            service.discoverRemoteHypervisor(datacenter.getId(), IPAddress
-                .newIPAddress(NodecollectorServiceStubMock.IP_BAD_REQUEST_EXCEPTION),
+            service.discoverRemoteHypervisor(datacenter.getId(),
+                IPAddress.newIPAddress(NodecollectorServiceStubMock.IP_BAD_REQUEST_EXCEPTION),
                 HypervisorType.VMX_04, "user", "password", 8889);
 
             fail();
@@ -194,12 +194,9 @@ public class DatacenterServiceTest extends AbstractJpaGeneratorIT
     {
         try
         {
-            service
-                .discoverRemoteHypervisor(
-                    datacenter.getId(),
-                    IPAddress
-                        .newIPAddress(NodecollectorServiceStubMock.IP_SERVICE_UNAVAILABLE_EXCEPTION),
-                    HypervisorType.VMX_04, "user", "password", 8889);
+            service.discoverRemoteHypervisor(datacenter.getId(), IPAddress
+                .newIPAddress(NodecollectorServiceStubMock.IP_SERVICE_UNAVAILABLE_EXCEPTION),
+                HypervisorType.VMX_04, "user", "password", 8889);
 
             fail();
         }
@@ -225,8 +222,8 @@ public class DatacenterServiceTest extends AbstractJpaGeneratorIT
     {
         try
         {
-            service.discoverRemoteHypervisor(datacenter.getId(), IPAddress
-                .newIPAddress(NodecollectorServiceStubMock.IP_UNPROVISIONED_EXCEPTION),
+            service.discoverRemoteHypervisor(datacenter.getId(),
+                IPAddress.newIPAddress(NodecollectorServiceStubMock.IP_UNPROVISIONED_EXCEPTION),
                 HypervisorType.VMX_04, "user", "password", 8889);
 
             fail();
@@ -253,10 +250,9 @@ public class DatacenterServiceTest extends AbstractJpaGeneratorIT
     {
         try
         {
-            service
-                .discoverRemoteHypervisor(datacenter.getId(), IPAddress
-                    .newIPAddress(NodecollectorServiceStubMock.IP_CONNECTION_EXCEPTION),
-                    HypervisorType.VMX_04, "user", "password", 8889);
+            service.discoverRemoteHypervisor(datacenter.getId(),
+                IPAddress.newIPAddress(NodecollectorServiceStubMock.IP_CONNECTION_EXCEPTION),
+                HypervisorType.VMX_04, "user", "password", 8889);
 
             fail();
         }

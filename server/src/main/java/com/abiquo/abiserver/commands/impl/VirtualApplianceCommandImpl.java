@@ -354,7 +354,8 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
             APIStubFactory.getInstance(userSession, new VirtualDatacenterResourceStubImpl(),
                 VirtualDatacenterResourceStub.class);
 
-        BasicResult result = proxy.updateVirtualDatacenter(virtualDataCenter, resourceManager);
+        DataResult<VirtualDataCenter> result =
+            proxy.updateVirtualDatacenter(virtualDataCenter, resourceManager);
 
         if (!result.getSuccess())
         {
@@ -364,14 +365,14 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
         }
         else
         {
+            VirtualDataCenter vdc = result.getData();
             // Log the event
             BasicCommand.traceLog(SeverityType.INFO, ComponentType.VIRTUAL_DATACENTER,
-                EventType.VDC_MODIFY, userSession, null, virtualDataCenter.getName(),
-                "Virtual datacenter '" + virtualDataCenter.getName() + "' with a "
-                    + virtualDataCenter.getHyperType() + " hypervisor has been modified [Name: "
-                    + virtualDataCenter.getName() + "]", null, null, null, null, null);
+                EventType.VDC_MODIFY, userSession, null, vdc.getName(), "Virtual datacenter '"
+                    + vdc.getName() + "' with a " + vdc.getHyperType().getFriendlyName()
+                    + " hypervisor type has been modified [Name: " + vdc.getName() + "]", null,
+                null, null, null, null);
         }
-
         return result;
     }
 

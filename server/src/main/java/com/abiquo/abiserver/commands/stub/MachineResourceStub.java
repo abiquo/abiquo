@@ -94,4 +94,14 @@ public interface MachineResourceStub
      * @param PhysicalMachine machine.
      */
     public DataResult<BladeLocatorLed> getBladeLocatorLed(PhysicalMachine machine);
+
+    /**
+     * Refreshes the datastores of the physical machine.
+     * 
+     * @param datacenterId identifier of the datacenter
+     * @param rackId identifier of the rack
+     * @param machineId identifier of the machine
+     * @return BasicResult without data.
+     */
+    public BasicResult refreshDatastores(Integer datacenterId, Integer rackId, Integer machineId);
 }

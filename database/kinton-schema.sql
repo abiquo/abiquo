@@ -881,7 +881,8 @@ INSERT INTO `privilege` VALUES
  (49,'PRICING_VIEW',0),
  (50,'PRICING_MANAGE',0),
  (51,'USERS_MANAGE_CHEF_ENTERPRISE',0),
- (52,'MANAGE_HARD_DISKS',0);
+ (52,'MANAGE_HARD_DISKS',0),
+ (53,'APPLIB_MANAGE_GLOBAL_CATEGORIES',0);
 UNLOCK TABLES;
 /*!40000 ALTER TABLE `privilege` ENABLE KEYS */;
 
@@ -893,7 +894,7 @@ UNLOCK TABLES;
 LOCK TABLES `roles_privileges` WRITE;
 INSERT INTO `roles_privileges` VALUES
  (1,1,0),(1,2,0),(1,3,0),(1,4,0),(1,5,0),(1,6,0),(1,7,0),(1,8,0),(1,9,0),(1,10,0),(1,11,0),(1,12,0),(1,13,0),(1,14,0),(1,15,0),(1,16,0),(1,17,0),(1,18,0),(1,19,0),(1,20,0),(1,21,0),(1,22,0),(1,23,0),(1,24,0),(1,25,0),
- (1,26,0),(1,27,0),(1,28,0),(1,29,0),(1,30,0),(1,31,0),(1,32,0),(1,33,0),(1,34,0),(1,35,0),(1,36,0),(1,37,0),(1,38,0),(1,39,0),(1,40,0),(1,41,0),(1,42,0),(1,43,0),(1,44,0),(1,45,0),(1,47,0),(1,48,0),(1,49,0),(1,50,0),(1,51,0),(1,52,0),
+ (1,26,0),(1,27,0),(1,28,0),(1,29,0),(1,30,0),(1,31,0),(1,32,0),(1,33,0),(1,34,0),(1,35,0),(1,36,0),(1,37,0),(1,38,0),(1,39,0),(1,40,0),(1,41,0),(1,42,0),(1,43,0),(1,44,0),(1,45,0),(1,47,0),(1,48,0),(1,49,0),(1,50,0),(1,51,0),(1,52,0),(1,53,0),
  (3,3,0),(3,12,0),(3,13,0),(3,14,0),(3,15,0),(3,16,0),(3,17,0),(3,18,0),(3,19,0),(3,20,0),(3,21,0),(3,22,0),(3,23,0),(3,24,0),(3,25,0),(3,26,0),(3,27,0),(3,28,0),(3,29,0),(3,30,0),(3,32,0),(3,34,0),(3,43,0),(3,48,0),
 (2,12,0),(2,14,0),(2,17,0),(2,18,0),(2,19,0),(2,20,0),(2,21,0),(2,22,0),(2,23,0),(2,43,0);
 UNLOCK TABLES;
@@ -2095,7 +2096,7 @@ DROP TRIGGER IF EXISTS `kinton`.`datacenter_created`;
 DROP TRIGGER IF EXISTS `kinton`.`datacenter_deleted`;
 DROP TRIGGER IF EXISTS `kinton`.`virtualapp_created`;
 DROP TRIGGER IF EXISTS `kinton`.`virtualapp_deleted`;
-DROP TRIGGER IF EXISTS `kinton`.`update_virtualapp_update_stats`;
+DROP TRIGGER IF EXISTS kinton.update_virtualapp_update_stats;
 DROP TRIGGER IF EXISTS `kinton`.`enterprise_created`;
 DROP TRIGGER IF EXISTS `kinton`.`enterprise_deleted`;
 DROP TRIGGER IF EXISTS `kinton`.`enterprise_updated`;
@@ -2191,23 +2192,29 @@ CREATE TRIGGER `kinton`.`virtualapp_deleted` AFTER DELETE ON `kinton`.`virtualap
 --
 -- Fires: On an UPDATE for the 'virtualapp' table
 -- ******************************************************************************************
-CREATE TRIGGER `kinton`.`update_virtualapp_update_stats` AFTER UPDATE ON `kinton`.`virtualapp`
+CREATE TRIGGER kinton.update_virtualapp_update_stats AFTER UPDATE ON kinton.virtualapp
   FOR EACH ROW BEGIN
     DECLARE numVMachinesCreated INTEGER;
+    DECLARE vdcNameObj VARCHAR(45);
     IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN
     -- V2V: Vmachines moved between VDC
   IF NEW.idVirtualDataCenter != OLD.idVirtualDataCenter THEN
-      -- calculate vmachines total and running in this Vapp
-      SELECT IF (COUNT(*) IS NULL, 0, COUNT(*)) INTO numVMachinesCreated
-      FROM nodevirtualimage nvi, virtualmachine v, node n
-      WHERE nvi.idNode IS NOT NULL
-      AND v.idVM = nvi.idVM
-      AND n.idNode = nvi.idNode
-      AND n.idVirtualApp = NEW.idVirtualApp
-      AND v.state != "NOT_ALLOCATED" AND v.state != "UNKNOWN"
-      and v.idType = 1;
-      UPDATE IGNORE vdc_enterprise_stats SET vmCreated = vmCreated- numVMachinesCreated WHERE idVirtualDataCenter = OLD.idVirtualDataCenter;
-      UPDATE IGNORE vdc_enterprise_stats SET vmCreated = vmCreated+ numVMachinesCreated WHERE idVirtualDataCenter = NEW.idVirtualDataCenter;
+	-- calculate vmachines total and running in this Vapp
+	SELECT IF (COUNT(*) IS NULL, 0, COUNT(*)) INTO numVMachinesCreated
+	FROM nodevirtualimage nvi, virtualmachine v, node n
+	WHERE nvi.idNode IS NOT NULL
+	AND v.idVM = nvi.idVM
+	AND n.idNode = nvi.idNode
+	AND n.idVirtualApp = NEW.idVirtualApp
+	AND v.state != "NOT_ALLOCATED" AND v.state != "UNKNOWN"
+	and v.idType = 1;
+	UPDATE IGNORE vdc_enterprise_stats SET vmCreated = vmCreated- numVMachinesCreated WHERE idVirtualDataCenter = OLD.idVirtualDataCenter;
+	UPDATE IGNORE vdc_enterprise_stats SET vmCreated = vmCreated+ numVMachinesCreated WHERE idVirtualDataCenter = NEW.idVirtualDataCenter;
+	-- Changing VDC name in VAppStats
+	SELECT vdc.name INTO vdcNameObj
+	FROM virtualdatacenter vdc
+	WHERE vdc.idVirtualDataCenter = NEW.idVirtualDataCenter;
+	UPDATE IGNORE vapp_enterprise_stats SET vdcName = vdcNameObj WHERE idVirtualApp = NEW.idVirtualApp;
     END IF;
     -- Checks for changes
     IF OLD.name != NEW.name THEN

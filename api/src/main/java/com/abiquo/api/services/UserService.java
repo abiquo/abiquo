@@ -63,8 +63,8 @@ import com.abiquo.server.core.enterprise.EnterpriseRep;
 import com.abiquo.server.core.enterprise.Privilege;
 import com.abiquo.server.core.enterprise.Role;
 import com.abiquo.server.core.enterprise.User;
-import com.abiquo.server.core.enterprise.User.AuthType;
 import com.abiquo.server.core.enterprise.UserDto;
+import com.abiquo.server.core.enterprise.User.AuthType;
 import com.abiquo.tracer.ComponentType;
 import com.abiquo.tracer.EventType;
 import com.abiquo.tracer.SeverityType;
@@ -140,7 +140,7 @@ public class UserService extends DefaultApiService
             // [ABICLOUDPREMIUM-1310] Cloud admin can view all. Enterprise admin and users can only
             // view their enterprise: check that the provided id corresponds to their enterprise,
             // and fail if the id is invalid
-            checkCurrentEnterprise(enterprise);
+            checkCurrentEnterpriseForUsers(enterprise);
         }
         else
         {
@@ -171,7 +171,8 @@ public class UserService extends DefaultApiService
         }
 
         Collection<User> users =
-            repo.findUsersByEnterprise(enterprise, filter, order, desc, connected, page, numResults);
+            repo
+                .findUsersByEnterprise(enterprise, filter, order, desc, connected, page, numResults);
 
         // Refresh all entities to avioid lazys
         for (User u : users)
@@ -218,16 +219,13 @@ public class UserService extends DefaultApiService
         }
 
         User user =
-            enterprise.createUser(role, dto.getName(), dto.getSurname(), dto.getEmail(),
-                dto.getNick(), encrypt(dto.getPassword()), dto.getLocale());
+            enterprise.createUser(role, dto.getName(), dto.getSurname(), dto.getEmail(), dto
+                .getNick(), encrypt(dto.getPassword()), dto.getLocale());
         user.setActive(dto.isActive() ? 1 : 0);
         user.setDescription(dto.getDescription());
         validate(user);
-        if (securityService.hasPrivilege(Privileges.USERS_PROHIBIT_VDC_RESTRICTION, user))
-        {
-            user.setAvailableVirtualDatacenters(null);
-        }
-        else
+        if (!securityService.hasPrivilege(Privileges.USERS_PROHIBIT_VDC_RESTRICTION, user)
+            && !StringUtils.isBlank(dto.getAvailableVirtualDatacenters()))
         {
             user.setAvailableVirtualDatacenters(dto.getAvailableVirtualDatacenters());
         }
@@ -251,9 +249,8 @@ public class UserService extends DefaultApiService
         repo.insertUser(user);
 
         tracer
-            .log(SeverityType.INFO, ComponentType.USER, EventType.USER_CREATE, "user.created",
-                user.getName(), enterprise.getName(), user.getName(), user.getSurname(),
-                user.getRole());
+            .log(SeverityType.INFO, ComponentType.USER, EventType.USER_CREATE, "user.created", user
+                .getName(), enterprise.getName(), user.getName(), user.getSurname(), user.getRole());
 
         return user;
     }
@@ -327,16 +324,10 @@ public class UserService extends DefaultApiService
         }
         old.setDescription(user.getDescription());
 
-        if (securityService.hasPrivilege(Privileges.USERS_PROHIBIT_VDC_RESTRICTION, old))
+        if (!securityService.hasPrivilege(Privileges.USERS_PROHIBIT_VDC_RESTRICTION, old)
+            && !StringUtils.isBlank(old.getAvailableVirtualDatacenters()))
         {
-            user.setAvailableVirtualDatacenters(null);
-        }
-        else
-        {
-            if (user.getAvailableVirtualDatacenters() != null)
-            {
-                old.setAvailableVirtualDatacenters(user.getAvailableVirtualDatacenters());
-            }
+            user.setAvailableVirtualDatacenters(old.getAvailableVirtualDatacenters());
         }
 
         if (!emailIsValid(user.getEmail()))
@@ -400,8 +391,8 @@ public class UserService extends DefaultApiService
         updateUser(old);
 
         tracer.log(SeverityType.INFO, ComponentType.USER, EventType.USER_MODIFY, "user.modified",
-            old.getName(), old.getEnterprise().getName(), old.getName(), old.getSurname(),
-            old.getRole());
+            old.getName(), old.getEnterprise().getName(), old.getName(), old.getSurname(), old
+                .getRole());
 
         return old;
     }
@@ -441,8 +432,8 @@ public class UserService extends DefaultApiService
         repo.removeUser(user);
 
         tracer.log(SeverityType.INFO, ComponentType.USER, EventType.USER_DELETE, "user.deleted",
-            user.getName(), user.getEnterprise().getName(), user.getName(), user.getSurname(),
-            user.getRole());
+            user.getName(), user.getEnterprise().getName(), user.getName(), user.getSurname(), user
+                .getRole());
     }
 
     public boolean isAssignedTo(final Integer enterpriseId, final Integer userId)
@@ -587,6 +578,18 @@ public class UserService extends DefaultApiService
         }
     }
 
+    public void checkCurrentEnterpriseForUsers(final Enterprise enterprise)
+    {
+        User user = getCurrentUser();
+        boolean sameEnterprise = enterprise.getId().equals(user.getEnterprise().getId());
+
+        if (!sameEnterprise
+            && !securityService.hasPrivilege(Privileges.USERS_MANAGE_OTHER_ENTERPRISES))
+        {
+            throw new AccessDeniedException("Missing privilege to get info from other enterprises");
+        }
+    }
+
     public void checkCurrentEnterpriseForPostMethods(final Enterprise enterprise)
     {
         User user = getCurrentUser();
@@ -651,7 +654,7 @@ public class UserService extends DefaultApiService
     }
 
     /**
-     * Check if a user has permissions to user a given virtual datacenter
+     * Check if a user has permissions to use the given virtual datacenter
      * 
      * @param username nick of the given User
      * @param authtype authentication type of the given User
@@ -663,5 +666,20 @@ public class UserService extends DefaultApiService
         final String authtype, final String[] privileges, final Integer idVdc)
     {
         return repo.isUserAllowedToUseVirtualDatacenter(username, authtype, privileges, idVdc);
+    }
+
+    /**
+     * Check if a user has permissions to use or see the given enterprise
+     * 
+     * @param username nick of the given User
+     * @param authtype authentication type of the given User
+     * @param privileges array of strings with all privileges names from the given User role
+     * @param idEnteprise identifier from enterprise to check
+     * @return True if user is allowed to use or see the given enterprise
+     */
+    public boolean isUserAllowedToEnterprise(final String username, final String authtype,
+        final String[] privileges, final Integer idEnterprise)
+    {
+        return repo.isUserAllowedToEnterprise(username, authtype, privileges, idEnterprise);
     }
 }

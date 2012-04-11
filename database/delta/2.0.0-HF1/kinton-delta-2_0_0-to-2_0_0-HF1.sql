@@ -56,6 +56,14 @@ BEGIN
 		ALTER TABLE kinton.category ADD CONSTRAINT category_enterprise_FK FOREIGN KEY category_enterprise_FK (idEnterprise) REFERENCES enterprise (idEnterprise) ON DELETE CASCADE ON UPDATE NO ACTION;
 	END IF;
 
+    IF EXISTS (SELECT * FROM information_schema.table_constraints WHERE table_schema= 'kinton' AND table_name='category' AND constraint_name='name') THEN
+		ALTER TABLE `kinton`.`category` DROP INDEX `name`;
+	END IF;
+
+    IF NOT EXISTS (SELECT * FROM information_schema.table_constraints WHERE table_schema= 'kinton' AND table_name='category' AND constraint_name='name') THEN
+		ALTER TABLE `kinton`.`category` ADD UNIQUE INDEX `name`(`name`, `idEnterprise`) using BTREE;
+	END IF;
+
     -- ########################################################## --    
         -- ######## DATA: NEW DATA (INSERTS, UPDATES, DELETES ####### --
     -- ########################################################## --
@@ -76,22 +84,42 @@ BEGIN
         INSERT INTO kinton.roles_privileges VALUES (1,51,0);
     END IF;
 
+    -- GLOBAL CATEGORY --
+    SELECT COUNT(*) INTO @existsCount FROM kinton.privilege WHERE idPrivilege='53' AND name='APPLIB_MANAGE_GLOBAL_CATEGORIES';
+    IF @existsCount = 0 THEN 
+        INSERT INTO kinton.privilege VALUES (53,'APPLIB_MANAGE_GLOBAL_CATEGORIES',0);
+    END IF;
+
+    -- GLOBAL CATEGORY Privilege for cloud admin
+    SELECT COUNT(*) INTO @existsCount FROM kinton.roles_privileges WHERE idRole='1' AND idPrivilege='53';
+    IF @existsCount = 0 THEN 
+        INSERT INTO kinton.roles_privileges VALUES (1,53,0);
+    END IF;
+
     -- New System Properties
     SELECT COUNT(*) INTO @existsCount FROM kinton.system_properties WHERE name='client.main.showHardDisk' AND value='1' AND description='Show (1) or hide (0) hard disk tab';
     IF @existsCount = 0 THEN 
         INSERT INTO kinton.system_properties (name, value, description) VALUES ('client.main.showHardDisk','1','Show (1) or hide (0) hard disk tab');
     END IF;
 
-    -- New Privilege
+    -- New Privileges
     SELECT COUNT(*) INTO @existsCount FROM kinton.privilege WHERE idPrivilege='52' AND name='MANAGE_HARD_DISKS';
     IF @existsCount = 0 THEN 
         INSERT INTO kinton.privilege VALUES (52,'MANAGE_HARD_DISKS',0);
     END IF;
+    SELECT COUNT(*) INTO @existsCount FROM kinton.privilege WHERE idPrivilege='53' AND name='APPLIB_MANAGE_GLOBAL_CATEGORIES';
+    IF @existsCount = 0 THEN 
+        INSERT INTO kinton.privilege VALUES (53,'APPLIB_MANAGE_GLOBAL_CATEGORIES',0);
+    END IF;
 
-    -- Assign New Privilege to Cloud Admin
+    -- Assign New Privileges to Cloud Admin
     SELECT COUNT(*) INTO @existsCount FROM kinton.roles_privileges WHERE idRole='1' AND idPrivilege='52';
     IF @existsCount = 0 THEN 
         INSERT INTO kinton.roles_privileges VALUES (1,52,0);
+    END IF;
+     SELECT COUNT(*) INTO @existsCount FROM kinton.roles_privileges WHERE idRole='1' AND idPrivilege='53';
+    IF @existsCount = 0 THEN 
+        INSERT INTO kinton.roles_privileges VALUES (1,53,0);
     END IF;
 
 
@@ -129,7 +157,44 @@ SELECT "STEP 10 UPDATING TRIGGERS..." as " ";
 DROP TRIGGER IF EXISTS kinton.create_nodevirtualimage_update_stats;
 DROP TRIGGER IF EXISTS kinton.delete_nodevirtualimage_update_stats;
 DROP TRIGGER IF EXISTS kinton.update_virtualmachine_update_stats;
+DROP TRIGGER IF EXISTS kinton.update_virtualapp_update_stats;
+
 DELIMITER |
+--
+SELECT "Recreating trigger update_virtualapp_update_stats..." as " ";
+CREATE TRIGGER kinton.update_virtualapp_update_stats AFTER UPDATE ON kinton.virtualapp
+  FOR EACH ROW BEGIN
+    DECLARE numVMachinesCreated INTEGER;
+    DECLARE vdcNameObj VARCHAR(45);
+    IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN
+    -- V2V: Vmachines moved between VDC
+  IF NEW.idVirtualDataCenter != OLD.idVirtualDataCenter THEN
+	-- calculate vmachines total and running in this Vapp
+	SELECT IF (COUNT(*) IS NULL, 0, COUNT(*)) INTO numVMachinesCreated
+	FROM nodevirtualimage nvi, virtualmachine v, node n
+	WHERE nvi.idNode IS NOT NULL
+	AND v.idVM = nvi.idVM
+	AND n.idNode = nvi.idNode
+	AND n.idVirtualApp = NEW.idVirtualApp
+	AND v.state != "NOT_ALLOCATED" AND v.state != "UNKNOWN"
+	and v.idType = 1;
+	UPDATE IGNORE vdc_enterprise_stats SET vmCreated = vmCreated- numVMachinesCreated WHERE idVirtualDataCenter = OLD.idVirtualDataCenter;
+	UPDATE IGNORE vdc_enterprise_stats SET vmCreated = vmCreated+ numVMachinesCreated WHERE idVirtualDataCenter = NEW.idVirtualDataCenter;
+	-- Changing VDC name in VAppStats
+	SELECT vdc.name INTO vdcNameObj
+	FROM virtualdatacenter vdc
+	WHERE vdc.idVirtualDataCenter = NEW.idVirtualDataCenter;
+	UPDATE IGNORE vapp_enterprise_stats SET vdcName = vdcNameObj WHERE idVirtualApp = NEW.idVirtualApp;
+    END IF;
+    -- Checks for changes
+    IF OLD.name != NEW.name THEN
+      -- Name changed !!!
+      UPDATE IGNORE vapp_enterprise_stats SET vappName = NEW.name
+      WHERE idVirtualApp = NEW.idVirtualApp;
+    END IF;
+  END IF;
+  END;
+|
 --
 SELECT "Recreating trigger create_nodevirtualimage_update_stats..." as " ";
 DROP TRIGGER IF EXISTS kinton.create_nodevirtualimage_update_stats;

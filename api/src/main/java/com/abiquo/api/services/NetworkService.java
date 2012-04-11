@@ -43,6 +43,7 @@ import com.abiquo.api.services.cloud.VirtualMachineService;
 import com.abiquo.api.tracer.TracerLogger;
 import com.abiquo.model.enumerator.NetworkType;
 import com.abiquo.model.transport.LinksDto;
+import com.abiquo.model.transport.error.CommonError;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualDatacenterRep;
@@ -262,9 +263,27 @@ public class NetworkService extends DefaultApiService
         VirtualMachine newvm = vmService.duplicateVirtualMachineObject(oldvm);
         List<IpPoolManagement> ips = vmService.getNICsFromDto(vdc, nicRefs);
 
+        checkIps(ips);
+
         newvm.getIps().addAll(ips);
 
         return vmService.reconfigureVirtualMachine(vdc, vapp, oldvm, newvm, originalState);
+    }
+
+    private void checkIps(final List<IpPoolManagement> ips)
+    {
+        for (IpPoolManagement ip : ips)
+        {
+            if (ip.getQuarantine())
+            {
+                LOGGER.debug("Cannot attach ip " + ip.toString()
+                    + " to a virtual machine because the ip is in quarantine");
+                addConflictErrors(new CommonError(APIError.VLANS_IP_IS_IN_QUARANTINE.getCode(),
+                    String.format(APIError.VLANS_IP_IS_IN_QUARANTINE.getMessage(), ip.getIp())));
+                flushErrors();
+            }
+        }
+
     }
 
     /**

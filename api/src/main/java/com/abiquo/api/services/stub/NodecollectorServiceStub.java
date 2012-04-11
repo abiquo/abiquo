@@ -244,6 +244,14 @@ public class NodecollectorServiceStub extends DefaultApiService
         catch (LoginException e)
         {
             logger.debug(e.getMessage());
+            if (hypType == HypervisorType.HYPERV_301)
+            {
+                // Hyper-V is the only hypervisor that returns the same message for bad credentials
+                // that bad configuration. We must add this extra info to the user.
+                logger.debug("hyperv");
+                addConflictErrors(APIError.NC_BAD_CONFIGURATION);
+                flushErrors();
+            }
             addConflictErrors(APIError.NC_BAD_CREDENTIALS_TO_MACHINE);
         }
         catch (ConnectionException e)
@@ -533,8 +541,15 @@ public class NodecollectorServiceStub extends DefaultApiService
         int cpus = (int) host.getCpu();
 
         Machine machine =
-            new Machine(datacenter, host.getName(), "", ram, 0, cpus, 0, transfromToState(host
-                .getStatus()), "");
+            new Machine(datacenter,
+                host.getName(),
+                "",
+                ram,
+                0,
+                cpus,
+                0,
+                transfromToState(host.getStatus()),
+                "");
 
         // Long totalStorage = 0L;
         String switches = "";

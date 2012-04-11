@@ -148,7 +148,8 @@ public class TemplateDefinitionListsResourceIT extends AbstractJpaGeneratorIT
     public void getTemplateDefinitionListsByNonExistentEnterpriseRises404() throws Exception
     {
         validURI = resolveTemplateDefinitionListsURI(2);
-        ClientResponse response = get(validURI, TemplateDefinitionListsDto.MEDIA_TYPE);
+        ClientResponse response =
+            get(validURI, SYSADMIN, SYSADMIN, TemplateDefinitionListsDto.MEDIA_TYPE);
         assertError(response, 404, APIError.NON_EXISTENT_ENTERPRISE);
     }
 
@@ -236,9 +237,12 @@ public class TemplateDefinitionListsResourceIT extends AbstractJpaGeneratorIT
 
         String xmlindexURI = "http://localhost:7979/testovf/invalidovfindex/ovfindex.xml";
 
+        String basicAuth = basicAuth(SYSADMIN, SYSADMIN);
+
         ClientResponse response =
             client.resource(validURI).accept(TemplateDefinitionListDto.MEDIA_TYPE)
-                .contentType(MediaType.TEXT_PLAIN).post(xmlindexURI);
+                .contentType(MediaType.TEXT_PLAIN).header("Authorization", "Basic " + basicAuth)
+                .post(xmlindexURI);
 
         assertError(response, 400, APIError.INVALID_OVF_INDEX_XML);
     }

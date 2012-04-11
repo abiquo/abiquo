@@ -23,18 +23,22 @@ package com.abiquo.server.core.infrastructure.network;
 
 import java.io.Serializable;
 
+import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.abiquo.model.enumerator.NetworkType;
 import com.abiquo.model.transport.SingleResourceTransportDto;
+import com.abiquo.model.validation.Desc;
+import com.abiquo.model.validation.Output;
 
 @XmlRootElement(name = "network")
 public class VLANNetworkDto extends SingleResourceTransportDto implements Serializable
 {
     public static final String BASE_MEDIA_TYPE = "application/vnd.abiquo.vlan+xml";
+
     public static final String MEDIA_TYPE = BASE_MEDIA_TYPE + "; version=" + API_VERSION;
-    
+
     private Integer id;
 
     private String name;
@@ -61,6 +65,7 @@ public class VLANNetworkDto extends SingleResourceTransportDto implements Serial
 
     private DhcpOptionsDto dhcpOptions;
 
+    @Desc("Identifier of the entity")
     public Integer getId()
     {
         return id;
@@ -71,6 +76,8 @@ public class VLANNetworkDto extends SingleResourceTransportDto implements Serial
         this.id = id;
     }
 
+    @NotNull
+    @Desc(value = "Name of the VLAN")
     @XmlElement(defaultValue = "")
     public String getName()
     {
@@ -82,6 +89,7 @@ public class VLANNetworkDto extends SingleResourceTransportDto implements Serial
         this.name = name;
     }
 
+    @Desc(value = "Tag of the VLAN. It will need an input value for PUBLIC, EXTERNAL and UNMANAGED networks")
     public Integer getTag()
     {
         return tag;
@@ -92,6 +100,8 @@ public class VLANNetworkDto extends SingleResourceTransportDto implements Serial
         this.tag = tag;
     }
 
+    @NotNull
+    @Desc(value = "Gateway of the VLAN")
     public String getGateway()
     {
         return gateway;
@@ -102,6 +112,8 @@ public class VLANNetworkDto extends SingleResourceTransportDto implements Serial
         this.gateway = gateway;
     }
 
+    @NotNull
+    @Desc(value = "Network Address of the VLAN.")
     public String getAddress()
     {
         return address;
@@ -112,6 +124,8 @@ public class VLANNetworkDto extends SingleResourceTransportDto implements Serial
         this.address = address;
     }
 
+    @NotNull
+    @Desc(value = "Numerical value of the VLAN")
     public Integer getMask()
     {
         return mask;
@@ -122,6 +136,7 @@ public class VLANNetworkDto extends SingleResourceTransportDto implements Serial
         this.mask = mask;
     }
 
+    @Desc(value = "Primary DNS address")
     public String getPrimaryDNS()
     {
         return primaryDNS;
@@ -132,6 +147,7 @@ public class VLANNetworkDto extends SingleResourceTransportDto implements Serial
         this.primaryDNS = primaryDNS;
     }
 
+    @Desc(value = "Secondary DNS value")
     public String getSecondaryDNS()
     {
         return secondaryDNS;
@@ -142,6 +158,7 @@ public class VLANNetworkDto extends SingleResourceTransportDto implements Serial
         this.secondaryDNS = secondaryDNS;
     }
 
+    @Desc(value = "Suffix DNS value")
     public String getSufixDNS()
     {
         return sufixDNS;
@@ -152,6 +169,8 @@ public class VLANNetworkDto extends SingleResourceTransportDto implements Serial
         this.sufixDNS = sufixDNS;
     }
 
+    @Output
+    @Desc(value = "Return if it is used as Default Network. Read only.")
     public Boolean getDefaultNetwork()
     {
         return defaultNetwork;
@@ -162,6 +181,8 @@ public class VLANNetworkDto extends SingleResourceTransportDto implements Serial
         this.defaultNetwork = defaultNetwork;
     }
 
+    @Output
+    @Desc(value = "Kind of network: PUBLIC, INTERNAL, EXTERNAL and UNMANAGED")
     public NetworkType getType()
     {
         return type;
@@ -182,6 +203,8 @@ public class VLANNetworkDto extends SingleResourceTransportDto implements Serial
         this.dhcpOptions = dhcpOptions;
     }
 
+    @Output
+    @Desc(value = "Return if the VLAN is unmanaged")
     public Boolean getUnmanaged()
     {
         return unmanaged;
@@ -197,11 +220,11 @@ public class VLANNetworkDto extends SingleResourceTransportDto implements Serial
     {
         return VLANNetworkDto.MEDIA_TYPE;
     }
-    
+
     @Override
     public String getBaseMediaType()
     {
         return BASE_MEDIA_TYPE;
     }
-    
+
 }

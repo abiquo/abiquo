@@ -262,6 +262,74 @@ public class UserDAOTest extends DefaultDAOTestBase<UserDAO, User>
         Assert.assertTrue(isAllowed);
     }
 
+    // ENT
+    @Test
+    public void sysadminUserIsAllowedToOwnEnterprise()
+    {
+        Map<String, Object> map = setupSysadminUser();
+        User user = (User) map.get("sysadmin");
+        String[] ps = (String[]) map.get("sysadmin.privileges");
+        Enterprise ent = (Enterprise) map.get("sysadmin.enterprise");
+
+        UserDAO dao = createDaoForRollbackTransaction();
+
+        boolean isAllowed =
+            dao.isUserAllowedToEnterprise(user.getNick(), user.getAuthType().name(), ps,
+                ent.getId());
+        Assert.assertTrue(isAllowed);
+    }
+
+    @Test
+    public void userIsAllowedToUseOwnEnterprise()
+    {
+        Map<String, Object> map = setupNormalUser(null);
+        User user = (User) map.get("user");
+        String[] ps = (String[]) map.get("user.privileges");
+        Enterprise ent = (Enterprise) map.get("user.enterprise");
+
+        UserDAO dao = createDaoForRollbackTransaction();
+
+        boolean isAllowed =
+            dao.isUserAllowedToEnterprise(user.getNick(), user.getAuthType().name(), ps,
+                ent.getId());
+        Assert.assertTrue(isAllowed);
+    }
+
+    @Test
+    public void sysadminIsAllowedToUseOtherEnterprise()
+    {
+        Map<String, Object> map = setupSysadminUserAndNormalUser(null);
+        User user = (User) map.get("sysadmin");
+        String[] ps = (String[]) map.get("sysadmin.privileges");
+        Enterprise ent = (Enterprise) map.get("user.enterprise");
+
+        UserDAO dao = createDaoForRollbackTransaction();
+
+        boolean isAllowed =
+            dao.isUserAllowedToEnterprise(user.getNick(), user.getAuthType().name(), ps,
+                ent.getId());
+        Assert.assertTrue(isAllowed);
+    }
+
+    @Test
+    public void userIsNOTAllowedToUserOtherEnterprise()
+    {
+        Map<String, Object> map = setupSysadminUserAndNormalUser(null);
+        User user = (User) map.get("user");
+        String[] ps = (String[]) map.get("user.privileges");
+        Enterprise ent = (Enterprise) map.get("sysadmin.enterprise");
+
+        UserDAO dao = createDaoForRollbackTransaction();
+
+        boolean isAllowed =
+            dao.isUserAllowedToEnterprise(user.getNick(), user.getAuthType().name(), ps,
+                ent.getId());
+        Assert.assertFalse(isAllowed);
+    }
+
+    // ----------------------- //
+    // Private usefull methods //
+    // ----------------------- //
     private Map<String, Object> setupSysadminUser()
     {
         Map<String, Object> map = new HashMap<String, Object>();
@@ -291,6 +359,7 @@ public class UserDAOTest extends DefaultDAOTestBase<UserDAO, User>
         map.put("sysadmin", sysadmin);
         map.put("sysadmin.virtualdatacenter", sysadminVdc);
         map.put("sysadmin.privileges", sysadminPrivs);
+        map.put("sysadmin.enterprise", sysadmin.getEnterprise());
 
         return map;
     }
@@ -341,6 +410,7 @@ public class UserDAOTest extends DefaultDAOTestBase<UserDAO, User>
         map.put("user", user);
         map.put("user.virtualdatacenter", userVdc);
         map.put("user.privileges", userPrivs);
+        map.put("user.enterprise", user.getEnterprise());
         return map;
 
     }

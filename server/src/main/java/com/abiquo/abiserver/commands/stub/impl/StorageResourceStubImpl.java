@@ -115,7 +115,7 @@ public class StorageResourceStubImpl extends AbstractAPIStub implements StorageR
     {
         DataResult<Disk> result = new DataResult<Disk>();
 
-        String uri = createVirtualDatacenterDisksLink(vdcId);
+        String uri = createVirtualDatacenterDisksLink(vdcId, forceSoftLimits);
         DiskManagementDto inputDto = new DiskManagementDto();
         inputDto.setSizeInMb(diskSizeInMb);
         ClientResponse response = post(uri, inputDto);
@@ -131,7 +131,7 @@ public class StorageResourceStubImpl extends AbstractAPIStub implements StorageR
             link.setHref(diskDto.getEditLink().getHref());
             links.addLink(link);
 
-            String vmUri = createVirtualMachineDisksLink(vdcId, vappId, vmId, forceSoftLimits);
+            String vmUri = createVirtualMachineDisksLink(vdcId, vappId, vmId);
 
             response = post(vmUri, AcceptedRequestDto.MEDIA_TYPE, LinksDto.MEDIA_TYPE, links);
 

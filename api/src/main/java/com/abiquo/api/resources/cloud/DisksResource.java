@@ -26,11 +26,13 @@ import java.util.List;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 
 import org.apache.wink.common.annotations.Parent;
@@ -66,6 +68,8 @@ import com.abiquo.server.core.infrastructure.storage.DisksManagementDto;
 public class DisksResource extends AbstractResource
 {
     public static final String DISKS_PATH = "disks";
+
+    public static final String FORCE = "force";
 
     /** Autowired business logic service. */
     @Autowired
@@ -117,9 +121,11 @@ public class DisksResource extends AbstractResource
     @Produces(DiskManagementDto.MEDIA_TYPE)
     public DiskManagementDto createHardDisk(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) @NotNull @Min(1) final Integer vdcId,
-        final DiskManagementDto inputDto, @Context final IRESTBuilder restBuilder) throws Exception
+        final DiskManagementDto inputDto,
+        @QueryParam(FORCE) @DefaultValue("false") final Boolean force,
+        @Context final IRESTBuilder restBuilder) throws Exception
     {
-        DiskManagement disk = service.createHardDisk(vdcId, inputDto.getSizeInMb());
+        DiskManagement disk = service.createHardDisk(vdcId, inputDto.getSizeInMb(), force);
 
         return DiskResource.createDiskTransferObject(disk, restBuilder);
     }
