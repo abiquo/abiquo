@@ -324,10 +324,14 @@ public class UserService extends DefaultApiService
         }
         old.setDescription(user.getDescription());
 
-        if (!securityService.hasPrivilege(Privileges.USERS_PROHIBIT_VDC_RESTRICTION, old)
-            && !StringUtils.isBlank(old.getAvailableVirtualDatacenters()))
+        if (!securityService.hasPrivilege(Privileges.USERS_PROHIBIT_VDC_RESTRICTION, old))
         {
-            user.setAvailableVirtualDatacenters(old.getAvailableVirtualDatacenters());
+            if (StringUtils.isBlank(user.getAvailableVirtualDatacenters()))
+            {
+                user.setAvailableVirtualDatacenters(null);
+            }
+
+            old.setAvailableVirtualDatacenters(user.getAvailableVirtualDatacenters());
         }
 
         if (!emailIsValid(user.getEmail()))
