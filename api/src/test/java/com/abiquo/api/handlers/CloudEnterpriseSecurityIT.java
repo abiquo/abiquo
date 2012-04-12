@@ -121,9 +121,9 @@ public class CloudEnterpriseSecurityIT extends AbstractJpaGeneratorIT
         setup(entitiesToSetup.toArray());
     }
 
-    // ----------------- //
-    // VIRTUALDATACENTERS LIST
-    // ----------------- //
+    // ----------------------- //
+    // VIRTUALDATACENTERS LIST //
+    // ----------------------- //
     @Test(groups = {TestConfig.SECURITY_HANDLERS_INTEGRATION_TESTS})
     public void sysadminGetsVirtualDatacenters()
     {
