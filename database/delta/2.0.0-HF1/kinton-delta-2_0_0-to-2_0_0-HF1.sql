@@ -121,6 +121,9 @@ BEGIN
     IF @existsCount = 0 THEN 
         INSERT INTO kinton.roles_privileges VALUES (1,53,0);
     END IF;
+    
+    -- Change to NULL to avoid an empty string for the property availableVirtualDatacenters --
+    UPDATE IGNORE user SET availableVirtualDatacenters = NULL WHERE availableVirtualDatacenters = "";
 
 
     -- ######################################## --  
