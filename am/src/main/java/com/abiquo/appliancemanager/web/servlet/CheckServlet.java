@@ -51,11 +51,12 @@ public class CheckServlet extends AbstractCheckServlet
     private final static String MOUNT_FILE = "/etc/mtab";
 
     /** The expected file mark in the repositoryl. */
-    private final static String REPO_MARK = AMConfiguration.getRepositoryPath()
-        + ".abiquo_repository";
+    private final static String REPO_MARK =
+        AMConfiguration.getRepositoryPath() + ".abiquo_repository";
 
-    private final boolean DO_CHECK = Boolean.parseBoolean(System.getProperty(
-        "abiquo.appliancemanager.checkMountedRepository", "true"));
+    private final boolean DO_CHECK =
+        Boolean.parseBoolean(System.getProperty("abiquo.appliancemanager.checkMountedRepository",
+            "true"));
 
     @Override
     protected boolean check() throws Exception
@@ -106,16 +107,16 @@ public class CheckServlet extends AbstractCheckServlet
 
     public synchronized boolean checkRepositoryMounted()
     {
-        final String repositoryLocatino =
+        final String repositoryLocation =
             FilenameUtils.normalizeNoEndSeparator(AMConfiguration.getRepositoryLocation());
         final String repositoryMountPoint =
             FilenameUtils.normalizeNoEndSeparator(AMConfiguration.getRepositoryPath());
 
-        if (repositoryLocatino.startsWith("localhost")
-            || repositoryLocatino.startsWith("127.0.0.1"))
+        if (repositoryLocation.startsWith("localhost")
+            || repositoryLocation.startsWith("127.0.0.1"))
         {
-            LOGGER.warn("Can't validate ''abiquo.appliancemanager.repositoryLocation'' {}."
-                + " Its a local repository", repositoryLocatino);
+            LOGGER.warn("Cannot validate ''abiquo.appliancemanager.repositoryLocation'' {}."
+                + " It is a local repository", repositoryLocation);
             return true;
         }
 
@@ -127,10 +128,10 @@ public class CheckServlet extends AbstractCheckServlet
 
             for (String line = mountReader.readLine(); line != null; line = mountReader.readLine())
             {
-                if (line.contains(repositoryLocatino))
+                if (line.contains(repositoryLocation))
                 {
                     final String[] parts = line.split(" ");
-                    if (repositoryLocatino.equals(FilenameUtils.normalizeNoEndSeparator(parts[0]))
+                    if (repositoryLocation.equals(FilenameUtils.normalizeNoEndSeparator(parts[0]))
                         && repositoryMountPoint.equalsIgnoreCase(FilenameUtils
                             .normalizeNoEndSeparator(parts[1])))
                     {
@@ -140,7 +141,7 @@ public class CheckServlet extends AbstractCheckServlet
                     {
                         LOGGER.warn(
                             "Repository location {} present but not mounted on the expected path {} \n"
-                                + line, repositoryLocatino, repositoryMountPoint);
+                                + line, repositoryLocation, repositoryMountPoint);
                     }
                 }
             }
