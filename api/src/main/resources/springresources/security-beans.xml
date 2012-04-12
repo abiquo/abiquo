@@ -403,7 +403,7 @@
         <security:intercept-url pattern="/cloud/virtualdatacenters/*/virtualappliances/*/virtualmachines/*/storage/volumes/*" method="DELETE" access="ROLE_VAPP_CUSTOMISE_SETTINGS" />
         <security:intercept-url pattern="/cloud/virtualdatacenters/*/virtualappliances/*/virtualmachines/*/action/checkedit" method="PUT" access="ROLE_VAPP_CUSTOMISE_SETTINGS" />
         <security:intercept-url pattern="/cloud/virtualdatacenters/*/virtualappliances/*/virtualmachines/*/action/reset" method="POST" access="ROLE_VAPP_PERFORM_ACTIONS" />
-        <security:intercept-url pattern="/cloud/virtualdatacenters/*/virtualappliances/*/virtualmachines/*/action/instance" method="POST" access="ROLE_VAPP_PERFORM_ACTIONS" />
+        <security:intercept-url pattern="/cloud/virtualdatacenters/*/virtualappliances/*/virtualmachines/*/action/instance" method="POST" access="ROLE_VAPP_CREATE_INSTANCE" />
         <security:intercept-url pattern="/cloud/virtualdatacenters/*/virtualappliances/*/virtualmachines/*/state" method="GET" access="ROLE_VAPP_PERFORM_ACTIONS" />
         <security:intercept-url pattern="/cloud/virtualdatacenters/*/virtualappliances/*/virtualmachines/*/state" method="PUT" access="ROLE_VAPP_PERFORM_ACTIONS" />
         <security:intercept-url pattern="/cloud/virtualdatacenters/*/virtualappliances/*/virtualmachines/*/action/undeploy" method="POST" access="ROLE_VAPP_DEPLOY_UNDEPLOY" />
@@ -411,8 +411,8 @@
         <security:intercept-url pattern="/cloud/virtualdatacenters/*/virtualappliances/*/virtualmachines/*/config/runlist" method="GET" access="ROLE_VAPP_CUSTOMISE_SETTINGS" />
         <security:intercept-url pattern="/cloud/virtualdatacenters/*/virtualappliances/*/virtualmachines/*/config/runlist" method="POST" access="ROLE_VAPP_PERFORM_ACTIONS" />
         <security:intercept-url pattern="/cloud/virtualdatacenters/*/virtualappliances/*/virtualmachines/*/config/bootstrap" method="GET" access="ROLE_ONE_TIME" />
-        <security:intercept-url pattern="/cloud/virtualdatacenters/*/virtualappliances/*/virtualmachines/*/tasks" method="GET" access="ROLE_VDC_MANAGE_VAPP,ROLE_VAPP_CUSTOMISE_SETTINGS,ROLE_VAPP_ASSIGN_NETWORK,ROLE_VAPP_PERFORM_ACTIONS,ROLE_VAPP_DEPLOY_UNDEPLOY" />
-        <security:intercept-url pattern="/cloud/virtualdatacenters/*/virtualappliances/*/virtualmachines/*/tasks/*" method="GET" access="ROLE_VDC_MANAGE_VAPP,ROLE_VAPP_CUSTOMISE_SETTINGS,ROLE_VAPP_ASSIGN_NETWORK,ROLE_VAPP_PERFORM_ACTIONS,ROLE_VAPP_DEPLOY_UNDEPLOY" />
+        <security:intercept-url pattern="/cloud/virtualdatacenters/*/virtualappliances/*/virtualmachines/*/tasks" method="GET" access="ROLE_VDC_MANAGE_VAPP,ROLE_VAPP_CUSTOMISE_SETTINGS,ROLE_VAPP_ASSIGN_NETWORK,ROLE_VAPP_PERFORM_ACTIONS,ROLE_VAPP_DEPLOY_UNDEPLOY,ROLE_VAPP_CREATE_INSTANCE" />
+        <security:intercept-url pattern="/cloud/virtualdatacenters/*/virtualappliances/*/virtualmachines/*/tasks/*" method="GET" access="ROLE_VDC_MANAGE_VAPP,ROLE_VAPP_CUSTOMISE_SETTINGS,ROLE_VAPP_ASSIGN_NETWORK,ROLE_VAPP_PERFORM_ACTIONS,ROLE_VAPP_DEPLOY_UNDEPLOY,ROLE_VAPP_CREATE_INSTANCE" />
         <!--=================================== -->
         <!--============= CONFIG ============== -->
         <!--=================================== -->
