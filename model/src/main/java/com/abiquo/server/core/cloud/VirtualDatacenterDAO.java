@@ -264,8 +264,9 @@ public class VirtualDatacenterDAO extends DefaultDAOBase<Integer, VirtualDatacen
             + "and rm.idResourceType = '8' and rm.idVirtualDatacenter = :virtualDatacenterId";
 
     private static final String SUM_EXTRA_HD_RESOURCES =
-        "select sum(r.limitResource) from rasd r, rasd_management rm where r.instanceID = rm.idResource "
-            + "and rm.idResourceType = '17' and rm.idVirtualDatacenter = :virtualDatacenterId";
+        "select sum(r.limitResource) from rasd r, rasd_management rm, virtualmachine vm where r.instanceID = rm.idResource "
+            + "and rm.idResourceType = '17' and rm.idVirtualDatacenter = :virtualDatacenterId "
+            + "and  rm.idVM = vm.idVM and vm.state != 'NOT_ALLOCATED' and vm.idHypervisor is not null";
 
     private static final String COUNT_PUBLIC_IP_RESOURCES =
         "select count(*) from ip_pool_management ipm, rasd_management rm, vlan_network vn, virtualdatacenter vdc "
