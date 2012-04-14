@@ -173,8 +173,9 @@ public class DatacenterDAO extends DefaultDAOBase<Integer, Datacenter>
             + " and pm.idDatacenter = :datacenterId and vm.idEnterprise = :enterpriseId and vm.state != 'NOT_ALLOCATED' and vm.idHypervisor is not null";
 
     private static final String SUM_EXTRA_HD_RESOURCES =
-        "select sum(r.limitResource) from rasd r, rasd_management rm, virtualdatacenter vdc where r.instanceID = rm.idResource "
-            + "and rm.idResourceType = '17' and rm.idVirtualDatacenter = vdc.idVirtualDatacenter and vdc.idDatacenter=:datacenterId";
+        "select sum(r.limitResource) from rasd r, rasd_management rm, virtualdatacenter vdc, virtualmachine vm where r.instanceID = rm.idResource "
+            + "and rm.idResourceType = '17' and rm.idVirtualDatacenter = vdc.idVirtualDatacenter and vdc.idDatacenter=:datacenterId "
+            + "and  rm.idVM = vm.idVM and vm.state != 'NOT_ALLOCATED' and vm.idHypervisor is not null";
 
     private static final String SUM_STORAGE_RESOURCES =
         "select sum(r.limitResource) "

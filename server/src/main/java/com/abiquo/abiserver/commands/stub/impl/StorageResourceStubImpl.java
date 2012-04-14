@@ -131,7 +131,7 @@ public class StorageResourceStubImpl extends AbstractAPIStub implements StorageR
             link.setHref(diskDto.getEditLink().getHref());
             links.addLink(link);
 
-            String vmUri = createVirtualMachineDisksLink(vdcId, vappId, vmId);
+            String vmUri = createVirtualMachineDisksLink(vdcId, vappId, vmId, forceSoftLimits);
 
             response = post(vmUri, AcceptedRequestDto.MEDIA_TYPE, LinksDto.MEDIA_TYPE, links);
 
