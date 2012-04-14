@@ -248,8 +248,9 @@ class EnterpriseDAO extends DefaultDAOBase<Integer, Enterprise>
             + " and vm.idEnterprise = :enterpriseId and vm.state != 'NOT_ALLOCATED' and vm.idHypervisor is not null";
 
     private static final String SUM_EXTRA_HD_RESOURCES =
-        "select sum(r.limitResource) from rasd r, rasd_management rm, virtualdatacenter vdc where r.instanceID = rm.idResource "
-            + "and rm.idResourceType = '17' and rm.idVirtualDatacenter = vdc.idVirtualDatacenter and vdc.idEnterprise=:enterpriseId";
+        "select sum(r.limitResource) from rasd r, rasd_management rm, virtualdatacenter vdc, virtualmachine vm where r.instanceID = rm.idResource "
+            + "and rm.idResourceType = '17' and rm.idVirtualDatacenter = vdc.idVirtualDatacenter and vdc.idEnterprise=:enterpriseId "
+            + "and  rm.idVM = vm.idVM and vm.state != 'NOT_ALLOCATED' and vm.idHypervisor is not null";
 
     public DefaultEntityCurrentUsed getEnterpriseResourceUsage(final int enterpriseId)
     {
