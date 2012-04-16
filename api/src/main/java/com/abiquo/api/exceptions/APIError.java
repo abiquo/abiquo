@@ -378,8 +378,8 @@ public enum APIError
         "RS-11",
         "Cannot delete a Virtual System Monitor Service. There are virtual machines deployed."), REMOTE_SERVICE_WRONG_URL(
         "RS-12", "The URL supplied is not valid"), REMOTE_SERVICE_DHCP_WRONG_URI("RS-13",
-        "The URI of the DHCP service is invalid"), REMOTE_SERVICE_DATACENTER_UUID_NOT_FOUND("RS-14",
-        "The remote service does not have the *abiquo.datacenter.id* property set"), REMOTE_SERVICE_DATACENTER_UUID_INCONSISTENT(
+        "The URI of the DHCP service is invalid"), REMOTE_SERVICE_DATACENTER_UUID_NOT_FOUND(
+        "RS-14", "The remote service does not have the *abiquo.datacenter.id* property set"), REMOTE_SERVICE_DATACENTER_UUID_INCONSISTENT(
         "RS-15",
         "The remote service is configured with a different datacenter UUID, please adjust the *abiquo.datacenter.id* property of the remote service."), REMOTE_SERVICE_UNDEFINED_PORT(
         "RS-16", "A port must be defined in the URI"), REMOTE_SERVICE_NON_POOLABLE("RS-17",
@@ -390,7 +390,8 @@ public enum APIError
     //
     AM_CLIENT("AM-0", "Failed Appliance Manager communication"), AM_TIMEOUT("AM-1",
         "Timeout during Appliance Manager communication"), AM_UNAVAILABE("AM-2",
-        "AM service unavailable; please check the URL of the service."), AM_FAILED_REQUEST("AM-3",
+        "AM service unavailable; please check the URL of the service."), AM_FAILED_REQUEST(
+        "AM-3",
         "Failed Appliance Manager request. "
             + "It is possible that the repositoryLocation property is not correct, NFS is not available or NFS privileges do not allow access to the server."),
 
@@ -611,7 +612,7 @@ public enum APIError
         "CHEF-5", "The node could not be updated on the Chef Server. "
             + "Please contact the Administrator."), CHEF_CANNOT_CONNECT("CHEF-6",
         "Could not connect to the Chef server. Please contact the Administrator."), CHEF_INVALID_ENTERPRISE_DATA(
-        "CHEF-7", "Could not connect to the Chef server with the given Validator and Admin data. "
+        "CHEF-7", "Could not connect to the Chef server with the given Admin data. "
             + "Please verify the credentials"), CHEF_INVALID_ENTERPRISE("CHEF-8",
         "The enterprise is not configured to use Chef"), CHEF_INVALID_VIRTUALMACHINE("CHEF-9",
         "The virtual machine cannot use Chef. "
@@ -620,7 +621,8 @@ public enum APIError
         "The validator certificate supplied is not a valid private key. Please verify the key format."), CHEF_INVALID_CLIENT_KEY(
         "CHEF-11",
         "The provided admin certificate is not a valid private key. Please verify the key format."), CHEF_MALFORMED_URL(
-        "CHEF-12", "The provided chef server URL is not well formed."),
+        "CHEF-12", "The provided chef server URL is not well formed."), CHEF_CLIENT_DOES_NOT_EXIST(
+        "CHEF-13", "The validator client supplied does not exist"),
 
     // Parsing links
     LINKS_INVALID_LINK("LNK-0", "Invalid link. Check documentation"), LINKS_ONLY_ACCEPTS_ONE_LINK(
