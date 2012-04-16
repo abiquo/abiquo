@@ -66,7 +66,7 @@ public class VirtualSystemServiceImpl implements VirtualSystemService
         {
             // Connect to it and retrieve information
             col.connect(user, password);
-            LOGGER.info("Connected to hypervisor {} at cloud node {} ", col.getHypervisorType()
+            LOGGER.debug("Connected to hypervisor {} at cloud node {} ", col.getHypervisorType()
                 .toString(), ipAddress);
 
             return col.getVirtualMachines();
