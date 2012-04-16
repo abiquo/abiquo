@@ -121,6 +121,9 @@ BEGIN
     IF @existsCount = 0 THEN 
         INSERT INTO kinton.roles_privileges VALUES (1,53,0);
     END IF;
+    
+    -- Change to NULL to avoid an empty string for the property availableVirtualDatacenters --
+    UPDATE IGNORE user SET availableVirtualDatacenters = NULL WHERE availableVirtualDatacenters = "";
 
 
     -- ######################################## --  
@@ -297,7 +300,7 @@ CREATE TRIGGER kinton.delete_nodevirtualimage_update_stats AFTER DELETE ON kinto
 -- INSERT INTO debug_msg (msg) VALUES (CONCAT('deleteNVI values', IFNULL(cpu,'NULL'), ' - ',IFNULL(ram,'NULL'), ' - ',IFNULL(hd,'NULL')));						
     --
     IF type = 1 THEN
-      IF state NOT IN ("NOT_ALLOCATED","UNKNOWN") THEN      
+      IF previousState NOT IN ("NOT_ALLOCATED","UNKNOWN") THEN      
         UPDATE IGNORE cloud_usage_stats SET vMachinesTotal = vMachinesTotal-1
           WHERE idDataCenter = idDataCenterObj;
         UPDATE IGNORE vapp_enterprise_stats SET vmCreated = vmCreated-1
