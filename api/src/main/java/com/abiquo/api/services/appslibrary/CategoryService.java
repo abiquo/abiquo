@@ -213,6 +213,7 @@ public class CategoryService extends DefaultApiService
         }
         old.setName(category.getName());
         old.setErasable(category.isErasable());
+        old.setEnterprise(newCat.getEnterprise());
 
         validate(old);
         appslibraryRep.updateCategory(old);
