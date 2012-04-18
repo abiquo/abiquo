@@ -97,7 +97,7 @@ public class TemplatesResource
         TemplatesStateDto list = new TemplatesStateDto();
         for (TemplateStateDto stt : ErepoFactory.getRepo(idEnterprise).getTemplateStates())
         {
-            if (state != null || stt.getStatus().equals(state))
+            if (state == null || stt.getStatus().equals(state))
             {
                 list.getCollection().add(stt);
             }
