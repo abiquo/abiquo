@@ -114,6 +114,14 @@ public class AMClient extends AMClientResources
         return response.getEntity(EnterpriseRepositoryDto.class);
     }
 
+    public void refreshRepository(final Integer idEnterprise) throws AMClientException
+    {
+        ClientResponse response =
+            repository(idEnterprise).accept(MediaType.APPLICATION_XML).post(null);
+
+        checkResponseErrors(response);
+    }
+
     public void checkService() throws AMClientException
     {
         ClientResponse response = check()//
