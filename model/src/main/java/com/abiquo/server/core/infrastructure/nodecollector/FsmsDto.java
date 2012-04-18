@@ -66,7 +66,7 @@ public class FsmsDto
      */
     private static final long serialVersionUID = 5643469409057556537L;
 
-    private List<FsmDto> collection = new ArrayList<FsmDto>();
+    protected List<FsmDto> fsms = new ArrayList<FsmDto>();
 
     private int totalSize;
 
@@ -88,21 +88,21 @@ public class FsmsDto
     @XmlElement(name = "fsm")
     public List<FsmDto> getCollection()
     {
-        if (collection == null)
+        if (fsms == null)
         {
-            collection = new ArrayList<FsmDto>();
+            fsms = new ArrayList<FsmDto>();
         }
-        return this.collection;
+        return this.fsms;
     }
 
     public void add(final FsmDto element)
     {
-        collection.add(element);
+        fsms.add(element);
     }
 
     public boolean isEmpty()
     {
-        return collection.isEmpty();
+        return fsms.isEmpty();
     }
 
     public void setTotalSize(final Integer totalSize)

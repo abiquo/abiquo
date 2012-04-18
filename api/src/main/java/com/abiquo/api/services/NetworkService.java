@@ -21,6 +21,9 @@
 
 package com.abiquo.api.services;
 
+import java.net.Inet4Address;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -393,15 +396,23 @@ public class NetworkService extends DefaultApiService
         for (DhcpOption dhcpOption : newVlan.getDhcpOption())
         {
             dhcpOption.setOption(121);
-            datacenterRepo.insertDhcpOption(dhcpOption);
-            DhcpOption dhcpOption2 =
-                new DhcpOption(249,
-                    dhcpOption.getGateway(),
-                    dhcpOption.getNetworkAddress(),
-                    dhcpOption.getMask(),
-                    dhcpOption.getNetmask());
-            datacenterRepo.insertDhcpOption(dhcpOption2);
-            opts.add(dhcpOption2);
+            dhcpOption.setMask(getMaskbyNetMask(dhcpOption.getNetmask()));
+            if (dhcpOption.getMask() != 0)
+            {
+                datacenterRepo.insertDhcpOption(dhcpOption);
+                DhcpOption dhcpOption2 =
+                    new DhcpOption(249,
+                        dhcpOption.getGateway(),
+                        dhcpOption.getNetworkAddress(),
+                        dhcpOption.getMask(),
+                        dhcpOption.getNetmask());
+                datacenterRepo.insertDhcpOption(dhcpOption2);
+                opts.add(dhcpOption2);
+            }
+            else
+            {
+                opts.remove(dhcpOption);
+            }
         }
         newVlan.setDhcpOption(opts);
         // Before to insert the new VLAN, check if we want the vlan as the default one. If it is,
@@ -1217,15 +1228,23 @@ public class NetworkService extends DefaultApiService
         for (DhcpOption dhcpOption : newNetwork.getDhcpOption())
         {
             dhcpOption.setOption(121);
-            datacenterRepo.insertDhcpOption(dhcpOption);
-            DhcpOption dhcpOption2 =
-                new DhcpOption(249,
-                    dhcpOption.getGateway(),
-                    dhcpOption.getNetworkAddress(),
-                    dhcpOption.getMask(),
-                    dhcpOption.getNetmask());
-            datacenterRepo.insertDhcpOption(dhcpOption2);
-            opts.add(dhcpOption2);
+            dhcpOption.setMask(getMaskbyNetMask(dhcpOption.getNetmask()));
+            if (dhcpOption.getMask() != 0)
+            {
+                datacenterRepo.insertDhcpOption(dhcpOption);
+                DhcpOption dhcpOption2 =
+                    new DhcpOption(249,
+                        dhcpOption.getGateway(),
+                        dhcpOption.getNetworkAddress(),
+                        dhcpOption.getMask(),
+                        dhcpOption.getNetmask());
+                datacenterRepo.insertDhcpOption(dhcpOption2);
+                opts.add(dhcpOption2);
+            }
+            else
+            {
+                opts.remove(dhcpOption);
+            }
         }
         oldNetwork.setDhcpOption(opts);
 
@@ -1416,6 +1435,30 @@ public class NetworkService extends DefaultApiService
             repo.insertIpManagement(ipManagement);
         }
 
+    }
+
+    private Integer getMaskbyNetMask(final String netmask)
+    {
+
+        Inet4Address address;
+        try
+        {
+            address = (Inet4Address) InetAddress.getByName(netmask);
+            byte[] values = address.getAddress();
+            int hex = values[0] << 24 | values[1] << 16 | values[2] << 8 | values[3] << 0;
+
+            Integer mask = Integer.bitCount(hex);
+            if (mask < 32)
+            {
+                return mask;
+            }
+        }
+        catch (UnknownHostException e)
+        {
+            // invalid netmask
+        }
+
+        return 0;
     }
 
 }

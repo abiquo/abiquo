@@ -127,7 +127,8 @@ public class StorageService extends DefaultApiService
      */
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public Object attachHardDisks(final Integer vdcId, final Integer vappId, final Integer vmId,
-        final LinksDto hdRefs, final VirtualMachineState originalState)
+        final LinksDto hdRefs, final VirtualMachineState originalState,
+        final Boolean forceSoftLimits)
     {
         VirtualDatacenter vdc = getVirtualDatacenter(vdcId);
         VirtualAppliance vapp = getVirtualAppliance(vdc, vappId);
@@ -138,8 +139,8 @@ public class StorageService extends DefaultApiService
 
         newvm.getDisks().addAll(disks);
 
-        // softlimits already checked when created the hd
-        return vmService.reconfigureVirtualMachine(vdc, vapp, oldvm, newvm, originalState, true);
+        return vmService.reconfigureVirtualMachine(vdc, vapp, oldvm, newvm, originalState,
+            forceSoftLimits);
     }
 
     /**
@@ -202,8 +203,8 @@ public class StorageService extends DefaultApiService
             flushErrors();
         }
 
-        // check the limits.
-        checkStorageLimits(vdc, sizeInMb, forceSoftLimits);
+        // check the limits.Already check when deploy/reconfigure VM
+        // checkStorageLimits(vdc, sizeInMb, forceSoftLimits);
 
         DiskManagement disk = new DiskManagement(vdc, sizeInMb);
         validate(disk);

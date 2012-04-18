@@ -254,6 +254,8 @@ public class AMServiceStub extends DefaultApiService
 
         try
         {
+            amClient.refreshRepository(enterpriseId);
+
             List<TemplateStateDto> downloads =
                 amClient.getTemplatesState(enterpriseId, TemplateStatusEnumType.DOWNLOAD)
                     .getCollection();
