@@ -138,8 +138,8 @@ public class AbstractAPIStub
             props.put("jclouds.timeouts.CloudClient.deleteVolume", "90000");
 
             context =
-                new AbiquoContextFactory().createContext(token, ImmutableSet
-                    .<Module> of(new NullLoggingModule()), props);
+                new AbiquoContextFactory().createContext(token,
+                    ImmutableSet.<Module> of(new NullLoggingModule()), props);
         }
 
         return context;
@@ -510,8 +510,8 @@ public class AbstractAPIStub
 
     protected String createEnterpriseLink(final int enterpriseId)
     {
-        return URIResolver.resolveURI(apiUri, "admin/enterprises/{enterprise}", Collections
-            .singletonMap("enterprise", valueOf(enterpriseId)));
+        return URIResolver.resolveURI(apiUri, "admin/enterprises/{enterprise}",
+            Collections.singletonMap("enterprise", valueOf(enterpriseId)));
     }
 
     protected String createEnterpriseIPsLink(final int enterpriseId)
@@ -629,8 +629,8 @@ public class AbstractAPIStub
 
     protected String createRoleLink(final int roleId)
     {
-        return URIResolver.resolveURI(apiUri, "admin/roles/{role}", Collections.singletonMap(
-            "role", valueOf(roleId)));
+        return URIResolver.resolveURI(apiUri, "admin/roles/{role}",
+            Collections.singletonMap("role", valueOf(roleId)));
     }
 
     protected String createRolesLink()
@@ -657,8 +657,8 @@ public class AbstractAPIStub
 
     protected String createPrivilegeLink(final int privilegeId)
     {
-        return URIResolver.resolveURI(apiUri, "config/privileges/{privilege}", Collections
-            .singletonMap("privilege", valueOf(privilegeId)));
+        return URIResolver.resolveURI(apiUri, "config/privileges/{privilege}",
+            Collections.singletonMap("privilege", valueOf(privilegeId)));
     }
 
     protected String createRoleActionGetPrivilegesURI(final Integer entId)
@@ -690,8 +690,8 @@ public class AbstractAPIStub
 
     protected String createRoleLdapLink(final int roleLdapId)
     {
-        return URIResolver.resolveURI(apiUri, "admin/rolesldap/{roleldap}", Collections
-            .singletonMap("roleldap", valueOf(roleLdapId)));
+        return URIResolver.resolveURI(apiUri, "admin/rolesldap/{roleldap}",
+            Collections.singletonMap("roleldap", valueOf(roleLdapId)));
     }
 
     protected String createUsersLink(final String enterpriseId)
@@ -703,8 +703,8 @@ public class AbstractAPIStub
         final Integer numResults)
     {
         String uri =
-            URIResolver.resolveURI(apiUri, "admin/enterprises/{enterprise}/users", Collections
-                .singletonMap("enterprise", enterpriseId));
+            URIResolver.resolveURI(apiUri, "admin/enterprises/{enterprise}/users",
+                Collections.singletonMap("enterprise", enterpriseId));
 
         Map<String, String[]> queryParams = new HashMap<String, String[]>();
         if (offset != null && numResults != null)
@@ -781,8 +781,8 @@ public class AbstractAPIStub
     {
         String uri =
             URIResolver.resolveURI(apiUri,
-                "admin/enterprises/{enterprise}/appslib/templateDefinitions", Collections
-                    .singletonMap("enterprise", enterpriseId));
+                "admin/enterprises/{enterprise}/appslib/templateDefinitions",
+                Collections.singletonMap("enterprise", enterpriseId));
         return uri;
     }
 
@@ -1364,6 +1364,7 @@ public class AbstractAPIStub
             uri += "action/checkmachineipmi?ip={ip}&user={user}&password={password}";
             if (port != null)
             {
+                params.put("port", port.toString());
                 uri += "&port={port}";
             }
         }
@@ -1786,8 +1787,8 @@ public class AbstractAPIStub
 
     protected String createCurrencyLink(final int currencyId)
     {
-        return URIResolver.resolveURI(apiUri, "config/currencies/{currency}", Collections
-            .singletonMap("currency", valueOf(currencyId)));
+        return URIResolver.resolveURI(apiUri, "config/currencies/{currency}",
+            Collections.singletonMap("currency", valueOf(currencyId)));
     }
 
     protected String createPricingTemplateLink(final int templateId)
@@ -1861,16 +1862,16 @@ public class AbstractAPIStub
 
     protected String createCostCodeLink(final int costCodeId)
     {
-        return URIResolver.resolveURI(apiUri, "config/costcodes/{costcode}", Collections
-            .singletonMap("costcode", valueOf(costCodeId)));
+        return URIResolver.resolveURI(apiUri, "config/costcodes/{costcode}",
+            Collections.singletonMap("costcode", valueOf(costCodeId)));
     }
 
     protected String createCostCodeCurrenciesLink(final String costCodeId, Integer offset,
         final Integer numResults)
     {
         String uri =
-            URIResolver.resolveURI(apiUri, "config/costcodes/{costcode}/currencies", Collections
-                .singletonMap("costcode", valueOf(costCodeId)));
+            URIResolver.resolveURI(apiUri, "config/costcodes/{costcode}/currencies",
+                Collections.singletonMap("costcode", valueOf(costCodeId)));
 
         Map<String, String[]> queryParams = new HashMap<String, String[]>();
         if (offset != null && numResults != null)
