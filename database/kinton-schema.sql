@@ -2629,7 +2629,7 @@ CREATE TRIGGER kinton.update_virtualmachine_update_stats AFTER UPDATE ON kinton.
 	-- For debugging purposes only        
         IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN   
 	-- We always store previous state when starting a transaction
-	IF NEW.state != OLD.state AND NEW.state='LOCKED' THEN
+	IF NEW.state != OLD.state AND OLD.state NOT IN ('LOCKED') THEN
 		UPDATE virtualmachinetrackedstate SET previousState=OLD.state WHERE idVM=NEW.idVM;
 	END IF;
 	--
@@ -2662,39 +2662,43 @@ CREATE TRIGGER kinton.update_virtualmachine_update_stats AFTER UPDATE ON kinton.
 	-- Main case: an imported VM changes its state (from LOCKED to ...)
 	-- TODO: Create SQLProcedures to update stats. Code is repeated here
 	IF NEW.idType = 1 AND (NEW.state != OLD.state) THEN
-		IF previousState IN ("NOT_ALLOCATED") AND NEW.state IN ("ON") THEN
-			-- INSERT INTO debug_msg (msg) VALUES (CONCAT('UpdateVMStats DEPLOY+POWERON event detected for Running machine. Updating (+1) VMachinesTotal & VMachinesRunning VM from Stats', NEW.idVM));
+		IF previousState IN ("NOT_ALLOCATED") AND NEW.state IN ("OFF", "ON") THEN
+			-- Machine has been deployed or re-captured
+			INSERT INTO debug_msg (msg) VALUES (CONCAT('UpdateVMStats DEPLOY+POWERON event detected for Running machine. Updating (+1) VMachinesTotal from Stats', NEW.idVM));
 			UPDATE IGNORE vapp_enterprise_stats SET vmCreated = vmCreated+1
-                WHERE idVirtualApp = idVirtualAppObj;
-                UPDATE IGNORE vdc_enterprise_stats SET vmCreated = vmCreated+1
-                WHERE idVirtualDataCenter = idVirtualDataCenterObj;
-                UPDATE IGNORE cloud_usage_stats SET vMachinesTotal = vMachinesTotal+1
-                WHERE idDataCenter = idDataCenterObj;
-			UPDATE IGNORE vapp_enterprise_stats SET vmActive = vmActive+1
-                WHERE idVirtualApp = idVirtualAppObj;
-                UPDATE IGNORE vdc_enterprise_stats SET vmActive = vmActive+1
-                WHERE idVirtualDataCenter = idVirtualDataCenterObj;
-                UPDATE IGNORE cloud_usage_stats SET vMachinesRunning = vMachinesRunning+1
-                WHERE idDataCenter = idDataCenterObj;       
-			SELECT IFNULL(SUM(limitResource),0) * 1048576 INTO extraHDSize 
-			FROM rasd_management rm, rasd r 
-			WHERE rm.idResource = r.instanceID AND rm.idVM = NEW.idVM AND rm.idResourceType=17;    
-		-- INSERT INTO debug_msg (msg) VALUES (CONCAT('NEW ExtraHDs added ', extraHDSize));
-                UPDATE IGNORE enterprise_resources_stats 
-                    SET vCpuUsed = vCpuUsed + NEW.cpu,
-                        memoryUsed = memoryUsed + NEW.ram,
-                        localStorageUsed = localStorageUsed + NEW.hd + extraHDSize
-                WHERE idEnterprise = NEW.idEnterprise;
-                UPDATE IGNORE dc_enterprise_stats 
-                SET     vCpuUsed = vCpuUsed + NEW.cpu,
-                    memoryUsed = memoryUsed + NEW.ram,
-                    localStorageUsed = localStorageUsed + NEW.hd + extraHDSize
-                WHERE idEnterprise = NEW.idEnterprise AND idDataCenter = idDataCenterObj;
-                UPDATE IGNORE vdc_enterprise_stats 
-                SET     vCpuUsed = vCpuUsed + NEW.cpu,
-                    memoryUsed = memoryUsed + NEW.ram,
-                    localStorageUsed = localStorageUsed + NEW.hd + extraHDSize
-                WHERE idVirtualDataCenter = idVirtualDataCenterObj;		
+	           WHERE idVirtualApp = idVirtualAppObj;
+	           UPDATE IGNORE vdc_enterprise_stats SET vmCreated = vmCreated+1
+	           WHERE idVirtualDataCenter = idVirtualDataCenterObj;
+	           UPDATE IGNORE cloud_usage_stats SET vMachinesTotal = vMachinesTotal+1
+	           WHERE idDataCenter = idDataCenterObj;
+			IF NEW.state IN ("ON") THEN
+				INSERT INTO debug_msg (msg) VALUES (CONCAT('UpdateVMStats DEPLOY+POWERON event detected for Running machine. Updating (+1) VMachinesRunning VM from Stats', NEW.idVM));
+				UPDATE IGNORE vapp_enterprise_stats SET vmActive = vmActive+1
+	                WHERE idVirtualApp = idVirtualAppObj;
+	                UPDATE IGNORE vdc_enterprise_stats SET vmActive = vmActive+1
+	                WHERE idVirtualDataCenter = idVirtualDataCenterObj;
+	                UPDATE IGNORE cloud_usage_stats SET vMachinesRunning = vMachinesRunning+1
+	                WHERE idDataCenter = idDataCenterObj;       
+				SELECT IFNULL(SUM(limitResource),0) * 1048576 INTO extraHDSize 
+				FROM rasd_management rm, rasd r 
+				WHERE rm.idResource = r.instanceID AND rm.idVM = NEW.idVM AND rm.idResourceType=17;    
+			-- INSERT INTO debug_msg (msg) VALUES (CONCAT('NEW ExtraHDs added ', extraHDSize));
+	                UPDATE IGNORE enterprise_resources_stats 
+	                    SET vCpuUsed = vCpuUsed + NEW.cpu,
+	                        memoryUsed = memoryUsed + NEW.ram,
+	                        localStorageUsed = localStorageUsed + NEW.hd + extraHDSize
+	                WHERE idEnterprise = NEW.idEnterprise;
+	                UPDATE IGNORE dc_enterprise_stats 
+	                SET     vCpuUsed = vCpuUsed + NEW.cpu,
+	                    memoryUsed = memoryUsed + NEW.ram,
+	                    localStorageUsed = localStorageUsed + NEW.hd + extraHDSize
+	                WHERE idEnterprise = NEW.idEnterprise AND idDataCenter = idDataCenterObj;
+	                UPDATE IGNORE vdc_enterprise_stats 
+	                SET     vCpuUsed = vCpuUsed + NEW.cpu,
+	                    memoryUsed = memoryUsed + NEW.ram,
+	                    localStorageUsed = localStorageUsed + NEW.hd + extraHDSize
+	                WHERE idVirtualDataCenter = idVirtualDataCenterObj;						
+			END IF;
 		ELSEIF previousState IN ("ON","PAUSED","OFF") AND NEW.state IN ("NOT_ALLOCATED") THEN
 			-- INSERT INTO debug_msg (msg) VALUES (CONCAT('UpdateVMStats UNDEPLOY event detected. Updating (-1) VMachinesTotal VM from Stats', NEW.idVM));
 			UPDATE IGNORE vapp_enterprise_stats SET vmCreated = vmCreated-1
