@@ -1,7 +1,6 @@
--- MySQL Administrator dump 1.4
---
--- ------------------------------------------------------
--- Server version  5.0.51a-3ubuntu5.4
+-- 
+-- Full Initial Schema
+-- 
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -13,513 +12,515 @@
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 
 
+
+
 --
--- Create schema kinton
+-- Create schema kinton_liquibase
 --
 DROP DATABASE IF EXISTS kinton_liquibase;
 CREATE DATABASE IF NOT EXISTS kinton_liquibase;
 USE kinton_liquibase;
 
 --
--- Definition of table kinton_liquibase.appliancemanagernotification
+-- Definition of table `kinton_liquibase`.`appliancemanagernotification`
 --
 
-DROP TABLE IF EXISTS kinton_liquibase.appliancemanagernotification;
+DROP TABLE IF EXISTS `kinton_liquibase`.`appliancemanagernotification`;
 
 --
--- Definition of table kinton_liquibase.auth_group
+-- Definition of table `kinton_liquibase`.`auth_group`
 --
 
-DROP TABLE IF EXISTS kinton_liquibase.auth_group;
-CREATE TABLE  kinton_liquibase.auth_group (
-  id int(11) unsigned NOT NULL auto_increment,
-  name varchar(20) default NULL,
-  description varchar(50) default NULL,
-  PRIMARY KEY  (id)
+DROP TABLE IF EXISTS `kinton_liquibase`.`auth_group`;
+CREATE TABLE  `kinton_liquibase`.`auth_group` (
+  `id` int(11) unsigned NOT NULL auto_increment,
+  `name` varchar(20) default NULL,
+  `description` varchar(50) default NULL,
+  PRIMARY KEY  (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
 
 --
--- Dumping data for table kinton_liquibase.auth_group
+-- Dumping data for table `kinton_liquibase`.`auth_group`
 --
 
-/*!40000 ALTER TABLE auth_group DISABLE KEYS */;
-LOCK TABLES auth_group WRITE;
-INSERT INTO auth_group VALUES
+/*!40000 ALTER TABLE `auth_group` DISABLE KEYS */;
+LOCK TABLES `auth_group` WRITE;
+INSERT INTO `auth_group` VALUES
  (1,'GENERIC', 'Generic'),
  (2,'MAIN','Flex client main menu group'),
  (3,'USER','Flex and server Users Management'),
  (4,'APPLIANCE_LIBRARY','Flex and server Appliance Library Management');
 UNLOCK TABLES;
-/*!40000 ALTER TABLE auth_group ENABLE KEYS */;
+/*!40000 ALTER TABLE `auth_group` ENABLE KEYS */;
 
 
 --
--- Definition of table kinton_liquibase.auth_serverresource
+-- Definition of table `kinton_liquibase`.`auth_serverresource`
 --
 
-DROP TABLE IF EXISTS kinton_liquibase.auth_serverresource;
-CREATE TABLE  kinton_liquibase.auth_serverresource (
-  id int(11) unsigned NOT NULL auto_increment,
-  name varchar(50) default NULL,
-  description varchar(100) default NULL,
-  idGroup int(11) unsigned default NULL,
-  idRole int(3) unsigned NOT NULL,
-  PRIMARY KEY  (id),
-  KEY auth_serverresourceFK1 (idGroup),
-  KEY auth_serverresourceFK2 (idRole),
-  CONSTRAINT auth_serverresourceFK1 FOREIGN KEY (idGroup) REFERENCES auth_group (id) ON DELETE CASCADE,
-  CONSTRAINT auth_serverresourceFK2 FOREIGN KEY (idRole) REFERENCES role (idRole) ON DELETE CASCADE
+DROP TABLE IF EXISTS `kinton_liquibase`.`auth_serverresource`;
+CREATE TABLE  `kinton_liquibase`.`auth_serverresource` (
+  `id` int(11) unsigned NOT NULL auto_increment,
+  `name` varchar(50) default NULL,
+  `description` varchar(100) default NULL,
+  `idGroup` int(11) unsigned default NULL,
+  `idRole` int(3) unsigned NOT NULL,
+  PRIMARY KEY  (`id`),
+  KEY `auth_serverresourceFK1` (`idGroup`),
+  KEY `auth_serverresourceFK2` (`idRole`),
+  CONSTRAINT `auth_serverresourceFK1` FOREIGN KEY (`idGroup`) REFERENCES `auth_group` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `auth_serverresourceFK2` FOREIGN KEY (`idRole`) REFERENCES `role` (`idRole`) ON DELETE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8;
 
 --
--- Dumping data for table kinton_liquibase.auth_serverresource
+-- Dumping data for table `kinton_liquibase`.`auth_serverresource`
 --
 
-/*!40000 ALTER TABLE auth_serverresource DISABLE KEYS */;
-LOCK TABLES auth_serverresource WRITE;
-INSERT INTO kinton_liquibase.auth_serverresource VALUES  (1,'LOGIN','Login Service',1,2),
+/*!40000 ALTER TABLE `auth_serverresource` DISABLE KEYS */;
+LOCK TABLES `auth_serverresource` WRITE;
+INSERT INTO `kinton_liquibase`.`auth_serverresource` VALUES  (1,'LOGIN','Login Service',1,2),
  (2,'ENTERPRISE_GET_ALL_ENTERPRISES','Security to retrieve the whole list of enterprises',3,1),
  (3,'ENTERPRISE_GET_ENTERPRISES','Security to call method getEnterprises in UserCommand',3,3),
  (4,'USER_GETUSERS','Security to call method getUsers in UserCommand',3,3),
  (5,'USER_GET_ALL_USERS','Security to retrieve the whole list of users',3,1);
 UNLOCK TABLES;
-/*!40000 ALTER TABLE auth_serverresource ENABLE KEYS */;
+/*!40000 ALTER TABLE `auth_serverresource` ENABLE KEYS */;
 
 
 --
--- Definition of table kinton_liquibase.auth_serverresource_exception
+-- Definition of table `kinton_liquibase`.`auth_serverresource_exception`
 --
 
-DROP TABLE IF EXISTS kinton_liquibase.auth_serverresource_exception;
-CREATE TABLE  kinton_liquibase.auth_serverresource_exception (
-  id int(11) unsigned NOT NULL auto_increment,
-  idResource int(11) unsigned NOT NULL,
-  idUser int(10) unsigned NOT NULL,
-  version_c int(11) default 0,
-  PRIMARY KEY  (id),
-  KEY auth_serverresource_exceptionFK1 (idResource),
-  KEY auth_serverresource_exceptionFK2 (idUser),
-  CONSTRAINT auth_serverresource_exceptionFK1 FOREIGN KEY (idResource) REFERENCES auth_serverresource (id) ON DELETE CASCADE,
-  CONSTRAINT auth_serverresource_exceptionFK2 FOREIGN KEY (idUser) REFERENCES user (idUser) ON DELETE CASCADE
+DROP TABLE IF EXISTS `kinton_liquibase`.`auth_serverresource_exception`;
+CREATE TABLE  `kinton_liquibase`.`auth_serverresource_exception` (
+  `id` int(11) unsigned NOT NULL auto_increment,
+  `idResource` int(11) unsigned NOT NULL,
+  `idUser` int(10) unsigned NOT NULL,
+  `version_c` int(11) default 0,
+  PRIMARY KEY  (`id`),
+  KEY `auth_serverresource_exceptionFK1` (`idResource`),
+  KEY `auth_serverresource_exceptionFK2` (`idUser`),
+  CONSTRAINT `auth_serverresource_exceptionFK1` FOREIGN KEY (`idResource`) REFERENCES `auth_serverresource` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `auth_serverresource_exceptionFK2` FOREIGN KEY (`idUser`) REFERENCES `user` (`idUser`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
--- Dumping data for table kinton_liquibase.auth_serverresource_exception
+-- Dumping data for table `kinton_liquibase`.`auth_serverresource_exception`
 --
 
-/*!40000 ALTER TABLE auth_serverresource_exception DISABLE KEYS */;
-LOCK TABLES auth_serverresource_exception WRITE;
+/*!40000 ALTER TABLE `auth_serverresource_exception` DISABLE KEYS */;
+LOCK TABLES `auth_serverresource_exception` WRITE;
 UNLOCK TABLES;
-/*!40000 ALTER TABLE auth_serverresource_exception ENABLE KEYS */;
+/*!40000 ALTER TABLE `auth_serverresource_exception` ENABLE KEYS */;
 
 --
--- Definition of table kinton_liquibase.category
+-- Definition of table `kinton_liquibase`.`category`
 --
 
-DROP TABLE IF EXISTS kinton_liquibase.category;
-CREATE TABLE  kinton_liquibase.category (
-  idCategory int(3) unsigned NOT NULL auto_increment,
-  name varchar(30) NOT NULL,
-  isErasable int(1) unsigned NOT NULL default '1',
-  isDefault int(1) unsigned NOT NULL default '0',
-  version_c int(11) default 0,
-  PRIMARY KEY  (idCategory),
-  UNIQUE KEY (name)
+DROP TABLE IF EXISTS `kinton_liquibase`.`category`;
+CREATE TABLE  `kinton_liquibase`.`category` (
+  `idCategory` int(3) unsigned NOT NULL auto_increment,
+  `name` varchar(30) NOT NULL,
+  `isErasable` int(1) unsigned NOT NULL default '1',
+  `isDefault` int(1) unsigned NOT NULL default '0',
+  `version_c` int(11) default 0,
+  PRIMARY KEY  (`idCategory`),
+  UNIQUE KEY (`name`)
 ) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8;
 
 --
--- Dumping data for table kinton_liquibase.category
+-- Dumping data for table `kinton_liquibase`.`category`
 --
 
-/*!40000 ALTER TABLE category DISABLE KEYS */;
-LOCK TABLES category WRITE;
-INSERT INTO kinton_liquibase.category VALUES  (1,'Others',0,1,0),
+/*!40000 ALTER TABLE `category` DISABLE KEYS */;
+LOCK TABLES `category` WRITE;
+INSERT INTO `kinton_liquibase`.`category` VALUES  (1,'Others',0,1,0),
  (2,'Database servers',1,0, 0),
  (4,'Applications servers',1,0,0),
  (5,'Web servers',1,0,0);
 UNLOCK TABLES;
-/*!40000 ALTER TABLE category ENABLE KEYS */;
+/*!40000 ALTER TABLE `category` ENABLE KEYS */;
 
 --
 -- NETWORK TABLES
 --
 -- DROP THE TABLES RELATED TO NETWORK --
-DROP TABLE IF EXISTS kinton_liquibase.vlan_network;
-DROP TABLE IF EXISTS kinton_liquibase.network_configuration;
-DROP TABLE IF EXISTS kinton_liquibase.network;
-DROP TABLE IF EXISTS kinton_liquibase.vlan_network_assignment;
+DROP TABLE IF EXISTS `kinton_liquibase`.`vlan_network`;
+DROP TABLE IF EXISTS `kinton_liquibase`.`network_configuration`;
+DROP TABLE IF EXISTS `kinton_liquibase`.`network`;
+DROP TABLE IF EXISTS `kinton_liquibase`.`vlan_network_assignment`;
 
 --
--- Definition of table kinton_liquibase.network
+-- Definition of table `kinton_liquibase`.`network`
 --
-CREATE TABLE  kinton_liquibase.network (
-  network_id int(11) unsigned NOT NULL auto_increment,
-  uuid varchar(40) NOT NULL,
-  version_c integer NOT NULL DEFAULT 1,
-  PRIMARY KEY  (network_id)
+CREATE TABLE  `kinton_liquibase`.`network` (
+  `network_id` int(11) unsigned NOT NULL auto_increment,
+  `uuid` varchar(40) NOT NULL,
+  `version_c` integer NOT NULL DEFAULT 1,
+  PRIMARY KEY  (`network_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
 --
--- Definition of table kinton_liquibase.network_configuration
+-- Definition of table `kinton_liquibase`.`network_configuration`
 --
-CREATE TABLE kinton_liquibase.network_configuration (
-  network_configuration_id int(11) unsigned NOT NULL auto_increment,
-  gateway varchar(40),
-  network_address varchar(40) NOT NULL,
-  mask int(4) NOT NULL,
-  netmask varchar(20) NOT NULL,
-  primary_dns varchar(20),
-  secondary_dns varchar(20),
-  sufix_dns varchar(40),
-  fence_mode varchar(20) NOT NULL,
-  version_c integer NOT NULL DEFAULT 1,
-  PRIMARY KEY  (network_configuration_id)
+CREATE TABLE `kinton_liquibase`.`network_configuration` (
+  `network_configuration_id` int(11) unsigned NOT NULL auto_increment,
+  `gateway` varchar(40),
+  `network_address` varchar(40) NOT NULL,
+  `mask` int(4) NOT NULL,
+  `netmask` varchar(20) NOT NULL,
+  `primary_dns` varchar(20),
+  `secondary_dns` varchar(20),
+  `sufix_dns` varchar(40),
+  `fence_mode` varchar(20) NOT NULL,
+  `version_c` integer NOT NULL DEFAULT 1,
+  PRIMARY KEY  (`network_configuration_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
--- Definition of table kinton_liquibase.vlan_network
+-- Definition of table `kinton_liquibase`.`vlan_network`
 --
-CREATE TABLE  kinton_liquibase.vlan_network (
-  vlan_network_id int(11) unsigned NOT NULL auto_increment,
-  network_id int(11) unsigned NOT NULL,
-  network_configuration_id int(11) unsigned NOT NULL, 
-  network_name varchar(40) NOT NULL,
-  vlan_tag int(4) unsigned DEFAULT NULL,
-  networktype varchar(15) NOT NULL DEFAULT 'INTERNAL',
-  version_c integer NOT NULL DEFAULT 1,
-  enterprise_id int(10) unsigned DEFAULT NULL,
-  PRIMARY KEY  (vlan_network_id),
-  KEY vlannetwork_network_FK (network_id),
-  KEY vlannetwork_configuration_FK (network_configuration_id),
-  KEY vlannetwork_enterprise_FK (enterprise_id),
-  CONSTRAINT vlannetwork_enterprise_FK FOREIGN KEY (enterprise_id) REFERENCES enterprise (idEnterprise),
-  CONSTRAINT vlannetwork_network_FK FOREIGN KEY (network_id) REFERENCES network (network_id) ON DELETE CASCADE,
-  CONSTRAINT vlannetwork_configuration_FK FOREIGN KEY (network_configuration_id) REFERENCES network_configuration (network_configuration_id) ON DELETE RESTRICT
+CREATE TABLE  `kinton_liquibase`.`vlan_network` (
+  `vlan_network_id` int(11) unsigned NOT NULL auto_increment,
+  `network_id` int(11) unsigned NOT NULL,
+  `network_configuration_id` int(11) unsigned NOT NULL, 
+  `network_name` varchar(40) NOT NULL,
+  `vlan_tag` int(4) unsigned DEFAULT NULL,
+  `networktype` varchar(15) NOT NULL DEFAULT 'INTERNAL',
+  `version_c` integer NOT NULL DEFAULT 1,
+  `enterprise_id` int(10) unsigned DEFAULT NULL,
+  PRIMARY KEY  (`vlan_network_id`),
+  KEY `vlannetwork_network_FK` (`network_id`),
+  KEY `vlannetwork_configuration_FK` (`network_configuration_id`),
+  KEY `vlannetwork_enterprise_FK` (`enterprise_id`),
+  CONSTRAINT `vlannetwork_enterprise_FK` FOREIGN KEY (`enterprise_id`) REFERENCES `enterprise` (`idEnterprise`),
+  CONSTRAINT `vlannetwork_network_FK` FOREIGN KEY (`network_id`) REFERENCES `network` (`network_id`) ON DELETE CASCADE,
+  CONSTRAINT `vlannetwork_configuration_FK` FOREIGN KEY (`network_configuration_id`) REFERENCES `network_configuration` (`network_configuration_id`) ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-CREATE TABLE kinton_liquibase.vlan_network_assignment (
-  id int(10) unsigned NOT NULL auto_increment,
-  vlan_network_id INTEGER UNSIGNED NOT NULL,
-  idRack INT(15) UNSIGNED NOT NULL,
-  idVirtualDataCenter int(10) UNSIGNED default NULL,
-  version_c integer NOT NULL DEFAULT 1,
-  PRIMARY KEY  (id),
-  INDEX vlan_network_assignment_networkid_FK(vlan_network_id),
-  INDEX vlan_network_assignment_idRack_FK(idRack),
-  CONSTRAINT vlan_network_assignment_networkid_FK FOREIGN KEY vlan_network_assignment_networkid_FK (vlan_network_id)
-    REFERENCES vlan_network (vlan_network_id)    ON DELETE CASCADE,
-  CONSTRAINT vlan_network_assignment_idVirtualDataCenter_FK FOREIGN KEY (idVirtualDataCenter) REFERENCES virtualdatacenter (idVirtualDataCenter) ON DELETE SET NULL,
-  CONSTRAINT vlan_network_assignment_idRack_FK FOREIGN KEY vlan_network_assignment_idRack_FK (idRack)
-    REFERENCES rack (idRack)
+CREATE TABLE `kinton_liquibase`.`vlan_network_assignment` (
+  `id` int(10) unsigned NOT NULL auto_increment,
+  `vlan_network_id` INTEGER UNSIGNED NOT NULL,
+  `idRack` INT(15) UNSIGNED NOT NULL,
+  `idVirtualDataCenter` int(10) UNSIGNED default NULL,
+  `version_c` integer NOT NULL DEFAULT 1,
+  PRIMARY KEY  (`id`),
+  INDEX `vlan_network_assignment_networkid_FK`(`vlan_network_id`),
+  INDEX `vlan_network_assignment_idRack_FK`(`idRack`),
+  CONSTRAINT `vlan_network_assignment_networkid_FK` FOREIGN KEY `vlan_network_assignment_networkid_FK` (`vlan_network_id`)
+    REFERENCES `vlan_network` (`vlan_network_id`)    ON DELETE CASCADE,
+  CONSTRAINT `vlan_network_assignment_idVirtualDataCenter_FK` FOREIGN KEY (`idVirtualDataCenter`) REFERENCES `virtualdatacenter` (`idVirtualDataCenter`) ON DELETE SET NULL,
+  CONSTRAINT `vlan_network_assignment_idRack_FK` FOREIGN KEY `vlan_network_assignment_idRack_FK` (`idRack`)
+    REFERENCES `rack` (`idRack`)
     ON DELETE CASCADE
 )
 ENGINE = InnoDB DEFAULT CHARSET=utf8;
 
-/*!40000 ALTER TABLE network DISABLE KEYS */;
-LOCK TABLES network WRITE;
-INSERT INTO kinton_liquibase.network VALUES  (1, "6cd20366-72e5-11df-8f9d-002564aeca80", 1);
+/*!40000 ALTER TABLE `network` DISABLE KEYS */;
+LOCK TABLES `network` WRITE;
+INSERT INTO `kinton_liquibase`.`network` VALUES  (1, "6cd20366-72e5-11df-8f9d-002564aeca80", 1);
 UNLOCK TABLES;
-/*!40000 ALTER TABLE network ENABLE KEYS */;
+/*!40000 ALTER TABLE `network` ENABLE KEYS */;
 
 -- NETWORK TABLES END!!!
 
 --
--- Definition of table kinton_liquibase.datacenter
+-- Definition of table `kinton_liquibase`.`datacenter`
 --
 
-DROP TABLE IF EXISTS kinton_liquibase.datacenter;
-CREATE TABLE  kinton_liquibase.datacenter (
-  idDataCenter int(10) unsigned NOT NULL auto_increment,
-  uuid varchar(40) default NULL,
-  name varchar(20) NOT NULL,
-  situation varchar(100) default NULL,
-  network_id int(11) unsigned default NULL,
-  version_c int(11) default 0,
-  PRIMARY KEY  (idDataCenter),
-  KEY datacenternetwork_FK1 (network_id),
-  CONSTRAINT datacenternetwork_FK1 FOREIGN KEY (network_id) REFERENCES network (network_id)
+DROP TABLE IF EXISTS `kinton_liquibase`.`datacenter`;
+CREATE TABLE  `kinton_liquibase`.`datacenter` (
+  `idDataCenter` int(10) unsigned NOT NULL auto_increment,
+  `uuid` varchar(40) default NULL,
+  `name` varchar(20) NOT NULL,
+  `situation` varchar(100) default NULL,
+  `network_id` int(11) unsigned default NULL,
+  `version_c` int(11) default 0,
+  PRIMARY KEY  (`idDataCenter`),
+  KEY `datacenternetwork_FK1` (`network_id`),
+  CONSTRAINT `datacenternetwork_FK1` FOREIGN KEY (`network_id`) REFERENCES `network` (`network_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
 
 --
--- Dumping data for table kinton_liquibase.datacenter
+-- Dumping data for table `kinton_liquibase`.`datacenter`
 --
 
-/*!40000 ALTER TABLE datacenter DISABLE KEYS */;
-LOCK TABLES datacenter WRITE;
+/*!40000 ALTER TABLE `datacenter` DISABLE KEYS */;
+LOCK TABLES `datacenter` WRITE;
 UNLOCK TABLES;
-/*!40000 ALTER TABLE datacenter ENABLE KEYS */;
+/*!40000 ALTER TABLE `datacenter` ENABLE KEYS */;
 
 --
--- Definition of table kinton_liquibase.enterprise
+-- Definition of table `kinton_liquibase`.`enterprise`
 --
 
-DROP TABLE IF EXISTS kinton_liquibase.enterprise;
-CREATE TABLE  kinton_liquibase.enterprise (
-  idEnterprise int(10) unsigned NOT NULL auto_increment,
-  name varchar(40) NOT NULL,
-  ramSoft bigint(20) NOT NULL default 0,
-  cpuSoft bigint(20) NOT NULL default 0,
-  hdSoft bigint(20)  NOT NULL default 0,
-  storageSoft bigint(20)  NOT NULL default 0,
-  repositorySoft bigint(20)  NOT NULL default 0,
-  vlanSoft bigint(20)  NOT NULL default 0,
-  publicIPSoft bigint(20)  NOT NULL default 0,
-  ramHard bigint(20) NOT NULL default 0,
-  cpuHard bigint(20) NOT NULL default 0,
-  hdHard bigint(20)  NOT NULL default 0,
-  storageHard bigint(20)  NOT NULL default 0,
-  repositoryHard bigint(20)  NOT NULL default 0,
-  vlanHard bigint(20)  NOT NULL default 0,
-  publicIPHard bigint(20)  NOT NULL default 0,
-  chef_url varchar(255) default NULL,
-  chef_client varchar(50) default NULL,
-  chef_validator varchar(50) default NULL,
-  chef_client_certificate text default NULL,
-  chef_validator_certificate text default NULL,
-  isReservationRestricted tinyint(1) default '0',
-  version_c integer NOT NULL DEFAULT 1,
-  PRIMARY KEY  (idEnterprise)
+DROP TABLE IF EXISTS `kinton_liquibase`.`enterprise`;
+CREATE TABLE  `kinton_liquibase`.`enterprise` (
+  `idEnterprise` int(10) unsigned NOT NULL auto_increment,
+  `name` varchar(40) NOT NULL,
+  `ramSoft` bigint(20) NOT NULL default 0,
+  `cpuSoft` bigint(20) NOT NULL default 0,
+  `hdSoft` bigint(20)  NOT NULL default 0,
+  `storageSoft` bigint(20)  NOT NULL default 0,
+  `repositorySoft` bigint(20)  NOT NULL default 0,
+  `vlanSoft` bigint(20)  NOT NULL default 0,
+  `publicIPSoft` bigint(20)  NOT NULL default 0,
+  `ramHard` bigint(20) NOT NULL default 0,
+  `cpuHard` bigint(20) NOT NULL default 0,
+  `hdHard` bigint(20)  NOT NULL default 0,
+  `storageHard` bigint(20)  NOT NULL default 0,
+  `repositoryHard` bigint(20)  NOT NULL default 0,
+  `vlanHard` bigint(20)  NOT NULL default 0,
+  `publicIPHard` bigint(20)  NOT NULL default 0,
+  `chef_url` varchar(255) default NULL,
+  `chef_client` varchar(50) default NULL,
+  `chef_validator` varchar(50) default NULL,
+  `chef_client_certificate` text default NULL,
+  `chef_validator_certificate` text default NULL,
+  `isReservationRestricted` tinyint(1) default '0',
+  `version_c` integer NOT NULL DEFAULT 1,
+  PRIMARY KEY  (`idEnterprise`)
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
 
 --
--- Dumping data for table kinton_liquibase.enterprise
+-- Dumping data for table `kinton_liquibase`.`enterprise`
 --
 
-/*!40000 ALTER TABLE enterprise DISABLE KEYS */;
-LOCK TABLES enterprise WRITE;
-INSERT INTO kinton_liquibase.enterprise VALUES  (1,'Abiquo',0,0,0,0,0,0,0,0,0,0,0,0,0,0,NULL,NULL,NULL,NULL,NULL,0,1);
+/*!40000 ALTER TABLE `enterprise` DISABLE KEYS */;
+LOCK TABLES `enterprise` WRITE;
+INSERT INTO `kinton_liquibase`.`enterprise` VALUES  (1,'Abiquo',0,0,0,0,0,0,0,0,0,0,0,0,0,0,NULL,NULL,NULL,NULL,NULL,0,1);
 UNLOCK TABLES;
-/*!40000 ALTER TABLE enterprise ENABLE KEYS */;
+/*!40000 ALTER TABLE `enterprise` ENABLE KEYS */;
 
 --
--- Definition of table kinton_liquibase.enterprise_properties
+-- Definition of table `kinton_liquibase`.`enterprise_properties`
 --
 
-DROP TABLE IF EXISTS kinton_liquibase.enterprise_properties;
-CREATE TABLE  kinton_liquibase.enterprise_properties (
-  idProperties int(11) unsigned NOT NULL auto_increment,
-  enterprise int(11) unsigned DEFAULT NULL,
-  PRIMARY KEY  (idProperties),
-  CONSTRAINT FK_enterprise FOREIGN KEY (enterprise) REFERENCES enterprise (idEnterprise)
+DROP TABLE IF EXISTS `kinton_liquibase`.`enterprise_properties`;
+CREATE TABLE  `kinton_liquibase`.`enterprise_properties` (
+  `idProperties` int(11) unsigned NOT NULL auto_increment,
+  `enterprise` int(11) unsigned DEFAULT NULL,
+  PRIMARY KEY  (`idProperties`),
+  CONSTRAINT `FK_enterprise` FOREIGN KEY (`enterprise`) REFERENCES `enterprise` (`idEnterprise`)
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
 
 --
--- Dumping data for table kinton_liquibase.enterprise_properties
+-- Dumping data for table `kinton_liquibase`.`enterprise_properties`
 --
 
-/*!40000 ALTER TABLE enterprise_properties DISABLE KEYS */;
-LOCK TABLES enterprise_properties WRITE;
-INSERT INTO kinton_liquibase.enterprise_properties VALUES  (1,1);
+/*!40000 ALTER TABLE `enterprise_properties` DISABLE KEYS */;
+LOCK TABLES `enterprise_properties` WRITE;
+INSERT INTO `kinton_liquibase`.`enterprise_properties` VALUES  (1,1);
 UNLOCK TABLES;
-/*!40000 ALTER TABLE enterprise_properties ENABLE KEYS */;
+/*!40000 ALTER TABLE `enterprise_properties` ENABLE KEYS */;
 
 --
--- Definition of table kinton_liquibase.enterprise_properties_map
+-- Definition of table `kinton_liquibase`.`enterprise_properties_map`
 --
 
-DROP TABLE IF EXISTS kinton_liquibase.enterprise_properties_map;
-CREATE TABLE  kinton_liquibase.enterprise_properties_map (
- enterprise_properties int(11) unsigned NOT NULL,
-  map_key varchar(30) NOT NULL,
-  value varchar(50) default NULL, 
-  CONSTRAINT FK2_enterprise_properties FOREIGN KEY (enterprise_properties) REFERENCES enterprise_properties (idProperties) ON DELETE CASCADE
+DROP TABLE IF EXISTS `kinton_liquibase`.`enterprise_properties_map`;
+CREATE TABLE  `kinton_liquibase`.`enterprise_properties_map` (
+ `enterprise_properties` int(11) unsigned NOT NULL,
+  `map_key` varchar(30) NOT NULL,
+  `value` varchar(50) default NULL, 
+  CONSTRAINT `FK2_enterprise_properties` FOREIGN KEY (`enterprise_properties`) REFERENCES `enterprise_properties` (`idProperties`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
--- Dumping data for table kinton_liquibase.enterprise_properties_map
+-- Dumping data for table `kinton_liquibase`.`enterprise_properties_map`
 --
 
-/*!40000 ALTER TABLE enterprise_properties_map DISABLE KEYS */;
-LOCK TABLES enterprise_properties_map WRITE;
-INSERT INTO kinton_liquibase.enterprise_properties_map VALUES  (1,'Support e-mail','support@abiquo.com');
+/*!40000 ALTER TABLE `enterprise_properties_map` DISABLE KEYS */;
+LOCK TABLES `enterprise_properties_map` WRITE;
+INSERT INTO `kinton_liquibase`.`enterprise_properties_map` VALUES  (1,'Support e-mail','support@abiquo.com');
 UNLOCK TABLES;
-/*!40000 ALTER TABLE enterprise_properties_map ENABLE KEYS */;
+/*!40000 ALTER TABLE `enterprise_properties_map` ENABLE KEYS */;
 
 --
--- Definition of table kinton_liquibase.hypervisor
+-- Definition of table `kinton_liquibase`.`hypervisor`
 --
 
-DROP TABLE IF EXISTS kinton_liquibase.hypervisor;
-CREATE TABLE  kinton_liquibase.hypervisor (
-  id int(20) unsigned NOT NULL auto_increment,
-  idPhysicalMachine int(20) unsigned NOT NULL,
-  ip varchar(39) NOT NULL,
-  ipService varchar(39) NOT NULL,
-  port int(5) NOT NULL,
-  user varchar(255) NOT NULL DEFAULT 'user',
-  password varchar(255) NOT NULL DEFAULT 'password',
-  version_c int(11) default 0,
-  type varchar(255) NOT NULL,
-  PRIMARY KEY  (id),
-  KEY Hypervisor_FK1 (idPhysicalMachine),
-  CONSTRAINT Hypervisor_FK1 FOREIGN KEY (idPhysicalMachine) REFERENCES physicalmachine (idPhysicalMachine) ON DELETE CASCADE
+DROP TABLE IF EXISTS `kinton_liquibase`.`hypervisor`;
+CREATE TABLE  `kinton_liquibase`.`hypervisor` (
+  `id` int(20) unsigned NOT NULL auto_increment,
+  `idPhysicalMachine` int(20) unsigned NOT NULL,
+  `ip` varchar(39) NOT NULL,
+  `ipService` varchar(39) NOT NULL,
+  `port` int(5) NOT NULL,
+  `user` varchar(255) NOT NULL DEFAULT 'user',
+  `password` varchar(255) NOT NULL DEFAULT 'password',
+  `version_c` int(11) default 0,
+  `type` varchar(255) NOT NULL,
+  PRIMARY KEY  (`id`),
+  KEY `Hypervisor_FK1` (`idPhysicalMachine`),
+  CONSTRAINT `Hypervisor_FK1` FOREIGN KEY (`idPhysicalMachine`) REFERENCES `physicalmachine` (`idPhysicalMachine`) ON DELETE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
 
 
 --
--- Definition of table kinton_liquibase.log
+-- Definition of table `kinton_liquibase`.`log`
 --
 
-DROP TABLE IF EXISTS kinton_liquibase.log;
-CREATE TABLE  kinton_liquibase.log (
-  idLog int(10) unsigned NOT NULL auto_increment,
-  idVirtualApp int(10) unsigned NOT NULL,
-  description varchar(250) NOT NULL,
-  logDate timestamp NOT NULL,
-  deleted tinyint(1) unsigned DEFAULT '0',
-  PRIMARY KEY  (idLog),
-  KEY log_FK1 (idVirtualApp),
-  CONSTRAINT log_FK1 FOREIGN KEY (idVirtualApp) REFERENCES virtualapp (idVirtualApp) ON DELETE CASCADE
+DROP TABLE IF EXISTS `kinton_liquibase`.`log`;
+CREATE TABLE  `kinton_liquibase`.`log` (
+  `idLog` int(10) unsigned NOT NULL auto_increment,
+  `idVirtualApp` int(10) unsigned NOT NULL,
+  `description` varchar(250) NOT NULL,
+  `logDate` timestamp NOT NULL,
+  `deleted` tinyint(1) unsigned DEFAULT '0',
+  PRIMARY KEY  (`idLog`),
+  KEY `log_FK1` (`idVirtualApp`),
+  CONSTRAINT `log_FK1` FOREIGN KEY (`idVirtualApp`) REFERENCES `virtualapp` (`idVirtualApp`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
 --
--- Dumping data for table kinton_liquibase.log
+-- Dumping data for table `kinton_liquibase`.`log`
 --
 
-/*!40000 ALTER TABLE log DISABLE KEYS */;
-LOCK TABLES log WRITE;
+/*!40000 ALTER TABLE `log` DISABLE KEYS */;
+LOCK TABLES `log` WRITE;
 UNLOCK TABLES;
-/*!40000 ALTER TABLE log ENABLE KEYS */;
+/*!40000 ALTER TABLE `log` ENABLE KEYS */;
 
 --
--- Definition of table kinton_liquibase.node
+-- Definition of table `kinton_liquibase`.`node`
 --
 
-DROP TABLE IF EXISTS kinton_liquibase.node;
-CREATE TABLE  kinton_liquibase.node (
-  idVirtualApp int(10) unsigned NOT NULL,
-  idNode int(10) unsigned NOT NULL auto_increment,
-  modified int(2) NOT NULL,
-  posX int(3) NOT NULL DEFAULT 0,
-  posY int(3) NOT NULL DEFAULT 0, 
-  type varchar(50) NOT NULL,
-  name varchar(255) NOT NULL,
-  ip varchar(15) default NULL,
-  mac varchar(17) default NULL,
-  version_c int(11) default 0,
-  PRIMARY KEY  (idNode),
-  KEY Nodes_FK4 (idVirtualApp),
-  CONSTRAINT node_FK2 FOREIGN KEY (idVirtualApp) REFERENCES virtualapp (idVirtualApp) ON DELETE CASCADE
+DROP TABLE IF EXISTS `kinton_liquibase`.`node`;
+CREATE TABLE  `kinton_liquibase`.`node` (
+  `idVirtualApp` int(10) unsigned NOT NULL,
+  `idNode` int(10) unsigned NOT NULL auto_increment,
+  `modified` int(2) NOT NULL,
+  `posX` int(3) NOT NULL DEFAULT 0,
+  `posY` int(3) NOT NULL DEFAULT 0, 
+  `type` varchar(50) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `ip` varchar(15) default NULL,
+  `mac` varchar(17) default NULL,
+  `version_c` int(11) default 0,
+  PRIMARY KEY  (`idNode`),
+  KEY `Nodes_FK4` (`idVirtualApp`),
+  CONSTRAINT `node_FK2` FOREIGN KEY (`idVirtualApp`) REFERENCES `virtualapp` (`idVirtualApp`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
--- Dumping data for table kinton_liquibase.node
+-- Dumping data for table `kinton_liquibase`.`node`
 --
 
-/*!40000 ALTER TABLE node DISABLE KEYS */;
-LOCK TABLES node WRITE;
+/*!40000 ALTER TABLE `node` DISABLE KEYS */;
+LOCK TABLES `node` WRITE;
 UNLOCK TABLES;
-/*!40000 ALTER TABLE node ENABLE KEYS */;
+/*!40000 ALTER TABLE `node` ENABLE KEYS */;
 
 
 --
--- Definition of table kinton_liquibase.nodenetwork
+-- Definition of table `kinton_liquibase`.`nodenetwork`
 --
 
-DROP TABLE IF EXISTS kinton_liquibase.nodenetwork;
-CREATE TABLE  kinton_liquibase.nodenetwork (
-  idNode int(10) unsigned NOT NULL,
-  PRIMARY KEY  (idNode),
-  CONSTRAINT nodeNetwork_FK1 FOREIGN KEY (idNode) REFERENCES node (idNode) ON DELETE CASCADE
+DROP TABLE IF EXISTS `kinton_liquibase`.`nodenetwork`;
+CREATE TABLE  `kinton_liquibase`.`nodenetwork` (
+  `idNode` int(10) unsigned NOT NULL,
+  PRIMARY KEY  (`idNode`),
+  CONSTRAINT `nodeNetwork_FK1` FOREIGN KEY (`idNode`) REFERENCES `node` (`idNode`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
--- Dumping data for table kinton_liquibase.nodenetwork
+-- Dumping data for table `kinton_liquibase`.`nodenetwork`
 --
 
-/*!40000 ALTER TABLE nodenetwork DISABLE KEYS */;
-LOCK TABLES nodenetwork WRITE;
+/*!40000 ALTER TABLE `nodenetwork` DISABLE KEYS */;
+LOCK TABLES `nodenetwork` WRITE;
 UNLOCK TABLES;
-/*!40000 ALTER TABLE nodenetwork ENABLE KEYS */;
+/*!40000 ALTER TABLE `nodenetwork` ENABLE KEYS */;
 
 
 --
--- Definition of table kinton_liquibase.noderelationtype
+-- Definition of table `kinton_liquibase`.`noderelationtype`
 --
 
-DROP TABLE IF EXISTS kinton_liquibase.noderelationtype;
-CREATE TABLE  kinton_liquibase.noderelationtype (
-  idNodeRelationType int(2) unsigned NOT NULL auto_increment,
-  name varchar(20) default NULL,
-  PRIMARY KEY  (idNodeRelationType)
+DROP TABLE IF EXISTS `kinton_liquibase`.`noderelationtype`;
+CREATE TABLE  `kinton_liquibase`.`noderelationtype` (
+  `idNodeRelationType` int(2) unsigned NOT NULL auto_increment,
+  `name` varchar(20) default NULL,
+  PRIMARY KEY  (`idNodeRelationType`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
--- Dumping data for table kinton_liquibase.noderelationtype
+-- Dumping data for table `kinton_liquibase`.`noderelationtype`
 --
 
-/*!40000 ALTER TABLE noderelationtype DISABLE KEYS */;
-LOCK TABLES noderelationtype WRITE;
+/*!40000 ALTER TABLE `noderelationtype` DISABLE KEYS */;
+LOCK TABLES `noderelationtype` WRITE;
 UNLOCK TABLES;
-/*!40000 ALTER TABLE noderelationtype ENABLE KEYS */;
+/*!40000 ALTER TABLE `noderelationtype` ENABLE KEYS */;
 
 
 --
--- Definition of table kinton_liquibase.nodestorage
+-- Definition of table `kinton_liquibase`.`nodestorage`
 --
 
-DROP TABLE IF EXISTS kinton_liquibase.nodestorage;
-CREATE TABLE  kinton_liquibase.nodestorage (
-  idNode int(10) unsigned NOT NULL default '0',
-  PRIMARY KEY  (idNode),
-  CONSTRAINT nodeStorage_FK1 FOREIGN KEY (idNode) REFERENCES node (idNode) ON DELETE CASCADE
+DROP TABLE IF EXISTS `kinton_liquibase`.`nodestorage`;
+CREATE TABLE  `kinton_liquibase`.`nodestorage` (
+  `idNode` int(10) unsigned NOT NULL default '0',
+  PRIMARY KEY  (`idNode`),
+  CONSTRAINT `nodeStorage_FK1` FOREIGN KEY (`idNode`) REFERENCES `node` (`idNode`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
--- Dumping data for table kinton_liquibase.nodestorage
+-- Dumping data for table `kinton_liquibase`.`nodestorage`
 --
 
-/*!40000 ALTER TABLE nodestorage DISABLE KEYS */;
-LOCK TABLES nodestorage WRITE;
+/*!40000 ALTER TABLE `nodestorage` DISABLE KEYS */;
+LOCK TABLES `nodestorage` WRITE;
 UNLOCK TABLES;
-/*!40000 ALTER TABLE nodestorage ENABLE KEYS */;
+/*!40000 ALTER TABLE `nodestorage` ENABLE KEYS */;
 
 --
--- Definition of table kinton_liquibase.nodevirtualimage
+-- Definition of table `kinton_liquibase`.`nodevirtualimage`
 --
 
-DROP TABLE IF EXISTS kinton_liquibase.nodevirtualimage;
-CREATE TABLE  kinton_liquibase.nodevirtualimage (
-  idNode int(10) unsigned NOT NULL,
-  idVM int(10) unsigned default NULL,
-  idImage int(10) unsigned NOT NULL,
-  version_c int(11) default 0,
-  KEY nodevirtualImage_FK1 (idImage),
-  KEY nodevirtualImage_FK2 (idVM),
-  KEY nodevirtualimage_FK3 (idNode),
-  CONSTRAINT nodevirtualImage_FK1 FOREIGN KEY (idImage) REFERENCES virtualimage (idImage),
-  CONSTRAINT nodevirtualImage_FK2 FOREIGN KEY (idVM) REFERENCES virtualmachine (idVM) ON DELETE SET NULL,
-  CONSTRAINT nodevirtualimage_FK3 FOREIGN KEY (idNode) REFERENCES node (idNode) ON DELETE CASCADE
+DROP TABLE IF EXISTS `kinton_liquibase`.`nodevirtualimage`;
+CREATE TABLE  `kinton_liquibase`.`nodevirtualimage` (
+  `idNode` int(10) unsigned NOT NULL,
+  `idVM` int(10) unsigned default NULL,
+  `idImage` int(10) unsigned NOT NULL,
+  `version_c` int(11) default 0,
+  KEY `nodevirtualImage_FK1` (`idImage`),
+  KEY `nodevirtualImage_FK2` (`idVM`),
+  KEY `nodevirtualimage_FK3` (`idNode`),
+  CONSTRAINT `nodevirtualImage_FK1` FOREIGN KEY (`idImage`) REFERENCES `virtualimage` (`idImage`),
+  CONSTRAINT `nodevirtualImage_FK2` FOREIGN KEY (`idVM`) REFERENCES `virtualmachine` (`idVM`) ON DELETE SET NULL,
+  CONSTRAINT `nodevirtualimage_FK3` FOREIGN KEY (`idNode`) REFERENCES `node` (`idNode`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
--- Dumping data for table kinton_liquibase.nodevirtualimage
+-- Dumping data for table `kinton_liquibase`.`nodevirtualimage`
 --
 
-/*!40000 ALTER TABLE nodevirtualimage DISABLE KEYS */;
-LOCK TABLES nodevirtualimage WRITE;
+/*!40000 ALTER TABLE `nodevirtualimage` DISABLE KEYS */;
+LOCK TABLES `nodevirtualimage` WRITE;
 UNLOCK TABLES;
-/*!40000 ALTER TABLE nodevirtualimage ENABLE KEYS */;
+/*!40000 ALTER TABLE `nodevirtualimage` ENABLE KEYS */;
 
 
 --
--- Definition of table kinton_liquibase.physicalmachine
+-- Definition of table `kinton_liquibase`.`physicalmachine`
 --
 
-DROP TABLE IF EXISTS kinton_liquibase.physicalmachine;
-CREATE TABLE  kinton_liquibase.physicalmachine (
-  idPhysicalMachine int(20) unsigned NOT NULL auto_increment,
-  idRack int(15) unsigned default NULL,
-  idDataCenter int(10) unsigned NOT NULL,
-  name varchar(256) NOT NULL,
-  description varchar(100) default NULL,
-  ram int(7) NOT NULL,
-  cpu int(11) NOT NULL,
-  ramUsed int(7) NOT NULL,
-  cpuUsed int(11) NOT NULL,
-  idState INT UNSIGNED NOT NULL DEFAULT 0 COMMENT '0 - STOPPED
+DROP TABLE IF EXISTS `kinton_liquibase`.`physicalmachine`;
+CREATE TABLE  `kinton_liquibase`.`physicalmachine` (
+  `idPhysicalMachine` int(20) unsigned NOT NULL auto_increment,
+  `idRack` int(15) unsigned default NULL,
+  `idDataCenter` int(10) unsigned NOT NULL,
+  `name` varchar(256) NOT NULL,
+  `description` varchar(100) default NULL,
+  `ram` int(7) NOT NULL,
+  `cpu` int(11) NOT NULL,
+  `ramUsed` int(7) NOT NULL,
+  `cpuUsed` int(11) NOT NULL,
+  `idState` INT UNSIGNED NOT NULL DEFAULT 0 COMMENT '0 - STOPPED
 1 - NOT PROVISIONED
 2 - NOT MANAGED
 3 - MANAGED
@@ -527,306 +528,306 @@ CREATE TABLE  kinton_liquibase.physicalmachine (
 5 - UNLICENSED
 6 - HA_IN_PROGRESS
 7 - DISABLED_FOR_HA',
-  vswitchName VARCHAR(200)  NOT NULL,
-  idEnterprise int(10) unsigned default NULL,
-  initiatorIQN VARCHAR(256) DEFAULT NULL,
-  version_c int(11) default 0,
-  ipmiIP varchar(39) default NULL,
-  ipmiPort int(5) unsigned default NULL,
-  ipmiUser varchar(255) default NULL,
-  ipmiPassword varchar(255) default NULL,
-  PRIMARY KEY  (idPhysicalMachine),
-  KEY PhysicalMachine_FK1 (idRack),
-  KEY PhysicalMachine_FK5 (idDataCenter),
-  KEY PhysicalMachine_FK6 (idEnterprise),
-  CONSTRAINT PhysicalMachine_FK1 FOREIGN KEY (idRack) REFERENCES rack (idRack) ON DELETE CASCADE,  
-  CONSTRAINT PhysicalMachine_FK5 FOREIGN KEY (idDataCenter) REFERENCES datacenter (idDataCenter) ON DELETE CASCADE,
-  CONSTRAINT PhysicalMachine_FK6 FOREIGN KEY (idEnterprise) REFERENCES enterprise (idEnterprise) ON DELETE SET NULL
+  `vswitchName` VARCHAR(200)  NOT NULL,
+  `idEnterprise` int(10) unsigned default NULL,
+  `initiatorIQN` VARCHAR(256) DEFAULT NULL,
+  `version_c` int(11) default 0,
+  `ipmiIP` varchar(39) default NULL,
+  `ipmiPort` int(5) unsigned default NULL,
+  `ipmiUser` varchar(255) default NULL,
+  `ipmiPassword` varchar(255) default NULL,
+  PRIMARY KEY  (`idPhysicalMachine`),
+  KEY `PhysicalMachine_FK1` (`idRack`),
+  KEY `PhysicalMachine_FK5` (`idDataCenter`),
+  KEY `PhysicalMachine_FK6` (`idEnterprise`),
+  CONSTRAINT `PhysicalMachine_FK1` FOREIGN KEY (`idRack`) REFERENCES `rack` (`idRack`) ON DELETE CASCADE,  
+  CONSTRAINT `PhysicalMachine_FK5` FOREIGN KEY (`idDataCenter`) REFERENCES `datacenter` (`idDataCenter`) ON DELETE CASCADE,
+  CONSTRAINT `PhysicalMachine_FK6` FOREIGN KEY (`idEnterprise`) REFERENCES `enterprise` (`idEnterprise`) ON DELETE SET NULL
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
 
 --
--- Dumping data for table kinton_liquibase.physicalmachine
+-- Dumping data for table `kinton_liquibase`.`physicalmachine`
 --
-LOCK TABLES physicalmachine WRITE;
+LOCK TABLES `physicalmachine` WRITE;
 UNLOCK TABLES;
 
-/*!40000 ALTER TABLE physicalmachine DISABLE KEYS */;
--- XXX LOCK TABLES physicalmachine WRITE;
--- XXX INSERT INTO kinton_liquibase.physicalmachine VALUES  (1,1,1,'myMachine','My local machine',1024,2,42949672960,2,1,'2009-02-03 00:00:00',1,'2009-03-30 21:00:51',0,0,0);
+/*!40000 ALTER TABLE `physicalmachine` DISABLE KEYS */;
+-- XXX LOCK TABLES `physicalmachine` WRITE;
+-- XXX INSERT INTO `kinton_liquibase`.`physicalmachine` VALUES  (1,1,1,'myMachine','My local machine',1024,2,42949672960,2,1,'2009-02-03 00:00:00',1,'2009-03-30 21:00:51',0,0,0);
 -- XXX UNLOCK TABLES;
-/*!40000 ALTER TABLE physicalmachine ENABLE KEYS */;
+/*!40000 ALTER TABLE `physicalmachine` ENABLE KEYS */;
 
 
 --
--- Definition of table kinton_liquibase.rack
+-- Definition of table `kinton_liquibase`.`rack`
 --
 
-DROP TABLE IF EXISTS kinton_liquibase.rack;
-CREATE TABLE  kinton_liquibase.rack (
-  idRack int(15) unsigned NOT NULL auto_increment,
-  idDataCenter int(10) unsigned NOT NULL,
-  name varchar(20) NOT NULL,
-  shortDescription varchar(30) default NULL,
-  largeDescription varchar(100) default NULL,
-  vlan_id_min int(15) unsigned default 2,
-  vlan_id_max int(15) unsigned default 4094,
-  vlans_id_avoided varchar(255) default '',
-  vlan_per_vdc_expected int(15) unsigned default 8,
-  nrsq int(15) unsigned default 10,
-  haEnabled boolean default false COMMENT 'TRUE - This rack is enabled for the HA functionality',
-  version_c int(11) default 0,
-  PRIMARY KEY  (idRack),
-  KEY Rack_FK1 (idDataCenter),
-  CONSTRAINT Rack_FK1 FOREIGN KEY (idDataCenter) REFERENCES datacenter (idDataCenter) ON DELETE CASCADE
+DROP TABLE IF EXISTS `kinton_liquibase`.`rack`;
+CREATE TABLE  `kinton_liquibase`.`rack` (
+  `idRack` int(15) unsigned NOT NULL auto_increment,
+  `idDataCenter` int(10) unsigned NOT NULL,
+  `name` varchar(20) NOT NULL,
+  `shortDescription` varchar(30) default NULL,
+  `largeDescription` varchar(100) default NULL,
+  `vlan_id_min` int(15) unsigned default 2,
+  `vlan_id_max` int(15) unsigned default 4094,
+  `vlans_id_avoided` varchar(255) default '',
+  `vlan_per_vdc_expected` int(15) unsigned default 8,
+  `nrsq` int(15) unsigned default 10,
+  `haEnabled` boolean default false COMMENT 'TRUE - This rack is enabled for the HA functionality',
+  `version_c` int(11) default 0,
+  PRIMARY KEY  (`idRack`),
+  KEY `Rack_FK1` (`idDataCenter`),
+  CONSTRAINT `Rack_FK1` FOREIGN KEY (`idDataCenter`) REFERENCES `datacenter` (`idDataCenter`) ON DELETE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
 
-/*!40000 ALTER TABLE rack DISABLE KEYS */;
-LOCK TABLES rack WRITE;
+/*!40000 ALTER TABLE `rack` DISABLE KEYS */;
+LOCK TABLES `rack` WRITE;
 UNLOCK TABLES;
-/*!40000 ALTER TABLE rack ENABLE KEYS */;
+/*!40000 ALTER TABLE `rack` ENABLE KEYS */;
 
 --
--- Definition of table kinton_liquibase.ucs_rack
+-- Definition of table `kinton_liquibase`.`ucs_rack`
 --
-DROP TABLE IF EXISTS kinton_liquibase.ucs_rack;
-CREATE TABLE  kinton_liquibase.ucs_rack (
-  idRack int(15) unsigned NOT NULL,
-  ip varchar(20) NOT NULL,
-  port int(5) NOT NULL,
-  user_rack varchar(255) NOT NULL,
-  password varchar(255) NOT NULL,
-  defaultTemplate varchar(200),
-  maxMachinesOn int(4) DEFAULT 0,
-  KEY id_rack_FK (idRack),
-  CONSTRAINT id_rack_FK FOREIGN KEY (idRack) REFERENCES rack (idRack) ON DELETE CASCADE
+DROP TABLE IF EXISTS `kinton_liquibase`.`ucs_rack`;
+CREATE TABLE  `kinton_liquibase`.`ucs_rack` (
+  `idRack` int(15) unsigned NOT NULL,
+  `ip` varchar(20) NOT NULL,
+  `port` int(5) NOT NULL,
+  `user_rack` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `defaultTemplate` varchar(200),
+  `maxMachinesOn` int(4) DEFAULT 0,
+  KEY `id_rack_FK` (`idRack`),
+  CONSTRAINT `id_rack_FK` FOREIGN KEY (`idRack`) REFERENCES `rack` (`idRack`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
--- Dumping data for table kinton_liquibase.rack
+-- Dumping data for table `kinton_liquibase`.`rack`
 --
 
 --
--- Definition of table kinton_liquibase.datastore
+-- Definition of table `kinton_liquibase`.`datastore`
 --
-CREATE TABLE  kinton_liquibase.datastore (
-  idDatastore int(10) unsigned NOT NULL auto_increment,
-  name varchar(255) NOT NULL,
-  rootPath varchar(42) NOT NULL,
-  directory varchar(255) NOT NULL,
-  enabled boolean NOT NULL default 0,
-  size bigint(40) unsigned NOT NULL,
-  usedSize bigint(40) unsigned NOT NULL,
-  datastoreUuid VARCHAR(255) default NULL COMMENT 'Datastore UUID set by Abiquo to identify shared datastores.',
-  version_c integer NOT NULL DEFAULT 1,
-  PRIMARY KEY  (idDatastore)
+CREATE TABLE  `kinton_liquibase`.`datastore` (
+  `idDatastore` int(10) unsigned NOT NULL auto_increment,
+  `name` varchar(255) NOT NULL,
+  `rootPath` varchar(42) NOT NULL,
+  `directory` varchar(255) NOT NULL,
+  `enabled` boolean NOT NULL default 0,
+  `size` bigint(40) unsigned NOT NULL,
+  `usedSize` bigint(40) unsigned NOT NULL,
+  `datastoreUuid` VARCHAR(255) default NULL COMMENT 'Datastore UUID set by Abiquo to identify shared datastores.',
+  `version_c` integer NOT NULL DEFAULT 1,
+  PRIMARY KEY  (`idDatastore`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-/*!40000 ALTER TABLE datastore DISABLE KEYS */;
-LOCK TABLES datastore WRITE;
+/*!40000 ALTER TABLE `datastore` DISABLE KEYS */;
+LOCK TABLES `datastore` WRITE;
 UNLOCK TABLES;
-/*!40000 ALTER TABLE datastore ENABLE KEYS */;
+/*!40000 ALTER TABLE `datastore` ENABLE KEYS */;
 
 --
--- Definition of table kinton_liquibase.datastore_assignment
+-- Definition of table `kinton_liquibase`.`datastore_assignment`
 --
 
-CREATE TABLE kinton_liquibase.datastore_assignment (
-  idDatastore INT(10) UNSIGNED NOT NULL,
-  idPhysicalMachine int(20) UNSIGNED default NULL,
-  version_c integer NOT NULL DEFAULT 1,
-  PRIMARY KEY  (idDatastore,idPhysicalMachine)
+CREATE TABLE `kinton_liquibase`.`datastore_assignment` (
+  `idDatastore` INT(10) UNSIGNED NOT NULL,
+  `idPhysicalMachine` int(20) UNSIGNED default NULL,
+  `version_c` integer NOT NULL DEFAULT 1,
+  PRIMARY KEY  (`idDatastore`,`idPhysicalMachine`)
 ) ENGINE = InnoDB DEFAULT CHARSET=utf8;
 
-/*!40000 ALTER TABLE datastore_assignment DISABLE KEYS */;
-LOCK TABLES datastore_assignment WRITE;
+/*!40000 ALTER TABLE `datastore_assignment` DISABLE KEYS */;
+LOCK TABLES `datastore_assignment` WRITE;
 UNLOCK TABLES;
-/*!40000 ALTER TABLE datastore ENABLE KEYS */;
+/*!40000 ALTER TABLE `datastore` ENABLE KEYS */;
 
 
 --
--- Definition of table kinton_liquibase.rasd
+-- Definition of table `kinton_liquibase`.`rasd`
 --
 
-DROP TABLE IF EXISTS kinton_liquibase.rasd;
-CREATE TABLE  kinton_liquibase.rasd (
-  address varchar(256) default NULL,
-  addressOnParent varchar(25) default NULL,
-  allocationUnits varchar(15) default NULL,
-  automaticAllocation int(1) default NULL,
-  automaticDeallocation int(1) default NULL,
-  caption varchar(15) default NULL,
-  changeableType int(1) default NULL,
-  configurationName varchar(15) default NULL,
-  connectionResource varchar(256) default NULL,
-  consumerVisibility int(5) default NULL,
-  description varchar(255) default NULL,
-  elementName varchar(255) NOT NULL,
-  generation BIGINT default NULL,
-  hostResource varchar(256) default NULL,
-  instanceID varchar(50) NOT NULL,
-  limitResource BIGINT default NULL,
-  mappingBehaviour int(5) default NULL,
-  otherResourceType varchar(50) default NULL,
-  parent varchar(50) default NULL,
-  poolID varchar(50) default NULL,
-  reservation BIGINT default NULL,
-  resourceSubType varchar(15) default NULL COMMENT 'For IPs: 0 = private, 1 = public, 2 = external',
-  resourceType int(5) NOT NULL,
-  virtualQuantity int(20) default NULL,
-  weight int(5) default NULL,
-  version_c integer NOT NULL DEFAULT 1,
-  PRIMARY KEY  (instanceID)
+DROP TABLE IF EXISTS `kinton_liquibase`.`rasd`;
+CREATE TABLE  `kinton_liquibase`.`rasd` (
+  `address` varchar(256) default NULL,
+  `addressOnParent` varchar(25) default NULL,
+  `allocationUnits` varchar(15) default NULL,
+  `automaticAllocation` int(1) default NULL,
+  `automaticDeallocation` int(1) default NULL,
+  `caption` varchar(15) default NULL,
+  `changeableType` int(1) default NULL,
+  `configurationName` varchar(15) default NULL,
+  `connectionResource` varchar(256) default NULL,
+  `consumerVisibility` int(5) default NULL,
+  `description` varchar(255) default NULL,
+  `elementName` varchar(255) NOT NULL,
+  `generation` BIGINT default NULL,
+  `hostResource` varchar(256) default NULL,
+  `instanceID` varchar(50) NOT NULL,
+  `limitResource` BIGINT default NULL,
+  `mappingBehaviour` int(5) default NULL,
+  `otherResourceType` varchar(50) default NULL,
+  `parent` varchar(50) default NULL,
+  `poolID` varchar(50) default NULL,
+  `reservation` BIGINT default NULL,
+  `resourceSubType` varchar(15) default NULL COMMENT 'For IPs: 0 = private, 1 = public, 2 = external',
+  `resourceType` int(5) NOT NULL,
+  `virtualQuantity` int(20) default NULL,
+  `weight` int(5) default NULL,
+  `version_c` integer NOT NULL DEFAULT 1,
+  PRIMARY KEY  (`instanceID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
--- Dumping data for table kinton_liquibase.rasd
+-- Dumping data for table `kinton_liquibase`.`rasd`
 --
 
-/*!40000 ALTER TABLE rasd DISABLE KEYS */;
-LOCK TABLES rasd WRITE;
+/*!40000 ALTER TABLE `rasd` DISABLE KEYS */;
+LOCK TABLES `rasd` WRITE;
 UNLOCK TABLES;
-/*!40000 ALTER TABLE rasd ENABLE KEYS */;
+/*!40000 ALTER TABLE `rasd` ENABLE KEYS */;
 
 
 --
--- Definition of table kinton_liquibase.rasd_management
+-- Definition of table `kinton_liquibase`.`rasd_management`
 --
 
-DROP TABLE IF EXISTS kinton_liquibase.rasd_management;
-CREATE TABLE  kinton_liquibase.rasd_management (
-  idManagement int(10) unsigned NOT NULL auto_increment,
-  idResourceType varchar(5) NOT NULL,
-  idVirtualDataCenter int(10) unsigned default NULL,
-  idVM int(10) unsigned default NULL,
-  idResource varchar(50),
-  idVirtualApp int(10) unsigned default NULL,
-  version_c integer NOT NULL DEFAULT 1,
-  temporal int(10) unsigned DEFAULT NULL,
-  sequence int(10) unsigned default NULL,
-  PRIMARY KEY  (idManagement),
-  KEY idVirtualApp_FK (idVirtualApp),
-  KEY idVM_FK (idVM),
-  KEY idVirtualDataCenter_FK (idVirtualDataCenter),
-  KEY idResource_FK (idResource),
-  CONSTRAINT idVirtualApp_FK FOREIGN KEY (idVirtualApp) REFERENCES virtualapp (idVirtualApp) ON DELETE SET NULL,
-  CONSTRAINT idVirtualDataCenter_FK FOREIGN KEY (idVirtualDataCenter) REFERENCES virtualdatacenter (idVirtualDataCenter) ON DELETE SET NULL,
-  CONSTRAINT idVM_FK FOREIGN KEY (idVM) REFERENCES virtualmachine (idVM) ON DELETE SET NULL,
-  CONSTRAINT idResource_FK FOREIGN KEY (idResource) REFERENCES rasd (instanceID) ON DELETE SET NULL
+DROP TABLE IF EXISTS `kinton_liquibase`.`rasd_management`;
+CREATE TABLE  `kinton_liquibase`.`rasd_management` (
+  `idManagement` int(10) unsigned NOT NULL auto_increment,
+  `idResourceType` varchar(5) NOT NULL,
+  `idVirtualDataCenter` int(10) unsigned default NULL,
+  `idVM` int(10) unsigned default NULL,
+  `idResource` varchar(50),
+  `idVirtualApp` int(10) unsigned default NULL,
+  `version_c` integer NOT NULL DEFAULT 1,
+  `temporal` int(10) unsigned DEFAULT NULL,
+  `sequence` int(10) unsigned default NULL,
+  PRIMARY KEY  (`idManagement`),
+  KEY `idVirtualApp_FK` (`idVirtualApp`),
+  KEY `idVM_FK` (`idVM`),
+  KEY `idVirtualDataCenter_FK` (`idVirtualDataCenter`),
+  KEY `idResource_FK` (`idResource`),
+  CONSTRAINT `idVirtualApp_FK` FOREIGN KEY (`idVirtualApp`) REFERENCES `virtualapp` (`idVirtualApp`) ON DELETE SET NULL,
+  CONSTRAINT `idVirtualDataCenter_FK` FOREIGN KEY (`idVirtualDataCenter`) REFERENCES `virtualdatacenter` (`idVirtualDataCenter`) ON DELETE SET NULL,
+  CONSTRAINT `idVM_FK` FOREIGN KEY (`idVM`) REFERENCES `virtualmachine` (`idVM`) ON DELETE SET NULL,
+  CONSTRAINT `idResource_FK` FOREIGN KEY (`idResource`) REFERENCES `rasd` (`instanceID`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
--- Dumping data for table kinton_liquibase.rasd_management
+-- Dumping data for table `kinton_liquibase`.`rasd_management`
 --
 
-/*!40000 ALTER TABLE rasd_management DISABLE KEYS */;
-LOCK TABLES rasd_management WRITE;
+/*!40000 ALTER TABLE `rasd_management` DISABLE KEYS */;
+LOCK TABLES `rasd_management` WRITE;
 UNLOCK TABLES;
-/*!40000 ALTER TABLE rasd_management ENABLE KEYS */;
+/*!40000 ALTER TABLE `rasd_management` ENABLE KEYS */;
 
 --
--- Definition of table kinton_liquibase.ip_pool
+-- Definition of table `kinton_liquibase`.`ip_pool`
 --
-DROP TABLE IF EXISTS kinton_liquibase.ip_pool_management;
-CREATE TABLE  kinton_liquibase.ip_pool_management (
-  idManagement int(10) unsigned NOT NULL,
-  mac varchar(20),
-  name varchar(30),
-  ip varchar(20) NOT NULL,
-  vlan_network_name varchar(40),
-  vlan_network_id int(11) unsigned,
-  quarantine boolean NOT NULL default 0,
-  available boolean NOT NULL default 1,
-  version_c integer NOT NULL DEFAULT 1,
-  KEY id_management_FK (idManagement),
-  KEY ippool_vlan_network_FK (vlan_network_id),
-  CONSTRAINT id_management_FK FOREIGN KEY (idManagement) REFERENCES rasd_management (idManagement) ON DELETE CASCADE,
-  CONSTRAINT ippool_vlan_network_FK FOREIGN KEY (vlan_network_id) REFERENCES vlan_network (vlan_network_id)  ON DELETE RESTRICT
+DROP TABLE IF EXISTS `kinton_liquibase`.`ip_pool_management`;
+CREATE TABLE  `kinton_liquibase`.`ip_pool_management` (
+  `idManagement` int(10) unsigned NOT NULL,
+  `mac` varchar(20),
+  `name` varchar(30),
+  `ip` varchar(20) NOT NULL,
+  `vlan_network_name` varchar(40),
+  `vlan_network_id` int(11) unsigned,
+  `quarantine` boolean NOT NULL default 0,
+  `available` boolean NOT NULL default 1,
+  `version_c` integer NOT NULL DEFAULT 1,
+  KEY `id_management_FK` (`idManagement`),
+  KEY `ippool_vlan_network_FK` (`vlan_network_id`),
+  CONSTRAINT `id_management_FK` FOREIGN KEY (`idManagement`) REFERENCES `rasd_management` (`idManagement`) ON DELETE CASCADE,
+  CONSTRAINT `ippool_vlan_network_FK` FOREIGN KEY (`vlan_network_id`) REFERENCES `vlan_network` (`vlan_network_id`)  ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-DROP TABLE IF EXISTS kinton_liquibase.repository;
-CREATE TABLE  kinton_liquibase.repository (
-  idRepository int(3) unsigned NOT NULL auto_increment,
-  idDataCenter INT UNSIGNED NOT NULL ,
-  name varchar(30),
-  URL varchar(255) NOT NULL,
-  version_c int(11) default 0,
-  PRIMARY KEY  (idRepository),
-  CONSTRAINT fk_idDataCenter FOREIGN KEY ( idDataCenter ) REFERENCES datacenter ( idDataCenter ) ON DELETE CASCADE
+DROP TABLE IF EXISTS `kinton_liquibase`.`repository`;
+CREATE TABLE  `kinton_liquibase`.`repository` (
+  `idRepository` int(3) unsigned NOT NULL auto_increment,
+  `idDataCenter` INT UNSIGNED NOT NULL ,
+  `name` varchar(30),
+  `URL` varchar(255) NOT NULL,
+  `version_c` int(11) default 0,
+  PRIMARY KEY  (`idRepository`),
+  CONSTRAINT `fk_idDataCenter` FOREIGN KEY ( `idDataCenter` ) REFERENCES `datacenter` ( `idDataCenter` ) ON DELETE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
 --
--- Dumping data for table kinton_liquibase.repository
+-- Dumping data for table `kinton_liquibase`.`repository`
 --
 
 --
--- Definition of table kinton_liquibase.role
+-- Definition of table `kinton_liquibase`.`role`
 --
 
 
-DROP TABLE IF EXISTS kinton_liquibase.role;
+DROP TABLE IF EXISTS `kinton_liquibase`.`role`;
 
-CREATE TABLE  kinton_liquibase.role (
-  idRole int(3) unsigned NOT NULL AUTO_INCREMENT,
-  name varchar(40) NOT NULL DEFAULT 'auto_name',
-  idEnterprise int(10) unsigned DEFAULT NULL,
-  blocked tinyint(1) NOT NULL DEFAULT '0',
-  version_c int(11) DEFAULT '0',
-  PRIMARY KEY (idRole),
-  KEY fk_role_1 (idEnterprise),
-  CONSTRAINT fk_role_1 FOREIGN KEY (idEnterprise) REFERENCES enterprise (idEnterprise) ON DELETE NO ACTION ON UPDATE NO ACTION
+CREATE TABLE  `kinton_liquibase`.`role` (
+  `idRole` int(3) unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(40) NOT NULL DEFAULT 'auto_name',
+  `idEnterprise` int(10) unsigned DEFAULT NULL,
+  `blocked` tinyint(1) NOT NULL DEFAULT '0',
+  `version_c` int(11) DEFAULT '0',
+  PRIMARY KEY (`idRole`),
+  KEY `fk_role_1` (`idEnterprise`),
+  CONSTRAINT `fk_role_1` FOREIGN KEY (`idEnterprise`) REFERENCES `enterprise` (`idEnterprise`) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8; 
 
 --
--- Dumping data for table kinton_liquibase.role
+-- Dumping data for table `kinton_liquibase`.`role`
 --
 
-/*!40000 ALTER TABLE role DISABLE KEYS */;
-LOCK TABLES role WRITE;
-	INSERT INTO kinton_liquibase.role (idRole,name,blocked,version_c) VALUES (1,'CLOUD_ADMIN',1,0);
-	INSERT INTO kinton_liquibase.role (idRole,name,version_c) VALUES (2,'USER',0);
-	INSERT INTO kinton_liquibase.role (idRole,name,version_c) VALUES (3,'ENTERPRISE_ADMIN',0);
+/*!40000 ALTER TABLE `role` DISABLE KEYS */;
+LOCK TABLES `role` WRITE;
+	INSERT INTO `kinton_liquibase`.`role` (idRole,name,blocked,version_c) VALUES (1,'CLOUD_ADMIN',1,0);
+	INSERT INTO `kinton_liquibase`.`role` (idRole,name,version_c) VALUES (2,'USER',0);
+	INSERT INTO `kinton_liquibase`.`role` (idRole,name,version_c) VALUES (3,'ENTERPRISE_ADMIN',0);
 UNLOCK TABLES;
-/*!40000 ALTER TABLE role ENABLE KEYS */;
+/*!40000 ALTER TABLE `role` ENABLE KEYS */;
 
 --
--- Definition of table kinton_liquibase.roles_privileges
+-- Definition of table `kinton_liquibase`.`roles_privileges`
 --
 
-CREATE  TABLE kinton_liquibase.roles_privileges (
-  idRole INT(10) UNSIGNED NOT NULL ,
-  idPrivilege INT(10) UNSIGNED NOT NULL ,
-  version_c INT(11) default 0,
-  INDEX fk_roles_privileges_role (idRole ASC) ,
-  INDEX fk_roles_privileges_privileges (idPrivilege ASC) ,
-  CONSTRAINT fk_roles_privileges_role
-    FOREIGN KEY (idRole )
-    REFERENCES kinton_liquibase.role (idRole )
+CREATE  TABLE `kinton_liquibase`.`roles_privileges` (
+  `idRole` INT(10) UNSIGNED NOT NULL ,
+  `idPrivilege` INT(10) UNSIGNED NOT NULL ,
+  `version_c` INT(11) default 0,
+  INDEX `fk_roles_privileges_role` (`idRole` ASC) ,
+  INDEX `fk_roles_privileges_privileges` (`idPrivilege` ASC) ,
+  CONSTRAINT `fk_roles_privileges_role`
+    FOREIGN KEY (`idRole` )
+    REFERENCES `kinton_liquibase`.`role` (`idRole` )
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
-  CONSTRAINT fk_roles_privileges_privileges
-    FOREIGN KEY (idPrivilege )
-    REFERENCES kinton_liquibase.privilege (idPrivilege )
+  CONSTRAINT `fk_roles_privileges_privileges`
+    FOREIGN KEY (`idPrivilege` )
+    REFERENCES `kinton_liquibase`.`privilege` (`idPrivilege` )
     ON DELETE NO ACTION
     ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
--- Definition of table kinton_liquibase.privilege
+-- Definition of table `kinton_liquibase`.`privilege`
 --
 
-CREATE TABLE privilege (
-  idPrivilege int(10) unsigned NOT NULL AUTO_INCREMENT,
-  name varchar(50) NOT NULL,
-  version_c int(11) default 0,
-  PRIMARY KEY (idPrivilege)
+CREATE TABLE `privilege` (
+  `idPrivilege` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(50) NOT NULL,
+  `version_c` int(11) default 0,
+  PRIMARY KEY (`idPrivilege`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
--- Dumping data for table kinton_liquibase.privilege
+-- Dumping data for table `kinton_liquibase`.`privilege`
 --
 
-/*!40000 ALTER TABLE privilege DISABLE KEYS */;
-LOCK TABLES privilege WRITE;
-INSERT INTO privilege VALUES
+/*!40000 ALTER TABLE `privilege` DISABLE KEYS */;
+LOCK TABLES `privilege` WRITE;
+INSERT INTO `privilege` VALUES
  (1,'ENTERPRISE_ENUMERATE',0),
  (2,'ENTERPRISE_ADMINISTER_ALL',0),
  (3,'ENTERPRISE_RESOURCE_SUMMARY_ENT',0),
@@ -878,417 +879,417 @@ INSERT INTO privilege VALUES
  (49,'PRICING_VIEW',0),
  (50,'PRICING_MANAGE',0);
 UNLOCK TABLES;
-/*!40000 ALTER TABLE privilege ENABLE KEYS */;
+/*!40000 ALTER TABLE `privilege` ENABLE KEYS */;
 
 --
--- Dumping data for table kinton_liquibase.roles_privileges
+-- Dumping data for table `kinton_liquibase`.`roles_privileges`
 --
 
-/*!40000 ALTER TABLE roles_privileges DISABLE KEYS */;
-LOCK TABLES roles_privileges WRITE;
-INSERT INTO roles_privileges VALUES
+/*!40000 ALTER TABLE `roles_privileges` DISABLE KEYS */;
+LOCK TABLES `roles_privileges` WRITE;
+INSERT INTO `roles_privileges` VALUES
  (1,1,0),(1,2,0),(1,3,0),(1,4,0),(1,5,0),(1,6,0),(1,7,0),(1,8,0),(1,9,0),(1,10,0),(1,11,0),(1,12,0),(1,13,0),(1,14,0),(1,15,0),(1,16,0),(1,17,0),(1,18,0),(1,19,0),(1,20,0),(1,21,0),(1,22,0),(1,23,0),(1,24,0),(1,25,0),
  (1,26,0),(1,27,0),(1,28,0),(1,29,0),(1,30,0),(1,31,0),(1,32,0),(1,33,0),(1,34,0),(1,35,0),(1,36,0),(1,37,0),(1,38,0),(1,39,0),(1,40,0),(1,41,0),(1,42,0),(1,43,0),(1,44,0),(1,45,0),(1,47,0),(1,48,0),(1,49,0),(1,50,0),
  (3,3,0),(3,12,0),(3,13,0),(3,14,0),(3,15,0),(3,16,0),(3,17,0),(3,18,0),(3,19,0),(3,20,0),(3,21,0),(3,22,0),(3,23,0),(3,24,0),(3,25,0),(3,26,0),(3,27,0),(3,28,0),(3,29,0),(3,30,0),(3,32,0),(3,34,0),(3,43,0),(3,48,0),
 (2,12,0),(2,14,0),(2,17,0),(2,18,0),(2,19,0),(2,20,0),(2,21,0),(2,22,0),(2,23,0),(2,43,0);
 UNLOCK TABLES;
-/*!40000 ALTER TABLE roles_privileges ENABLE KEYS */;
+/*!40000 ALTER TABLE `roles_privileges` ENABLE KEYS */;
 
 --
--- Definition of table kinton_liquibase.role_ldap
+-- Definition of table `kinton_liquibase`.`role_ldap`
 --
-DROP TABLE IF EXISTS kinton_liquibase.role_ldap;
+DROP TABLE IF EXISTS `kinton_liquibase`.`role_ldap`;
 
-CREATE  TABLE kinton_liquibase.role_ldap (
-  idRole_ldap INT(3) NOT NULL AUTO_INCREMENT ,
-  idRole INT(10) UNSIGNED NOT NULL ,
-  role_ldap VARCHAR(128) NOT NULL ,
-  version_c int(11) default 0,
-  PRIMARY KEY (idRole_ldap) ,
-  KEY fk_role_ldap_role (idRole) ,
-  CONSTRAINT fk_role_ldap_role FOREIGN KEY (idRole ) REFERENCES kinton_liquibase.role (idRole ) ON DELETE NO ACTION ON UPDATE NO ACTION
+CREATE  TABLE `kinton_liquibase`.`role_ldap` (
+  `idRole_ldap` INT(3) NOT NULL AUTO_INCREMENT ,
+  `idRole` INT(10) UNSIGNED NOT NULL ,
+  `role_ldap` VARCHAR(128) NOT NULL ,
+  `version_c` int(11) default 0,
+  PRIMARY KEY (`idRole_ldap`) ,
+  KEY `fk_role_ldap_role` (`idRole`) ,
+  CONSTRAINT `fk_role_ldap_role` FOREIGN KEY (`idRole` ) REFERENCES `kinton_liquibase`.`role` (`idRole` ) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
--- Definition of table kinton_liquibase.user
+-- Definition of table `kinton_liquibase`.`user`
 --
 
-DROP TABLE IF EXISTS kinton_liquibase.user;
-CREATE TABLE  kinton_liquibase.user (
-  idUser int(10) unsigned NOT NULL auto_increment,
-  idRole int(3) unsigned NOT NULL,
-  idEnterprise int(10) unsigned default NULL,
-  user varchar(128) NOT NULL,
-  name varchar(128) NOT NULL,
-  surname varchar(50) default NULL,
-  description varchar(100) default NULL,
-  email varchar(200),
-  locale varchar(10) NOT NULL,
-  password varchar(32),
-  availableVirtualDatacenters varchar(255),
-  active int(1) unsigned NOT NULL default '0',
-  authType varchar(20) NOT NULL,
-  creationDate timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  version_c int(11) default 0,
-  PRIMARY KEY  (idUser),
-  KEY User_FK1 (idRole),
-  KEY FK1_user (idEnterprise),
-  CONSTRAINT FK1_user FOREIGN KEY (idEnterprise) REFERENCES enterprise (idEnterprise),
-  CONSTRAINT User_FK1 FOREIGN KEY (idRole) REFERENCES role (idRole),
+DROP TABLE IF EXISTS `kinton_liquibase`.`user`;
+CREATE TABLE  `kinton_liquibase`.`user` (
+  `idUser` int(10) unsigned NOT NULL auto_increment,
+  `idRole` int(3) unsigned NOT NULL,
+  `idEnterprise` int(10) unsigned default NULL,
+  `user` varchar(128) NOT NULL,
+  `name` varchar(128) NOT NULL,
+  `surname` varchar(50) default NULL,
+  `description` varchar(100) default NULL,
+  `email` varchar(200),
+  `locale` varchar(10) NOT NULL,
+  `password` varchar(32),
+  `availableVirtualDatacenters` varchar(255),
+  `active` int(1) unsigned NOT NULL default '0',
+  `authType` varchar(20) NOT NULL,
+  `creationDate` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `version_c` int(11) default 0,
+  PRIMARY KEY  (`idUser`),
+  KEY `User_FK1` (`idRole`),
+  KEY `FK1_user` (`idEnterprise`),
+  CONSTRAINT `FK1_user` FOREIGN KEY (`idEnterprise`) REFERENCES `enterprise` (`idEnterprise`),
+  CONSTRAINT `User_FK1` FOREIGN KEY (`idRole`) REFERENCES `role` (`idRole`),
   UNIQUE KEY user_auth_idx (user, authType)
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
 
 --
--- Dumping data for table kinton_liquibase.user
+-- Dumping data for table `kinton_liquibase`.`user`
 --
 
-/*!40000 ALTER TABLE user DISABLE KEYS */;
-LOCK TABLES user WRITE;
-INSERT INTO kinton_liquibase.user VALUES  (1,1,1,'admin','Cloud','Administrator','Main administrator','','en_US','c69a39bd64ffb77ea7ee3369dce742f3',null,1, 'ABIQUO', NOW(), 0),
+/*!40000 ALTER TABLE `user` DISABLE KEYS */;
+LOCK TABLES `user` WRITE;
+INSERT INTO `kinton_liquibase`.`user` VALUES  (1,1,1,'admin','Cloud','Administrator','Main administrator','','en_US','c69a39bd64ffb77ea7ee3369dce742f3',null,1, 'ABIQUO', NOW(), 0),
  (2,2,1,'user','Standard','User','Standard user','','en_US','c69a39bd64ffb77ea7ee3369dce742f3',null,1, 'ABIQUO',NOW(), 0);
 UNLOCK TABLES;
-/*!40000 ALTER TABLE user ENABLE KEYS */;
+/*!40000 ALTER TABLE `user` ENABLE KEYS */;
 
 --
--- Definition of table kinton_liquibase.session
+-- Definition of table `kinton_liquibase`.`session`
 --
 
-DROP TABLE IF EXISTS kinton_liquibase.session;
-CREATE TABLE  kinton_liquibase.session (
-  id int(10) unsigned NOT NULL auto_increment,
-  user varchar(128) NOT NULL,
-  key varchar(100) NOT NULL,
-  expireDate timestamp NOT NULL,
-  idUser int(10) unsigned default null,
-  authType varchar(20) NOT NULL,
-  version_c int(11) default 0,
-  PRIMARY KEY  (id),
-  CONSTRAINT fk_session_user foreign key (idUser) references user (idUser)
+DROP TABLE IF EXISTS `kinton_liquibase`.`session`;
+CREATE TABLE  `kinton_liquibase`.`session` (
+  `id` int(10) unsigned NOT NULL auto_increment,
+  `user` varchar(128) NOT NULL,
+  `key` varchar(100) NOT NULL,
+  `expireDate` timestamp NOT NULL,
+  `idUser` int(10) unsigned default null,
+  `authType` varchar(20) NOT NULL,
+  `version_c` int(11) default 0,
+  PRIMARY KEY  (`id`),
+  CONSTRAINT `fk_session_user` foreign key (`idUser`) references `user` (`idUser`)
 ) ENGINE=InnoDB AUTO_INCREMENT=311 DEFAULT CHARSET=utf8;
 
 --
--- Definition of table kinton_liquibase.virtualapp
+-- Definition of table `kinton_liquibase`.`virtualapp`
 --
 
-DROP TABLE IF EXISTS kinton_liquibase.virtualapp;
-CREATE TABLE  kinton_liquibase.virtualapp (
-  idVirtualApp int(10) unsigned NOT NULL auto_increment,
-  idVirtualDataCenter int(10) unsigned NOT NULL,
-  idEnterprise int(10) unsigned default NULL,
-  name varchar(30) NOT NULL,
-  public int(1) unsigned NOT NULL COMMENT '0-No 1-Yes',
-  high_disponibility int(1) unsigned NOT NULL COMMENT '0-No 1-Yes',
-  error int(1) unsigned NOT NULL,
-  nodeconnections text,
-  version_c integer NOT NULL DEFAULT 1,
-  PRIMARY KEY  (idVirtualApp),
-  KEY VirtualApp_FK4 (idVirtualDataCenter),
-  KEY VirtualApp_FK5 (idEnterprise),
-  CONSTRAINT VirtualApp_FK4 FOREIGN KEY (idVirtualDataCenter) REFERENCES virtualdatacenter (idVirtualDataCenter) ON DELETE CASCADE,
-  CONSTRAINT VirtualApp_FK5 FOREIGN KEY (idEnterprise) REFERENCES enterprise (idEnterprise)
+DROP TABLE IF EXISTS `kinton_liquibase`.`virtualapp`;
+CREATE TABLE  `kinton_liquibase`.`virtualapp` (
+  `idVirtualApp` int(10) unsigned NOT NULL auto_increment,
+  `idVirtualDataCenter` int(10) unsigned NOT NULL,
+  `idEnterprise` int(10) unsigned default NULL,
+  `name` varchar(30) NOT NULL,
+  `public` int(1) unsigned NOT NULL COMMENT '0-No 1-Yes',
+  `high_disponibility` int(1) unsigned NOT NULL COMMENT '0-No 1-Yes',
+  `error` int(1) unsigned NOT NULL,
+  `nodeconnections` text,
+  `version_c` integer NOT NULL DEFAULT 1,
+  PRIMARY KEY  (`idVirtualApp`),
+  KEY `VirtualApp_FK4` (`idVirtualDataCenter`),
+  KEY `VirtualApp_FK5` (`idEnterprise`),
+  CONSTRAINT `VirtualApp_FK4` FOREIGN KEY (`idVirtualDataCenter`) REFERENCES `virtualdatacenter` (`idVirtualDataCenter`) ON DELETE CASCADE,
+  CONSTRAINT `VirtualApp_FK5` FOREIGN KEY (`idEnterprise`) REFERENCES `enterprise` (`idEnterprise`)
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
 
 --
--- Dumping data for table kinton_liquibase.virtualapp
+-- Dumping data for table `kinton_liquibase`.`virtualapp`
 --
 
-/*!40000 ALTER TABLE virtualapp DISABLE KEYS */;
-LOCK TABLES virtualapp WRITE;
+/*!40000 ALTER TABLE `virtualapp` DISABLE KEYS */;
+LOCK TABLES `virtualapp` WRITE;
 UNLOCK TABLES;
-/*!40000 ALTER TABLE virtualapp ENABLE KEYS */;
+/*!40000 ALTER TABLE `virtualapp` ENABLE KEYS */;
 
 
 --
--- Definition of table kinton_liquibase.virtualdatacenter
+-- Definition of table `kinton_liquibase`.`virtualdatacenter`
 --
 
-DROP TABLE IF EXISTS kinton_liquibase.virtualdatacenter;
-CREATE TABLE  kinton_liquibase.virtualdatacenter (
-  idVirtualDataCenter int(10) unsigned NOT NULL auto_increment,
-  idEnterprise int(10) unsigned NOT NULL,
-  name varchar(40) default NULL,
-  idDataCenter int(10) unsigned NOT NULL,
-  networktypeID int(11) unsigned,
-  hypervisorType varchar(255) NOT NULL,
-  ramSoft bigint(20) NOT NULL default 0,
-  cpuSoft bigint(20) NOT NULL default 0,
-  hdSoft bigint(20)  NOT NULL default 0,
-  storageSoft bigint(20)  NOT NULL default 0,
-  vlanSoft bigint(20)  NOT NULL default 0,
-  publicIPSoft bigint(20)  NOT NULL default 0,
-  ramHard bigint(20) NOT NULL default 0,
-  cpuHard bigint(20) NOT NULL default 0,
-  hdHard bigint(20)  NOT NULL default 0,
-  storageHard bigint(20)  NOT NULL default 0,
-  vlanHard bigint(20)  NOT NULL default 0,
-  publicIPHard bigint(20)  NOT NULL default 0,
-  default_vlan_network_id int(11) unsigned default NULL,
-  version_c integer NOT NULL DEFAULT 1,
-  PRIMARY KEY  (idVirtualDataCenter),
-  KEY virtualDataCenter_FK1 (idEnterprise),
-  KEY virtualDataCenter_FK6 (idDataCenter),
-  CONSTRAINT virtualDataCenter_FK1 FOREIGN KEY (idEnterprise) REFERENCES enterprise (idEnterprise),
-  CONSTRAINT virtualDataCenter_FK4 FOREIGN KEY (networktypeID) REFERENCES network (network_id),
-  CONSTRAINT virtualDataCenter_FK6 FOREIGN KEY (idDataCenter) REFERENCES datacenter (idDataCenter) ON DELETE RESTRICT,
-  CONSTRAINT virtualDataCenter_FK7 FOREIGN KEY (default_vlan_network_id) REFERENCES vlan_network (vlan_network_id)
+DROP TABLE IF EXISTS `kinton_liquibase`.`virtualdatacenter`;
+CREATE TABLE  `kinton_liquibase`.`virtualdatacenter` (
+  `idVirtualDataCenter` int(10) unsigned NOT NULL auto_increment,
+  `idEnterprise` int(10) unsigned NOT NULL,
+  `name` varchar(40) default NULL,
+  `idDataCenter` int(10) unsigned NOT NULL,
+  `networktypeID` int(11) unsigned,
+  `hypervisorType` varchar(255) NOT NULL,
+  `ramSoft` bigint(20) NOT NULL default 0,
+  `cpuSoft` bigint(20) NOT NULL default 0,
+  `hdSoft` bigint(20)  NOT NULL default 0,
+  `storageSoft` bigint(20)  NOT NULL default 0,
+  `vlanSoft` bigint(20)  NOT NULL default 0,
+  `publicIPSoft` bigint(20)  NOT NULL default 0,
+  `ramHard` bigint(20) NOT NULL default 0,
+  `cpuHard` bigint(20) NOT NULL default 0,
+  `hdHard` bigint(20)  NOT NULL default 0,
+  `storageHard` bigint(20)  NOT NULL default 0,
+  `vlanHard` bigint(20)  NOT NULL default 0,
+  `publicIPHard` bigint(20)  NOT NULL default 0,
+  `default_vlan_network_id` int(11) unsigned default NULL,
+  `version_c` integer NOT NULL DEFAULT 1,
+  PRIMARY KEY  (`idVirtualDataCenter`),
+  KEY `virtualDataCenter_FK1` (`idEnterprise`),
+  KEY `virtualDataCenter_FK6` (`idDataCenter`),
+  CONSTRAINT `virtualDataCenter_FK1` FOREIGN KEY (`idEnterprise`) REFERENCES `enterprise` (`idEnterprise`),
+  CONSTRAINT `virtualDataCenter_FK4` FOREIGN KEY (`networktypeID`) REFERENCES `network` (`network_id`),
+  CONSTRAINT `virtualDataCenter_FK6` FOREIGN KEY (`idDataCenter`) REFERENCES `datacenter` (`idDataCenter`) ON DELETE RESTRICT,
+  CONSTRAINT `virtualDataCenter_FK7` FOREIGN KEY (`default_vlan_network_id`) REFERENCES `vlan_network` (`vlan_network_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
 
 --
--- Dumping data for table kinton_liquibase.virtualdatacenter
+-- Dumping data for table `kinton_liquibase`.`virtualdatacenter`
 --
 
-/*!40000 ALTER TABLE virtualdatacenter DISABLE KEYS */;
-LOCK TABLES virtualdatacenter WRITE;
+/*!40000 ALTER TABLE `virtualdatacenter` DISABLE KEYS */;
+LOCK TABLES `virtualdatacenter` WRITE;
 UNLOCK TABLES;
-/*!40000 ALTER TABLE virtualdatacenter ENABLE KEYS */;
+/*!40000 ALTER TABLE `virtualdatacenter` ENABLE KEYS */;
 
 
 --
--- Definition of table kinton_liquibase.virtualimage
+-- Definition of table `kinton_liquibase`.`virtualimage`
 --
 
 
 
 
 
-DROP TABLE IF EXISTS kinton_liquibase.virtualimage;
-CREATE TABLE  kinton_liquibase.virtualimage (
-  idImage int(4) unsigned NOT NULL auto_increment,
-  name varchar(255) NOT NULL,
-  description varchar(255) default NULL,
-  pathName varchar(255) NOT NULL,
-  hd_required bigint(20) default NULL,
-  ram_required int(7) unsigned default NULL,
-  cpu_required int(11) default NULL,
-  iconUrl varchar(255) default NULL,
-  idCategory int(3) unsigned NOT NULL,
-  idRepository int(3) unsigned default NULL,
-  type varchar(50) NOT NULL,
-  ethDriverType varchar(16) default NULL,
-  idMaster int(4) unsigned default NULL,
-  idEnterprise int(10) unsigned default null,
-  shared int(1) unsigned NOT NULL default 0 COMMENT '0-No 1-Yes',
-  ovfid varchar(255),
-  stateful int(1) unsigned NOT NULL,
-  diskFileSize BIGINT(20) UNSIGNED NOT NULL,
-  chefEnabled boolean NOT NULL default false,
-  cost_code int(10) DEFAULT 0,
-  creation_date timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  creation_user varchar(128) NOT NULL,
-  version_c integer NOT NULL DEFAULT 1,
-  PRIMARY KEY  (idImage),
-  KEY fk_virtualimage_category (idCategory),
-  KEY virtualImage_FK3 (idRepository),
-  CONSTRAINT fk_virtualimage_category FOREIGN KEY (idCategory) REFERENCES category (idCategory),
-  CONSTRAINT virtualImage_FK3 FOREIGN KEY (idRepository) REFERENCES repository (idRepository) ON DELETE SET NULL,
-  CONSTRAINT virtualImage_FK8 FOREIGN KEY (idMaster) REFERENCES virtualimage (idImage) ON DELETE SET NULL,
-  CONSTRAINT virtualImage_FK9 FOREIGN KEY (idEnterprise) REFERENCES enterprise (idEnterprise) ON DELETE SET NULL
+DROP TABLE IF EXISTS `kinton_liquibase`.`virtualimage`;
+CREATE TABLE  `kinton_liquibase`.`virtualimage` (
+  `idImage` int(4) unsigned NOT NULL auto_increment,
+  `name` varchar(255) NOT NULL,
+  `description` varchar(255) default NULL,
+  `pathName` varchar(255) NOT NULL,
+  `hd_required` bigint(20) default NULL,
+  `ram_required` int(7) unsigned default NULL,
+  `cpu_required` int(11) default NULL,
+  `iconUrl` varchar(255) default NULL,
+  `idCategory` int(3) unsigned NOT NULL,
+  `idRepository` int(3) unsigned default NULL,
+  `type` varchar(50) NOT NULL,
+  `ethDriverType` varchar(16) default NULL,
+  `idMaster` int(4) unsigned default NULL,
+  `idEnterprise` int(10) unsigned default null,
+  `shared` int(1) unsigned NOT NULL default 0 COMMENT '0-No 1-Yes',
+  `ovfid` varchar(255),
+  `stateful` int(1) unsigned NOT NULL,
+  `diskFileSize` BIGINT(20) UNSIGNED NOT NULL,
+  `chefEnabled` boolean NOT NULL default false,
+  `cost_code` int(10) DEFAULT 0,
+  `creation_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `creation_user` varchar(128) NOT NULL,
+  `version_c` integer NOT NULL DEFAULT 1,
+  PRIMARY KEY  (`idImage`),
+  KEY `fk_virtualimage_category` (`idCategory`),
+  KEY `virtualImage_FK3` (`idRepository`),
+  CONSTRAINT `fk_virtualimage_category` FOREIGN KEY (`idCategory`) REFERENCES `category` (`idCategory`),
+  CONSTRAINT `virtualImage_FK3` FOREIGN KEY (`idRepository`) REFERENCES `repository` (`idRepository`) ON DELETE SET NULL,
+  CONSTRAINT `virtualImage_FK8` FOREIGN KEY (`idMaster`) REFERENCES `virtualimage` (`idImage`) ON DELETE SET NULL,
+  CONSTRAINT `virtualImage_FK9` FOREIGN KEY (`idEnterprise`) REFERENCES `enterprise` (`idEnterprise`) ON DELETE SET NULL
 ) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8;
 
 --
--- Dumping data for table kinton_liquibase.virtualimage
+-- Dumping data for table `kinton_liquibase`.`virtualimage`
 --
 
-/*!40000 ALTER TABLE virtualimage DISABLE KEYS */;
-LOCK TABLES virtualimage WRITE;
+/*!40000 ALTER TABLE `virtualimage` DISABLE KEYS */;
+LOCK TABLES `virtualimage` WRITE;
 UNLOCK TABLES;
-/*!40000 ALTER TABLE virtualimage ENABLE KEYS */;
+/*!40000 ALTER TABLE `virtualimage` ENABLE KEYS */;
 
 
 --
--- Definition of table kinton_liquibase.virtualmachine
+-- Definition of table `kinton_liquibase`.`virtualmachine`
 --
 
-DROP TABLE IF EXISTS kinton_liquibase.virtualmachine;
-CREATE TABLE  kinton_liquibase.virtualmachine (
-  idVM int(10) unsigned NOT NULL auto_increment,
-  idHypervisor int(2) unsigned default NULL,
-  idImage int(4) unsigned DEFAULT NULL,
-  UUID varchar(36) NOT NULL,
-  name varchar(255) NOT NULL,
-  description varchar(255) default NULL,
-  ram int(7) unsigned default NULL,
-  cpu int(10) unsigned default NULL,
-  hd bigint(20) unsigned default NULL,
-  vdrpPort int(5) unsigned default NULL,
-  vdrpIP varchar(39) default NULL,
-  state varchar(50) NOT NULL,
-  subState varchar(50) DEFAULT NULL,
-  high_disponibility int(1) unsigned NOT NULL,
-  idConversion INT(10) UNSIGNED,
-  idType INT(1) UNSIGNED NOT NULL DEFAULT 0 COMMENT '0 - NOT MANAGED BY ABICLOUD  1 - MANAGED BY ABICLOUD',
-  idUser INT(10) unsigned default NULL COMMENT 'User who creates the VM',
-  idEnterprise int(10) unsigned default NULL COMMENT 'Enterprise of the user',
-  idDatastore int(10) unsigned default NULL,
-  password varchar(32) default NULL,
-  network_configuration_id int(11) unsigned, 
-  temporal int(10) unsigned default NULL,
-  ethDriverType varchar(16) default NULL,
-  version_c int(11) default 0,
-  PRIMARY KEY  (idVM),
-  KEY VirtualMachine_FK1 (idHypervisor),
-  KEY virtualMachine_datastore_FK (idDatastore),
-  KEY virtualMachine_FK3 (idImage),
-  KEY virtualMachine_FK4 (idUser),
-  KEY virtualMachine_FK5 (idEnterprise),
-  KEY virtualMachine_FK6 (network_configuration_id),
-  CONSTRAINT virtualMachine_FK1 FOREIGN KEY (idHypervisor) REFERENCES hypervisor (id) ON DELETE CASCADE,
-  CONSTRAINT virtualMachine_datastore_FK FOREIGN KEY (idDatastore) REFERENCES datastore (idDatastore),
-  CONSTRAINT virtualMachine_FK3 FOREIGN KEY (idImage) REFERENCES virtualimage (idImage),
-  CONSTRAINT virtualmachine_conversion_FK FOREIGN KEY virtualmachine_conversion_FK (idConversion) REFERENCES virtualimage_conversions (id),
-  CONSTRAINT virtualMachine_FK5 FOREIGN KEY (idEnterprise) REFERENCES enterprise (idEnterprise) ON DELETE SET NULL,
-  CONSTRAINT virtualMachine_FK4 FOREIGN KEY (idUser) REFERENCES user (idUser) ON DELETE SET NULL,
-  CONSTRAINT virtualMachine_FK6 FOREIGN KEY (network_configuration_id) REFERENCES network_configuration (network_configuration_id) ON DELETE SET NULL  
+DROP TABLE IF EXISTS `kinton_liquibase`.`virtualmachine`;
+CREATE TABLE  `kinton_liquibase`.`virtualmachine` (
+  `idVM` int(10) unsigned NOT NULL auto_increment,
+  `idHypervisor` int(2) unsigned default NULL,
+  `idImage` int(4) unsigned DEFAULT NULL,
+  `UUID` varchar(36) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `description` varchar(255) default NULL,
+  `ram` int(7) unsigned default NULL,
+  `cpu` int(10) unsigned default NULL,
+  `hd` bigint(20) unsigned default NULL,
+  `vdrpPort` int(5) unsigned default NULL,
+  `vdrpIP` varchar(39) default NULL,
+  `state` varchar(50) NOT NULL,
+  `subState` varchar(50) DEFAULT NULL,
+  `high_disponibility` int(1) unsigned NOT NULL,
+  `idConversion` INT(10) UNSIGNED,
+  `idType` INT(1) UNSIGNED NOT NULL DEFAULT 0 COMMENT '0 - NOT MANAGED BY ABICLOUD  1 - MANAGED BY ABICLOUD',
+  `idUser` INT(10) unsigned default NULL COMMENT 'User who creates the VM',
+  `idEnterprise` int(10) unsigned default NULL COMMENT 'Enterprise of the user',
+  `idDatastore` int(10) unsigned default NULL,
+  `password` varchar(32) default NULL,
+  `network_configuration_id` int(11) unsigned, 
+  `temporal` int(10) unsigned default NULL,
+  `ethDriverType` varchar(16) default NULL,
+  `version_c` int(11) default 0,
+  PRIMARY KEY  (`idVM`),
+  KEY `VirtualMachine_FK1` (`idHypervisor`),
+  KEY `virtualMachine_datastore_FK` (`idDatastore`),
+  KEY `virtualMachine_FK3` (`idImage`),
+  KEY `virtualMachine_FK4` (`idUser`),
+  KEY `virtualMachine_FK5` (`idEnterprise`),
+  KEY `virtualMachine_FK6` (`network_configuration_id`),
+  CONSTRAINT `virtualMachine_FK1` FOREIGN KEY (`idHypervisor`) REFERENCES `hypervisor` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `virtualMachine_datastore_FK` FOREIGN KEY (`idDatastore`) REFERENCES `datastore` (`idDatastore`),
+  CONSTRAINT `virtualMachine_FK3` FOREIGN KEY (`idImage`) REFERENCES `virtualimage` (`idImage`),
+  CONSTRAINT `virtualmachine_conversion_FK` FOREIGN KEY `virtualmachine_conversion_FK` (`idConversion`) REFERENCES `virtualimage_conversions` (`id`),
+  CONSTRAINT `virtualMachine_FK5` FOREIGN KEY (`idEnterprise`) REFERENCES `enterprise` (`idEnterprise`) ON DELETE SET NULL,
+  CONSTRAINT `virtualMachine_FK4` FOREIGN KEY (`idUser`) REFERENCES `user` (`idUser`) ON DELETE SET NULL,
+  CONSTRAINT `virtualMachine_FK6` FOREIGN KEY (`network_configuration_id`) REFERENCES `network_configuration` (`network_configuration_id`) ON DELETE SET NULL  
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
--- Dumping data for table kinton_liquibase.virtualmachine
+-- Dumping data for table `kinton_liquibase`.`virtualmachine`
 --
 
-/*!40000 ALTER TABLE virtualmachine DISABLE KEYS */;
-LOCK TABLES virtualmachine WRITE;
+/*!40000 ALTER TABLE `virtualmachine` DISABLE KEYS */;
+LOCK TABLES `virtualmachine` WRITE;
 UNLOCK TABLES;
-/*!40000 ALTER TABLE virtualmachine ENABLE KEYS */;
+/*!40000 ALTER TABLE `virtualmachine` ENABLE KEYS */;
 
 --
--- Definition of table kinton_liquibase.virtualmachinetrackedstate
+-- Definition of table `kinton_liquibase`.`virtualmachinetrackedstate`
 -- This table is kept only for tracking VM states and updating statistics/accounting information
 --
-DROP TABLE IF EXISTS kinton_liquibase.virtualmachinetrackedstate;
-CREATE TABLE  kinton_liquibase.virtualmachinetrackedstate (
-  idVM int(10) unsigned NOT NULL,
-  previousState varchar(50) NOT NULL,
-  PRIMARY KEY  (idVM),
-  KEY VirtualMachineTrackedState_FK1 (idVM),
-  CONSTRAINT VirtualMachineTrackedState_FK1 FOREIGN KEY (idVM) REFERENCES virtualmachine (idVM) ON DELETE CASCADE
+DROP TABLE IF EXISTS `kinton_liquibase`.`virtualmachinetrackedstate`;
+CREATE TABLE  `kinton_liquibase`.`virtualmachinetrackedstate` (
+  `idVM` int(10) unsigned NOT NULL,
+  `previousState` varchar(50) NOT NULL,
+  PRIMARY KEY  (`idVM`),
+  KEY `VirtualMachineTrackedState_FK1` (`idVM`),
+  CONSTRAINT `VirtualMachineTrackedState_FK1` FOREIGN KEY (`idVM`) REFERENCES `virtualmachine` (`idVM`) ON DELETE CASCADE
   )
  ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
 --
--- Definition of table kinton_liquibase.remote_service
+-- Definition of table `kinton_liquibase`.`remote_service`
 --
 
-DROP TABLE IF EXISTS kinton_liquibase.remote_service;
-CREATE TABLE  kinton_liquibase.remote_service (
-  idRemoteService int(10) unsigned NOT NULL auto_increment,
-  uri varchar(255) NOT NULL,
-  idDataCenter int(10) unsigned NOT NULL,
-  status INT(1) unsigned NOT NULL DEFAULT 0,
-  remoteServiceType varchar(255) NOT NULL,
-  version_c int(11) default 0,
-  PRIMARY KEY  (idRemoteService),
-  KEY idDatecenter_FK (idDataCenter),
-  CONSTRAINT idDatecenter_FK FOREIGN KEY (idDataCenter) REFERENCES datacenter (idDataCenter) ON DELETE CASCADE
+DROP TABLE IF EXISTS `kinton_liquibase`.`remote_service`;
+CREATE TABLE  `kinton_liquibase`.`remote_service` (
+  `idRemoteService` int(10) unsigned NOT NULL auto_increment,
+  `uri` varchar(255) NOT NULL,
+  `idDataCenter` int(10) unsigned NOT NULL,
+  `status` INT(1) unsigned NOT NULL DEFAULT 0,
+  `remoteServiceType` varchar(255) NOT NULL,
+  `version_c` int(11) default 0,
+  PRIMARY KEY  (`idRemoteService`),
+  KEY `idDatecenter_FK` (`idDataCenter`),
+  CONSTRAINT `idDatecenter_FK` FOREIGN KEY (`idDataCenter`) REFERENCES `datacenter` (`idDataCenter`) ON DELETE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
 
 --
--- Definition of table kinton_liquibase.chef_runlist
+-- Definition of table `kinton_liquibase`.`chef_runlist`
 --
 
-DROP TABLE IF EXISTS kinton_liquibase.chef_runlist;
-CREATE TABLE  kinton_liquibase.chef_runlist (
-  id int(10) unsigned NOT NULL auto_increment,
-  idVM int(10) unsigned NOT NULL,
-  name varchar(100) NOT NULL,
-  description varchar(255),
-  priority int(10) NOT NULL default 0,
-  version_c int(11) default 0,
-  PRIMARY KEY  (id),
-  KEY chef_runlist_FK1 (idVM),
-  CONSTRAINT chef_runlist_FK1 FOREIGN KEY (idVM) REFERENCES virtualmachine (idVM) ON DELETE CASCADE
+DROP TABLE IF EXISTS `kinton_liquibase`.`chef_runlist`;
+CREATE TABLE  `kinton_liquibase`.`chef_runlist` (
+  `id` int(10) unsigned NOT NULL auto_increment,
+  `idVM` int(10) unsigned NOT NULL,
+  `name` varchar(100) NOT NULL,
+  `description` varchar(255),
+  `priority` int(10) NOT NULL default 0,
+  `version_c` int(11) default 0,
+  PRIMARY KEY  (`id`),
+  KEY `chef_runlist_FK1` (`idVM`),
+  CONSTRAINT `chef_runlist_FK1` FOREIGN KEY (`idVM`) REFERENCES `virtualmachine` (`idVM`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
 /**
- *  Definition of table kinton_liquibase.metering
+ *  Definition of table `kinton_liquibase`.`metering`
  */
 
-DROP TABLE IF EXISTS kinton_liquibase.metering;
-CREATE TABLE  kinton_liquibase.metering (
-  idMeter BIGINT unsigned NOT NULL auto_increment,
-  idDatacenter int(10) unsigned default null,
-  datacenter varchar(20) default null,
-  idRack int(15) unsigned default NULL,
-  rack varchar(20) default NULL,
-  idPhysicalMachine int(20) unsigned default NULL,
-  physicalmachine varchar(256) default NULL,
-  idStorageSystem int(10) unsigned default NULL,
-  storageSystem varchar(256) default NULL,
-  idStoragePool varchar(40) default NULL,
-  storagePool varchar(256) default NULL,
-  idVolume varchar(50) default NULL,
-  volume varchar(256) default NULL,
-  idNetwork int(11) unsigned default NULL,
-  network varchar(256) default NULL,
-  idSubnet int(11) unsigned default NULL,
-  subnet varchar(256) default NULL,
-  idEnterprise int(10) unsigned default NULL,
-  enterprise varchar(40) default NULL,
-  idUser int(10) unsigned default NULL,
-  user varchar(128) default NULL,
-  idVirtualDataCenter int(10) unsigned default NULL,
-  virtualDataCenter varchar(40) default NULL,
-  idVirtualApp int(10) unsigned default NULL,
-  virtualApp varchar(30) default NULL,
-  idVirtualMachine int(10) unsigned default NULL,
-  virtualmachine varchar(256) default NULL,
-  severity varchar(100) NOT NULL,
-  timestamp timestamp NOT NULL,
-  performedby varchar(255) NOT NULL,
-  actionperformed varchar(100) NOT NULL,
-  component varchar(255) default NULL,
-  stacktrace text default NULL,
-  PRIMARY KEY  (idMeter)
+DROP TABLE IF EXISTS `kinton_liquibase`.`metering`;
+CREATE TABLE  `kinton_liquibase`.`metering` (
+  `idMeter` BIGINT unsigned NOT NULL auto_increment,
+  `idDatacenter` int(10) unsigned default null,
+  `datacenter` varchar(20) default null,
+  `idRack` int(15) unsigned default NULL,
+  `rack` varchar(20) default NULL,
+  `idPhysicalMachine` int(20) unsigned default NULL,
+  `physicalmachine` varchar(256) default NULL,
+  `idStorageSystem` int(10) unsigned default NULL,
+  `storageSystem` varchar(256) default NULL,
+  `idStoragePool` varchar(40) default NULL,
+  `storagePool` varchar(256) default NULL,
+  `idVolume` varchar(50) default NULL,
+  `volume` varchar(256) default NULL,
+  `idNetwork` int(11) unsigned default NULL,
+  `network` varchar(256) default NULL,
+  `idSubnet` int(11) unsigned default NULL,
+  `subnet` varchar(256) default NULL,
+  `idEnterprise` int(10) unsigned default NULL,
+  `enterprise` varchar(40) default NULL,
+  `idUser` int(10) unsigned default NULL,
+  `user` varchar(128) default NULL,
+  `idVirtualDataCenter` int(10) unsigned default NULL,
+  `virtualDataCenter` varchar(40) default NULL,
+  `idVirtualApp` int(10) unsigned default NULL,
+  `virtualApp` varchar(30) default NULL,
+  `idVirtualMachine` int(10) unsigned default NULL,
+  `virtualmachine` varchar(256) default NULL,
+  `severity` varchar(100) NOT NULL,
+  `timestamp` timestamp NOT NULL,
+  `performedby` varchar(255) NOT NULL,
+  `actionperformed` varchar(100) NOT NULL,
+  `component` varchar(255) default NULL,
+  `stacktrace` text default NULL,
+  PRIMARY KEY  (`idMeter`)
 ) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
-DROP TABLE IF EXISTS kinton_liquibase.virtualimage_conversions;
-CREATE TABLE  kinton_liquibase.virtualimage_conversions (
-  id int(10) unsigned NOT NULL auto_increment,
-  idImage int(10) unsigned NOT NULL,
-  sourceType varchar(50),
-  targetType varchar(50) NOT NULL,
-  sourcePath varchar(255),
-  targetPath varchar(255) NOT NULL,
-  state varchar(50) NOT NULL,
-  timestamp timestamp NOT NULL,
-  size BIGINT default NULL,
-  version_c int(11) default 0,
-  PRIMARY KEY  (id),
-  KEY idImage_FK (idImage),
-  CONSTRAINT idImage_FK FOREIGN KEY (idImage) REFERENCES virtualimage (idImage) ON DELETE CASCADE
+DROP TABLE IF EXISTS `kinton_liquibase`.`virtualimage_conversions`;
+CREATE TABLE  `kinton_liquibase`.`virtualimage_conversions` (
+  `id` int(10) unsigned NOT NULL auto_increment,
+  `idImage` int(10) unsigned NOT NULL,
+  `sourceType` varchar(50),
+  `targetType` varchar(50) NOT NULL,
+  `sourcePath` varchar(255),
+  `targetPath` varchar(255) NOT NULL,
+  `state` varchar(50) NOT NULL,
+  `timestamp` timestamp NOT NULL,
+  `size` BIGINT default NULL,
+  `version_c` int(11) default 0,
+  PRIMARY KEY  (`id`),
+  KEY `idImage_FK` (`idImage`),
+  CONSTRAINT `idImage_FK` FOREIGN KEY (`idImage`) REFERENCES `virtualimage` (`idImage`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
-DROP TABLE IF EXISTS kinton_liquibase.virtual_appliance_conversions;
-CREATE TABLE kinton_liquibase.virtual_appliance_conversions (
-  id int(10) unsigned NOT NULL auto_increment,
-  idConversion int(10) unsigned NOT NULL,
-  idVirtualAppliance int(10) unsigned NOT NULL,
-  idUser int(10) unsigned,
-  forceLimits boolean,
-  idNode int(10) unsigned,
-  PRIMARY KEY (id),
-  KEY idConversion_K (idConversion),
-  KEY idVirtualAppliance_K (idVirtualAppliance),
-  KEY idUser_K (idUser),
-  CONSTRAINT virtualimage_conversions_FK FOREIGN KEY (idConversion) REFERENCES virtualimage_conversions (id) ON DELETE CASCADE,
-  CONSTRAINT virtualapp_FK FOREIGN KEY (idVirtualAppliance) REFERENCES virtualapp (idVirtualApp) ON DELETE CASCADE,
-  CONSTRAINT user_FK FOREIGN KEY (idUser) REFERENCES user (idUser),
-  constraint virtual_appliance_conversions_node_FK foreign key (idNode) references nodevirtualimage (idNode)
+DROP TABLE IF EXISTS `kinton_liquibase`.`virtual_appliance_conversions`;
+CREATE TABLE `kinton_liquibase`.`virtual_appliance_conversions` (
+  `id` int(10) unsigned NOT NULL auto_increment,
+  `idConversion` int(10) unsigned NOT NULL,
+  `idVirtualAppliance` int(10) unsigned NOT NULL,
+  `idUser` int(10) unsigned,
+  `forceLimits` boolean,
+  `idNode` int(10) unsigned,
+  PRIMARY KEY (`id`),
+  KEY `idConversion_K` (`idConversion`),
+  KEY `idVirtualAppliance_K` (`idVirtualAppliance`),
+  KEY `idUser_K` (`idUser`),
+  CONSTRAINT `virtualimage_conversions_FK` FOREIGN KEY (`idConversion`) REFERENCES `virtualimage_conversions` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `virtualapp_FK` FOREIGN KEY (`idVirtualAppliance`) REFERENCES `virtualapp` (`idVirtualApp`) ON DELETE CASCADE,
+  CONSTRAINT `user_FK` FOREIGN KEY (`idUser`) REFERENCES `user` (`idUser`),
+  constraint `virtual_appliance_conversions_node_FK` foreign key (`idNode`) references `nodevirtualimage` (`idNode`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 DROP TABLE IF EXISTS alerts;
 CREATE TABLE IF NOT EXISTS alerts (
   id char(36) NOT NULL,
-  type varchar(60) NOT NULL,
-  value varchar(60) NOT NULL,
+  `type` varchar(60) NOT NULL,
+  `value` varchar(60) NOT NULL,
   description varchar(240) DEFAULT NULL,
   tstamp timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-LOCK TABLES alerts WRITE;
+LOCK TABLES `alerts` WRITE;
 insert into alerts (id, type, value, tstamp) values ("1", "REGISTER", "LATER", date_sub(now(), INTERVAL 4 DAY)), ("2", "HEARTBEAT", "YES", date_sub(now(), INTERVAL 4 DAY));
 UNLOCK TABLES;
 
@@ -1355,19 +1356,19 @@ CREATE TABLE IF NOT EXISTS register (
 -- System properties
 --
 
-DROP TABLE IF EXISTS kinton_liquibase.system_properties;
-CREATE TABLE kinton_liquibase.system_properties (
-  systemPropertyId int(10) unsigned NOT NULL auto_increment,
-  version_c int(11) default 0,
-  name varchar(255) NOT NULL,
-  value varchar(255) NOT NULL,
-  description varchar(255) NULL,
-  PRIMARY KEY (systemPropertyId)
+DROP TABLE IF EXISTS `kinton_liquibase`.`system_properties`;
+CREATE TABLE `kinton_liquibase`.`system_properties` (
+  `systemPropertyId` int(10) unsigned NOT NULL auto_increment,
+  `version_c` int(11) default 0,
+  `name` varchar(255) NOT NULL,
+  `value` varchar(255) NOT NULL,
+  `description` varchar(255) NULL,
+  PRIMARY KEY (`systemPropertyId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-/*!40000 ALTER TABLE system_properties DISABLE KEYS */;
-LOCK TABLES system_properties WRITE;
-INSERT INTO kinton_liquibase.system_properties (name, value, description) VALUES
+/*!40000 ALTER TABLE `system_properties` DISABLE KEYS */;
+LOCK TABLES `system_properties` WRITE;
+INSERT INTO `kinton_liquibase`.`system_properties` (`name`, `value`, `description`) VALUES
  ("client.applibrary.ovfpackagesDownloadingProgressUpdateInterval","10","Time interval in seconds"),
  ("client.applibrary.virtualimageUploadProgressUpdateInterval","10","Time interval in seconds"),
  ("client.dashboard.abiquoURL","http://www.abiquo.org","URL of Abiquo web page"),
@@ -1454,151 +1455,151 @@ INSERT INTO kinton_liquibase.system_properties (name, value, description) VALUES
  ("client.network.defaultSufixDNS","","default sufix DNS");
 UNLOCK TABLES;
 
-/*!40000 ALTER TABLE system_properties ENABLE KEYS */;
+/*!40000 ALTER TABLE `system_properties` ENABLE KEYS */;
 
 
 -- -----------------------------------------------------
--- Table kinton_liquibase.apps_library
+-- Table `kinton_liquibase`.`apps_library`
 -- -----------------------------------------------------
-CREATE  TABLE IF NOT EXISTS kinton_liquibase.apps_library (
-  id_apps_library INT UNSIGNED NOT NULL auto_increment,
-  idEnterprise INT UNSIGNED NOT NULL ,
-  PRIMARY KEY (id_apps_library),
-  CONSTRAINT fk_idEnterpriseApps FOREIGN KEY ( idEnterprise ) REFERENCES enterprise ( idEnterprise ) ON DELETE CASCADE
+CREATE  TABLE IF NOT EXISTS `kinton_liquibase`.`apps_library` (
+  `id_apps_library` INT UNSIGNED NOT NULL auto_increment,
+  `idEnterprise` INT UNSIGNED NOT NULL ,
+  PRIMARY KEY (`id_apps_library`),
+  CONSTRAINT `fk_idEnterpriseApps` FOREIGN KEY ( `idEnterprise` ) REFERENCES `enterprise` ( `idEnterprise` ) ON DELETE CASCADE
   )
 ENGINE = InnoDB DEFAULT CHARSET=utf8;
 
-LOCK TABLES apps_library WRITE;
-insert into kinton_liquibase.apps_library (id_apps_library, idEnterprise) values (1, 1);
+LOCK TABLES `apps_library` WRITE;
+insert into `kinton_liquibase`.`apps_library` (id_apps_library, idEnterprise) values (1, 1);
 UNLOCK TABLES;
 
 
 -- -----------------------------------------------------
--- Table kinton_liquibase.ovf_package_list
+-- Table `kinton_liquibase`.`ovf_package_list`
 -- -----------------------------------------------------
-CREATE  TABLE IF NOT EXISTS kinton_liquibase.ovf_package_list (
-  id_ovf_package_list INT NOT NULL auto_increment,
-  name VARCHAR(45) NOT NULL,
-  url VARCHAR(255) NULL,
-  id_apps_library INT UNSIGNED NOT NULL ,
-  version_c int(11) default 0,
-  PRIMARY KEY (id_ovf_package_list) ,
-  CONSTRAINT fk_ovf_package_list_repository
-    FOREIGN KEY (id_apps_library)
-    REFERENCES kinton_liquibase.apps_library (id_apps_library)
+CREATE  TABLE IF NOT EXISTS `kinton_liquibase`.`ovf_package_list` (
+  `id_ovf_package_list` INT NOT NULL auto_increment,
+  `name` VARCHAR(45) NOT NULL,
+  `url` VARCHAR(255) NULL,
+  `id_apps_library` INT UNSIGNED NOT NULL ,
+  `version_c` int(11) default 0,
+  PRIMARY KEY (`id_ovf_package_list`) ,
+  CONSTRAINT `fk_ovf_package_list_repository`
+    FOREIGN KEY (`id_apps_library`)
+    REFERENCES `kinton_liquibase`.`apps_library` (`id_apps_library`)
     ON DELETE CASCADE
     ON UPDATE NO ACTION
   )
 ENGINE = InnoDB DEFAULT CHARSET=utf8;
 -- -----------------------------------------------------
--- Table kinton_liquibase.ovf_package
+-- Table `kinton_liquibase`.`ovf_package`
 -- -----------------------------------------------------
-CREATE  TABLE IF NOT EXISTS kinton_liquibase.ovf_package (
-  id_ovf_package INT NOT NULL auto_increment,
-  id_apps_library INT UNSIGNED NOT NULL ,
-  url VARCHAR(255) NULL NOT NULL,
-  name VARCHAR(255) NULL ,
-  description VARCHAR(255) NULL ,
-  iconUrl varchar(255) default NULL,
-  productName VARCHAR(255) NULL ,
-  productUrl VARCHAR(45) NULL ,
-  productVersion VARCHAR(45) NULL ,
-  productVendor VARCHAR(45) NULL ,
-   idCategory int(3) unsigned NULL,  -- NOT NULL default 1,
-   diskSizeMb bigint(20) NULL,
-  version_c int(11) default 0,
-  type varchar(50) not null,
+CREATE  TABLE IF NOT EXISTS `kinton_liquibase`.`ovf_package` (
+  `id_ovf_package` INT NOT NULL auto_increment,
+  `id_apps_library` INT UNSIGNED NOT NULL ,
+  `url` VARCHAR(255) NULL NOT NULL,
+  `name` VARCHAR(255) NULL ,
+  `description` VARCHAR(255) NULL ,
+  `iconUrl` varchar(255) default NULL,
+  `productName` VARCHAR(255) NULL ,
+  `productUrl` VARCHAR(45) NULL ,
+  `productVersion` VARCHAR(45) NULL ,
+  `productVendor` VARCHAR(45) NULL ,
+   `idCategory` int(3) unsigned NULL,  -- NOT NULL default 1,
+   `diskSizeMb` bigint(20) NULL,
+  `version_c` int(11) default 0,
+  `type` varchar(50) not null,
 
-  PRIMARY KEY (id_ovf_package),
-  CONSTRAINT fk_ovf_package_repository
-    FOREIGN KEY (id_apps_library)
-    REFERENCES kinton_liquibase.apps_library (id_apps_library)
+  PRIMARY KEY (`id_ovf_package`),
+  CONSTRAINT `fk_ovf_package_repository`
+    FOREIGN KEY (`id_apps_library`)
+    REFERENCES `kinton_liquibase`.`apps_library` (`id_apps_library`)
     ON DELETE CASCADE,
     -- ON UPDATE NO ACTION
-  CONSTRAINT fk_ovf_package_category FOREIGN KEY (idCategory) REFERENCES category (idCategory) ON DELETE SET NULL
+  CONSTRAINT `fk_ovf_package_category` FOREIGN KEY (`idCategory`) REFERENCES `category` (`idCategory`) ON DELETE SET NULL
   )
 ENGINE = InnoDB DEFAULT CHARSET=utf8;
 -- -----------------------------------------------------
--- Table kinton_liquibase.ovf_package_list_has_ovf_package
+-- Table `kinton_liquibase`.`ovf_package_list_has_ovf_package`
 -- -----------------------------------------------------
-CREATE  TABLE IF NOT EXISTS kinton_liquibase.ovf_package_list_has_ovf_package (
-  id_ovf_package_list INT NOT NULL ,
-  id_ovf_package INT NOT NULL ,
-  version_c int(11) default 0,
-  PRIMARY KEY (id_ovf_package_list, id_ovf_package) ,
-  INDEX fk_ovf_package_list_has_ovf_package_ovf_package_list1 (id_ovf_package_list ASC) ,
-  INDEX fk_ovf_package_list_has_ovf_package_ovf_package1 (id_ovf_package ASC) ,
-  CONSTRAINT fk_ovf_package_list_has_ovf_package_ovf_package_list1
-    FOREIGN KEY (id_ovf_package_list )
-    REFERENCES kinton_liquibase.ovf_package_list (id_ovf_package_list )
+CREATE  TABLE IF NOT EXISTS `kinton_liquibase`.`ovf_package_list_has_ovf_package` (
+  `id_ovf_package_list` INT NOT NULL ,
+  `id_ovf_package` INT NOT NULL ,
+  `version_c` int(11) default 0,
+  PRIMARY KEY (`id_ovf_package_list`, `id_ovf_package`) ,
+  INDEX `fk_ovf_package_list_has_ovf_package_ovf_package_list1` (`id_ovf_package_list` ASC) ,
+  INDEX `fk_ovf_package_list_has_ovf_package_ovf_package1` (`id_ovf_package` ASC) ,
+  CONSTRAINT `fk_ovf_package_list_has_ovf_package_ovf_package_list1`
+    FOREIGN KEY (`id_ovf_package_list` )
+    REFERENCES `kinton_liquibase`.`ovf_package_list` (`id_ovf_package_list` )
     ON DELETE CASCADE
     ON UPDATE NO ACTION,
-  CONSTRAINT fk_ovf_package_list_has_ovf_package_ovf_package1
-    FOREIGN KEY (id_ovf_package )
-    REFERENCES kinton_liquibase.ovf_package (id_ovf_package )
+  CONSTRAINT `fk_ovf_package_list_has_ovf_package_ovf_package1`
+    FOREIGN KEY (`id_ovf_package` )
+    REFERENCES `kinton_liquibase`.`ovf_package` (`id_ovf_package` )
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------------------
--- Workload Engine: Table kinton_liquibase.workload_enterprise_exclusion_rule
+-- Workload Engine: Table `kinton_liquibase`.`workload_enterprise_exclusion_rule`
 -- --------------------------------------------------------------------
 
-DROP TABLE IF EXISTS kinton_liquibase.workload_enterprise_exclusion_rule;
-CREATE TABLE  kinton_liquibase.workload_enterprise_exclusion_rule (
-  id int(10) unsigned NOT NULL AUTO_INCREMENT,
-  idEnterprise1 int(10) unsigned NOT NULL,
-  idEnterprise2 int(10) unsigned NOT NULL,
-  version_c integer NOT NULL DEFAULT 1,
-  PRIMARY KEY (id),
-  KEY FK_eerule_enterprise_1 (idEnterprise1),
-  KEY FK_eerule_enterprise_2 (idEnterprise2),
-  CONSTRAINT FK_eerule_enterprise_1 FOREIGN KEY (idEnterprise1) REFERENCES enterprise (idEnterprise) ON DELETE CASCADE,
-  CONSTRAINT FK_eerule_enterprise_2 FOREIGN KEY (idEnterprise2) REFERENCES enterprise (idEnterprise) ON DELETE CASCADE
+DROP TABLE IF EXISTS `kinton_liquibase`.`workload_enterprise_exclusion_rule`;
+CREATE TABLE  `kinton_liquibase`.`workload_enterprise_exclusion_rule` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `idEnterprise1` int(10) unsigned NOT NULL,
+  `idEnterprise2` int(10) unsigned NOT NULL,
+  `version_c` integer NOT NULL DEFAULT 1,
+  PRIMARY KEY (`id`),
+  KEY `FK_eerule_enterprise_1` (`idEnterprise1`),
+  KEY `FK_eerule_enterprise_2` (`idEnterprise2`),
+  CONSTRAINT `FK_eerule_enterprise_1` FOREIGN KEY (`idEnterprise1`) REFERENCES `enterprise` (`idEnterprise`) ON DELETE CASCADE,
+  CONSTRAINT `FK_eerule_enterprise_2` FOREIGN KEY (`idEnterprise2`) REFERENCES `enterprise` (`idEnterprise`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- ------------------------------------------------------------
--- Workload Engine: Table kinton_liquibase.workload_machine_load_rule
+-- Workload Engine: Table `kinton_liquibase`.`workload_machine_load_rule`
 -- ------------------------------------------------------------
 
-DROP TABLE IF EXISTS kinton_liquibase.workload_machine_load_rule;
-CREATE TABLE  kinton_liquibase.workload_machine_load_rule (
-  id int(10) unsigned NOT NULL AUTO_INCREMENT,
-  ramLoadPercentage int(10) unsigned NOT NULL,
-  cpuLoadPercentage int(10) unsigned NOT NULL,
-  idDatacenter int(10) unsigned DEFAULT NULL,
-  idRack int(15) unsigned DEFAULT NULL,
-  idMachine int(20) unsigned DEFAULT NULL,
-  version_c integer NOT NULL DEFAULT 1,
-  PRIMARY KEY (id),
-  KEY FK_mlrule_datacenter (idDatacenter),
-  KEY FK_mlrule_rack (idRack),
-  KEY FK_mlrule_machine (idMachine),
-  CONSTRAINT FK_mlrule_datacenter FOREIGN KEY (idDatacenter) REFERENCES datacenter (idDataCenter),
-  CONSTRAINT FK_mlrule_machine FOREIGN KEY (idMachine) REFERENCES physicalmachine (idPhysicalMachine),
-  CONSTRAINT FK_mlrule_rack FOREIGN KEY (idRack) REFERENCES rack (idRack)
+DROP TABLE IF EXISTS `kinton_liquibase`.`workload_machine_load_rule`;
+CREATE TABLE  `kinton_liquibase`.`workload_machine_load_rule` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `ramLoadPercentage` int(10) unsigned NOT NULL,
+  `cpuLoadPercentage` int(10) unsigned NOT NULL,
+  `idDatacenter` int(10) unsigned DEFAULT NULL,
+  `idRack` int(15) unsigned DEFAULT NULL,
+  `idMachine` int(20) unsigned DEFAULT NULL,
+  `version_c` integer NOT NULL DEFAULT 1,
+  PRIMARY KEY (`id`),
+  KEY `FK_mlrule_datacenter` (`idDatacenter`),
+  KEY `FK_mlrule_rack` (`idRack`),
+  KEY `FK_mlrule_machine` (`idMachine`),
+  CONSTRAINT `FK_mlrule_datacenter` FOREIGN KEY (`idDatacenter`) REFERENCES `datacenter` (`idDataCenter`),
+  CONSTRAINT `FK_mlrule_machine` FOREIGN KEY (`idMachine`) REFERENCES `physicalmachine` (`idPhysicalMachine`),
+  CONSTRAINT `FK_mlrule_rack` FOREIGN KEY (`idRack`) REFERENCES `rack` (`idRack`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- ----------------------------------------------------------
--- Workload Engine: Table kinton_liquibase.workload_fit_policy_rule
+-- Workload Engine: Table `kinton_liquibase`.`workload_fit_policy_rule`
 -- ----------------------------------------------------------
 
-DROP TABLE IF EXISTS kinton_liquibase.workload_fit_policy_rule;
-CREATE TABLE  kinton_liquibase.workload_fit_policy_rule (
-  id int(10) unsigned NOT NULL AUTO_INCREMENT,
-  fitPolicy varchar(20) NOT NULL,
-  idDatacenter int(10) unsigned DEFAULT NULL,
-  version_c integer NOT NULL DEFAULT 1,
-  PRIMARY KEY (id),
-  KEY FK_fprule_datacenter (idDatacenter),
-  CONSTRAINT FK_fprule_datacenter FOREIGN KEY (idDatacenter) REFERENCES datacenter (idDataCenter) ON DELETE CASCADE
+DROP TABLE IF EXISTS `kinton_liquibase`.`workload_fit_policy_rule`;
+CREATE TABLE  `kinton_liquibase`.`workload_fit_policy_rule` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `fitPolicy` varchar(20) NOT NULL,
+  `idDatacenter` int(10) unsigned DEFAULT NULL,
+  `version_c` integer NOT NULL DEFAULT 1,
+  PRIMARY KEY (`id`),
+  KEY `FK_fprule_datacenter` (`idDatacenter`),
+  CONSTRAINT `FK_fprule_datacenter` FOREIGN KEY (`idDatacenter`) REFERENCES `datacenter` (`idDataCenter`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-/*!40000 ALTER TABLE workload_fit_policy_rule DISABLE KEYS */;
-LOCK TABLES workload_fit_policy_rule WRITE;
-INSERT INTO kinton_liquibase.workload_fit_policy_rule (id,fitPolicy) VALUES (0, 'PROGRESSIVE');
+/*!40000 ALTER TABLE `workload_fit_policy_rule` DISABLE KEYS */;
+LOCK TABLES `workload_fit_policy_rule` WRITE;
+INSERT INTO `kinton_liquibase`.`workload_fit_policy_rule` (id,fitPolicy) VALUES (0, 'PROGRESSIVE');
 UNLOCK TABLES;
-/*!40000 ALTER TABLE workload_fit_policy_rule ENABLE KEYS */;
+/*!40000 ALTER TABLE `workload_fit_policy_rule` ENABLE KEYS */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
 /*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
@@ -1610,32 +1611,32 @@ UNLOCK TABLES;
 
 
 -- -----------------------------------------------------
--- Table kinton_liquibase.enterprise_limits_by_datacenter
+-- Table `kinton_liquibase`.`enterprise_limits_by_datacenter`
 -- -----------------------------------------------------
 
-DROP TABLE IF EXISTS kinton_liquibase.enterprise_limits_by_datacenter;
-CREATE TABLE  kinton_liquibase.enterprise_limits_by_datacenter (
-  idDatacenterLimit int(10) unsigned NOT NULL AUTO_INCREMENT,
-  idEnterprise int(10) unsigned,
-  idDataCenter int(10) unsigned,
-  ramSoft bigint(20) NOT NULL,
-  cpuSoft bigint(20) NOT NULL,
-  hdSoft bigint(20)  NOT NULL,
-  storageSoft bigint(20)  NOT NULL,
-  repositorySoft bigint(20)  NOT NULL,
-  vlanSoft bigint(20)  NOT NULL,
-  publicIPSoft bigint(20)  NOT NULL,
-  ramHard bigint(20) NOT NULL,
-  cpuHard bigint(20) NOT NULL,
-  hdHard bigint(20)  NOT NULL,
-  storageHard bigint(20)  NOT NULL,
-  repositoryHard bigint(20)  NOT NULL,
-  vlanHard bigint(20)  NOT NULL,
-  publicIPHard bigint(20)  NOT NULL,
-  version_c integer NOT NULL DEFAULT 1,
-  default_vlan_network_id int(11) unsigned default NULL,
-  PRIMARY KEY (idDatacenterLimit),
-  CONSTRAINT enterprise_FK7 FOREIGN KEY (default_vlan_network_id) REFERENCES vlan_network (vlan_network_id)
+DROP TABLE IF EXISTS `kinton_liquibase`.`enterprise_limits_by_datacenter`;
+CREATE TABLE  `kinton_liquibase`.`enterprise_limits_by_datacenter` (
+  `idDatacenterLimit` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `idEnterprise` int(10) unsigned,
+  `idDataCenter` int(10) unsigned,
+  `ramSoft` bigint(20) NOT NULL,
+  `cpuSoft` bigint(20) NOT NULL,
+  `hdSoft` bigint(20)  NOT NULL,
+  `storageSoft` bigint(20)  NOT NULL,
+  `repositorySoft` bigint(20)  NOT NULL,
+  `vlanSoft` bigint(20)  NOT NULL,
+  `publicIPSoft` bigint(20)  NOT NULL,
+  `ramHard` bigint(20) NOT NULL,
+  `cpuHard` bigint(20) NOT NULL,
+  `hdHard` bigint(20)  NOT NULL,
+  `storageHard` bigint(20)  NOT NULL,
+  `repositoryHard` bigint(20)  NOT NULL,
+  `vlanHard` bigint(20)  NOT NULL,
+  `publicIPHard` bigint(20)  NOT NULL,
+  `version_c` integer NOT NULL DEFAULT 1,
+  `default_vlan_network_id` int(11) unsigned default NULL,
+  PRIMARY KEY (`idDatacenterLimit`),
+  CONSTRAINT `enterprise_FK7` FOREIGN KEY (`default_vlan_network_id`) REFERENCES `vlan_network` (`vlan_network_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
 
 -- MySQL Administrator dump 1.4
@@ -1653,256 +1654,256 @@ CREATE TABLE  kinton_liquibase.enterprise_limits_by_datacenter (
 /*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 
-USE kinton;
+USE kinton_liquibase;
 
 -- 
--- Definition of table kinton_liquibase.tier.
+-- Definition of table `kinton_liquibase`.`tier`.
 --
-DROP TABLE IF EXISTS kinton_liquibase.tier;
-CREATE TABLE kinton_liquibase.tier (
-    id int(10) unsigned NOT NULL AUTO_INCREMENT,
-    name varchar(40) NOT NULL,
-    description varchar(255) NOT NULL,
-    isEnabled tinyint(1) unsigned NOT NULL default '1',
-    idDataCenter int(10) unsigned NOT NULL,
-    version_c integer NOT NULL DEFAULT 1,
-     PRIMARY KEY  (id),
-     CONSTRAINT tier_FK_1 FOREIGN KEY (idDataCenter) REFERENCES datacenter (idDataCenter) ON DELETE CASCADE
+DROP TABLE IF EXISTS `kinton_liquibase`.`tier`;
+CREATE TABLE `kinton_liquibase`.`tier` (
+    `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+    `name` varchar(40) NOT NULL,
+    `description` varchar(255) NOT NULL,
+    `isEnabled` tinyint(1) unsigned NOT NULL default '1',
+    `idDataCenter` int(10) unsigned NOT NULL,
+    `version_c` integer NOT NULL DEFAULT 1,
+     PRIMARY KEY  (`id`),
+     CONSTRAINT `tier_FK_1` FOREIGN KEY (`idDataCenter`) REFERENCES `datacenter` (`idDataCenter`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8; 
 
-/*!40000 ALTER TABLE tier ENABLE KEYS */;
+/*!40000 ALTER TABLE `tier` ENABLE KEYS */;
 --
--- Definition of table kinton_liquibase.cabin
+-- Definition of table `kinton_liquibase`.`cabin`
 --
 
-CREATE TABLE kinton_liquibase.storage_device (
-  id int(10) unsigned NOT NULL AUTO_INCREMENT,
-  name varchar(256) NOT NULL,
-  idDataCenter int(10) unsigned NOT NULL,
-  management_ip varchar(256) NOT NULL,
-  management_port int(5) unsigned NOT NULL DEFAULT '0',
-  iscsi_ip varchar(256) NOT NULL,
-  iscsi_port int(5) unsigned NOT NULL DEFAULT '0',
-  storage_technology varchar(256) DEFAULT NULL,
-  username varchar(256) DEFAULT NULL,
-  password varchar(256) DEFAULT NULL,
-  version_c integer NOT NULL DEFAULT 1,
-  PRIMARY KEY  (id),
-  CONSTRAINT storage_device_FK_1 FOREIGN KEY (idDataCenter) REFERENCES datacenter (idDataCenter) ON DELETE CASCADE
+CREATE TABLE `kinton_liquibase`.`storage_device` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(256) NOT NULL,
+  `idDataCenter` int(10) unsigned NOT NULL,
+  `management_ip` varchar(256) NOT NULL,
+  `management_port` int(5) unsigned NOT NULL DEFAULT '0',
+  `iscsi_ip` varchar(256) NOT NULL,
+  `iscsi_port` int(5) unsigned NOT NULL DEFAULT '0',
+  `storage_technology` varchar(256) DEFAULT NULL,
+  `username` varchar(256) DEFAULT NULL,
+  `password` varchar(256) DEFAULT NULL,
+  `version_c` integer NOT NULL DEFAULT 1,
+  PRIMARY KEY  (`id`),
+  CONSTRAINT `storage_device_FK_1` FOREIGN KEY (`idDataCenter`) REFERENCES `datacenter` (`idDataCenter`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-/*!40000 ALTER TABLE storage_device DISABLE KEYS */;
-LOCK TABLES kinton_liquibase.storage_device WRITE;
+/*!40000 ALTER TABLE `storage_device` DISABLE KEYS */;
+LOCK TABLES `kinton_liquibase`.`storage_device` WRITE;
 UNLOCK TABLES;
-/*!40000 ALTER TABLE storage_device ENABLE KEYS */;
+/*!40000 ALTER TABLE `storage_device` ENABLE KEYS */;
 
 --
--- Definition of table kinton_liquibase.storage_pool
+-- Definition of table `kinton_liquibase`.`storage_pool`
 --
 
-DROP TABLE IF EXISTS kinton_liquibase.storage_pool;
-CREATE TABLE  kinton_liquibase.storage_pool (
-  idStorage varchar(40) NOT NULL,
-  idStorageDevice int(10) unsigned NOT NULL,
-  idTier int(10) unsigned NOT NULL,
-  isEnabled tinyint(1) unsigned NOT NULL default '1',
-  version_c integer NOT NULL DEFAULT 1,
-  totalSizeInMb bigint(20) unsigned NOT NULL default 0,
-  usedSizeInMb bigint(20) unsigned NOT NULL default 0,
-  availableSizeInMb bigint(20) unsigned NOT NULL default 0,
-  name varchar(256) DEFAULT NULL,
-  PRIMARY KEY (idStorage),
-  CONSTRAINT storage_pool_FK1 FOREIGN KEY (idStorageDevice) REFERENCES kinton_liquibase.storage_device (id) ON DELETE CASCADE,
-  CONSTRAINT storage_pool_FK2 FOREIGN KEY (idTier) REFERENCES kinton_liquibase.tier (id) ON DELETE RESTRICT
+DROP TABLE IF EXISTS `kinton_liquibase`.`storage_pool`;
+CREATE TABLE  `kinton_liquibase`.`storage_pool` (
+  `idStorage` varchar(40) NOT NULL,
+  `idStorageDevice` int(10) unsigned NOT NULL,
+  `idTier` int(10) unsigned NOT NULL,
+  `isEnabled` tinyint(1) unsigned NOT NULL default '1',
+  `version_c` integer NOT NULL DEFAULT 1,
+  `totalSizeInMb` bigint(20) unsigned NOT NULL default 0,
+  `usedSizeInMb` bigint(20) unsigned NOT NULL default 0,
+  `availableSizeInMb` bigint(20) unsigned NOT NULL default 0,
+  `name` varchar(256) DEFAULT NULL,
+  PRIMARY KEY (`idStorage`),
+  CONSTRAINT `storage_pool_FK1` FOREIGN KEY (`idStorageDevice`) REFERENCES `kinton_liquibase`.`storage_device` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `storage_pool_FK2` FOREIGN KEY (`idTier`) REFERENCES `kinton_liquibase`.`tier` (`id`) ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
--- Dumping data for table kinton_liquibase.storage_pool
+-- Dumping data for table `kinton_liquibase`.`storage_pool`
 --
 
-/*!40000 ALTER TABLE storage_pool DISABLE KEYS */;
-LOCK TABLES storage_pool WRITE;
+/*!40000 ALTER TABLE `storage_pool` DISABLE KEYS */;
+LOCK TABLES `storage_pool` WRITE;
 UNLOCK TABLES;
-/*!40000 ALTER TABLE storage_pool ENABLE KEYS */;
+/*!40000 ALTER TABLE `storage_pool` ENABLE KEYS */;
 
 --
--- Definition of table kinton_liquibase.volume_management
+-- Definition of table `kinton_liquibase`.`volume_management`
 --
-DROP TABLE IF EXISTS kinton_liquibase.volume_management;
-CREATE TABLE  kinton_liquibase.volume_management (
-  idManagement int(10) unsigned NOT NULL,
-  usedSize bigint(20) unsigned NOT NULL default 0,
-  idSCSI varchar(256) NOT NULL,
-  state int(11) NOT NULL,
-  idStorage varchar(40) NOT NULL,
-  idImage int(4) unsigned default NULL,
-  version_c int(11) default 0,
-  KEY idStorage_FK (idStorage),
-  KEY idManagement_FK (idManagement),
-  KEY volumemanagement_FK3 (idImage),
-  CONSTRAINT idStorage_FK FOREIGN KEY (idStorage) REFERENCES storage_pool (idStorage) ON DELETE CASCADE,
-  CONSTRAINT idManagement_FK FOREIGN KEY (idManagement) REFERENCES rasd_management (idManagement) ON DELETE CASCADE,
-  CONSTRAINT volumemanagement_FK3 FOREIGN KEY (idImage) REFERENCES virtualimage (idImage) ON DELETE CASCADE
+DROP TABLE IF EXISTS `kinton_liquibase`.`volume_management`;
+CREATE TABLE  `kinton_liquibase`.`volume_management` (
+  `idManagement` int(10) unsigned NOT NULL,
+  `usedSize` bigint(20) unsigned NOT NULL default 0,
+  `idSCSI` varchar(256) NOT NULL,
+  `state` int(11) NOT NULL,
+  `idStorage` varchar(40) NOT NULL,
+  `idImage` int(4) unsigned default NULL,
+  `version_c` int(11) default 0,
+  KEY `idStorage_FK` (`idStorage`),
+  KEY `idManagement_FK` (`idManagement`),
+  KEY `volumemanagement_FK3` (`idImage`),
+  CONSTRAINT `idStorage_FK` FOREIGN KEY (`idStorage`) REFERENCES `storage_pool` (`idStorage`) ON DELETE CASCADE,
+  CONSTRAINT `idManagement_FK` FOREIGN KEY (`idManagement`) REFERENCES `rasd_management` (`idManagement`) ON DELETE CASCADE,
+  CONSTRAINT `volumemanagement_FK3` FOREIGN KEY (`idImage`) REFERENCES `virtualimage` (`idImage`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-/*!40000 ALTER TABLE volume_management DISABLE KEYS */;
-LOCK TABLES volume_management WRITE;
+/*!40000 ALTER TABLE `volume_management` DISABLE KEYS */;
+LOCK TABLES `volume_management` WRITE;
 UNLOCK TABLES;
-/*!40000 ALTER TABLE volume_management ENABLE KEYS */;
+/*!40000 ALTER TABLE `volume_management` ENABLE KEYS */;
 --
--- Definition of table kinton_liquibase.disk_management
+-- Definition of table `kinton_liquibase`.`disk_management`
 --
-DROP TABLE IF EXISTS kinton_liquibase.disk_management;
-CREATE TABLE  kinton_liquibase.disk_management (
-  idManagement int(10) unsigned NOT NULL,
-  idDatastore int(10) unsigned default NULL,
-  KEY disk_idManagement_FK (idManagement),
-  KEY disk_management_datastore_FK (idDatastore),
-  CONSTRAINT disk_idManagement_FK FOREIGN KEY (idManagement) REFERENCES rasd_management (idManagement) ON DELETE CASCADE,
-  CONSTRAINT disk_datastore_FK FOREIGN KEY (idDatastore) REFERENCES datastore (idDatastore)
+DROP TABLE IF EXISTS `kinton_liquibase`.`disk_management`;
+CREATE TABLE  `kinton_liquibase`.`disk_management` (
+  `idManagement` int(10) unsigned NOT NULL,
+  `idDatastore` int(10) unsigned default NULL,
+  KEY `disk_idManagement_FK` (`idManagement`),
+  KEY `disk_management_datastore_FK` (`idDatastore`),
+  CONSTRAINT `disk_idManagement_FK` FOREIGN KEY (`idManagement`) REFERENCES `rasd_management` (`idManagement`) ON DELETE CASCADE,
+  CONSTRAINT `disk_datastore_FK` FOREIGN KEY (`idDatastore`) REFERENCES `datastore` (`idDatastore`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
--- Dumping data for table kinton_liquibase.volume_management
+-- Dumping data for table `kinton_liquibase`.`volume_management`
 --
 
 
 --
--- Definition of table kinton_liquibase.initiator_mapping
+-- Definition of table `kinton_liquibase`.`initiator_mapping`
 --
 
-DROP TABLE IF EXISTS kinton_liquibase.initiator_mapping;
-CREATE TABLE  kinton_liquibase.initiator_mapping (
-  idInitiatorMapping int(10) unsigned NOT NULL auto_increment,
-  idManagementint(10) unsigned NOT NULL,
-  initiatorIqn varchar(256) NOT NULL,
-  targetIqn varchar(256) NOT NULL,
-  targetLun int(10) NOT NULL,
-  version_c int(11) default 0,
-  PRIMARY KEY  (idInitiatorMapping),
-  KEY volume_managementFK_1 (idManagement),
-  CONSTRAINT volume_managementFK_1 FOREIGN KEY (idManagement) REFERENCES volume_management (idManagement) ON DELETE CASCADE
+DROP TABLE IF EXISTS `kinton_liquibase`.`initiator_mapping`;
+CREATE TABLE  `kinton_liquibase`.`initiator_mapping` (
+  `idInitiatorMapping` int(10) unsigned NOT NULL auto_increment,
+  `idManagement`int(10) unsigned NOT NULL,
+  `initiatorIqn` varchar(256) NOT NULL,
+  `targetIqn` varchar(256) NOT NULL,
+  `targetLun` int(10) NOT NULL,
+  `version_c` int(11) default 0,
+  PRIMARY KEY  (`idInitiatorMapping`),
+  KEY `volume_managementFK_1` (`idManagement`),
+  CONSTRAINT `volume_managementFK_1` FOREIGN KEY (`idManagement`) REFERENCES `volume_management` (`idManagement`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
--- Dumping data for table kinton_liquibase.initiator_mapping
+-- Dumping data for table `kinton_liquibase`.`initiator_mapping`
 --
 
-/*!40000 ALTER TABLE initiator_mapping DISABLE KEYS */;
-LOCK TABLES initiator_mapping WRITE;
+/*!40000 ALTER TABLE `initiator_mapping` DISABLE KEYS */;
+LOCK TABLES `initiator_mapping` WRITE;
 UNLOCK TABLES;
-/*!40000 ALTER TABLE initiator_mapping ENABLE KEYS */;
+/*!40000 ALTER TABLE `initiator_mapping` ENABLE KEYS */;
 
 
 --
--- Definition of table kinton_liquibase.diskstateful_conversions
+-- Definition of table `kinton_liquibase`.`diskstateful_conversions`
 --
-DROP TABLE IF EXISTS kinton_liquibase.diskstateful_conversions;
-CREATE TABLE  kinton_liquibase.diskstateful_conversions (
-  id int(10) unsigned NOT NULL auto_increment,
-  imagePath varchar(256) NOT NULL,
-  idManagement int(10) unsigned NOT NULL,
-  state varchar(50) NOT NULL,
-  convertionTimestamp timestamp NOT NULL,
-  version_c int(11) default 0,
-  PRIMARY KEY  (id),
-  KEY idManagement_FK2 (idManagement),
-  CONSTRAINT idManagement_FK2 FOREIGN KEY (idManagement) REFERENCES volume_management (idManagement) ON DELETE CASCADE
+DROP TABLE IF EXISTS `kinton_liquibase`.`diskstateful_conversions`;
+CREATE TABLE  `kinton_liquibase`.`diskstateful_conversions` (
+  `id` int(10) unsigned NOT NULL auto_increment,
+  `imagePath` varchar(256) NOT NULL,
+  `idManagement` int(10) unsigned NOT NULL,
+  `state` varchar(50) NOT NULL,
+  `convertionTimestamp` timestamp NOT NULL,
+  `version_c` int(11) default 0,
+  PRIMARY KEY  (`id`),
+  KEY `idManagement_FK2` (`idManagement`),
+  CONSTRAINT `idManagement_FK2` FOREIGN KEY (`idManagement`) REFERENCES `volume_management` (`idManagement`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
--- Definition of table kinton_liquibase.vappstateful_conversions
+-- Definition of table `kinton_liquibase`.`vappstateful_conversions`
 --
-DROP TABLE IF EXISTS kinton_liquibase.vappstateful_conversions;
-CREATE TABLE  kinton_liquibase.vappstateful_conversions (
-  id int(10) unsigned NOT NULL auto_increment,
-  idVirtualApp int(10) unsigned NOT NULL,
-  idUser int(1) unsigned NOT NULL,
-  version_c int(11) default 0,
-  PRIMARY KEY  (id),
-  KEY idVirtualApp_FK3 (idVirtualApp),
-  KEY idUser_FK3 (idUser),
-  CONSTRAINT idVirtualApp_FK3 FOREIGN KEY (idVirtualApp) REFERENCES virtualapp (idVirtualApp) ON DELETE CASCADE,
-  CONSTRAINT idUser_FK3 FOREIGN KEY (idUser) REFERENCES user (idUser) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-
---
--- Definition of table kinton_liquibase.node_virtual_image_stateful_conversions
---
-DROP TABLE IF EXISTS kinton_liquibase.node_virtual_image_stateful_conversions;
-CREATE TABLE  kinton_liquibase.node_virtual_image_stateful_conversions (
-  id int(10) unsigned NOT NULL auto_increment,
-  newName varchar(255) NOT NULL,
-  idVirtualApplianceStatefulConversion int(10) unsigned NOT NULL,
-  idNodeVirtualImage int(10) unsigned NOT NULL,
-  idVirtualImageConversion int(1) unsigned,
-  idDiskStatefulConversion int(1) unsigned,
-  state varchar(50) NOT NULL,
-  subState varchar(50) DEFAULT NULL,
-  version_c int(11) default 0,
-  idTier int(10) unsigned NOT NULL,
-  idManagement int(10) unsigned,
-  PRIMARY KEY  (id),
-  KEY idVirtualApplianceStatefulConversion_FK4 (idVirtualApplianceStatefulConversion),
-  KEY idNodeVirtualImage_FK4 (idNodeVirtualImage),
-  KEY idVirtualImageConversion_FK4 (idVirtualImageConversion),
-  KEY idDiskStatefulConversion_FK4 (idDiskStatefulConversion),
-  KEY idTier_FK4 (idTier),
-  KEY idManagement_FK4 (idManagement),
-  CONSTRAINT idVirtualApplianceStatefulConversion_FK4 FOREIGN KEY (idVirtualApplianceStatefulConversion) REFERENCES vappstateful_conversions (id) ON DELETE CASCADE,
-  CONSTRAINT idNodeVirtualImage_FK4 FOREIGN KEY (idNodeVirtualImage) REFERENCES nodevirtualimage (idNode) ON DELETE CASCADE,
-  CONSTRAINT idVirtualImageConversion_FK4 FOREIGN KEY (idVirtualImageConversion) REFERENCES virtualimage_conversions (id) ON DELETE CASCADE,
-  CONSTRAINT idDiskStatefulConversion_FK4 FOREIGN KEY (idDiskStatefulConversion) REFERENCES diskstateful_conversions (id) ON DELETE CASCADE,
-  CONSTRAINT idTier_FK4 FOREIGN KEY (idTier) REFERENCES tier (id) ON DELETE CASCADE,
-  CONSTRAINT idManagement_FK4 FOREIGN KEY (idManagement) REFERENCES volume_management (idManagement) ON DELETE CASCADE
+DROP TABLE IF EXISTS `kinton_liquibase`.`vappstateful_conversions`;
+CREATE TABLE  `kinton_liquibase`.`vappstateful_conversions` (
+  `id` int(10) unsigned NOT NULL auto_increment,
+  `idVirtualApp` int(10) unsigned NOT NULL,
+  `idUser` int(1) unsigned NOT NULL,
+  `version_c` int(11) default 0,
+  PRIMARY KEY  (`id`),
+  KEY `idVirtualApp_FK3` (`idVirtualApp`),
+  KEY `idUser_FK3` (`idUser`),
+  CONSTRAINT `idVirtualApp_FK3` FOREIGN KEY (`idVirtualApp`) REFERENCES `virtualapp` (`idVirtualApp`) ON DELETE CASCADE,
+  CONSTRAINT `idUser_FK3` FOREIGN KEY (`idUser`) REFERENCES `user` (`idUser`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
 --
--- Definition of table kinton_liquibase.license
+-- Definition of table `kinton_liquibase`.`node_virtual_image_stateful_conversions`
 --
-DROP TABLE IF EXISTS kinton_liquibase.license;
-CREATE TABLE  kinton_liquibase.license (
-  idLicense int(11) NOT NULL auto_increment,
-  data varchar(1000) NOT NULL,
-  version_c int(11) default 0,
-  PRIMARY KEY (idLicense)
+DROP TABLE IF EXISTS `kinton_liquibase`.`node_virtual_image_stateful_conversions`;
+CREATE TABLE  `kinton_liquibase`.`node_virtual_image_stateful_conversions` (
+  `id` int(10) unsigned NOT NULL auto_increment,
+  `newName` varchar(255) NOT NULL,
+  `idVirtualApplianceStatefulConversion` int(10) unsigned NOT NULL,
+  `idNodeVirtualImage` int(10) unsigned NOT NULL,
+  `idVirtualImageConversion` int(1) unsigned,
+  `idDiskStatefulConversion` int(1) unsigned,
+  `state` varchar(50) NOT NULL,
+  `subState` varchar(50) DEFAULT NULL,
+  `version_c` int(11) default 0,
+  `idTier` int(10) unsigned NOT NULL,
+  `idManagement` int(10) unsigned,
+  PRIMARY KEY  (`id`),
+  KEY `idVirtualApplianceStatefulConversion_FK4` (`idVirtualApplianceStatefulConversion`),
+  KEY `idNodeVirtualImage_FK4` (`idNodeVirtualImage`),
+  KEY `idVirtualImageConversion_FK4` (`idVirtualImageConversion`),
+  KEY `idDiskStatefulConversion_FK4` (`idDiskStatefulConversion`),
+  KEY `idTier_FK4` (`idTier`),
+  KEY `idManagement_FK4` (`idManagement`),
+  CONSTRAINT `idVirtualApplianceStatefulConversion_FK4` FOREIGN KEY (`idVirtualApplianceStatefulConversion`) REFERENCES `vappstateful_conversions` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `idNodeVirtualImage_FK4` FOREIGN KEY (`idNodeVirtualImage`) REFERENCES `nodevirtualimage` (`idNode`) ON DELETE CASCADE,
+  CONSTRAINT `idVirtualImageConversion_FK4` FOREIGN KEY (`idVirtualImageConversion`) REFERENCES `virtualimage_conversions` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `idDiskStatefulConversion_FK4` FOREIGN KEY (`idDiskStatefulConversion`) REFERENCES `diskstateful_conversions` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `idTier_FK4` FOREIGN KEY (`idTier`) REFERENCES `tier` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `idManagement_FK4` FOREIGN KEY (`idManagement`) REFERENCES `volume_management` (`idManagement`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+--
+-- Definition of table `kinton_liquibase`.`license`
+--
+DROP TABLE IF EXISTS `kinton_liquibase`.`license`;
+CREATE TABLE  `kinton_liquibase`.`license` (
+  `idLicense` int(11) NOT NULL auto_increment,
+  `data` varchar(1000) NOT NULL,
+  `version_c` int(11) default 0,
+  PRIMARY KEY (`idLicense`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
--- Definition of table kinton_liquibase.dhcpOption
+-- Definition of table `kinton_liquibase`.`dhcpOption`
 --
-CREATE TABLE kinton_liquibase.dhcpOption (
-  idDhcpOption int(10) unsigned NOT NULL AUTO_INCREMENT ,
-  dhcp_opt int(20) NOT NULL ,
-   gateway varchar(40),
-  network_address varchar(40) NOT NULL,
-  mask int(4) NOT NULL,
-  netmask varchar(20) NOT NULL,
-  version_c int(11) default 0,
-  PRIMARY KEY (idDhcpOption)
+CREATE TABLE `kinton_liquibase`.`dhcpOption` (
+  `idDhcpOption` int(10) unsigned NOT NULL AUTO_INCREMENT ,
+  `dhcp_opt` int(20) NOT NULL ,
+   `gateway` varchar(40),
+  `network_address` varchar(40) NOT NULL,
+  `mask` int(4) NOT NULL,
+  `netmask` varchar(20) NOT NULL,
+  `version_c` int(11) default 0,
+  PRIMARY KEY (`idDhcpOption`)
   ) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 
 
 --
--- Definition of table kinton_liquibase.vlans_dhcpOption
+-- Definition of table `kinton_liquibase`.`vlans_dhcpOption`
 --
 
-CREATE  TABLE kinton_liquibase.vlans_dhcpOption (
-  idVlan INT(10) UNSIGNED NOT NULL ,
-  idDhcpOption INT(10) UNSIGNED NOT NULL ,
-  version_c INT(11) default 0,
-  INDEX fk_vlans_dhcp_vlan (idVlan ASC) ,
-  INDEX fk_vlans_dhcp_dhcp (idDhcpOption ASC) ,
-  CONSTRAINT fk_vlans_dhcp_vlan
-    FOREIGN KEY (idVlan )
-    REFERENCES kinton_liquibase.vlan_network (vlan_network_id )
+CREATE  TABLE `kinton_liquibase`.`vlans_dhcpOption` (
+  `idVlan` INT(10) UNSIGNED NOT NULL ,
+  `idDhcpOption` INT(10) UNSIGNED NOT NULL ,
+  `version_c` INT(11) default 0,
+  INDEX `fk_vlans_dhcp_vlan` (`idVlan` ASC) ,
+  INDEX `fk_vlans_dhcp_dhcp` (`idDhcpOption` ASC) ,
+  CONSTRAINT `fk_vlans_dhcp_vlan`
+    FOREIGN KEY (`idVlan` )
+    REFERENCES `kinton_liquibase`.`vlan_network` (`vlan_network_id` )
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
-  CONSTRAINT fk_vlans_dhcp_dhcp
-    FOREIGN KEY (idDhcpOption )
-    REFERENCES kinton_liquibase.dhcpOption (idDhcpOption )
+  CONSTRAINT `fk_vlans_dhcp_dhcp`
+    FOREIGN KEY (`idDhcpOption` )
+    REFERENCES `kinton_liquibase`.`dhcpOption` (`idDhcpOption` )
     ON DELETE NO ACTION
     ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -1929,153 +1930,153 @@ CREATE  TABLE kinton_liquibase.vlans_dhcpOption (
 --
 
 --
--- Definition of table kinton_liquibase.cloud_usage_stats
+-- Definition of table `kinton_liquibase`.`cloud_usage_stats`
 --
-DROP  TABLE IF EXISTS kinton_liquibase.cloud_usage_stats;
-CREATE  TABLE kinton_liquibase.cloud_usage_stats (
-  idDataCenter INT NOT NULL AUTO_INCREMENT,
-  serversTotal  BIGINT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Total number of Physical machines managed.',
-  serversRunning BIGINT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Total number of Physical Machines running currently.',  
-  storageTotal BIGINT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'External storage managed by Abiquo (in Megabytes)',
-  storageReserved BIGINT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'External storage reserved by Enterprises in Datacenters (in Megabytes)',
-  storageUsed BIGINT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'External storage used (attached or mounted) by any virtual machines (in Megabytes)',
-  publicIPsTotal BIGINT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Total number of IPs defined (managed).',
-  publicIPsReserved BIGINT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Total number of IPs assigned to a VirtualDatacenter (Reserved)',
-  publicIPsUsed BIGINT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Total number of IPs used by virtual machines',
-  vlanReserved BIGINT UNSIGNED NOT NULL DEFAULT 0  COMMENT 'Total maximum number of VLANs reserved by all enterprises. (enterprise.vlanHard)',
-  vlanUsed BIGINT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Total number of VLANs in use by any datacenter managed.',
-  vMachinesTotal BIGINT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Total number of Virtual Machines managed by Abiquo.',
-  vMachinesRunning BIGINT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Total number of Virtual Machines currently in a running state.',
-  vCpuTotal BIGINT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Total number of Virtual CPUs in Virtual Machines managed (can be used for VMs).',
-  vCpuReserved BIGINT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Maximum number of Virtual CPUs reserved by all enterprises.',
-  vCpuUsed BIGINT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Total number of Virtual CPUs in Virtual Machines currently in a running state.',
-  vMemoryTotal BIGINT UNSIGNED NOT NULL DEFAULT 0  COMMENT 'Total amount of RAM managed (can be used for VMs) in Megabytes.',
-  vMemoryReserved BIGINT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Maximum amount of RAM reserved by all enterprises in Megabytes.',
-  vMemoryUsed BIGINT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Total amount of RAM used by Virtual Machines currently in a running state in Megabytes.',
-  vStorageReserved BIGINT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Maximum storage size reserved by all enterprises for Virtual Machines  in Megabytes.',
-  vStorageUsed BIGINT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Total storage size used by Virtual Machines currently in a running state  in Megabytes.',
-  vStorageTotal BIGINT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Total storage size managed to be used by Virtual Machines  in Megabytes.',
-  numUsersCreated BIGINT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Total number of users in system.',
-  numVDCCreated BIGINT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Total number of Virtual Data Centers in system.',
-  numEnterprisesCreated BIGINT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Total number of enterprises in system.',
-  version_c INT NOT NULL DEFAULT 1,
-  PRIMARY KEY (idDataCenter) )
+DROP  TABLE IF EXISTS `kinton_liquibase`.`cloud_usage_stats`;
+CREATE  TABLE `kinton_liquibase`.`cloud_usage_stats` (
+  `idDataCenter` INT NOT NULL AUTO_INCREMENT,
+  `serversTotal`  BIGINT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Total number of Physical machines managed.',
+  `serversRunning` BIGINT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Total number of Physical Machines running currently.',  
+  `storageTotal` BIGINT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'External storage managed by Abiquo (in Megabytes)',
+  `storageReserved` BIGINT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'External storage reserved by Enterprises in Datacenters (in Megabytes)',
+  `storageUsed` BIGINT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'External storage used (attached or mounted) by any virtual machines (in Megabytes)',
+  `publicIPsTotal` BIGINT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Total number of IPs defined (managed).',
+  `publicIPsReserved` BIGINT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Total number of IPs assigned to a VirtualDatacenter (Reserved)',
+  `publicIPsUsed` BIGINT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Total number of IPs used by virtual machines',
+  `vlanReserved` BIGINT UNSIGNED NOT NULL DEFAULT 0  COMMENT 'Total maximum number of VLANs reserved by all enterprises. (enterprise.vlanHard)',
+  `vlanUsed` BIGINT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Total number of VLANs in use by any datacenter managed.',
+  `vMachinesTotal` BIGINT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Total number of Virtual Machines managed by Abiquo.',
+  `vMachinesRunning` BIGINT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Total number of Virtual Machines currently in a running state.',
+  `vCpuTotal` BIGINT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Total number of Virtual CPUs in Virtual Machines managed (can be used for VMs).',
+  `vCpuReserved` BIGINT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Maximum number of Virtual CPUs reserved by all enterprises.',
+  `vCpuUsed` BIGINT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Total number of Virtual CPUs in Virtual Machines currently in a running state.',
+  `vMemoryTotal` BIGINT UNSIGNED NOT NULL DEFAULT 0  COMMENT 'Total amount of RAM managed (can be used for VMs) in Megabytes.',
+  `vMemoryReserved` BIGINT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Maximum amount of RAM reserved by all enterprises in Megabytes.',
+  `vMemoryUsed` BIGINT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Total amount of RAM used by Virtual Machines currently in a running state in Megabytes.',
+  `vStorageReserved` BIGINT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Maximum storage size reserved by all enterprises for Virtual Machines  in Megabytes.',
+  `vStorageUsed` BIGINT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Total storage size used by Virtual Machines currently in a running state  in Megabytes.',
+  `vStorageTotal` BIGINT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Total storage size managed to be used by Virtual Machines  in Megabytes.',
+  `numUsersCreated` BIGINT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Total number of users in system.',
+  `numVDCCreated` BIGINT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Total number of Virtual Data Centers in system.',
+  `numEnterprisesCreated` BIGINT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Total number of enterprises in system.',
+  `version_c` INT NOT NULL DEFAULT 1,
+  PRIMARY KEY (`idDataCenter`) )
 ENGINE=InnoDB DEFAULT CHARSET=utf8;
 -- Creating Fake DataCenter (for retrieving ALL Cloud Usage Stats)
-LOCK TABLES cloud_usage_stats WRITE;
+LOCK TABLES `cloud_usage_stats` WRITE;
 INSERT INTO cloud_usage_stats (idDataCenter,serversTotal,serversRunning,storageTotal,storageReserved,storageUsed,publicIPsTotal,publicIPsReserved,publicIPsUsed,vlanReserved,vlanUsed,vMachinesTotal,vMachinesRunning,vCpuTotal,vCpuReserved,vCpuUsed,vMemoryTotal,vMemoryReserved,vMemoryUsed,vStorageReserved,vStorageUsed,vStorageTotal,numUsersCreated,numVDCCreated,numEnterprisesCreated) VALUES (-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0);
 UNLOCK TABLES;
 
-DROP  TABLE IF EXISTS kinton_liquibase.enterprise_resources_stats;
-CREATE  TABLE IF NOT EXISTS kinton_liquibase.enterprise_resources_stats (
-  idEnterprise INT NOT NULL AUTO_INCREMENT ,
-  vCpuReserved BIGINT UNSIGNED NULL DEFAULT 0 COMMENT 'Maximum number of Virtual CPUs reserved by all enterprises.',
-  vCpuUsed BIGINT UNSIGNED NULL DEFAULT 0 COMMENT 'Total number of Virtual CPUs in Virtual Machines currently in a running state.',
-  memoryReserved BIGINT UNSIGNED NULL DEFAULT 0 COMMENT 'Maximum amount of RAM reserved by all enterprises in Megabytes.',
-  memoryUsed BIGINT UNSIGNED NULL DEFAULT 0 COMMENT 'Total amount of RAM used by Virtual Machines currently in a running state in Megabytes.',
-  localStorageReserved BIGINT UNSIGNED NULL DEFAULT 0 COMMENT 'Maximum storage size reserved by all enterprises for Virtual Machines  in Megabytes.',
-  localStorageUsed BIGINT UNSIGNED NULL DEFAULT 0 COMMENT 'Total storage size used by Virtual Machines currently in a running state  in Megabytes.',
-  extStorageReserved BIGINT UNSIGNED NULL DEFAULT 0 COMMENT 'Maximum external storage size reserved by all enterprises in Bytes.',
-  extStorageUsed BIGINT UNSIGNED NULL DEFAULT 0 COMMENT 'External storage used (attached or mounted) by any virtual machines (in Megabytes)',
-  repositoryReserved BIGINT UNSIGNED NULL DEFAULT 0 COMMENT 'Maximum repository size reserved by all enterprises in Megabytes.',
-  repositoryUsed BIGINT UNSIGNED NULL DEFAULT 0 COMMENT 'Total repository size currently used by all enterprises in Megabytes.',
-  publicIPsReserved BIGINT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Total number of IPs assigned to a VirtualDatacenter (Reserved)',
-  publicIPsUsed BIGINT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Total number of IPs used by virtual machines',
-  vlanReserved BIGINT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Total maximum number of VLANs reserved by all enterprises. (enterprise.vlanHard)',
-  vlanUsed BIGINT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Total number of VLANs in use by any datacenter managed.',
-  version_c INT NOT NULL DEFAULT 1,
-  PRIMARY KEY (idEnterprise) )
+DROP  TABLE IF EXISTS `kinton_liquibase`.`enterprise_resources_stats`;
+CREATE  TABLE IF NOT EXISTS `kinton_liquibase`.`enterprise_resources_stats` (
+  `idEnterprise` INT NOT NULL AUTO_INCREMENT ,
+  `vCpuReserved` BIGINT UNSIGNED NULL DEFAULT 0 COMMENT 'Maximum number of Virtual CPUs reserved by all enterprises.',
+  `vCpuUsed` BIGINT UNSIGNED NULL DEFAULT 0 COMMENT 'Total number of Virtual CPUs in Virtual Machines currently in a running state.',
+  `memoryReserved` BIGINT UNSIGNED NULL DEFAULT 0 COMMENT 'Maximum amount of RAM reserved by all enterprises in Megabytes.',
+  `memoryUsed` BIGINT UNSIGNED NULL DEFAULT 0 COMMENT 'Total amount of RAM used by Virtual Machines currently in a running state in Megabytes.',
+  `localStorageReserved` BIGINT UNSIGNED NULL DEFAULT 0 COMMENT 'Maximum storage size reserved by all enterprises for Virtual Machines  in Megabytes.',
+  `localStorageUsed` BIGINT UNSIGNED NULL DEFAULT 0 COMMENT 'Total storage size used by Virtual Machines currently in a running state  in Megabytes.',
+  `extStorageReserved` BIGINT UNSIGNED NULL DEFAULT 0 COMMENT 'Maximum external storage size reserved by all enterprises in Bytes.',
+  `extStorageUsed` BIGINT UNSIGNED NULL DEFAULT 0 COMMENT 'External storage used (attached or mounted) by any virtual machines (in Megabytes)',
+  `repositoryReserved` BIGINT UNSIGNED NULL DEFAULT 0 COMMENT 'Maximum repository size reserved by all enterprises in Megabytes.',
+  `repositoryUsed` BIGINT UNSIGNED NULL DEFAULT 0 COMMENT 'Total repository size currently used by all enterprises in Megabytes.',
+  `publicIPsReserved` BIGINT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Total number of IPs assigned to a VirtualDatacenter (Reserved)',
+  `publicIPsUsed` BIGINT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Total number of IPs used by virtual machines',
+  `vlanReserved` BIGINT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Total maximum number of VLANs reserved by all enterprises. (enterprise.vlanHard)',
+  `vlanUsed` BIGINT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Total number of VLANs in use by any datacenter managed.',
+  `version_c` INT NOT NULL DEFAULT 1,
+  PRIMARY KEY (`idEnterprise`) )
 ENGINE = InnoDB DEFAULT CHARSET=utf8;
 --
-DROP  TABLE IF EXISTS kinton_liquibase.dc_enterprise_stats;
-CREATE  TABLE IF NOT EXISTS kinton_liquibase.dc_enterprise_stats (
-  idDCEnterpriseStats INT NOT NULL AUTO_INCREMENT,
-  idDataCenter INT NOT NULL ,
-  idEnterprise INT NOT NULL ,
-  vCpuReserved BIGINT UNSIGNED NULL DEFAULT 0 COMMENT 'Maximum number of Virtual CPUs reserved for this enterprise in this datacenter.',
-  vCpuUsed BIGINT UNSIGNED NULL DEFAULT 0 COMMENT 'Total number of Virtual CPUs in Virtual Machines currently in a running state.',
-  memoryReserved BIGINT UNSIGNED NULL DEFAULT 0 COMMENT 'Maximum amount of RAM reserved for this enterprise in this datacenter in Megabytes.',
-  memoryUsed BIGINT UNSIGNED NULL DEFAULT 0 COMMENT 'Total amount of RAM used by Virtual Machines currently in a running state in Megabytes.',
-  localStorageReserved BIGINT UNSIGNED NULL DEFAULT 0 COMMENT 'Maximum storage size reserved for this enterprise in this datacenter for Virtual Machines  in Megabytes.',
-  localStorageUsed BIGINT UNSIGNED NULL DEFAULT 0 COMMENT 'Total storage size used by Virtual Machines currently in a running state  in Megabytes.',
-  extStorageReserved BIGINT UNSIGNED NULL DEFAULT 0 COMMENT ' Maximum external storage size reserved for this enterprise in this datacenter in Megabytes.',
-  extStorageUsed BIGINT UNSIGNED NULL DEFAULT 0 COMMENT 'External storage used (attached or mounted) by any virtual machines (in Megabytes).',
-  repositoryReserved BIGINT UNSIGNED NULL DEFAULT 0 COMMENT 'Maximum repository size reserved for this enterprise in this datacenter in Megabytes.',
-  repositoryUsed BIGINT UNSIGNED NULL DEFAULT 0 COMMENT 'Total repository size currently used for this enterprise in this datacenter in Megabytes.',
-  publicIPsReserved BIGINT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Total number of IPs assigned to a VirtualDatacenter (Reserved).',
-  publicIPsUsed BIGINT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Total number of IPs used by virtual machines.',
-  vlanReserved BIGINT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Total maximum number of VLANs reserved for this enterprise in this datacenter. (enterprise.vlanHard)',
-  vlanUsed BIGINT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Total number of VLANs in use by this datacenter.',
-  version_c INT NOT NULL DEFAULT 1,
-  PRIMARY KEY (idDCEnterpriseStats) )
-ENGINE = InnoDB DEFAULT CHARSET=utf8;
---
---
-DROP  TABLE IF EXISTS kinton_liquibase.vdc_enterprise_stats;
-CREATE  TABLE IF NOT EXISTS kinton_liquibase.vdc_enterprise_stats (
-  idVirtualDataCenter INT NOT NULL AUTO_INCREMENT,
-  idEnterprise INT NOT NULL ,
-  vdcName VARCHAR(45) NULL COMMENT 'Name for the virtualdatacenter',
-  vmCreated MEDIUMINT UNSIGNED NULL DEFAULT 0 COMMENT 'Number of virtual machines created in this virtual datacenter',
-  vmActive MEDIUMINT UNSIGNED NULL DEFAULT 0 COMMENT 'Number of virtual machines currently running in this virtual datacenter',
-  volCreated MEDIUMINT UNSIGNED NULL DEFAULT 0 COMMENT 'Number of volumes created in this virtual datacenter',
-  volAssociated MEDIUMINT UNSIGNED NULL DEFAULT 0 COMMENT 'Number of volumes associated to a virtual machine in this virtual datacenter', 
-  volAttached MEDIUMINT UNSIGNED NULL DEFAULT 0 COMMENT 'Number of volumes currently attached to a virtual machine in this virtual datacenter', 
-  vCpuReserved BIGINT UNSIGNED NULL DEFAULT 0 COMMENT 'Maximum number of Virtual CPUs reserved for this enterprise in this virtual datacenter.',
-  vCpuUsed BIGINT UNSIGNED NULL DEFAULT 0 COMMENT 'Total number of Virtual CPUs in Virtual Machines currently in a running state.',
-  memoryReserved BIGINT UNSIGNED NULL DEFAULT 0 COMMENT 'Maximum amount of RAM reserved for this enterprise in this virtual datacenter in Megabytes.',
-  memoryUsed BIGINT UNSIGNED NULL DEFAULT 0 COMMENT 'Total amount of RAM used by Virtual Machines currently in a running state in Megabytes.',
-  localStorageReserved BIGINT UNSIGNED NULL DEFAULT 0 COMMENT 'Maximum storage size reserved for this enterprise in this virtual datacenter for Virtual Machines  in Megabytes.',
-  localStorageUsed BIGINT UNSIGNED NULL DEFAULT 0 COMMENT 'Total storage size used by Virtual Machines currently in a running state  in Megabytes.',
-  extStorageReserved BIGINT UNSIGNED NULL DEFAULT 0 COMMENT ' Maximum external storage size reserved for this enterprise in this virtual datacenter in Megabytes.',
-  extStorageUsed BIGINT UNSIGNED NULL DEFAULT 0 COMMENT 'External storage used (attached or mounted) by any virtual machines (in Megabytes).',
-  publicIPsReserved MEDIUMINT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Total number of IPs assigned to this virtualDatacenter (Reserved).',
-  publicIPsUsed MEDIUMINT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Total number of IPs used by virtual machines.',
-  vlanReserved MEDIUMINT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Total maximum number of VLANs reserved for this enterprise in this virtual datacenter. (enterprise.vlanHard)',
-  vlanUsed MEDIUMINT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Total number of VLANs in use by this virtual datacenter.',
-  version_c INT NOT NULL DEFAULT 1,
-  PRIMARY KEY (idVirtualDataCenter,idEnterprise) )
+DROP  TABLE IF EXISTS `kinton_liquibase`.`dc_enterprise_stats`;
+CREATE  TABLE IF NOT EXISTS `kinton_liquibase`.`dc_enterprise_stats` (
+  `idDCEnterpriseStats` INT NOT NULL AUTO_INCREMENT,
+  `idDataCenter` INT NOT NULL ,
+  `idEnterprise` INT NOT NULL ,
+  `vCpuReserved` BIGINT UNSIGNED NULL DEFAULT 0 COMMENT 'Maximum number of Virtual CPUs reserved for this enterprise in this datacenter.',
+  `vCpuUsed` BIGINT UNSIGNED NULL DEFAULT 0 COMMENT 'Total number of Virtual CPUs in Virtual Machines currently in a running state.',
+  `memoryReserved` BIGINT UNSIGNED NULL DEFAULT 0 COMMENT 'Maximum amount of RAM reserved for this enterprise in this datacenter in Megabytes.',
+  `memoryUsed` BIGINT UNSIGNED NULL DEFAULT 0 COMMENT 'Total amount of RAM used by Virtual Machines currently in a running state in Megabytes.',
+  `localStorageReserved` BIGINT UNSIGNED NULL DEFAULT 0 COMMENT 'Maximum storage size reserved for this enterprise in this datacenter for Virtual Machines  in Megabytes.',
+  `localStorageUsed` BIGINT UNSIGNED NULL DEFAULT 0 COMMENT 'Total storage size used by Virtual Machines currently in a running state  in Megabytes.',
+  `extStorageReserved` BIGINT UNSIGNED NULL DEFAULT 0 COMMENT ' Maximum external storage size reserved for this enterprise in this datacenter in Megabytes.',
+  `extStorageUsed` BIGINT UNSIGNED NULL DEFAULT 0 COMMENT 'External storage used (attached or mounted) by any virtual machines (in Megabytes).',
+  `repositoryReserved` BIGINT UNSIGNED NULL DEFAULT 0 COMMENT 'Maximum repository size reserved for this enterprise in this datacenter in Megabytes.',
+  `repositoryUsed` BIGINT UNSIGNED NULL DEFAULT 0 COMMENT 'Total repository size currently used for this enterprise in this datacenter in Megabytes.',
+  `publicIPsReserved` BIGINT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Total number of IPs assigned to a VirtualDatacenter (Reserved).',
+  `publicIPsUsed` BIGINT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Total number of IPs used by virtual machines.',
+  `vlanReserved` BIGINT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Total maximum number of VLANs reserved for this enterprise in this datacenter. (enterprise.vlanHard)',
+  `vlanUsed` BIGINT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Total number of VLANs in use by this datacenter.',
+  `version_c` INT NOT NULL DEFAULT 1,
+  PRIMARY KEY (`idDCEnterpriseStats`) )
 ENGINE = InnoDB DEFAULT CHARSET=utf8;
 --
 --
-DROP  TABLE IF EXISTS kinton_liquibase.vapp_enterprise_stats;
-CREATE  TABLE IF NOT EXISTS kinton_liquibase.vapp_enterprise_stats (
-  idVirtualApp INT NOT NULL AUTO_INCREMENT,
-  idEnterprise INT NOT NULL ,
-  idVirtualDataCenter INT NOT NULL,
-  vappName VARCHAR(45) NULL COMMENT 'Name for this virtual appliance',
-  vdcName VARCHAR(45) NULL COMMENT 'Name for the virtualdatacenter',
-  vmCreated MEDIUMINT UNSIGNED NULL DEFAULT 0 COMMENT 'Number of virtual machines created in this virtual appliance',
-  vmActive MEDIUMINT UNSIGNED NULL DEFAULT 0 COMMENT 'Number of virtual machines currently running in this virtual appliance',
-  volAssociated MEDIUMINT UNSIGNED NULL DEFAULT 0 COMMENT 'Number of volumes associated to this virtual appliance',
-  volAttached MEDIUMINT UNSIGNED NULL DEFAULT 0 COMMENT 'Number of volumes currently attached to a virtual machine in this virtual appliance',
-  version_c INT NOT NULL DEFAULT 1,
-  PRIMARY KEY (idVirtualApp) )
+DROP  TABLE IF EXISTS `kinton_liquibase`.`vdc_enterprise_stats`;
+CREATE  TABLE IF NOT EXISTS `kinton_liquibase`.`vdc_enterprise_stats` (
+  `idVirtualDataCenter` INT NOT NULL AUTO_INCREMENT,
+  `idEnterprise` INT NOT NULL ,
+  `vdcName` VARCHAR(45) NULL COMMENT 'Name for the virtualdatacenter',
+  `vmCreated` MEDIUMINT UNSIGNED NULL DEFAULT 0 COMMENT 'Number of virtual machines created in this virtual datacenter',
+  `vmActive` MEDIUMINT UNSIGNED NULL DEFAULT 0 COMMENT 'Number of virtual machines currently running in this virtual datacenter',
+  `volCreated` MEDIUMINT UNSIGNED NULL DEFAULT 0 COMMENT 'Number of volumes created in this virtual datacenter',
+  `volAssociated` MEDIUMINT UNSIGNED NULL DEFAULT 0 COMMENT 'Number of volumes associated to a virtual machine in this virtual datacenter', 
+  `volAttached` MEDIUMINT UNSIGNED NULL DEFAULT 0 COMMENT 'Number of volumes currently attached to a virtual machine in this virtual datacenter', 
+  `vCpuReserved` BIGINT UNSIGNED NULL DEFAULT 0 COMMENT 'Maximum number of Virtual CPUs reserved for this enterprise in this virtual datacenter.',
+  `vCpuUsed` BIGINT UNSIGNED NULL DEFAULT 0 COMMENT 'Total number of Virtual CPUs in Virtual Machines currently in a running state.',
+  `memoryReserved` BIGINT UNSIGNED NULL DEFAULT 0 COMMENT 'Maximum amount of RAM reserved for this enterprise in this virtual datacenter in Megabytes.',
+  `memoryUsed` BIGINT UNSIGNED NULL DEFAULT 0 COMMENT 'Total amount of RAM used by Virtual Machines currently in a running state in Megabytes.',
+  `localStorageReserved` BIGINT UNSIGNED NULL DEFAULT 0 COMMENT 'Maximum storage size reserved for this enterprise in this virtual datacenter for Virtual Machines  in Megabytes.',
+  `localStorageUsed` BIGINT UNSIGNED NULL DEFAULT 0 COMMENT 'Total storage size used by Virtual Machines currently in a running state  in Megabytes.',
+  `extStorageReserved` BIGINT UNSIGNED NULL DEFAULT 0 COMMENT ' Maximum external storage size reserved for this enterprise in this virtual datacenter in Megabytes.',
+  `extStorageUsed` BIGINT UNSIGNED NULL DEFAULT 0 COMMENT 'External storage used (attached or mounted) by any virtual machines (in Megabytes).',
+  `publicIPsReserved` MEDIUMINT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Total number of IPs assigned to this virtualDatacenter (Reserved).',
+  `publicIPsUsed` MEDIUMINT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Total number of IPs used by virtual machines.',
+  `vlanReserved` MEDIUMINT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Total maximum number of VLANs reserved for this enterprise in this virtual datacenter. (enterprise.vlanHard)',
+  `vlanUsed` MEDIUMINT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Total number of VLANs in use by this virtual datacenter.',
+  `version_c` INT NOT NULL DEFAULT 1,
+  PRIMARY KEY (`idVirtualDataCenter`,`idEnterprise`) )
+ENGINE = InnoDB DEFAULT CHARSET=utf8;
+--
+--
+DROP  TABLE IF EXISTS `kinton_liquibase`.`vapp_enterprise_stats`;
+CREATE  TABLE IF NOT EXISTS `kinton_liquibase`.`vapp_enterprise_stats` (
+  `idVirtualApp` INT NOT NULL AUTO_INCREMENT,
+  `idEnterprise` INT NOT NULL ,
+  `idVirtualDataCenter` INT NOT NULL,
+  `vappName` VARCHAR(45) NULL COMMENT 'Name for this virtual appliance',
+  `vdcName` VARCHAR(45) NULL COMMENT 'Name for the virtualdatacenter',
+  `vmCreated` MEDIUMINT UNSIGNED NULL DEFAULT 0 COMMENT 'Number of virtual machines created in this virtual appliance',
+  `vmActive` MEDIUMINT UNSIGNED NULL DEFAULT 0 COMMENT 'Number of virtual machines currently running in this virtual appliance',
+  `volAssociated` MEDIUMINT UNSIGNED NULL DEFAULT 0 COMMENT 'Number of volumes associated to this virtual appliance',
+  `volAttached` MEDIUMINT UNSIGNED NULL DEFAULT 0 COMMENT 'Number of volumes currently attached to a virtual machine in this virtual appliance',
+  `version_c` INT NOT NULL DEFAULT 1,
+  PRIMARY KEY (`idVirtualApp`) )
 ENGINE = InnoDB DEFAULT CHARSET=utf8;
 --
 --
 -- STATISTICS MODULE TABLES END
 --
 --
-DROP  TABLE IF EXISTS kinton_liquibase.enterprise_theme;
-CREATE  TABLE IF NOT EXISTS kinton_liquibase.enterprise_theme (
-  idEnterprise int(10) unsigned NOT NULL,
-  company_logo_path text NULL,
-  theme text NULL ,
-  version_c int(11) default 0,
-  PRIMARY KEY (idEnterprise),
-  KEY (idEnterprise),
-  CONSTRAINT THEME_FK1 FOREIGN KEY (idEnterprise) REFERENCES enterprise (idEnterprise) ON DELETE CASCADE
+DROP  TABLE IF EXISTS `kinton_liquibase`.`enterprise_theme`;
+CREATE  TABLE IF NOT EXISTS `kinton_liquibase`.`enterprise_theme` (
+  `idEnterprise` int(10) unsigned NOT NULL,
+  `company_logo_path` text NULL,
+  `theme` text NULL ,
+  `version_c` int(11) default 0,
+  PRIMARY KEY (`idEnterprise`),
+  KEY (`idEnterprise`),
+  CONSTRAINT `THEME_FK1` FOREIGN KEY (`idEnterprise`) REFERENCES `enterprise` (`idEnterprise`) ON DELETE CASCADE
 )ENGINE = InnoDB DEFAULT CHARSET=utf8;
 
 --
 -- ONETIMETOKEN TABLE
 --
-DROP  TABLE IF EXISTS kinton_liquibase.one_time_token;
-CREATE  TABLE kinton_liquibase.one_time_token (idOneTimeTokenSession int(3) unsigned NOT NULL AUTO_INCREMENT,
-  token VARCHAR(128) NOT NULL ,
-  version_c int(11) default 0,
-  PRIMARY KEY (idOneTimeTokenSession)) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
+DROP  TABLE IF EXISTS `kinton_liquibase`.`one_time_token`;
+CREATE  TABLE `kinton_liquibase`.`one_time_token` (`idOneTimeTokenSession` int(3) unsigned NOT NULL AUTO_INCREMENT,
+  `token` VARCHAR(128) NOT NULL ,
+  `version_c` int(11) default 0,
+  PRIMARY KEY (`idOneTimeTokenSession`)) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
  
 --
 -- STATISTICS MODULE TRIGGERS
@@ -2085,46 +2086,46 @@ CREATE  TABLE kinton_liquibase.one_time_token (idOneTimeTokenSession int(3) unsi
 --	
 -- 	
 
-DROP TRIGGER IF EXISTS kinton_liquibase.datacenter_created;
-DROP TRIGGER IF EXISTS kinton_liquibase.datacenter_deleted;
-DROP TRIGGER IF EXISTS kinton_liquibase.virtualapp_created;
-DROP TRIGGER IF EXISTS kinton_liquibase.virtualapp_deleted;
-DROP TRIGGER IF EXISTS kinton_liquibase.update_virtualapp_update_stats;
-DROP TRIGGER IF EXISTS kinton_liquibase.enterprise_created;
-DROP TRIGGER IF EXISTS kinton_liquibase.enterprise_deleted;
-DROP TRIGGER IF EXISTS kinton_liquibase.enterprise_updated;
-DROP TRIGGER IF EXISTS kinton_liquibase.create_physicalmachine_update_stats;
-DROP TRIGGER IF EXISTS kinton_liquibase.delete_physicalmachine_update_stats;
-DROP TRIGGER IF EXISTS kinton_liquibase.update_physicalmachine_update_stats;
-DROP TRIGGER IF EXISTS kinton_liquibase.create_datastore_update_stats;
-DROP TRIGGER IF EXISTS kinton_liquibase.update_datastore_update_stats;
-DROP TRIGGER IF EXISTS kinton_liquibase.delete_datastore_update_stats;
-DROP TRIGGER IF EXISTS kinton.create_virtualmachine_update_stats;
-DROP TRIGGER IF EXISTS kinton.update_virtualmachine_update_stats;
-DROP TRIGGER IF EXISTS kinton.delete_virtualmachine_update_stats;
-DROP TRIGGER IF EXISTS kinton_liquibase.create_nodevirtualimage_update_stats;
-DROP TRIGGER IF EXISTS kinton.delete_nodevirtualimage_update_stats;
-DROP TRIGGER IF EXISTS kinton_liquibase.virtualdatacenter_created;
-DROP TRIGGER IF EXISTS kinton_liquibase.virtualdatacenter_updated;
-DROP TRIGGER IF EXISTS kinton_liquibase.virtualdatacenter_deleted;
--- DROP TRIGGER IF EXISTS kinton_liquibase.create_rasd_management_update_stats;
-DROP TRIGGER IF EXISTS kinton.delete_rasd_management_update_stats;
-DROP TRIGGER IF EXISTS kinton_liquibase.create_volume_management_update_stats;
-DROP TRIGGER IF EXISTS kinton_liquibase.delete_volume_management_update_stats;
-DROP TRIGGER IF EXISTS kinton_liquibase.update_volume_management_update_stats;
-DROP TRIGGER IF EXISTS kinton.update_rasd_management_update_stats;
-DROP TRIGGER IF EXISTS kinton_liquibase.update_rasd_update_stats;
-DROP TRIGGER IF EXISTS kinton_liquibase.user_created;
-DROP TRIGGER IF EXISTS kinton_liquibase.user_deleted;
-DROP TRIGGER IF EXISTS kinton.create_ip_pool_management_update_stats;
-DROP TRIGGER IF EXISTS kinton_liquibase.create_vlan_network_update_stats;
-DROP TRIGGER IF EXISTS kinton_liquibase.delete_vlan_network_update_stats;
-DROP TRIGGER IF EXISTS kinton.update_ip_pool_management_update_stats;
-DROP TRIGGER IF EXISTS kinton.delete_ip_pool_management_update_stats;
-DROP TRIGGER IF EXISTS kinton_liquibase.update_network_configuration_update_stats;
-DROP TRIGGER IF EXISTS kinton_liquibase.dclimit_created;
-DROP TRIGGER IF EXISTS kinton_liquibase.dclimit_updated;
-DROP TRIGGER IF EXISTS kinton_liquibase.dclimit_deleted;
+DROP TRIGGER IF EXISTS `kinton_liquibase`.`datacenter_created`;
+DROP TRIGGER IF EXISTS `kinton_liquibase`.`datacenter_deleted`;
+DROP TRIGGER IF EXISTS `kinton_liquibase`.`virtualapp_created`;
+DROP TRIGGER IF EXISTS `kinton_liquibase`.`virtualapp_deleted`;
+DROP TRIGGER IF EXISTS `kinton_liquibase`.`update_virtualapp_update_stats`;
+DROP TRIGGER IF EXISTS `kinton_liquibase`.`enterprise_created`;
+DROP TRIGGER IF EXISTS `kinton_liquibase`.`enterprise_deleted`;
+DROP TRIGGER IF EXISTS `kinton_liquibase`.`enterprise_updated`;
+DROP TRIGGER IF EXISTS `kinton_liquibase`.`create_physicalmachine_update_stats`;
+DROP TRIGGER IF EXISTS `kinton_liquibase`.`delete_physicalmachine_update_stats`;
+DROP TRIGGER IF EXISTS `kinton_liquibase`.`update_physicalmachine_update_stats`;
+DROP TRIGGER IF EXISTS `kinton_liquibase`.`create_datastore_update_stats`;
+DROP TRIGGER IF EXISTS `kinton_liquibase`.`update_datastore_update_stats`;
+DROP TRIGGER IF EXISTS `kinton_liquibase`.`delete_datastore_update_stats`;
+DROP TRIGGER IF EXISTS kinton_liquibase.create_virtualmachine_update_stats;
+DROP TRIGGER IF EXISTS kinton_liquibase.update_virtualmachine_update_stats;
+DROP TRIGGER IF EXISTS kinton_liquibase.delete_virtualmachine_update_stats;
+DROP TRIGGER IF EXISTS `kinton_liquibase`.`create_nodevirtualimage_update_stats`;
+DROP TRIGGER IF EXISTS kinton_liquibase.delete_nodevirtualimage_update_stats;
+DROP TRIGGER IF EXISTS `kinton_liquibase`.`virtualdatacenter_created`;
+DROP TRIGGER IF EXISTS `kinton_liquibase`.`virtualdatacenter_updated`;
+DROP TRIGGER IF EXISTS `kinton_liquibase`.`virtualdatacenter_deleted`;
+-- DROP TRIGGER IF EXISTS `kinton_liquibase`.`create_rasd_management_update_stats`;
+DROP TRIGGER IF EXISTS kinton_liquibase.delete_rasd_management_update_stats;
+DROP TRIGGER IF EXISTS `kinton_liquibase`.`create_volume_management_update_stats`;
+DROP TRIGGER IF EXISTS `kinton_liquibase`.`delete_volume_management_update_stats`;
+DROP TRIGGER IF EXISTS `kinton_liquibase`.`update_volume_management_update_stats`;
+DROP TRIGGER IF EXISTS kinton_liquibase.update_rasd_management_update_stats;
+DROP TRIGGER IF EXISTS `kinton_liquibase`.`update_rasd_update_stats`;
+DROP TRIGGER IF EXISTS `kinton_liquibase`.`user_created`;
+DROP TRIGGER IF EXISTS `kinton_liquibase`.`user_deleted`;
+DROP TRIGGER IF EXISTS kinton_liquibase.create_ip_pool_management_update_stats;
+DROP TRIGGER IF EXISTS `kinton_liquibase`.`create_vlan_network_update_stats`;
+DROP TRIGGER IF EXISTS `kinton_liquibase`.`delete_vlan_network_update_stats`;
+DROP TRIGGER IF EXISTS kinton_liquibase.update_ip_pool_management_update_stats;
+DROP TRIGGER IF EXISTS kinton_liquibase.delete_ip_pool_management_update_stats;
+DROP TRIGGER IF EXISTS `kinton_liquibase`.`update_network_configuration_update_stats`;
+DROP TRIGGER IF EXISTS `kinton_liquibase`.`dclimit_created`;
+DROP TRIGGER IF EXISTS `kinton_liquibase`.`dclimit_updated`;
+DROP TRIGGER IF EXISTS `kinton_liquibase`.`dclimit_deleted`;
 --
 -- Init Stats
 DELIMITER |
@@ -2140,7 +2141,7 @@ SET @DISABLE_STATS_TRIGGERS = NULL;
 -- Fires:
 --
 -- ******************************************************************
-CREATE TRIGGER kinton_liquibase.datacenter_created AFTER INSERT ON kinton_liquibase.datacenter
+CREATE TRIGGER `kinton_liquibase`.`datacenter_created` AFTER INSERT ON `kinton_liquibase`.`datacenter`
   FOR EACH ROW BEGIN
     IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN
       INSERT IGNORE INTO cloud_usage_stats (idDataCenter) VALUES (NEW.idDataCenter);
@@ -2148,7 +2149,7 @@ CREATE TRIGGER kinton_liquibase.datacenter_created AFTER INSERT ON kinton_liquib
   END;
 |
 --
-CREATE TRIGGER kinton_liquibase.datacenter_deleted AFTER DELETE ON kinton_liquibase.datacenter
+CREATE TRIGGER `kinton_liquibase`.`datacenter_deleted` AFTER DELETE ON `kinton_liquibase`.`datacenter`
   FOR EACH ROW BEGIN
     IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN
 	DELETE FROM dc_enterprise_stats WHERE idDataCenter = OLD.idDataCenter;
@@ -2157,7 +2158,7 @@ CREATE TRIGGER kinton_liquibase.datacenter_deleted AFTER DELETE ON kinton_liquib
   END;
 --
 |
-CREATE TRIGGER kinton_liquibase.virtualapp_created AFTER INSERT ON kinton_liquibase.virtualapp
+CREATE TRIGGER `kinton_liquibase`.`virtualapp_created` AFTER INSERT ON `kinton_liquibase`.`virtualapp`
   FOR EACH ROW BEGIN
     DECLARE vdcNameObj VARCHAR(50);
     IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN
@@ -2169,7 +2170,7 @@ CREATE TRIGGER kinton_liquibase.virtualapp_created AFTER INSERT ON kinton_liquib
   END;
 --
 |
-CREATE TRIGGER kinton_liquibase.virtualapp_deleted AFTER DELETE ON kinton_liquibase.virtualapp
+CREATE TRIGGER `kinton_liquibase`.`virtualapp_deleted` AFTER DELETE ON `kinton_liquibase`.`virtualapp`
   FOR EACH ROW BEGIN
     IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN
     DELETE FROM vapp_enterprise_stats WHERE idVirtualApp = OLD.idVirtualApp;
@@ -2185,7 +2186,7 @@ CREATE TRIGGER kinton_liquibase.virtualapp_deleted AFTER DELETE ON kinton_liquib
 --
 -- Fires: On an UPDATE for the 'virtualapp' table
 -- ******************************************************************************************
-CREATE TRIGGER kinton_liquibase.update_virtualapp_update_stats AFTER UPDATE ON kinton_liquibase.virtualapp
+CREATE TRIGGER `kinton_liquibase`.`update_virtualapp_update_stats` AFTER UPDATE ON `kinton_liquibase`.`virtualapp`
   FOR EACH ROW BEGIN
     DECLARE numVMachinesCreated INTEGER;
     IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN
@@ -2222,7 +2223,7 @@ CREATE TRIGGER kinton_liquibase.update_virtualapp_update_stats AFTER UPDATE ON k
 
 -- ******************************************************************************************
 |
-CREATE TRIGGER kinton_liquibase.enterprise_created AFTER INSERT ON kinton_liquibase.enterprise
+CREATE TRIGGER `kinton_liquibase`.`enterprise_created` AFTER INSERT ON `kinton_liquibase`.`enterprise`
     FOR EACH ROW BEGIN      
         IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN       
             --  Creates a New row in enterprise_resources_stats to store this enterprise's statistics
@@ -2259,7 +2260,7 @@ CREATE TRIGGER kinton_liquibase.enterprise_created AFTER INSERT ON kinton_liquib
 --
 -- ******************************************************************************************
 |
-CREATE TRIGGER kinton_liquibase.enterprise_updated AFTER UPDATE ON kinton_liquibase.enterprise
+CREATE TRIGGER `kinton_liquibase`.`enterprise_updated` AFTER UPDATE ON `kinton_liquibase`.`enterprise`
 -- WARN: Enterprises are not deleted, logical delete (delete field) 
     FOR EACH ROW BEGIN
         IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN       
@@ -2293,7 +2294,7 @@ CREATE TRIGGER kinton_liquibase.enterprise_updated AFTER UPDATE ON kinton_liquib
 --
 -- ************************************************************************************
 |
-CREATE TRIGGER kinton_liquibase.enterprise_deleted AFTER DELETE ON kinton_liquibase.enterprise
+CREATE TRIGGER `kinton_liquibase`.`enterprise_deleted` AFTER DELETE ON `kinton_liquibase`.`enterprise`
     FOR EACH ROW BEGIN      
         IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN
         DELETE FROM enterprise_resources_stats WHERE idEnterprise = OLD.idEnterprise;           
@@ -2323,7 +2324,7 @@ CREATE TRIGGER kinton_liquibase.enterprise_deleted AFTER DELETE ON kinton_liquib
 -- ************************************************************************************
 --
 |
-CREATE TRIGGER kinton_liquibase.create_physicalmachine_update_stats AFTER INSERT ON kinton_liquibase.physicalmachine
+CREATE TRIGGER `kinton_liquibase`.`create_physicalmachine_update_stats` AFTER INSERT ON `kinton_liquibase`.`physicalmachine`
 FOR EACH ROW BEGIN
 IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN
     IF NEW.idState = 3 THEN
@@ -2339,7 +2340,7 @@ IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN
 END IF;
 END
 |
-CREATE TRIGGER kinton_liquibase.create_datastore_update_stats AFTER INSERT ON kinton_liquibase.datastore_assignment
+CREATE TRIGGER `kinton_liquibase`.`create_datastore_update_stats` AFTER INSERT ON `kinton_liquibase`.`datastore_assignment`
 FOR EACH ROW BEGIN
 DECLARE machineState INT UNSIGNED;
 DECLARE idDatacenter INT UNSIGNED;
@@ -2380,7 +2381,7 @@ END
 --
 -- ************************************************************************************
 |
-CREATE TRIGGER kinton_liquibase.delete_physicalmachine_update_stats AFTER DELETE ON kinton_liquibase.physicalmachine
+CREATE TRIGGER `kinton_liquibase`.`delete_physicalmachine_update_stats` AFTER DELETE ON `kinton_liquibase`.`physicalmachine`
 FOR EACH ROW BEGIN
 IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN
     IF OLD.idState = 3 THEN
@@ -2396,7 +2397,7 @@ IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN
 END IF;
 END;
 |
-CREATE TRIGGER kinton_liquibase.delete_datastore_update_stats BEFORE DELETE ON kinton_liquibase.datastore
+CREATE TRIGGER `kinton_liquibase`.`delete_datastore_update_stats` BEFORE DELETE ON `kinton_liquibase`.`datastore`
 FOR EACH ROW BEGIN
 DECLARE machineState INT UNSIGNED;
 DECLARE idDatacenter INT UNSIGNED;
@@ -2432,7 +2433,7 @@ END
 -- Fires: On an UPDATE IGNORE for the physicalmachine table
 --
 -- ************************************************************************************
-CREATE TRIGGER kinton_liquibase.update_physicalmachine_update_stats AFTER UPDATE ON kinton_liquibase.physicalmachine
+CREATE TRIGGER `kinton_liquibase`.`update_physicalmachine_update_stats` AFTER UPDATE ON `kinton_liquibase`.`physicalmachine`
 FOR EACH ROW BEGIN
 DECLARE datastoreSize BIGINT UNSIGNED;
 DECLARE oldDatastoreSize BIGINT UNSIGNED;
@@ -2490,7 +2491,7 @@ END;
 --
 -- ******************************************************************************************
 |
-CREATE TRIGGER kinton_liquibase.create_virtualmachine_update_stats AFTER INSERT ON kinton_liquibase.virtualmachine
+CREATE TRIGGER `kinton_liquibase`.`create_virtualmachine_update_stats` AFTER INSERT ON `kinton_liquibase`.`virtualmachine`
     FOR EACH ROW BEGIN
 	IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN
 		INSERT INTO virtualmachinetrackedstate (idVM) VALUES (NEW.idVM);
@@ -2504,7 +2505,7 @@ CREATE TRIGGER kinton_liquibase.create_virtualmachine_update_stats AFTER INSERT 
 --  * Keeps track of previous states for virtualmachines
 --
 -- ******************************************************************************************	
-CREATE TRIGGER kinton_liquibase.delete_virtualmachine_update_stats AFTER DELETE ON kinton_liquibase.virtualmachine
+CREATE TRIGGER `kinton_liquibase`.`delete_virtualmachine_update_stats` AFTER DELETE ON `kinton_liquibase`.`virtualmachine`
     FOR EACH ROW BEGIN
 	IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN
 		DELETE FROM virtualmachinetrackedstate WHERE idVM = OLD.idVM;
@@ -2523,7 +2524,7 @@ CREATE TRIGGER kinton_liquibase.delete_virtualmachine_update_stats AFTER DELETE 
 --
 --
 -- ******************************************************************************************
-CREATE TRIGGER kinton.update_virtualmachine_update_stats AFTER UPDATE ON kinton.virtualmachine
+CREATE TRIGGER kinton_liquibase.update_virtualmachine_update_stats AFTER UPDATE ON kinton_liquibase.virtualmachine
     FOR EACH ROW BEGIN
         DECLARE idDataCenterObj INTEGER;
         DECLARE idVirtualAppObj INTEGER;
@@ -2627,7 +2628,7 @@ CREATE TRIGGER kinton.update_virtualmachine_update_stats AFTER UPDATE ON kinton.
         FROM virtualimage vi
         WHERE vi.idImage = NEW.idImage;
         -- Register Accounting Events
-        IF EXISTS( SELECT * FROM information_schema.ROUTINES WHERE ROUTINE_SCHEMA='kinton' AND ROUTINE_TYPE='PROCEDURE' AND ROUTINE_NAME='AccountingVMRegisterEvents' ) THEN
+        IF EXISTS( SELECT * FROM information_schema.ROUTINES WHERE ROUTINE_SCHEMA='kinton_liquibase' AND ROUTINE_TYPE='PROCEDURE' AND ROUTINE_NAME='AccountingVMRegisterEvents' ) THEN
        		 IF EXISTS(SELECT * FROM virtualimage vi WHERE vi.idImage=NEW.idImage) THEN 
 	          CALL AccountingVMRegisterEvents(NEW.idVM, NEW.idType, OLD.state, NEW.state, previousState, NEW.ram, NEW.cpu, NEW.hd + extraHDSize, costCodeObj);
        		 END IF;              
@@ -2647,7 +2648,7 @@ CREATE TRIGGER kinton.update_virtualmachine_update_stats AFTER UPDATE ON kinton.
 -- ******************************************************************************************
 --
 |
-CREATE TRIGGER kinton.create_nodevirtualimage_update_stats AFTER INSERT ON kinton.nodevirtualimage
+CREATE TRIGGER kinton_liquibase.create_nodevirtualimage_update_stats AFTER INSERT ON kinton_liquibase.nodevirtualimage
   FOR EACH ROW BEGIN
     DECLARE idDataCenterObj INTEGER;
     DECLARE idVirtualAppObj INTEGER;
@@ -2704,7 +2705,7 @@ CREATE TRIGGER kinton.create_nodevirtualimage_update_stats AFTER INSERT ON kinto
     SELECT IF(vi.cost_code IS NULL, 0, vi.cost_code) INTO costCodeObj
         FROM virtualimage vi
         WHERE vi.idImage = NEW.idImage;
-    IF EXISTS( SELECT * FROM information_schema.ROUTINES WHERE ROUTINE_SCHEMA='kinton' AND ROUTINE_TYPE='PROCEDURE' AND ROUTINE_NAME='AccountingVMRegisterEvents' ) THEN
+    IF EXISTS( SELECT * FROM information_schema.ROUTINES WHERE ROUTINE_SCHEMA='kinton_liquibase' AND ROUTINE_TYPE='PROCEDURE' AND ROUTINE_NAME='AccountingVMRegisterEvents' ) THEN
        IF EXISTS(SELECT * FROM virtualimage vi WHERE vi.idImage=NEW.idImage) THEN 
 	          CALL AccountingVMRegisterEvents(NEW.idVM, type, "NOT_ALLOCATED", state, "NOT_ALLOCATED", ram, cpu, hd, costCodeObj);
         END IF;              
@@ -2722,7 +2723,7 @@ CREATE TRIGGER kinton.create_nodevirtualimage_update_stats AFTER INSERT ON kinto
 -- ******************************************************************************************
 --
 |
-CREATE TRIGGER kinton.delete_nodevirtualimage_update_stats AFTER DELETE ON kinton.nodevirtualimage
+CREATE TRIGGER kinton_liquibase.delete_nodevirtualimage_update_stats AFTER DELETE ON kinton_liquibase.nodevirtualimage
   FOR EACH ROW BEGIN
     DECLARE idDataCenterObj INTEGER;
     DECLARE idVirtualAppObj INTEGER;
@@ -2788,7 +2789,7 @@ CREATE TRIGGER kinton.delete_nodevirtualimage_update_stats AFTER DELETE ON kinto
     SELECT IF(vi.cost_code IS NULL, 0, vi.cost_code) INTO costCodeObj
         FROM virtualimage vi
         WHERE vi.idImage = OLD.idImage;
-    IF EXISTS( SELECT * FROM information_schema.ROUTINES WHERE ROUTINE_SCHEMA='kinton' AND ROUTINE_TYPE='PROCEDURE' AND ROUTINE_NAME='AccountingVMRegisterEvents' ) THEN
+    IF EXISTS( SELECT * FROM information_schema.ROUTINES WHERE ROUTINE_SCHEMA='kinton_liquibase' AND ROUTINE_TYPE='PROCEDURE' AND ROUTINE_NAME='AccountingVMRegisterEvents' ) THEN
        IF EXISTS(SELECT * FROM virtualimage vi WHERE vi.idImage=OLD.idImage) THEN 
 	          CALL AccountingVMRegisterEvents(OLD.idVM, type, "-", "NOT_ALLOCATED", previousState, ram, cpu, hd, costCodeObj);
         END IF;              
@@ -2806,8 +2807,8 @@ CREATE TRIGGER kinton.delete_nodevirtualimage_update_stats AFTER DELETE ON kinto
 --
 -- ******************************************************************************************
 |
--- This Trigger was deleted in 2.0-> CREATE TRIGGER kinton_liquibase.create_rasd_management_update_stats AFTER INSERT ON kinton_liquibase.rasd_management
-CREATE TRIGGER kinton_liquibase.create_volume_management_update_stats AFTER INSERT ON kinton_liquibase.volume_management
+-- This Trigger was deleted in 2.0-> CREATE TRIGGER `kinton_liquibase`.`create_rasd_management_update_stats` AFTER INSERT ON `kinton_liquibase`.`rasd_management`
+CREATE TRIGGER `kinton_liquibase`.`create_volume_management_update_stats` AFTER INSERT ON `kinton_liquibase`.`volume_management`
     FOR EACH ROW BEGIN
         DECLARE idDataCenterObj INTEGER;
         DECLARE idVirtualDataCenterObj INTEGER;
@@ -2839,7 +2840,7 @@ CREATE TRIGGER kinton_liquibase.create_volume_management_update_stats AFTER INSE
             IF idResourceTypeObj='8' THEN 
                 UPDATE IGNORE cloud_usage_stats SET storageTotal = storageTotal+limitResourceObj WHERE idDataCenter = idDataCenterObj;
                 UPDATE IGNORE vdc_enterprise_stats SET volCreated = volCreated+1 WHERE idVirtualDataCenter = idVirtualDataCenterObj;
-                IF EXISTS( SELECT * FROM information_schema.ROUTINES WHERE ROUTINE_SCHEMA='kinton' AND ROUTINE_TYPE='PROCEDURE' AND ROUTINE_NAME='AccountingStorageRegisterEvents' ) THEN
+                IF EXISTS( SELECT * FROM `information_schema`.ROUTINES WHERE ROUTINE_SCHEMA='kinton_liquibase' AND ROUTINE_TYPE='PROCEDURE' AND ROUTINE_NAME='AccountingStorageRegisterEvents' ) THEN
                     CALL AccountingStorageRegisterEvents('CREATE_STORAGE', idResourceObj, resourceName, idStorageTier, idVirtualDataCenterObj, idThisEnterprise, limitResourceObj);
                 END IF;               
             END IF;
@@ -2855,7 +2856,7 @@ CREATE TRIGGER kinton_liquibase.create_volume_management_update_stats AFTER INSE
 --
 -- ******************************************************************************************
 |
-CREATE TRIGGER kinton.delete_rasd_management_update_stats AFTER DELETE ON kinton.rasd_management
+CREATE TRIGGER kinton_liquibase.delete_rasd_management_update_stats AFTER DELETE ON kinton_liquibase.rasd_management
     FOR EACH ROW BEGIN
         DECLARE idDataCenterObj INTEGER;
         DECLARE idThisEnterprise INTEGER;
@@ -2880,7 +2881,7 @@ CREATE TRIGGER kinton.delete_rasd_management_update_stats AFTER DELETE ON kinton
             IF OLD.idResourceType='8' THEN 
                 UPDATE IGNORE cloud_usage_stats SET storageTotal = storageTotal-limitResourceObj WHERE idDataCenter = idDataCenterObj;
                 UPDATE IGNORE vdc_enterprise_stats SET volCreated = volCreated-1 WHERE idVirtualDataCenter = OLD.idVirtualDataCenter;
-                IF EXISTS( SELECT * FROM information_schema.ROUTINES WHERE ROUTINE_SCHEMA='kinton' AND ROUTINE_TYPE='PROCEDURE' AND ROUTINE_NAME='AccountingStorageRegisterEvents' ) THEN
+                IF EXISTS( SELECT * FROM `information_schema`.ROUTINES WHERE ROUTINE_SCHEMA='kinton_liquibase' AND ROUTINE_TYPE='PROCEDURE' AND ROUTINE_NAME='AccountingStorageRegisterEvents' ) THEN
                     CALL AccountingStorageRegisterEvents('DELETE_STORAGE', OLD.idResource, resourceName, 0, OLD.idVirtualDataCenter, idThisEnterprise, limitResourceObj);
                 END IF;                  
             END IF;
@@ -2910,7 +2911,7 @@ CREATE TRIGGER kinton.delete_rasd_management_update_stats AFTER DELETE ON kinton
 --
 -- ******************************************************************************************
 |
-CREATE TRIGGER kinton_liquibase.virtualdatacenter_created AFTER INSERT ON kinton_liquibase.virtualdatacenter
+CREATE TRIGGER `kinton_liquibase`.`virtualdatacenter_created` AFTER INSERT ON `kinton_liquibase`.`virtualdatacenter`
     FOR EACH ROW BEGIN
         IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN
         UPDATE IGNORE cloud_usage_stats SET numVDCCreated = numVDCCreated + 1 WHERE idDataCenter = NEW.idDataCenter;    
@@ -2934,7 +2935,7 @@ CREATE TRIGGER kinton_liquibase.virtualdatacenter_created AFTER INSERT ON kinton
 -- Fires: On an UPDATE for the 'virtualdatacenter' table
 -- ******************************************************************************************
 |
-CREATE TRIGGER kinton_liquibase.virtualdatacenter_updated AFTER UPDATE ON kinton_liquibase.virtualdatacenter
+CREATE TRIGGER `kinton_liquibase`.`virtualdatacenter_updated` AFTER UPDATE ON `kinton_liquibase`.`virtualdatacenter`
     FOR EACH ROW BEGIN
     DECLARE vlanNetworkIdObj INTEGER;    
         	  DECLARE networkNameObj VARCHAR(40);
@@ -2972,7 +2973,7 @@ CREATE TRIGGER kinton_liquibase.virtualdatacenter_updated AFTER UPDATE ON kinton
 		   IF NOT done THEN
 
 		    -- INSERT INTO debug_msg (msg) VALUES (CONCAT('VDC UPDATED -> OLD.networktypeID ', IFNULL(OLD.networktypeID,'NULL'), 'Enterprise: ',IFNULL(OLD.idEnterprise,'NULL'),' VDC: ',IFNULL(OLD.idVirtualDataCenter,'NULL'),IFNULL(vlanNetworkIdObj,'NULL'),IFNULL(networkNameObj,'NULL')));
-			IF EXISTS( SELECT * FROM information_schema.ROUTINES WHERE ROUTINE_SCHEMA='kinton' AND ROUTINE_TYPE='PROCEDURE' AND ROUTINE_NAME='AccountingVLANRegisterEvents' ) THEN
+			IF EXISTS( SELECT * FROM `information_schema`.ROUTINES WHERE ROUTINE_SCHEMA='kinton_liquibase' AND ROUTINE_TYPE='PROCEDURE' AND ROUTINE_NAME='AccountingVLANRegisterEvents' ) THEN
 				CALL AccountingVLANRegisterEvents('DELETE_VLAN',vlanNetworkIdObj, networkNameObj, OLD.idVirtualDataCenter,OLD.idEnterprise);
 			END IF;
 			-- Statistics
@@ -3000,7 +3001,7 @@ CREATE TRIGGER kinton_liquibase.virtualdatacenter_updated AFTER UPDATE ON kinton
 -- Fires: On an DELETE for the virtualdatacenter table
 --
 -- ******************************************************************************************
-CREATE TRIGGER kinton_liquibase.virtualdatacenter_deleted BEFORE DELETE ON kinton_liquibase.virtualdatacenter
+CREATE TRIGGER `kinton_liquibase`.`virtualdatacenter_deleted` BEFORE DELETE ON `kinton_liquibase`.`virtualdatacenter`
     FOR EACH ROW BEGIN
     DECLARE currentIdManagement INTEGER DEFAULT -1;
     DECLARE currentDataCenter INTEGER DEFAULT -1;
@@ -3030,7 +3031,7 @@ CREATE TRIGGER kinton_liquibase.virtualdatacenter_deleted BEFORE DELETE ON kinto
 --      INSERT INTO debug_msg (msg) VALUES (CONCAT('IP_FREED: ',currentIpAddress, ' - idManagement: ', currentIdManagement, ' - OLD.idVirtualDataCenter: ', OLD.idVirtualDataCenter, ' - idEnterpriseObj: ', OLD.idEnterprise));
         -- We reset MAC and NAME for the reserved IPs. Java code should do this!
         UPDATE ip_pool_management set mac=NULL, name=NULL WHERE idManagement = currentIdManagement;
-        IF EXISTS( SELECT * FROM information_schema.ROUTINES WHERE ROUTINE_SCHEMA='kinton' AND ROUTINE_TYPE='PROCEDURE' AND ROUTINE_NAME='AccountingIPsRegisterEvents' ) THEN
+        IF EXISTS( SELECT * FROM `information_schema`.ROUTINES WHERE ROUTINE_SCHEMA='kinton_liquibase' AND ROUTINE_TYPE='PROCEDURE' AND ROUTINE_NAME='AccountingIPsRegisterEvents' ) THEN
                     CALL AccountingIPsRegisterEvents('IP_FREED',currentIdManagement,currentIpAddress,OLD.idVirtualDataCenter, OLD.idEnterprise);
             END IF;                    
         UPDATE IGNORE cloud_usage_stats SET publicIPsUsed = publicIPsUsed-1 WHERE idDataCenter = currentDataCenter;
@@ -3050,7 +3051,7 @@ CREATE TRIGGER kinton_liquibase.virtualdatacenter_deleted BEFORE DELETE ON kinto
 --
 -- ******************************************************************************************
 |
-CREATE TRIGGER kinton_liquibase.user_created AFTER INSERT ON kinton_liquibase.user
+CREATE TRIGGER `kinton_liquibase`.`user_created` AFTER INSERT ON `kinton_liquibase`.`user`
   FOR EACH ROW BEGIN
     -- DECLARE idDataCenterObj INTEGER;
     IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN
@@ -3070,7 +3071,7 @@ CREATE TRIGGER kinton_liquibase.user_created AFTER INSERT ON kinton_liquibase.us
 --
 -- ******************************************************************************************
 |
-CREATE TRIGGER kinton_liquibase.user_deleted AFTER DELETE ON kinton_liquibase.user
+CREATE TRIGGER `kinton_liquibase`.`user_deleted` AFTER DELETE ON `kinton_liquibase`.`user`
   FOR EACH ROW BEGIN
     IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN
     UPDATE IGNORE cloud_usage_stats SET numUsersCreated = numUsersCreated-1 WHERE idDataCenter = -1;
@@ -3091,7 +3092,7 @@ CREATE TRIGGER kinton_liquibase.user_deleted AFTER DELETE ON kinton_liquibase.us
 --
 -- ******************************************************************************************
 |
-CREATE TRIGGER kinton_liquibase.update_volume_management_update_stats AFTER UPDATE ON kinton_liquibase.volume_management
+CREATE TRIGGER `kinton_liquibase`.`update_volume_management_update_stats` AFTER UPDATE ON `kinton_liquibase`.`volume_management`
     FOR EACH ROW BEGIN
         DECLARE idDataCenterObj INTEGER;
         DECLARE idVirtualAppObj INTEGER;
@@ -3156,7 +3157,7 @@ CREATE TRIGGER kinton_liquibase.update_volume_management_update_stats AFTER UPDA
 --
 -- ******************************************************************************************
 |
-CREATE TRIGGER kinton.update_rasd_management_update_stats AFTER UPDATE ON kinton.rasd_management
+CREATE TRIGGER kinton_liquibase.update_rasd_management_update_stats AFTER UPDATE ON kinton_liquibase.rasd_management
     FOR EACH ROW BEGIN
         DECLARE state VARCHAR(50) CHARACTER SET utf8;
         DECLARE idState INTEGER;
@@ -3350,7 +3351,7 @@ CREATE TRIGGER kinton.update_rasd_management_update_stats AFTER UPDATE ON kinton
                     UPDATE IGNORE enterprise_resources_stats SET publicIPsReserved = publicIPsReserved-1 WHERE idEnterprise = idEnterpriseObj;
                     UPDATE IGNORE vdc_enterprise_stats SET publicIPsReserved = publicIPsReserved-1 WHERE idVirtualDataCenter = OLD.idVirtualDataCenter;
                     UPDATE IGNORE dc_enterprise_stats SET publicIPsReserved = publicIPsReserved-1 WHERE idDataCenter = idDataCenterObj;
-                    IF EXISTS( SELECT * FROM information_schema.ROUTINES WHERE ROUTINE_SCHEMA='kinton' AND ROUTINE_TYPE='PROCEDURE' AND ROUTINE_NAME='AccountingIPsRegisterEvents' ) THEN
+                    IF EXISTS( SELECT * FROM information_schema.ROUTINES WHERE ROUTINE_SCHEMA='kinton_liquibase' AND ROUTINE_TYPE='PROCEDURE' AND ROUTINE_NAME='AccountingIPsRegisterEvents' ) THEN
                         CALL AccountingIPsRegisterEvents('IP_FREED',OLD.idManagement,ipAddress,OLD.idVirtualDataCenter, idEnterpriseObj);
                     END IF;                    
                 END IF;
@@ -3368,7 +3369,7 @@ CREATE TRIGGER kinton.update_rasd_management_update_stats AFTER UPDATE ON kinton
 --
 -- ******************************************************************************************
 |
-CREATE TRIGGER kinton_liquibase.update_rasd_update_stats AFTER UPDATE ON kinton_liquibase.rasd
+CREATE TRIGGER `kinton_liquibase`.`update_rasd_update_stats` AFTER UPDATE ON `kinton_liquibase`.`rasd`
     FOR EACH ROW BEGIN
         DECLARE idDataCenterObj INTEGER;
         DECLARE idThisEnterprise INTEGER;
@@ -3402,7 +3403,7 @@ CREATE TRIGGER kinton_liquibase.update_rasd_update_stats AFTER UPDATE ON kinton_
                         extStorageUsed = extStorageUsed +  NEW.limitResource - OLD.limitResource 
                     WHERE idVirtualDataCenter = idThisVirtualDataCenter;
                 END IF;        
-                IF EXISTS( SELECT * FROM information_schema.ROUTINES WHERE ROUTINE_SCHEMA='kinton' AND ROUTINE_TYPE='PROCEDURE' AND ROUTINE_NAME='AccountingStorageRegisterEvents' ) THEN
+                IF EXISTS( SELECT * FROM `information_schema`.ROUTINES WHERE ROUTINE_SCHEMA='kinton_liquibase' AND ROUTINE_TYPE='PROCEDURE' AND ROUTINE_NAME='AccountingStorageRegisterEvents' ) THEN
                     CALL AccountingStorageRegisterEvents('UPDATE_STORAGE', NEW.instanceID, NEW.elementName, 0, idThisVirtualDataCenter, idThisEnterprise, NEW.limitResource);
                 END IF;
             END IF;
@@ -3415,7 +3416,7 @@ CREATE TRIGGER kinton_liquibase.update_rasd_update_stats AFTER UPDATE ON kinton_
 --
 -- Fires: On an INSERT for the ip_pool_management
 -- ******************************************************************************************
-CREATE TRIGGER kinton.create_ip_pool_management_update_stats AFTER INSERT ON kinton.ip_pool_management
+CREATE TRIGGER kinton_liquibase.create_ip_pool_management_update_stats AFTER INSERT ON kinton_liquibase.ip_pool_management
   FOR EACH ROW BEGIN
     DECLARE idDataCenterObj INTEGER;
     IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN
@@ -3439,7 +3440,7 @@ CREATE TRIGGER kinton.create_ip_pool_management_update_stats AFTER INSERT ON kin
 --
 -- Fires: On an DELETE for the ip_pool_management
 -- ******************************************************************************************
-CREATE TRIGGER kinton.delete_ip_pool_management_update_stats AFTER DELETE ON kinton.ip_pool_management
+CREATE TRIGGER kinton_liquibase.delete_ip_pool_management_update_stats AFTER DELETE ON kinton_liquibase.ip_pool_management
   FOR EACH ROW BEGIN
     DECLARE idDataCenterObj INTEGER;
     IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN
@@ -3463,10 +3464,10 @@ CREATE TRIGGER kinton.delete_ip_pool_management_update_stats AFTER DELETE ON kin
 -- Description: 
 -- * Registers Created VLAN for Accounting for enterprise, dc, vdc
 --
--- Fires: On an INSERT ON kinton_liquibase.vlan_network
+-- Fires: On an INSERT ON `kinton_liquibase`.`vlan_network`
 --
 -- ******************************************************************************************
-CREATE TRIGGER kinton_liquibase.create_vlan_network_update_stats AFTER INSERT ON kinton_liquibase.vlan_network
+CREATE TRIGGER `kinton_liquibase`.`create_vlan_network_update_stats` AFTER INSERT ON `kinton_liquibase`.`vlan_network`
 FOR EACH ROW BEGIN
     DECLARE idVirtualDataCenterObj INTEGER;
     DECLARE idDataCenterObj INTEGER;
@@ -3480,7 +3481,7 @@ FOR EACH ROW BEGIN
     FROM datacenter dc
     WHERE dc.network_id = NEW.network_id;
     -- INSERT INTO debug_msg (msg) VALUES (CONCAT('PROCEDURE AccountingVLANRegisterEvents Activated: ',IFNULL(NEW.vlan_network_id,'NULL'),'-',IFNULL(NEW.network_name,'NULL'),'-',IFNULL(idVirtualDataCenterObj,'NULL'),'-',idEnterpriseObj,'-','CREATE_VLAN','-',now()));
-    IF EXISTS( SELECT * FROM information_schema.ROUTINES WHERE ROUTINE_SCHEMA='kinton' AND ROUTINE_TYPE='PROCEDURE' AND ROUTINE_NAME='AccountingVLANRegisterEvents' ) THEN
+    IF EXISTS( SELECT * FROM `information_schema`.ROUTINES WHERE ROUTINE_SCHEMA='kinton_liquibase' AND ROUTINE_TYPE='PROCEDURE' AND ROUTINE_NAME='AccountingVLANRegisterEvents' ) THEN
             CALL AccountingVLANRegisterEvents('CREATE_VLAN',NEW.vlan_network_id, NEW.network_name, idVirtualDataCenterObj,idEnterpriseObj);
         END IF;    
     -- Statistics
@@ -3501,11 +3502,11 @@ END;
 -- Description: 
 -- * Registers Deleted VLAN for Accounting for enterprise, dc, vdc
 --
--- Fires: On an DELETE ON kinton_liquibase.vlan_network
+-- Fires: On an DELETE ON `kinton_liquibase`.`vlan_network`
 --
 -- ******************************************************************************************
 |
-CREATE TRIGGER kinton_liquibase.delete_vlan_network_update_stats AFTER DELETE ON kinton_liquibase.vlan_network
+CREATE TRIGGER `kinton_liquibase`.`delete_vlan_network_update_stats` AFTER DELETE ON `kinton_liquibase`.`vlan_network`
 FOR EACH ROW
 BEGIN
     DECLARE idVirtualDataCenterObj INTEGER;
@@ -3522,7 +3523,7 @@ BEGIN
             FROM virtualdatacenter vdc, enterprise e
             WHERE vdc.networktypeID=OLD.network_id
             AND vdc.idEnterprise=e.idEnterprise;
-            IF EXISTS( SELECT * FROM information_schema.ROUTINES WHERE ROUTINE_SCHEMA='kinton' AND ROUTINE_TYPE='PROCEDURE' AND ROUTINE_NAME='AccountingVLANRegisterEvents' ) THEN
+            IF EXISTS( SELECT * FROM `information_schema`.ROUTINES WHERE ROUTINE_SCHEMA='kinton_liquibase' AND ROUTINE_TYPE='PROCEDURE' AND ROUTINE_NAME='AccountingVLANRegisterEvents' ) THEN
                 CALL AccountingVLANRegisterEvents('DELETE_VLAN',OLD.vlan_network_id, OLD.network_name, idVirtualDataCenterObj,idEnterpriseObj);
             END IF;
             -- Statistics
@@ -3550,7 +3551,7 @@ END;
 --
 -- Fires: On an UPDATE for the ip_pool_management
 -- ******************************************************************************************
-CREATE TRIGGER kinton.update_ip_pool_management_update_stats AFTER UPDATE ON kinton.ip_pool_management
+CREATE TRIGGER kinton_liquibase.update_ip_pool_management_update_stats AFTER UPDATE ON kinton_liquibase.ip_pool_management
     FOR EACH ROW BEGIN
         DECLARE idDataCenterObj INTEGER;
         DECLARE idVirtualDataCenterObj INTEGER;
@@ -3585,7 +3586,7 @@ CREATE TRIGGER kinton.update_ip_pool_management_update_stats AFTER UPDATE ON kin
                 UPDATE IGNORE enterprise_resources_stats SET publicIPsReserved = publicIPsReserved+1 WHERE idEnterprise = idEnterpriseObj;
                 UPDATE IGNORE vdc_enterprise_stats SET publicIPsReserved = publicIPsReserved+1 WHERE idVirtualDataCenter = idVirtualDataCenterObj;
                 UPDATE IGNORE dc_enterprise_stats SET publicIPsReserved = publicIPsReserved+1 WHERE idDataCenter = idDataCenterObj;
-                IF EXISTS( SELECT * FROM information_schema.ROUTINES WHERE ROUTINE_SCHEMA='kinton' AND ROUTINE_TYPE='PROCEDURE' AND ROUTINE_NAME='AccountingIPsRegisterEvents' ) THEN
+                IF EXISTS( SELECT * FROM `information_schema`.ROUTINES WHERE ROUTINE_SCHEMA='kinton_liquibase' AND ROUTINE_TYPE='PROCEDURE' AND ROUTINE_NAME='AccountingIPsRegisterEvents' ) THEN
                     CALL AccountingIPsRegisterEvents('IP_RESERVED',NEW.idManagement,NEW.ip,idVirtualDataCenterObj, idEnterpriseObj);
                 END IF;
             END IF;
@@ -3598,7 +3599,7 @@ CREATE TRIGGER kinton.update_ip_pool_management_update_stats AFTER UPDATE ON kin
 --
 -- Fires: On an INSERT for the enterprise_limits_by_datacenter
 -- ******************************************************************************************
-CREATE TRIGGER kinton_liquibase.dclimit_created AFTER INSERT ON kinton_liquibase.enterprise_limits_by_datacenter
+CREATE TRIGGER `kinton_liquibase`.`dclimit_created` AFTER INSERT ON `kinton_liquibase`.`enterprise_limits_by_datacenter`
     FOR EACH ROW BEGIN      
         IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN                   
         		 IF (NEW.idEnterprise != 0 AND NEW.idDataCenter != 0) THEN
@@ -3627,7 +3628,7 @@ CREATE TRIGGER kinton_liquibase.dclimit_created AFTER INSERT ON kinton_liquibase
 --
 -- Fires: On an UPDATE for the enterprise_limits_by_datacenter
 -- ******************************************************************************************
-CREATE TRIGGER kinton_liquibase.dclimit_updated AFTER UPDATE ON kinton_liquibase.enterprise_limits_by_datacenter
+CREATE TRIGGER `kinton_liquibase`.`dclimit_updated` AFTER UPDATE ON `kinton_liquibase`.`enterprise_limits_by_datacenter`
 FOR EACH ROW BEGIN     
 	 IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN       
                 -- Limit is not used anymore. Statistics are removed
@@ -3658,7 +3659,7 @@ END;
 --
 -- Fires: On an UPDATE for the enterprise_limits_by_datacenter
 -- ******************************************************************************************
-CREATE TRIGGER kinton_liquibase.dclimit_deleted AFTER DELETE ON kinton_liquibase.enterprise_limits_by_datacenter
+CREATE TRIGGER `kinton_liquibase`.`dclimit_deleted` AFTER DELETE ON `kinton_liquibase`.`enterprise_limits_by_datacenter`
     FOR EACH ROW BEGIN
         DELETE FROM dc_enterprise_stats WHERE idEnterprise = OLD.idEnterprise AND idDataCenter = OLD.idDataCenter;
         UPDATE IGNORE cloud_usage_stats 
@@ -3672,7 +3673,7 @@ CREATE TRIGGER kinton_liquibase.dclimit_deleted AFTER DELETE ON kinton_liquibase
         WHERE idDataCenter = OLD.idDataCenter;
     END;
 |
-CREATE TRIGGER kinton_liquibase.update_datastore_update_stats AFTER UPDATE ON kinton_liquibase.datastore
+CREATE TRIGGER `kinton_liquibase`.`update_datastore_update_stats` AFTER UPDATE ON `kinton_liquibase`.`datastore`
     FOR EACH ROW BEGIN
 	DECLARE idDatacenter INT UNSIGNED;
 	DECLARE machineState INT UNSIGNED;
@@ -3755,13 +3756,13 @@ CREATE TRIGGER kinton_liquibase.update_datastore_update_stats AFTER UPDATE ON ki
 --  Checks statistics miscalculations and corrects them to zero
 --
 -- ****************************************************************************************
-DROP TRIGGER IF EXISTS kinton_liquibase.cloud_usage_stats_negative_check;
-DROP TRIGGER IF EXISTS kinton_liquibase.enterprise_resources_stats_negative_check;
-DROP TRIGGER IF EXISTS kinton_liquibase.vapp_enterprise_stats_negative_check;
-DROP TRIGGER IF EXISTS kinton_liquibase.vdc_enterprise_stats_negative_check;
-DROP TRIGGER IF EXISTS kinton_liquibase.dc_enterprise_stats_negative_check;
+DROP TRIGGER IF EXISTS `kinton_liquibase`.`cloud_usage_stats_negative_check`;
+DROP TRIGGER IF EXISTS `kinton_liquibase`.`enterprise_resources_stats_negative_check`;
+DROP TRIGGER IF EXISTS `kinton_liquibase`.`vapp_enterprise_stats_negative_check`;
+DROP TRIGGER IF EXISTS `kinton_liquibase`.`vdc_enterprise_stats_negative_check`;
+DROP TRIGGER IF EXISTS `kinton_liquibase`.`dc_enterprise_stats_negative_check`;
 
-CREATE TRIGGER kinton_liquibase.cloud_usage_stats_negative_check BEFORE UPDATE ON kinton_liquibase.cloud_usage_stats
+CREATE TRIGGER `kinton_liquibase`.`cloud_usage_stats_negative_check` BEFORE UPDATE ON `kinton_liquibase`.`cloud_usage_stats`
   FOR EACH ROW BEGIN
     IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN
       IF (NEW.serversTotal > 16700000)  THEN SET NEW.serversTotal = 0; END IF;
@@ -3792,7 +3793,7 @@ CREATE TRIGGER kinton_liquibase.cloud_usage_stats_negative_check BEFORE UPDATE O
   END;
 
 
-CREATE TRIGGER kinton_liquibase.enterprise_resources_stats_negative_check BEFORE UPDATE ON kinton_liquibase.enterprise_resources_stats
+CREATE TRIGGER `kinton_liquibase`.`enterprise_resources_stats_negative_check` BEFORE UPDATE ON `kinton_liquibase`.`enterprise_resources_stats`
   FOR EACH ROW BEGIN
     IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN
       IF (NEW.vCpuReserved > 18446000000000000000)  THEN SET NEW.vCpuReserved = 0; END IF;
@@ -3812,7 +3813,7 @@ CREATE TRIGGER kinton_liquibase.enterprise_resources_stats_negative_check BEFORE
     END IF;
   END;
 
-CREATE TRIGGER kinton_liquibase.dc_enterprise_stats_negative_check BEFORE UPDATE ON kinton_liquibase.dc_enterprise_stats
+CREATE TRIGGER `kinton_liquibase`.`dc_enterprise_stats_negative_check` BEFORE UPDATE ON `kinton_liquibase`.`dc_enterprise_stats`
   FOR EACH ROW BEGIN
     IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN
       IF (NEW.vCpuReserved > 18446000000000000000)  THEN SET NEW.vCpuReserved = 0; END IF;
@@ -3833,7 +3834,7 @@ CREATE TRIGGER kinton_liquibase.dc_enterprise_stats_negative_check BEFORE UPDATE
   END;
 
 
-CREATE TRIGGER kinton_liquibase.vapp_enterprise_stats_negative_check BEFORE UPDATE ON kinton_liquibase.vapp_enterprise_stats
+CREATE TRIGGER `kinton_liquibase`.`vapp_enterprise_stats_negative_check` BEFORE UPDATE ON `kinton_liquibase`.`vapp_enterprise_stats`
   FOR EACH ROW BEGIN
     IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN
       IF (NEW.vmCreated > 16700000)  THEN SET NEW.vmCreated = 0; END IF;
@@ -3845,7 +3846,7 @@ CREATE TRIGGER kinton_liquibase.vapp_enterprise_stats_negative_check BEFORE UPDA
 
 
 
-CREATE TRIGGER kinton_liquibase.vdc_enterprise_stats_negative_check BEFORE UPDATE ON kinton_liquibase.vdc_enterprise_stats
+CREATE TRIGGER `kinton_liquibase`.`vdc_enterprise_stats_negative_check` BEFORE UPDATE ON `kinton_liquibase`.`vdc_enterprise_stats`
   FOR EACH ROW BEGIN
     IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN
       IF (NEW.vmCreated > 16700000)  THEN SET NEW.vmCreated = 0; END IF;
@@ -3877,15 +3878,15 @@ CREATE TRIGGER kinton_liquibase.vdc_enterprise_stats_negative_check BEFORE UPDAT
 --
 -- ****************************************************************************************
 
-DROP PROCEDURE IF EXISTS kinton_liquibase.CalculateCloudUsageStats;
-DROP PROCEDURE IF EXISTS kinton_liquibase.CalculateEnterpriseResourcesStats;
-DROP PROCEDURE IF EXISTS kinton_liquibase.CalculateVappEnterpriseStats;
-DROP PROCEDURE IF EXISTS kinton_liquibase.CalculateVdcEnterpriseStats;
+DROP PROCEDURE IF EXISTS `kinton_liquibase`.`CalculateCloudUsageStats`;
+DROP PROCEDURE IF EXISTS `kinton_liquibase`.`CalculateEnterpriseResourcesStats`;
+DROP PROCEDURE IF EXISTS `kinton_liquibase`.`CalculateVappEnterpriseStats`;
+DROP PROCEDURE IF EXISTS `kinton_liquibase`.`CalculateVdcEnterpriseStats`;
 |
 --
 --
 --
-CREATE PROCEDURE kinton.CalculateCloudUsageStats()
+CREATE PROCEDURE `kinton_liquibase`.CalculateCloudUsageStats()
    BEGIN
   DECLARE idDataCenterObj INTEGER;
   DECLARE serversTotal BIGINT UNSIGNED;
@@ -4088,7 +4089,7 @@ CREATE PROCEDURE kinton.CalculateCloudUsageStats()
 --
 --
 --
-CREATE PROCEDURE kinton.CalculateEnterpriseResourcesStats()
+CREATE PROCEDURE `kinton_liquibase`.CalculateEnterpriseResourcesStats()
    BEGIN
   DECLARE idEnterpriseObj INTEGER;
   DECLARE vCpuReserved BIGINT UNSIGNED;
@@ -4182,7 +4183,7 @@ CREATE PROCEDURE kinton.CalculateEnterpriseResourcesStats()
 --
 --
 --
-CREATE PROCEDURE kinton.CalculateVdcEnterpriseStats()
+CREATE PROCEDURE `kinton_liquibase`.CalculateVdcEnterpriseStats()
    BEGIN
   DECLARE idVirtualDataCenterObj INTEGER;
   DECLARE idEnterprise INTEGER;
@@ -4318,12 +4319,12 @@ CREATE PROCEDURE kinton.CalculateVdcEnterpriseStats()
 |
 --
 -- To be DONE when showing Datacenter Stats by Enterprise
--- CREATE PROCEDURE kinton.CalculateDcEnterpriseStats()
+-- CREATE PROCEDURE `kinton_liquibase`.CalculateDcEnterpriseStats()
 --   BEGIN
 --   END;
 --
 --
-CREATE PROCEDURE kinton.CalculateVappEnterpriseStats()
+CREATE PROCEDURE `kinton_liquibase`.CalculateVappEnterpriseStats()
    BEGIN
   DECLARE idVirtualAppObj INTEGER;
   DECLARE idEnterprise INTEGER;
@@ -4404,12 +4405,12 @@ DELIMITER ;
 --  Procedures to calculate datastore size
 --
 -- ****************************************************************************************
-DROP PROCEDURE IF EXISTS kinton_liquibase.get_datastore_size_by_dc;
-DROP PROCEDURE IF EXISTS kinton_liquibase.get_datastore_used_size_by_dc;
+DROP PROCEDURE IF EXISTS `kinton_liquibase`.`get_datastore_size_by_dc`;
+DROP PROCEDURE IF EXISTS `kinton_liquibase`.`get_datastore_used_size_by_dc`;
 
 DELIMITER |
 --
-CREATE PROCEDURE kinton_liquibase.get_datastore_size_by_dc(IN idDC INT, OUT size BIGINT UNSIGNED)
+CREATE PROCEDURE `kinton_liquibase`.`get_datastore_size_by_dc`(IN idDC INT, OUT size BIGINT UNSIGNED)
 BEGIN
     SELECT IF (SUM(ds_view.size) IS NULL,0,SUM(ds_view.size)) INTO size
     FROM (SELECT d.size as size FROM datastore d LEFT OUTER JOIN datastore_assignment da ON d.idDatastore = da.idDatastore 
@@ -4419,7 +4420,7 @@ END
 --
 |
 --
-CREATE PROCEDURE kinton_liquibase.get_datastore_used_size_by_dc(IN idDC INT, OUT usedSize BIGINT UNSIGNED)
+CREATE PROCEDURE `kinton_liquibase`.`get_datastore_used_size_by_dc`(IN idDC INT, OUT usedSize BIGINT UNSIGNED)
 BEGIN
     SELECT IF (SUM(ds_view.usedSize) IS NULL,0,SUM(ds_view.usedSize)) INTO usedSize
     FROM (SELECT d.usedSize as usedSize FROM datastore d LEFT OUTER JOIN datastore_assignment da ON d.idDatastore = da.idDatastore
@@ -4446,14 +4447,14 @@ UPDATE IGNORE cloud_usage_stats SET numUsersCreated = numUsersCreated+2 WHERE id
 -- Checks ALL Tables in DB and adds the 'version_c' column required for Hibernate Persistence 
 --
 
-DROP PROCEDURE IF EXISTS kinton_liquibase.add_version_column_to_all;
+DROP PROCEDURE IF EXISTS `kinton_liquibase`.`add_version_column_to_all`;
 
 DELIMITER |
-CREATE PROCEDURE kinton_liquibase.add_version_column_to_all()
+CREATE PROCEDURE `kinton_liquibase`.`add_version_column_to_all`()
 BEGIN
     DECLARE currentTableName VARCHAR(64);
     DECLARE no_more_tables INTEGER;
-    DECLARE curAllTables CURSOR FOR SELECT TABLE_NAME from information_schema.TABLES where TABLE_SCHEMA = "kinton" AND TABLE_TYPE="BASE TABLE";
+    DECLARE curAllTables CURSOR FOR SELECT TABLE_NAME from `information_schema`.TABLES where TABLE_SCHEMA = "kinton_liquibase" AND TABLE_TYPE="BASE TABLE";
     DECLARE CONTINUE HANDLER FOR NOT FOUND SET no_more_tables=1;
     SET no_more_tables = 0;
     OPEN curAllTables;  
@@ -4462,7 +4463,7 @@ BEGIN
         IF no_more_tables = 1 THEN
            LEAVE dept_loop;
         END IF;
-        IF NOT EXISTS( (SELECT * FROM information_schema.COLUMNS WHERE TABLE_SCHEMA= "kinton" AND TABLE_NAME=currentTableName AND COLUMN_NAME='version_c') ) THEN
+        IF NOT EXISTS( (SELECT * FROM `information_schema`.COLUMNS WHERE TABLE_SCHEMA= "kinton_liquibase" AND TABLE_NAME=currentTableName AND COLUMN_NAME='version_c') ) THEN
             SET @alter_sql=CONCAT('ALTER IGNORE TABLE ', currentTableName,' ADD COLUMN version_c int default 0;');
             PREPARE stmt from @alter_sql;
             EXECUTE stmt;
@@ -4473,12 +4474,12 @@ END;
 |
 DELIMITER ;
 
-CREATE TABLE tasks (
-  id int(11) NOT NULL AUTO_INCREMENT,
-  status varchar(20) NOT NULL,
-  component varchar(20) NOT NULL,
-  action varchar(20) NOT NULL,
-  PRIMARY KEY (id)
+CREATE TABLE `tasks` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `status` varchar(20) NOT NULL,
+  `component` varchar(20) NOT NULL,
+  `action` varchar(20) NOT NULL,
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
@@ -4488,129 +4489,129 @@ CREATE TABLE tasks (
 -- ******************************************************************************************
 
 -- DROP THE TABLES RELATED TO PRICING --
-DROP TABLE IF EXISTS kinton_liquibase.pricing_template;
-DROP TABLE IF EXISTS kinton_liquibase.costCode;
-DROP TABLE IF EXISTS kinton_liquibase.pricingCostCode;
-DROP TABLE IF EXISTS kinton_liquibase.pricingTier;
-DROP TABLE IF EXISTS kinton_liquibase.currency;
-DROP TABLE IF EXISTS kinton_liquibase.costCodeCurrency;
+DROP TABLE IF EXISTS `kinton_liquibase`.`pricing_template`;
+DROP TABLE IF EXISTS `kinton_liquibase`.`costCode`;
+DROP TABLE IF EXISTS `kinton_liquibase`.`pricingCostCode`;
+DROP TABLE IF EXISTS `kinton_liquibase`.`pricingTier`;
+DROP TABLE IF EXISTS `kinton_liquibase`.`currency`;
+DROP TABLE IF EXISTS `kinton_liquibase`.`costCodeCurrency`;
 
 --
--- Definition of table kinton_liquibase.currency
+-- Definition of table `kinton_liquibase`.`currency`
 --
 
-CREATE TABLE kinton_liquibase.currency (
-  idCurrency int(10) UNSIGNED NOT NULL AUTO_INCREMENT ,
-  symbol varchar(10) NOT NULL ,
-  name varchar(20) NOT NULL,
-  digits int(1)  NOT NULL default 2,
-  version_c int(11) default 0,
-  PRIMARY KEY (idCurrency)
+CREATE TABLE `kinton_liquibase`.`currency` (
+  `idCurrency` int(10) UNSIGNED NOT NULL AUTO_INCREMENT ,
+  `symbol` varchar(10) NOT NULL ,
+  `name` varchar(20) NOT NULL,
+  `digits` int(1)  NOT NULL default 2,
+  `version_c` int(11) default 0,
+  PRIMARY KEY (`idCurrency`)
   ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
     
 
 --
--- Dumping data for table kinton_liquibase.currency
+-- Dumping data for table `kinton_liquibase`.`currency`
 --
 
-/*!40000 ALTER TABLE currency DISABLE KEYS */;
-LOCK TABLES currency WRITE;
-INSERT INTO kinton_liquibase.currency values (1, "USD", "Dollar - $", 2,  0);
-INSERT INTO kinton_liquibase.currency values (2, "EUR", CONCAT("Euro - " ,0xE282AC), 2,0);
-INSERT INTO kinton_liquibase.currency values (3, "JPY", CONCAT("Yen - " , 0xc2a5), 0,  0);
+/*!40000 ALTER TABLE `currency` DISABLE KEYS */;
+LOCK TABLES `currency` WRITE;
+INSERT INTO `kinton_liquibase`.`currency` values (1, "USD", "Dollar - $", 2,  0);
+INSERT INTO `kinton_liquibase`.`currency` values (2, "EUR", CONCAT("Euro - " ,0xE282AC), 2,0);
+INSERT INTO `kinton_liquibase`.`currency` values (3, "JPY", CONCAT("Yen - " , 0xc2a5), 0,  0);
 UNLOCK TABLES;
-/*!40000 ALTER TABLE currency ENABLE KEYS */;  
+/*!40000 ALTER TABLE `currency` ENABLE KEYS */;  
   
 --
--- Definition of table kinton_liquibase.costCode
+-- Definition of table `kinton_liquibase`.`costCode`
 --  
 
-CREATE TABLE kinton_liquibase.costCode (
-  idCostCode int(10) NOT NULL AUTO_INCREMENT ,
-   name varchar(20) NOT NULL ,
-  description varchar(100) NOT NULL ,
-  version_c int(11) default 0,
-  PRIMARY KEY (idCostCode)
+CREATE TABLE `kinton_liquibase`.`costCode` (
+  `idCostCode` int(10) NOT NULL AUTO_INCREMENT ,
+   `name` varchar(20) NOT NULL ,
+  `description` varchar(100) NOT NULL ,
+  `version_c` int(11) default 0,
+  PRIMARY KEY (`idCostCode`)
   ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
 
 --
--- Definition of table kinton_liquibase.pricing
+-- Definition of table `kinton_liquibase`.`pricing`
 --
   
 
-CREATE TABLE kinton_liquibase.pricingTemplate (
-  idPricingTemplate int(10) UNSIGNED NOT NULL AUTO_INCREMENT ,
-  idCurrency int(10) UNSIGNED NOT NULL ,
-  name varchar(256) NOT NULL ,
-  chargingPeriod  int(10) UNSIGNED NOT NULL ,
-  minimumCharge int(10) UNSIGNED NOT NULL ,
-  showChangesBefore boolean NOT NULL default 0,
-  standingChargePeriod DECIMAL(20,5) NOT NULL default 0,
-  minimumChargePeriod DECIMAL(20,5) NOT NULL default 0,
-  vcpu DECIMAL(20,5) NOT NULL default 0,
-  memoryMB DECIMAL(20,5) NOT NULL default 0,
-  hdGB DECIMAL(20,5) NOT NULL default 0,
-  vlan DECIMAL(20,5) NOT NULL default 0,
-  publicIp DECIMAL(20,5) NOT NULL default 0,
-  defaultTemplate boolean NOT NULL default 0,
-  description varchar(1000)  NOT NULL,
-  last_update timestamp NOT NULL,
-  version_c int(11) default 0,
-  PRIMARY KEY (idPricingTemplate) ,
-  KEY Pricing_FK2_Currency (idCurrency),
-  CONSTRAINT Pricing_FK2_Currency FOREIGN KEY (idCurrency ) REFERENCES kinton_liquibase.currency (idCurrency ) ON DELETE NO ACTION
+CREATE TABLE `kinton_liquibase`.`pricingTemplate` (
+  `idPricingTemplate` int(10) UNSIGNED NOT NULL AUTO_INCREMENT ,
+  `idCurrency` int(10) UNSIGNED NOT NULL ,
+  `name` varchar(256) NOT NULL ,
+  `chargingPeriod`  int(10) UNSIGNED NOT NULL ,
+  `minimumCharge` int(10) UNSIGNED NOT NULL ,
+  `showChangesBefore` boolean NOT NULL default 0,
+  `standingChargePeriod` DECIMAL(20,5) NOT NULL default 0,
+  `minimumChargePeriod` DECIMAL(20,5) NOT NULL default 0,
+  `vcpu` DECIMAL(20,5) NOT NULL default 0,
+  `memoryMB` DECIMAL(20,5) NOT NULL default 0,
+  `hdGB` DECIMAL(20,5) NOT NULL default 0,
+  `vlan` DECIMAL(20,5) NOT NULL default 0,
+  `publicIp` DECIMAL(20,5) NOT NULL default 0,
+  `defaultTemplate` boolean NOT NULL default 0,
+  `description` varchar(1000)  NOT NULL,
+  `last_update` timestamp NOT NULL,
+  `version_c` int(11) default 0,
+  PRIMARY KEY (`idPricingTemplate`) ,
+  KEY `Pricing_FK2_Currency` (`idCurrency`),
+  CONSTRAINT `Pricing_FK2_Currency` FOREIGN KEY (`idCurrency` ) REFERENCES `kinton_liquibase`.`currency` (`idCurrency` ) ON DELETE NO ACTION
   ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
   
 
 --
--- Definition of table kinton_liquibase.pricingCostCode
+-- Definition of table `kinton_liquibase`.`pricingCostCode`
 --  
   
 
-CREATE TABLE kinton_liquibase.pricingCostCode (
-idPricingCostCode int(10) unsigned NOT NULL AUTO_INCREMENT,
-  idPricingTemplate int(10) UNSIGNED NOT NULL,
-  idCostCode int(10) UNSIGNED NOT NULL,
-  price DECIMAL(20,5) NOT NULL default 0,
-  version_c int(11) default 0,
-  PRIMARY KEY (idPricingCostCode) 
+CREATE TABLE `kinton_liquibase`.`pricingCostCode` (
+`idPricingCostCode` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `idPricingTemplate` int(10) UNSIGNED NOT NULL,
+  `idCostCode` int(10) UNSIGNED NOT NULL,
+  `price` DECIMAL(20,5) NOT NULL default 0,
+  `version_c` int(11) default 0,
+  PRIMARY KEY (`idPricingCostCode`) 
   ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;  
   
  
 --
--- Table kinton_liquibase.costCodeCurrency
+-- Table `kinton_liquibase`.`costCodeCurrency`
 -- 
 
-DROP TABLE IF EXISTS kinton_liquibase.costCodeCurrency;
-CREATE TABLE  kinton_liquibase.costCodeCurrency (
-  idCostCodeCurrency int(10) unsigned NOT NULL AUTO_INCREMENT,
-  idCostCode int(10) unsigned,
-  idCurrency int(10) unsigned,ZZ
-  price DECIMAL(20,5) NOT NULL default 0,
-  version_c integer NOT NULL DEFAULT 1,
-  PRIMARY KEY (idCostCodeCurrency)
-  -- CONSTRAINT idCostCode_FK FOREIGN KEY (idCostCode) REFERENCES costCode (idCostCode),
-  -- CONSTRAINT idCurrency_FK FOREIGN KEY (idCurrency) REFERENCES currency (idCurrency)
+DROP TABLE IF EXISTS `kinton_liquibase`.`costCodeCurrency`;
+CREATE TABLE  `kinton_liquibase`.`costCodeCurrency` (
+  `idCostCodeCurrency` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `idCostCode` int(10) unsigned,
+  `idCurrency` int(10) unsigned,
+  `price` DECIMAL(20,5) NOT NULL default 0,
+  `version_c` integer NOT NULL DEFAULT 1,
+  PRIMARY KEY (`idCostCodeCurrency`)
+  -- CONSTRAINT `idCostCode_FK` FOREIGN KEY (`idCostCode`) REFERENCES `costCode` (`idCostCode`),
+  -- CONSTRAINT `idCurrency_FK` FOREIGN KEY (`idCurrency`) REFERENCES `currency` (`idCurrency`)
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
  
  
 --
--- Definition of table kinton_liquibase.pricingTemplate_tier
+-- Definition of table `kinton_liquibase`.`pricingTemplate_tier`
 --  
 
 
-CREATE TABLE kinton_liquibase.pricingTier (
-  idPricingTier int(10) unsigned NOT NULL AUTO_INCREMENT,
-  idPricingTemplate int(10) UNSIGNED NOT NULL,
-  idTier int(10) UNSIGNED NOT NULL,
-  price  DECIMAL(20,5) NOT NULL default 0,
-  version_c int(11) default 0,
-  PRIMARY KEY (idPricingTier) 
+CREATE TABLE `kinton_liquibase`.`pricingTier` (
+  `idPricingTier` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `idPricingTemplate` int(10) UNSIGNED NOT NULL,
+  `idTier` int(10) UNSIGNED NOT NULL,
+  `price`  DECIMAL(20,5) NOT NULL default 0,
+  `version_c` int(11) default 0,
+  PRIMARY KEY (`idPricingTier`) 
   ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;    
   
 -- ADD THE COLUMN ID_PRICING TO ENTERPRISE --
-ALTER TABLE kinton_liquibase.enterprise ADD COLUMN idPricingTemplate int(10) unsigned DEFAULT NULL;
-ALTER TABLE kinton_liquibase.enterprise ADD CONSTRAINT enterprise_pricing_FK FOREIGN KEY (idPricingTemplate) REFERENCES kinton_liquibase.pricingTemplate (idPricingTemplate);
+ALTER TABLE `kinton_liquibase`.`enterprise` ADD COLUMN `idPricingTemplate` int(10) unsigned DEFAULT NULL;
+ALTER TABLE `kinton_liquibase`.`enterprise` ADD CONSTRAINT `enterprise_pricing_FK` FOREIGN KEY (`idPricingTemplate`) REFERENCES `kinton_liquibase`.`pricingTemplate` (`idPricingTemplate`);
 
 
-CALL kinton_liquibase.add_version_column_to_all();
+-- CALL `kinton_liquibase`.`add_version_column_to_all`();

@@ -28,9 +28,21 @@
     <!-- DB PROPERTIES -->
 	<properties>
 		<previousVersion>2.0-ga</previousVersion>
+		<schemaPath>schema</schemaPath>
+		<dataPath>data</dataPath>
+		<procPath>procedures</procPath>
 		<triggersPath>.</triggersPath>
+		<jdbcUrl>jdbc:mysql://${devmachine}:3306/kinton_liquibase</jdbcUrl>		
 	</properties>
     <!-- -->
+<dependencies>
+<dependency>
+<groupId>org.liquibase</groupId>
+<artifactId>liquibase-core</artifactId>
+<version>2.0.3</version>
+</dependency>
+</dependencies>
+            
     <!-- -->
     <!-- BUILD SETTINGS -->
     <!-- -->
@@ -48,7 +60,29 @@
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>1.1</version>
                 <executions>
-                    <execution>
+			<execution>
+                        <id>generate-sql-scripts</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>liquibase</executable>
+                            <arguments>
+<!--
+                                <argument>driver=${driver}</argument>
+				<argument>classpath=${driverPath}</argument>				
+				<argument>username=${dbUser} </argument>
+				<argument>password=${dbPasswd}</argument>
+-->
+				<argument>--url=${jdbcUrl}</argument>
+				<argument>--changeLogFile=/home/destevezg/abiws/abiquo/database/changelog.xml</argument>
+				<argument>updateSQL</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+					<!--- TODO: ReEnable this!!!
+					<execution>
                         <id>generate-database-test</id>
                         <phase>generate-sources</phase>
                         <goals>
@@ -61,9 +95,14 @@
                             </arguments>
                         </configuration>
                     </execution>
-                    <execution>
-                        <id>install</id>
-                        <phase>install</phase>
+                    -->
+		<execution>
+			<!-- Steps to build full schema -->
+			<!-- 1) Import table definitions in schema/kinton.sql -->
+			<!-- 2) Triggers and procedures -->
+			<!-- 3) Insert initial data : one file per each Table?--> 
+			<id>install</id>
+			<phase>install</phase>
                         <goals>
                             <goal>exec</goal>
                         </goals>
@@ -73,8 +112,24 @@
                                 <argument>-h${devmachine}</argument>
                                 <argument>-uroot</argument>
                                 <argument>-proot</argument>
-                                <argument>&lt;kinton.sql</argument>
+                                <argument>&lt;./${schemaPath}/kinton.sql</argument>
                             </arguments>
+							<executable>mysql</executable>
+                            <arguments>
+                                <argument>-h${devmachine}</argument>
+                                <argument>-uroot</argument>
+                                <argument>-proot</argument>
+                                <argument>&lt;./${dataPath}/data.sql</argument>
+                            </arguments>
+<!--
+							<executable>mysql</executable>
+                            <arguments>
+                                <argument>-h${devmachine}</argument>
+                                <argument>-uroot</argument>
+                                <argument>-proot</argument>
+                                <argument>&lt;./${procPath}/procedures.sql</argument>
+                            </arguments>
+-->
                         </configuration>
                     </execution>
                 </executions>

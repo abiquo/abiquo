@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+    <changeSet author="destevezg (generated)" id="1334562618578-1">
+        <createTable tableName="alerts">
+            <column name="id" type="CHAR(36)">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="type" type="VARCHAR(60)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="value" type="VARCHAR(60)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="VARCHAR(240)"/>
+            <column defaultValueComputed="CURRENT_TIMESTAMP" name="tstamp" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="version_c" type="INT"/>
+        </createTable>
+    </changeSet>
+</databaseChangeLog>
