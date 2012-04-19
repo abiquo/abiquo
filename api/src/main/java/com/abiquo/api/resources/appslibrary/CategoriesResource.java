@@ -42,13 +42,11 @@ import org.springframework.stereotype.Controller;
 import com.abiquo.api.resources.AbstractResource;
 import com.abiquo.api.services.appslibrary.CategoryService;
 import com.abiquo.api.util.IRESTBuilder;
+import com.abiquo.model.transport.Since;
 import com.abiquo.server.core.appslibrary.CategoriesDto;
 import com.abiquo.server.core.appslibrary.Category;
 import com.abiquo.server.core.appslibrary.CategoryDto;
 
-/**
- * @wiki Categories are the entities
- */
 @Path(CategoriesResource.CATEGORIES_PATH)
 @Controller
 @Workspace(workspaceTitle = "Abiquo configuration workspace", collectionTitle = "Categories")
@@ -73,16 +71,16 @@ public class CategoriesResource extends AbstractResource
      * @wiki Returns the global categories by default. If you supply the id of a enterprise, the
      *       global categories and the local categories of the the given id will be retrieved. If no
      *       id is supplied, global categories will be retrieved.
-     * @newFeature from version 2.0-HF1 the categories are divided into global and local categories.
-     * @param restBuilder a Context-injected object to create the links of the Dto
      * @param idEnterprise If you supply the id of a enterprise, the global categories and the local
-     *            categories of the the given id will be retrieved. If no id is supplied, global
-     *            categories will be retrieved.
+     *            - * categories of the the given id will be retrieved. If no id is supplied, global
+     *            - * categories will be retrieved.
+     * @param restBuilder a Context-injected object to create the links of the Dto
      * @return a {CategoriesDto} object with all categories
      * @throws Exception
      */
     @GET
     @Produces(CategoriesDto.MEDIA_TYPE)
+    @Since(version = "2.0-HF1", desc = "the categories are divided into global and local categories.")
     public CategoriesDto getCategory(
         @QueryParam(CATEGORIES_OF_ENTERPRISE_QUERYPARAM) final Integer idEnterprise,
         @Context final IRESTBuilder restBuilder) throws Exception
@@ -101,14 +99,8 @@ public class CategoriesResource extends AbstractResource
     }
 
     /**
-     * Creates a category and returns it after creation. To create a local category you have to
-     * provide the link to the enterprise in the dto. If no link to enterprise is provided the new
-     * category is created as a global category.
+     * Creates a category and returns it after creation
      * 
-     * @wiki To create a local category you have to provide the link to the enterprise in the dto.
-     *       If no link to enterprise is provided the new category is created as a global category.
-     *       A part from roles needed to create a category, to create a global category is necessary
-     *       the role of APPLIB_MANAGE_GLOBAL_CATEGORIES.
      * @param categoryDto category to create
      * @param builder a Context-injected object to create the links of the Dto
      * @return a {CategoryDto} with the created category
