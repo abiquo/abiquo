@@ -392,7 +392,7 @@ CREATE TRIGGER kinton.update_virtualmachine_update_stats AFTER UPDATE ON kinton.
 	IF NEW.idType = 1 AND (NEW.state != OLD.state) THEN
 		IF previousState IN ("NOT_ALLOCATED") AND NEW.state IN ("OFF", "ON") THEN
 			-- Machine has been deployed or re-captured
-			INSERT INTO debug_msg (msg) VALUES (CONCAT('UpdateVMStats DEPLOY+POWERON event detected for Running machine. Updating (+1) VMachinesTotal from Stats', NEW.idVM));
+			-- INSERT INTO debug_msg (msg) VALUES (CONCAT('UpdateVMStats DEPLOY+POWERON event detected for Running machine. Updating (+1) VMachinesTotal from Stats', NEW.idVM));
 			UPDATE IGNORE vapp_enterprise_stats SET vmCreated = vmCreated+1
 	           WHERE idVirtualApp = idVirtualAppObj;
 	           UPDATE IGNORE vdc_enterprise_stats SET vmCreated = vmCreated+1
@@ -400,7 +400,7 @@ CREATE TRIGGER kinton.update_virtualmachine_update_stats AFTER UPDATE ON kinton.
 	           UPDATE IGNORE cloud_usage_stats SET vMachinesTotal = vMachinesTotal+1
 	           WHERE idDataCenter = idDataCenterObj;
 			IF NEW.state IN ("ON") THEN
-				INSERT INTO debug_msg (msg) VALUES (CONCAT('UpdateVMStats DEPLOY+POWERON event detected for Running machine. Updating (+1) VMachinesRunning VM from Stats', NEW.idVM));
+				-- INSERT INTO debug_msg (msg) VALUES (CONCAT('UpdateVMStats DEPLOY+POWERON event detected for Running machine. Updating (+1) VMachinesRunning VM from Stats', NEW.idVM));
 				UPDATE IGNORE vapp_enterprise_stats SET vmActive = vmActive+1
 	                WHERE idVirtualApp = idVirtualAppObj;
 	                UPDATE IGNORE vdc_enterprise_stats SET vmActive = vmActive+1
