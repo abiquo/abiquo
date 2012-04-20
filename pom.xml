@@ -7,7 +7,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.abiquo.abicloud</groupId>
     <artifactId>platform</artifactId>
-    <version>2.0-HF1</version>
+    <version>2.0-HF2-SNAPSHOT</version>
     <packaging>pom</packaging>
     <!-- Shared Properties -->
     <properties>
@@ -29,9 +29,9 @@
         <jackson.version>1.6.1</jackson.version>
         <catalina.version>6.0.29</catalina.version>
         <testng.version>5.12.1</testng.version>
-        <commonsamqp.version>1.1</commonsamqp.version>
+        <commonsamqp.version>1.2-SNAPSHOT</commonsamqp.version>
         <guava.version>11.0.1</guava.version>
-        <abiquo-jclouds.version>2.1</abiquo-jclouds.version>
+        <abiquo-jclouds.version>2.2-SNAPSHOT</abiquo-jclouds.version>
     </properties>
     <!-- Aggregations. Common modules -->
     <modules>
