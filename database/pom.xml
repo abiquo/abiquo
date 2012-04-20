@@ -33,15 +33,22 @@
 		<procPath>procedures</procPath>
 		<triggersPath>.</triggersPath>
 		<jdbcUrl>jdbc:mysql://${devmachine}:3306/kinton_liquibase</jdbcUrl>		
+		<mysqlDriverVersion>5.1.6</mysqlDriverVersion>
 	</properties>
     <!-- -->
-<dependencies>
-<dependency>
-<groupId>org.liquibase</groupId>
-<artifactId>liquibase-core</artifactId>
-<version>2.0.3</version>
-</dependency>
-</dependencies>
+		<dependencies>
+		 <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <!-- Replace with the version of the MySQL driver you want to use -->
+            <version>${mysqlDriverVersion}</version>
+        </dependency>
+		<dependency>
+		<groupId>org.liquibase</groupId>
+		<artifactId>liquibase-core</artifactId>
+		<version>2.0.3</version>
+		</dependency>
+		</dependencies>
             
     <!-- -->
     <!-- BUILD SETTINGS -->
@@ -134,6 +141,25 @@
                     </execution>
                 </executions>
             </plugin>
+<plugin>
+          <groupId>org.liquibase</groupId>
+          <artifactId>liquibase-maven-plugin</artifactId>
+          <version>2.0.3</version>
+          <configuration>
+			<!-- propertyFileWillOverride>true</propertyFileWillOverride -->
+			<propertyFile>liquibase.properties</propertyFile>
+			<url>jdbc:mysql://${devmachine}:3306/kinton_liquibase</url>
+</configuration>
+			<executions>
+            <execution>
+              <!-- will generate migrate.sql at target/liquibase -->
+				<phase>generate-dbschema</phase>
+              <goals>
+                <goal>updateSQL</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
         </plugins>
         <filters>
             <filter>../system-properties/src/main/filters/${env}-${env.family}.properties</filter>
