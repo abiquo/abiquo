@@ -149,6 +149,7 @@
 			<!-- propertyFileWillOverride>true</propertyFileWillOverride -->
 			<propertyFile>liquibase.properties</propertyFile>
 			<url>jdbc:mysql://${devmachine}:3306/kinton_liquibase</url>
+			<migrationSqlOutputFile>kinton_liquibase_generated.sql</migrationSqlOutputFile>
 </configuration>
 			<executions>
             <execution>
