@@ -166,15 +166,6 @@ public class ESXiCollector extends AbstractCollector
         virtualMachineSpec[0].setAll(true);
     }
 
-    // TODO DELME
-    public static void main(final String[] args) throws Exception
-    {
-        ESXiCollector coll = new ESXiCollector();
-        coll.setIpAddress("10.60.1.120");
-        coll.connect("root", "temporal");
-        coll.getHostInfo();
-    }
-
     /**
      * This method creates a SelectionSpec[] to traverses the entire inventory tree starting at a
      * Folder.
@@ -642,7 +633,7 @@ public class ESXiCollector extends AbstractCollector
 
                 HostInternetScsiHba iscsicurrent = (HostInternetScsiHba) hba;
 
-                LOGGER.info(String.format(
+                LOGGER.debug(String.format(
                     "[iscsi] Device:%s Driver:%s Model:%s\n\tAlias:%s Name:%s Software:%s",
                     iscsicurrent.getDevice(), iscsicurrent.getDriver(), iscsicurrent.getModel(),
                     iscsicurrent.getIScsiAlias(), iscsicurrent.getIScsiName(),
@@ -664,7 +655,7 @@ public class ESXiCollector extends AbstractCollector
             // message
         }
 
-        LOGGER.info(String.format(
+        LOGGER.debug(String.format(
             "[iscsi] SELECTED :\n Device:%s Driver:%s Model:%s\n\tAlias:%s Name:%s Software:%s",
             iscsi.getDevice(), iscsi.getDriver(), iscsi.getModel(), iscsi.getIScsiAlias(),
             iscsi.getIScsiName(), String.valueOf(iscsi.isIsSoftwareBased())));
@@ -962,7 +953,7 @@ public class ESXiCollector extends AbstractCollector
 
         if (uuid == null)
         {
-            LOGGER.info(String.format(
+            LOGGER.debug(String.format(
                 "Datastore %s on Host [%s] hasn't any folder mark, creating it.", dsName,
                 getIpAddress()));
 

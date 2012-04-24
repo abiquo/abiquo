@@ -43,7 +43,7 @@ public class HypervisorServiceImpl implements HypervisorService
 {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HypervisorServiceImpl.class);
-    
+
     @Override
     public HypervisorType discoverHypervisor(final String ip, final Integer aimport)
         throws NodecollectorException
@@ -55,7 +55,8 @@ public class HypervisorServiceImpl implements HypervisorService
             // Checks if at least the machine is NOT_MANAGED
             ProvisioningUtils.provisioningCheck(ip);
 
-            final List<HypervisorCollector> collectorsList = PluginLoader.getInstance().getAllPlugins();
+            final List<HypervisorCollector> collectorsList =
+                PluginLoader.getInstance().getAllPlugins();
 
             // Default user and passord. We only want to know if there is an Hypervisor out there,
             // not logging it successfully. So, we invent a user and password.
@@ -64,23 +65,25 @@ public class HypervisorServiceImpl implements HypervisorService
 
             if (collectorsList != null)
             {
-                LOGGER.info("Discovering hypervisors to cloud node {}...", ip);
+                LOGGER.debug("Discovering hypervisors to cloud node {}...", ip);
 
                 for (HypervisorCollector col : collectorsList)
                 {
                     try
                     {
                         LOGGER.info("Trying " + col.getHypervisorType().name());
-                        col.setAimPort((aimport == null) ? 8889 : aimport);
+                        col.setAimPort(aimport == null ? 8889 : aimport);
                         col.setIpAddress(ip);
                         col.connect(fakeUser, fakePassword);
-                        LOGGER.info("Discovered hypervisor: {} at cloud node {}", col.getHypervisorType().toString(), ip);
+                        LOGGER.debug("Discovered hypervisor: {} at cloud node {}", col
+                            .getHypervisorType().toString(), ip);
                         collector = col;
                         return col.getHypervisorType();
                     }
                     catch (LoginException le)
                     {
-                        LOGGER.info("Discovered hypervisor: {} at cloud node {}", col.getHypervisorType().toString(), ip);
+                        LOGGER.debug("Discovered hypervisor: {} at cloud node {}", col
+                            .getHypervisorType().toString(), ip);
                         return col.getHypervisorType();
                     }
                     catch (ConnectionException e)
@@ -89,22 +92,24 @@ public class HypervisorServiceImpl implements HypervisorService
                     }
                     catch (NoClassDefFoundError e)
                     {
-                        LOGGER.error("FATAL ERROR: Libvirt package not found in nodecollector machine");
+                        LOGGER
+                            .error("FATAL ERROR: Libvirt package not found in nodecollector machine");
                         continue;
                     }
                     catch (UnsatisfiedLinkError e)
                     {
-                        LOGGER.error("FATAL ERROR: Libvirt package not found in nodecollector machine");
+                        LOGGER
+                            .error("FATAL ERROR: Libvirt package not found in nodecollector machine");
                         continue;
                     }
 
                 }
 
             }
-            
+
             LOGGER.info("No Hypervisors found.");
             throw new ConnectionException(MessageValues.NOHYP_EXCP);
-            
+
         }
         finally
         {

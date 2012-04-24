@@ -47,11 +47,12 @@ public class HostServiceImpl implements HostService
 
     @Override
     public HostDto getHostInfo(final String ipAddress, final HypervisorType hypervisorType,
-        final String user, final String password, final Integer aimport) throws NodecollectorException
+        final String user, final String password, final Integer aimport)
+        throws NodecollectorException
     {
         // Checks if at least the machine is NOT_MANAGED
         ProvisioningUtils.provisioningCheck(ipAddress);
-        
+
         // Get the Hypervisor and set parameters.
         final HypervisorCollector col = PluginLoader.getInstance().getPlugin(hypervisorType);
         if (col == null)
@@ -65,7 +66,8 @@ public class HostServiceImpl implements HostService
         {
             // Connect to it and retrieve information
             col.connect(user, password);
-            LOGGER.info("Connected to hypervisor {} at cloud node {} ", col.getHypervisorType().toString(), ipAddress);
+            LOGGER.debug("Connected to hypervisor {} at cloud node {} ", col.getHypervisorType()
+                .toString(), ipAddress);
             return col.getHostInfo();
 
         }
