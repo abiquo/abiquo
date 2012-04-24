@@ -56,7 +56,7 @@
         <security:intercept-url pattern="/admin/enterprises/*" method="DELETE" access="ROLE_USERS_MANAGE_ENTERPRISE" />
         <security:intercept-url pattern="/admin/enterprises/*" method="OPTIONS" access="ROLE_AUTHENTICATED" />
         <security:intercept-url pattern="/admin/enterprises/*" method="PUT" access="ROLE_USERS_MANAGE_ENTERPRISE,ROLE_PRICING_VIEW" />
-        <security:intercept-url pattern="/admin/enterprises/*/action/ips" method="GET" access="ROLE_VDC_ENUMERATE,ROLE_PHYS_DC_ENUMERATE" />
+        <security:intercept-url pattern="/admin/enterprises/*/action/ips" method="GET" access="ROLE_VDC_ENUMERATE,ROLE_PHYS_DC_RETIEVE_DETAILS" />
         <security:intercept-url pattern="/admin/enterprises/*/action/icons" method="GET" access="ROLE_VDC_ENUMERATE,ROLE_PHYS_DC_ENUMERATE" />
         <security:intercept-url pattern="/admin/enterprises/*/action/volumes" method="GET" access="ROLE_VDC_ENUMERATE" />
         <security:intercept-url pattern="/admin/enterprises/*/action/virtualmachines" method="GET" access="ROLE_VAPP_CUSTOMISE_SETTINGS" />
@@ -208,16 +208,16 @@
         <security:intercept-url pattern="/admin/datacenters/*/racks/*/machines/*/virtualmachines/*/action/disk" method="GET" access="ROLE_PHYS_DC_ALLOW_MODIFY_SERVERS, ROLE_PHYS_DC_RETRIEVE_DETAILS" />
         <security:intercept-url pattern="/admin/datacenters/*/racks/*/machines/*/virtualmachines/*/action/nics" method="GET" access="ROLE_PHYS_DC_ALLOW_MODIFY_SERVERS, ROLE_PHYS_DC_RETRIEVE_DETAILS" />
         <!-- PUBLIC NETWORKS -->
-        <security:intercept-url pattern="/admin/datacenters/*/network" method="GET" access="ROLE_PHYS_DC_ENUMERATE" />
+        <security:intercept-url pattern="/admin/datacenters/*/network" method="GET" access="ROLE_PHYS_DC_ENUMERATE, PHYS_DC_RETRIEVE_DETAILS" />
         <security:intercept-url pattern="/admin/datacenters/*/network" method="POST" access="ROLE_PHYS_DC_ALLOW_MODIFY_NETWORK" />
-        <security:intercept-url pattern="/admin/datacenters/*/network/action/checkavailability" method="GET" access="ROLE_PHYS_DC_ENUMERATE" />
-        <security:intercept-url pattern="/admin/datacenters/*/network/action/publicips" method="GET" access="ROLE_PHYS_DC_ENUMERATE" />
-        <security:intercept-url pattern="/admin/datacenters/*/network/*" method="GET" access="ROLE_PHYS_DC_ENUMERATE" />
+        <security:intercept-url pattern="/admin/datacenters/*/network/action/checkavailability" method="GET" access="ROLE_PHYS_DC_ENUMERATE, PHYS_DC_RETRIEVE_DETAILS" />
+        <security:intercept-url pattern="/admin/datacenters/*/network/action/publicips" method="GET" access="ROLE_PHYS_DC_ENUMERATE, PHYS_DC_RETRIEVE_DETAILS" />
+        <security:intercept-url pattern="/admin/datacenters/*/network/*" method="GET" access="ROLE_PHYS_DC_ENUMERATE, PHYS_DC_RETRIEVE_DETAILS" />
         <security:intercept-url pattern="/admin/datacenters/*/network/*" method="PUT" access="ROLE_PHYS_DC_ALLOW_MODIFY_NETWORK" />
         <security:intercept-url pattern="/admin/datacenters/*/network/*" method="DELETE" access="ROLE_PHYS_DC_ALLOW_MODIFY_NETWORK" />
-        <security:intercept-url pattern="/admin/datacenters/*/network/*/ips" method="GET" access="ROLE_PHYS_DC_ENUMERATE" />
+        <security:intercept-url pattern="/admin/datacenters/*/network/*/ips" method="GET" access="ROLE_PHYS_DC_ENUMERATE, PHYS_DC_RETRIEVE_DETAILS" />
         <security:intercept-url pattern="/admin/datacenters/*/network/*/ips" method="PUT" access="ROLE_PHYS_DC_ALLOW_MODIFY_NETWORK" />
-        <security:intercept-url pattern="/admin/datacenters/*/network/*/ips/*" method="GET" access="ROLE_PHYS_DC_ENUMERATE" />
+        <security:intercept-url pattern="/admin/datacenters/*/network/*/ips/*" method="GET" access="ROLE_PHYS_DC_ENUMERATE, PHYS_DC_RETRIEVE_DETAILS" />
         <security:intercept-url pattern="/admin/datacenters/*/network/*/ips/*" method="PUT" access="ROLE_PHYS_DC_ALLOW_MODIFY_NETWORK" />
         <!-- DATASTORES -->
         <security:intercept-url pattern="/admin/datacenters/*/racks/*/machines/*/datastores" method="POST" access="ROLE_PHYS_DC_ALLOW_MODIFY_SERVERS" />
@@ -315,7 +315,7 @@
         <security:intercept-url pattern="/cloud/virtualdatacenters/*" method="PUT" access="ROLE_VDC_MANAGE" />
         <security:intercept-url pattern="/cloud/virtualdatacenters/*/tiers" method="GET" access="ROLE_VDC_ENUMERATE" />
         <security:intercept-url pattern="/cloud/virtualdatacenters/*/tiers/*" method="GET" access="ROLE_VDC_ENUMERATE" />
-        <security:intercept-url pattern="/cloud/virtualdatacenters/*/action/ips" method="GET" access="ROLE_VDC_ENUMERATE,ROLE_PHYS_DC_ENUMERATE" />
+        <security:intercept-url pattern="/cloud/virtualdatacenters/*/action/ips" method="GET" access="ROLE_VDC_ENUMERATE,ROLE_PHYS_DC_RETRIEVE_DETAILS" />
         <security:intercept-url pattern="/cloud/virtualdatacenters/*/action/dhcpinfo" method="GET" access="ROLE_VDC_ENUMERATE" />
         <security:intercept-url pattern="/cloud/virtualdatacenters/*/action/defaultvlan" method="PUT" access="ROLE_VDC_MANAGE, ROLE_VDC_MANAGE_NETWORK" />
         <security:intercept-url pattern="/cloud/virtualdatacenters/*/action/defaultvlan" method="GET" access="ROLE_VDC_MANAGE, ROLE_VDC_MANAGE_NETWORK" />

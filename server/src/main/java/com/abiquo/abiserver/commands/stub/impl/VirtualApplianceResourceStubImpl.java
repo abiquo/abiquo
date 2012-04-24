@@ -236,27 +236,43 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
                     }
                     case Node.NODE_MODIFIED:
                     {
-                        // We should only update DB without sending a reconfigure operation
-                        VirtualMachineWithNodeDto virtualMachineDto =
-                            virtualImageNodeToDto(virtualAppliance, n.getVirtualMachine(), n,
-                                virtualDatacenterId, virtualAppliance.getVirtualDataCenter()
-                                    .getIdDataCenter());
-
-                        String linkVirtualMachine =
-                            createVirtualMachineUrl(virtualDatacenterId, virtualAppliance.getId(),
-                                n.getVirtualMachine().getId());
-
-                        ClientResponse put =
-                            put(linkVirtualMachine, virtualMachineDto,
-                                AcceptedRequestDto.MEDIA_TYPE, VirtualMachineWithNodeDto.MEDIA_TYPE);
-                        if (put.getStatusCode() != Status.OK.getStatusCode()
-                            && put.getStatusCode() != Status.NO_CONTENT.getStatusCode()
-                            && put.getStatusCode() != Status.ACCEPTED.getStatusCode())
+                        try
                         {
-                            addErrors(result, errors, put, "updateVirtualApplianceNodes");
-                            result.setSuccess(Boolean.FALSE);
+                            // Retrieve the VirtualDatacenter to associate the new virtual appliance
+                            VirtualDatacenter vdc =
+                                getApiClient().getCloudService().getVirtualDatacenter(
+                                    virtualAppliance.getVirtualDataCenter().getId());
 
-                            result.setMessage(errors.toString());
+                            org.jclouds.abiquo.domain.cloud.VirtualAppliance vapp =
+                                vdc.getVirtualAppliance(virtualAppliance.getId());
+
+                            org.jclouds.abiquo.domain.cloud.VirtualMachine virtualMachine =
+                                vapp.getVirtualMachine(n.getVirtualMachine().getId());
+
+                            // We should only update DB without sending a reconfigure operation
+                            VirtualMachineWithNodeDto virtualMachineDto =
+                                virtualImageNodeToDto(virtualMachine, n);
+                            String linkVirtualMachine =
+                                createVirtualMachineUrl(virtualDatacenterId,
+                                    virtualAppliance.getId(), n.getVirtualMachine().getId());
+
+                            ClientResponse put =
+                                put(linkVirtualMachine, virtualMachineDto,
+                                    AcceptedRequestDto.MEDIA_TYPE,
+                                    VirtualMachineWithNodeDto.MEDIA_TYPE);
+                            if (put.getStatusCode() != Status.OK.getStatusCode()
+                                && put.getStatusCode() != Status.NO_CONTENT.getStatusCode()
+                                && put.getStatusCode() != Status.ACCEPTED.getStatusCode())
+                            {
+                                addErrors(result, errors, put, "updateVirtualApplianceNodes");
+                                result.setSuccess(Boolean.FALSE);
+
+                                result.setMessage(errors.toString());
+                            }
+                        }
+                        finally
+                        {
+                            releaseApiClient();
                         }
                         break;
                     }
@@ -619,6 +635,33 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
 
         dto.addLink(new RESTLink("user", createUserLink(virtualAppliance.getEnterprise().getId(),
             currentSession.getUserIdDb())));
+        return dto;
+    }
+
+    private VirtualMachineWithNodeDto virtualImageNodeToDto(
+        final org.jclouds.abiquo.domain.cloud.VirtualMachine virtualMachine,
+        final NodeVirtualImage node)
+    {
+        VirtualMachineWithNodeDto dto = new VirtualMachineWithNodeDto();
+        dto.setCpu(virtualMachine.getCpu());
+        dto.setDescription(virtualMachine.getDescription());
+        dto.setHdInBytes(virtualMachine.getHdInBytes());
+        dto.setHighDisponibility(0);
+        dto.setIdState(VirtualMachineState.NOT_ALLOCATED.id());
+        // It belongs the this app
+        dto.setIdType(com.abiquo.server.core.cloud.VirtualMachine.MANAGED);
+        dto.setName(virtualMachine.getName());
+        dto.setPassword(virtualMachine.getPassword());
+        dto.setRam(virtualMachine.getRam());
+        dto.setState(VirtualMachineState.NOT_ALLOCATED);
+        dto.setUuid(virtualMachine.getUuid());
+
+        dto.setNodeName(node.getName());
+
+        dto.setX(node.getPosX());
+        dto.setY(node.getPosY());
+
+        dto.setLinks(virtualMachine.unwrap().getLinks());
         return dto;
     }
 

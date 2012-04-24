@@ -376,13 +376,6 @@ public class TarantinoJobCreator extends DefaultApiService
         final String path = conversion != null ? conversion.getTargetPath() : vmtemplate.getPath();
         final DiskControllerType cntrlType = getDiskController(htype, true, false);
 
-        if (cntrlType != null && cntrlType == DiskControllerType.SCSI
-            && format == DiskFormatType.VMDK_SPARSE)
-        {
-            addConflictErrors(APIError.VIRTUAL_MACHINE_ESXI_INCOMPATIBLE_DISK_CONTROLLER);
-            flushErrors();
-        }
-
         String url = "";
         if (virtualMachine.getVirtualMachineTemplate().getRepository() != null) // repo null when
                                                                                 // imported.

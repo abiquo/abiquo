@@ -477,7 +477,7 @@ public class DatacenterResource extends AbstractResource
         @PathParam(MachineResource.MACHINE) final Integer machineId,
         @QueryParam("ip") @NotNull final String ip, @QueryParam("user") @NotNull final String user,
         @QueryParam("password") @NotNull final String password,
-        @QueryParam("port") @NotNull final Integer port, @Context final IRESTBuilder restBuilder)
+        @QueryParam("port") final Integer port, @Context final IRESTBuilder restBuilder)
         throws Exception
     {
         infraService.isStonithUp(datacenterId, ip, user, password, port);
