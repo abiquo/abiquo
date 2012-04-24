@@ -99,12 +99,12 @@ import com.abiquo.server.core.cloud.VirtualApplianceRep;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualDatacenterRep;
 import com.abiquo.server.core.cloud.VirtualMachine;
+import com.abiquo.server.core.cloud.VirtualMachine.OrderByEnum;
 import com.abiquo.server.core.cloud.VirtualMachineDto;
 import com.abiquo.server.core.cloud.VirtualMachineRep;
 import com.abiquo.server.core.cloud.VirtualMachineState;
 import com.abiquo.server.core.cloud.VirtualMachineStateTransition;
 import com.abiquo.server.core.cloud.VirtualMachineWithNodeDto;
-import com.abiquo.server.core.cloud.VirtualMachine.OrderByEnum;
 import com.abiquo.server.core.enterprise.DatacenterLimits;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.EnterpriseRep;
@@ -306,8 +306,8 @@ public class VirtualMachineService extends DefaultApiService
             {
                 // needed for REST links.
                 DatacenterLimits dl =
-                    infRep.findDatacenterLimits(ip.getVlanNetwork().getEnterprise(), vdc
-                        .getDatacenter());
+                    infRep.findDatacenterLimits(ip.getVlanNetwork().getEnterprise(),
+                        vdc.getDatacenter());
                 ip.getVlanNetwork().setLimitId(dl.getId());
             }
         }
@@ -461,8 +461,8 @@ public class VirtualMachineService extends DefaultApiService
         final VirtualMachineState originalState, final Boolean forceSoftLimits)
     {
 
-        if (checkReconfigureTemplate(vm.getVirtualMachineTemplate(), newValues
-            .getVirtualMachineTemplate()))
+        if (checkReconfigureTemplate(vm.getVirtualMachineTemplate(),
+            newValues.getVirtualMachineTemplate()))
         {
             if (vm.isCaptured())
             {
@@ -806,8 +806,8 @@ public class VirtualMachineService extends DefaultApiService
         }
         else
         {
-            return !old.getNetworkConfiguration().getId().equals(
-                vmnew.getNetworkConfiguration().getId());
+            return !old.getNetworkConfiguration().getId()
+                .equals(vmnew.getNetworkConfiguration().getId());
         }
     }
 
@@ -1016,8 +1016,8 @@ public class VirtualMachineService extends DefaultApiService
 
         // Does it has volumes? PREMIUM
         detachVolumesFromVirtualMachine(virtualMachine);
-        LOGGER.debug("Detached the virtual machine's volumes with UUID {}", virtualMachine
-            .getUuid());
+        LOGGER.debug("Detached the virtual machine's volumes with UUID {}",
+            virtualMachine.getUuid());
 
         detachVirtualMachineIPs(virtualMachine);
 
@@ -1071,8 +1071,8 @@ public class VirtualMachineService extends DefaultApiService
 
         // Does it has volumes? PREMIUM
         detachVolumesFromVirtualMachine(virtualMachine);
-        LOGGER.debug("Detached the virtual machine's volumes with UUID {}", virtualMachine
-            .getUuid());
+        LOGGER.debug("Detached the virtual machine's volumes with UUID {}",
+            virtualMachine.getUuid());
 
         detachVirtualMachineIPs(virtualMachine);
 
@@ -1129,10 +1129,10 @@ public class VirtualMachineService extends DefaultApiService
         if (virtualMachine.getVirtualMachineTemplate().isStateful())
         {
             LOGGER.debug("Attaching virtual machine template volume");
-            virtualMachine.getVirtualMachineTemplate().getVolume().attach(0, virtualMachine,
-                virtualAppliance);
-            virtualMachine.getVirtualMachineTemplate().getVolume().setVirtualAppliance(
-                virtualAppliance);
+            virtualMachine.getVirtualMachineTemplate().getVolume()
+                .attach(0, virtualMachine, virtualAppliance);
+            virtualMachine.getVirtualMachineTemplate().getVolume()
+                .setVirtualAppliance(virtualAppliance);
             virtualMachine.getVirtualMachineTemplate().getVolume()
                 .setVirtualMachine(virtualMachine);
         }
@@ -1187,8 +1187,8 @@ public class VirtualMachineService extends DefaultApiService
         {
             vmachine.setEthernetDriverType(vmtemplate.getEthernetDriverType());
 
-            LOGGER.debug("VirtualMachine {} will use specific EthernetDriver {}", vmachine
-                .getName(), vmtemplate.getEthernetDriverType().name());
+            LOGGER.debug("VirtualMachine {} will use specific EthernetDriver {}",
+                vmachine.getName(), vmtemplate.getEthernetDriverType().name());
         }
 
         if (vmachine.getCpu() == 0)
@@ -1261,8 +1261,8 @@ public class VirtualMachineService extends DefaultApiService
     protected void createNodeVirtualImage(final VirtualMachine virtualMachine,
         final VirtualAppliance virtualAppliance, final String name)
     {
-        LOGGER.debug("Create node virtual image with name virtual machine: {}", virtualMachine
-            .getName());
+        LOGGER.debug("Create node virtual image with name virtual machine: {}",
+            virtualMachine.getName());
         NodeVirtualImage nodeVirtualImage =
             new NodeVirtualImage(name,
                 virtualAppliance,
@@ -1599,8 +1599,8 @@ public class VirtualMachineService extends DefaultApiService
 
             // For the Admin to know all errors
             tracer.systemLog(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
-                EventType.VM_UNDEPLOY, "virtualMachine.undeployError", e.toString(), virtualMachine
-                    .getName(), e.getMessage());
+                EventType.VM_UNDEPLOY, "virtualMachine.undeployError", e.toString(),
+                virtualMachine.getName(), e.getMessage());
             LOGGER
                 .error(
                     "Error undeploying setting the virtual machine to UNKNOWN virtual machine name {}: {}",
@@ -1672,8 +1672,8 @@ public class VirtualMachineService extends DefaultApiService
 
             // For the Admin to know all errors
             tracer.systemLog(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
-                EventType.VM_UNDEPLOY, "virtualMachine.undeployError", e.toString(), virtualMachine
-                    .getName(), e.getMessage());
+                EventType.VM_UNDEPLOY, "virtualMachine.undeployError", e.toString(),
+                virtualMachine.getName(), e.getMessage());
             LOGGER
                 .error(
                     "Error undeploying setting the virtual machine to UNKNOWN virtual machine name {}: {}",
@@ -1731,8 +1731,8 @@ public class VirtualMachineService extends DefaultApiService
 
             // For the Admin to know all errors
             tracer.systemLog(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
-                EventType.VM_UNDEPLOY, "virtualMachine.undeployError", e.toString(), virtualMachine
-                    .getName(), e.getMessage());
+                EventType.VM_UNDEPLOY, "virtualMachine.undeployError", e.toString(),
+                virtualMachine.getName(), e.getMessage());
             LOGGER
                 .error(
                     "Error undeploying setting the virtual machine to UNKNOWN virtual machine name {}: {}",
@@ -1812,8 +1812,8 @@ public class VirtualMachineService extends DefaultApiService
 
             tracer
                 .systemError(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
-                    EventType.VM_INSTANCE, e, "virtualMachine.instanceFailed", virtualMachine
-                        .getName());
+                    EventType.VM_INSTANCE, e, "virtualMachine.instanceFailed",
+                    virtualMachine.getName());
 
             throw e;
         }
@@ -1824,8 +1824,8 @@ public class VirtualMachineService extends DefaultApiService
 
             tracer
                 .systemError(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
-                    EventType.VM_INSTANCE, e, "virtualMachine.instanceFailed", virtualMachine
-                        .getName());
+                    EventType.VM_INSTANCE, e, "virtualMachine.instanceFailed",
+                    virtualMachine.getName());
 
             addUnexpectedErrors(APIError.STATUS_INTERNAL_SERVER_ERROR);
             flushErrors();
@@ -1964,8 +1964,8 @@ public class VirtualMachineService extends DefaultApiService
                 "virtualMachine.resetVirtualMachineError", virtualMachine.getName());
 
             tracer.systemError(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
-                EventType.VM_DEPLOY, ex, "virtualMachine.resetVirtualMachineError", virtualMachine
-                    .getName());
+                EventType.VM_DEPLOY, ex, "virtualMachine.resetVirtualMachineError",
+                virtualMachine.getName());
 
             addUnexpectedErrors(APIError.STATUS_INTERNAL_SERVER_ERROR);
             flushErrors();
@@ -1990,8 +1990,8 @@ public class VirtualMachineService extends DefaultApiService
         for (RemoteService r : remoteServicesByDatacenter)
         {
             ErrorsDto checkRemoteServiceStatus =
-                remoteServiceService.checkRemoteServiceStatus(r.getDatacenter(), r.getType(), r
-                    .getUri());
+                remoteServiceService.checkRemoteServiceStatus(r.getDatacenter(), r.getType(),
+                    r.getUri());
             errors.addAll(checkRemoteServiceStatus);
         }
 
@@ -2031,8 +2031,8 @@ public class VirtualMachineService extends DefaultApiService
             {
                 // needed for REST links.
                 DatacenterLimits dl =
-                    infRep.findDatacenterLimits(ip.getVlanNetwork().getEnterprise(), vdc
-                        .getDatacenter());
+                    infRep.findDatacenterLimits(ip.getVlanNetwork().getEnterprise(),
+                        vdc.getDatacenter());
                 ip.getVlanNetwork().setLimitId(dl.getId());
             }
         }
@@ -2212,19 +2212,26 @@ public class VirtualMachineService extends DefaultApiService
                 // if it is new allocated, we set the integer into the 'blacklisted' list.
                 blackList.add(ip.getSequence());
                 tracer.log(SeverityType.INFO, ComponentType.NETWORK,
-                    EventType.NIC_ASSIGNED_VIRTUAL_MACHINE, "nic.attached", vm.getName(), ip
-                        .getIp(), ip.getVlanNetwork().getName());
+                    EventType.NIC_ASSIGNED_VIRTUAL_MACHINE, "nic.attached", vm.getName(),
+                    ip.getIp(), ip.getVlanNetwork().getName());
             }
         }
     }
 
     private List<IpPoolManagement> removeRepetedResources(final List<IpPoolManagement> resources)
     {
-        Map ipMap = new HashMap();
+        Map<String, IpPoolManagement> ipMap = new HashMap<String, IpPoolManagement>();
 
+        int numberOfNewUnmanagedNICs = 0;
         for (IpPoolManagement ip : resources)
         {
-            ipMap.put(ip.getIp(), ip);
+            String mac = ip.getMac();
+            if (mac.equalsIgnoreCase("?"))
+            {
+                mac = mac + numberOfNewUnmanagedNICs;
+                numberOfNewUnmanagedNICs++;
+            }
+            ipMap.put(mac, ip);
         }
 
         if (resources.size() > ipMap.size())
@@ -2294,8 +2301,8 @@ public class VirtualMachineService extends DefaultApiService
                     }
                     vdcRep.updateIpManagement(ip);
                     tracer.log(SeverityType.INFO, ComponentType.NETWORK,
-                        EventType.NIC_ASSIGNED_VIRTUAL_MACHINE, "nic.released", oldVm.getName(), ip
-                            .getIp(), ip.getVlanNetwork().getName());
+                        EventType.NIC_ASSIGNED_VIRTUAL_MACHINE, "nic.released", oldVm.getName(),
+                        ip.getIp(), ip.getVlanNetwork().getName());
                 }
 
                 // if the dellocated ip is the one with the default configuration,
@@ -2340,8 +2347,8 @@ public class VirtualMachineService extends DefaultApiService
                     vdcRep.deleteRasd(disk.getRasd());
                     rasdDao.remove(disk);
                     tracer.log(SeverityType.INFO, ComponentType.STORAGE_DEVICE,
-                        EventType.HARD_DISK_ASSIGN, "hardDisk.released", disk.getSizeInMb(), oldVm
-                            .getName());
+                        EventType.HARD_DISK_ASSIGN, "hardDisk.released", disk.getSizeInMb(),
+                        oldVm.getName());
                 }
                 else
                 {
