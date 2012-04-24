@@ -319,7 +319,9 @@ public enum APIError
         "VM-33", "Only 'cpu' and 'ram' can be reconfigured in imported virtual machines"), VIRTUAL_MACHINE_IMPORTED_WILL_BE_DELETED(
         "VM-44",
         "You are trying to undeploy an imported virtual machine. If you undeploy it, the virtual machine template cannot be recovered. If you are confident of this action, please call this functionality again with the 'forceUndeploy=true' option"), RESOURCES_ALREADY_ASSIGNED(
-        "VM-45", "Some of the resources indicated are already used"),
+        "VM-45", "Some of the resources indicated are already used"), VIRTUAL_MACHINE_AT_LEAST_ONE_NIC_SHOULD_BE_LINKED(
+        "VM-45",
+        "At least a link to an IP address should be informed when attaching or changing Virtual Machine NICs"),
 
     // ROLE
     NON_EXISTENT_ROLE("ROLE-0", "The requested role does not exist"), NON_MODIFICABLE_ROLE(
@@ -712,7 +714,7 @@ public enum APIError
     REDIS_CONNECTION_FAILED("REDIS-0", "Failed connection to Redis"),
 
     // RABBITMQ
-    RABBITMQ_CONNECTION_FAILED("RABBITMQ-0", "Failed connection to RabbitMQ");
+    RABBITMQ_CONNECTION_FAILED("RABBITMQ-0", "Failed connection to RabbitMQ"), ;
 
     /**
      * Internal error code
