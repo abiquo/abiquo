@@ -2244,7 +2244,6 @@ public class VirtualMachineService extends DefaultApiService
         }
 
         return new ArrayList<IpPoolManagement>(ipMap.values());
-
     }
 
     /**

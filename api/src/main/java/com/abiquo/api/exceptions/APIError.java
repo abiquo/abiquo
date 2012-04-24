@@ -320,8 +320,11 @@ public enum APIError
         "VM-44",
         "You are trying to undeploy an imported virtual machine. If you undeploy it, the virtual machine template cannot be recovered. If you are confident of this action, please call this functionality again with the 'forceUndeploy=true' option"), RESOURCES_ALREADY_ASSIGNED(
         "VM-45", "Some of the resources indicated are already used"), VIRTUAL_MACHINE_AT_LEAST_ONE_NIC_SHOULD_BE_LINKED(
-        "VM-45",
-        "At least a link to an IP address should be informed when attaching or changing Virtual Machine NICs"),
+        "VM-46",
+        "At least a link to an IP address should be informed when attaching or changing Virtual Machine NICs"), VIRTUAL_MACHINE_AT_LEAST_ONE_DISK_SHOULD_BE_LINKED(
+        "VM-47",
+        "At least a link to a Hard Disk should be informed when attaching or changing Virtual Machine Hard Disks"), VIRTUAL_MACHINE_DISK_ALREADY_ATTACHED_TO_THIS_VIRTUALMACHINE(
+        "VM-48", "Disk already attached to this virtual machine"),
 
     // ROLE
     NON_EXISTENT_ROLE("ROLE-0", "The requested role does not exist"), NON_MODIFICABLE_ROLE(
