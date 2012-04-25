@@ -34,7 +34,6 @@ import org.hibernate.Transaction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.LogHB;
 import com.abiquo.abiserver.persistence.hibernate.HibernateUtil;
 import com.abiquo.abiserver.pojo.result.BasicResult;
 
@@ -101,9 +100,10 @@ public class AbiCloudError
      * @param idVirtualAppliance the id of the virtual machine - can be null if the error if the
      *            operation does not involve a virtualAppliance
      */
-    public AbiCloudError(String errorCode, String errorName, String errorMsgTemplate,
-        String errorMsg, String contactInstructions, String logMsgTemplate, String[] msgs,
-        Exception exception, Integer idVirtualAppliance)
+    public AbiCloudError(final String errorCode, final String errorName,
+        final String errorMsgTemplate, final String errorMsg, final String contactInstructions,
+        final String logMsgTemplate, final String[] msgs, final Exception exception,
+        final Integer idVirtualAppliance)
     {
 
         this.errorCode = errorCode;
@@ -119,9 +119,9 @@ public class AbiCloudError
 
     }
 
-    public AbiCloudError(String errorMsgTemplate, String extraMsg, String errorName,
-        String errorCode, String contactInstructions, Exception exception,
-        Integer idVirtualAppliance)
+    public AbiCloudError(final String errorMsgTemplate, final String extraMsg,
+        final String errorName, final String errorCode, final String contactInstructions,
+        final Exception exception, final Integer idVirtualAppliance)
     {
 
         this.errorMsgTemplate = errorMsgTemplate;
@@ -143,7 +143,7 @@ public class AbiCloudError
      * 
      * @return
      */
-    public String getMessage(boolean appendContactInstructions)
+    public String getMessage(final boolean appendContactInstructions)
     {
 
         String msg = errorMsgTemplate;
@@ -170,10 +170,8 @@ public class AbiCloudError
      * @param result
      * @param error
      */
-    public final void handleError(BasicResult result)
+    public final void handleError(final BasicResult result)
     {
-
-        logMessage();
 
         if (result != null)
         {
@@ -183,54 +181,4 @@ public class AbiCloudError
 
     }
 
-    /**
-     * Logs the error to the log file and also stores the error in the database if the error
-     * occurred during a modification,creation or deletion of a VirtuaAppliance
-     */
-    public void logMessage()
-    {
-        // Construction of the message to be logged - the usage of logMsgTemplate will be redundant
-        // in the future
-        String logMessage =
-            errorName + "  " + MessageFormat.format(logMsgTemplate, (Object[]) msgs);
-        logMessage +=
-            "[Error code:" + errorCode + " Timestamp:" + errorID + "]. " + getMessage(false);
-
-        logger.error(logMessage, exception);
-
-        if (idVirtualAppliance != null && idVirtualAppliance > 0)
-        {
-            Transaction transaction = null;
-
-            try
-            {
-
-                Session session = HibernateUtil.getSession();
-                transaction = session.beginTransaction();
-
-                LogHB virtualApplianceLogHB = new LogHB();
-
-                virtualApplianceLogHB.setIdVirtualAppliance(idVirtualAppliance);
-                virtualApplianceLogHB.setDescription(getMessage(false));
-                virtualApplianceLogHB.setLogDate(new Date());
-
-                session.save(virtualApplianceLogHB);
-
-                transaction.commit();
-
-            }
-            catch (Exception e)
-            {
-                logger.error("SQL Error", e);
-
-                if (transaction != null && transaction.isActive())
-                {
-                    transaction.rollback();
-                }
-
-            }
-
-        }
-
-    }
 }

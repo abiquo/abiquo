@@ -42,7 +42,6 @@ import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.result.DataResult;
 import com.abiquo.abiserver.pojo.result.ListRequest;
 import com.abiquo.abiserver.pojo.user.Enterprise;
-import com.abiquo.abiserver.pojo.virtualappliance.Log;
 import com.abiquo.abiserver.pojo.virtualappliance.Node;
 import com.abiquo.abiserver.pojo.virtualappliance.VirtualAppliance;
 import com.abiquo.abiserver.pojo.virtualappliance.VirtualDataCenter;
@@ -130,20 +129,6 @@ public interface VirtualApplianceCommand
 
     public abstract DataResult<Collection<VirtualAppliance>> getVirtualAppliancesByEnterpriseAndDatacenter(
         UserSession userSession, final Enterprise enterprise, final DataCenter datacenter);
-
-    /**
-     * Returns the a list with all Logs entries for a Virtual Appliance Useful to frequently update
-     * the logs for a VirtualAppliance, without having to return the entire Virtual Appliance
-     * 
-     * @param session
-     * @param virtualAppliance The VirtualAppliance which we want to return the list of logs
-     * @return A DataResult object, containing an ArrayList<Log> with the list of logs for the
-     *         virtualAppliance
-     */
-    public abstract DataResult<ArrayList<Log>> getVirtualApplianceUpdatedLogs(
-        final VirtualAppliance virtualAppliance);
-
-    public abstract BasicResult markLogAsDeleted(final Log log);
 
     public DataResult<VirtualDatacentersListResult> getVirtualDataCentersByEnterprise(
         final UserSession userSession, final Enterprise enterprise, final ListRequest listRequest);
@@ -263,7 +248,4 @@ public interface VirtualApplianceCommand
      */
     public abstract void afterCreatingNode(final Session session,
         final VirtualAppliance virtualAppliance, final NodeHB newNode);
-
-    public abstract DataResult<Collection<Log>> getVirtualApplianceLogs(UserSession userSession,
-        VirtualAppliance virtualAppliance);
 }

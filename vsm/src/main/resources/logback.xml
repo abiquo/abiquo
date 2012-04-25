@@ -15,8 +15,10 @@
             <Pattern>%date %level %logger{10} [%file:%line] %msg%n</Pattern>
         </layout>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>${catalina.base}/logs/vsm-%d{yyyy-MM-dd}.log</fileNamePattern>
-            <maxHistory>5</maxHistory>
+            <fileNamePattern>${catalina.base}/logs/vsm-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>50MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
         </rollingPolicy>
     </appender>
     <!-- Hypervisor specific output -->
@@ -26,8 +28,10 @@
             <Pattern>%date %level %logger{10} [%file:%line] %msg%n</Pattern>
         </layout>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>${catalina.base}/logs/vsm-esx-%d{yyyy-MM-dd}.log</fileNamePattern>
-            <maxHistory>5</maxHistory>
+            <fileNamePattern>${catalina.base}/logs/vsm-esx-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>50MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
         </rollingPolicy>
     </appender>
     <appender name="HYPERV" class="ch.qos.logback.core.rolling.RollingFileAppender">
@@ -36,8 +40,10 @@
             <Pattern>%date %level %logger{10} [%file:%line] %msg%n</Pattern>
         </layout>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>${catalina.base}/logs/vsm-hyperv-%d{yyyy-MM-dd}.log</fileNamePattern>
-            <maxHistory>5</maxHistory>
+            <fileNamePattern>${catalina.base}/logs/vsm-hyperv-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>50MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
         </rollingPolicy>
     </appender>
     <appender name="VBOX" class="ch.qos.logback.core.rolling.RollingFileAppender">
@@ -46,8 +52,10 @@
             <Pattern>%date %level %logger{10} [%file:%line] %msg%n</Pattern>
         </layout>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>${catalina.base}/logs/vsm-vbox-%d{yyyy-MM-dd}.log</fileNamePattern>
-            <maxHistory>5</maxHistory>
+            <fileNamePattern>${catalina.base}/logs/vsm-vbox-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>50MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
         </rollingPolicy>
     </appender>
      <appender name="XENSERVER" class="ch.qos.logback.core.rolling.RollingFileAppender">
@@ -56,8 +64,10 @@
             <Pattern>%date %level %logger{10} [%file:%line] %msg%n</Pattern>
         </layout>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>${catalina.base}/logs/vsm-xenserver-%d{yyyy-MM-dd}.log</fileNamePattern>
-            <maxHistory>5</maxHistory>
+            <fileNamePattern>${catalina.base}/logs/vsm-xenserver-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>50MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
         </rollingPolicy>
     </appender>
     <logger name="com.abiquo">
