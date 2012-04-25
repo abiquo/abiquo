@@ -59,7 +59,7 @@ public class ErrorManager extends Properties
      * @param args
      * @return
      */
-    public static synchronized ErrorManager getInstance(String... args)
+    public static synchronized ErrorManager getInstance(final String... args)
     {
 
         if (ErrorManager.singletonObject == null)
@@ -71,7 +71,7 @@ public class ErrorManager extends Properties
 
     }
 
-    private ErrorManager(String prefix)
+    private ErrorManager(final String prefix)
     {
         this.prefix = prefix;
 
@@ -109,7 +109,7 @@ public class ErrorManager extends Properties
      * @param errorCode
      * @return
      */
-    public String getErrorString(int errorCode)
+    public String getErrorString(final int errorCode)
     {
         return errorCode < 10 ? "00" + errorCode : "0" + errorCode;
     }
@@ -121,14 +121,14 @@ public class ErrorManager extends Properties
      * @param msgs optional array of strings that will be used to replace place holder in message
      *            strings in the resource bundle
      */
-    public void reportError(ResourceManager resourceManager, BasicResult faultResult,
-        String bundleBaseName, String... msgs)
+    public void reportError(final ResourceManager resourceManager, final BasicResult faultResult,
+        final String bundleBaseName, final String... msgs)
     {
         this.reportError(resourceManager, faultResult, bundleBaseName, null, 0, msgs);
     }
 
-    public void reportError(ResourceManager resourceManager, BasicResult faultResult,
-        String bundleBaseName, Integer idVirtualAppliance, String... msgs)
+    public void reportError(final ResourceManager resourceManager, final BasicResult faultResult,
+        final String bundleBaseName, final Integer idVirtualAppliance, final String... msgs)
     {
         this.reportError(resourceManager, faultResult, bundleBaseName, null, idVirtualAppliance,
             msgs);
@@ -141,15 +141,15 @@ public class ErrorManager extends Properties
      * @param exception
      * @param msgs
      */
-    public void reportError(ResourceManager resourceManager, BasicResult faultResult,
-        String bundleBaseName, Exception exception, String... msg)
+    public void reportError(final ResourceManager resourceManager, final BasicResult faultResult,
+        final String bundleBaseName, final Exception exception, final String... msg)
     {
         this.reportError(resourceManager, faultResult, bundleBaseName, exception, 0, msg);
     }
 
     // This reports an error for a virtual machine
-    public void reportError(ResourceManager resourceManager, BasicResult faultResult,
-        String bundleBaseName, Exception exception, Integer idVirtualAppliance, String... msgs)
+    public void reportError(final ResourceManager resourceManager, final BasicResult faultResult,
+        final String bundleBaseName, final Exception exception, final Integer idVirtualAppliance, final String... msgs)
     {
 
         AbiCloudError error =
@@ -160,15 +160,15 @@ public class ErrorManager extends Properties
     }
 
     // This reports an error for a virtual machine
-    public AbiCloudError createAbiError(ResourceManager resourceManager, String bundleBaseName,
-        Integer idVirtualAppliance, String... msgs)
+    public AbiCloudError createAbiError(final ResourceManager resourceManager, final String bundleBaseName,
+        final Integer idVirtualAppliance, final String... msgs)
     {
         return this.createAbiError(resourceManager, bundleBaseName, null, idVirtualAppliance, msgs);
     }
 
     // This reports an error for a virtual machine
-    public AbiCloudError createAbiError(ResourceManager resourceManager, String bundleBaseName,
-        Exception exception, Integer idVirtualAppliance, String... msgs)
+    public AbiCloudError createAbiError(final ResourceManager resourceManager, final String bundleBaseName,
+        final Exception exception, final Integer idVirtualAppliance, final String... msgs)
     {
 
         ResourceBundle bundle = resourceManager.getResourceBundle();
@@ -242,23 +242,23 @@ public class ErrorManager extends Properties
 
     }
 
-    public String reportError(AbiCloudException abiCloudException)
+    public String reportError(final AbiCloudException abiCloudException)
     {
         return reportError(abiCloudException, Locale.getDefault().toString(), 0);
     }
 
-    public String reportError(AbiCloudException abiCloudException, Integer idVirtualAppliance)
+    public String reportError(final AbiCloudException abiCloudException, final Integer idVirtualAppliance)
     {
         return reportError(abiCloudException, Locale.getDefault().toString(), idVirtualAppliance);
     }
 
-    public String reportError(AbiCloudException abiCloudException, String localeString)
+    public String reportError(final AbiCloudException abiCloudException, final String localeString)
     {
         return reportError(abiCloudException, localeString, 0);
     }
 
-    public String reportError(AbiCloudException abiCloudException, String localeString,
-        Integer idVirtualAppliance)
+    public String reportError(final AbiCloudException abiCloudException, final String localeString,
+        final Integer idVirtualAppliance)
     {
         int errorCode = abiCloudException.getAbicloudErrorCode();
         String errorName = getProperty(errorCode + "." + localeString);
@@ -288,8 +288,6 @@ public class ErrorManager extends Properties
                 contactInstructions,
                 abiCloudException,
                 idVirtualAppliance);
-
-        abiError.logMessage();
 
         return abiError.getMessage(true);
     }

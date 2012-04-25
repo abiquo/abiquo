@@ -56,12 +56,6 @@
         <property name="nodeConnections" type="string">
             <column name="nodeconnections" not-null="false" />
         </property>
-        <set inverse="true" lazy="false" name="logsHB" order-by="logDate DESC" where="deleted=0">
-            <key>
-                <column name="idVirtualApp" not-null="true" />
-            </key>
-            <one-to-many class="com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.LogHB" />
-        </set>
     </class>
     <!-- VirtualappExtendedHB
         Same fields than VirtualappHB, with the addition of the nodes list
@@ -117,12 +111,6 @@
         <property name="nodeConnections" type="string">
             <column name="nodeconnections" not-null="false" />
         </property>
-        <set inverse="true" lazy="false" name="logsHB" order-by="logDate DESC">
-            <key>
-                <column name="idVirtualApp" not-null="true" />
-            </key>
-            <one-to-many class="com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.LogHB" />
-        </set>
         <set inverse="true" lazy="false" name="nodesHB" order-by="name" cascade="all">
             <key>
                 <column name="idVirtualApp" not-null="true" />

@@ -74,11 +74,8 @@ public class NonBlockingService
         try
         {
             infrastructureCommand =
-                (InfrastructureCommand) Thread
-                    .currentThread()
-                    .getContextClassLoader()
-                    .loadClass(
-                        "com.abiquo.abiserver.commands.impl.InfrastructureCommandPremiumImpl")
+                (InfrastructureCommand) Thread.currentThread().getContextClassLoader().loadClass(
+                    "com.abiquo.abiserver.commands.impl.InfrastructureCommandPremiumImpl")
                     .newInstance();
         }
         catch (Exception e)
@@ -89,11 +86,8 @@ public class NonBlockingService
         try
         {
             virtualAppCommand =
-                (VirtualApplianceCommand) Thread
-                    .currentThread()
-                    .getContextClassLoader()
-                    .loadClass(
-                        "com.abiquo.abiserver.commands.impl.VirtualApplianceCommandPremiumImpl")
+                (VirtualApplianceCommand) Thread.currentThread().getContextClassLoader().loadClass(
+                    "com.abiquo.abiserver.commands.impl.VirtualApplianceCommandPremiumImpl")
                     .newInstance();
         }
         catch (Exception e)
@@ -331,16 +325,6 @@ public class NonBlockingService
     {
         return proxyVirtualApplianceResourceStub(session).instanceVirtualApplianceNodes(
             virtualAppliance.getVirtualDataCenter().getId(), virtualAppliance.getId(), nodes);
-    }
-
-    public BasicResult getVirtualApplianceLogs(final UserSession userSession,
-        final VirtualAppliance virtualAppliance)
-    {
-        VirtualApplianceCommand command =
-            BusinessDelegateProxy.getInstance(userSession, virtualAppCommand,
-                VirtualApplianceCommand.class);
-
-        return command.getVirtualApplianceLogs(userSession, virtualAppliance);
     }
 
     protected VirtualApplianceResourceStub proxyVirtualApplianceResourceStub(

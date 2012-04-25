@@ -40,7 +40,6 @@ import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.StateEnum;
 import com.abiquo.abiserver.business.hibernate.pojohb.networking.IpPoolManagementHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.networking.NetworkConfigurationHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.user.UserHB;
-import com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.LogHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.NodeHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.NodeVirtualImageHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualDataCenterHB;
@@ -75,7 +74,6 @@ import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.result.DataResult;
 import com.abiquo.abiserver.pojo.result.ListRequest;
 import com.abiquo.abiserver.pojo.user.Enterprise;
-import com.abiquo.abiserver.pojo.virtualappliance.Log;
 import com.abiquo.abiserver.pojo.virtualappliance.Node;
 import com.abiquo.abiserver.pojo.virtualappliance.NodeVirtualImage;
 import com.abiquo.abiserver.pojo.virtualappliance.VirtualAppliance;
@@ -229,8 +227,8 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
                 virtualApplianceId);
 
             traceLog(SeverityType.CRITICAL, ComponentType.VIRTUAL_APPLIANCE, EventType.VAPP_CREATE,
-                userSession, null, virtualAppliance.getVirtualDataCenter().getName(),
-                e.getMessage(), null, null, null, null, null);
+                userSession, null, virtualAppliance.getVirtualDataCenter().getName(), e
+                    .getMessage(), null, null, null, null, null);
 
             return dataResult;
         }
@@ -264,8 +262,8 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
         if (!result.getSuccess())
         {
             BasicCommand.traceLog(SeverityType.CRITICAL, ComponentType.VIRTUAL_DATACENTER,
-                EventType.VDC_CREATE, userSession, null, virtualDataCenter.getName(),
-                result.getMessage(), null, null, null, null, null);
+                EventType.VDC_CREATE, userSession, null, virtualDataCenter.getName(), result
+                    .getMessage(), null, null, null, null, null);
         }
         else
         {
@@ -360,8 +358,8 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
         if (!result.getSuccess())
         {
             BasicCommand.traceLog(SeverityType.CRITICAL, ComponentType.VIRTUAL_DATACENTER,
-                EventType.VDC_MODIFY, userSession, null, virtualDataCenter.getName(),
-                result.getMessage(), null, null, null, null, null);
+                EventType.VDC_MODIFY, userSession, null, virtualDataCenter.getName(), result
+                    .getMessage(), null, null, null, null, null);
         }
         else
         {
@@ -437,54 +435,6 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
         return dataResult;
     }
 
-    @Override
-    public DataResult<Collection<Log>> getVirtualApplianceLogs(final UserSession userSession,
-        final VirtualAppliance virtualAppliance)
-    {
-        DataResult<Collection<Log>> dataResult = new DataResult<Collection<Log>>();
-
-        Session session = null;
-        Transaction transaction = null;
-
-        try
-        {
-            session = HibernateUtil.getSession();
-            transaction = session.beginTransaction();
-
-            String query = "from LogHB logs where logs.idVirtualAppliance = :vappId";
-
-            Query namedQuery =
-                session.createQuery(query).setParameter("vappId", virtualAppliance.getId());
-
-            List<LogHB> logs = namedQuery.list();
-            Collection<Log> logsList = new ArrayList<Log>();
-
-            for (LogHB l : logs)
-            {
-                logsList.add(l.toPojo());
-            }
-
-            // Building result
-            dataResult.setSuccess(true);
-            dataResult.setData(logsList);
-            dataResult.setMessage("VirtualAppliance logs successfully retrieved");
-
-            transaction.commit();
-        }
-        catch (Exception e)
-        {
-            if (transaction != null && transaction.isActive())
-            {
-                transaction.rollback();
-            }
-
-            errorManager.reportError(resourceManager, dataResult, "getVirtualApplianceLogs", e,
-                virtualAppliance.getId());
-        }
-
-        return dataResult;
-    }
-
     /*
      * (non-Javadoc)
      * @see
@@ -529,101 +479,6 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
                     datacenterId);
             }
         }.getVirtualAppliances(errorManager, resourceManager);
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see
-     * com.abiquo.abiserver.commands.VirtualApplianceCommand#getVirtualApplianceUpdatedLogs(com.
-     * abiquo.abiserver.pojo.virtualappliance.VirtualAppliance)
-     */
-    @Override
-    public DataResult<ArrayList<Log>> getVirtualApplianceUpdatedLogs(
-        final VirtualAppliance virtualAppliance)
-    {
-        Session session = null;
-        Transaction transaction = null;
-        DataResult<ArrayList<Log>> dataResult = new DataResult<ArrayList<Log>>();
-
-        try
-        {
-            session = HibernateUtil.getSession();
-            transaction = session.beginTransaction();
-
-            // Getting the VirtualAppliance
-            VirtualappHB virtualappHB =
-                (VirtualappHB) session.get("VirtualappHB", virtualAppliance.getId());
-            VirtualAppliance virtualApplianceUpdated = virtualappHB.toPojo();
-
-            // Building result
-            dataResult.setData(virtualApplianceUpdated.getLogs());
-            dataResult.setSuccess(true);
-            dataResult.setMessage(resourceManager
-                .getMessage("getVirtualApplianceUpdatedLogs.success"));
-
-            transaction.commit();
-        }
-        catch (Exception e)
-        {
-            if (transaction != null && transaction.isActive())
-            {
-                transaction.rollback();
-            }
-
-            errorManager.reportError(resourceManager, dataResult, "getVirtualApplianceUpdatedLogs",
-                e, virtualAppliance.getId());
-        }
-
-        return dataResult;
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see
-     * com.abiquo.abiserver.commands.VirtualApplianceCommand#markLogAsDeleted(com.abiquo.abiserver
-     * .pojo.virtualappliance.Log)
-     */
-    @Override
-    public BasicResult markLogAsDeleted(final Log log)
-    {
-        BasicResult basicResult = new BasicResult();
-
-        Session session = null;
-        Transaction transaction = null;
-
-        try
-        {
-            session = HibernateUtil.getSession();
-            transaction = session.beginTransaction();
-
-            // Getting the Log to be marked as deleted
-            LogHB logHB = (LogHB) session.get(LogHB.class, log.getIdLog());
-            if (logHB != null)
-            {
-                logHB.setDeleted(1);
-                session.update(logHB);
-
-                basicResult.setSuccess(true);
-                basicResult.setMessage(resourceManager.getMessage("markLogAsDeleted.success"));
-            }
-            else
-            {
-                basicResult.setMessage("This log entry no longer exists.");
-            }
-
-            transaction.commit();
-        }
-        catch (Exception e)
-        {
-            if (transaction != null && transaction.isActive())
-            {
-                transaction.rollback();
-            }
-
-            errorManager.reportError(resourceManager, basicResult, "markLogAsDeleted", e);
-        }
-
-        return basicResult;
     }
 
     @Override
@@ -785,8 +640,8 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
                 .getVirtualDataCenter().getName(), message, vApp, null, null, null, null);
         }
 
-        errorManager.reportError(resourceManager, dataResult, reportErrorKey, exception,
-            vApp.getId());
+        errorManager.reportError(resourceManager, dataResult, reportErrorKey, exception, vApp
+            .getId());
 
         if (exception instanceof VirtualApplianceTimeoutException)
         {
@@ -895,8 +750,8 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
 
                     VirtualSystemEvent event = new VirtualSystemEvent();
                     event.setEventType(eventType.name());
-                    event.setVirtualSystemAddress(String.format("http://%s:%d/", hv.getIp(),
-                        hv.getPort()));
+                    event.setVirtualSystemAddress(String.format("http://%s:%d/", hv.getIp(), hv
+                        .getPort()));
                     event.setVirtualSystemId(vm.getName());
                     event.setVirtualSystemType(hv.getType().getName());
 
@@ -1121,8 +976,8 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
             ResourceAllocationSettingData rasd = netMan.getRasd();
             session.delete(rasd);
 
-            if (resourceManagement.getVirtualDataCenter().getDefaultVlan().getNetworkType()
-                .equals(NetworkType.UNMANAGED.name()))
+            if (resourceManagement.getVirtualDataCenter().getDefaultVlan().getNetworkType().equals(
+                NetworkType.UNMANAGED.name()))
             {
                 session.delete(netMan);
             }
