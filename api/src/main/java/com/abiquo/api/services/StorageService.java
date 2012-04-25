@@ -183,11 +183,6 @@ public class StorageService extends DefaultApiService
 
         VirtualMachine newvm = vmService.duplicateVirtualMachineObject(vm);
         List<DiskManagement> disks = vmService.getHardDisksFromDto(vdc, hdRefs);
-        if (0 == disks.size())
-        {
-            addValidationErrors(APIError.VIRTUAL_MACHINE_AT_LEAST_ONE_DISK_SHOULD_BE_LINKED);
-            flushErrors();
-        }
         newvm.setDisks(disks);
 
         return vmService.reconfigureVirtualMachine(vdc, vapp, vm, newvm, originalState);
