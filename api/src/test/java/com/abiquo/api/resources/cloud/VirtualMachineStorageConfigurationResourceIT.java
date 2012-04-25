@@ -209,10 +209,12 @@ public class VirtualMachineStorageConfigurationResourceIT extends AbstractJpaGen
         ClientResponse response =
             post(uri, new LinksDto(), SYSADMIN, SYSADMIN, AcceptedRequestDto.MEDIA_TYPE,
                 LinksDto.MEDIA_TYPE);
-        assertEquals(response.getStatusCode(), Status.ACCEPTED.getStatusCode());
+        assertEquals(response.getStatusCode(), Status.BAD_REQUEST.getStatusCode());
 
         // Verify that no volume is attached
         response = get(uri, SYSADMIN, SYSADMIN, DisksManagementDto.MEDIA_TYPE);
+
+        // Can not attach a hard disk empty
         assertEquals(response.getStatusCode(), Status.OK.getStatusCode());
 
         DisksManagementDto dto = response.getEntity(DisksManagementDto.class);
