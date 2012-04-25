@@ -114,6 +114,10 @@ BEGIN
     -- ######################################## --
     SELECT "STEP 7 REMOVING DEPRECATED COLUMNS..." as " ";  
     
+    IF EXISTS(SELECT * FROM information_schema.tables WHERE table_schema='kinton' AND table_name='log') THEN
+		SELECT "Removing table log..." as " ";
+		DROP  TABLE IF EXISTS kinton.log;
+	END IF;
 
     -- ######################################## --  
     -- ######## SCHEMA: TABLES REMOVED ######## --

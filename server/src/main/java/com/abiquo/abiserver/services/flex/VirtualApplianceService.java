@@ -37,7 +37,6 @@ import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.result.DataResult;
 import com.abiquo.abiserver.pojo.result.ListRequest;
 import com.abiquo.abiserver.pojo.user.Enterprise;
-import com.abiquo.abiserver.pojo.virtualappliance.Log;
 import com.abiquo.abiserver.pojo.virtualappliance.VirtualAppliance;
 import com.abiquo.abiserver.pojo.virtualappliance.VirtualDataCenter;
 
@@ -372,38 +371,6 @@ public class VirtualApplianceService
         return proxyVirtualApplianceResourceStub(session).deleteVirtualAppliance(virtualAppliance,
             false);
         // return command.deleteVirtualAppliance(session, virtualAppliance);
-    }
-
-    /**
-     * Returns the a list with all Logs entries for a Virtual Appliance Useful to frequently update
-     * the logs for a VirtualAppliance, without having to return the entire Virtual Appliance
-     * 
-     * @param session
-     * @param virtualAppliance The VirtualAppliance which we want to return the list of logs
-     * @return A DataResult object, containing an ArrayList<Log> with the list of logs for the
-     *         virtualAppliance
-     */
-    public BasicResult getVirtualApplianceUpdatedLogs(final UserSession session,
-        final VirtualAppliance virtualAppliance)
-    {
-        VirtualApplianceCommand command = proxyCommand(session);
-
-        return command.getVirtualApplianceUpdatedLogs(virtualAppliance);
-    }
-
-    /**
-     * Marks a Log entry from a Virtual Appliance, as deleted. This Log will no longer appear in the
-     * log list of the VirtualAppliance which the Log belongs to
-     * 
-     * @param session
-     * @param log a Log object to be marked as deleted
-     * @return A BasicResult object
-     */
-    public BasicResult markLogAsDeleted(final UserSession session, final Log log)
-    {
-        VirtualApplianceCommand command = proxyCommand(session);
-
-        return command.markLogAsDeleted(log);
     }
 
     /**

@@ -28,7 +28,6 @@
         <mapping resource="com/abiquo/abiserver/business/hibernate/pojohb/infrastructure/DatacenterHB.hbm.xml" />
         <mapping resource="com/abiquo/abiserver/business/hibernate/pojohb/user/EnterpriseHB.hbm.xml" />
         <mapping resource="com/abiquo/abiserver/business/hibernate/pojohb/infrastructure/HypervisorHB.hbm.xml" />
-        <mapping resource="com/abiquo/abiserver/business/hibernate/pojohb/virtualappliance/LogHB.hbm.xml" />
         <mapping resource="com/abiquo/abiserver/business/hibernate/pojohb/virtualappliance/NodeHB.hbm.xml" />
         <mapping resource="com/abiquo/abiserver/business/hibernate/pojohb/infrastructure/DatastoreHB.hbm.xml" />
         <mapping resource="com/abiquo/abiserver/business/hibernate/pojohb/infrastructure/PhysicalmachineHB.hbm.xml" />
