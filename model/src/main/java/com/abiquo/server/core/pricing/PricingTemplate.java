@@ -66,7 +66,7 @@ public class PricingTemplate extends DefaultEntityBase
         final PricingPeriod chargingPeriod, final BigDecimal minimumChargePeriod,
         final boolean showChangesBefore, final PricingPeriod minimumCharge,
         final Currency currency, final BigDecimal publicIp, final BigDecimal vCpu,
-        final BigDecimal memoryMB, final boolean defaultTemplate, final String description)
+        final BigDecimal memoryGB, final boolean defaultTemplate, final String description)
     {
 
         setName(name);
@@ -80,7 +80,7 @@ public class PricingTemplate extends DefaultEntityBase
         setCurrency(currency);
         setPublicIp(publicIp);
         setVcpu(vCpu);
-        setMemoryMB(memoryMB);
+        setMemoryGB(memoryGB);
         setDefaultTemplate(defaultTemplate);
         setLastUpdate(new Date());
         setDescription(description);
@@ -363,25 +363,25 @@ public class PricingTemplate extends DefaultEntityBase
         this.vcpu = vcpu;
     }
 
-    public final static String MEMORY_MB_PROPERTY = "memoryMB";
+    public final static String MEMORY_GB_PROPERTY = "memoryGB";
 
-    private final static boolean MEMORY_MB_REQUIRED = true;
+    private final static boolean MEMORY_GB_REQUIRED = true;
 
-    private final static String MEMORY_MB_COLUMN = "memoryMB";
+    private final static String MEMORY_GB_COLUMN = "memoryGB";
 
-    @Column(name = MEMORY_MB_COLUMN, nullable = false)
-    private BigDecimal memoryMB;
+    @Column(name = MEMORY_GB_COLUMN, nullable = false)
+    private BigDecimal memoryGB;
 
-    @Required(value = MEMORY_MB_REQUIRED)
+    @Required(value = MEMORY_GB_REQUIRED)
     @BigDec
-    public BigDecimal getMemoryMB()
+    public BigDecimal getMemoryGB()
     {
-        return memoryMB;
+        return memoryGB;
     }
 
-    public void setMemoryMB(final BigDecimal memoryMB)
+    public void setMemoryGB(final BigDecimal memoryGB)
     {
-        this.memoryMB = memoryMB;
+        this.memoryGB = memoryGB;
     }
 
     public final static String DEFAULT_TEMPLATE_PROPERTY = "defaultTemplate";
@@ -419,9 +419,9 @@ public class PricingTemplate extends DefaultEntityBase
     }
 
     @OneToMany(targetEntity = PricingCostCode.class, cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "pricingTemplate")
-    private List<PricingCostCode> costCodeByPricing = new ArrayList<PricingCostCode>();
+    private final List<PricingCostCode> costCodeByPricing = new ArrayList<PricingCostCode>();
 
     @OneToMany(targetEntity = PricingTier.class, cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "pricingTemplate")
-    private List<PricingTier> pricingTier = new ArrayList<PricingTier>();
+    private final List<PricingTier> pricingTier = new ArrayList<PricingTier>();
 
 }

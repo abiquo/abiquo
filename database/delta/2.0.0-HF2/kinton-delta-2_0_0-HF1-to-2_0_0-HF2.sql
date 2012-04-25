@@ -40,7 +40,13 @@ BEGIN
     
 
     ALTER TABLE `kinton`.`costCode` CHANGE COLUMN `idCostCode` `idCostCode` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT;    
-    
+   
+
+    IF EXISTS (SELECT * FROM information_schema.columns WHERE table_schema= 'kinton' AND table_name='pricingTemplate' AND column_name='memoryMB') THEN
+    ALTER TABLE kinton.pricingTemplate ADD COLUMN memoryGB DECIMAL(20,5) DEFAULT 0 AFTER vcpu;
+    UPDATE  kinton.pricingTemplate SET memoryGB = memoryMB/1024;
+         ALTER TABLE kinton.pricingTemplate drop COLUMN memoryMB;
+    END IF;
 
     -- ############################################ --  
     -- ######## SCHEMA: CONSTRAINTS MODIFIED ###### --
@@ -157,3 +163,4 @@ CALL kinton.add_version_column_to_all();
 SELECT "STEP 12 ENABLING TRIGGERS" as " ";
 SET @DISABLE_STATS_TRIGGERS = null;
 SELECT "#### UPGRADE COMPLETED ####" as " ";
+

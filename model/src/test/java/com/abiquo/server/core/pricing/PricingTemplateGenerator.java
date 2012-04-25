@@ -63,7 +63,7 @@ public class PricingTemplateGenerator extends DefaultEntityGenerator<PricingTemp
         assertEquals(obj1.getMinimumChargePeriod().setScale(2), obj2.getMinimumChargePeriod()
             .setScale(2));
         assertEquals(obj1.getPublicIp().setScale(2), obj2.getPublicIp().setScale(2));
-        assertEquals(obj1.getMemoryMB().setScale(2), obj2.getMemoryMB().setScale(2));
+        assertEquals(obj1.getMemoryGB().setScale(2), obj2.getMemoryGB().setScale(2));
         assertEquals(obj1.getCurrency().getId(), obj2.getCurrency().getId());
     }
 
@@ -95,7 +95,7 @@ public class PricingTemplateGenerator extends DefaultEntityGenerator<PricingTemp
         final PricingPeriod minimumCharge = PricingPeriod.WEEK;
         final BigDecimal publicIp = seed;
         final BigDecimal vCpu = seed;
-        final BigDecimal memoryMb = seed;
+        final BigDecimal memoryGB = seed;
         final String description = newString(nextSeed(), 0, 255);
 
         PricingTemplate pricingTemplate =
@@ -110,7 +110,7 @@ public class PricingTemplateGenerator extends DefaultEntityGenerator<PricingTemp
                 currency,
                 publicIp,
                 vCpu,
-                memoryMb,
+                memoryGB,
                 false,
                 description);
 
