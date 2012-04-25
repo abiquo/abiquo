@@ -515,7 +515,7 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
 
             StringBuilder reservedMachinesB =
                 new StringBuilder(String.format(
-                    "Enterprise %s have the follow machine reservations : ", enterprise.getName()));
+                    "Enterprise %s has the following machine reservations : ", enterprise.getName()));
             for (Integer mid : reserveds)
             {
                 reservedMachinesB.append(mid + ' ');
