@@ -6798,4 +6798,7 @@
             <column name="authType"/>
         </createIndex>
     </changeSet>
+
+<!-- VERSIONS -->
+<include file="delta/deltachangelogHF1.xml"/>
 </databaseChangeLog>

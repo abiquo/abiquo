@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd"/>
+    <changeSet author="destevezg (generated)" id="1335280201177-1">
+        <createTable schemaName="kinton" tableName="accounting_event_detail">
+            <column autoIncrement="true" name="idAccountingEvent" type="BIGINT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column defaultValue="0000-00-00 00:00:00" name="startTime" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValue="0000-00-00 00:00:00" name="endTime" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="idAccountingResourceType" remarks="1 - VirtualMachine-vcpu; 2 - VirtualMachine-vram; 3 - VirtualMachine-vhd; 4 - ExternalStorage; 5 - IPAddress;" type="TINYINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="resourceType" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="resourceUnits" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="resourceName" type="VARCHAR(511)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="idEnterprise" type="INT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column name="idVirtualDataCenter" type="INT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column name="idVirtualApp" type="INT UNSIGNED"/>
+            <column name="idVirtualMachine" type="INT UNSIGNED"/>
+            <column name="enterpriseName" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="virtualDataCenter" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="virtualApp" type="VARCHAR(255)"/>
+            <column name="virtualMachine" type="VARCHAR(255)"/>
+            <column name="costCode" type="INT"/>
+            <column name="idStorageTier" type="INT"/>
+            <column defaultValueNumeric="0" name="version_c" type="INT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335280201177-2">
+        <createTable schemaName="kinton" tableName="accounting_event_ips">
+            <column autoIncrement="true" name="idIPsAccountingEvent" type="BIGINT UNSIGNED">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="idManagement" type="INT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column name="idEnterprise" type="INT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column name="idVirtualDataCenter" type="INT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ip" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="startTime" type="TIMESTAMP"/>
+            <column name="stopTime" type="TIMESTAMP"/>
+            <column defaultValueBoolean="false" name="consolidated" type="BIT">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="version_c" type="INT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335280201177-3">
+        <createTable schemaName="kinton" tableName="accounting_event_storage">
+            <column autoIncrement="true" name="idStorageAccountingEvent" type="BIGINT UNSIGNED">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="idResource" type="VARCHAR(50)"/>
+            <column name="resourceName" type="VARCHAR(511)"/>
+            <column name="idVM" type="INT UNSIGNED"/>
+            <column name="idStorageTier" type="INT UNSIGNED"/>
+            <column name="idEnterprise" type="INT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column name="idVirtualDataCenter" type="INT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column name="idVirtualApp" type="INT UNSIGNED"/>
+            <column name="sizeReserved" type="BIGINT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column name="startTime" type="TIMESTAMP"/>
+            <column name="stopTime" type="TIMESTAMP"/>
+            <column defaultValueBoolean="false" name="consolidated" type="BIT">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="version_c" type="INT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335280201177-4">
+        <createTable schemaName="kinton" tableName="accounting_event_vlan">
+            <column autoIncrement="true" name="idVLANAccountingEvent" type="BIGINT UNSIGNED">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="vlan_network_id" type="INT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column name="idEnterprise" type="INT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column name="idVirtualDataCenter" type="INT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column name="network_name" type="VARCHAR(40)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="startTime" type="TIMESTAMP"/>
+            <column name="stopTime" type="TIMESTAMP"/>
+            <column defaultValueBoolean="false" name="consolidated" type="BIT">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="version_c" type="INT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335280201177-5">
+        <createTable schemaName="kinton" tableName="accounting_event_vm">
+            <column autoIncrement="true" name="idVMAccountingEvent" type="BIGINT UNSIGNED">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="idVM" type="INT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column name="idEnterprise" type="INT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column name="idVirtualDataCenter" type="INT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column name="idVirtualApp" type="INT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column name="cpu" type="INT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ram" type="INT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column name="hd" type="BIGINT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column name="startTime" type="TIMESTAMP"/>
+            <column name="stopTime" type="TIMESTAMP"/>
+            <column defaultValueBoolean="false" name="consolidated" type="BIT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="costCode" type="INT"/>
+            <column name="hypervisorType" type="VARCHAR(255)"/>
+            <column defaultValueNumeric="0" name="version_c" type="INT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335280201177-6">
+        <createTable schemaName="kinton" tableName="chargeback_simple">
+            <column name="idAccountingResourceType" type="TINYINT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="resourceType" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="costPerHour" type="DECIMAL(15,12)">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="version_c" type="INT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335280201177-7">
+        <addColumn schemaName="kinton" tableName="category">
+            <column name="idEnterprise" type="INT UNSIGNED"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335280201177-8">
+        <addForeignKeyConstraint baseColumnNames="idEnterprise" baseTableName="category" baseTableSchemaName="kinton" constraintName="category_enterprise_FK" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="idEnterprise" referencedTableName="enterprise" referencedTableSchemaName="kinton" referencesUniqueColumn="false"/>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335280201177-9">
+        <dropIndex indexName="name" schemaName="kinton" tableName="category"/>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335280201177-10">
+        <createIndex indexName="name" schemaName="kinton" tableName="category" unique="true">
+            <column name="name"/>
+            <column name="idEnterprise"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335280201177-11">
+        <createView viewName="DAILY_USAGE_SUM_VW">select cast(`v`.`startTime` as date) AS `startTime`,cast(`v`.`startTime` as date) AS `endTime`,`v`.`idAccountingResourceType` AS `idAccountingResourceType`,`v`.`resourceType` AS `resourceType`,sum(`v`.`resourceUnits`) AS `resourceUnits`,`v`.`idEnterprise` AS `idEnterprise`,`v`.`idVirtualDataCenter` AS `idVirtualDataCenter`,`v`.`enterpriseName` AS `enterpriseName`,`v`.`virtualDataCenter` AS `virtualDataCenter` from `kinton`.`HOURLY_USAGE_MAX_VW` `v` group by cast(`v`.`startTime` as date),`v`.`idAccountingResourceType`,`v`.`resourceType`,`v`.`idEnterprise`,`v`.`idVirtualDataCenter`,`v`.`enterpriseName`,`v`.`virtualDataCenter`</createView>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335280201177-12">
+        <createView viewName="HOURLY_USAGE_MAX_VW">select `kinton`.`accounting_event_detail`.`startTime` AS `startTime`,`kinton`.`accounting_event_detail`.`endTime` AS `endTime`,`kinton`.`accounting_event_detail`.`idAccountingResourceType` AS `idAccountingResourceType`,`kinton`.`accounting_event_detail`.`resourceType` AS `resourceType`,`kinton`.`accounting_event_detail`.`resourceName` AS `resourceName`,max(`kinton`.`accounting_event_detail`.`resourceUnits`) AS `resourceUnits`,`kinton`.`accounting_event_detail`.`idEnterprise` AS `idEnterprise`,`kinton`.`accounting_event_detail`.`idVirtualDataCenter` AS `idVirtualDataCenter`,`kinton`.`accounting_event_detail`.`idVirtualApp` AS `idVirtualApp`,`kinton`.`accounting_event_detail`.`idVirtualMachine` AS `idVirtualMachine`,`kinton`.`accounting_event_detail`.`enterpriseName` AS `enterpriseName`,`kinton`.`accounting_event_detail`.`virtualDataCenter` AS `virtualDataCenter`,`kinton`.`accounting_event_detail`.`virtualApp` AS `virtualApp`,`kinton`.`accounting_event_detail`.`virtualMachine` AS `virtualMachine` from `kinton`.`accounting_event_detail` group by `kinton`.`accounting_event_detail`.`startTime`,`kinton`.`accounting_event_detail`.`endTime`,`kinton`.`accounting_event_detail`.`idAccountingResourceType`,`kinton`.`accounting_event_detail`.`resourceType`,`kinton`.`accounting_event_detail`.`resourceName`,`kinton`.`accounting_event_detail`.`idEnterprise`,`kinton`.`accounting_event_detail`.`idVirtualDataCenter`,`kinton`.`accounting_event_detail`.`idVirtualApp`,`kinton`.`accounting_event_detail`.`idVirtualMachine`,`kinton`.`accounting_event_detail`.`enterpriseName`,`kinton`.`accounting_event_detail`.`virtualDataCenter`,`kinton`.`accounting_event_detail`.`virtualApp`,`kinton`.`accounting_event_detail`.`virtualMachine`</createView>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335280201177-13">
+        <createView viewName="HOURLY_USAGE_SUM_VW">select `v`.`startTime` AS `startTime`,`v`.`endTime` AS `endTime`,`v`.`idAccountingResourceType` AS `idAccountingResourceType`,`v`.`resourceType` AS `resourceType`,sum(`v`.`resourceUnits`) AS `resourceUnits`,`v`.`idEnterprise` AS `idEnterprise`,`v`.`idVirtualDataCenter` AS `idVirtualDataCenter`,`v`.`enterpriseName` AS `enterpriseName`,`v`.`virtualDataCenter` AS `virtualDataCenter` from `kinton`.`HOURLY_USAGE_MAX_VW` `v` group by `v`.`startTime`,`v`.`endTime`,`v`.`idAccountingResourceType`,`v`.`resourceType`,`v`.`idEnterprise`,`v`.`idVirtualDataCenter`,`v`.`enterpriseName`,`v`.`virtualDataCenter`</createView>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335280201177-14">
+        <createView viewName="LAST_HOUR_USAGE_IPS_VW">select `kinton`.`accounting_event_ips`.`idIPsAccountingEvent` AS `idIPsAccountingEvent`,`kinton`.`accounting_event_ips`.`idEnterprise` AS `idEnterprise`,`kinton`.`accounting_event_ips`.`idVirtualDataCenter` AS `idVirtualDataCenter`,`kinton`.`accounting_event_ips`.`ip` AS `ip`,`kinton`.`accounting_event_ips`.`startTime` AS `startTime`,`kinton`.`accounting_event_ips`.`stopTime` AS `stopTime`,(unix_timestamp(`kinton`.`accounting_event_ips`.`stopTime`) - unix_timestamp(`kinton`.`accounting_event_ips`.`startTime`)) AS `DELTA_TIME`,from_unixtime((-(3600) + (truncate((unix_timestamp(now()) / 3600),0) * 3600))) AS `ROUNDED_HOUR`,`kinton`.`virtualdatacenter`.`name` AS `VIRTUAL_DATACENTER`,`kinton`.`enterprise`.`name` AS `VIRTUAL_ENTERPRISE` from ((`kinton`.`accounting_event_ips` join `kinton`.`virtualdatacenter` on((`kinton`.`accounting_event_ips`.`idVirtualDataCenter` = `kinton`.`virtualdatacenter`.`idVirtualDataCenter`))) join `kinton`.`enterprise` on((`kinton`.`accounting_event_ips`.`idEnterprise` = `kinton`.`enterprise`.`idEnterprise`))) where (isnull(`kinton`.`accounting_event_ips`.`stopTime`) or ((`kinton`.`accounting_event_ips`.`stopTime` &gt; from_unixtime((-(3600) + (truncate((unix_timestamp(now()) / 3600),0) * 3600)))) and ((unix_timestamp(`kinton`.`accounting_event_ips`.`stopTime`) - unix_timestamp(`kinton`.`accounting_event_ips`.`startTime`)) &gt; 3600)) or ((`kinton`.`accounting_event_ips`.`startTime` &gt; from_unixtime((-(3600) + (truncate((unix_timestamp(now()) / 3600),0) * 3600)))) and ((unix_timestamp(`kinton`.`accounting_event_ips`.`stopTime`) - unix_timestamp(`kinton`.`accounting_event_ips`.`startTime`)) &lt;= 3600)))</createView>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335280201177-15">
+        <createView viewName="LAST_HOUR_USAGE_STORAGE_VW">select `kinton`.`accounting_event_storage`.`idStorageAccountingEvent` AS `idStorageAccountingEvent`,`kinton`.`accounting_event_storage`.`idVM` AS `idVM`,`kinton`.`accounting_event_storage`.`idEnterprise` AS `idEnterprise`,`kinton`.`accounting_event_storage`.`idVirtualDataCenter` AS `idVirtualDataCenter`,`kinton`.`accounting_event_storage`.`idVirtualApp` AS `idVirtualApp`,`kinton`.`accounting_event_storage`.`idResource` AS `idResource`,`kinton`.`accounting_event_storage`.`resourceName` AS `resourceName`,`kinton`.`accounting_event_storage`.`idStorageTier` AS `idStorageTier`,`kinton`.`accounting_event_storage`.`sizeReserved` AS `sizeReserved`,`kinton`.`accounting_event_storage`.`startTime` AS `startTime`,`kinton`.`accounting_event_storage`.`stopTime` AS `stopTime`,(unix_timestamp(`kinton`.`accounting_event_storage`.`stopTime`) - unix_timestamp(`kinton`.`accounting_event_storage`.`startTime`)) AS `DELTA_TIME`,from_unixtime((-(3600) + (truncate((unix_timestamp(now()) / 3600),0) * 3600))) AS `ROUNDED_HOUR`,`kinton`.`virtualdatacenter`.`name` AS `VIRTUAL_DATACENTER`,`kinton`.`enterprise`.`name` AS `VIRTUAL_ENTERPRISE` from ((`kinton`.`accounting_event_storage` join `kinton`.`virtualdatacenter` on((`kinton`.`accounting_event_storage`.`idVirtualDataCenter` = `kinton`.`virtualdatacenter`.`idVirtualDataCenter`))) join `kinton`.`enterprise` on((`kinton`.`accounting_event_storage`.`idEnterprise` = `kinton`.`enterprise`.`idEnterprise`))) where (isnull(`kinton`.`accounting_event_storage`.`stopTime`) or ((`kinton`.`accounting_event_storage`.`stopTime` &gt; from_unixtime((-(3600) + (truncate((unix_timestamp(now()) / 3600),0) * 3600)))) and ((unix_timestamp(`kinton`.`accounting_event_storage`.`stopTime`) - unix_timestamp(`kinton`.`accounting_event_storage`.`startTime`)) &gt; 3600)) or ((`kinton`.`accounting_event_storage`.`startTime` &gt; from_unixtime((-(3600) + (truncate((unix_timestamp(now()) / 3600),0) * 3600)))) and ((unix_timestamp(`kinton`.`accounting_event_storage`.`stopTime`) - unix_timestamp(`kinton`.`accounting_event_storage`.`startTime`)) &lt;= 3600)))</createView>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335280201177-16">
+        <createView viewName="LAST_HOUR_USAGE_VLAN_VW">select `kinton`.`accounting_event_vlan`.`idVLANAccountingEvent` AS `idVLANAccountingEvent`,`kinton`.`accounting_event_vlan`.`idEnterprise` AS `idEnterprise`,`kinton`.`accounting_event_vlan`.`idVirtualDataCenter` AS `idVirtualDataCenter`,`kinton`.`accounting_event_vlan`.`network_name` AS `networkName`,`kinton`.`accounting_event_vlan`.`startTime` AS `startTime`,`kinton`.`accounting_event_vlan`.`stopTime` AS `stopTime`,(unix_timestamp(`kinton`.`accounting_event_vlan`.`stopTime`) - unix_timestamp(`kinton`.`accounting_event_vlan`.`startTime`)) AS `DELTA_TIME`,from_unixtime((-(3600) + (truncate((unix_timestamp(now()) / 3600),0) * 3600))) AS `ROUNDED_HOUR`,`kinton`.`virtualdatacenter`.`name` AS `VIRTUAL_DATACENTER`,`kinton`.`enterprise`.`name` AS `VIRTUAL_ENTERPRISE` from ((`kinton`.`accounting_event_vlan` join `kinton`.`virtualdatacenter` on((`kinton`.`accounting_event_vlan`.`idVirtualDataCenter` = `kinton`.`virtualdatacenter`.`idVirtualDataCenter`))) join `kinton`.`enterprise` on((`kinton`.`accounting_event_vlan`.`idEnterprise` = `kinton`.`enterprise`.`idEnterprise`))) where (isnull(`kinton`.`accounting_event_vlan`.`stopTime`) or ((`kinton`.`accounting_event_vlan`.`stopTime` &gt; from_unixtime((-(3600) + (truncate((unix_timestamp(now()) / 3600),0) * 3600)))) and ((unix_timestamp(`kinton`.`accounting_event_vlan`.`stopTime`) - unix_timestamp(`kinton`.`accounting_event_vlan`.`startTime`)) &gt; 3600)) or ((`kinton`.`accounting_event_vlan`.`startTime` &gt; from_unixtime((-(3600) + (truncate((unix_timestamp(now()) / 3600),0) * 3600)))) and ((unix_timestamp(`kinton`.`accounting_event_vlan`.`stopTime`) - unix_timestamp(`kinton`.`accounting_event_vlan`.`startTime`)) &lt;= 3600)))</createView>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335280201177-17">
+        <createView viewName="LAST_HOUR_USAGE_VM_VW">select `kinton`.`accounting_event_vm`.`idVMAccountingEvent` AS `idVMAccountingEvent`,`kinton`.`accounting_event_vm`.`idVM` AS `idVM`,`kinton`.`accounting_event_vm`.`idEnterprise` AS `idEnterprise`,`kinton`.`accounting_event_vm`.`idVirtualDataCenter` AS `idVirtualDataCenter`,`kinton`.`accounting_event_vm`.`idVirtualApp` AS `idVirtualApp`,`kinton`.`accounting_event_vm`.`cpu` AS `cpu`,`kinton`.`accounting_event_vm`.`ram` AS `ram`,`kinton`.`accounting_event_vm`.`hd` AS `hd`,`kinton`.`accounting_event_vm`.`startTime` AS `startTime`,`kinton`.`accounting_event_vm`.`stopTime` AS `stopTime`,`kinton`.`accounting_event_vm`.`costCode` AS `costCode`,`kinton`.`accounting_event_vm`.`hypervisorType` AS `hypervisorType`,(unix_timestamp(`kinton`.`accounting_event_vm`.`stopTime`) - unix_timestamp(`kinton`.`accounting_event_vm`.`startTime`)) AS `DELTA_TIME`,from_unixtime((-(3600) + (truncate((unix_timestamp(now()) / 3600),0) * 3600))) AS `ROUNDED_HOUR`,concat(if(isnull(`kinton`.`virtualmachine`.`description`),'',substr(`kinton`.`virtualmachine`.`description`,1,120)),' - ',`kinton`.`virtualmachine`.`name`) AS `VIRTUAL_MACHINE`,`kinton`.`virtualapp`.`name` AS `VIRTUAL_APP`,`kinton`.`virtualdatacenter`.`name` AS `VIRTUAL_DATACENTER`,`kinton`.`enterprise`.`name` AS `VIRTUAL_ENTERPRISE` from ((((`kinton`.`accounting_event_vm` join `kinton`.`virtualmachine` on((`kinton`.`accounting_event_vm`.`idVM` = `kinton`.`virtualmachine`.`idVM`))) join `kinton`.`virtualapp` on((`kinton`.`accounting_event_vm`.`idVirtualApp` = `kinton`.`virtualapp`.`idVirtualApp`))) join `kinton`.`virtualdatacenter` on((`kinton`.`accounting_event_vm`.`idVirtualDataCenter` = `kinton`.`virtualdatacenter`.`idVirtualDataCenter`))) join `kinton`.`enterprise` on((`kinton`.`accounting_event_vm`.`idEnterprise` = `kinton`.`enterprise`.`idEnterprise`))) where (isnull(`kinton`.`accounting_event_vm`.`stopTime`) or ((`kinton`.`accounting_event_vm`.`stopTime` &gt; from_unixtime((-(3600) + (truncate((unix_timestamp(now()) / 3600),0) * 3600)))) and ((unix_timestamp(`kinton`.`accounting_event_vm`.`stopTime`) - unix_timestamp(`kinton`.`accounting_event_vm`.`startTime`)) &gt; 3600)) or ((`kinton`.`accounting_event_vm`.`startTime` &gt; from_unixtime((-(3600) + (truncate((unix_timestamp(now()) / 3600),0) * 3600)))) and ((unix_timestamp(`kinton`.`accounting_event_vm`.`stopTime`) - unix_timestamp(`kinton`.`accounting_event_vm`.`startTime`)) &lt;= 3600)))</createView>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335280201177-18">
+        <createView viewName="MONTHLY_USAGE_SUM_VW">select cast((`v`.`startTime` - interval (dayofmonth(`v`.`startTime`) - 1) day) as date) AS `startTime`,last_day(`v`.`startTime`) AS `endTime`,`v`.`idAccountingResourceType` AS `idAccountingResourceType`,`v`.`resourceType` AS `resourceType`,sum(`v`.`resourceUnits`) AS `resourceUnits`,`v`.`idEnterprise` AS `idEnterprise`,`v`.`idVirtualDataCenter` AS `idVirtualDataCenter`,`v`.`enterpriseName` AS `enterpriseName`,`v`.`virtualDataCenter` AS `virtualDataCenter` from `kinton`.`HOURLY_USAGE_MAX_VW` `v` group by cast((`v`.`startTime` - interval (dayofmonth(`v`.`startTime`) - 1) day) as date),`v`.`idAccountingResourceType`,`v`.`resourceType`,`v`.`idEnterprise`,`v`.`idVirtualDataCenter`,`v`.`enterpriseName`,`v`.`virtualDataCenter`</createView>
+    </changeSet>
+</databaseChangeLog>

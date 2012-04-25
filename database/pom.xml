@@ -141,7 +141,7 @@
                     </execution>
                 </executions>
             </plugin>
-<plugin>
+	<plugin>
           <groupId>org.liquibase</groupId>
           <artifactId>liquibase-maven-plugin</artifactId>
           <version>2.0.3</version>
@@ -150,11 +150,11 @@
 			<propertyFile>liquibase.properties</propertyFile>
 			<url>jdbc:mysql://${devmachine}:3306/kinton_liquibase</url>
 			<migrationSqlOutputFile>kinton_liquibase_generated.sql</migrationSqlOutputFile>
-</configuration>
+		</configuration>
 			<executions>
             <execution>
               <!-- will generate migrate.sql at target/liquibase -->
-				<phase>generate-dbschema</phase>
+				<phase>generate-sources</phase>
               <goals>
                 <goal>updateSQL</goal>
               </goals>
