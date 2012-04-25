@@ -710,10 +710,6 @@ public class RESTBuilder implements IRESTBuilder
             VirtualDatacenterResource.VIRTUAL_DATACENTER_GET_IPS_PATH,
             VirtualDatacenterResource.VIRTUAL_DATACENTER_GET_IPS_REL, params,
             IpPoolManagementDto.BASE_MEDIA_TYPE));
-        links.add(builder.buildRestLink(VirtualDatacenterResource.class,
-            VirtualDatacenterResource.VIRTUAL_DATACENTER_DHCP_INFO_PATH,
-            VirtualDatacenterResource.VIRTUAL_DATACENTER_DHCP_INFO_REL, params,
-            MediaType.TEXT_PLAIN));
         RESTLink getVlanLink =
             builder.buildRestLink(VirtualDatacenterResource.class,
                 VirtualDatacenterResource.DEFAULT_VLAN_PATH,

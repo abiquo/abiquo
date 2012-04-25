@@ -617,7 +617,7 @@ public enum APIError
         "CHEF-5", "The node could not be updated on the Chef Server. "
             + "Please contact the Administrator."), CHEF_CANNOT_CONNECT("CHEF-6",
         "Could not connect to the Chef server. Please contact the Administrator."), CHEF_INVALID_ENTERPRISE_DATA(
-        "CHEF-7", "Could not connect to the Chef server with the given Validator and Admin data. "
+        "CHEF-7", "Could not connect to the Chef server with the given Admin data. "
             + "Please verify the credentials"), CHEF_INVALID_ENTERPRISE("CHEF-8",
         "The enterprise is not configured to use Chef"), CHEF_INVALID_VIRTUALMACHINE("CHEF-9",
         "The virtual machine cannot use Chef. "
@@ -625,7 +625,9 @@ public enum APIError
         "CHEF-10",
         "The validator certificate supplied is not a valid private key. Please verify the key format."), CHEF_INVALID_CLIENT_KEY(
         "CHEF-11",
-        "The admin certificate supplied is not a valid private key. Please verify the key format."),
+        "The provided admin certificate is not a valid private key. Please verify the key format."), CHEF_MALFORMED_URL(
+        "CHEF-12", "The provided chef server URL is not well formed."), CHEF_CLIENT_DOES_NOT_EXIST(
+        "CHEF-13", "The validator client supplied does not exist"),
 
     // Parsing links
     LINKS_INVALID_LINK("LNK-0", "Invalid link. Check documentation"), LINKS_ONLY_ACCEPTS_ONE_LINK(
@@ -770,8 +772,8 @@ public enum APIError
         // Outputs all errors in wiki table format
         for (APIError error : errors)
         {
-            System.out.println(String.format("| %s | %s | %s |", error.code, error.message,
-                error.name()));
+            System.out.println(String.format("| %s | %s | %s |", error.code, error.message, error
+                .name()));
         }
 
         System.out.println("\n ************ Flex client labels ************** \n");
