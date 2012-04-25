@@ -147,8 +147,7 @@ public class StorageService extends DefaultApiService
         // 'reconfigureVirtualMachine' method
         for (DiskManagement disk : disks)
         {
-            if (disk.getVirtualMachine().getId() != null
-                && disk.getVirtualMachine().getId().equals(vmId))
+            if (disk.getVirtualMachine() != null && disk.getVirtualMachine().getId().equals(vmId))
             {
                 addConflictErrors(APIError.VIRTUAL_MACHINE_DISK_ALREADY_ATTACHED_TO_THIS_VIRTUALMACHINE);
                 flushErrors();
