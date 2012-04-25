@@ -625,8 +625,8 @@ public enum APIError
         "CHEF-10",
         "The validator certificate supplied is not a valid private key. Please verify the key format."), CHEF_INVALID_CLIENT_KEY(
         "CHEF-11",
-        "The admin certificate supplied is not a valid private key. Please verify the key format."),
-
+        "The provided admin certificate is not a valid private key. Please verify the key format."), CHEF_MALFORMED_URL(
+        "CHEF-12", "The provided chef server URL is not well formed."),
     // Parsing links
     LINKS_INVALID_LINK("LNK-0", "Invalid link. Check documentation"), LINKS_ONLY_ACCEPTS_ONE_LINK(
         "LNK-1", "Invalid number of links: This resource only accepts a single link"), LINKS_VIRTUAL_MACHINE_TEMPLATE_NOT_FOUND(
@@ -770,8 +770,8 @@ public enum APIError
         // Outputs all errors in wiki table format
         for (APIError error : errors)
         {
-            System.out.println(String.format("| %s | %s | %s |", error.code, error.message,
-                error.name()));
+            System.out.println(String.format("| %s | %s | %s |", error.code, error.message, error
+                .name()));
         }
 
         System.out.println("\n ************ Flex client labels ************** \n");
