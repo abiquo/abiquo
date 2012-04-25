@@ -67,6 +67,14 @@ public class CategoriesResource extends AbstractResource
      * Returns all categories
      * 
      * @title Retrieve all categories
+     * @wiki Returns the global categories by default. If you supply the id of a enterprise, the
+     *       global categories and the local categories of the the given id will be retrieved. If no
+     *       id is supplied, global categories will be retrieved. This feature is available from
+     *       version 2.0-HF1
+     * @param idEnterprise If you supply the id of a enterprise, the global categories and the local
+     *            categories of the the given enterprise will be retrieved. If no id is supplied,
+     *            global categories will be retrieved.
+     * @since 2.0-HF1
      * @param restBuilder a Context-injected object to create the links of the Dto
      * @return a {CategoriesDto} object with all categories
      * @throws Exception
@@ -91,8 +99,12 @@ public class CategoriesResource extends AbstractResource
     }
 
     /**
-     * Creates a category and returns it after creation
-     * 
+     * @wiki Creates a category and returns it after creation. If you provide a link to the
+     *       enterprise it will create a local category, and without any link in the dto it will try
+     *       to create a global category. To create global category user must have the role
+     *       APPLIB_MANAGE_GLOBAL_CATEGORIES. The division in local and global categories is
+     *       available from versin 2.0-HF1
+     * @since 2.0-HF1
      * @param categoryDto category to create
      * @param builder a Context-injected object to create the links of the Dto
      * @return a {CategoryDto} with the created category

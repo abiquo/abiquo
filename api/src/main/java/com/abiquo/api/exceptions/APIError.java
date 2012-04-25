@@ -319,7 +319,12 @@ public enum APIError
         "VM-33", "Only 'cpu' and 'ram' can be reconfigured in imported virtual machines"), VIRTUAL_MACHINE_IMPORTED_WILL_BE_DELETED(
         "VM-44",
         "You are trying to undeploy an imported virtual machine. If you undeploy it, the virtual machine template cannot be recovered. If you are confident of this action, please call this functionality again with the 'forceUndeploy=true' option"), RESOURCES_ALREADY_ASSIGNED(
-        "VM-45", "Some of the resources indicated are already used"),
+        "VM-45", "Some of the resources indicated are already used"), VIRTUAL_MACHINE_AT_LEAST_ONE_NIC_SHOULD_BE_LINKED(
+        "VM-46",
+        "At least a link to an IP address should be informed when attaching or changing Virtual Machine NICs"), VIRTUAL_MACHINE_AT_LEAST_ONE_DISK_SHOULD_BE_LINKED(
+        "VM-47",
+        "At least a link to a Hard Disk should be informed when attaching or changing Virtual Machine Hard Disks"), VIRTUAL_MACHINE_DISK_ALREADY_ATTACHED_TO_THIS_VIRTUALMACHINE(
+        "VM-48", "Disk already attached to this virtual machine"),
 
     // ROLE
     NON_EXISTENT_ROLE("ROLE-0", "The requested role does not exist"), NON_MODIFICABLE_ROLE(
@@ -612,7 +617,7 @@ public enum APIError
         "CHEF-5", "The node could not be updated on the Chef Server. "
             + "Please contact the Administrator."), CHEF_CANNOT_CONNECT("CHEF-6",
         "Could not connect to the Chef server. Please contact the Administrator."), CHEF_INVALID_ENTERPRISE_DATA(
-        "CHEF-7", "Could not connect to the Chef server with the given Validator and Admin data. "
+        "CHEF-7", "Could not connect to the Chef server with the given Admin data. "
             + "Please verify the credentials"), CHEF_INVALID_ENTERPRISE("CHEF-8",
         "The enterprise is not configured to use Chef"), CHEF_INVALID_VIRTUALMACHINE("CHEF-9",
         "The virtual machine cannot use Chef. "
@@ -620,7 +625,9 @@ public enum APIError
         "CHEF-10",
         "The validator certificate supplied is not a valid private key. Please verify the key format."), CHEF_INVALID_CLIENT_KEY(
         "CHEF-11",
-        "The admin certificate supplied is not a valid private key. Please verify the key format."),
+        "The provided admin certificate is not a valid private key. Please verify the key format."), CHEF_MALFORMED_URL(
+        "CHEF-12", "The provided chef server URL is not well formed."), CHEF_CLIENT_DOES_NOT_EXIST(
+        "CHEF-13", "The validator client supplied does not exist"),
 
     // Parsing links
     LINKS_INVALID_LINK("LNK-0", "Invalid link. Check documentation"), LINKS_ONLY_ACCEPTS_ONE_LINK(
@@ -712,7 +719,7 @@ public enum APIError
     REDIS_CONNECTION_FAILED("REDIS-0", "Failed connection to Redis"),
 
     // RABBITMQ
-    RABBITMQ_CONNECTION_FAILED("RABBITMQ-0", "Failed connection to RabbitMQ");
+    RABBITMQ_CONNECTION_FAILED("RABBITMQ-0", "Failed connection to RabbitMQ"), ;
 
     /**
      * Internal error code
@@ -765,8 +772,8 @@ public enum APIError
         // Outputs all errors in wiki table format
         for (APIError error : errors)
         {
-            System.out.println(String.format("| %s | %s | %s |", error.code, error.message,
-                error.name()));
+            System.out.println(String.format("| %s | %s | %s |", error.code, error.message, error
+                .name()));
         }
 
         System.out.println("\n ************ Flex client labels ************** \n");
