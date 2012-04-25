@@ -31,7 +31,6 @@ import com.abiquo.abiserver.business.hibernate.pojohb.IPojoHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.StateEnum;
 import com.abiquo.abiserver.business.hibernate.pojohb.user.EnterpriseHB;
 import com.abiquo.abiserver.pojo.infrastructure.State;
-import com.abiquo.abiserver.pojo.virtualappliance.Log;
 import com.abiquo.abiserver.pojo.virtualappliance.Node;
 import com.abiquo.abiserver.pojo.virtualappliance.VirtualAppliance;
 
@@ -73,13 +72,6 @@ public class VirtualappHB implements java.io.Serializable, IPojoHB<VirtualApplia
      * The Enterprise to which this Virtual Appliance belongs
      */
     private EnterpriseHB enterpriseHB;
-
-    /**
-     * LogHB list, with the log entries for this Virtual Appliance
-     * 
-     * @return
-     */
-    private Set<LogHB> logsHB;
 
     public Integer getIdVirtualApp()
     {
@@ -197,16 +189,6 @@ public class VirtualappHB implements java.io.Serializable, IPojoHB<VirtualApplia
         this.nodeConnections = nodeConnections;
     }
 
-    public Set<LogHB> getLogsHB()
-    {
-        return logsHB;
-    }
-
-    public void setLogsHB(final Set<LogHB> logsHB)
-    {
-        this.logsHB = logsHB;
-    }
-
     /**
      * This method transform the hibernate pojo to normal pojo object
      */
@@ -228,21 +210,6 @@ public class VirtualappHB implements java.io.Serializable, IPojoHB<VirtualApplia
         if (enterpriseHB != null)
         {
             virtualAppliance.setEnterprise(enterpriseHB.toPojo());
-        }
-
-        if (logsHB != null)
-        {
-            ArrayList<Log> logs = new ArrayList<Log>();
-            for (LogHB logHB : logsHB)
-            {
-                logs.add(logHB.toPojo());
-            }
-
-            virtualAppliance.setLogs(logs);
-        }
-        else
-        {
-            virtualAppliance.setLogs(null);
         }
 
         if (nodesHB != null)

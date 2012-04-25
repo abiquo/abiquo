@@ -359,33 +359,6 @@ CREATE TABLE  `kinton`.`hypervisor` (
   CONSTRAINT `Hypervisor_FK1` FOREIGN KEY (`idPhysicalMachine`) REFERENCES `physicalmachine` (`idPhysicalMachine`) ON DELETE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
 
-
---
--- Definition of table `kinton`.`log`
---
-
-DROP TABLE IF EXISTS `kinton`.`log`;
-CREATE TABLE  `kinton`.`log` (
-  `idLog` int(10) unsigned NOT NULL auto_increment,
-  `idVirtualApp` int(10) unsigned NOT NULL,
-  `description` varchar(250) NOT NULL,
-  `logDate` timestamp NOT NULL,
-  `deleted` tinyint(1) unsigned DEFAULT '0',
-  PRIMARY KEY  (`idLog`),
-  KEY `log_FK1` (`idVirtualApp`),
-  CONSTRAINT `log_FK1` FOREIGN KEY (`idVirtualApp`) REFERENCES `virtualapp` (`idVirtualApp`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-
---
--- Dumping data for table `kinton`.`log`
---
-
-/*!40000 ALTER TABLE `log` DISABLE KEYS */;
-LOCK TABLES `log` WRITE;
-UNLOCK TABLES;
-/*!40000 ALTER TABLE `log` ENABLE KEYS */;
-
 --
 -- Definition of table `kinton`.`node`
 --

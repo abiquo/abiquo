@@ -27,7 +27,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.StateEnum;
-import com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.LogHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.NodeHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualappHB;
 import com.abiquo.abiserver.pojo.IPojo;
@@ -63,9 +62,6 @@ public class VirtualAppliance implements IPojo<VirtualappHB>
 
     // String with an XML document that contains the relations between nodes
     private String nodeConnections;
-
-    // Array containing a Log list
-    private ArrayList<Log> logs;
 
     /**
      * false - no errors true - errors
@@ -204,16 +200,6 @@ public class VirtualAppliance implements IPojo<VirtualappHB>
         this.enterprise = enterprise;
     }
 
-    public ArrayList<Log> getLogs()
-    {
-        return logs;
-    }
-
-    public void setLogs(final ArrayList<Log> logs)
-    {
-        this.logs = logs;
-    }
-
     /**
      * This method transform the pojo object to hibernate pojo object.
      */
@@ -238,21 +224,6 @@ public class VirtualAppliance implements IPojo<VirtualappHB>
         else
         {
             virtualappHB.setEnterpriseHB(null);
-        }
-
-        if (logs != null)
-        {
-            Set<LogHB> logsHB = new HashSet<LogHB>(0);
-            for (Log log : logs)
-            {
-                logsHB.add(log.toPojoHB());
-            }
-
-            virtualappHB.setLogsHB(logsHB);
-        }
-        else
-        {
-            virtualappHB.setLogsHB(null);
         }
 
         if (nodes != null)
