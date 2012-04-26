@@ -21,6 +21,8 @@
 
 package com.abiquo.api.resources.cloud;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import javax.validation.constraints.Min;
@@ -274,6 +276,17 @@ public class VirtualMachineNetworkConfigurationResource extends AbstractResource
         List<IpPoolManagement> all =
             service.getListIpPoolManagementByVirtualMachine(vdcId, vappId, vmId);
         NicsDto ips = new NicsDto();
+
+        // [ABICLOUDPREMIUM-3782] It is important to keep the order stablished by the sequence
+        Collections.sort(all, new Comparator<IpPoolManagement>()
+        {
+            @Override
+            public int compare(final IpPoolManagement ip1, final IpPoolManagement ip2)
+            {
+                return ip1.getSequence() - ip2.getSequence();
+            }
+        });
+
         for (IpPoolManagement ip : all)
         {
             ips.add(createNICTransferObject(ip, restBuilder));
