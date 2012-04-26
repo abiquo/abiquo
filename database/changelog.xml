@@ -1,8 +1,15 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">   
 <!-- Clean database -->
+<changeSet author='destevez' id='brandnewdb' runAlways='true'>
+    <sql>
+	DROP DATABASE IF EXISTS kinton_liquibase;
+	CREATE DATABASE IF NOT EXISTS kinton_liquibase;
+	USE kinton_liquibase;
+    </sql>
+  </changeSet>
 <!-- VERSIONS APPLIED-->
 <include file="kinton2_0_ga.xml"/>
-<include file="delta/deltachangelogHF1.xml"/>
-<include file="delta/deltachangelogHF2.xml"/>
+<include file="delta/2.0.0-HF1_new/deltachangelogHF1.xml"/>
+<include file="delta/2.0.0-HF2_new/deltachangelogHF2.xml"/>
 </databaseChangeLog>

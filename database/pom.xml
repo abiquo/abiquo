@@ -27,13 +27,15 @@
     <!-- -->
     <!-- DB PROPERTIES -->
 	<properties>
+		<!--TODO: Deprecate unused properties-->
 		<previousVersion>2.0-ga</previousVersion>
+		<nextVersionForDelta>2.0.0-HF1_new</nextVersionForDelta>
 		<schemaPath>schema</schemaPath>
 		<dataPath>data</dataPath>
 		<procPath>procedures</procPath>
 		<triggersPath>.</triggersPath>
 		<jdbcUrl>jdbc:mysql://${devmachine}:3306/kinton</jdbcUrl>		
-		<mysqlDriverVersion>5.1.6</mysqlDriverVersion>
+		<mysqlDriverVersion>5.1.6</mysqlDriverVersion>		
 	</properties>
     <!-- -->
 		<dependencies>
@@ -64,6 +66,47 @@
             </plugin>
 
 	<plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>1.1</version>
+                <executions>
+			<execution>
+                        <id>cleaningDB</id>
+			<!-- Liquibase requires schema to be created before starting -->
+                        <phase>clean</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>mysql</executable>
+                            <arguments>
+                                <argument>-h${devmachine}</argument>
+                                <argument>-uroot</argument>
+                                <argument>-proot</argument>
+                                <argument>&lt;recreatekinton.sql</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+	<execution>
+                        <id>cleaningTestDB</id>
+			<!-- Liquibase requires schema to be created before starting -->
+                        <phase>clean</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>mysql</executable>
+                            <arguments>
+                                <argument>-h${devmachine}</argument>
+                                <argument>-uroot</argument>
+                                <argument>-proot</argument>
+                                <argument>&lt;recreatekintontest.sql</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+</executions>
+	</plugin>
+	<plugin>
           <groupId>org.liquibase</groupId>
           <artifactId>liquibase-maven-plugin</artifactId>
           <version>2.0.3</version>
@@ -75,18 +118,51 @@
 		<password>root</password>
 		<defaultSchemaName>kinton</defaultSchemaName>
 		<url>jdbc:mysql://${devmachine}:3306/kinton</url>
+		<!-- TODO: Move all generated Scripts to /target -->
 		<migrationSqlOutputFile>kinton_liquibase_generated.sql</migrationSqlOutputFile>
+		<promptOnNonLocalDatabase>false</promptOnNonLocalDatabase>
+		<logLevel>warning</logLevel>
+		<verbose>false</verbose>
 	</configuration>
 	<executions>
             <execution>
-		<id>sqlscripts</id>
-              <!-- will generate migrate.sql at target/liquibase -->
+		<id>sqlschemascript</id>
+              <!-- will generate ${migrationSqlOutputFile}.sql  -->
+	      <!-- TODO: This step shouldn't be necessary on install phase -->
 	      <phase>generate-resources</phase>
               <goals>
-                <goal>updateSQL</goal>
+              <goal>updateSQL</goal>
               </goals>
-</execution>
-<execution>
+		</execution>
+		<!-- generate delta SCRIPTS is also needed -->
+		<execution>
+		<id>sqlDeltaScript</id>
+              <!-- will generate ${migrationSqlOutputFile}.sql  -->
+	      <!-- TODO: This step shouldn't be necessary on install phase -->
+	      <phase>generate-resources</phase>
+              <goals>
+              <goal>updateSQL</goal>
+              </goals>
+		<configuration>
+		<migrationSqlOutputFile>kinton_delta_liquibase_generated.sql</migrationSqlOutputFile>
+		<!-- TODO delete _new suffix -->
+		<changeLogFile>delta/${nextVersionForDelta}/deltachangelog.xml</changeLogFile>
+          </configuration>
+		</execution>
+
+		<execution>
+		<id>testing</id>
+	      <phase>test</phase>
+		<configuration>
+		<defaultSchemaName>kinton_test</defaultSchemaName>
+	<!-- TODO: Move all generated Scripts to /target -->
+		<migrationSqlOutputFile>kinton_test_liquibase_generated.sql</migrationSqlOutputFile>
+          </configuration>
+              <goals>
+                <goal>update</goal>
+              </goals>
+		</execution>
+	<execution>
 	<id>apply2DB</id>
 	      <phase>install</phase>
               <goals>
