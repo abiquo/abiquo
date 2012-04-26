@@ -1,0 +1,68 @@
+<!--
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>1.1</version>
+                <executions>
+			<execution>
+                        <id>generate-sql-scripts</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>liquibase</executable>
+                            <arguments>
+                                <argument>driver=${driver}</argument>
+				<argument>classpath=${driverPath}</argument>				
+				<argument>username=${dbUser} </argument>
+				<argument>password=${dbPasswd}</argument>
+				<argument>--url=${jdbcUrl}</argument>
+				<argument>--changeLogFile=/home/destevezg/abiws/abiquo/database/changelog.xml</argument>
+				<argument>updateSQL</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+
+			TODO: ReEnable this!!!
+					<execution>
+                        <id>generate-database-test</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>python</executable>
+                            <arguments>
+                                <argument>create_schema_test.py</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+		<execution>
+-->
+			<!-- Steps to build full schema -->
+			<!-- 1) Import table definitions in schema/kinton.sql -->
+			<!-- 2) Triggers and procedures -->
+			<!-- 3) Insert initial data : one file per each Table?--> 
+<!--
+			<id>install</id>
+			<phase>install</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+				<executable>liquibase</executable>
+                            <arguments>
+                                <argument>driver=${driver}</argument>
+				<argument>classpath=${driverPath}</argument>				
+				<argument>username=${dbUser} </argument>
+				<argument>password=${dbPasswd}</argument>
+				<argument>--url=${jdbcUrl}</argument>
+				<argument>--changeLogFile=/home/destevezg/abiws/abiquo/database/changelog.xml</argument>
+				<argument>updateSQL</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+-->

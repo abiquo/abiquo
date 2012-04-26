@@ -32,7 +32,7 @@
 		<dataPath>data</dataPath>
 		<procPath>procedures</procPath>
 		<triggersPath>.</triggersPath>
-		<jdbcUrl>jdbc:mysql://${devmachine}:3306/kinton_liquibase</jdbcUrl>		
+		<jdbcUrl>jdbc:mysql://${devmachine}:3306/kinton</jdbcUrl>		
 		<mysqlDriverVersion>5.1.6</mysqlDriverVersion>
 	</properties>
     <!-- -->
@@ -62,108 +62,44 @@
                     <skip>true</skip>
                 </configuration>
             </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>exec-maven-plugin</artifactId>
-                <version>1.1</version>
-                <executions>
-			<execution>
-                        <id>generate-sql-scripts</id>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>exec</goal>
-                        </goals>
-                        <configuration>
-                            <executable>liquibase</executable>
-                            <arguments>
-<!--
-                                <argument>driver=${driver}</argument>
-				<argument>classpath=${driverPath}</argument>				
-				<argument>username=${dbUser} </argument>
-				<argument>password=${dbPasswd}</argument>
--->
-				<argument>--url=${jdbcUrl}</argument>
-				<argument>--changeLogFile=/home/destevezg/abiws/abiquo/database/changelog.xml</argument>
-				<argument>updateSQL</argument>
-                            </arguments>
-                        </configuration>
-                    </execution>
-					<!--- TODO: ReEnable this!!!
-					<execution>
-                        <id>generate-database-test</id>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>exec</goal>
-                        </goals>
-                        <configuration>
-                            <executable>python</executable>
-                            <arguments>
-                                <argument>create_schema_test.py</argument>
-                            </arguments>
-                        </configuration>
-                    </execution>
-                    -->
-		<execution>
-			<!-- Steps to build full schema -->
-			<!-- 1) Import table definitions in schema/kinton.sql -->
-			<!-- 2) Triggers and procedures -->
-			<!-- 3) Insert initial data : one file per each Table?--> 
-			<id>install</id>
-			<phase>install</phase>
-                        <goals>
-                            <goal>exec</goal>
-                        </goals>
-                        <configuration>
-                            <executable>mysql</executable>
-                            <arguments>
-                                <argument>-h${devmachine}</argument>
-                                <argument>-uroot</argument>
-                                <argument>-proot</argument>
-                                <argument>&lt;./${schemaPath}/kinton.sql</argument>
-                            </arguments>
-							<executable>mysql</executable>
-                            <arguments>
-                                <argument>-h${devmachine}</argument>
-                                <argument>-uroot</argument>
-                                <argument>-proot</argument>
-                                <argument>&lt;./${dataPath}/data.sql</argument>
-                            </arguments>
-<!--
-							<executable>mysql</executable>
-                            <arguments>
-                                <argument>-h${devmachine}</argument>
-                                <argument>-uroot</argument>
-                                <argument>-proot</argument>
-                                <argument>&lt;./${procPath}/procedures.sql</argument>
-                            </arguments>
--->
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
+
 	<plugin>
           <groupId>org.liquibase</groupId>
           <artifactId>liquibase-maven-plugin</artifactId>
           <version>2.0.3</version>
           <configuration>
-			<!-- propertyFileWillOverride>true</propertyFileWillOverride -->
-			<propertyFile>liquibase.properties</propertyFile>
-			<url>jdbc:mysql://${devmachine}:3306/kinton_liquibase</url>
-			<migrationSqlOutputFile>kinton_liquibase_generated.sql</migrationSqlOutputFile>
-		</configuration>
-			<executions>
+		<driver>com.mysql.jdbc.Driver</driver>
+		<classpath>/opt/tomcat/lib/mysql-connector-java-5.1.6.jar</classpath>
+		<changeLogFile>kinton_master_changelog.xml</changeLogFile>
+		<username>root</username>
+		<password>root</password>
+		<defaultSchemaName>kinton</defaultSchemaName>
+		<url>jdbc:mysql://${devmachine}:3306/kinton</url>
+		<migrationSqlOutputFile>kinton_liquibase_generated.sql</migrationSqlOutputFile>
+	</configuration>
+	<executions>
             <execution>
+		<id>sqlscripts</id>
               <!-- will generate migrate.sql at target/liquibase -->
-				<phase>generate-sources</phase>
+	      <phase>generate-resources</phase>
               <goals>
                 <goal>updateSQL</goal>
+              </goals>
+</execution>
+<execution>
+	<id>apply2DB</id>
+	      <phase>install</phase>
+              <goals>
+                <goal>update</goal>
               </goals>
             </execution>
           </executions>
         </plugin>
         </plugins>
+<!-- Is this necessary?
         <filters>
             <filter>../system-properties/src/main/filters/${env}-${env.family}.properties</filter>
         </filters>
+-->
     </build>
 </project>
