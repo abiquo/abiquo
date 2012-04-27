@@ -708,12 +708,12 @@ public class VirtualMachineService extends DefaultApiService
         old.setPassword(vmnew.getPassword());
         old.setVirtualMachineTemplate(vmnew.getVirtualMachineTemplate());
 
-        List<Integer> usedNICslots = dellocateOldNICs(old, vmnew);
+        boolean nicsDetached = dellocateOldNICs(old, vmnew);
+
         // if the number of old nics still used is different from
         // the number of usedNICslots, OR the number of old nics is different
         // from the new ones, it means some NICs has changed.
-        if (usedNICslots.size() != old.getIps().size()
-            || old.getIps().size() != vmnew.getIps().size())
+        if (nicsDetached || old.getIps().size() != vmnew.getIps().size())
         {
             if (old.isCaptured()
                 && !vapp.getVirtualDatacenter().getHypervisorType().equals(HypervisorType.VMX_04))
@@ -728,7 +728,7 @@ public class VirtualMachineService extends DefaultApiService
                 flushErrors();
             }
         }
-        allocateNewNICs(vapp, old, vmnew.getIps(), usedNICslots);
+        allocateNewNICs(vapp, old, vmnew.getIps());
 
         List<Integer> usedVolumeSlots = dellocateOldVolumes(old, vmnew);
         // if the number of old volumes still used is different from
@@ -2125,7 +2125,7 @@ public class VirtualMachineService extends DefaultApiService
             if (!isStatefulVolume(resource))
             {
                 boolean allocated =
-                    allocateResource(vm, vapp, resource, getFreeAttachmentSlot(blackList));
+                    allocateNewResource(vm, vapp, resource, getFreeAttachmentSlot(blackList));
                 if (allocated)
                 {
                     // In Hyper-v only 2 attached volumes are allowed
@@ -2174,11 +2174,13 @@ public class VirtualMachineService extends DefaultApiService
      * @param resources the list of resources that will be allocated.
      */
     protected void allocateNewNICs(final VirtualAppliance vapp, final VirtualMachine vm,
-        final List<IpPoolManagement> resources, final List<Integer> blackList)
+        final List<IpPoolManagement> resources)
     {
+        int i = 0;
+
         for (IpPoolManagement ip : resources)
         {
-            boolean allocated = allocateResource(vm, vapp, ip, getFreeAttachmentSlot(blackList));
+            boolean allocated = allocateNewResource(vm, vapp, ip, i);
             if (allocated)
             {
                 if (ip.getVlanNetwork().getType().equals(NetworkType.EXTERNAL)
@@ -2200,11 +2202,32 @@ public class VirtualMachineService extends DefaultApiService
                 vdcRep.updateIpManagement(ip);
 
                 // if it is new allocated, we set the integer into the 'blacklisted' list.
-                blackList.add(ip.getSequence());
                 tracer.log(SeverityType.INFO, ComponentType.NETWORK,
                     EventType.NIC_ASSIGNED_VIRTUAL_MACHINE, "nic.attached", vm.getName(),
                     ip.getIp(), ip.getVlanNetwork().getName());
             }
+            else
+            {
+                // The resources that arrive here as a method parameter are not persisted in the
+                // database. They only hold the new values, but do not exist on the database. To
+                // update the sequence number of the corresponding NIC we need to find the NIC in
+                // the vm object and update its sequence number. Updating the "ip" object here would
+                // not work, since this resource object does not exist in the database; it is only a
+                // temporal information holder
+                for (IpPoolManagement existingIp : vm.getIps())
+                {
+                    if (existingIp.getId().equals(ip.getTemporal()))
+                    {
+                        existingIp.attach(i, vm, vapp);
+                    }
+                }
+
+                // We also need to update the sequence number in the "newvalues" object in order to
+                // properly build the Dto sent to Tarantino
+                ip.attach(i, vm, vapp);
+            }
+
+            i++;
         }
     }
 
@@ -2217,15 +2240,17 @@ public class VirtualMachineService extends DefaultApiService
      * @param newVm {@link VirtualMachine} with the 'new' configuration.
      * @return the list of attachment order still in oldVm
      */
-    protected List<Integer> dellocateOldNICs(final VirtualMachine oldVm, final VirtualMachine newVm)
+    protected boolean dellocateOldNICs(final VirtualMachine oldVm, final VirtualMachine newVm)
     {
-        List<Integer> oldNicsAttachments = new ArrayList<Integer>();
+        boolean nicsChanged = false;
 
         // dellocate the old ips that are not in the new virtual machine.
         for (IpPoolManagement ip : oldVm.getIps())
         {
             if (!resourceIntoNewList(ip, newVm.getIps()))
             {
+                nicsChanged = true;
+
                 // if the machine is NOT_ALLOCATED, the values here are definitive,
                 // otherwise, it will be deleted in the handler
                 if (oldVm.getState() == VirtualMachineState.NOT_ALLOCATED)
@@ -2260,7 +2285,7 @@ public class VirtualMachineService extends DefaultApiService
                         ip.setName(null);
                         ip.setVirtualDatacenter(null);
                     }
-                    vdcRep.updateIpManagement(ip);
+                    // vdcRep.updateIpManagement(ip);
                     tracer.log(SeverityType.INFO, ComponentType.NETWORK,
                         EventType.NIC_ASSIGNED_VIRTUAL_MACHINE, "nic.released", oldVm.getName(),
                         ip.getIp(), ip.getVlanNetwork().getName());
@@ -2275,12 +2300,9 @@ public class VirtualMachineService extends DefaultApiService
                 }
 
             }
-            else
-            {
-                oldNicsAttachments.add(ip.getSequence());
-            }
         }
-        return oldNicsAttachments;
+
+        return nicsChanged;
     }
 
     /**
@@ -2908,14 +2930,11 @@ public class VirtualMachineService extends DefaultApiService
             }
 
             /*
-             * CAUTION! We need this flush exactly here. Otherwise it tries to set teh
+             * CAUTION! We need this flush exactly here. Otherwise it tries to set the
              * vlanNetwork.setTag(null) after to delete the related IpPoolManagement (that will be
              * deleted in the next loop) and it raises an UnknowEntityException.
              */
             vlanNetworkDao.flush();
-
-            // we need to first delete the vm (as it updates the rasd_man)
-            repo.deleteVirtualMachine(backUpVm);
 
             for (RasdManagement rollbackRasd : rasds)
             {
@@ -2959,6 +2978,11 @@ public class VirtualMachineService extends DefaultApiService
                 rasdDao.remove(rasdDao.findById(rollbackRasd.getId()));
             }
 
+            rasdDao.flush();
+
+            // we need to first delete the vm (as it updates the rasd_man)
+            backUpVm.setRasdManagements(null);
+            repo.deleteVirtualMachine(backUpVm);
             rasdDao.flush();
         }
         finally
@@ -3075,9 +3099,6 @@ public class VirtualMachineService extends DefaultApiService
 
             if (!originalRasd.isAttached())
             {
-                // Re attach the resource to the virtual machine
-                LOGGER.trace("restore: attach resource " + originalRasd.getId());
-                originalRasd.attach(originalRasd.getSequence(), updatedVm);
                 // I dunno if it is necessary for the rest of resources,
                 // but for IPs it is.
                 if (originalRasd instanceof IpPoolManagement)
@@ -3092,6 +3113,11 @@ public class VirtualMachineService extends DefaultApiService
                 }
             }
 
+            // We always need to restore the sequence number: If we removed the interface we
+            // reattach it, or if we just changed its order, we make sure the original sequence
+            // number is maintained
+            LOGGER.trace("restore: attach resource " + originalRasd.getId());
+            originalRasd.attach(rollbackRasd.getSequence(), updatedVm);
         }
 
         repo.deleteVirtualMachine(rollbackVm);
@@ -3190,7 +3216,7 @@ public class VirtualMachineService extends DefaultApiService
      * @param attachOrder the number of allocation order for this resource.
      * @return true if the resource has been allocated, false if it was previously allocated.
      */
-    protected boolean allocateResource(final VirtualMachine vm, final VirtualAppliance vapp,
+    protected boolean allocateNewResource(final VirtualMachine vm, final VirtualAppliance vapp,
         final RasdManagement resource, final Integer attachOrder)
     {
 
