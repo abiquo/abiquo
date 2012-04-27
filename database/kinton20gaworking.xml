@@ -1,0 +1,2473 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+    <changeSet author="destevezg (generated)" id="1335522742615-1">
+        <createTable tableName="accounting_event_detail">
+            <column autoIncrement="true" name="idAccountingEvent" type="BIGINT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column defaultValue="0000-00-00 00:00:00" name="startTime" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValue="0000-00-00 00:00:00" name="endTime" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="idAccountingResourceType" remarks="1 - VirtualMachine-vcpu; 2 - VirtualMachine-vram; 3 - VirtualMachine-vhd; 4 - ExternalStorage; 5 - IPAddress;" type="TINYINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="resourceType" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="resourceUnits" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="resourceName" type="VARCHAR(511)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="idEnterprise" type="INT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column name="idVirtualDataCenter" type="INT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column name="idVirtualApp" type="INT UNSIGNED"/>
+            <column name="idVirtualMachine" type="INT UNSIGNED"/>
+            <column name="enterpriseName" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="virtualDataCenter" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="virtualApp" type="VARCHAR(255)"/>
+            <column name="virtualMachine" type="VARCHAR(255)"/>
+            <column name="costCode" type="INT"/>
+            <column name="idStorageTier" type="INT"/>
+            <column defaultValueNumeric="0" name="version_c" type="INT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-2">
+        <createTable tableName="accounting_event_ips">
+            <column autoIncrement="true" name="idIPsAccountingEvent" type="BIGINT UNSIGNED">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="idManagement" type="INT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column name="idEnterprise" type="INT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column name="idVirtualDataCenter" type="INT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ip" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="startTime" type="TIMESTAMP"/>
+            <column name="stopTime" type="TIMESTAMP"/>
+            <column defaultValueBoolean="false" name="consolidated" type="BIT">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="version_c" type="INT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-3">
+        <createTable tableName="accounting_event_storage">
+            <column autoIncrement="true" name="idStorageAccountingEvent" type="BIGINT UNSIGNED">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="idResource" type="VARCHAR(50)"/>
+            <column name="resourceName" type="VARCHAR(511)"/>
+            <column name="idVM" type="INT UNSIGNED"/>
+            <column name="idStorageTier" type="INT UNSIGNED"/>
+            <column name="idEnterprise" type="INT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column name="idVirtualDataCenter" type="INT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column name="idVirtualApp" type="INT UNSIGNED"/>
+            <column name="sizeReserved" type="BIGINT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column name="startTime" type="TIMESTAMP"/>
+            <column name="stopTime" type="TIMESTAMP"/>
+            <column defaultValueBoolean="false" name="consolidated" type="BIT">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="version_c" type="INT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-4">
+        <createTable tableName="accounting_event_vlan">
+            <column autoIncrement="true" name="idVLANAccountingEvent" type="BIGINT UNSIGNED">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="vlan_network_id" type="INT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column name="idEnterprise" type="INT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column name="idVirtualDataCenter" type="INT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column name="network_name" type="VARCHAR(40)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="startTime" type="TIMESTAMP"/>
+            <column name="stopTime" type="TIMESTAMP"/>
+            <column defaultValueBoolean="false" name="consolidated" type="BIT">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="version_c" type="INT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-5">
+        <createTable tableName="accounting_event_vm">
+            <column autoIncrement="true" name="idVMAccountingEvent" type="BIGINT UNSIGNED">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="idVM" type="INT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column name="idEnterprise" type="INT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column name="idVirtualDataCenter" type="INT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column name="idVirtualApp" type="INT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column name="cpu" type="INT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ram" type="INT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column name="hd" type="BIGINT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column name="startTime" type="TIMESTAMP"/>
+            <column name="stopTime" type="TIMESTAMP"/>
+            <column defaultValueBoolean="false" name="consolidated" type="BIT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="costCode" type="INT"/>
+            <column name="hypervisorType" type="VARCHAR(255)"/>
+            <column defaultValueNumeric="0" name="version_c" type="INT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-6">
+        <createTable tableName="alerts">
+            <column name="id" type="CHAR(36)">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="type" type="VARCHAR(60)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="value" type="VARCHAR(60)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="VARCHAR(240)"/>
+            <column defaultValueComputed="CURRENT_TIMESTAMP" name="tstamp" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="version_c" type="INT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-7">
+        <createTable tableName="apps_library">
+            <column autoIncrement="true" name="id_apps_library" type="INT UNSIGNED">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="idEnterprise" type="INT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="version_c" type="INT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-8">
+        <createTable tableName="auth_group">
+            <column autoIncrement="true" name="id" type="INT UNSIGNED">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="name" type="VARCHAR(20)"/>
+            <column name="description" type="VARCHAR(50)"/>
+            <column defaultValueNumeric="0" name="version_c" type="INT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-9">
+        <createTable tableName="auth_serverresource">
+            <column autoIncrement="true" name="id" type="INT UNSIGNED">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="name" type="VARCHAR(50)"/>
+            <column name="description" type="VARCHAR(100)"/>
+            <column name="idGroup" type="INT UNSIGNED"/>
+            <column name="idRole" type="INT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="version_c" type="INT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-10">
+        <createTable tableName="auth_serverresource_exception">
+            <column autoIncrement="true" name="id" type="INT UNSIGNED">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="idResource" type="INT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column name="idUser" type="INT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="version_c" type="INT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-11">
+        <createTable tableName="category">
+            <column autoIncrement="true" name="idCategory" type="INT UNSIGNED">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="name" type="VARCHAR(30)">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="1" name="isErasable" type="INT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="isDefault" type="INT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="version_c" type="INT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-12">
+        <createTable tableName="chargeback_simple">
+            <column name="idAccountingResourceType" type="TINYINT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="resourceType" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="costPerHour" type="DECIMAL(15,12)">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="version_c" type="INT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-13">
+        <createTable tableName="chef_runlist">
+            <column autoIncrement="true" name="id" type="INT UNSIGNED">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="idVM" type="INT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="VARCHAR(255)"/>
+            <column defaultValueNumeric="0" name="priority" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="version_c" type="INT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-14">
+        <createTable tableName="cloud_usage_stats">
+            <column autoIncrement="true" name="idDataCenter" type="INT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column defaultValueNumeric="0" name="serversTotal" remarks="Total number of Physical machines managed." type="BIGINT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="serversRunning" remarks="Total number of Physical Machines running currently." type="BIGINT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="storageTotal" remarks="External storage managed by Abiquo (in Megabytes)" type="BIGINT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="storageReserved" remarks="External storage reserved by Enterprises in Datacenters (in Megabytes)" type="BIGINT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="storageUsed" remarks="External storage used (attached or mounted) by any virtual machines (in Megabytes)" type="BIGINT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="publicIPsTotal" remarks="Total number of IPs defined (managed)." type="BIGINT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="publicIPsReserved" remarks="Total number of IPs assigned to a VirtualDatacenter (Reserved)" type="BIGINT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="publicIPsUsed" remarks="Total number of IPs used by virtual machines" type="BIGINT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="vlanReserved" remarks="Total maximum number of VLANs reserved by all enterprises. (enterprise.vlanHard)" type="BIGINT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="vlanUsed" remarks="Total number of VLANs in use by any datacenter managed." type="BIGINT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="vMachinesTotal" remarks="Total number of Virtual Machines managed by Abiquo." type="BIGINT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="vMachinesRunning" remarks="Total number of Virtual Machines currently in a running state." type="BIGINT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="vCpuTotal" remarks="Total number of Virtual CPUs in Virtual Machines managed (can be used for VMs)." type="BIGINT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="vCpuReserved" remarks="Maximum number of Virtual CPUs reserved by all enterprises." type="BIGINT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="vCpuUsed" remarks="Total number of Virtual CPUs in Virtual Machines currently in a running state." type="BIGINT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="vMemoryTotal" remarks="Total amount of RAM managed (can be used for VMs) in Megabytes." type="BIGINT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="vMemoryReserved" remarks="Maximum amount of RAM reserved by all enterprises in Megabytes." type="BIGINT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="vMemoryUsed" remarks="Total amount of RAM used by Virtual Machines currently in a running state in Megabytes." type="BIGINT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="vStorageReserved" remarks="Maximum storage size reserved by all enterprises for Virtual Machines  in Megabytes." type="BIGINT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="vStorageUsed" remarks="Total storage size used by Virtual Machines currently in a running state  in Megabytes." type="BIGINT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="vStorageTotal" remarks="Total storage size managed to be used by Virtual Machines  in Megabytes." type="BIGINT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="numUsersCreated" remarks="Total number of users in system." type="BIGINT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="numVDCCreated" remarks="Total number of Virtual Data Centers in system." type="BIGINT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="numEnterprisesCreated" remarks="Total number of enterprises in system." type="BIGINT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="1" name="version_c" type="INT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-15">
+        <createTable tableName="costCode">
+            <column autoIncrement="true" name="idCostCode" type="INT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="name" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="version_c" type="INT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-16">
+        <createTable tableName="costCodeCurrency">
+            <column autoIncrement="true" name="idCostCodeCurrency" type="INT UNSIGNED">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="idCostCode" type="INT UNSIGNED"/>
+            <column name="idCurrency" type="INT UNSIGNED"/>
+            <column defaultValueNumeric="0.00000" name="price" type="DECIMAL(20,5)">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="1" name="version_c" type="INT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-17">
+        <createTable tableName="currency">
+            <column autoIncrement="true" name="idCurrency" type="INT UNSIGNED">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="symbol" type="VARCHAR(10)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="2" name="digits" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="version_c" type="INT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-18">
+        <createTable tableName="datacenter">
+            <column autoIncrement="true" name="idDataCenter" type="INT UNSIGNED">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="uuid" type="VARCHAR(40)"/>
+            <column name="name" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="situation" type="VARCHAR(100)"/>
+            <column name="network_id" type="INT UNSIGNED"/>
+            <column defaultValueNumeric="0" name="version_c" type="INT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-19">
+        <createTable tableName="datastore">
+            <column autoIncrement="true" name="idDatastore" type="INT UNSIGNED">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="rootPath" type="VARCHAR(42)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="directory" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueBoolean="false" name="enabled" type="BIT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="size" type="BIGINT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column name="usedSize" type="BIGINT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column name="datastoreUuid" remarks="Datastore UUID set by Abiquo to identify shared datastores." type="VARCHAR(255)"/>
+            <column defaultValueNumeric="1" name="version_c" type="INT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-20">
+        <createTable tableName="datastore_assignment">
+            <column name="idDatastore" type="INT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="idPhysicalMachine" type="INT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="1" name="version_c" type="INT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-21">
+        <createTable tableName="dc_enterprise_stats">
+            <column autoIncrement="true" name="idDCEnterpriseStats" type="INT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="idDataCenter" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="idEnterprise" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="vCpuReserved" remarks="Maximum number of Virtual CPUs reserved for this enterprise in this datacenter." type="BIGINT UNSIGNED"/>
+            <column defaultValueNumeric="0" name="vCpuUsed" remarks="Total number of Virtual CPUs in Virtual Machines currently in a running state." type="BIGINT UNSIGNED"/>
+            <column defaultValueNumeric="0" name="memoryReserved" remarks="Maximum amount of RAM reserved for this enterprise in this datacenter in Megabytes." type="BIGINT UNSIGNED"/>
+            <column defaultValueNumeric="0" name="memoryUsed" remarks="Total amount of RAM used by Virtual Machines currently in a running state in Megabytes." type="BIGINT UNSIGNED"/>
+            <column defaultValueNumeric="0" name="localStorageReserved" remarks="Maximum storage size reserved for this enterprise in this datacenter for Virtual Machines  in Megabytes." type="BIGINT UNSIGNED"/>
+            <column defaultValueNumeric="0" name="localStorageUsed" remarks="Total storage size used by Virtual Machines currently in a running state  in Megabytes." type="BIGINT UNSIGNED"/>
+            <column defaultValueNumeric="0" name="extStorageReserved" remarks=" Maximum external storage size reserved for this enterprise in this datacenter in Megabytes." type="BIGINT UNSIGNED"/>
+            <column defaultValueNumeric="0" name="extStorageUsed" remarks="External storage used (attached or mounted) by any virtual machines (in Megabytes)." type="BIGINT UNSIGNED"/>
+            <column defaultValueNumeric="0" name="repositoryReserved" remarks="Maximum repository size reserved for this enterprise in this datacenter in Megabytes." type="BIGINT UNSIGNED"/>
+            <column defaultValueNumeric="0" name="repositoryUsed" remarks="Total repository size currently used for this enterprise in this datacenter in Megabytes." type="BIGINT UNSIGNED"/>
+            <column defaultValueNumeric="0" name="publicIPsReserved" remarks="Total number of IPs assigned to a VirtualDatacenter (Reserved)." type="BIGINT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="publicIPsUsed" remarks="Total number of IPs used by virtual machines." type="BIGINT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="vlanReserved" remarks="Total maximum number of VLANs reserved for this enterprise in this datacenter. (enterprise.vlanHard)" type="BIGINT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="vlanUsed" remarks="Total number of VLANs in use by this datacenter." type="BIGINT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="1" name="version_c" type="INT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-22">
+        <createTable tableName="dhcpOption">
+            <column autoIncrement="true" name="idDhcpOption" type="INT UNSIGNED">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="dhcp_opt" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="gateway" type="VARCHAR(40)"/>
+            <column name="network_address" type="VARCHAR(40)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="mask" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="netmask" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="version_c" type="INT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-23">
+        <createTable tableName="disk_management">
+            <column name="idManagement" type="INT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column name="idDatastore" type="INT UNSIGNED"/>
+            <column defaultValueNumeric="0" name="version_c" type="INT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-24">
+        <createTable tableName="diskstateful_conversions">
+            <column autoIncrement="true" name="id" type="INT UNSIGNED">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="imagePath" type="VARCHAR(256)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="idManagement" type="INT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column name="state" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueComputed="CURRENT_TIMESTAMP" name="convertionTimestamp" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="version_c" type="INT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-25">
+        <createTable tableName="enterprise">
+            <column autoIncrement="true" name="idEnterprise" type="INT UNSIGNED">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="name" type="VARCHAR(40)">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="ramSoft" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="cpuSoft" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="hdSoft" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="storageSoft" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="repositorySoft" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="vlanSoft" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="publicIPSoft" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="ramHard" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="cpuHard" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="hdHard" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="storageHard" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="repositoryHard" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="vlanHard" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="publicIPHard" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="chef_url" type="VARCHAR(255)"/>
+            <column name="chef_client" type="VARCHAR(50)"/>
+            <column name="chef_validator" type="VARCHAR(50)"/>
+            <column name="chef_client_certificate" type="TEXT"/>
+            <column name="chef_validator_certificate" type="TEXT"/>
+            <column defaultValueBoolean="false" name="isReservationRestricted" type="BIT"/>
+            <column defaultValueNumeric="1" name="version_c" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="idPricingTemplate" type="INT UNSIGNED"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-26">
+        <createTable tableName="enterprise_limits_by_datacenter">
+            <column autoIncrement="true" name="idDatacenterLimit" type="INT UNSIGNED">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="idEnterprise" type="INT UNSIGNED"/>
+            <column name="idDataCenter" type="INT UNSIGNED"/>
+            <column name="ramSoft" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="cpuSoft" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="hdSoft" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="storageSoft" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="repositorySoft" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="vlanSoft" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="publicIPSoft" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ramHard" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="cpuHard" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="hdHard" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="storageHard" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="repositoryHard" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="vlanHard" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="publicIPHard" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="1" name="version_c" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="default_vlan_network_id" type="INT UNSIGNED"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-27">
+        <createTable tableName="enterprise_properties">
+            <column autoIncrement="true" name="idProperties" type="INT UNSIGNED">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="enterprise" type="INT UNSIGNED"/>
+            <column defaultValueNumeric="0" name="version_c" type="INT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-28">
+        <createTable tableName="enterprise_properties_map">
+            <column name="enterprise_properties" type="INT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column name="map_key" type="VARCHAR(30)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="value" type="VARCHAR(50)"/>
+            <column defaultValueNumeric="0" name="version_c" type="INT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-29">
+        <createTable tableName="enterprise_resources_stats">
+            <column autoIncrement="true" name="idEnterprise" type="INT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column defaultValueNumeric="0" name="vCpuReserved" remarks="Maximum number of Virtual CPUs reserved by all enterprises." type="BIGINT UNSIGNED"/>
+            <column defaultValueNumeric="0" name="vCpuUsed" remarks="Total number of Virtual CPUs in Virtual Machines currently in a running state." type="BIGINT UNSIGNED"/>
+            <column defaultValueNumeric="0" name="memoryReserved" remarks="Maximum amount of RAM reserved by all enterprises in Megabytes." type="BIGINT UNSIGNED"/>
+            <column defaultValueNumeric="0" name="memoryUsed" remarks="Total amount of RAM used by Virtual Machines currently in a running state in Megabytes." type="BIGINT UNSIGNED"/>
+            <column defaultValueNumeric="0" name="localStorageReserved" remarks="Maximum storage size reserved by all enterprises for Virtual Machines  in Megabytes." type="BIGINT UNSIGNED"/>
+            <column defaultValueNumeric="0" name="localStorageUsed" remarks="Total storage size used by Virtual Machines currently in a running state  in Megabytes." type="BIGINT UNSIGNED"/>
+            <column defaultValueNumeric="0" name="extStorageReserved" remarks="Maximum external storage size reserved by all enterprises in Bytes." type="BIGINT UNSIGNED"/>
+            <column defaultValueNumeric="0" name="extStorageUsed" remarks="External storage used (attached or mounted) by any virtual machines (in Megabytes)" type="BIGINT UNSIGNED"/>
+            <column defaultValueNumeric="0" name="repositoryReserved" remarks="Maximum repository size reserved by all enterprises in Megabytes." type="BIGINT UNSIGNED"/>
+            <column defaultValueNumeric="0" name="repositoryUsed" remarks="Total repository size currently used by all enterprises in Megabytes." type="BIGINT UNSIGNED"/>
+            <column defaultValueNumeric="0" name="publicIPsReserved" remarks="Total number of IPs assigned to a VirtualDatacenter (Reserved)" type="BIGINT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="publicIPsUsed" remarks="Total number of IPs used by virtual machines" type="BIGINT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="vlanReserved" remarks="Total maximum number of VLANs reserved by all enterprises. (enterprise.vlanHard)" type="BIGINT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="vlanUsed" remarks="Total number of VLANs in use by any datacenter managed." type="BIGINT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="1" name="version_c" type="INT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-30">
+        <createTable tableName="enterprise_theme">
+            <column name="idEnterprise" type="INT UNSIGNED">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="company_logo_path" type="TEXT"/>
+            <column name="theme" type="TEXT"/>
+            <column defaultValueNumeric="0" name="version_c" type="INT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-31">
+        <createTable tableName="heartbeatlog">
+            <column name="id" type="CHAR(36)">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="abicloud_id" type="VARCHAR(60)"/>
+            <column name="client_ip" type="VARCHAR(16)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="physical_servers" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="virtual_machines" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="volumes" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="virtual_datacenters" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="virtual_appliances" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="organizations" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="total_virtual_cores_allocated" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="total_virtual_cores_used" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="total_virtual_cores" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="total_virtual_memory_allocated" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="total_virtual_memory_used" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="total_virtual_memory" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="total_volume_space_allocated" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="total_volume_space_used" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="total_volume_space" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="virtual_images" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="operating_system_name" type="VARCHAR(60)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="operating_system_version" type="VARCHAR(60)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="database_name" type="VARCHAR(60)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="database_version" type="VARCHAR(60)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="application_server_name" type="VARCHAR(60)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="application_server_version" type="VARCHAR(60)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="java_version" type="VARCHAR(60)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="abicloud_version" type="VARCHAR(60)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="abicloud_distribution" type="VARCHAR(60)">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueComputed="CURRENT_TIMESTAMP" name="tstamp" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="version_c" type="INT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-32">
+        <createTable tableName="hypervisor">
+            <column autoIncrement="true" name="id" type="INT UNSIGNED">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="idPhysicalMachine" type="INT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ip" type="VARCHAR(39)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ipService" type="VARCHAR(39)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="port" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValue="user" name="user" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValue="password" name="password" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="version_c" type="INT"/>
+            <column name="type" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-33">
+        <createTable tableName="initiator_mapping">
+            <column autoIncrement="true" name="idInitiatorMapping" type="INT UNSIGNED">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="idManagement" type="INT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column name="initiatorIqn" type="VARCHAR(256)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="targetIqn" type="VARCHAR(256)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="targetLun" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="version_c" type="INT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-34">
+        <createTable tableName="ip_pool_management">
+            <column name="idManagement" type="INT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column name="mac" type="VARCHAR(20)"/>
+            <column name="name" type="VARCHAR(30)"/>
+            <column name="ip" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="vlan_network_name" type="VARCHAR(40)"/>
+            <column name="vlan_network_id" type="INT UNSIGNED"/>
+            <column defaultValueBoolean="false" name="quarantine" type="BIT">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueBoolean="true" name="available" type="BIT">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="1" name="version_c" type="INT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-35">
+        <createTable tableName="license">
+            <column autoIncrement="true" name="idLicense" type="INT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="data" type="VARCHAR(1000)">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="version_c" type="INT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-36">
+        <createTable tableName="log">
+            <column autoIncrement="true" name="idLog" type="INT UNSIGNED">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="idVirtualApp" type="INT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="VARCHAR(250)">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueComputed="CURRENT_TIMESTAMP" name="logDate" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueBoolean="false" name="deleted" type="BIT"/>
+            <column defaultValueNumeric="0" name="version_c" type="INT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-37">
+        <createTable tableName="metering">
+            <column autoIncrement="true" name="idMeter" type="BIGINT UNSIGNED">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="idDatacenter" type="INT UNSIGNED"/>
+            <column name="datacenter" type="VARCHAR(20)"/>
+            <column name="idRack" type="INT UNSIGNED"/>
+            <column name="rack" type="VARCHAR(20)"/>
+            <column name="idPhysicalMachine" type="INT UNSIGNED"/>
+            <column name="physicalmachine" type="VARCHAR(256)"/>
+            <column name="idStorageSystem" type="INT UNSIGNED"/>
+            <column name="storageSystem" type="VARCHAR(256)"/>
+            <column name="idStoragePool" type="VARCHAR(40)"/>
+            <column name="storagePool" type="VARCHAR(256)"/>
+            <column name="idVolume" type="VARCHAR(50)"/>
+            <column name="volume" type="VARCHAR(256)"/>
+            <column name="idNetwork" type="INT UNSIGNED"/>
+            <column name="network" type="VARCHAR(256)"/>
+            <column name="idSubnet" type="INT UNSIGNED"/>
+            <column name="subnet" type="VARCHAR(256)"/>
+            <column name="idEnterprise" type="INT UNSIGNED"/>
+            <column name="enterprise" type="VARCHAR(40)"/>
+            <column name="idUser" type="INT UNSIGNED"/>
+            <column name="user" type="VARCHAR(128)"/>
+            <column name="idVirtualDataCenter" type="INT UNSIGNED"/>
+            <column name="virtualDataCenter" type="VARCHAR(40)"/>
+            <column name="idVirtualApp" type="INT UNSIGNED"/>
+            <column name="virtualApp" type="VARCHAR(30)"/>
+            <column name="idVirtualMachine" type="INT UNSIGNED"/>
+            <column name="virtualmachine" type="VARCHAR(256)"/>
+            <column name="severity" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueComputed="CURRENT_TIMESTAMP" name="timestamp" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="performedby" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="actionperformed" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="component" type="VARCHAR(255)"/>
+            <column name="stacktrace" type="TEXT"/>
+            <column defaultValueNumeric="0" name="version_c" type="INT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-38">
+        <createTable tableName="network">
+            <column autoIncrement="true" name="network_id" type="INT UNSIGNED">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="uuid" type="VARCHAR(40)">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="1" name="version_c" type="INT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-39">
+        <createTable tableName="network_configuration">
+            <column autoIncrement="true" name="network_configuration_id" type="INT UNSIGNED">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="gateway" type="VARCHAR(40)"/>
+            <column name="network_address" type="VARCHAR(40)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="mask" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="netmask" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="primary_dns" type="VARCHAR(20)"/>
+            <column name="secondary_dns" type="VARCHAR(20)"/>
+            <column name="sufix_dns" type="VARCHAR(40)"/>
+            <column name="fence_mode" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="1" name="version_c" type="INT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-40">
+        <createTable tableName="node">
+            <column name="idVirtualApp" type="INT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column autoIncrement="true" name="idNode" type="INT UNSIGNED">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="modified" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="posX" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="posY" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="type" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ip" type="VARCHAR(15)"/>
+            <column name="mac" type="VARCHAR(17)"/>
+            <column defaultValueNumeric="0" name="version_c" type="INT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-41">
+        <createTable tableName="node_virtual_image_stateful_conversions">
+            <column autoIncrement="true" name="id" type="INT UNSIGNED">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="newName" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="idVirtualApplianceStatefulConversion" type="INT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column name="idNodeVirtualImage" type="INT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column name="idVirtualImageConversion" type="INT UNSIGNED"/>
+            <column name="idDiskStatefulConversion" type="INT UNSIGNED"/>
+            <column name="state" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="subState" type="VARCHAR(50)"/>
+            <column defaultValueNumeric="0" name="version_c" type="INT"/>
+            <column name="idTier" type="INT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column name="idManagement" type="INT UNSIGNED"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-42">
+        <createTable tableName="nodenetwork">
+            <column name="idNode" type="INT UNSIGNED">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column defaultValueNumeric="0" name="version_c" type="INT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-43">
+        <createTable tableName="noderelationtype">
+            <column autoIncrement="true" name="idNodeRelationType" type="INT UNSIGNED">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="name" type="VARCHAR(20)"/>
+            <column defaultValueNumeric="0" name="version_c" type="INT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-44">
+        <createTable tableName="nodestorage">
+            <column defaultValueNumeric="0" name="idNode" type="INT UNSIGNED">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column defaultValueNumeric="0" name="version_c" type="INT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-45">
+        <createTable tableName="nodevirtualimage">
+            <column name="idNode" type="INT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column name="idVM" type="INT UNSIGNED"/>
+            <column name="idImage" type="INT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="version_c" type="INT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-46">
+        <createTable tableName="one_time_token">
+            <column autoIncrement="true" name="idOneTimeTokenSession" type="INT UNSIGNED">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="token" type="VARCHAR(128)">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="version_c" type="INT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-47">
+        <createTable tableName="ovf_package">
+            <column autoIncrement="true" name="id_ovf_package" type="INT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="id_apps_library" type="INT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column name="url" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(255)"/>
+            <column name="description" type="VARCHAR(255)"/>
+            <column name="iconUrl" type="VARCHAR(255)"/>
+            <column name="productName" type="VARCHAR(255)"/>
+            <column name="productUrl" type="VARCHAR(45)"/>
+            <column name="productVersion" type="VARCHAR(45)"/>
+            <column name="productVendor" type="VARCHAR(45)"/>
+            <column name="idCategory" type="INT UNSIGNED"/>
+            <column name="diskSizeMb" type="BIGINT"/>
+            <column defaultValueNumeric="0" name="version_c" type="INT"/>
+            <column name="type" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-48">
+        <createTable tableName="ovf_package_list">
+            <column autoIncrement="true" name="id_ovf_package_list" type="INT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="name" type="VARCHAR(45)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="url" type="VARCHAR(255)"/>
+            <column name="id_apps_library" type="INT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="version_c" type="INT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-49">
+        <createTable tableName="ovf_package_list_has_ovf_package">
+            <column name="id_ovf_package_list" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="id_ovf_package" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="version_c" type="INT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-50">
+        <createTable tableName="physicalmachine">
+            <column autoIncrement="true" name="idPhysicalMachine" type="INT UNSIGNED">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="idRack" type="INT UNSIGNED"/>
+            <column name="idDataCenter" type="INT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(256)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="VARCHAR(100)"/>
+            <column name="ram" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="cpu" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ramUsed" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="cpuUsed" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="idState" remarks="0 - STOPPED&#10;1 - NOT PROVISIONED&#10;2 - NOT MANAGED&#10;3 - MANAGED&#10;4 - HALTED&#10;5 - UNLICENSED&#10;6 - HA_IN_PROGRESS&#10;7 - DISABLED_FOR_HA" type="INT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column name="vswitchName" type="VARCHAR(200)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="idEnterprise" type="INT UNSIGNED"/>
+            <column name="initiatorIQN" type="VARCHAR(256)"/>
+            <column defaultValueNumeric="0" name="version_c" type="INT"/>
+            <column name="ipmiIP" type="VARCHAR(39)"/>
+            <column name="ipmiPort" type="INT UNSIGNED"/>
+            <column name="ipmiUser" type="VARCHAR(255)"/>
+            <column name="ipmiPassword" type="VARCHAR(255)"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-51">
+        <createTable tableName="pricingCostCode">
+            <column autoIncrement="true" name="idPricingCostCode" type="INT UNSIGNED">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="idPricingTemplate" type="INT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column name="idCostCode" type="INT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0.00000" name="price" type="DECIMAL(20,5)">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="version_c" type="INT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-52">
+        <createTable tableName="pricingTemplate">
+            <column autoIncrement="true" name="idPricingTemplate" type="INT UNSIGNED">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="idCurrency" type="INT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(256)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="chargingPeriod" type="INT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column name="minimumCharge" type="INT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueBoolean="false" name="showChangesBefore" type="BIT">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0.00000" name="standingChargePeriod" type="DECIMAL(20,5)">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0.00000" name="minimumChargePeriod" type="DECIMAL(20,5)">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0.00000" name="vcpu" type="DECIMAL(20,5)">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0.00000" name="memoryMB" type="DECIMAL(20,5)">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0.00000" name="hdGB" type="DECIMAL(20,5)">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0.00000" name="vlan" type="DECIMAL(20,5)">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0.00000" name="publicIp" type="DECIMAL(20,5)">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueBoolean="false" name="defaultTemplate" type="BIT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="VARCHAR(1000)">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueComputed="CURRENT_TIMESTAMP" name="last_update" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="version_c" type="INT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-53">
+        <createTable tableName="pricingTier">
+            <column autoIncrement="true" name="idPricingTier" type="INT UNSIGNED">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="idPricingTemplate" type="INT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column name="idTier" type="INT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0.00000" name="price" type="DECIMAL(20,5)">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="version_c" type="INT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-54">
+        <createTable tableName="privilege">
+            <column autoIncrement="true" name="idPrivilege" type="INT UNSIGNED">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="name" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="version_c" type="INT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-55">
+        <createTable tableName="rack">
+            <column autoIncrement="true" name="idRack" type="INT UNSIGNED">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="idDataCenter" type="INT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="shortDescription" type="VARCHAR(30)"/>
+            <column name="largeDescription" type="VARCHAR(100)"/>
+            <column defaultValueNumeric="2" name="vlan_id_min" type="INT UNSIGNED"/>
+            <column defaultValueNumeric="4094" name="vlan_id_max" type="INT UNSIGNED"/>
+            <column defaultValue="" name="vlans_id_avoided" type="VARCHAR(255)"/>
+            <column defaultValueNumeric="8" name="vlan_per_vdc_expected" type="INT UNSIGNED"/>
+            <column defaultValueNumeric="10" name="nrsq" type="INT UNSIGNED"/>
+            <column defaultValueBoolean="false" name="haEnabled" remarks="TRUE - This rack is enabled for the HA functionality" type="BIT"/>
+            <column defaultValueNumeric="0" name="version_c" type="INT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-56">
+        <createTable tableName="rasd">
+            <column name="address" type="VARCHAR(256)"/>
+            <column name="addressOnParent" type="VARCHAR(25)"/>
+            <column name="allocationUnits" type="VARCHAR(15)"/>
+            <column name="automaticAllocation" type="INT"/>
+            <column name="automaticDeallocation" type="INT"/>
+            <column name="caption" type="VARCHAR(15)"/>
+            <column name="changeableType" type="INT"/>
+            <column name="configurationName" type="VARCHAR(15)"/>
+            <column name="connectionResource" type="VARCHAR(256)"/>
+            <column name="consumerVisibility" type="INT"/>
+            <column name="description" type="VARCHAR(255)"/>
+            <column name="elementName" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="generation" type="BIGINT"/>
+            <column name="hostResource" type="VARCHAR(256)"/>
+            <column name="instanceID" type="VARCHAR(50)">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="limitResource" type="BIGINT"/>
+            <column name="mappingBehaviour" type="INT"/>
+            <column name="otherResourceType" type="VARCHAR(50)"/>
+            <column name="parent" type="VARCHAR(50)"/>
+            <column name="poolID" type="VARCHAR(50)"/>
+            <column name="reservation" type="BIGINT"/>
+            <column name="resourceSubType" remarks="For IPs: 0 = private, 1 = public, 2 = external" type="VARCHAR(15)"/>
+            <column name="resourceType" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="virtualQuantity" type="INT"/>
+            <column name="weight" type="INT"/>
+            <column defaultValueNumeric="1" name="version_c" type="INT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-57">
+        <createTable tableName="rasd_management">
+            <column autoIncrement="true" name="idManagement" type="INT UNSIGNED">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="idResourceType" type="VARCHAR(5)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="idVirtualDataCenter" type="INT UNSIGNED"/>
+            <column name="idVM" type="INT UNSIGNED"/>
+            <column name="idResource" type="VARCHAR(50)"/>
+            <column name="idVirtualApp" type="INT UNSIGNED"/>
+            <column defaultValueNumeric="1" name="version_c" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="temporal" type="INT UNSIGNED"/>
+            <column name="sequence" type="INT UNSIGNED"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-58">
+        <createTable tableName="register">
+            <column name="id" type="CHAR(36)">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="company_name" type="VARCHAR(60)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="company_address" type="VARCHAR(240)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="company_state" type="VARCHAR(60)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="company_country_code" type="VARCHAR(2)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="company_industry" type="VARCHAR(255)"/>
+            <column name="contact_title" type="VARCHAR(60)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="contact_name" type="VARCHAR(60)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="contact_email" type="VARCHAR(60)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="contact_phone" type="VARCHAR(60)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="company_size_revenue" type="VARCHAR(60)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="company_size_employees" type="VARCHAR(60)">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueBoolean="false" name="subscribe_development_news" type="BIT">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueBoolean="false" name="subscribe_commercial_news" type="BIT">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueBoolean="false" name="allow_commercial_contact" type="BIT">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValue="0000-00-00 00:00:00" name="creation_date" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueComputed="CURRENT_TIMESTAMP" name="last_updated" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="version_c" type="INT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-59">
+        <createTable tableName="remote_service">
+            <column autoIncrement="true" name="idRemoteService" type="INT UNSIGNED">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="uri" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="idDataCenter" type="INT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="status" type="INT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column name="remoteServiceType" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="version_c" type="INT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-60">
+        <createTable tableName="repository">
+            <column autoIncrement="true" name="idRepository" type="INT UNSIGNED">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="idDataCenter" type="INT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(30)"/>
+            <column name="URL" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="version_c" type="INT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-61">
+        <createTable tableName="role">
+            <column autoIncrement="true" name="idRole" type="INT UNSIGNED">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column defaultValue="auto_name" name="name" type="VARCHAR(40)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="idEnterprise" type="INT UNSIGNED"/>
+            <column defaultValueBoolean="false" name="blocked" type="BIT">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="version_c" type="INT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-62">
+        <createTable tableName="role_ldap">
+            <column autoIncrement="true" name="idRole_ldap" type="INT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="idRole" type="INT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column name="role_ldap" type="VARCHAR(128)">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="version_c" type="INT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-63">
+        <createTable tableName="roles_privileges">
+            <column name="idRole" type="INT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column name="idPrivilege" type="INT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="version_c" type="INT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-64">
+        <createTable tableName="session">
+            <column autoIncrement="true" name="id" type="INT UNSIGNED">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="user" type="VARCHAR(128)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="key" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueComputed="CURRENT_TIMESTAMP" name="expireDate" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="idUser" type="INT UNSIGNED"/>
+            <column name="authType" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="version_c" type="INT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-65">
+        <createTable tableName="storage_device">
+            <column autoIncrement="true" name="id" type="INT UNSIGNED">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="name" type="VARCHAR(256)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="idDataCenter" type="INT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column name="management_ip" type="VARCHAR(256)">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="management_port" type="INT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column name="iscsi_ip" type="VARCHAR(256)">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="iscsi_port" type="INT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column name="storage_technology" type="VARCHAR(256)"/>
+            <column name="username" type="VARCHAR(256)"/>
+            <column name="password" type="VARCHAR(256)"/>
+            <column defaultValueNumeric="1" name="version_c" type="INT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-66">
+        <createTable tableName="storage_pool">
+            <column name="idStorage" type="VARCHAR(40)">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="idStorageDevice" type="INT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column name="idTier" type="INT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueBoolean="true" name="isEnabled" type="BIT">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="1" name="version_c" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="totalSizeInMb" type="BIGINT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="usedSizeInMb" type="BIGINT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="availableSizeInMb" type="BIGINT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(256)"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-67">
+        <createTable tableName="system_properties">
+            <column autoIncrement="true" name="systemPropertyId" type="INT UNSIGNED">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column defaultValueNumeric="0" name="version_c" type="INT"/>
+            <column name="name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="value" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="VARCHAR(255)"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-68">
+        <createTable tableName="tasks">
+            <column autoIncrement="true" name="id" type="INT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="status" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="component" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="action" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="version_c" type="INT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-69">
+        <createTable tableName="tier">
+            <column autoIncrement="true" name="id" type="INT UNSIGNED">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="name" type="VARCHAR(40)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueBoolean="true" name="isEnabled" type="BIT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="idDataCenter" type="INT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="1" name="version_c" type="INT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-70">
+        <createTable tableName="ucs_rack">
+            <column name="idRack" type="INT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ip" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="port" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="user_rack" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="password" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="defaultTemplate" type="VARCHAR(200)"/>
+            <column defaultValueNumeric="0" name="maxMachinesOn" type="INT"/>
+            <column defaultValueNumeric="0" name="version_c" type="INT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-71">
+        <createTable tableName="user">
+            <column autoIncrement="true" name="idUser" type="INT UNSIGNED">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="idRole" type="INT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column name="idEnterprise" type="INT UNSIGNED"/>
+            <column name="user" type="VARCHAR(128)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(128)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="surname" type="VARCHAR(50)"/>
+            <column name="description" type="VARCHAR(100)"/>
+            <column name="email" type="VARCHAR(200)"/>
+            <column name="locale" type="VARCHAR(10)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="password" type="VARCHAR(32)"/>
+            <column name="availableVirtualDatacenters" type="VARCHAR(255)"/>
+            <column defaultValueNumeric="0" name="active" type="INT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column name="authType" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueComputed="CURRENT_TIMESTAMP" name="creationDate" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="version_c" type="INT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-72">
+        <createTable tableName="vapp_enterprise_stats">
+            <column autoIncrement="true" name="idVirtualApp" type="INT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="idEnterprise" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="idVirtualDataCenter" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="vappName" remarks="Name for this virtual appliance" type="VARCHAR(45)"/>
+            <column name="vdcName" remarks="Name for the virtualdatacenter" type="VARCHAR(45)"/>
+            <column defaultValueNumeric="0" name="vmCreated" remarks="Number of virtual machines created in this virtual appliance" type="MEDIUMINT UNSIGNED"/>
+            <column defaultValueNumeric="0" name="vmActive" remarks="Number of virtual machines currently running in this virtual appliance" type="MEDIUMINT UNSIGNED"/>
+            <column defaultValueNumeric="0" name="volAssociated" remarks="Number of volumes associated to this virtual appliance" type="MEDIUMINT UNSIGNED"/>
+            <column defaultValueNumeric="0" name="volAttached" remarks="Number of volumes currently attached to a virtual machine in this virtual appliance" type="MEDIUMINT UNSIGNED"/>
+            <column defaultValueNumeric="1" name="version_c" type="INT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-73">
+        <createTable tableName="vappstateful_conversions">
+            <column autoIncrement="true" name="id" type="INT UNSIGNED">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="idVirtualApp" type="INT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column name="idUser" type="INT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="version_c" type="INT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-74">
+        <createTable tableName="vdc_enterprise_stats">
+            <column autoIncrement="true" name="idVirtualDataCenter" type="INT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="idEnterprise" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="vdcName" remarks="Name for the virtualdatacenter" type="VARCHAR(45)"/>
+            <column defaultValueNumeric="0" name="vmCreated" remarks="Number of virtual machines created in this virtual datacenter" type="MEDIUMINT UNSIGNED"/>
+            <column defaultValueNumeric="0" name="vmActive" remarks="Number of virtual machines currently running in this virtual datacenter" type="MEDIUMINT UNSIGNED"/>
+            <column defaultValueNumeric="0" name="volCreated" remarks="Number of volumes created in this virtual datacenter" type="MEDIUMINT UNSIGNED"/>
+            <column defaultValueNumeric="0" name="volAssociated" remarks="Number of volumes associated to a virtual machine in this virtual datacenter" type="MEDIUMINT UNSIGNED"/>
+            <column defaultValueNumeric="0" name="volAttached" remarks="Number of volumes currently attached to a virtual machine in this virtual datacenter" type="MEDIUMINT UNSIGNED"/>
+            <column defaultValueNumeric="0" name="vCpuReserved" remarks="Maximum number of Virtual CPUs reserved for this enterprise in this virtual datacenter." type="BIGINT UNSIGNED"/>
+            <column defaultValueNumeric="0" name="vCpuUsed" remarks="Total number of Virtual CPUs in Virtual Machines currently in a running state." type="BIGINT UNSIGNED"/>
+            <column defaultValueNumeric="0" name="memoryReserved" remarks="Maximum amount of RAM reserved for this enterprise in this virtual datacenter in Megabytes." type="BIGINT UNSIGNED"/>
+            <column defaultValueNumeric="0" name="memoryUsed" remarks="Total amount of RAM used by Virtual Machines currently in a running state in Megabytes." type="BIGINT UNSIGNED"/>
+            <column defaultValueNumeric="0" name="localStorageReserved" remarks="Maximum storage size reserved for this enterprise in this virtual datacenter for Virtual Machines  in Megabytes." type="BIGINT UNSIGNED"/>
+            <column defaultValueNumeric="0" name="localStorageUsed" remarks="Total storage size used by Virtual Machines currently in a running state  in Megabytes." type="BIGINT UNSIGNED"/>
+            <column defaultValueNumeric="0" name="extStorageReserved" remarks=" Maximum external storage size reserved for this enterprise in this virtual datacenter in Megabytes." type="BIGINT UNSIGNED"/>
+            <column defaultValueNumeric="0" name="extStorageUsed" remarks="External storage used (attached or mounted) by any virtual machines (in Megabytes)." type="BIGINT UNSIGNED"/>
+            <column defaultValueNumeric="0" name="publicIPsReserved" remarks="Total number of IPs assigned to this virtualDatacenter (Reserved)." type="MEDIUMINT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="publicIPsUsed" remarks="Total number of IPs used by virtual machines." type="MEDIUMINT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="vlanReserved" remarks="Total maximum number of VLANs reserved for this enterprise in this virtual datacenter. (enterprise.vlanHard)" type="MEDIUMINT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="vlanUsed" remarks="Total number of VLANs in use by this virtual datacenter." type="MEDIUMINT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="1" name="version_c" type="INT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-75">
+        <createTable tableName="virtual_appliance_conversions">
+            <column autoIncrement="true" name="id" type="INT UNSIGNED">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="idConversion" type="INT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column name="idVirtualAppliance" type="INT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column name="idUser" type="INT UNSIGNED"/>
+            <column name="forceLimits" type="BIT"/>
+            <column name="idNode" type="INT UNSIGNED"/>
+            <column defaultValueNumeric="0" name="version_c" type="INT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-76">
+        <createTable tableName="virtualapp">
+            <column autoIncrement="true" name="idVirtualApp" type="INT UNSIGNED">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="idVirtualDataCenter" type="INT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column name="idEnterprise" type="INT UNSIGNED"/>
+            <column name="name" type="VARCHAR(30)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="public" remarks="0-No 1-Yes" type="INT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column name="high_disponibility" remarks="0-No 1-Yes" type="INT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column name="error" type="INT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column name="nodeconnections" type="TEXT"/>
+            <column defaultValueNumeric="1" name="version_c" type="INT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-77">
+        <createTable tableName="virtualdatacenter">
+            <column autoIncrement="true" name="idVirtualDataCenter" type="INT UNSIGNED">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="idEnterprise" type="INT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(40)"/>
+            <column name="idDataCenter" type="INT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column name="networktypeID" type="INT UNSIGNED"/>
+            <column name="hypervisorType" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="ramSoft" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="cpuSoft" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="hdSoft" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="storageSoft" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="vlanSoft" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="publicIPSoft" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="ramHard" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="cpuHard" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="hdHard" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="storageHard" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="vlanHard" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="publicIPHard" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="default_vlan_network_id" type="INT UNSIGNED"/>
+            <column defaultValueNumeric="1" name="version_c" type="INT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-78">
+        <createTable tableName="virtualimage">
+            <column autoIncrement="true" name="idImage" type="INT UNSIGNED">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="VARCHAR(255)"/>
+            <column name="pathName" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="hd_required" type="BIGINT"/>
+            <column name="ram_required" type="INT UNSIGNED"/>
+            <column name="cpu_required" type="INT"/>
+            <column name="iconUrl" type="VARCHAR(255)"/>
+            <column name="idCategory" type="INT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column name="idRepository" type="INT UNSIGNED"/>
+            <column name="type" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ethDriverType" type="VARCHAR(16)"/>
+            <column name="idMaster" type="INT UNSIGNED"/>
+            <column name="idEnterprise" type="INT UNSIGNED"/>
+            <column defaultValueNumeric="0" name="shared" remarks="0-No 1-Yes" type="INT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ovfid" type="VARCHAR(255)"/>
+            <column name="stateful" type="INT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column name="diskFileSize" type="BIGINT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueBoolean="false" name="chefEnabled" type="BIT">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="cost_code" type="INT"/>
+            <column defaultValueComputed="CURRENT_TIMESTAMP" name="creation_date" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="creation_user" type="VARCHAR(128)">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="1" name="version_c" type="INT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-79">
+        <createTable tableName="virtualimage_conversions">
+            <column autoIncrement="true" name="id" type="INT UNSIGNED">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="idImage" type="INT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column name="sourceType" type="VARCHAR(50)"/>
+            <column name="targetType" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="sourcePath" type="VARCHAR(255)"/>
+            <column name="targetPath" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="state" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueComputed="CURRENT_TIMESTAMP" name="timestamp" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="size" type="BIGINT"/>
+            <column defaultValueNumeric="0" name="version_c" type="INT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-80">
+        <createTable tableName="virtualmachine">
+            <column autoIncrement="true" name="idVM" type="INT UNSIGNED">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="idHypervisor" type="INT UNSIGNED"/>
+            <column name="idImage" type="INT UNSIGNED"/>
+            <column name="UUID" type="VARCHAR(36)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="VARCHAR(255)"/>
+            <column name="ram" type="INT UNSIGNED"/>
+            <column name="cpu" type="INT UNSIGNED"/>
+            <column name="hd" type="BIGINT UNSIGNED"/>
+            <column name="vdrpPort" type="INT UNSIGNED"/>
+            <column name="vdrpIP" type="VARCHAR(39)"/>
+            <column name="state" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="subState" type="VARCHAR(50)"/>
+            <column name="high_disponibility" type="INT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column name="idConversion" type="INT UNSIGNED"/>
+            <column defaultValueNumeric="0" name="idType" remarks="0 - NOT MANAGED BY ABICLOUD  1 - MANAGED BY ABICLOUD" type="INT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column name="idUser" remarks="User who creates the VM" type="INT UNSIGNED"/>
+            <column name="idEnterprise" remarks="Enterprise of the user" type="INT UNSIGNED"/>
+            <column name="idDatastore" type="INT UNSIGNED"/>
+            <column name="password" type="VARCHAR(32)"/>
+            <column name="network_configuration_id" type="INT UNSIGNED"/>
+            <column name="temporal" type="INT UNSIGNED"/>
+            <column name="ethDriverType" type="VARCHAR(16)"/>
+            <column defaultValueNumeric="0" name="version_c" type="INT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-81">
+        <createTable tableName="virtualmachinetrackedstate">
+            <column name="idVM" type="INT UNSIGNED">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="previousState" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="version_c" type="INT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-82">
+        <createTable tableName="vlan_network">
+            <column autoIncrement="true" name="vlan_network_id" type="INT UNSIGNED">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="network_id" type="INT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column name="network_configuration_id" type="INT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column name="network_name" type="VARCHAR(40)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="vlan_tag" type="INT UNSIGNED"/>
+            <column defaultValue="INTERNAL" name="networktype" type="VARCHAR(15)">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="1" name="version_c" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="enterprise_id" type="INT UNSIGNED"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-83">
+        <createTable tableName="vlan_network_assignment">
+            <column autoIncrement="true" name="id" type="INT UNSIGNED">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="vlan_network_id" type="INT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column name="idRack" type="INT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column name="idVirtualDataCenter" type="INT UNSIGNED"/>
+            <column defaultValueNumeric="1" name="version_c" type="INT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-84">
+        <createTable tableName="vlans_dhcpOption">
+            <column name="idVlan" type="INT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column name="idDhcpOption" type="INT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="version_c" type="INT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-85">
+        <createTable tableName="volume_management">
+            <column name="idManagement" type="INT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="usedSize" type="BIGINT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column name="idSCSI" type="VARCHAR(256)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="state" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="idStorage" type="VARCHAR(40)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="idImage" type="INT UNSIGNED"/>
+            <column defaultValueNumeric="0" name="version_c" type="INT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-86">
+        <createTable tableName="workload_enterprise_exclusion_rule">
+            <column autoIncrement="true" name="id" type="INT UNSIGNED">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="idEnterprise1" type="INT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column name="idEnterprise2" type="INT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="1" name="version_c" type="INT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-87">
+        <createTable tableName="workload_fit_policy_rule">
+            <column autoIncrement="true" name="id" type="INT UNSIGNED">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="fitPolicy" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="idDatacenter" type="INT UNSIGNED"/>
+            <column defaultValueNumeric="1" name="version_c" type="INT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-88">
+        <createTable tableName="workload_machine_load_rule">
+            <column autoIncrement="true" name="id" type="INT UNSIGNED">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="ramLoadPercentage" type="INT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column name="cpuLoadPercentage" type="INT UNSIGNED">
+                <constraints nullable="false"/>
+            </column>
+            <column name="idDatacenter" type="INT UNSIGNED"/>
+            <column name="idRack" type="INT UNSIGNED"/>
+            <column name="idMachine" type="INT UNSIGNED"/>
+            <column defaultValueNumeric="1" name="version_c" type="INT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-89">
+        <addPrimaryKey columnNames="idDatastore, idPhysicalMachine" tableName="datastore_assignment"/>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-90">
+        <addPrimaryKey columnNames="id_ovf_package_list, id_ovf_package" tableName="ovf_package_list_has_ovf_package"/>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-92">
+        <addForeignKeyConstraint baseColumnNames="idEnterprise" baseTableName="apps_library" baseTableSchemaName="kinton" constraintName="fk_idEnterpriseApps" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" onUpdate="NO ACTION" referencedColumnNames="idEnterprise" referencedTableName="enterprise" referencedTableSchemaName="kinton" referencesUniqueColumn="false"/>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-93">
+        <addForeignKeyConstraint baseColumnNames="idGroup" baseTableName="auth_serverresource" baseTableSchemaName="kinton" constraintName="auth_serverresourceFK1" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="auth_group" referencedTableSchemaName="kinton" referencesUniqueColumn="false"/>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-94">
+        <addForeignKeyConstraint baseColumnNames="idRole" baseTableName="auth_serverresource" baseTableSchemaName="kinton" constraintName="auth_serverresourceFK2" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" onUpdate="NO ACTION" referencedColumnNames="idRole" referencedTableName="role" referencedTableSchemaName="kinton" referencesUniqueColumn="false"/>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-95">
+        <addForeignKeyConstraint baseColumnNames="idResource" baseTableName="auth_serverresource_exception" baseTableSchemaName="kinton" constraintName="auth_serverresource_exceptionFK1" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="auth_serverresource" referencedTableSchemaName="kinton" referencesUniqueColumn="false"/>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-96">
+        <addForeignKeyConstraint baseColumnNames="idUser" baseTableName="auth_serverresource_exception" baseTableSchemaName="kinton" constraintName="auth_serverresource_exceptionFK2" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" onUpdate="NO ACTION" referencedColumnNames="idUser" referencedTableName="user" referencedTableSchemaName="kinton" referencesUniqueColumn="false"/>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-97">
+        <addForeignKeyConstraint baseColumnNames="idVM" baseTableName="chef_runlist" baseTableSchemaName="kinton" constraintName="chef_runlist_FK1" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" onUpdate="NO ACTION" referencedColumnNames="idVM" referencedTableName="virtualmachine" referencedTableSchemaName="kinton" referencesUniqueColumn="false"/>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-98">
+        <addForeignKeyConstraint baseColumnNames="network_id" baseTableName="datacenter" baseTableSchemaName="kinton" constraintName="datacenternetwork_FK1" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="network_id" referencedTableName="network" referencedTableSchemaName="kinton" referencesUniqueColumn="false"/>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-99">
+        <addForeignKeyConstraint baseColumnNames="idDatastore" baseTableName="disk_management" baseTableSchemaName="kinton" constraintName="disk_datastore_FK" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="idDatastore" referencedTableName="datastore" referencedTableSchemaName="kinton" referencesUniqueColumn="false"/>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-100">
+        <addForeignKeyConstraint baseColumnNames="idManagement" baseTableName="disk_management" baseTableSchemaName="kinton" constraintName="disk_idManagement_FK" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" onUpdate="NO ACTION" referencedColumnNames="idManagement" referencedTableName="rasd_management" referencedTableSchemaName="kinton" referencesUniqueColumn="false"/>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-101">
+        <addForeignKeyConstraint baseColumnNames="idManagement" baseTableName="diskstateful_conversions" baseTableSchemaName="kinton" constraintName="idManagement_FK2" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" onUpdate="NO ACTION" referencedColumnNames="idManagement" referencedTableName="volume_management" referencedTableSchemaName="kinton" referencesUniqueColumn="false"/>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-102">
+        <addForeignKeyConstraint baseColumnNames="idPricingTemplate" baseTableName="enterprise" baseTableSchemaName="kinton" constraintName="enterprise_pricing_FK" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="idPricingTemplate" referencedTableName="pricingTemplate" referencedTableSchemaName="kinton" referencesUniqueColumn="false"/>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-103">
+        <addForeignKeyConstraint baseColumnNames="default_vlan_network_id" baseTableName="enterprise_limits_by_datacenter" baseTableSchemaName="kinton" constraintName="enterprise_FK7" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="vlan_network_id" referencedTableName="vlan_network" referencedTableSchemaName="kinton" referencesUniqueColumn="false"/>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-104">
+        <addForeignKeyConstraint baseColumnNames="enterprise" baseTableName="enterprise_properties" baseTableSchemaName="kinton" constraintName="FK_enterprise" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="idEnterprise" referencedTableName="enterprise" referencedTableSchemaName="kinton" referencesUniqueColumn="false"/>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-105">
+        <addForeignKeyConstraint baseColumnNames="enterprise_properties" baseTableName="enterprise_properties_map" baseTableSchemaName="kinton" constraintName="FK2_enterprise_properties" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" onUpdate="NO ACTION" referencedColumnNames="idProperties" referencedTableName="enterprise_properties" referencedTableSchemaName="kinton" referencesUniqueColumn="false"/>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-106">
+        <addForeignKeyConstraint baseColumnNames="idEnterprise" baseTableName="enterprise_theme" baseTableSchemaName="kinton" constraintName="THEME_FK1" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" onUpdate="NO ACTION" referencedColumnNames="idEnterprise" referencedTableName="enterprise" referencedTableSchemaName="kinton" referencesUniqueColumn="false"/>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-107">
+        <addForeignKeyConstraint baseColumnNames="idPhysicalMachine" baseTableName="hypervisor" baseTableSchemaName="kinton" constraintName="Hypervisor_FK1" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" onUpdate="NO ACTION" referencedColumnNames="idPhysicalMachine" referencedTableName="physicalmachine" referencedTableSchemaName="kinton" referencesUniqueColumn="false"/>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-108">
+        <addForeignKeyConstraint baseColumnNames="idManagement" baseTableName="initiator_mapping" baseTableSchemaName="kinton" constraintName="volume_managementFK_1" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" onUpdate="NO ACTION" referencedColumnNames="idManagement" referencedTableName="volume_management" referencedTableSchemaName="kinton" referencesUniqueColumn="false"/>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-109">
+        <addForeignKeyConstraint baseColumnNames="idManagement" baseTableName="ip_pool_management" baseTableSchemaName="kinton" constraintName="id_management_FK" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" onUpdate="NO ACTION" referencedColumnNames="idManagement" referencedTableName="rasd_management" referencedTableSchemaName="kinton" referencesUniqueColumn="false"/>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-110">
+        <addForeignKeyConstraint baseColumnNames="vlan_network_id" baseTableName="ip_pool_management" baseTableSchemaName="kinton" constraintName="ippool_vlan_network_FK" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="vlan_network_id" referencedTableName="vlan_network" referencedTableSchemaName="kinton" referencesUniqueColumn="false"/>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-111">
+        <addForeignKeyConstraint baseColumnNames="idVirtualApp" baseTableName="log" baseTableSchemaName="kinton" constraintName="log_FK1" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" onUpdate="NO ACTION" referencedColumnNames="idVirtualApp" referencedTableName="virtualapp" referencedTableSchemaName="kinton" referencesUniqueColumn="false"/>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-112">
+        <addForeignKeyConstraint baseColumnNames="idVirtualApp" baseTableName="node" baseTableSchemaName="kinton" constraintName="node_FK2" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" onUpdate="NO ACTION" referencedColumnNames="idVirtualApp" referencedTableName="virtualapp" referencedTableSchemaName="kinton" referencesUniqueColumn="false"/>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-113">
+        <addForeignKeyConstraint baseColumnNames="idDiskStatefulConversion" baseTableName="node_virtual_image_stateful_conversions" baseTableSchemaName="kinton" constraintName="idDiskStatefulConversion_FK4" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="diskstateful_conversions" referencedTableSchemaName="kinton" referencesUniqueColumn="false"/>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-114">
+        <addForeignKeyConstraint baseColumnNames="idManagement" baseTableName="node_virtual_image_stateful_conversions" baseTableSchemaName="kinton" constraintName="idManagement_FK4" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" onUpdate="NO ACTION" referencedColumnNames="idManagement" referencedTableName="volume_management" referencedTableSchemaName="kinton" referencesUniqueColumn="false"/>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-115">
+        <addForeignKeyConstraint baseColumnNames="idNodeVirtualImage" baseTableName="node_virtual_image_stateful_conversions" baseTableSchemaName="kinton" constraintName="idNodeVirtualImage_FK4" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" onUpdate="NO ACTION" referencedColumnNames="idNode" referencedTableName="nodevirtualimage" referencedTableSchemaName="kinton" referencesUniqueColumn="false"/>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-116">
+        <addForeignKeyConstraint baseColumnNames="idTier" baseTableName="node_virtual_image_stateful_conversions" baseTableSchemaName="kinton" constraintName="idTier_FK4" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="tier" referencedTableSchemaName="kinton" referencesUniqueColumn="false"/>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-117">
+        <addForeignKeyConstraint baseColumnNames="idVirtualApplianceStatefulConversion" baseTableName="node_virtual_image_stateful_conversions" baseTableSchemaName="kinton" constraintName="idVirtualApplianceStatefulConversion_FK4" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="vappstateful_conversions" referencedTableSchemaName="kinton" referencesUniqueColumn="false"/>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-118">
+        <addForeignKeyConstraint baseColumnNames="idVirtualImageConversion" baseTableName="node_virtual_image_stateful_conversions" baseTableSchemaName="kinton" constraintName="idVirtualImageConversion_FK4" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="virtualimage_conversions" referencedTableSchemaName="kinton" referencesUniqueColumn="false"/>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-119">
+        <addForeignKeyConstraint baseColumnNames="idNode" baseTableName="nodenetwork" baseTableSchemaName="kinton" constraintName="nodeNetwork_FK1" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" onUpdate="NO ACTION" referencedColumnNames="idNode" referencedTableName="node" referencedTableSchemaName="kinton" referencesUniqueColumn="false"/>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-120">
+        <addForeignKeyConstraint baseColumnNames="idNode" baseTableName="nodestorage" baseTableSchemaName="kinton" constraintName="nodeStorage_FK1" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" onUpdate="NO ACTION" referencedColumnNames="idNode" referencedTableName="node" referencedTableSchemaName="kinton" referencesUniqueColumn="false"/>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-121">
+        <addForeignKeyConstraint baseColumnNames="idImage" baseTableName="nodevirtualimage" baseTableSchemaName="kinton" constraintName="nodevirtualImage_FK1" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="idImage" referencedTableName="virtualimage" referencedTableSchemaName="kinton" referencesUniqueColumn="false"/>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-122">
+        <addForeignKeyConstraint baseColumnNames="idNode" baseTableName="nodevirtualimage" baseTableSchemaName="kinton" constraintName="nodevirtualimage_FK3" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" onUpdate="NO ACTION" referencedColumnNames="idNode" referencedTableName="node" referencedTableSchemaName="kinton" referencesUniqueColumn="false"/>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-123">
+        <addForeignKeyConstraint baseColumnNames="idVM" baseTableName="nodevirtualimage" baseTableSchemaName="kinton" constraintName="nodevirtualImage_FK2" deferrable="false" initiallyDeferred="false" onDelete="SET NULL" onUpdate="NO ACTION" referencedColumnNames="idVM" referencedTableName="virtualmachine" referencedTableSchemaName="kinton" referencesUniqueColumn="false"/>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-124">
+        <addForeignKeyConstraint baseColumnNames="id_apps_library" baseTableName="ovf_package" baseTableSchemaName="kinton" constraintName="fk_ovf_package_repository" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" onUpdate="NO ACTION" referencedColumnNames="id_apps_library" referencedTableName="apps_library" referencedTableSchemaName="kinton" referencesUniqueColumn="false"/>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-125">
+        <addForeignKeyConstraint baseColumnNames="idCategory" baseTableName="ovf_package" baseTableSchemaName="kinton" constraintName="fk_ovf_package_category" deferrable="false" initiallyDeferred="false" onDelete="SET NULL" onUpdate="NO ACTION" referencedColumnNames="idCategory" referencedTableName="category" referencedTableSchemaName="kinton" referencesUniqueColumn="false"/>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-126">
+        <addForeignKeyConstraint baseColumnNames="id_apps_library" baseTableName="ovf_package_list" baseTableSchemaName="kinton" constraintName="fk_ovf_package_list_repository" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" onUpdate="NO ACTION" referencedColumnNames="id_apps_library" referencedTableName="apps_library" referencedTableSchemaName="kinton" referencesUniqueColumn="false"/>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-127">
+        <addForeignKeyConstraint baseColumnNames="id_ovf_package" baseTableName="ovf_package_list_has_ovf_package" baseTableSchemaName="kinton" constraintName="fk_ovf_package_list_has_ovf_package_ovf_package1" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id_ovf_package" referencedTableName="ovf_package" referencedTableSchemaName="kinton" referencesUniqueColumn="false"/>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-128">
+        <addForeignKeyConstraint baseColumnNames="id_ovf_package_list" baseTableName="ovf_package_list_has_ovf_package" baseTableSchemaName="kinton" constraintName="fk_ovf_package_list_has_ovf_package_ovf_package_list1" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" onUpdate="NO ACTION" referencedColumnNames="id_ovf_package_list" referencedTableName="ovf_package_list" referencedTableSchemaName="kinton" referencesUniqueColumn="false"/>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-129">
+        <addForeignKeyConstraint baseColumnNames="idDataCenter" baseTableName="physicalmachine" baseTableSchemaName="kinton" constraintName="PhysicalMachine_FK5" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" onUpdate="NO ACTION" referencedColumnNames="idDataCenter" referencedTableName="datacenter" referencedTableSchemaName="kinton" referencesUniqueColumn="false"/>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-130">
+        <addForeignKeyConstraint baseColumnNames="idEnterprise" baseTableName="physicalmachine" baseTableSchemaName="kinton" constraintName="PhysicalMachine_FK6" deferrable="false" initiallyDeferred="false" onDelete="SET NULL" onUpdate="NO ACTION" referencedColumnNames="idEnterprise" referencedTableName="enterprise" referencedTableSchemaName="kinton" referencesUniqueColumn="false"/>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-131">
+        <addForeignKeyConstraint baseColumnNames="idRack" baseTableName="physicalmachine" baseTableSchemaName="kinton" constraintName="PhysicalMachine_FK1" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" onUpdate="NO ACTION" referencedColumnNames="idRack" referencedTableName="rack" referencedTableSchemaName="kinton" referencesUniqueColumn="false"/>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-132">
+        <addForeignKeyConstraint baseColumnNames="idCurrency" baseTableName="pricingTemplate" baseTableSchemaName="kinton" constraintName="Pricing_FK2_Currency" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="idCurrency" referencedTableName="currency" referencedTableSchemaName="kinton" referencesUniqueColumn="false"/>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-133">
+        <addForeignKeyConstraint baseColumnNames="idDataCenter" baseTableName="rack" baseTableSchemaName="kinton" constraintName="Rack_FK1" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" onUpdate="NO ACTION" referencedColumnNames="idDataCenter" referencedTableName="datacenter" referencedTableSchemaName="kinton" referencesUniqueColumn="false"/>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-134">
+        <addForeignKeyConstraint baseColumnNames="idResource" baseTableName="rasd_management" baseTableSchemaName="kinton" constraintName="idResource_FK" deferrable="false" initiallyDeferred="false" onDelete="SET NULL" onUpdate="NO ACTION" referencedColumnNames="instanceID" referencedTableName="rasd" referencedTableSchemaName="kinton" referencesUniqueColumn="false"/>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-135">
+        <addForeignKeyConstraint baseColumnNames="idVirtualApp" baseTableName="rasd_management" baseTableSchemaName="kinton" constraintName="idVirtualApp_FK" deferrable="false" initiallyDeferred="false" onDelete="SET NULL" onUpdate="NO ACTION" referencedColumnNames="idVirtualApp" referencedTableName="virtualapp" referencedTableSchemaName="kinton" referencesUniqueColumn="false"/>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-136">
+        <addForeignKeyConstraint baseColumnNames="idVirtualDataCenter" baseTableName="rasd_management" baseTableSchemaName="kinton" constraintName="idVirtualDataCenter_FK" deferrable="false" initiallyDeferred="false" onDelete="SET NULL" onUpdate="NO ACTION" referencedColumnNames="idVirtualDataCenter" referencedTableName="virtualdatacenter" referencedTableSchemaName="kinton" referencesUniqueColumn="false"/>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-137">
+        <addForeignKeyConstraint baseColumnNames="idVM" baseTableName="rasd_management" baseTableSchemaName="kinton" constraintName="idVM_FK" deferrable="false" initiallyDeferred="false" onDelete="SET NULL" onUpdate="NO ACTION" referencedColumnNames="idVM" referencedTableName="virtualmachine" referencedTableSchemaName="kinton" referencesUniqueColumn="false"/>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-138">
+        <addForeignKeyConstraint baseColumnNames="idDataCenter" baseTableName="remote_service" baseTableSchemaName="kinton" constraintName="idDatecenter_FK" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" onUpdate="NO ACTION" referencedColumnNames="idDataCenter" referencedTableName="datacenter" referencedTableSchemaName="kinton" referencesUniqueColumn="false"/>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-139">
+        <addForeignKeyConstraint baseColumnNames="idDataCenter" baseTableName="repository" baseTableSchemaName="kinton" constraintName="fk_idDataCenter" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" onUpdate="NO ACTION" referencedColumnNames="idDataCenter" referencedTableName="datacenter" referencedTableSchemaName="kinton" referencesUniqueColumn="false"/>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-140">
+        <addForeignKeyConstraint baseColumnNames="idEnterprise" baseTableName="role" baseTableSchemaName="kinton" constraintName="fk_role_1" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="idEnterprise" referencedTableName="enterprise" referencedTableSchemaName="kinton" referencesUniqueColumn="false"/>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-141">
+        <addForeignKeyConstraint baseColumnNames="idRole" baseTableName="role_ldap" baseTableSchemaName="kinton" constraintName="fk_role_ldap_role" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="idRole" referencedTableName="role" referencedTableSchemaName="kinton" referencesUniqueColumn="false"/>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-142">
+        <addForeignKeyConstraint baseColumnNames="idPrivilege" baseTableName="roles_privileges" baseTableSchemaName="kinton" constraintName="fk_roles_privileges_privileges" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="idPrivilege" referencedTableName="privilege" referencedTableSchemaName="kinton" referencesUniqueColumn="false"/>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-143">
+        <addForeignKeyConstraint baseColumnNames="idRole" baseTableName="roles_privileges" baseTableSchemaName="kinton" constraintName="fk_roles_privileges_role" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="idRole" referencedTableName="role" referencedTableSchemaName="kinton" referencesUniqueColumn="false"/>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-144">
+        <addForeignKeyConstraint baseColumnNames="idUser" baseTableName="session" baseTableSchemaName="kinton" constraintName="fk_session_user" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="idUser" referencedTableName="user" referencedTableSchemaName="kinton" referencesUniqueColumn="false"/>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-145">
+        <addForeignKeyConstraint baseColumnNames="idDataCenter" baseTableName="storage_device" baseTableSchemaName="kinton" constraintName="storage_device_FK_1" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" onUpdate="NO ACTION" referencedColumnNames="idDataCenter" referencedTableName="datacenter" referencedTableSchemaName="kinton" referencesUniqueColumn="false"/>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-146">
+        <addForeignKeyConstraint baseColumnNames="idStorageDevice" baseTableName="storage_pool" baseTableSchemaName="kinton" constraintName="storage_pool_FK1" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="storage_device" referencedTableSchemaName="kinton" referencesUniqueColumn="false"/>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-147">
+        <addForeignKeyConstraint baseColumnNames="idTier" baseTableName="storage_pool" baseTableSchemaName="kinton" constraintName="storage_pool_FK2" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="tier" referencedTableSchemaName="kinton" referencesUniqueColumn="false"/>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-148">
+        <addForeignKeyConstraint baseColumnNames="idDataCenter" baseTableName="tier" baseTableSchemaName="kinton" constraintName="tier_FK_1" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" onUpdate="NO ACTION" referencedColumnNames="idDataCenter" referencedTableName="datacenter" referencedTableSchemaName="kinton" referencesUniqueColumn="false"/>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-149">
+        <addForeignKeyConstraint baseColumnNames="idRack" baseTableName="ucs_rack" baseTableSchemaName="kinton" constraintName="id_rack_FK" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" onUpdate="NO ACTION" referencedColumnNames="idRack" referencedTableName="rack" referencedTableSchemaName="kinton" referencesUniqueColumn="false"/>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-150">
+        <addForeignKeyConstraint baseColumnNames="idEnterprise" baseTableName="user" baseTableSchemaName="kinton" constraintName="FK1_user" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="idEnterprise" referencedTableName="enterprise" referencedTableSchemaName="kinton" referencesUniqueColumn="false"/>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-151">
+        <addForeignKeyConstraint baseColumnNames="idRole" baseTableName="user" baseTableSchemaName="kinton" constraintName="User_FK1" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="idRole" referencedTableName="role" referencedTableSchemaName="kinton" referencesUniqueColumn="false"/>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-152">
+        <addForeignKeyConstraint baseColumnNames="idUser" baseTableName="vappstateful_conversions" baseTableSchemaName="kinton" constraintName="idUser_FK3" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" onUpdate="NO ACTION" referencedColumnNames="idUser" referencedTableName="user" referencedTableSchemaName="kinton" referencesUniqueColumn="false"/>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-153">
+        <addForeignKeyConstraint baseColumnNames="idVirtualApp" baseTableName="vappstateful_conversions" baseTableSchemaName="kinton" constraintName="idVirtualApp_FK3" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" onUpdate="NO ACTION" referencedColumnNames="idVirtualApp" referencedTableName="virtualapp" referencedTableSchemaName="kinton" referencesUniqueColumn="false"/>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-154">
+        <addForeignKeyConstraint baseColumnNames="idConversion" baseTableName="virtual_appliance_conversions" baseTableSchemaName="kinton" constraintName="virtualimage_conversions_FK" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="virtualimage_conversions" referencedTableSchemaName="kinton" referencesUniqueColumn="false"/>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-155">
+        <addForeignKeyConstraint baseColumnNames="idNode" baseTableName="virtual_appliance_conversions" baseTableSchemaName="kinton" constraintName="virtual_appliance_conversions_node_FK" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="idNode" referencedTableName="nodevirtualimage" referencedTableSchemaName="kinton" referencesUniqueColumn="false"/>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-156">
+        <addForeignKeyConstraint baseColumnNames="idUser" baseTableName="virtual_appliance_conversions" baseTableSchemaName="kinton" constraintName="user_FK" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="idUser" referencedTableName="user" referencedTableSchemaName="kinton" referencesUniqueColumn="false"/>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-157">
+        <addForeignKeyConstraint baseColumnNames="idVirtualAppliance" baseTableName="virtual_appliance_conversions" baseTableSchemaName="kinton" constraintName="virtualapp_FK" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" onUpdate="NO ACTION" referencedColumnNames="idVirtualApp" referencedTableName="virtualapp" referencedTableSchemaName="kinton" referencesUniqueColumn="false"/>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-158">
+        <addForeignKeyConstraint baseColumnNames="idEnterprise" baseTableName="virtualapp" baseTableSchemaName="kinton" constraintName="VirtualApp_FK5" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="idEnterprise" referencedTableName="enterprise" referencedTableSchemaName="kinton" referencesUniqueColumn="false"/>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-159">
+        <addForeignKeyConstraint baseColumnNames="idVirtualDataCenter" baseTableName="virtualapp" baseTableSchemaName="kinton" constraintName="VirtualApp_FK4" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" onUpdate="NO ACTION" referencedColumnNames="idVirtualDataCenter" referencedTableName="virtualdatacenter" referencedTableSchemaName="kinton" referencesUniqueColumn="false"/>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-160">
+        <addForeignKeyConstraint baseColumnNames="default_vlan_network_id" baseTableName="virtualdatacenter" baseTableSchemaName="kinton" constraintName="virtualDataCenter_FK7" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="vlan_network_id" referencedTableName="vlan_network" referencedTableSchemaName="kinton" referencesUniqueColumn="false"/>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-161">
+        <addForeignKeyConstraint baseColumnNames="idDataCenter" baseTableName="virtualdatacenter" baseTableSchemaName="kinton" constraintName="virtualDataCenter_FK6" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="idDataCenter" referencedTableName="datacenter" referencedTableSchemaName="kinton" referencesUniqueColumn="false"/>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-162">
+        <addForeignKeyConstraint baseColumnNames="idEnterprise" baseTableName="virtualdatacenter" baseTableSchemaName="kinton" constraintName="virtualDataCenter_FK1" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="idEnterprise" referencedTableName="enterprise" referencedTableSchemaName="kinton" referencesUniqueColumn="false"/>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-163">
+        <addForeignKeyConstraint baseColumnNames="networktypeID" baseTableName="virtualdatacenter" baseTableSchemaName="kinton" constraintName="virtualDataCenter_FK4" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="network_id" referencedTableName="network" referencedTableSchemaName="kinton" referencesUniqueColumn="false"/>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-164">
+        <addForeignKeyConstraint baseColumnNames="idCategory" baseTableName="virtualimage" baseTableSchemaName="kinton" constraintName="fk_virtualimage_category" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="idCategory" referencedTableName="category" referencedTableSchemaName="kinton" referencesUniqueColumn="false"/>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-165">
+        <addForeignKeyConstraint baseColumnNames="idEnterprise" baseTableName="virtualimage" baseTableSchemaName="kinton" constraintName="virtualImage_FK9" deferrable="false" initiallyDeferred="false" onDelete="SET NULL" onUpdate="NO ACTION" referencedColumnNames="idEnterprise" referencedTableName="enterprise" referencedTableSchemaName="kinton" referencesUniqueColumn="false"/>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-166">
+        <addForeignKeyConstraint baseColumnNames="idMaster" baseTableName="virtualimage" baseTableSchemaName="kinton" constraintName="virtualImage_FK8" deferrable="false" initiallyDeferred="false" onDelete="SET NULL" onUpdate="NO ACTION" referencedColumnNames="idImage" referencedTableName="virtualimage" referencedTableSchemaName="kinton" referencesUniqueColumn="false"/>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-167">
+        <addForeignKeyConstraint baseColumnNames="idRepository" baseTableName="virtualimage" baseTableSchemaName="kinton" constraintName="virtualImage_FK3" deferrable="false" initiallyDeferred="false" onDelete="SET NULL" onUpdate="NO ACTION" referencedColumnNames="idRepository" referencedTableName="repository" referencedTableSchemaName="kinton" referencesUniqueColumn="false"/>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-168">
+        <addForeignKeyConstraint baseColumnNames="idImage" baseTableName="virtualimage_conversions" baseTableSchemaName="kinton" constraintName="idImage_FK" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" onUpdate="NO ACTION" referencedColumnNames="idImage" referencedTableName="virtualimage" referencedTableSchemaName="kinton" referencesUniqueColumn="false"/>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-169">
+        <addForeignKeyConstraint baseColumnNames="idConversion" baseTableName="virtualmachine" baseTableSchemaName="kinton" constraintName="virtualmachine_conversion_FK" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="virtualimage_conversions" referencedTableSchemaName="kinton" referencesUniqueColumn="false"/>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-170">
+        <addForeignKeyConstraint baseColumnNames="idDatastore" baseTableName="virtualmachine" baseTableSchemaName="kinton" constraintName="virtualMachine_datastore_FK" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="idDatastore" referencedTableName="datastore" referencedTableSchemaName="kinton" referencesUniqueColumn="false"/>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-171">
+        <addForeignKeyConstraint baseColumnNames="idEnterprise" baseTableName="virtualmachine" baseTableSchemaName="kinton" constraintName="virtualMachine_FK5" deferrable="false" initiallyDeferred="false" onDelete="SET NULL" onUpdate="NO ACTION" referencedColumnNames="idEnterprise" referencedTableName="enterprise" referencedTableSchemaName="kinton" referencesUniqueColumn="false"/>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-172">
+        <addForeignKeyConstraint baseColumnNames="idHypervisor" baseTableName="virtualmachine" baseTableSchemaName="kinton" constraintName="virtualMachine_FK1" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="hypervisor" referencedTableSchemaName="kinton" referencesUniqueColumn="false"/>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-173">
+        <addForeignKeyConstraint baseColumnNames="idImage" baseTableName="virtualmachine" baseTableSchemaName="kinton" constraintName="virtualMachine_FK3" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="idImage" referencedTableName="virtualimage" referencedTableSchemaName="kinton" referencesUniqueColumn="false"/>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-174">
+        <addForeignKeyConstraint baseColumnNames="idUser" baseTableName="virtualmachine" baseTableSchemaName="kinton" constraintName="virtualMachine_FK4" deferrable="false" initiallyDeferred="false" onDelete="SET NULL" onUpdate="NO ACTION" referencedColumnNames="idUser" referencedTableName="user" referencedTableSchemaName="kinton" referencesUniqueColumn="false"/>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-175">
+        <addForeignKeyConstraint baseColumnNames="network_configuration_id" baseTableName="virtualmachine" baseTableSchemaName="kinton" constraintName="virtualMachine_FK6" deferrable="false" initiallyDeferred="false" onDelete="SET NULL" onUpdate="NO ACTION" referencedColumnNames="network_configuration_id" referencedTableName="network_configuration" referencedTableSchemaName="kinton" referencesUniqueColumn="false"/>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-176">
+        <addForeignKeyConstraint baseColumnNames="idVM" baseTableName="virtualmachinetrackedstate" baseTableSchemaName="kinton" constraintName="VirtualMachineTrackedState_FK1" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" onUpdate="NO ACTION" referencedColumnNames="idVM" referencedTableName="virtualmachine" referencedTableSchemaName="kinton" referencesUniqueColumn="false"/>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-177">
+        <addForeignKeyConstraint baseColumnNames="enterprise_id" baseTableName="vlan_network" baseTableSchemaName="kinton" constraintName="vlannetwork_enterprise_FK" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="idEnterprise" referencedTableName="enterprise" referencedTableSchemaName="kinton" referencesUniqueColumn="false"/>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-178">
+        <addForeignKeyConstraint baseColumnNames="network_configuration_id" baseTableName="vlan_network" baseTableSchemaName="kinton" constraintName="vlannetwork_configuration_FK" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="network_configuration_id" referencedTableName="network_configuration" referencedTableSchemaName="kinton" referencesUniqueColumn="false"/>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-179">
+        <addForeignKeyConstraint baseColumnNames="network_id" baseTableName="vlan_network" baseTableSchemaName="kinton" constraintName="vlannetwork_network_FK" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" onUpdate="NO ACTION" referencedColumnNames="network_id" referencedTableName="network" referencedTableSchemaName="kinton" referencesUniqueColumn="false"/>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-180">
+        <addForeignKeyConstraint baseColumnNames="idRack" baseTableName="vlan_network_assignment" baseTableSchemaName="kinton" constraintName="vlan_network_assignment_idRack_FK" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" onUpdate="NO ACTION" referencedColumnNames="idRack" referencedTableName="rack" referencedTableSchemaName="kinton" referencesUniqueColumn="false"/>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-181">
+        <addForeignKeyConstraint baseColumnNames="idVirtualDataCenter" baseTableName="vlan_network_assignment" baseTableSchemaName="kinton" constraintName="vlan_network_assignment_idVirtualDataCenter_FK" deferrable="false" initiallyDeferred="false" onDelete="SET NULL" onUpdate="NO ACTION" referencedColumnNames="idVirtualDataCenter" referencedTableName="virtualdatacenter" referencedTableSchemaName="kinton" referencesUniqueColumn="false"/>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-182">
+        <addForeignKeyConstraint baseColumnNames="vlan_network_id" baseTableName="vlan_network_assignment" baseTableSchemaName="kinton" constraintName="vlan_network_assignment_networkid_FK" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" onUpdate="NO ACTION" referencedColumnNames="vlan_network_id" referencedTableName="vlan_network" referencedTableSchemaName="kinton" referencesUniqueColumn="false"/>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-183">
+        <addForeignKeyConstraint baseColumnNames="idDhcpOption" baseTableName="vlans_dhcpOption" baseTableSchemaName="kinton" constraintName="fk_vlans_dhcp_dhcp" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="idDhcpOption" referencedTableName="dhcpOption" referencedTableSchemaName="kinton" referencesUniqueColumn="false"/>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-184">
+        <addForeignKeyConstraint baseColumnNames="idVlan" baseTableName="vlans_dhcpOption" baseTableSchemaName="kinton" constraintName="fk_vlans_dhcp_vlan" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="vlan_network_id" referencedTableName="vlan_network" referencedTableSchemaName="kinton" referencesUniqueColumn="false"/>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-185">
+        <addForeignKeyConstraint baseColumnNames="idImage" baseTableName="volume_management" baseTableSchemaName="kinton" constraintName="volumemanagement_FK3" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" onUpdate="NO ACTION" referencedColumnNames="idImage" referencedTableName="virtualimage" referencedTableSchemaName="kinton" referencesUniqueColumn="false"/>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-186">
+        <addForeignKeyConstraint baseColumnNames="idManagement" baseTableName="volume_management" baseTableSchemaName="kinton" constraintName="idManagement_FK" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" onUpdate="NO ACTION" referencedColumnNames="idManagement" referencedTableName="rasd_management" referencedTableSchemaName="kinton" referencesUniqueColumn="false"/>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-187">
+        <addForeignKeyConstraint baseColumnNames="idStorage" baseTableName="volume_management" baseTableSchemaName="kinton" constraintName="idStorage_FK" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" onUpdate="NO ACTION" referencedColumnNames="idStorage" referencedTableName="storage_pool" referencedTableSchemaName="kinton" referencesUniqueColumn="false"/>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-188">
+        <addForeignKeyConstraint baseColumnNames="idEnterprise1" baseTableName="workload_enterprise_exclusion_rule" baseTableSchemaName="kinton" constraintName="FK_eerule_enterprise_1" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" onUpdate="NO ACTION" referencedColumnNames="idEnterprise" referencedTableName="enterprise" referencedTableSchemaName="kinton" referencesUniqueColumn="false"/>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-189">
+        <addForeignKeyConstraint baseColumnNames="idEnterprise2" baseTableName="workload_enterprise_exclusion_rule" baseTableSchemaName="kinton" constraintName="FK_eerule_enterprise_2" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" onUpdate="NO ACTION" referencedColumnNames="idEnterprise" referencedTableName="enterprise" referencedTableSchemaName="kinton" referencesUniqueColumn="false"/>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-190">
+        <addForeignKeyConstraint baseColumnNames="idDatacenter" baseTableName="workload_fit_policy_rule" baseTableSchemaName="kinton" constraintName="FK_fprule_datacenter" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" onUpdate="NO ACTION" referencedColumnNames="idDataCenter" referencedTableName="datacenter" referencedTableSchemaName="kinton" referencesUniqueColumn="false"/>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-191">
+        <addForeignKeyConstraint baseColumnNames="idDatacenter" baseTableName="workload_machine_load_rule" baseTableSchemaName="kinton" constraintName="FK_mlrule_datacenter" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="idDataCenter" referencedTableName="datacenter" referencedTableSchemaName="kinton" referencesUniqueColumn="false"/>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-192">
+        <addForeignKeyConstraint baseColumnNames="idMachine" baseTableName="workload_machine_load_rule" baseTableSchemaName="kinton" constraintName="FK_mlrule_machine" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="idPhysicalMachine" referencedTableName="physicalmachine" referencedTableSchemaName="kinton" referencesUniqueColumn="false"/>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-193">
+        <addForeignKeyConstraint baseColumnNames="idRack" baseTableName="workload_machine_load_rule" baseTableSchemaName="kinton" constraintName="FK_mlrule_rack" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="idRack" referencedTableName="rack" referencedTableSchemaName="kinton" referencesUniqueColumn="false"/>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-194">
+        <createIndex indexName="name" tableName="category" unique="true">
+            <column name="name"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-195">
+        <createIndex indexName="user_auth_idx" tableName="user" unique="true">
+            <column name="user"/>
+            <column name="authType"/>
+        </createIndex>
+    </changeSet>
+<changeSet author="destevezg (generated)" id="1335522742615-197">
+        <createView viewName="HOURLY_USAGE_MAX_VW">select `kinton`.`accounting_event_detail`.`startTime` AS `startTime`,`kinton`.`accounting_event_detail`.`endTime` AS `endTime`,`kinton`.`accounting_event_detail`.`idAccountingResourceType` AS `idAccountingResourceType`,`kinton`.`accounting_event_detail`.`resourceType` AS `resourceType`,`kinton`.`accounting_event_detail`.`resourceName` AS `resourceName`,max(`kinton`.`accounting_event_detail`.`resourceUnits`) AS `resourceUnits`,`kinton`.`accounting_event_detail`.`idEnterprise` AS `idEnterprise`,`kinton`.`accounting_event_detail`.`idVirtualDataCenter` AS `idVirtualDataCenter`,`kinton`.`accounting_event_detail`.`idVirtualApp` AS `idVirtualApp`,`kinton`.`accounting_event_detail`.`idVirtualMachine` AS `idVirtualMachine`,`kinton`.`accounting_event_detail`.`enterpriseName` AS `enterpriseName`,`kinton`.`accounting_event_detail`.`virtualDataCenter` AS `virtualDataCenter`,`kinton`.`accounting_event_detail`.`virtualApp` AS `virtualApp`,`kinton`.`accounting_event_detail`.`virtualMachine` AS `virtualMachine` from `kinton`.`accounting_event_detail` group by `kinton`.`accounting_event_detail`.`startTime`,`kinton`.`accounting_event_detail`.`endTime`,`kinton`.`accounting_event_detail`.`idAccountingResourceType`,`kinton`.`accounting_event_detail`.`resourceType`,`kinton`.`accounting_event_detail`.`resourceName`,`kinton`.`accounting_event_detail`.`idEnterprise`,`kinton`.`accounting_event_detail`.`idVirtualDataCenter`,`kinton`.`accounting_event_detail`.`idVirtualApp`,`kinton`.`accounting_event_detail`.`idVirtualMachine`,`kinton`.`accounting_event_detail`.`enterpriseName`,`kinton`.`accounting_event_detail`.`virtualDataCenter`,`kinton`.`accounting_event_detail`.`virtualApp`,`kinton`.`accounting_event_detail`.`virtualMachine`</createView>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-196">
+        <createView viewName="DAILY_USAGE_SUM_VW">select cast(`v`.`startTime` as date) AS `startTime`,cast(`v`.`startTime` as date) AS `endTime`,`v`.`idAccountingResourceType` AS `idAccountingResourceType`,`v`.`resourceType` AS `resourceType`,sum(`v`.`resourceUnits`) AS `resourceUnits`,`v`.`idEnterprise` AS `idEnterprise`,`v`.`idVirtualDataCenter` AS `idVirtualDataCenter`,`v`.`enterpriseName` AS `enterpriseName`,`v`.`virtualDataCenter` AS `virtualDataCenter` from `kinton`.`HOURLY_USAGE_MAX_VW` `v` group by cast(`v`.`startTime` as date),`v`.`idAccountingResourceType`,`v`.`resourceType`,`v`.`idEnterprise`,`v`.`idVirtualDataCenter`,`v`.`enterpriseName`,`v`.`virtualDataCenter`</createView>
+    </changeSet>    
+    <changeSet author="destevezg (generated)" id="1335522742615-198">
+        <createView viewName="HOURLY_USAGE_SUM_VW">select `v`.`startTime` AS `startTime`,`v`.`endTime` AS `endTime`,`v`.`idAccountingResourceType` AS `idAccountingResourceType`,`v`.`resourceType` AS `resourceType`,sum(`v`.`resourceUnits`) AS `resourceUnits`,`v`.`idEnterprise` AS `idEnterprise`,`v`.`idVirtualDataCenter` AS `idVirtualDataCenter`,`v`.`enterpriseName` AS `enterpriseName`,`v`.`virtualDataCenter` AS `virtualDataCenter` from `kinton`.`HOURLY_USAGE_MAX_VW` `v` group by `v`.`startTime`,`v`.`endTime`,`v`.`idAccountingResourceType`,`v`.`resourceType`,`v`.`idEnterprise`,`v`.`idVirtualDataCenter`,`v`.`enterpriseName`,`v`.`virtualDataCenter`</createView>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-199">
+        <createView viewName="LAST_HOUR_USAGE_IPS_VW">select `kinton`.`accounting_event_ips`.`idIPsAccountingEvent` AS `idIPsAccountingEvent`,`kinton`.`accounting_event_ips`.`idEnterprise` AS `idEnterprise`,`kinton`.`accounting_event_ips`.`idVirtualDataCenter` AS `idVirtualDataCenter`,`kinton`.`accounting_event_ips`.`ip` AS `ip`,`kinton`.`accounting_event_ips`.`startTime` AS `startTime`,`kinton`.`accounting_event_ips`.`stopTime` AS `stopTime`,(unix_timestamp(`kinton`.`accounting_event_ips`.`stopTime`) - unix_timestamp(`kinton`.`accounting_event_ips`.`startTime`)) AS `DELTA_TIME`,from_unixtime((-(3600) + (truncate((unix_timestamp(now()) / 3600),0) * 3600))) AS `ROUNDED_HOUR`,`kinton`.`virtualdatacenter`.`name` AS `VIRTUAL_DATACENTER`,`kinton`.`enterprise`.`name` AS `VIRTUAL_ENTERPRISE` from ((`kinton`.`accounting_event_ips` join `kinton`.`virtualdatacenter` on((`kinton`.`accounting_event_ips`.`idVirtualDataCenter` = `kinton`.`virtualdatacenter`.`idVirtualDataCenter`))) join `kinton`.`enterprise` on((`kinton`.`accounting_event_ips`.`idEnterprise` = `kinton`.`enterprise`.`idEnterprise`))) where (isnull(`kinton`.`accounting_event_ips`.`stopTime`) or ((`kinton`.`accounting_event_ips`.`stopTime` &gt; from_unixtime((-(3600) + (truncate((unix_timestamp(now()) / 3600),0) * 3600)))) and ((unix_timestamp(`kinton`.`accounting_event_ips`.`stopTime`) - unix_timestamp(`kinton`.`accounting_event_ips`.`startTime`)) &gt; 3600)) or ((`kinton`.`accounting_event_ips`.`startTime` &gt; from_unixtime((-(3600) + (truncate((unix_timestamp(now()) / 3600),0) * 3600)))) and ((unix_timestamp(`kinton`.`accounting_event_ips`.`stopTime`) - unix_timestamp(`kinton`.`accounting_event_ips`.`startTime`)) &lt;= 3600)))</createView>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-200">
+        <createView viewName="LAST_HOUR_USAGE_STORAGE_VW">select `kinton`.`accounting_event_storage`.`idStorageAccountingEvent` AS `idStorageAccountingEvent`,`kinton`.`accounting_event_storage`.`idVM` AS `idVM`,`kinton`.`accounting_event_storage`.`idEnterprise` AS `idEnterprise`,`kinton`.`accounting_event_storage`.`idVirtualDataCenter` AS `idVirtualDataCenter`,`kinton`.`accounting_event_storage`.`idVirtualApp` AS `idVirtualApp`,`kinton`.`accounting_event_storage`.`idResource` AS `idResource`,`kinton`.`accounting_event_storage`.`resourceName` AS `resourceName`,`kinton`.`accounting_event_storage`.`idStorageTier` AS `idStorageTier`,`kinton`.`accounting_event_storage`.`sizeReserved` AS `sizeReserved`,`kinton`.`accounting_event_storage`.`startTime` AS `startTime`,`kinton`.`accounting_event_storage`.`stopTime` AS `stopTime`,(unix_timestamp(`kinton`.`accounting_event_storage`.`stopTime`) - unix_timestamp(`kinton`.`accounting_event_storage`.`startTime`)) AS `DELTA_TIME`,from_unixtime((-(3600) + (truncate((unix_timestamp(now()) / 3600),0) * 3600))) AS `ROUNDED_HOUR`,`kinton`.`virtualdatacenter`.`name` AS `VIRTUAL_DATACENTER`,`kinton`.`enterprise`.`name` AS `VIRTUAL_ENTERPRISE` from ((`kinton`.`accounting_event_storage` join `kinton`.`virtualdatacenter` on((`kinton`.`accounting_event_storage`.`idVirtualDataCenter` = `kinton`.`virtualdatacenter`.`idVirtualDataCenter`))) join `kinton`.`enterprise` on((`kinton`.`accounting_event_storage`.`idEnterprise` = `kinton`.`enterprise`.`idEnterprise`))) where (isnull(`kinton`.`accounting_event_storage`.`stopTime`) or ((`kinton`.`accounting_event_storage`.`stopTime` &gt; from_unixtime((-(3600) + (truncate((unix_timestamp(now()) / 3600),0) * 3600)))) and ((unix_timestamp(`kinton`.`accounting_event_storage`.`stopTime`) - unix_timestamp(`kinton`.`accounting_event_storage`.`startTime`)) &gt; 3600)) or ((`kinton`.`accounting_event_storage`.`startTime` &gt; from_unixtime((-(3600) + (truncate((unix_timestamp(now()) / 3600),0) * 3600)))) and ((unix_timestamp(`kinton`.`accounting_event_storage`.`stopTime`) - unix_timestamp(`kinton`.`accounting_event_storage`.`startTime`)) &lt;= 3600)))</createView>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-201">
+        <createView viewName="LAST_HOUR_USAGE_VLAN_VW">select `kinton`.`accounting_event_vlan`.`idVLANAccountingEvent` AS `idVLANAccountingEvent`,`kinton`.`accounting_event_vlan`.`idEnterprise` AS `idEnterprise`,`kinton`.`accounting_event_vlan`.`idVirtualDataCenter` AS `idVirtualDataCenter`,`kinton`.`accounting_event_vlan`.`network_name` AS `networkName`,`kinton`.`accounting_event_vlan`.`startTime` AS `startTime`,`kinton`.`accounting_event_vlan`.`stopTime` AS `stopTime`,(unix_timestamp(`kinton`.`accounting_event_vlan`.`stopTime`) - unix_timestamp(`kinton`.`accounting_event_vlan`.`startTime`)) AS `DELTA_TIME`,from_unixtime((-(3600) + (truncate((unix_timestamp(now()) / 3600),0) * 3600))) AS `ROUNDED_HOUR`,`kinton`.`virtualdatacenter`.`name` AS `VIRTUAL_DATACENTER`,`kinton`.`enterprise`.`name` AS `VIRTUAL_ENTERPRISE` from ((`kinton`.`accounting_event_vlan` join `kinton`.`virtualdatacenter` on((`kinton`.`accounting_event_vlan`.`idVirtualDataCenter` = `kinton`.`virtualdatacenter`.`idVirtualDataCenter`))) join `kinton`.`enterprise` on((`kinton`.`accounting_event_vlan`.`idEnterprise` = `kinton`.`enterprise`.`idEnterprise`))) where (isnull(`kinton`.`accounting_event_vlan`.`stopTime`) or ((`kinton`.`accounting_event_vlan`.`stopTime` &gt; from_unixtime((-(3600) + (truncate((unix_timestamp(now()) / 3600),0) * 3600)))) and ((unix_timestamp(`kinton`.`accounting_event_vlan`.`stopTime`) - unix_timestamp(`kinton`.`accounting_event_vlan`.`startTime`)) &gt; 3600)) or ((`kinton`.`accounting_event_vlan`.`startTime` &gt; from_unixtime((-(3600) + (truncate((unix_timestamp(now()) / 3600),0) * 3600)))) and ((unix_timestamp(`kinton`.`accounting_event_vlan`.`stopTime`) - unix_timestamp(`kinton`.`accounting_event_vlan`.`startTime`)) &lt;= 3600)))</createView>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-202">
+        <createView viewName="LAST_HOUR_USAGE_VM_VW">select `kinton`.`accounting_event_vm`.`idVMAccountingEvent` AS `idVMAccountingEvent`,`kinton`.`accounting_event_vm`.`idVM` AS `idVM`,`kinton`.`accounting_event_vm`.`idEnterprise` AS `idEnterprise`,`kinton`.`accounting_event_vm`.`idVirtualDataCenter` AS `idVirtualDataCenter`,`kinton`.`accounting_event_vm`.`idVirtualApp` AS `idVirtualApp`,`kinton`.`accounting_event_vm`.`cpu` AS `cpu`,`kinton`.`accounting_event_vm`.`ram` AS `ram`,`kinton`.`accounting_event_vm`.`hd` AS `hd`,`kinton`.`accounting_event_vm`.`startTime` AS `startTime`,`kinton`.`accounting_event_vm`.`stopTime` AS `stopTime`,`kinton`.`accounting_event_vm`.`costCode` AS `costCode`,`kinton`.`accounting_event_vm`.`hypervisorType` AS `hypervisorType`,(unix_timestamp(`kinton`.`accounting_event_vm`.`stopTime`) - unix_timestamp(`kinton`.`accounting_event_vm`.`startTime`)) AS `DELTA_TIME`,from_unixtime((-(3600) + (truncate((unix_timestamp(now()) / 3600),0) * 3600))) AS `ROUNDED_HOUR`,concat(if(isnull(`kinton`.`virtualmachine`.`description`),'',substr(`kinton`.`virtualmachine`.`description`,1,120)),' - ',`kinton`.`virtualmachine`.`name`) AS `VIRTUAL_MACHINE`,`kinton`.`virtualapp`.`name` AS `VIRTUAL_APP`,`kinton`.`virtualdatacenter`.`name` AS `VIRTUAL_DATACENTER`,`kinton`.`enterprise`.`name` AS `VIRTUAL_ENTERPRISE` from ((((`kinton`.`accounting_event_vm` join `kinton`.`virtualmachine` on((`kinton`.`accounting_event_vm`.`idVM` = `kinton`.`virtualmachine`.`idVM`))) join `kinton`.`virtualapp` on((`kinton`.`accounting_event_vm`.`idVirtualApp` = `kinton`.`virtualapp`.`idVirtualApp`))) join `kinton`.`virtualdatacenter` on((`kinton`.`accounting_event_vm`.`idVirtualDataCenter` = `kinton`.`virtualdatacenter`.`idVirtualDataCenter`))) join `kinton`.`enterprise` on((`kinton`.`accounting_event_vm`.`idEnterprise` = `kinton`.`enterprise`.`idEnterprise`))) where (isnull(`kinton`.`accounting_event_vm`.`stopTime`) or ((`kinton`.`accounting_event_vm`.`stopTime` &gt; from_unixtime((-(3600) + (truncate((unix_timestamp(now()) / 3600),0) * 3600)))) and ((unix_timestamp(`kinton`.`accounting_event_vm`.`stopTime`) - unix_timestamp(`kinton`.`accounting_event_vm`.`startTime`)) &gt; 3600)) or ((`kinton`.`accounting_event_vm`.`startTime` &gt; from_unixtime((-(3600) + (truncate((unix_timestamp(now()) / 3600),0) * 3600)))) and ((unix_timestamp(`kinton`.`accounting_event_vm`.`stopTime`) - unix_timestamp(`kinton`.`accounting_event_vm`.`startTime`)) &lt;= 3600)))</createView>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522742615-203">
+        <createView viewName="MONTHLY_USAGE_SUM_VW">select cast((`v`.`startTime` - interval (dayofmonth(`v`.`startTime`) - 1) day) as date) AS `startTime`,last_day(`v`.`startTime`) AS `endTime`,`v`.`idAccountingResourceType` AS `idAccountingResourceType`,`v`.`resourceType` AS `resourceType`,sum(`v`.`resourceUnits`) AS `resourceUnits`,`v`.`idEnterprise` AS `idEnterprise`,`v`.`idVirtualDataCenter` AS `idVirtualDataCenter`,`v`.`enterpriseName` AS `enterpriseName`,`v`.`virtualDataCenter` AS `virtualDataCenter` from `kinton`.`HOURLY_USAGE_MAX_VW` `v` group by cast((`v`.`startTime` - interval (dayofmonth(`v`.`startTime`) - 1) day) as date),`v`.`idAccountingResourceType`,`v`.`resourceType`,`v`.`idEnterprise`,`v`.`idVirtualDataCenter`,`v`.`enterpriseName`,`v`.`virtualDataCenter`</createView>
+    </changeSet>
+</databaseChangeLog>

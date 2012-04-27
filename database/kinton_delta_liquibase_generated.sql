@@ -2,7 +2,7 @@
 -- Update Database Script
 -- *********************************************************************
 -- Change Log: delta/2.0.0-HF1_new/deltachangelog.xml
--- Ran at: 4/27/12 12:18 PM
+-- Ran at: 4/27/12 12:47 PM
 -- Against: root@destevez.bcn.abiquo.com@jdbc:mysql://10.60.12.230:3306/kinton
 -- Liquibase version: 2.0.3
 -- *********************************************************************

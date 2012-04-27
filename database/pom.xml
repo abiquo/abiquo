@@ -121,7 +121,7 @@
 		<!-- TODO: Move all generated Scripts to /target -->
 		<migrationSqlOutputFile>kinton_liquibase_generated.sql</migrationSqlOutputFile>
 		<promptOnNonLocalDatabase>false</promptOnNonLocalDatabase>
-		<logLevel>severe</logLevel>
+		<!-- logLevel>severe</logLevel TODO: Notify Liquibase logLevel is logging-->
 <logging>severe</logging>
 		<verbose>false</verbose>
 	</configuration>
@@ -130,7 +130,7 @@
 		<id>sqlschemascript</id>
               <!-- will generate ${migrationSqlOutputFile}.sql  -->
 	      <!-- TODO: This step shouldn't be necessary on install phase -->
-	      <phase>generate-resources</phase>
+	      <phase>site</phase>
               <goals>
               <goal>updateSQL</goal>
               </goals>
@@ -140,7 +140,7 @@
 		<id>sqlDeltaScript</id>
               <!-- will generate ${migrationSqlOutputFile}.sql  -->
 	      <!-- TODO: This step shouldn't be necessary on install phase -->
-	      <phase>generate-resources</phase>
+	      <phase>site</phase>
               <goals>
               <goal>updateSQL</goal>
               </goals>
@@ -151,20 +151,18 @@
           </configuration>
 		</execution>
 <!-- TODO: Move all generated Scripts to /target -->
-<!--
 		<execution>
 		<id>testing</id>
 	      <phase>test</phase>
 		<configuration>
-		<defaultSchemaName>kinton_test</defaultSchemaName>
-	
+<url>jdbc:mysql://${devmachine}:3306/kinton_test</url>
+		<defaultSchemaName>kinton_test</defaultSchemaName>	
 		<migrationSqlOutputFile>kinton_test_liquibase_generated.sql</migrationSqlOutputFile>
           </configuration>
               <goals>
                 <goal>update</goal>
               </goals>
 		</execution>
--->
 	<execution>
 	<id>apply2DB</id>
 	      <phase>install</phase>

@@ -1,0 +1,1582 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+    <changeSet author="destevezg (generated)" id="1335522749701-1">
+        <insert tableName="enterprise_resources_stats">
+            <column name="idEnterprise" valueNumeric="1"/>
+            <column name="vCpuReserved" valueNumeric="0"/>
+            <column name="vCpuUsed" valueNumeric="0"/>
+            <column name="memoryReserved" valueNumeric="0"/>
+            <column name="memoryUsed" valueNumeric="0"/>
+            <column name="localStorageReserved" valueNumeric="0"/>
+            <column name="localStorageUsed" valueNumeric="0"/>
+            <column name="extStorageReserved" valueNumeric="0"/>
+            <column name="extStorageUsed" valueNumeric="0"/>
+            <column name="repositoryReserved" valueNumeric="0"/>
+            <column name="repositoryUsed" valueNumeric="0"/>
+            <column name="publicIPsReserved" valueNumeric="0"/>
+            <column name="publicIPsUsed" valueNumeric="0"/>
+            <column name="vlanReserved" valueNumeric="0"/>
+            <column name="vlanUsed" valueNumeric="0"/>
+            <column name="version_c" valueNumeric="1"/>
+        </insert>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522749701-2">
+        <insert tableName="apps_library">
+            <column name="id_apps_library" valueNumeric="1"/>
+            <column name="idEnterprise" valueNumeric="1"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522749701-3">
+        <insert tableName="license">
+            <column name="idLicense" valueNumeric="1"/>
+            <column name="data" value="BAmEs6WKlxr6gOzvjwQtwJah9GCm77qMZPhYC0MHoNkvn/Lu+6d3nkFdJO2ZsgIs/CNhpfV/3OMnnpGvHR668RGjh+dRUN8yDhbMvxGN7hAIYiiL1kl8Gt/uLYtlZOWUBqPdYSMjh9pNY0sKlfH5gIxavNWlu1Tp6fMzmgkioU4TfIixai+BwxYB5kihe1ZGhTR9mZ5HM4Tg6xn96CX1T8eGKiFrc0LBwzUaB4Rt2YNtvSfiyzl2xiBEqc2hhyhiOrvEYfPdmxSdDMt5wH/1pRbohavbTbVK0C+VDFcIKYi4DcbyFRvYWdj1WKQo8UMNuqx5tdyyOHoSoGnMToX94g=="/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522749701-4">
+        <insert tableName="privilege">
+            <column name="idPrivilege" valueNumeric="1"/>
+            <column name="name" value="ENTERPRISE_ENUMERATE"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="privilege">
+            <column name="idPrivilege" valueNumeric="2"/>
+            <column name="name" value="ENTERPRISE_ADMINISTER_ALL"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="privilege">
+            <column name="idPrivilege" valueNumeric="3"/>
+            <column name="name" value="ENTERPRISE_RESOURCE_SUMMARY_ENT"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="privilege">
+            <column name="idPrivilege" valueNumeric="4"/>
+            <column name="name" value="PHYS_DC_ENUMERATE"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="privilege">
+            <column name="idPrivilege" valueNumeric="5"/>
+            <column name="name" value="PHYS_DC_RETRIEVE_RESOURCE_USAGE"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="privilege">
+            <column name="idPrivilege" valueNumeric="6"/>
+            <column name="name" value="PHYS_DC_MANAGE"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="privilege">
+            <column name="idPrivilege" valueNumeric="7"/>
+            <column name="name" value="PHYS_DC_RETRIEVE_DETAILS"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="privilege">
+            <column name="idPrivilege" valueNumeric="8"/>
+            <column name="name" value="PHYS_DC_ALLOW_MODIFY_SERVERS"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="privilege">
+            <column name="idPrivilege" valueNumeric="9"/>
+            <column name="name" value="PHYS_DC_ALLOW_MODIFY_NETWORK"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="privilege">
+            <column name="idPrivilege" valueNumeric="10"/>
+            <column name="name" value="PHYS_DC_ALLOW_MODIFY_STORAGE"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="privilege">
+            <column name="idPrivilege" valueNumeric="11"/>
+            <column name="name" value="PHYS_DC_ALLOW_MODIFY_ALLOCATION"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="privilege">
+            <column name="idPrivilege" valueNumeric="12"/>
+            <column name="name" value="VDC_ENUMERATE"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="privilege">
+            <column name="idPrivilege" valueNumeric="13"/>
+            <column name="name" value="VDC_MANAGE"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="privilege">
+            <column name="idPrivilege" valueNumeric="14"/>
+            <column name="name" value="VDC_MANAGE_VAPP"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="privilege">
+            <column name="idPrivilege" valueNumeric="15"/>
+            <column name="name" value="VDC_MANAGE_NETWORK"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="privilege">
+            <column name="idPrivilege" valueNumeric="16"/>
+            <column name="name" value="VDC_MANAGE_STORAGE"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="privilege">
+            <column name="idPrivilege" valueNumeric="17"/>
+            <column name="name" value="VAPP_CUSTOMISE_SETTINGS"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="privilege">
+            <column name="idPrivilege" valueNumeric="18"/>
+            <column name="name" value="VAPP_DEPLOY_UNDEPLOY"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="privilege">
+            <column name="idPrivilege" valueNumeric="19"/>
+            <column name="name" value="VAPP_ASSIGN_NETWORK"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="privilege">
+            <column name="idPrivilege" valueNumeric="20"/>
+            <column name="name" value="VAPP_ASSIGN_VOLUME"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="privilege">
+            <column name="idPrivilege" valueNumeric="21"/>
+            <column name="name" value="VAPP_PERFORM_ACTIONS"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="privilege">
+            <column name="idPrivilege" valueNumeric="22"/>
+            <column name="name" value="VAPP_CREATE_STATEFUL"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="privilege">
+            <column name="idPrivilege" valueNumeric="23"/>
+            <column name="name" value="VAPP_CREATE_INSTANCE"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="privilege">
+            <column name="idPrivilege" valueNumeric="24"/>
+            <column name="name" value="APPLIB_VIEW"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="privilege">
+            <column name="idPrivilege" valueNumeric="25"/>
+            <column name="name" value="APPLIB_ALLOW_MODIFY"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="privilege">
+            <column name="idPrivilege" valueNumeric="26"/>
+            <column name="name" value="APPLIB_UPLOAD_IMAGE"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="privilege">
+            <column name="idPrivilege" valueNumeric="27"/>
+            <column name="name" value="APPLIB_MANAGE_REPOSITORY"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="privilege">
+            <column name="idPrivilege" valueNumeric="28"/>
+            <column name="name" value="APPLIB_DOWNLOAD_IMAGE"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="privilege">
+            <column name="idPrivilege" valueNumeric="29"/>
+            <column name="name" value="APPLIB_MANAGE_CATEGORIES"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="privilege">
+            <column name="idPrivilege" valueNumeric="30"/>
+            <column name="name" value="USERS_VIEW"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="privilege">
+            <column name="idPrivilege" valueNumeric="31"/>
+            <column name="name" value="USERS_MANAGE_ENTERPRISE"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="privilege">
+            <column name="idPrivilege" valueNumeric="32"/>
+            <column name="name" value="USERS_MANAGE_USERS"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="privilege">
+            <column name="idPrivilege" valueNumeric="33"/>
+            <column name="name" value="USERS_MANAGE_OTHER_ENTERPRISES"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="privilege">
+            <column name="idPrivilege" valueNumeric="34"/>
+            <column name="name" value="USERS_PROHIBIT_VDC_RESTRICTION"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="privilege">
+            <column name="idPrivilege" valueNumeric="35"/>
+            <column name="name" value="USERS_VIEW_PRIVILEGES"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="privilege">
+            <column name="idPrivilege" valueNumeric="36"/>
+            <column name="name" value="USERS_MANAGE_ROLES"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="privilege">
+            <column name="idPrivilege" valueNumeric="37"/>
+            <column name="name" value="USERS_MANAGE_ROLES_OTHER_ENTERPRISES"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="privilege">
+            <column name="idPrivilege" valueNumeric="38"/>
+            <column name="name" value="USERS_MANAGE_SYSTEM_ROLES"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="privilege">
+            <column name="idPrivilege" valueNumeric="39"/>
+            <column name="name" value="USERS_MANAGE_LDAP_GROUP"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="privilege">
+            <column name="idPrivilege" valueNumeric="40"/>
+            <column name="name" value="USERS_ENUMERATE_CONNECTED"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="privilege">
+            <column name="idPrivilege" valueNumeric="41"/>
+            <column name="name" value="SYSCONFIG_VIEW"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="privilege">
+            <column name="idPrivilege" valueNumeric="42"/>
+            <column name="name" value="SYSCONFIG_ALLOW_MODIFY"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="privilege">
+            <column name="idPrivilege" valueNumeric="43"/>
+            <column name="name" value="EVENTLOG_VIEW_ENTERPRISE"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="privilege">
+            <column name="idPrivilege" valueNumeric="44"/>
+            <column name="name" value="EVENTLOG_VIEW_ALL"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="privilege">
+            <column name="idPrivilege" valueNumeric="45"/>
+            <column name="name" value="APPLIB_VM_COST_CODE"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="privilege">
+            <column name="idPrivilege" valueNumeric="46"/>
+            <column name="name" value="USERS_MANAGE_ENTERPRISE_BRANDING"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="privilege">
+            <column name="idPrivilege" valueNumeric="47"/>
+            <column name="name" value="SYSCONFIG_SHOW_REPORTS"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="privilege">
+            <column name="idPrivilege" valueNumeric="48"/>
+            <column name="name" value="USERS_DEFINE_AS_MANAGER"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="privilege">
+            <column name="idPrivilege" valueNumeric="49"/>
+            <column name="name" value="PRICING_VIEW"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="privilege">
+            <column name="idPrivilege" valueNumeric="50"/>
+            <column name="name" value="PRICING_MANAGE"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522749701-5">
+        <insert tableName="enterprise">
+            <column name="idEnterprise" valueNumeric="1"/>
+            <column name="name" value="Abiquo"/>
+            <column name="ramSoft" valueNumeric="0"/>
+            <column name="cpuSoft" valueNumeric="0"/>
+            <column name="hdSoft" valueNumeric="0"/>
+            <column name="storageSoft" valueNumeric="0"/>
+            <column name="repositorySoft" valueNumeric="0"/>
+            <column name="vlanSoft" valueNumeric="0"/>
+            <column name="publicIPSoft" valueNumeric="0"/>
+            <column name="ramHard" valueNumeric="0"/>
+            <column name="cpuHard" valueNumeric="0"/>
+            <column name="hdHard" valueNumeric="0"/>
+            <column name="storageHard" valueNumeric="0"/>
+            <column name="repositoryHard" valueNumeric="0"/>
+            <column name="vlanHard" valueNumeric="0"/>
+            <column name="publicIPHard" valueNumeric="0"/>
+            <column name="chef_url"/>
+            <column name="chef_client"/>
+            <column name="chef_validator"/>
+            <column name="chef_client_certificate"/>
+            <column name="chef_validator_certificate"/>
+            <column name="isReservationRestricted" valueBoolean="false"/>
+            <column name="version_c" valueNumeric="1"/>
+            <column name="idPricingTemplate"/>
+        </insert>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522749701-6">
+        <insert tableName="workload_fit_policy_rule">
+            <column name="id" valueNumeric="0"/>
+            <column name="fitPolicy" value="PROGRESSIVE"/>
+            <column name="idDatacenter"/>
+            <column name="version_c" valueNumeric="1"/>
+        </insert>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522749701-7">
+        <insert tableName="cloud_usage_stats">
+            <column name="idDataCenter" valueNumeric="-1"/>
+            <column name="serversTotal" valueNumeric="0"/>
+            <column name="serversRunning" valueNumeric="0"/>
+            <column name="storageTotal" valueNumeric="0"/>
+            <column name="storageReserved" valueNumeric="0"/>
+            <column name="storageUsed" valueNumeric="0"/>
+            <column name="publicIPsTotal" valueNumeric="0"/>
+            <column name="publicIPsReserved" valueNumeric="0"/>
+            <column name="publicIPsUsed" valueNumeric="0"/>
+            <column name="vlanReserved" valueNumeric="0"/>
+            <column name="vlanUsed" valueNumeric="0"/>
+            <column name="vMachinesTotal" valueNumeric="0"/>
+            <column name="vMachinesRunning" valueNumeric="0"/>
+            <column name="vCpuTotal" valueNumeric="0"/>
+            <column name="vCpuReserved" valueNumeric="0"/>
+            <column name="vCpuUsed" valueNumeric="0"/>
+            <column name="vMemoryTotal" valueNumeric="0"/>
+            <column name="vMemoryReserved" valueNumeric="0"/>
+            <column name="vMemoryUsed" valueNumeric="0"/>
+            <column name="vStorageReserved" valueNumeric="0"/>
+            <column name="vStorageUsed" valueNumeric="0"/>
+            <column name="vStorageTotal" valueNumeric="0"/>
+            <column name="numUsersCreated" valueNumeric="2"/>
+            <column name="numVDCCreated" valueNumeric="0"/>
+            <column name="numEnterprisesCreated" valueNumeric="1"/>
+            <column name="version_c" valueNumeric="1"/>
+        </insert>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522749701-8">
+        <insert tableName="auth_group">
+            <column name="id" valueNumeric="1"/>
+            <column name="name" value="GENERIC"/>
+            <column name="description" value="Generic"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="auth_group">
+            <column name="id" valueNumeric="2"/>
+            <column name="name" value="MAIN"/>
+            <column name="description" value="Flex client main menu group"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="auth_group">
+            <column name="id" valueNumeric="3"/>
+            <column name="name" value="USER"/>
+            <column name="description" value="Flex and server Users Management"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="auth_group">
+            <column name="id" valueNumeric="4"/>
+            <column name="name" value="APPLIANCE_LIBRARY"/>
+            <column name="description" value="Flex and server Appliance Library Management"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522749701-9">
+        <insert tableName="auth_serverresource">
+            <column name="id" valueNumeric="1"/>
+            <column name="name" value="LOGIN"/>
+            <column name="description" value="Login Service"/>
+            <column name="idGroup" valueNumeric="1"/>
+            <column name="idRole" valueNumeric="2"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="auth_serverresource">
+            <column name="id" valueNumeric="2"/>
+            <column name="name" value="ENTERPRISE_GET_ALL_ENTERPRISES"/>
+            <column name="description" value="Security to retrieve the whole list of enterprises"/>
+            <column name="idGroup" valueNumeric="3"/>
+            <column name="idRole" valueNumeric="1"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="auth_serverresource">
+            <column name="id" valueNumeric="3"/>
+            <column name="name" value="ENTERPRISE_GET_ENTERPRISES"/>
+            <column name="description" value="Security to call method getEnterprises in UserCommand"/>
+            <column name="idGroup" valueNumeric="3"/>
+            <column name="idRole" valueNumeric="3"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="auth_serverresource">
+            <column name="id" valueNumeric="4"/>
+            <column name="name" value="USER_GETUSERS"/>
+            <column name="description" value="Security to call method getUsers in UserCommand"/>
+            <column name="idGroup" valueNumeric="3"/>
+            <column name="idRole" valueNumeric="3"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="auth_serverresource">
+            <column name="id" valueNumeric="5"/>
+            <column name="name" value="USER_GET_ALL_USERS"/>
+            <column name="description" value="Security to retrieve the whole list of users"/>
+            <column name="idGroup" valueNumeric="3"/>
+            <column name="idRole" valueNumeric="1"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522749701-10">
+        <insert tableName="enterprise_properties_map">
+            <column name="enterprise_properties" valueNumeric="1"/>
+            <column name="map_key" value="Support e-mail"/>
+            <column name="value" value="support@abiquo.com"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522749701-11">
+        <insert tableName="roles_privileges">
+            <column name="idRole" valueNumeric="1"/>
+            <column name="idPrivilege" valueNumeric="1"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="roles_privileges">
+            <column name="idRole" valueNumeric="1"/>
+            <column name="idPrivilege" valueNumeric="2"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="roles_privileges">
+            <column name="idRole" valueNumeric="1"/>
+            <column name="idPrivilege" valueNumeric="3"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="roles_privileges">
+            <column name="idRole" valueNumeric="1"/>
+            <column name="idPrivilege" valueNumeric="4"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="roles_privileges">
+            <column name="idRole" valueNumeric="1"/>
+            <column name="idPrivilege" valueNumeric="5"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="roles_privileges">
+            <column name="idRole" valueNumeric="1"/>
+            <column name="idPrivilege" valueNumeric="6"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="roles_privileges">
+            <column name="idRole" valueNumeric="1"/>
+            <column name="idPrivilege" valueNumeric="7"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="roles_privileges">
+            <column name="idRole" valueNumeric="1"/>
+            <column name="idPrivilege" valueNumeric="8"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="roles_privileges">
+            <column name="idRole" valueNumeric="1"/>
+            <column name="idPrivilege" valueNumeric="9"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="roles_privileges">
+            <column name="idRole" valueNumeric="1"/>
+            <column name="idPrivilege" valueNumeric="10"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="roles_privileges">
+            <column name="idRole" valueNumeric="1"/>
+            <column name="idPrivilege" valueNumeric="11"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="roles_privileges">
+            <column name="idRole" valueNumeric="1"/>
+            <column name="idPrivilege" valueNumeric="12"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="roles_privileges">
+            <column name="idRole" valueNumeric="1"/>
+            <column name="idPrivilege" valueNumeric="13"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="roles_privileges">
+            <column name="idRole" valueNumeric="1"/>
+            <column name="idPrivilege" valueNumeric="14"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="roles_privileges">
+            <column name="idRole" valueNumeric="1"/>
+            <column name="idPrivilege" valueNumeric="15"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="roles_privileges">
+            <column name="idRole" valueNumeric="1"/>
+            <column name="idPrivilege" valueNumeric="16"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="roles_privileges">
+            <column name="idRole" valueNumeric="1"/>
+            <column name="idPrivilege" valueNumeric="17"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="roles_privileges">
+            <column name="idRole" valueNumeric="1"/>
+            <column name="idPrivilege" valueNumeric="18"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="roles_privileges">
+            <column name="idRole" valueNumeric="1"/>
+            <column name="idPrivilege" valueNumeric="19"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="roles_privileges">
+            <column name="idRole" valueNumeric="1"/>
+            <column name="idPrivilege" valueNumeric="20"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="roles_privileges">
+            <column name="idRole" valueNumeric="1"/>
+            <column name="idPrivilege" valueNumeric="21"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="roles_privileges">
+            <column name="idRole" valueNumeric="1"/>
+            <column name="idPrivilege" valueNumeric="22"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="roles_privileges">
+            <column name="idRole" valueNumeric="1"/>
+            <column name="idPrivilege" valueNumeric="23"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="roles_privileges">
+            <column name="idRole" valueNumeric="1"/>
+            <column name="idPrivilege" valueNumeric="24"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="roles_privileges">
+            <column name="idRole" valueNumeric="1"/>
+            <column name="idPrivilege" valueNumeric="25"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="roles_privileges">
+            <column name="idRole" valueNumeric="1"/>
+            <column name="idPrivilege" valueNumeric="26"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="roles_privileges">
+            <column name="idRole" valueNumeric="1"/>
+            <column name="idPrivilege" valueNumeric="27"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="roles_privileges">
+            <column name="idRole" valueNumeric="1"/>
+            <column name="idPrivilege" valueNumeric="28"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="roles_privileges">
+            <column name="idRole" valueNumeric="1"/>
+            <column name="idPrivilege" valueNumeric="29"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="roles_privileges">
+            <column name="idRole" valueNumeric="1"/>
+            <column name="idPrivilege" valueNumeric="30"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="roles_privileges">
+            <column name="idRole" valueNumeric="1"/>
+            <column name="idPrivilege" valueNumeric="31"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="roles_privileges">
+            <column name="idRole" valueNumeric="1"/>
+            <column name="idPrivilege" valueNumeric="32"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="roles_privileges">
+            <column name="idRole" valueNumeric="1"/>
+            <column name="idPrivilege" valueNumeric="33"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="roles_privileges">
+            <column name="idRole" valueNumeric="1"/>
+            <column name="idPrivilege" valueNumeric="34"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="roles_privileges">
+            <column name="idRole" valueNumeric="1"/>
+            <column name="idPrivilege" valueNumeric="35"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="roles_privileges">
+            <column name="idRole" valueNumeric="1"/>
+            <column name="idPrivilege" valueNumeric="36"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="roles_privileges">
+            <column name="idRole" valueNumeric="1"/>
+            <column name="idPrivilege" valueNumeric="37"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="roles_privileges">
+            <column name="idRole" valueNumeric="1"/>
+            <column name="idPrivilege" valueNumeric="38"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="roles_privileges">
+            <column name="idRole" valueNumeric="1"/>
+            <column name="idPrivilege" valueNumeric="39"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="roles_privileges">
+            <column name="idRole" valueNumeric="1"/>
+            <column name="idPrivilege" valueNumeric="40"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="roles_privileges">
+            <column name="idRole" valueNumeric="1"/>
+            <column name="idPrivilege" valueNumeric="41"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="roles_privileges">
+            <column name="idRole" valueNumeric="1"/>
+            <column name="idPrivilege" valueNumeric="42"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="roles_privileges">
+            <column name="idRole" valueNumeric="1"/>
+            <column name="idPrivilege" valueNumeric="43"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="roles_privileges">
+            <column name="idRole" valueNumeric="1"/>
+            <column name="idPrivilege" valueNumeric="44"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="roles_privileges">
+            <column name="idRole" valueNumeric="1"/>
+            <column name="idPrivilege" valueNumeric="45"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="roles_privileges">
+            <column name="idRole" valueNumeric="1"/>
+            <column name="idPrivilege" valueNumeric="47"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="roles_privileges">
+            <column name="idRole" valueNumeric="1"/>
+            <column name="idPrivilege" valueNumeric="48"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="roles_privileges">
+            <column name="idRole" valueNumeric="1"/>
+            <column name="idPrivilege" valueNumeric="49"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="roles_privileges">
+            <column name="idRole" valueNumeric="1"/>
+            <column name="idPrivilege" valueNumeric="50"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="roles_privileges">
+            <column name="idRole" valueNumeric="3"/>
+            <column name="idPrivilege" valueNumeric="3"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="roles_privileges">
+            <column name="idRole" valueNumeric="3"/>
+            <column name="idPrivilege" valueNumeric="12"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="roles_privileges">
+            <column name="idRole" valueNumeric="3"/>
+            <column name="idPrivilege" valueNumeric="13"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="roles_privileges">
+            <column name="idRole" valueNumeric="3"/>
+            <column name="idPrivilege" valueNumeric="14"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="roles_privileges">
+            <column name="idRole" valueNumeric="3"/>
+            <column name="idPrivilege" valueNumeric="15"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="roles_privileges">
+            <column name="idRole" valueNumeric="3"/>
+            <column name="idPrivilege" valueNumeric="16"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="roles_privileges">
+            <column name="idRole" valueNumeric="3"/>
+            <column name="idPrivilege" valueNumeric="17"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="roles_privileges">
+            <column name="idRole" valueNumeric="3"/>
+            <column name="idPrivilege" valueNumeric="18"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="roles_privileges">
+            <column name="idRole" valueNumeric="3"/>
+            <column name="idPrivilege" valueNumeric="19"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="roles_privileges">
+            <column name="idRole" valueNumeric="3"/>
+            <column name="idPrivilege" valueNumeric="20"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="roles_privileges">
+            <column name="idRole" valueNumeric="3"/>
+            <column name="idPrivilege" valueNumeric="21"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="roles_privileges">
+            <column name="idRole" valueNumeric="3"/>
+            <column name="idPrivilege" valueNumeric="22"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="roles_privileges">
+            <column name="idRole" valueNumeric="3"/>
+            <column name="idPrivilege" valueNumeric="23"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="roles_privileges">
+            <column name="idRole" valueNumeric="3"/>
+            <column name="idPrivilege" valueNumeric="24"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="roles_privileges">
+            <column name="idRole" valueNumeric="3"/>
+            <column name="idPrivilege" valueNumeric="25"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="roles_privileges">
+            <column name="idRole" valueNumeric="3"/>
+            <column name="idPrivilege" valueNumeric="26"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="roles_privileges">
+            <column name="idRole" valueNumeric="3"/>
+            <column name="idPrivilege" valueNumeric="27"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="roles_privileges">
+            <column name="idRole" valueNumeric="3"/>
+            <column name="idPrivilege" valueNumeric="28"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="roles_privileges">
+            <column name="idRole" valueNumeric="3"/>
+            <column name="idPrivilege" valueNumeric="29"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="roles_privileges">
+            <column name="idRole" valueNumeric="3"/>
+            <column name="idPrivilege" valueNumeric="30"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="roles_privileges">
+            <column name="idRole" valueNumeric="3"/>
+            <column name="idPrivilege" valueNumeric="32"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="roles_privileges">
+            <column name="idRole" valueNumeric="3"/>
+            <column name="idPrivilege" valueNumeric="34"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="roles_privileges">
+            <column name="idRole" valueNumeric="3"/>
+            <column name="idPrivilege" valueNumeric="43"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="roles_privileges">
+            <column name="idRole" valueNumeric="3"/>
+            <column name="idPrivilege" valueNumeric="48"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="roles_privileges">
+            <column name="idRole" valueNumeric="2"/>
+            <column name="idPrivilege" valueNumeric="12"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="roles_privileges">
+            <column name="idRole" valueNumeric="2"/>
+            <column name="idPrivilege" valueNumeric="14"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="roles_privileges">
+            <column name="idRole" valueNumeric="2"/>
+            <column name="idPrivilege" valueNumeric="17"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="roles_privileges">
+            <column name="idRole" valueNumeric="2"/>
+            <column name="idPrivilege" valueNumeric="18"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="roles_privileges">
+            <column name="idRole" valueNumeric="2"/>
+            <column name="idPrivilege" valueNumeric="19"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="roles_privileges">
+            <column name="idRole" valueNumeric="2"/>
+            <column name="idPrivilege" valueNumeric="20"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="roles_privileges">
+            <column name="idRole" valueNumeric="2"/>
+            <column name="idPrivilege" valueNumeric="21"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="roles_privileges">
+            <column name="idRole" valueNumeric="2"/>
+            <column name="idPrivilege" valueNumeric="22"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="roles_privileges">
+            <column name="idRole" valueNumeric="2"/>
+            <column name="idPrivilege" valueNumeric="23"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="roles_privileges">
+            <column name="idRole" valueNumeric="2"/>
+            <column name="idPrivilege" valueNumeric="43"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522749701-12">
+        <insert tableName="role">
+            <column name="idRole" valueNumeric="1"/>
+            <column name="name" value="CLOUD_ADMIN"/>
+            <column name="idEnterprise"/>
+            <column name="blocked" valueBoolean="true"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="role">
+            <column name="idRole" valueNumeric="2"/>
+            <column name="name" value="USER"/>
+            <column name="idEnterprise"/>
+            <column name="blocked" valueBoolean="false"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="role">
+            <column name="idRole" valueNumeric="3"/>
+            <column name="name" value="ENTERPRISE_ADMIN"/>
+            <column name="idEnterprise"/>
+            <column name="blocked" valueBoolean="false"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522749701-13">
+        <insert tableName="enterprise_properties">
+            <column name="idProperties" valueNumeric="1"/>
+            <column name="enterprise" valueNumeric="1"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522749701-14">
+        <insert tableName="category">
+            <column name="idCategory" valueNumeric="1"/>
+            <column name="name" value="Others"/>
+            <column name="isErasable" valueNumeric="0"/>
+            <column name="isDefault" valueNumeric="1"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="category">
+            <column name="idCategory" valueNumeric="2"/>
+            <column name="name" value="Database servers"/>
+            <column name="isErasable" valueNumeric="1"/>
+            <column name="isDefault" valueNumeric="0"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="category">
+            <column name="idCategory" valueNumeric="4"/>
+            <column name="name" value="Applications servers"/>
+            <column name="isErasable" valueNumeric="1"/>
+            <column name="isDefault" valueNumeric="0"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="category">
+            <column name="idCategory" valueNumeric="5"/>
+            <column name="name" value="Web servers"/>
+            <column name="isErasable" valueNumeric="1"/>
+            <column name="isDefault" valueNumeric="0"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522749701-15">
+        <insert tableName="network">
+            <column name="network_id" valueNumeric="1"/>
+            <column name="uuid" value="6cd20366-72e5-11df-8f9d-002564aeca80"/>
+            <column name="version_c" valueNumeric="1"/>
+        </insert>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522749701-16">
+        <insert tableName="alerts">
+            <column name="id" value="1"/>
+            <column name="type" value="REGISTER"/>
+            <column name="value" value="LATER"/>
+            <column name="description"/>
+            <column name="tstamp" valueDate="2012-04-23T10:25:41.0"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="alerts">
+            <column name="id" value="2"/>
+            <column name="type" value="HEARTBEAT"/>
+            <column name="value" value="YES"/>
+            <column name="description"/>
+            <column name="tstamp" valueDate="2012-04-23T10:25:41.0"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522749701-17">
+        <insert tableName="user">
+            <column name="idUser" valueNumeric="1"/>
+            <column name="idRole" valueNumeric="1"/>
+            <column name="idEnterprise" valueNumeric="1"/>
+            <column name="user" value="admin"/>
+            <column name="name" value="Cloud"/>
+            <column name="surname" value="Administrator"/>
+            <column name="description" value="Main administrator"/>
+            <column name="email" value=""/>
+            <column name="locale" value="en_US"/>
+            <column name="password" value="c69a39bd64ffb77ea7ee3369dce742f3"/>
+            <column name="availableVirtualDatacenters"/>
+            <column name="active" valueNumeric="1"/>
+            <column name="authType" value="ABIQUO"/>
+            <column name="creationDate" valueDate="2012-04-27T10:25:34.0"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="user">
+            <column name="idUser" valueNumeric="2"/>
+            <column name="idRole" valueNumeric="2"/>
+            <column name="idEnterprise" valueNumeric="1"/>
+            <column name="user" value="user"/>
+            <column name="name" value="Standard"/>
+            <column name="surname" value="User"/>
+            <column name="description" value="Standard user"/>
+            <column name="email" value=""/>
+            <column name="locale" value="en_US"/>
+            <column name="password" value="c69a39bd64ffb77ea7ee3369dce742f3"/>
+            <column name="availableVirtualDatacenters"/>
+            <column name="active" valueNumeric="1"/>
+            <column name="authType" value="ABIQUO"/>
+            <column name="creationDate" valueDate="2012-04-27T10:25:34.0"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522749701-18">
+        <insert tableName="system_properties">
+            <column name="systemPropertyId" valueNumeric="1"/>
+            <column name="version_c" valueNumeric="0"/>
+            <column name="name" value="client.applibrary.ovfpackagesDownloadingProgressUpdateInterval"/>
+            <column name="value" value="10"/>
+            <column name="description" value="Time interval in seconds"/>
+        </insert>
+        <insert tableName="system_properties">
+            <column name="systemPropertyId" valueNumeric="2"/>
+            <column name="version_c" valueNumeric="0"/>
+            <column name="name" value="client.applibrary.virtualimageUploadProgressUpdateInterval"/>
+            <column name="value" value="10"/>
+            <column name="description" value="Time interval in seconds"/>
+        </insert>
+        <insert tableName="system_properties">
+            <column name="systemPropertyId" valueNumeric="3"/>
+            <column name="version_c" valueNumeric="0"/>
+            <column name="name" value="client.dashboard.abiquoURL"/>
+            <column name="value" value="http://www.abiquo.org"/>
+            <column name="description" value="URL of Abiquo web page"/>
+        </insert>
+        <insert tableName="system_properties">
+            <column name="systemPropertyId" valueNumeric="4"/>
+            <column name="version_c" valueNumeric="0"/>
+            <column name="name" value="client.dashboard.allowUsersAccess"/>
+            <column name="value" value="1"/>
+            <column name="description" value="Allow (1) or deny (0) access to the 'Users' section"/>
+        </insert>
+        <insert tableName="system_properties">
+            <column name="systemPropertyId" valueNumeric="5"/>
+            <column name="version_c" valueNumeric="0"/>
+            <column name="name" value="client.dashboard.showStartUpAlert"/>
+            <column name="value" value="1"/>
+            <column name="description" value="Set to 1 to show an Alert with the text found in Startup_Alert.txt file"/>
+        </insert>
+        <insert tableName="system_properties">
+            <column name="systemPropertyId" valueNumeric="6"/>
+            <column name="version_c" valueNumeric="0"/>
+            <column name="name" value="client.infra.googleMapsDefaultLatitude"/>
+            <column name="value" value="41.3825"/>
+            <column name="description" value="Google Maps will be centered by default at this longitude value"/>
+        </insert>
+        <insert tableName="system_properties">
+            <column name="systemPropertyId" valueNumeric="7"/>
+            <column name="version_c" valueNumeric="0"/>
+            <column name="name" value="client.infra.googleMapsDefaultLongitude"/>
+            <column name="value" value="2.176944"/>
+            <column name="description" value="Google Maps will be centered by default at this latitude value"/>
+        </insert>
+        <insert tableName="system_properties">
+            <column name="systemPropertyId" valueNumeric="8"/>
+            <column name="version_c" valueNumeric="0"/>
+            <column name="name" value="client.infra.googleMapsDefaultZoom"/>
+            <column name="value" value="4"/>
+            <column name="description" value="Google Maps will be centered by default with this zoom level value"/>
+        </insert>
+        <insert tableName="system_properties">
+            <column name="systemPropertyId" valueNumeric="9"/>
+            <column name="version_c" valueNumeric="0"/>
+            <column name="name" value="client.infra.googleMapskey"/>
+            <column name="value" value="0"/>
+            <column name="description" value="The map's Google key used in infrastructure section"/>
+        </insert>
+        <insert tableName="system_properties">
+            <column name="systemPropertyId" valueNumeric="10"/>
+            <column name="version_c" valueNumeric="0"/>
+            <column name="name" value="client.infra.googleMapsLadTimeOut"/>
+            <column name="value" value="10"/>
+            <column name="description" value="Time, in seconds, that applications waits Google Maps to load. After that, application considers that Google Maps service is temporarily unavailable, and is not used"/>
+        </insert>
+        <insert tableName="system_properties">
+            <column name="systemPropertyId" valueNumeric="11"/>
+            <column name="version_c" valueNumeric="0"/>
+            <column name="name" value="client.infra.InfrastructureUpdateInterval"/>
+            <column name="value" value="30"/>
+            <column name="description" value="Time interval in seconds"/>
+        </insert>
+        <insert tableName="system_properties">
+            <column name="systemPropertyId" valueNumeric="12"/>
+            <column name="version_c" valueNumeric="0"/>
+            <column name="name" value="client.infra.ucsManagerLink"/>
+            <column name="value" value="/ucsm/ucsm.jnlp"/>
+            <column name="description" value="URL to display UCS Manager Interface"/>
+        </insert>
+        <insert tableName="system_properties">
+            <column name="systemPropertyId" valueNumeric="13"/>
+            <column name="version_c" valueNumeric="0"/>
+            <column name="name" value="client.metering.meteringUpdateInterval"/>
+            <column name="value" value="10"/>
+            <column name="description" value="Time interval in seconds"/>
+        </insert>
+        <insert tableName="system_properties">
+            <column name="systemPropertyId" valueNumeric="14"/>
+            <column name="version_c" valueNumeric="0"/>
+            <column name="name" value="client.network.numberIpAdressesPerPage"/>
+            <column name="value" value="25"/>
+            <column name="description" value="Number entries that will appear when listing IP addresses in different parts of the application"/>
+        </insert>
+        <insert tableName="system_properties">
+            <column name="systemPropertyId" valueNumeric="15"/>
+            <column name="version_c" valueNumeric="0"/>
+            <column name="name" value="client.theme.defaultEnterpriseLogoPath"/>
+            <column name="value" value="themes/abicloudDefault/logo.png"/>
+            <column name="description" value="This is the path to the Enterprise logo used in the app"/>
+        </insert>
+        <insert tableName="system_properties">
+            <column name="systemPropertyId" valueNumeric="16"/>
+            <column name="version_c" valueNumeric="0"/>
+            <column name="name" value="client.user.numberEnterprisesPerPage"/>
+            <column name="value" value="25"/>
+            <column name="description" value="Number of enterprises per page that will appear in User Management"/>
+        </insert>
+        <insert tableName="system_properties">
+            <column name="systemPropertyId" valueNumeric="17"/>
+            <column name="version_c" valueNumeric="0"/>
+            <column name="name" value="client.user.numberUsersPerPage"/>
+            <column name="value" value="25"/>
+            <column name="description" value="Number of users per page that will appear in User Management"/>
+        </insert>
+        <insert tableName="system_properties">
+            <column name="systemPropertyId" valueNumeric="18"/>
+            <column name="version_c" valueNumeric="0"/>
+            <column name="name" value="client.virtual.allowVMRemoteAccess"/>
+            <column name="value" value="1"/>
+            <column name="description" value="Allow (1) or deny (0) virtual machine remote access"/>
+        </insert>
+        <insert tableName="system_properties">
+            <column name="systemPropertyId" valueNumeric="19"/>
+            <column name="version_c" valueNumeric="0"/>
+            <column name="name" value="client.virtual.virtualApplianceDeployingUpdateInterval"/>
+            <column name="value" value="5"/>
+            <column name="description" value="Time interval in seconds"/>
+        </insert>
+        <insert tableName="system_properties">
+            <column name="systemPropertyId" valueNumeric="20"/>
+            <column name="version_c" valueNumeric="0"/>
+            <column name="name" value="client.virtual.virtualAppliancesUpdateInterval"/>
+            <column name="value" value="30"/>
+            <column name="description" value="Time interval in seconds"/>
+        </insert>
+        <insert tableName="system_properties">
+            <column name="systemPropertyId" valueNumeric="21"/>
+            <column name="version_c" valueNumeric="0"/>
+            <column name="name" value="client.virtual.moreInfoAboutUploadLimitations"/>
+            <column name="value" value="http://wiki.abiquo.com/display/ABI20/Adding+VM+Templates+to+the+Appliance+Library#AddingVMTemplatestotheApplianceLibrary-UploadingfromtheLocalFilesystem"/>
+            <column name="description" value="URL of Abiquo virtual image upload limitations web page"/>
+        </insert>
+        <insert tableName="system_properties">
+            <column name="systemPropertyId" valueNumeric="22"/>
+            <column name="version_c" valueNumeric="0"/>
+            <column name="name" value="client.infra.vlanIdMin"/>
+            <column name="value" value="2"/>
+            <column name="description" value="Minimum value for vlan ID"/>
+        </insert>
+        <insert tableName="system_properties">
+            <column name="systemPropertyId" valueNumeric="23"/>
+            <column name="version_c" valueNumeric="0"/>
+            <column name="name" value="client.infra.vlanIdMax"/>
+            <column name="value" value="4094"/>
+            <column name="description" value="Maximum value for vlan ID"/>
+        </insert>
+        <insert tableName="system_properties">
+            <column name="systemPropertyId" valueNumeric="24"/>
+            <column name="version_c" valueNumeric="0"/>
+            <column name="name" value="client.dashboard.dashboardUpdateInterval"/>
+            <column name="value" value="30"/>
+            <column name="description" value="Time interval in seconds"/>
+        </insert>
+        <insert tableName="system_properties">
+            <column name="systemPropertyId" valueNumeric="25"/>
+            <column name="version_c" valueNumeric="0"/>
+            <column name="name" value="client.infra.defaultHypervisorPassword"/>
+            <column name="value" value="temporal"/>
+            <column name="description" value="Default Hypervisor password used when creating Physical Machines"/>
+        </insert>
+        <insert tableName="system_properties">
+            <column name="systemPropertyId" valueNumeric="26"/>
+            <column name="version_c" valueNumeric="0"/>
+            <column name="name" value="client.infra.defaultHypervisorPort"/>
+            <column name="value" value="8889"/>
+            <column name="description" value="Default Hypervisor port used when creating Physical Machines"/>
+        </insert>
+        <insert tableName="system_properties">
+            <column name="systemPropertyId" valueNumeric="27"/>
+            <column name="version_c" valueNumeric="0"/>
+            <column name="name" value="client.infra.defaultHypervisorUser"/>
+            <column name="value" value="root"/>
+            <column name="description" value="Default Hypervisor user used when creating Physical Machines"/>
+        </insert>
+        <insert tableName="system_properties">
+            <column name="systemPropertyId" valueNumeric="28"/>
+            <column name="version_c" valueNumeric="0"/>
+            <column name="name" value="client.storage.volumeMaxSizeValues"/>
+            <column name="value" value="1,2,4,8,16,32,64,128,256"/>
+            <column name="description" value="Comma separated values, with the allowed sizes when creating or editing a VolumeManagement"/>
+        </insert>
+        <insert tableName="system_properties">
+            <column name="systemPropertyId" valueNumeric="29"/>
+            <column name="version_c" valueNumeric="0"/>
+            <column name="name" value="client.virtual.virtualImagesRefreshConversionsInterval"/>
+            <column name="value" value="5"/>
+            <column name="description" value="Time interval in seconds to refresh missing virtual image conversions"/>
+        </insert>
+        <insert tableName="system_properties">
+            <column name="systemPropertyId" valueNumeric="30"/>
+            <column name="version_c" valueNumeric="0"/>
+            <column name="name" value="client.main.enterpriseLogoURL"/>
+            <column name="value" value="http://www.abiquo.com"/>
+            <column name="description" value="URL displayed when the header enterprise logo is clicked"/>
+        </insert>
+        <insert tableName="system_properties">
+            <column name="systemPropertyId" valueNumeric="31"/>
+            <column name="version_c" valueNumeric="0"/>
+            <column name="name" value="client.main.billingUrl"/>
+            <column name="value" value=""/>
+            <column name="description" value="URL displayed when the report header logo is clicked, if empty the report button will not be displayed"/>
+        </insert>
+        <insert tableName="system_properties">
+            <column name="systemPropertyId" valueNumeric="32"/>
+            <column name="version_c" valueNumeric="0"/>
+            <column name="name" value="client.main.disableChangePassword"/>
+            <column name="value" value="1"/>
+            <column name="description" value="Allow (1) or deny (0) user to change their password"/>
+        </insert>
+        <insert tableName="system_properties">
+            <column name="systemPropertyId" valueNumeric="33"/>
+            <column name="version_c" valueNumeric="0"/>
+            <column name="name" value="client.logout.url"/>
+            <column name="value" value=""/>
+            <column name="description" value="Redirect to this URL after logout (empty -&gt; login screen)"/>
+        </insert>
+        <insert tableName="system_properties">
+            <column name="systemPropertyId" valueNumeric="34"/>
+            <column name="version_c" valueNumeric="0"/>
+            <column name="name" value="client.main.allowLogout"/>
+            <column name="value" value="1"/>
+            <column name="description" value="Allow (1) or deny (0) user to logout"/>
+        </insert>
+        <insert tableName="system_properties">
+            <column name="systemPropertyId" valueNumeric="35"/>
+            <column name="version_c" valueNumeric="0"/>
+            <column name="name" value="client.wiki.showHelp"/>
+            <column name="value" value="1"/>
+            <column name="description" value="Show (1) or hide (0) the help icon within the plateform"/>
+        </insert>
+        <insert tableName="system_properties">
+            <column name="systemPropertyId" valueNumeric="36"/>
+            <column name="version_c" valueNumeric="0"/>
+            <column name="name" value="client.wiki.showDefaultHelp"/>
+            <column name="value" value="0"/>
+            <column name="description" value="Use (1) or not (0) the default help URL within the plateform"/>
+        </insert>
+        <insert tableName="system_properties">
+            <column name="systemPropertyId" valueNumeric="37"/>
+            <column name="version_c" valueNumeric="0"/>
+            <column name="name" value="client.wiki.defaultURL"/>
+            <column name="value" value="http://community.abiquo.com/display/ABI20/Abiquo+Documentation+Home"/>
+            <column name="description" value="The default URL opened when not specific help URL is specified"/>
+        </insert>
+        <insert tableName="system_properties">
+            <column name="systemPropertyId" valueNumeric="38"/>
+            <column name="version_c" valueNumeric="0"/>
+            <column name="name" value="client.wiki.infra.createDatacenter"/>
+            <column name="value" value="http://community.abiquo.com/display/ABI20/Managing+Datacenters#ManagingDatacenters-CreatingaDatacenter"/>
+            <column name="description" value="datacenter creation wiki"/>
+        </insert>
+        <insert tableName="system_properties">
+            <column name="systemPropertyId" valueNumeric="39"/>
+            <column name="version_c" valueNumeric="0"/>
+            <column name="name" value="client.wiki.infra.editDatacenter"/>
+            <column name="value" value="http://community.abiquo.com/display/ABI20/Managing+Datacenters#ManagingDatacenters-ModifyingaDatacenter"/>
+            <column name="description" value="datacenter edition wiki"/>
+        </insert>
+        <insert tableName="system_properties">
+            <column name="systemPropertyId" valueNumeric="40"/>
+            <column name="version_c" valueNumeric="0"/>
+            <column name="name" value="client.wiki.infra.editRemoteService"/>
+            <column name="value" value="http://community.abiquo.com/display/ABI20/Managing+Datacenters#ManagingDatacenters-RemoteServices"/>
+            <column name="description" value="remote service edition wiki"/>
+        </insert>
+        <insert tableName="system_properties">
+            <column name="systemPropertyId" valueNumeric="41"/>
+            <column name="version_c" valueNumeric="0"/>
+            <column name="name" value="client.wiki.infra.createPhysicalMachine"/>
+            <column name="value" value="http://community.abiquo.com/display/ABI20/Manage+Physical+Machines#ManagePhysicalMachines-CreatingPhysicalMachinesonStandardRacks"/>
+            <column name="description" value="physical machine creation wiki"/>
+        </insert>
+        <insert tableName="system_properties">
+            <column name="systemPropertyId" valueNumeric="42"/>
+            <column name="version_c" valueNumeric="0"/>
+            <column name="name" value="client.wiki.infra.mailNotification"/>
+            <column name="value" value="http://community.abiquo.com/display/ABI20/Manage+Physical+Machines#ManagePhysicalMachines-SendingEmailNotifications"/>
+            <column name="description" value="mail notification wiki"/>
+        </insert>
+        <insert tableName="system_properties">
+            <column name="systemPropertyId" valueNumeric="43"/>
+            <column name="version_c" valueNumeric="0"/>
+            <column name="name" value="client.wiki.infra.addDatastore"/>
+            <column name="value" value="http://community.abiquo.com/display/ABI20/Manage+Physical+Machines#ManagePhysicalMachines-DatastoreManagement"/>
+            <column name="description" value="Datastore manager wiki"/>
+        </insert>
+        <insert tableName="system_properties">
+            <column name="systemPropertyId" valueNumeric="44"/>
+            <column name="version_c" valueNumeric="0"/>
+            <column name="name" value="client.wiki.infra.createRack"/>
+            <column name="value" value="http://community.abiquo.com/display/ABI20/Manage+Racks#ManageRacks-CreatingRacks"/>
+            <column name="description" value="rack creation wiki"/>
+        </insert>
+        <insert tableName="system_properties">
+            <column name="systemPropertyId" valueNumeric="45"/>
+            <column name="version_c" valueNumeric="0"/>
+            <column name="name" value="client.wiki.infra.createMultiplePhysicalMachine"/>
+            <column name="value" value="http://community.abiquo.com/display/ABI20/Manage+Physical+Machines#ManagePhysicalMachines-CreatingMultiplePhysicalMachines"/>
+            <column name="description" value="multiple physical machine creation wiki"/>
+        </insert>
+        <insert tableName="system_properties">
+            <column name="systemPropertyId" valueNumeric="46"/>
+            <column name="version_c" valueNumeric="0"/>
+            <column name="name" value="client.wiki.network.publicVlan"/>
+            <column name="value" value="http://community.abiquo.com/display/ABI20/Manage+Network+Configuration#ManageNetworkConfiguration-CreateVLANsforPublicNetworks"/>
+            <column name="description" value="public vlan creation wiki"/>
+        </insert>
+        <insert tableName="system_properties">
+            <column name="systemPropertyId" valueNumeric="47"/>
+            <column name="version_c" valueNumeric="0"/>
+            <column name="name" value="client.wiki.network.staticRoutes"/>
+            <column name="value" value="http://community.abiquo.com/display/ABI20/Manage+Network+Configuration#ManageNetworkConfiguration-ConfiguringStaticRoutesUsingDHCP"/>
+            <column name="description" value="static routes wiki"/>
+        </insert>
+        <insert tableName="system_properties">
+            <column name="systemPropertyId" valueNumeric="48"/>
+            <column name="version_c" valueNumeric="0"/>
+            <column name="name" value="client.wiki.storage.storageDevice"/>
+            <column name="value" value="http://community.abiquo.com/display/ABI20/Managing+External+Storage#ManagingExternalStorage-ManagedStorage"/>
+            <column name="description" value="storage device creation wiki"/>
+        </insert>
+        <insert tableName="system_properties">
+            <column name="systemPropertyId" valueNumeric="49"/>
+            <column name="version_c" valueNumeric="0"/>
+            <column name="name" value="client.wiki.storage.storagePool"/>
+            <column name="value" value="http://community.abiquo.com/display/ABI20/Managing+External+Storage#ManagingExternalStorage-StoragePools"/>
+            <column name="description" value="storage pool creation wiki"/>
+        </insert>
+        <insert tableName="system_properties">
+            <column name="systemPropertyId" valueNumeric="50"/>
+            <column name="version_c" valueNumeric="0"/>
+            <column name="name" value="client.wiki.storage.tier"/>
+            <column name="value" value="http://community.abiquo.com/display/ABI20/Managing+External+Storage#ManagingExternalStorage-TierManagement"/>
+            <column name="description" value="tier edition wiki"/>
+        </insert>
+        <insert tableName="system_properties">
+            <column name="systemPropertyId" valueNumeric="51"/>
+            <column name="version_c" valueNumeric="0"/>
+            <column name="name" value="client.wiki.allocation.global"/>
+            <column name="value" value="http://community.abiquo.com/display/ABI20/Manage+Allocation+Rules#ManageAllocationRules-GlobalRulesManagement"/>
+            <column name="description" value="global rules wiki"/>
+        </insert>
+        <insert tableName="system_properties">
+            <column name="systemPropertyId" valueNumeric="52"/>
+            <column name="version_c" valueNumeric="0"/>
+            <column name="name" value="client.wiki.allocation.datacenter"/>
+            <column name="value" value="http://community.abiquo.com/display/ABI20/Manage+Allocation+Rules#ManageAllocationRules-DatacenterRulesManagement"/>
+            <column name="description" value="datacenter rules wiki"/>
+        </insert>
+        <insert tableName="system_properties">
+            <column name="systemPropertyId" valueNumeric="53"/>
+            <column name="version_c" valueNumeric="0"/>
+            <column name="name" value="client.wiki.vdc.createVdc"/>
+            <column name="value" value="http://community.abiquo.com/display/ABI20/Manage+Virtual+Datacenters#ManageVirtualDatacenters-CreatingaVirtualDatacenter"/>
+            <column name="description" value="virtual datacenter creation wiki"/>
+        </insert>
+        <insert tableName="system_properties">
+            <column name="systemPropertyId" valueNumeric="54"/>
+            <column name="version_c" valueNumeric="0"/>
+            <column name="name" value="client.wiki.vdc.createVapp"/>
+            <column name="value" value="http://community.abiquo.com/display/ABI20/Basic+operations#BasicOperations-CreatingaNewVirtualAppliance"/>
+            <column name="description" value="virtual app creation wiki"/>
+        </insert>
+        <insert tableName="system_properties">
+            <column name="systemPropertyId" valueNumeric="55"/>
+            <column name="version_c" valueNumeric="0"/>
+            <column name="name" value="client.wiki.vdc.createPrivateNetwork"/>
+            <column name="value" value="http://community.abiquo.com/display/ABI20/Manage+Networks#ManageNetworks-CreateaPrivateVLAN"/>
+            <column name="description" value="VDC private network creation wiki"/>
+        </insert>
+        <insert tableName="system_properties">
+            <column name="systemPropertyId" valueNumeric="56"/>
+            <column name="version_c" valueNumeric="0"/>
+            <column name="name" value="client.wiki.vdc.createPublicNetwork"/>
+            <column name="value" value="http://community.abiquo.com/display/ABI20/Manage+Networks#ManageNetworks-PublicIPReservation"/>
+            <column name="description" value="VDC public network creation wiki"/>
+        </insert>
+        <insert tableName="system_properties">
+            <column name="systemPropertyId" valueNumeric="57"/>
+            <column name="version_c" valueNumeric="0"/>
+            <column name="name" value="client.wiki.vdc.createVolume"/>
+            <column name="value" value="http://community.abiquo.com/display/ABI20/Manage+Virtual+Storage#ManageVirtualStorage-CreatingaVolumeofManagedStorage"/>
+            <column name="description" value="VDC virtual volume creation wiki"/>
+        </insert>
+        <insert tableName="system_properties">
+            <column name="systemPropertyId" valueNumeric="58"/>
+            <column name="version_c" valueNumeric="0"/>
+            <column name="name" value="client.wiki.vm.editVirtualMachine"/>
+            <column name="value" value="http://community.abiquo.com/display/ABI20/Configure+Virtual+Machines"/>
+            <column name="description" value="Virtual Machine edition wiki"/>
+        </insert>
+        <insert tableName="system_properties">
+            <column name="systemPropertyId" valueNumeric="59"/>
+            <column name="version_c" valueNumeric="0"/>
+            <column name="name" value="client.wiki.vm.bundleVirtualMachine"/>
+            <column name="value" value="http://community.abiquo.com/display/ABI20/Configure+a+Virtual+Appliance#ConfigureaVirtualAppliance-CreateanInstance"/>
+            <column name="description" value="Bundles VM wiki"/>
+        </insert>
+        <insert tableName="system_properties">
+            <column name="systemPropertyId" valueNumeric="60"/>
+            <column name="version_c" valueNumeric="0"/>
+            <column name="name" value="client.wiki.vm.createNetworkInterface"/>
+            <column name="value" value="http://community.abiquo.com/display/ABI20/Configure+Virtual+Machines#ConfigureVirtualMachines-CreatingaNewNetworkInterface"/>
+            <column name="description" value="Network Interface creation wiki"/>
+        </insert>
+        <insert tableName="system_properties">
+            <column name="systemPropertyId" valueNumeric="61"/>
+            <column name="version_c" valueNumeric="0"/>
+            <column name="name" value="client.wiki.vm.createInstance"/>
+            <column name="value" value="http://community.abiquo.com/display/ABI20/Create+Virtual+Machine+instances"/>
+            <column name="description" value="Virtual Machine instance creation wiki"/>
+        </insert>
+        <insert tableName="system_properties">
+            <column name="systemPropertyId" valueNumeric="62"/>
+            <column name="version_c" valueNumeric="0"/>
+            <column name="name" value="client.wiki.vm.createStateful"/>
+            <column name="value" value="http://community.abiquo.com/display/ABI20/Create+Persistent+Virtual+Machines"/>
+            <column name="description" value="Virtual Machine stateful creation wiki"/>
+        </insert>
+        <insert tableName="system_properties">
+            <column name="systemPropertyId" valueNumeric="63"/>
+            <column name="version_c" valueNumeric="0"/>
+            <column name="name" value="client.wiki.vm.captureVirtualMachine"/>
+            <column name="value" value="http://community.abiquo.com/display/ABI20/Manage+Physical+Machines#ManagePhysicalMachines-WorkingwithImportedVirtualMachines"/>
+            <column name="description" value="Capture Virtual Machine wiki"/>
+        </insert>
+        <insert tableName="system_properties">
+            <column name="systemPropertyId" valueNumeric="64"/>
+            <column name="version_c" valueNumeric="0"/>
+            <column name="name" value="client.wiki.vm.deployInfo"/>
+            <column name="value" value=""/>
+            <column name="description" value="Show more info when deploying"/>
+        </insert>
+        <insert tableName="system_properties">
+            <column name="systemPropertyId" valueNumeric="65"/>
+            <column name="version_c" valueNumeric="0"/>
+            <column name="name" value="client.wiki.apps.uploadVM"/>
+            <column name="value" value="http://community.abiquo.com/display/ABI20/Adding+VM+Templates+to+the+Appliance+Library#AddingVMTemplatestotheApplianceLibrary-UploadingfromtheLocalFilesystem"/>
+            <column name="description" value="Virtual Image upload wiki"/>
+        </insert>
+        <insert tableName="system_properties">
+            <column name="systemPropertyId" valueNumeric="66"/>
+            <column name="version_c" valueNumeric="0"/>
+            <column name="name" value="client.wiki.user.createEnterprise"/>
+            <column name="value" value="http://community.abiquo.com/display/ABI20/Manage+Enterprises#ManageEnterprises-CreatingorEditinganEnterprise"/>
+            <column name="description" value="Enterprise creation wiki"/>
+        </insert>
+        <insert tableName="system_properties">
+            <column name="systemPropertyId" valueNumeric="67"/>
+            <column name="version_c" valueNumeric="0"/>
+            <column name="name" value="client.wiki.user.dataCenterLimits"/>
+            <column name="value" value="http://community.abiquo.com/display/ABI20/Manage+Enterprises#ManageEnterprises-EdittheEnterprise%27sDatacenters"/>
+            <column name="description" value="Datacenter Limits wiki"/>
+        </insert>
+        <insert tableName="system_properties">
+            <column name="systemPropertyId" valueNumeric="68"/>
+            <column name="version_c" valueNumeric="0"/>
+            <column name="name" value="client.wiki.user.createUser"/>
+            <column name="value" value="http://community.abiquo.com/display/ABI20/Manage+Users#ManageUsers-CreatingorEditingaUser"/>
+            <column name="description" value="User creation wiki"/>
+        </insert>
+        <insert tableName="system_properties">
+            <column name="systemPropertyId" valueNumeric="69"/>
+            <column name="version_c" valueNumeric="0"/>
+            <column name="name" value="client.wiki.user.createRole"/>
+            <column name="value" value="http://community.abiquo.com/display/ABI20/Manage+Roles+and+Privileges"/>
+            <column name="description" value="Role creation wiki"/>
+        </insert>
+        <insert tableName="system_properties">
+            <column name="systemPropertyId" valueNumeric="70"/>
+            <column name="version_c" valueNumeric="0"/>
+            <column name="name" value="client.wiki.pricing.createCurrency"/>
+            <column name="value" value="http://community.abiquo.com/display/ABI20/Pricing+View#PricingView-CurrenciesTab"/>
+            <column name="description" value="Currency creation wiki"/>
+        </insert>
+        <insert tableName="system_properties">
+            <column name="systemPropertyId" valueNumeric="71"/>
+            <column name="version_c" valueNumeric="0"/>
+            <column name="name" value="client.wiki.pricing.createTemplate"/>
+            <column name="value" value="http://community.abiquo.com/display/ABI20/Pricing+View#PricingView-PricingModelsTab"/>
+            <column name="description" value="create pricing template wiki"/>
+        </insert>
+        <insert tableName="system_properties">
+            <column name="systemPropertyId" valueNumeric="72"/>
+            <column name="version_c" valueNumeric="0"/>
+            <column name="name" value="client.wiki.pricing.createCostCode"/>
+            <column name="value" value="http://community.abiquo.com/display/ABI20/Pricing+View#PricingView-CostCodesTab"/>
+            <column name="description" value="create pricing cost code wiki"/>
+        </insert>
+        <insert tableName="system_properties">
+            <column name="systemPropertyId" valueNumeric="73"/>
+            <column name="version_c" valueNumeric="0"/>
+            <column name="name" value="client.wiki.config.general"/>
+            <column name="value" value="http://community.abiquo.com/display/ABI20/Configuration+view"/>
+            <column name="description" value="Configuration wiki"/>
+        </insert>
+        <insert tableName="system_properties">
+            <column name="systemPropertyId" valueNumeric="74"/>
+            <column name="version_c" valueNumeric="0"/>
+            <column name="name" value="client.wiki.config.heartbeat"/>
+            <column name="value" value="http://community.abiquo.com/display/ABI20/Configuration+view#ConfigurationView-Heartbeating"/>
+            <column name="description" value="Heartbeat configuration wiki"/>
+        </insert>
+        <insert tableName="system_properties">
+            <column name="systemPropertyId" valueNumeric="75"/>
+            <column name="version_c" valueNumeric="0"/>
+            <column name="name" value="client.wiki.config.licence"/>
+            <column name="value" value="http://community.abiquo.com/display/ABI20/Configuration+view#ConfigurationView-LicenseManagement"/>
+            <column name="description" value="Licence configuration wiki"/>
+        </insert>
+        <insert tableName="system_properties">
+            <column name="systemPropertyId" valueNumeric="76"/>
+            <column name="version_c" valueNumeric="0"/>
+            <column name="name" value="client.wiki.config.registration"/>
+            <column name="value" value="http://community.abiquo.com/display/ABI20/Configuration+view#Configurationview-ProductRegistration"/>
+            <column name="description" value="Registration wiki"/>
+        </insert>
+        <insert tableName="system_properties">
+            <column name="systemPropertyId" valueNumeric="77"/>
+            <column name="version_c" valueNumeric="0"/>
+            <column name="name" value="client.wiki.infra.discoverBlades"/>
+            <column name="value" value="http://community.abiquo.com/display/ABI20/Manage+Physical+Machines#ManagePhysicalMachines-DiscoveringBladesonManagedRacks"/>
+            <column name="description" value="discover UCS blades wiki"/>
+        </insert>
+        <insert tableName="system_properties">
+            <column name="systemPropertyId" valueNumeric="78"/>
+            <column name="version_c" valueNumeric="0"/>
+            <column name="name" value="client.network.defaultName"/>
+            <column name="value" value="default_private_network"/>
+            <column name="description" value="default private vlan name"/>
+        </insert>
+        <insert tableName="system_properties">
+            <column name="systemPropertyId" valueNumeric="79"/>
+            <column name="version_c" valueNumeric="0"/>
+            <column name="name" value="client.network.defaultNetmask"/>
+            <column name="value" value="2"/>
+            <column name="description" value="index of available netmask"/>
+        </insert>
+        <insert tableName="system_properties">
+            <column name="systemPropertyId" valueNumeric="80"/>
+            <column name="version_c" valueNumeric="0"/>
+            <column name="name" value="client.network.defaultAddress"/>
+            <column name="value" value="192.168.0.0"/>
+            <column name="description" value="default private vlan address"/>
+        </insert>
+        <insert tableName="system_properties">
+            <column name="systemPropertyId" valueNumeric="81"/>
+            <column name="version_c" valueNumeric="0"/>
+            <column name="name" value="client.network.defaultGateway"/>
+            <column name="value" value="192.168.0.1"/>
+            <column name="description" value="default private vlan gateway"/>
+        </insert>
+        <insert tableName="system_properties">
+            <column name="systemPropertyId" valueNumeric="82"/>
+            <column name="version_c" valueNumeric="0"/>
+            <column name="name" value="client.network.defaultPrimaryDNS"/>
+            <column name="value" value=""/>
+            <column name="description" value="default primary DNS"/>
+        </insert>
+        <insert tableName="system_properties">
+            <column name="systemPropertyId" valueNumeric="83"/>
+            <column name="version_c" valueNumeric="0"/>
+            <column name="name" value="client.network.defaultSecondaryDNS"/>
+            <column name="value" value=""/>
+            <column name="description" value="default secondary DNS"/>
+        </insert>
+        <insert tableName="system_properties">
+            <column name="systemPropertyId" valueNumeric="84"/>
+            <column name="version_c" valueNumeric="0"/>
+            <column name="name" value="client.network.defaultSufixDNS"/>
+            <column name="value" value=""/>
+            <column name="description" value="default sufix DNS"/>
+        </insert>
+    </changeSet>
+    <changeSet author="destevezg (generated)" id="1335522749701-19">
+        <insert tableName="currency">
+            <column name="idCurrency" valueNumeric="1"/>
+            <column name="symbol" value="USD"/>
+            <column name="name" value="Dollar - $"/>
+            <column name="digits" valueNumeric="2"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="currency">
+            <column name="idCurrency" valueNumeric="2"/>
+            <column name="symbol" value="EUR"/>
+            <column name="name" value="Euro - €"/>
+            <column name="digits" valueNumeric="2"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+        <insert tableName="currency">
+            <column name="idCurrency" valueNumeric="3"/>
+            <column name="symbol" value="JPY"/>
+            <column name="name" value="Yen - ¥"/>
+            <column name="digits" valueNumeric="0"/>
+            <column name="version_c" valueNumeric="0"/>
+        </insert>
+    </changeSet>
+</databaseChangeLog>
