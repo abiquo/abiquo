@@ -121,7 +121,8 @@
 		<!-- TODO: Move all generated Scripts to /target -->
 		<migrationSqlOutputFile>kinton_liquibase_generated.sql</migrationSqlOutputFile>
 		<promptOnNonLocalDatabase>false</promptOnNonLocalDatabase>
-		<logLevel>warning</logLevel>
+		<logLevel>severe</logLevel>
+<logging>severe</logging>
 		<verbose>false</verbose>
 	</configuration>
 	<executions>
@@ -149,19 +150,21 @@
 		<changeLogFile>delta/${nextVersionForDelta}/deltachangelog.xml</changeLogFile>
           </configuration>
 		</execution>
-
+<!-- TODO: Move all generated Scripts to /target -->
+<!--
 		<execution>
 		<id>testing</id>
 	      <phase>test</phase>
 		<configuration>
 		<defaultSchemaName>kinton_test</defaultSchemaName>
-	<!-- TODO: Move all generated Scripts to /target -->
+	
 		<migrationSqlOutputFile>kinton_test_liquibase_generated.sql</migrationSqlOutputFile>
           </configuration>
               <goals>
                 <goal>update</goal>
               </goals>
 		</execution>
+-->
 	<execution>
 	<id>apply2DB</id>
 	      <phase>install</phase>
