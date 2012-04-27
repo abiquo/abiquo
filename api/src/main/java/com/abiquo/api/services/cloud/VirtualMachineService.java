@@ -899,8 +899,12 @@ public class VirtualMachineService extends DefaultApiService
     {
         for (RasdManagement newResource : newResources)
         {
+            // New resources being attached have a NULL rasd, so we should avoid considering them
+            // when comparing the list to find if the resource is present in the new list. This is
+            // specially notorious in PUT requests
+            if (newResource.getRasd() != null
             // Since the values point to the same rasd, the id should be the same
-            if (resource.getRasd().getId().equals(newResource.getRasd().getId()))
+                && resource.getRasd().getId().equals(newResource.getRasd().getId()))
             {
                 return true;
             }
