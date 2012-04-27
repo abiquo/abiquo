@@ -92,8 +92,9 @@ public class NetworkService extends DefaultApiService
     {
         // create the Rasd object.
         Rasd rasd =
-            new Rasd(UUID.randomUUID().toString(), IpPoolManagement.DEFAULT_RESOURCE_NAME, Integer
-                .valueOf(IpPoolManagement.DISCRIMINATOR));
+            new Rasd(UUID.randomUUID().toString(),
+                IpPoolManagement.DEFAULT_RESOURCE_NAME,
+                Integer.valueOf(IpPoolManagement.DISCRIMINATOR));
 
         rasd.setDescription(IpPoolManagement.DEFAULT_RESOURCE_DESCRIPTION);
         rasd.setConnection("");
@@ -169,8 +170,11 @@ public class NetworkService extends DefaultApiService
     public DhcpOption addDhcpOption(final DhcpOptionDto dto)
     {
         DhcpOption opt =
-            new DhcpOption(dto.getOption(), dto.getGateway(), dto.getNetworkAddress(), dto
-                .getMask(), dto.getNetmask());
+            new DhcpOption(dto.getOption(),
+                dto.getGateway(),
+                dto.getNetworkAddress(),
+                dto.getMask(),
+                dto.getNetmask());
 
         if (!opt.isValid())
         {
@@ -212,7 +216,7 @@ public class NetworkService extends DefaultApiService
                 ip = new IpPoolManagement(vlan, "?", "?", "?", vlan.getName());
                 ip.setVirtualDatacenter(vdc);
                 ip.setMac(IPNetworkRang.requestRandomMacAddress(vdc.getHypervisorType()));
-                ip.setName(ip.getMac() + "_host");
+                ip.setName(ip.getMac().replace(":", "") + "_host");
                 repo.insertIpManagement(ip);
 
                 break;
@@ -223,7 +227,7 @@ public class NetworkService extends DefaultApiService
                         .getGateway());
                 ip.setVirtualDatacenter(vdc);
                 ip.setMac(IPNetworkRang.requestRandomMacAddress(vdc.getHypervisorType()));
-                ip.setName(ip.getMac() + "_host");
+                ip.setName(ip.getMac().replace(":", "") + "_host");
         }
 
         Rasd rasd = createRasdEntity(vm, ip);
@@ -387,9 +391,9 @@ public class NetworkService extends DefaultApiService
         // once we have validated we have IPs in all IP parameters (isValid() method), we should
         // ensure they are
         // actually PRIVATE IPs. Also check if the gateway is in the range, and
-        checkAddressAndMaskCoherency(IPAddress
-            .newIPAddress(newVlan.getConfiguration().getAddress()), newVlan.getConfiguration()
-            .getMask());
+        checkAddressAndMaskCoherency(
+            IPAddress.newIPAddress(newVlan.getConfiguration().getAddress()), newVlan
+                .getConfiguration().getMask());
 
         List<DhcpOption> opts = new ArrayList<DhcpOption>(newVlan.getDhcpOption());
         for (DhcpOption dhcpOption : newVlan.getDhcpOption())
@@ -613,8 +617,8 @@ public class NetworkService extends DefaultApiService
         {
             // needed for REST links.
             DatacenterLimits dl =
-                datacenterRepo.findDatacenterLimits(ip.getVlanNetwork().getEnterprise(), vdc
-                    .getDatacenter());
+                datacenterRepo.findDatacenterLimits(ip.getVlanNetwork().getEnterprise(),
+                    vdc.getDatacenter());
             ip.getVlanNetwork().setLimitId(dl.getId());
         }
 
@@ -789,8 +793,8 @@ public class NetworkService extends DefaultApiService
             {
                 // needed for REST links.
                 DatacenterLimits dl =
-                    datacenterRepo.findDatacenterLimits(ip.getVlanNetwork().getEnterprise(), vdc
-                        .getDatacenter());
+                    datacenterRepo.findDatacenterLimits(ip.getVlanNetwork().getEnterprise(),
+                        vdc.getDatacenter());
                 ip.getVlanNetwork().setLimitId(dl.getId());
             }
         }
@@ -831,8 +835,8 @@ public class NetworkService extends DefaultApiService
             {
                 // needed for REST links.
                 DatacenterLimits dl =
-                    datacenterRepo.findDatacenterLimits(ip.getVlanNetwork().getEnterprise(), vdc
-                        .getDatacenter());
+                    datacenterRepo.findDatacenterLimits(ip.getVlanNetwork().getEnterprise(),
+                        vdc.getDatacenter());
                 ip.getVlanNetwork().setLimitId(dl.getId());
             }
         }
@@ -944,8 +948,8 @@ public class NetworkService extends DefaultApiService
         IpPoolManagement resultIp = ips.get(0);
         for (IpPoolManagement ip : ips)
         {
-            if (ip.getVlanNetwork().getConfiguration().getId().equals(
-                vm.getNetworkConfiguration().getId()))
+            if (ip.getVlanNetwork().getConfiguration().getId()
+                .equals(vm.getNetworkConfiguration().getId()))
             {
                 resultIp = ip;
                 break;
@@ -958,8 +962,8 @@ public class NetworkService extends DefaultApiService
         vmconfig.setPrimaryDNS(vlan.getConfiguration().getPrimaryDNS());
         vmconfig.setSecondaryDNS(vlan.getConfiguration().getSecondaryDNS());
         vmconfig.setSuffixDNS(vlan.getConfiguration().getSufixDNS());
-        vmconfig.setUsed(vlan.getConfiguration().getId().equals(
-            vm.getNetworkConfiguration().getId()));
+        vmconfig.setUsed(vlan.getConfiguration().getId()
+            .equals(vm.getNetworkConfiguration().getId()));
         vmconfig.setId(vlan.getConfiguration().getId());
 
         LOGGER
@@ -1165,10 +1169,10 @@ public class NetworkService extends DefaultApiService
         userService.checkCurrentEnterpriseForPostMethods(vdc.getEnterprise());
 
         // Values 'address', 'mask', and 'tag' can not be changed by the edit process
-        if (!oldNetwork.getConfiguration().getAddress().equalsIgnoreCase(
-            newNetwork.getConfiguration().getAddress())
-            || !oldNetwork.getConfiguration().getMask().equals(
-                newNetwork.getConfiguration().getMask())
+        if (!oldNetwork.getConfiguration().getAddress()
+            .equalsIgnoreCase(newNetwork.getConfiguration().getAddress())
+            || !oldNetwork.getConfiguration().getMask()
+                .equals(newNetwork.getConfiguration().getMask())
             || oldNetwork.getTag() == null
             && newNetwork.getTag() != null
             || oldNetwork.getTag() != null
@@ -1181,8 +1185,8 @@ public class NetworkService extends DefaultApiService
         }
 
         // Check the new gateway is inside the range of IPs.
-        if (!newNetwork.getConfiguration().getGateway().equalsIgnoreCase(
-            oldNetwork.getConfiguration().getGateway()))
+        if (!newNetwork.getConfiguration().getGateway()
+            .equalsIgnoreCase(oldNetwork.getConfiguration().getGateway()))
         {
             IPAddress networkIP =
                 IPAddress.newIPAddress(newNetwork.getConfiguration().getAddress());
