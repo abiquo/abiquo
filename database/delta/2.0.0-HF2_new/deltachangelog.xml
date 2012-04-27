@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
-	<changeSet author="destevezg (generated)" id="1335280201177-1">
-        <createTable schemaName="kinton" tableName="accounting_event_detail_HF2">
+<!--	<changeSet author="destevezg (generated)" id="1335280201177-1">
+        <createTable tableName="accounting_event_detail_HF2">
             <column autoIncrement="true" name="idAccountingEvent" type="BIGINT">
                 <constraints nullable="false" primaryKey="true"/>
             </column>
@@ -44,8 +44,19 @@
             <column defaultValueNumeric="0" name="version_c" type="INT"/>
         </createTable>
     </changeSet>
-<changeSet author="destevez" id="ABICLOUDPREMIUM-9899999">
-  <sqlFile path="triggers/datacenter_created.sql"/>
-  <sqlFile path="triggers/datacenter_deleted.sql"/>
+-->
+<changeSet id="DroppedTriggers" author="destevez" runAlways="true" runOnChange="true">
+	<sql>
+	DROP TRIGGER IF EXISTS datacenter_created;
+	DROP TRIGGER IF EXISTS datacenter_deleted;
+	DROP TRIGGER IF EXISTS virtualapp_created;
+	DROP TRIGGER IF EXISTS virtualapp_deleted;
+	</sql>
+</changeSet>
+<changeSet author="destevez" id="ABICLOUDPREMIUM-9899999" runAlways="true" runOnChange="true">
+  <sqlFile splitStatements="false" path="triggers/datacenter_created.sql"/>
+  <sqlFile splitStatements="false" path="triggers/datacenter_deleted.sql"/>
+  <sqlFile splitStatements="false" path="triggers/virtualapp_created.sql"/>
+  <sqlFile splitStatements="false" path="triggers/virtualapp_deleted.sql"/>
 </changeSet>
 </databaseChangeLog>

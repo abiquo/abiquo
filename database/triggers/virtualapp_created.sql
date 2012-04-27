@@ -1,5 +1,4 @@
-DROP TRIGGER IF EXISTS kinton.virtualapp_created;
-CREATE TRIGGER kinton.virtualapp_created AFTER INSERT ON kinton.virtualapp
+CREATE TRIGGER virtualapp_created AFTER INSERT ON virtualapp
   FOR EACH ROW BEGIN
     DECLARE vdcNameObj VARCHAR(50);
     IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN

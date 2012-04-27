@@ -5,8 +5,8 @@
 <include file="kinton-2.0-ga.xml"/>
 <include file="kinton-2.0-ga-views.xml"/>
 <include file="kinton-2.0-ga-data.xml"/>
-<!--
 <include file="delta/2.0.0-HF1_new/deltachangelog.xml"/>
 <include file="delta/2.0.0-HF2_new/deltachangelog.xml"/>
--->
+
+
 </databaseChangeLog>

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+<!--
 	<changeSet author="destevezg (generated)" id="1335280201177-1">
         <createTable schemaName="kinton" tableName="accounting_event_detail_HF1">
             <column autoIncrement="true" name="idAccountingEvent" type="BIGINT">
@@ -44,8 +45,13 @@
             <column defaultValueNumeric="0" name="version_c" type="INT"/>
         </createTable>
     </changeSet>
-<changeSet id="ABICLOUDPREMIUM-432432" author="destevez">
-  <sqlFile path="triggers/datacenter_created.sql"/>
+-->
+<!--   -->
+<changeSet id="DroppedTriggers" author="destevez" runAlways="true" runOnChange="true">
+	<sql>DROP TRIGGER IF EXISTS datacenter_created;</sql>
+</changeSet>
+<changeSet id="ABICLOUDPREMIUM-432432" author="destevez" runAlways="true" runOnChange="true">   
+  <sqlFile splitStatements="false"  path="triggers/datacenter_created.sql"/>
 </changeSet>
 
 
