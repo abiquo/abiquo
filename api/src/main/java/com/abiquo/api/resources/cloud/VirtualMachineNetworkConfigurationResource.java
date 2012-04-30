@@ -28,9 +28,7 @@ import java.util.List;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
-import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -312,44 +310,45 @@ public class VirtualMachineNetworkConfigurationResource extends AbstractResource
      * @throws Exception any thrown exception. Moved to HTTP status code in the
      *             {@link APIExceptionMapper} exception mapper.
      */
-    @POST
-    @Path(NICS_PATH)
-    @Consumes(LinksDto.MEDIA_TYPE)
-    @Produces(AcceptedRequestDto.MEDIA_TYPE)
-    public AcceptedRequestDto< ? > attachNICs(
-        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) @NotNull @Min(1) final Integer vdcId,
-        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) @NotNull @Min(1) final Integer vappId,
-        @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) @NotNull @Min(1) final Integer vmId,
-        @NotNull final LinksDto nicRefs, @Context final IRESTBuilder restBuilder) throws Exception
-    {
-        VirtualMachineState originalState =
-            vmLock.lockVirtualMachineBeforeReconfiguring(vdcId, vappId, vmId);
-
-        try
-        {
-            Object result = service.attachNICs(vdcId, vappId, vmId, nicRefs, originalState);
-
-            // The attach method may return a Tarantino task identifier if the operation requires a
-            // reconfigure. Otherwise it will return null.
-            if (result != null)
-            {
-                AcceptedRequestDto<Object> response = new AcceptedRequestDto<Object>();
-                response.setStatusUrlLink("http://status");
-                response.setEntity(result);
-                return response;
-            }
-
-            // If there is no async task the VM must be unlocked here
-            vmLock.unlockVirtualMachine(vmId, originalState);
-            return null;
-        }
-        catch (Exception ex)
-        {
-            // Make sure virtual machine is unlocked if reconfigure fails
-            vmLock.unlockVirtualMachine(vmId, originalState);
-            throw ex;
-        }
-    }
+    // @POST
+    // @Path(NICS_PATH)
+    // @Consumes(LinksDto.MEDIA_TYPE)
+    // @Produces(AcceptedRequestDto.MEDIA_TYPE)
+    // public AcceptedRequestDto< ? > attachNICs(
+    // @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) @NotNull @Min(1) final Integer
+    // vdcId,
+    // @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) @NotNull @Min(1) final Integer vappId,
+    // @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) @NotNull @Min(1) final Integer vmId,
+    // @NotNull final LinksDto nicRefs, @Context final IRESTBuilder restBuilder) throws Exception
+    // {
+    // VirtualMachineState originalState =
+    // vmLock.lockVirtualMachineBeforeReconfiguring(vdcId, vappId, vmId);
+    //
+    // try
+    // {
+    // Object result = service.attachNICs(vdcId, vappId, vmId, nicRefs, originalState);
+    //
+    // // The attach method may return a Tarantino task identifier if the operation requires a
+    // // reconfigure. Otherwise it will return null.
+    // if (result != null)
+    // {
+    // AcceptedRequestDto<Object> response = new AcceptedRequestDto<Object>();
+    // response.setStatusUrlLink("http://status");
+    // response.setEntity(result);
+    // return response;
+    // }
+    //
+    // // If there is no async task the VM must be unlocked here
+    // vmLock.unlockVirtualMachine(vmId, originalState);
+    // return null;
+    // }
+    // catch (Exception ex)
+    // {
+    // // Make sure virtual machine is unlocked if reconfigure fails
+    // vmLock.unlockVirtualMachine(vmId, originalState);
+    // throw ex;
+    // }
+    // }
 
     /**
      * <pre>
@@ -461,43 +460,44 @@ public class VirtualMachineNetworkConfigurationResource extends AbstractResource
      * @throws Exception any thrown exception. Moved to HTTP status code in the
      *             {@link APIExceptionMapper} exception mapper.
      */
-    @DELETE
-    @Path(NICS_PATH + "/" + NIC_PARAM)
-    public AcceptedRequestDto< ? > detachNic(
-        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) @NotNull @Min(1) final Integer vdcId,
-        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) @NotNull @Min(1) final Integer vappId,
-        @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) @NotNull @Min(1) final Integer vmId,
-        @PathParam(NIC) @NotNull @Min(0) final Integer nicId,
-        @Context final IRESTBuilder restBuilder) throws Exception
-    {
-        VirtualMachineState originalState =
-            vmLock.lockVirtualMachineBeforeReconfiguring(vdcId, vappId, vmId);
-
-        try
-        {
-            Object result = service.detachNIC(vdcId, vappId, vmId, nicId, originalState);
-
-            // The attach method may return a Tarantino task identifier if the operation requires a
-            // reconfigure. Otherwise it will return null.
-            if (result != null)
-            {
-                AcceptedRequestDto<Object> response = new AcceptedRequestDto<Object>();
-                response.setStatusUrlLink("http://status");
-                response.setEntity(result);
-                return response;
-            }
-
-            // If there is no async task the VM must be unlocked here
-            vmLock.unlockVirtualMachine(vmId, originalState);
-            return null;
-        }
-        catch (Exception ex)
-        {
-            // Make sure virtual machine is unlocked if reconfigure fails
-            vmLock.unlockVirtualMachine(vmId, originalState);
-            throw ex;
-        }
-    }
+    // @DELETE
+    // @Path(NICS_PATH + "/" + NIC_PARAM)
+    // public AcceptedRequestDto< ? > detachNic(
+    // @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) @NotNull @Min(1) final Integer
+    // vdcId,
+    // @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) @NotNull @Min(1) final Integer vappId,
+    // @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) @NotNull @Min(1) final Integer vmId,
+    // @PathParam(NIC) @NotNull @Min(0) final Integer nicId,
+    // @Context final IRESTBuilder restBuilder) throws Exception
+    // {
+    // VirtualMachineState originalState =
+    // vmLock.lockVirtualMachineBeforeReconfiguring(vdcId, vappId, vmId);
+    //
+    // try
+    // {
+    // Object result = service.detachNIC(vdcId, vappId, vmId, nicId, originalState);
+    //
+    // // The attach method may return a Tarantino task identifier if the operation requires a
+    // // reconfigure. Otherwise it will return null.
+    // if (result != null)
+    // {
+    // AcceptedRequestDto<Object> response = new AcceptedRequestDto<Object>();
+    // response.setStatusUrlLink("http://status");
+    // response.setEntity(result);
+    // return response;
+    // }
+    //
+    // // If there is no async task the VM must be unlocked here
+    // vmLock.unlockVirtualMachine(vmId, originalState);
+    // return null;
+    // }
+    // catch (Exception ex)
+    // {
+    // // Make sure virtual machine is unlocked if reconfigure fails
+    // vmLock.unlockVirtualMachine(vmId, originalState);
+    // throw ex;
+    // }
+    // }
 
     /**
      * TODO: modify this!!
