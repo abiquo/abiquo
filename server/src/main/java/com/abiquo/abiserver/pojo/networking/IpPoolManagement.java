@@ -90,11 +90,16 @@ public class IpPoolManagement extends ResourceManagement implements Serializable
      * The IP is available?.
      */
     private Boolean available;
-    
+
     /**
      * Its sequence inside the virtual machine.
      */
     private Integer sequence;
+
+    /**
+     * The type of the IP.
+     */
+    private String type;
 
     /**
      * @return the mac
@@ -261,7 +266,7 @@ public class IpPoolManagement extends ResourceManagement implements Serializable
         this.available = available;
     }
 
-    public void setSequence(Integer sequence)
+    public void setSequence(final Integer sequence)
     {
         this.sequence = sequence;
     }
@@ -269,6 +274,16 @@ public class IpPoolManagement extends ResourceManagement implements Serializable
     public Integer getSequence()
     {
         return sequence;
+    }
+
+    public String getType()
+    {
+        return type;
+    }
+
+    public void setType(final String type)
+    {
+        this.type = type;
     }
 
 }

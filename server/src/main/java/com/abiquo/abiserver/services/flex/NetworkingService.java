@@ -402,6 +402,14 @@ public class NetworkingService
             ipPoolManagement.getVlanNetworkId(), ipPoolManagement.getIdManagement());
     }
 
+    public BasicResult changeVirtualMachineNetworkConfiguration(final UserSession userSession,
+        final Integer vdcId, final Integer vappId, final Integer vmId,
+        final List<IpPoolManagement> ips, final IPAddress gateway)
+    {
+        return proxyStub(userSession).changeVirtualMachineNetworkConfiguration(vdcId, vappId, vmId,
+            ips, gateway);
+    }
+
     /**
      * Helper method that return all the available masks for a class Type.
      * 

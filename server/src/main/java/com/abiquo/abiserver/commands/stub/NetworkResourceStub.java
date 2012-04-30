@@ -25,6 +25,7 @@
 package com.abiquo.abiserver.commands.stub;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 import com.abiquo.abiserver.exception.NetworkCommandException;
@@ -98,7 +99,7 @@ public interface NetworkResourceStub
         Boolean onlyAvailable, Boolean freeIps);
 
     public BasicResult getListNetworkPoolByVirtualDatacenter(Integer vdcId, Integer offset,
-        Integer numElem, String filterLike, String orderBy, Boolean asc, String type,  Boolean all)
+        Integer numElem, String filterLike, String orderBy, Boolean asc, String type, Boolean all)
         throws NetworkCommandException;
 
     public BasicResult getListNetworkPublicPoolByDatacenter(Integer datacenterId, Integer offset,
@@ -142,6 +143,10 @@ public interface NetworkResourceStub
 
     public BasicResult requestExternalNicforVirtualMachine(Integer enterpriseId, Integer vdcId,
         Integer vappId, Integer vmId, Integer vlanNetworkId, Integer idManagement);
+
+    public BasicResult changeVirtualMachineNetworkConfiguration(final Integer vdcId,
+        final Integer vappId, final Integer vmId, final List<IpPoolManagement> ips,
+        final IPAddress gateway);
 
     public BasicResult requestPrivateNICforVirtualMachine(Integer vdcId, Integer vappId,
         Integer vmId, Integer vlanNetworkId, Integer idManagement);

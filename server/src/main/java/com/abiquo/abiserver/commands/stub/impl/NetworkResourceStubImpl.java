@@ -34,10 +34,7 @@ import java.util.Set;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response.Status;
 
-import org.apache.log.util.LoggerOutputStream;
 import org.apache.wink.client.ClientResponse;
-
-import ch.qos.logback.classic.Logger;
 
 import com.abiquo.abiserver.business.hibernate.pojohb.user.UserHB;
 import com.abiquo.abiserver.commands.stub.AbstractAPIStub;
@@ -45,6 +42,8 @@ import com.abiquo.abiserver.commands.stub.NetworkResourceStub;
 import com.abiquo.abiserver.exception.NetworkCommandException;
 import com.abiquo.abiserver.networking.IPAddress;
 import com.abiquo.abiserver.networking.IPNetworkRang;
+import com.abiquo.abiserver.persistence.DAOFactory;
+import com.abiquo.abiserver.persistence.hibernate.HibernateDAOFactory;
 import com.abiquo.abiserver.pojo.authentication.UserSession;
 import com.abiquo.abiserver.pojo.networking.DhcpOption;
 import com.abiquo.abiserver.pojo.networking.IpPoolManagement;
@@ -1163,6 +1162,7 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
         final Integer vmId)
     {
         DataResult<List<IpPoolManagement>> result = new DataResult<List<IpPoolManagement>>();
+        Integer currentEnterpriseId = getEnterpriseId();
 
         String uri = createVirtualMachineNICsLink(vdcId, vappId, vmId);
         ClientResponse response = get(uri, NicsDto.MEDIA_TYPE);
@@ -1174,7 +1174,7 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
 
             for (NicDto dto : nics.getCollection())
             {
-                returnIps.add(createFlexObject(dto));
+                returnIps.add(createFlexObject(dto, currentEnterpriseId));
             }
 
             result.setData(returnIps);
@@ -1471,6 +1471,121 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
         }
 
         return result;
+    }
+
+    @Override
+    public BasicResult changeVirtualMachineNetworkConfiguration(final Integer vdcId,
+        final Integer vappId, final Integer vmId, final List<IpPoolManagement> ips,
+        final IPAddress gateway)
+    {
+        BasicResult result = new BasicResult();
+        LinksDto links = new LinksDto();
+
+        // Look for the appropriate gateway uri to change it (adding it to the links list)
+        if (gateway != null)
+        {
+            String netConfigUri = createVirtualMachineConfigurationsLink(vdcId, vappId, vmId);
+            ClientResponse response = get(netConfigUri, VMNetworkConfigurationsDto.MEDIA_TYPE);
+            if (response.getStatusCode() == 200)
+            {
+                VMNetworkConfigurationsDto dtos =
+                    response.getEntity(VMNetworkConfigurationsDto.class);
+                for (VMNetworkConfigurationDto dto : dtos.getCollection())
+                {
+                    if (dto.getGateway().equalsIgnoreCase(gateway.toString()))
+                    {
+                        String gatewayToEnable =
+                            createVirtualMachineConfigurationLink(vdcId, vappId, vmId, dto.getId());
+                        links.addLink(new RESTLink("network_configuration", gatewayToEnable));
+                    }
+                }
+            }
+            else
+            {
+                populateErrors(response, result, "requestPrivateNICforVirtualMachine");
+                return result;
+            }
+        }
+
+        for (IpPoolManagement ip : ips)
+        {
+            links.addLink(getLinkForIp(vdcId, vappId, vmId, ip));
+        }
+
+        String uri = createVirtualMachineNICsLink(vdcId, vappId, vmId);
+        ClientResponse response =
+            put(uri, links, AcceptedRequestDto.MEDIA_TYPE, LinksDto.MEDIA_TYPE);
+
+        if (response.getStatusCode() == 204 || response.getStatusCode() == 202)
+        {
+            result.setSuccess(Boolean.TRUE);
+        }
+        else
+        {
+            populateErrors(response, result, "requestPrivateNICforVirtualMachine");
+        }
+
+        return result;
+    }
+
+    private RESTLink getLinkForIp(final Integer vdcId, final Integer vappId, final Integer vmId,
+        final IpPoolManagement ip)
+    {
+        RESTLink link = null;
+
+        if ("privateip".equalsIgnoreCase(ip.getType()))
+        {
+            String uriIp =
+                createPrivateNetworkIPLink(vdcId, ip.getVlanNetworkId(), ip.getIdManagement());
+            link = new RESTLink(ip.getType(), uriIp);
+        }
+        if ("publicip".equalsIgnoreCase(ip.getType()))
+        {
+            String uriIp =
+                createVirtualDatacenterPublicPurchasedIPLink(vdcId, ip.getIdManagement());
+            link = new RESTLink(ip.getType(), uriIp);
+        }
+        else if ("externalip".equalsIgnoreCase(ip.getType())
+            || "unmanagedip".equalsIgnoreCase(ip.getType()))
+        {
+            // First get the virtual datacenter
+            VirtualDatacenterDto vdcDto =
+                get(createVirtualDatacenterLink(vdcId), VirtualDatacenterDto.MEDIA_TYPE).getEntity(
+                    VirtualDatacenterDto.class);
+            RESTLink dcLink = vdcDto.searchLink("datacenter");
+            Integer datacenterId =
+                Integer.valueOf(dcLink.getHref().substring(dcLink.getHref().lastIndexOf("/") + 1));
+
+            String uri = createEnterpriseLimitsByDatacenterLink(ip.getEnterpriseId());
+            ClientResponse response = get(uri, DatacentersLimitsDto.MEDIA_TYPE);
+            DatacentersLimitsDto limits = response.getEntity(DatacentersLimitsDto.class);
+
+            for (DatacenterLimitsDto limitDto : limits.getCollection())
+            {
+                dcLink = limitDto.searchLink("datacenter");
+                Integer dcId =
+                    Integer.valueOf(dcLink.getHref().substring(
+                        dcLink.getHref().lastIndexOf("/") + 1));
+                if (dcId.equals(datacenterId))
+                {
+                    String uriIp =
+                        limitDto.searchLink("externalnetworks").getHref() + "/"
+                            + ip.getVlanNetworkId() + "/ips";
+
+                    // Can be null when attaching a new Unmanaged Ip. In that case we don't provide
+                    // the ip id to make the Api choose a new Ip from the unmanaged network
+                    // automatically. Otherwise we need the ip id
+                    if (ip.getIdManagement() != null && ip.getIdManagement() > 0)
+                    {
+                        uriIp += "/" + ip.getIdManagement();
+                    }
+
+                    link = new RESTLink(ip.getType(), uriIp);
+                }
+            }
+        }
+
+        return link;
     }
 
     @Override
@@ -1808,7 +1923,7 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
         return flexIp;
     }
 
-    private IpPoolManagement createFlexObject(final NicDto dto)
+    private IpPoolManagement createFlexObject(final NicDto dto, final Integer enterpriseId)
     {
         IpPoolManagement flexIp = new IpPoolManagement();
 
@@ -1821,18 +1936,30 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
         {
             if (currentLink.getRel().equalsIgnoreCase("privatenetwork"))
             {
+                flexIp.setType("privateip");
                 flexIp.setVlanNetworkName(currentLink.getTitle());
                 flexIp.setVlanNetworkId(Integer.valueOf(currentLink.getHref().substring(
                     currentLink.getHref().lastIndexOf("/") + 1)));
             }
             if (currentLink.getRel().equalsIgnoreCase("publicnetwork"))
             {
+                flexIp.setType("publicip");
                 flexIp.setVlanNetworkName(currentLink.getTitle());
                 flexIp.setVlanNetworkId(Integer.valueOf(currentLink.getHref().substring(
                     currentLink.getHref().lastIndexOf("/") + 1)));
             }
             if (currentLink.getRel().equalsIgnoreCase("externalnetwork"))
             {
+                flexIp.setType("externalip");
+                flexIp.setEnterpriseId(enterpriseId);
+                flexIp.setVlanNetworkName(currentLink.getTitle());
+                flexIp.setVlanNetworkId(Integer.valueOf(currentLink.getHref().substring(
+                    currentLink.getHref().lastIndexOf("/") + 1)));
+            }
+            if (currentLink.getRel().equalsIgnoreCase("unmanagednetwork"))
+            {
+                flexIp.setType("unmanagedip");
+                flexIp.setEnterpriseId(enterpriseId);
                 flexIp.setVlanNetworkName(currentLink.getTitle());
                 flexIp.setVlanNetworkId(Integer.valueOf(currentLink.getHref().substring(
                     currentLink.getHref().lastIndexOf("/") + 1)));
@@ -1870,6 +1997,7 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
         final Integer rackId, final Integer machineId, final Integer virtualMachineId)
     {
         DataResult<List<IpPoolManagement>> result = new DataResult<List<IpPoolManagement>>();
+        Integer currentEnterpriseId = getEnterpriseId();
 
         String uri =
             createInfrastructureVirtualMachineNICsLink(datacenterId, rackId, machineId,
@@ -1883,7 +2011,7 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
 
             for (NicDto dto : nics.getCollection())
             {
-                returnIps.add(createFlexObject(dto));
+                returnIps.add(createFlexObject(dto, currentEnterpriseId));
             }
 
             result.setData(returnIps);
@@ -1895,6 +2023,19 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
         }
 
         return result;
+    }
+
+    private Integer getEnterpriseId()
+    {
+        DAOFactory factory = HibernateDAOFactory.instance();
+        factory.beginConnection();
+
+        UserHB user = factory.getUserDAO().findById(currentSession.getUserIdDb());
+        Integer enterpriseId = user.getEnterpriseHB().getIdEnterprise();
+
+        factory.endConnection();
+
+        return enterpriseId;
     }
 
 }
