@@ -3026,11 +3026,9 @@ public class VirtualMachineService extends DefaultApiService
     public VirtualMachine restoreBackupVirtualMachine(final VirtualMachine updatedVm,
         final VirtualMachine rollbackVm)
     {
+        LOGGER.debug("Restoring virtual machine {} from backup...", updatedVm.getUuid());
 
-        // will use VsmServiceStub to force a refresh
-        // updatedVm.setState(VirtualMachineState.LOCKED);
-
-        // backup virtual machine properties
+        // Backup virtual machine properties
         updatedVm.setCpu(rollbackVm.getCpu());
         updatedVm.setDatastore(rollbackVm.getDatastore());
         updatedVm.setDescription(rollbackVm.getDescription());
@@ -3051,85 +3049,112 @@ public class VirtualMachineService extends DefaultApiService
         updatedVm.setVirtualMachineTemplate(rollbackVm.getVirtualMachineTemplate());
         updatedVm.setNetworkConfiguration(rollbackVm.getNetworkConfiguration());
 
-        List<RasdManagement> updatedResources = updatedVm.getRasdManagements();
+        List<RasdManagement> resourcesAfterUpdatingVm = updatedVm.getRasdManagements();
         List<RasdManagement> rollbackResources = getBackupResources(rollbackVm);
 
-        LOGGER.debug("removed backup virtual machine");
+        /* ************************************************************************ */
+        /* CASE 1: Detach resources that were attached in the reconfigure operation */
+        /* ************************************************************************ */
 
-        for (RasdManagement updatedRasd : updatedResources)
+        LOGGER.debug("Detaching resources attached during reconfigure...");
+
+        for (RasdManagement resourceAfterUpdatingVm : resourcesAfterUpdatingVm)
         {
-            RasdManagement rollbackRasd = getBackupResource(rollbackResources, updatedRasd.getId());
+            RasdManagement rollbackRasd =
+                getBackupResource(rollbackResources, resourceAfterUpdatingVm.getId());
 
+            // If the resource exists in the 'updatedVm' but it does not exist in the
+            // rollbackResources list then the resource has been added during the reconfigure
             if (rollbackRasd == null)
             {
-                LOGGER.trace("restore: detach resource " + updatedRasd.getId());
+                LOGGER.debug("Detaching resource {} of type {}", resourceAfterUpdatingVm.getId(),
+                    resourceAfterUpdatingVm.getClass().getSimpleName());
 
-                if (updatedRasd instanceof IpPoolManagement)
+                if (resourceAfterUpdatingVm instanceof IpPoolManagement)
                 {
-                    IpPoolManagement originalRasd = (IpPoolManagement) updatedRasd;
+                    IpPoolManagement addedIp = (IpPoolManagement) resourceAfterUpdatingVm;
 
-                    // remove the rasd
-                    vdcRep.deleteRasd(originalRasd.getRasd());
+                    vdcRep.deleteRasd(addedIp.getRasd());
 
-                    // unmanaged ips disappear when the are not assigned to a virtual machine.
-                    if (originalRasd.isUnmanagedIp())
+                    // Unmanaged ips disappear when the are not assigned to a virtual machine.
+                    if (addedIp.isUnmanagedIp())
                     {
-                        rasdDao.remove(originalRasd);
+                        rasdDao.remove(addedIp);
                     }
                 }
-                // DiskManagements always are deleted
-                if (updatedRasd instanceof DiskManagement)
+                // DiskManagements are always deleted
+                if (resourceAfterUpdatingVm instanceof DiskManagement)
                 {
-                    DiskManagement originalRasd = (DiskManagement) updatedRasd;
+                    DiskManagement addedDisk = (DiskManagement) resourceAfterUpdatingVm;
 
-                    vdcRep.deleteRasd(originalRasd.getRasd());
-                    rasdDao.remove(originalRasd);
+                    vdcRep.deleteRasd(addedDisk.getRasd());
+                    rasdDao.remove(addedDisk);
                 }
                 else
                 {
-                    // volumes only need to be dettached
-                    if (!isStatefulVolume(updatedRasd))
+                    // Other resources only need to be dettached
+                    if (!isStatefulVolume(resourceAfterUpdatingVm))
                     {
-                        updatedRasd.detach();
+                        resourceAfterUpdatingVm.detach();
                     }
                 }
+            }
+            else
+            {
+                /* ********************************************************* */
+                /* CASE 2: Restore the sequence number in modified resources */
+                /* ********************************************************* */
 
+                // If the resource exists in the 'updatedVm' and it exists in the rollbackResources
+                // list, then the resource was not attached/detached, but it may have been
+                // reattached in another position, so we need to restore the sequence number
+                if (resourceAfterUpdatingVm.getSequence() != rollbackRasd.getSequence())
+                {
+                    LOGGER.debug("Restoring attachment order for resource {} of type {}",
+                        resourceAfterUpdatingVm.getId(), resourceAfterUpdatingVm.getClass()
+                            .getSimpleName());
+
+                    resourceAfterUpdatingVm.setSequence(rollbackRasd.getSequence());
+                }
             }
         }
+
+        /* ************************************************************************ */
+        /* CASE 3: Attach resources that were detached in the reconfigure operation */
+        /* ************************************************************************ */
 
         for (RasdManagement rollbackRasd : rollbackResources)
         {
             RasdManagement originalRasd = rasdDao.findById(rollbackRasd.getTemporal());
 
+            // If it is present in the rollback rasd (it was attached in the original vm when the
+            // backup was created), but the original rasd is now detached, that means that the
+            // resource has been detached during the reconfigure operation. We need to reattach it.
             if (!originalRasd.isAttached())
             {
-                // I dunno if it is necessary for the rest of resources,
-                // but for IPs it is.
+                LOGGER.debug("Attaching resource {} of type {}", originalRasd.getId(), originalRasd
+                    .getClass().getSimpleName());
+
+                // Restore the attachment to all entities
+                VirtualAppliance vapp = vdcRep.findVirtualApplianceByVirtualMachine(updatedVm);
+                originalRasd.attach(rollbackRasd.getSequence(), updatedVm, vapp);
+                originalRasd.setVirtualDatacenter(rollbackRasd.getVirtualDatacenter());
+
                 if (originalRasd instanceof IpPoolManagement)
                 {
                     IpPoolManagement ipman = (IpPoolManagement) originalRasd;
                     IpPoolManagement ipRoll = (IpPoolManagement) rollbackRasd;
-                    VirtualAppliance vapp = vdcRep.findVirtualApplianceByVirtualMachine(updatedVm);
-                    ipman.setVirtualAppliance(vapp);
-                    ipman.setVirtualDatacenter(rollbackRasd.getVirtualDatacenter());
                     ipman.setIp(ipRoll.getIp());
                     ipman.setMac(ipRoll.getMac());
                 }
             }
-
-            // We always need to restore the sequence number: If we removed the interface we
-            // reattach it, or if we just changed its order, we make sure the original sequence
-            // number is maintained
-            LOGGER.trace("restore: attach resource " + originalRasd.getId());
-            originalRasd.attach(rollbackRasd.getSequence(), updatedVm);
         }
 
         repo.deleteVirtualMachine(rollbackVm);
         repo.update(updatedVm);
         rasdDao.flush();
-        // update virtual machine resources
 
-        LOGGER.info("restored virtual machine {} from backup", updatedVm.getUuid());
+        LOGGER.info("Restored virtual machine {} from backup", updatedVm.getUuid());
 
         return updatedVm;
     }
