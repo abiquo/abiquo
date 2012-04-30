@@ -31,7 +31,7 @@
         <testng.version>5.12.1</testng.version>
         <commonsamqp.version>1.1</commonsamqp.version>
         <guava.version>11.0.1</guava.version>
-        <abiquo-jclouds.version>2.1</abiquo-jclouds.version>
+        <abiquo-jclouds.version>2.2</abiquo-jclouds.version>
     </properties>
     <!-- Aggregations. Common modules -->
     <modules>
