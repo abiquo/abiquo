@@ -216,7 +216,7 @@ public class NetworkService extends DefaultApiService
                 ip = new IpPoolManagement(vlan, "?", "?", "?", vlan.getName());
                 ip.setVirtualDatacenter(vdc);
                 ip.setMac(IPNetworkRang.requestRandomMacAddress(vdc.getHypervisorType()));
-                ip.setName(ip.getMac() + "_host");
+                ip.setName(ip.getMac().replace(":", "") + "_host");
                 repo.insertIpManagement(ip);
 
                 break;
@@ -227,7 +227,7 @@ public class NetworkService extends DefaultApiService
                         .getGateway());
                 ip.setVirtualDatacenter(vdc);
                 ip.setMac(IPNetworkRang.requestRandomMacAddress(vdc.getHypervisorType()));
-                ip.setName(ip.getMac() + "_host");
+                ip.setName(ip.getMac().replace(":", "") + "_host");
         }
 
         Rasd rasd = createRasdEntity(vm, ip);
