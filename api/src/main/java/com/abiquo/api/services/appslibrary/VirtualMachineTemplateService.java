@@ -493,8 +493,14 @@ public class VirtualMachineTemplateService extends DefaultApiService
             viOvf = codifyBundleImportedOVFid(vmtemplateToDelete.getPath());
         }
 
-        am.delete(datacenterId, enterpriseId, viOvf);
-
+        if (vmtemplateToDelete.getMaster() != null && !vmtemplateToDelete.isStateful())
+        {
+            am.delete(datacenterId, vmtemplateToDelete.getMaster().getEnterprise().getId(), viOvf);
+        }
+        else
+        {
+            am.delete(datacenterId, enterpriseId, viOvf);
+        }
         // delete
         appsLibraryRep.deleteVirtualMachineTemplate(vmtemplateToDelete);
 
