@@ -1057,7 +1057,14 @@ public class RESTBuilder implements IRESTBuilder
         {
             // Master's enterprise may differ from the current virtual machine template.
             // Datacenter repository id will be the same (the id of the datacenter)
-            params.put(EnterpriseResource.ENTERPRISE, master.getEnterprise().getId().toString());
+
+            // FIXME SCG
+            // params.put(EnterpriseResource.ENTERPRISE, master.getEnterprise().getId().toString());
+            // Actually there are many exposed uris for the same resource (virtual machine template
+            // SHARED), one with the template's enterprise id and for the other enterprises it uses
+            // the own enterprise id. When the shared template logic will be fixed this line must be
+            // uncommented.
+            params.put(EnterpriseResource.ENTERPRISE, enterpriseId.toString());
             params.put(VirtualMachineTemplateResource.VIRTUAL_MACHINE_TEMPLATE, master.getId()
                 .toString());
             RESTLink masterLink =
