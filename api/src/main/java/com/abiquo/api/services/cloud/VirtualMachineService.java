@@ -26,8 +26,11 @@ import static com.abiquo.api.util.URIResolver.buildPath;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.UUID;
 
 import javax.persistence.EntityManager;
@@ -2489,10 +2492,15 @@ public class VirtualMachineService extends DefaultApiService
     public List<IpPoolManagement> getNICsFromDto(final VirtualDatacenter vdc,
         final SingleResourceTransportDto dto)
     {
+        List<RESTLink> links = dto.searchLinks(PrivateNetworkResource.PRIVATE_IP);
+
+        validateRepeatedLinks(links);
+        flushErrors();
+
         List<IpPoolManagement> privateIPs = new LinkedList<IpPoolManagement>();
 
         // Validate and load each ip from the link list
-        for (RESTLink link : dto.searchLinks(PrivateNetworkResource.PRIVATE_IP))
+        for (RESTLink link : links)
         {
             IpPoolManagement ip = getPrivateNICFromLink(vdc, link);
             if (ip != null)
@@ -3324,5 +3332,25 @@ public class VirtualMachineService extends DefaultApiService
     public Collection<VirtualMachine> getManagedByHypervisor(final Hypervisor hypervisor)
     {
         return repo.findManagedByHypervisor(hypervisor);
+    }
+
+    protected void validateRepeatedLinks(final List<RESTLink> links)
+    {
+        // Validate repeated considering rel and href
+        Set<RESTLink> uniqueLinks = new TreeSet<RESTLink>(new Comparator<RESTLink>()
+        {
+            @Override
+            public int compare(final RESTLink o1, final RESTLink o2)
+            {
+                return o1.getHref().equals(o2.getHref()) && o1.getRel().equals(o2.getRel()) ? 0 : 1;
+            }
+        });
+
+        uniqueLinks.addAll(links);
+
+        if (uniqueLinks.size() != links.size())
+        {
+            addConflictErrors(APIError.VLANS_IP_REPEATED_LINKS);
+        }
     }
 }
