@@ -185,7 +185,7 @@ public enum APIError
         "VLAN-47", "Cannot delete Unmanaged Networks associated with Virtual Machines"), VLANS_MISSING_ENTERPRISE_LINK(
         "VLAN-48", "Enterprise link with rel 'enterprise' is mandatory "), VLANS_IP_IS_IN_QUARANTINE(
         "VLAN-49", "The IP %s is in quarantine"), VLANS_IP_REPEATED_LINKS("VLAN-50",
-        "There are repeated ip links"),
+        "Invalid input. Repeated ips are not allowed."),
 
     // VIRTUAL APPLIANCE
     NON_EXISTENT_VIRTUALAPPLIANCE("VAPP-0", "The requested virtual appliance does not exist"), VIRTUALAPPLIANCE_NOT_DEPLOYED(
