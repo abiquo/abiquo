@@ -501,7 +501,7 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
         // minid-maxid range)
         for (Integer vlanId : vlanTemp)
         {
-            if (vlanId.intValue() < rack.getVlanIdMin())
+            if (vlanId.intValue() < rack.getVlanIdMin() || vlanId.intValue() > rack.getVlanIdMax())
             {
                 vlanIdsOrdered.remove(vlanId);
             }

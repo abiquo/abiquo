@@ -184,8 +184,8 @@ import com.softwarementors.bzngine.entities.PersistentEntity;
 
     private final static String COUNT_DEPLOYED_VLA = //
         "SELECT COUNT(vn.id) " + //
-            "FROM NetworkAssignment vn WHERE " + //
-            "vn.rack.id = :idRack";
+            "FROM NetworkAssignment vn INNER JOIN vn.rack r INNER JOIN vn.vlanNetwork v WHERE " + //
+            "vn.rack.id = :idRack AND v.tag BETWEEN r.vlanIdMin AND r.vlanIdMax";
 
     public Long getNumberOfDeployedVlanNetworks(final Integer rackId)
     {
