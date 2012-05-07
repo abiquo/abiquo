@@ -66,7 +66,7 @@ public class AMServiceStub extends DefaultApiService
     public TemplateDto getTemplate(final Integer datacenterId, final Integer enterpriseId,
         final String ovfId)
     {
-        final AMClient amClient = getAMClient(datacenterId, enterpriseId, false);
+        final AMClient amClient = getAMClient(datacenterId, enterpriseId, false, true);
 
         try
         {
@@ -106,7 +106,7 @@ public class AMServiceStub extends DefaultApiService
 
     public void delete(final Integer datacenterId, final Integer enterpriseId, final String ovfId)
     {
-        final AMClient amClient = getAMClient(datacenterId, enterpriseId, false);
+        final AMClient amClient = getAMClient(datacenterId, enterpriseId, false, false);
 
         try
         {
@@ -125,7 +125,7 @@ public class AMServiceStub extends DefaultApiService
     public String preBundleTemplate(final Integer datacenterId, final Integer enterpriseId,
         final String instanceName)
     {
-        final AMClient amClient = getAMClient(datacenterId, enterpriseId, false);
+        final AMClient amClient = getAMClient(datacenterId, enterpriseId, false, true);
 
         try
         {
@@ -145,7 +145,7 @@ public class AMServiceStub extends DefaultApiService
     public EnterpriseRepositoryDto getRepository(final Integer datacenterId,
         final Integer enterpriseId)
     {
-        final AMClient amClient = getAMClient(datacenterId, enterpriseId, false);
+        final AMClient amClient = getAMClient(datacenterId, enterpriseId, false, true);
 
         try
         {
@@ -165,7 +165,7 @@ public class AMServiceStub extends DefaultApiService
     public TemplatesStateDto getTemplatesState(final Integer datacenterId,
         final Integer enterpriseId, final String... ovfIds)
     {
-        final AMClient amClient = getAMClient(datacenterId, enterpriseId, false);
+        final AMClient amClient = getAMClient(datacenterId, enterpriseId, false, true);
 
         try
         {
@@ -185,7 +185,7 @@ public class AMServiceStub extends DefaultApiService
     public TemplateStateDto getTemplateState(final Integer datacenterId,
         final Integer enterpriseId, final String id)
     {
-        final AMClient amClient = getAMClient(datacenterId, enterpriseId, false);
+        final AMClient amClient = getAMClient(datacenterId, enterpriseId, false, true);
 
         try
         {
@@ -198,8 +198,8 @@ public class AMServiceStub extends DefaultApiService
             st.setStatus(TemplateStatusEnumType.DOWNLOADING);
             st.setDownloadingProgress(0.0);
 
-            LOGGER.warn("Can't update the download progress of {} caused by: {}", id,
-                e.getMessage());
+            LOGGER.warn("Can't update the download progress of {} caused by: {}", id, e
+                .getMessage());
             return st;
             // reportError(e);
             // return null;// unreachable
@@ -212,7 +212,7 @@ public class AMServiceStub extends DefaultApiService
 
     public void install(final Integer datacenterId, final Integer enterpriseId, final String id)
     {
-        final AMClient amClient = getAMClient(datacenterId, enterpriseId, false);
+        final AMClient amClient = getAMClient(datacenterId, enterpriseId, false, true);
 
         try
         {
@@ -231,7 +231,7 @@ public class AMServiceStub extends DefaultApiService
     public List<TemplateDto> refreshRepository(final Integer enterpriseId,
         final Integer datacenterId, final String currentRepositoryLocation)
     {
-        final AMClient amClient = getAMClient(datacenterId, enterpriseId, false);
+        final AMClient amClient = getAMClient(datacenterId, enterpriseId, false, true);
 
         String repositoryLocation = null;
         try
@@ -302,15 +302,19 @@ public class AMServiceStub extends DefaultApiService
      */
 
     private AMClient getAMClient(final Integer dcId, final Integer enterpriseId,
-        final boolean withTimeout)
+        final boolean withTimeout, final boolean checkLimits)
     {
-        // Check that the enterprise can use the datacenter
-        DatacenterLimits limits =
-            entService.findLimitsByEnterpriseAndDatacenter(enterpriseId, dcId);
-        if (limits == null)
+        // FIXME check limits used for the case when deleting instance of a shared image
+        if (checkLimits)
         {
-            addConflictErrors(APIError.ENTERPRISE_NOT_ALLOWED_DATACENTER);
-            flushErrors();
+            // Check that the enterprise can use the datacenter
+            DatacenterLimits limits =
+                entService.findLimitsByEnterpriseAndDatacenter(enterpriseId, dcId);
+            if (limits == null)
+            {
+                addConflictErrors(APIError.ENTERPRISE_NOT_ALLOWED_DATACENTER);
+                flushErrors();
+            }
         }
 
         final String amUri =
