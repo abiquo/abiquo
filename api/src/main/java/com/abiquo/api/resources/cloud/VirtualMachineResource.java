@@ -446,8 +446,8 @@ public class VirtualMachineResource extends AbstractResource
             SchedulerLock.acquire(lockMsg);
 
             String taskId =
-                vmService.deployVirtualMachine(vmId, vappId, vdcId, forceSoftLimits
-                    .isForceEnterpriseSoftLimits());
+                vmService.deployVirtualMachine(vmId, vappId, vdcId,
+                    forceSoftLimits.isForceEnterpriseSoftLimits());
 
             return buildAcceptedRequestDtoWithTaskLink(taskId, uriInfo);
         }
@@ -612,8 +612,8 @@ public class VirtualMachineResource extends AbstractResource
         try
         {
             String taskId =
-                vmService.instanceVirtualMachine(vmId, vappId, vdcId, snapshotData
-                    .getInstanceName(), originalState);
+                vmService.instanceVirtualMachine(vmId, vappId, vdcId,
+                    snapshotData.getInstanceName(), originalState);
             if (taskId == null)
             {
                 throw new InternalServerErrorException(APIError.STATUS_INTERNAL_SERVER_ERROR);
@@ -680,17 +680,21 @@ public class VirtualMachineResource extends AbstractResource
 
         if (!v.getVirtualMachine().isCaptured())
         {
+            // Shared templates and users without admin privileges
+            Integer idEnt =
+                virtualImage.isShared() && user != null ? user.getEnterprise().getId()
+                    : virtualImage.getEnterprise().getId();
+
             if (v.getVirtualMachine().isStateful())
             {
-                dto.addLink(restBuilder.buildVirtualMachineTemplateLink(virtualImage
-                    .getEnterprise().getId(), v.getVirtualAppliance().getVirtualDatacenter()
-                    .getDatacenter().getId(), virtualImage.getId()));
+                dto.addLink(restBuilder.buildVirtualMachineTemplateLink(idEnt, v
+                    .getVirtualAppliance().getVirtualDatacenter().getDatacenter().getId(),
+                    virtualImage.getId()));
             }
             else
             {
-                dto.addLink(restBuilder.buildVirtualMachineTemplateLink(virtualImage
-                    .getEnterprise().getId(), virtualImage.getRepository().getDatacenter().getId(),
-                    virtualImage.getId()));
+                dto.addLink(restBuilder.buildVirtualMachineTemplateLink(idEnt, virtualImage
+                    .getRepository().getDatacenter().getId(), virtualImage.getId()));
             }
         }
         else
@@ -785,8 +789,13 @@ public class VirtualMachineResource extends AbstractResource
         final VirtualMachineTemplate vmtemplate = v.getVirtualMachineTemplate();
         if (vmtemplate.getRepository() != null)
         {
-            dto.addLink(restBuilder.buildVirtualMachineTemplateLink(vmtemplate.getEnterprise()
-                .getId(), vmtemplate.getRepository().getDatacenter().getId(), vmtemplate.getId()));
+            // Shared templates and users without admin privileges
+            Integer idEnt =
+                vmtemplate.isShared() && user != null ? user.getEnterprise().getId() : vmtemplate
+                    .getEnterprise().getId();
+
+            dto.addLink(restBuilder.buildVirtualMachineTemplateLink(idEnt, vmtemplate
+                .getRepository().getDatacenter().getId(), vmtemplate.getId()));
         }
         else
         {
@@ -849,15 +858,20 @@ public class VirtualMachineResource extends AbstractResource
 
         dto.addLinks(restBuilder.buildVirtualMachineCloudAdminLinks(vdc.getId(), vappId, v,
             rack == null ? null : rack.getDatacenter().getId(), rack == null ? null : rack.getId(),
-            machine == null ? null : machine.getId(), enterprise == null ? null : enterprise
-                .getId(), user == null ? null : user.getId(), v.isChefEnabled(), volumeIds,
-            diskIds, ips, vdc.getHypervisorType(), null));
+            machine == null ? null : machine.getId(),
+            enterprise == null ? null : enterprise.getId(), user == null ? null : user.getId(),
+            v.isChefEnabled(), volumeIds, diskIds, ips, vdc.getHypervisorType(), null));
 
         final VirtualMachineTemplate vmtemplate = v.getVirtualMachineTemplate();
         if (vmtemplate.getRepository() != null)
         {
-            dto.addLink(restBuilder.buildVirtualMachineTemplateLink(vmtemplate.getEnterprise()
-                .getId(), vmtemplate.getRepository().getDatacenter().getId(), vmtemplate.getId()));
+            // Shared templates and users without admin privileges
+            Integer idEnt =
+                vmtemplate.isShared() && user != null ? user.getEnterprise().getId() : vmtemplate
+                    .getEnterprise().getId();
+
+            dto.addLink(restBuilder.buildVirtualMachineTemplateLink(idEnt, vmtemplate
+                .getRepository().getDatacenter().getId(), vmtemplate.getId()));
         }
         else
         {
@@ -901,9 +915,9 @@ public class VirtualMachineResource extends AbstractResource
     {
         NodeVirtualImage node = vmService.getNodeVirtualImage(vdcId, vappId, vmId);
 
-        return createNodeTransferObject(node, vdcId, vappId, restBuilder, getVolumeIds(node
-            .getVirtualMachine()), getDiskIds(node.getVirtualMachine()), node.getVirtualMachine()
-            .getIps());
+        return createNodeTransferObject(node, vdcId, vappId, restBuilder,
+            getVolumeIds(node.getVirtualMachine()), getDiskIds(node.getVirtualMachine()), node
+                .getVirtualMachine().getIps());
     }
 
     /**

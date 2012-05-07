@@ -457,6 +457,13 @@ public class VirtualMachineTemplateService extends DefaultApiService
             flushErrors();
         }
 
+        // Check that the enterprise can use the datacenter
+        if (enterpriseService.findLimitsByEnterpriseAndDatacenter(enterpriseId, datacenterId) == null)
+        {
+            addConflictErrors(APIError.ENTERPRISE_NOT_ALLOWED_DATACENTER);
+            flushErrors();
+        }
+
         if (appsLibraryRep.isMaster(vmtemplateToDelete))
         {
             addConflictErrors(APIError.VMTEMPLATE_MASTER_TEMPLATE_CANNOT_BE_DELETED);
@@ -493,8 +500,14 @@ public class VirtualMachineTemplateService extends DefaultApiService
             viOvf = codifyBundleImportedOVFid(vmtemplateToDelete.getPath());
         }
 
-        am.delete(datacenterId, enterpriseId, viOvf);
-
+        if (vmtemplateToDelete.getMaster() != null && !vmtemplateToDelete.isStateful())
+        {
+            am.delete(datacenterId, vmtemplateToDelete.getMaster().getEnterprise().getId(), viOvf);
+        }
+        else
+        {
+            am.delete(datacenterId, enterpriseId, viOvf);
+        }
         // delete
         appsLibraryRep.deleteVirtualMachineTemplate(vmtemplateToDelete);
 

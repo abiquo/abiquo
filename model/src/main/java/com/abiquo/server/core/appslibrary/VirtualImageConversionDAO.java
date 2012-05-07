@@ -57,10 +57,17 @@ public class VirtualImageConversionDAO extends DefaultDAOBase<Integer, VirtualIm
         return Restrictions.eq(VirtualImageConversion.VIRTUAL_MACHINE_TEMPLATE_PROPERTY, image);
     }
 
-    private static Criterion sameImage(final VirtualImageConversion conversion)
+    private static Criterion sameImageAndSourcePath(final VirtualImageConversion conversion)
     {
-        return Restrictions.eq(VirtualImageConversion.VIRTUAL_MACHINE_TEMPLATE_PROPERTY,
-            conversion.getVirtualMachineTemplate());
+        final Criterion sameimage =
+            Restrictions.eq(VirtualImageConversion.VIRTUAL_MACHINE_TEMPLATE_PROPERTY,
+                conversion.getVirtualMachineTemplate());
+
+        final Criterion samesourcepath =
+            Restrictions
+                .eq(VirtualImageConversion.SOURCE_PATH_PROPERTY, conversion.getSourcePath());
+
+        return Restrictions.and(sameimage, samesourcepath);
     }
 
     private static Criterion sameSourceFormat(final VirtualImageConversion image)
@@ -192,7 +199,8 @@ public class VirtualImageConversionDAO extends DefaultDAOBase<Integer, VirtualIm
 
     public boolean existDuplicatedConversion(final VirtualImageConversion conversion)
     {
-        Criterion cri = Restrictions.and(sameImage(conversion), sameSourceFormat(conversion));
+        Criterion cri =
+            Restrictions.and(sameImageAndSourcePath(conversion), sameSourceFormat(conversion));
         cri = Restrictions.and(cri, sameTargetFormat(conversion));
         return existsAnyByCriterions(cri);
     }

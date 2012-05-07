@@ -350,8 +350,12 @@ public class NetworkService extends DefaultApiService
 
         VirtualMachine newvm = vmService.duplicateVirtualMachineObject(oldvm);
         List<IpPoolManagement> ips = vmService.getNICsFromDto(vdc, nicRefs);
-
         newvm.setIps(ips);
+
+        // [ABICLOUDPREMIUM-3782] When changing nics we may also want to change the default gateway
+        NetworkConfiguration netconf =
+            vmService.getNetworkConfigurationFromDto(vapp, newvm, nicRefs);
+        newvm.setNetworkConfiguration(netconf);
 
         return vmService.reconfigureVirtualMachine(vdc, vapp, oldvm, newvm, originalState);
     }

@@ -193,6 +193,39 @@ public class VirtualImageConversionDAOTest extends
     }
 
     @Test
+    public void testNoDuplicatedConversionsIfDifferentSource()
+    {
+        VirtualMachineTemplate template = virtualImageGenerator.createUniqueInstance();
+
+        VirtualImageConversion imageConversion1_1 =
+            eg().createInstance(template, DiskFormatType.VHD_FLAT, DiskFormatType.VMDK_FLAT);
+
+        VirtualImageConversion imageConversion2_1 =
+            eg().createInstance(template, DiskFormatType.VHD_FLAT, DiskFormatType.VMDK_FLAT);
+        VirtualImageConversion imageConversion2_2 =
+            eg().createInstance(template, DiskFormatType.VHD_FLAT, DiskFormatType.VMDK_FLAT);
+
+        imageConversion1_1.setSourcePath("1");
+        imageConversion2_1.setSourcePath("2");
+        imageConversion2_2.setSourcePath("2");
+
+        List<Object> entitiesToPersist = new ArrayList<Object>();
+
+        eg().addAuxiliaryEntitiesToPersist(imageConversion1_1, entitiesToPersist);
+
+        entitiesToPersist.add(imageConversion2_1);
+        entitiesToPersist.add(imageConversion2_2);
+
+        ds().persistAll(entitiesToPersist.toArray());
+
+        VirtualImageConversionDAO dao = createDaoForRollbackTransaction();
+
+        assertFalse(dao.existDuplicatedConversion(imageConversion1_1));
+        assertTrue(dao.existDuplicatedConversion(imageConversion2_1));
+        assertTrue(dao.existDuplicatedConversion(imageConversion2_2));
+    }
+
+    @Test
     public void testNotExistsDuplicatedConversionsDiferentTemplate()
     {
         VirtualMachineTemplate template = virtualImageGenerator.createUniqueInstance();
