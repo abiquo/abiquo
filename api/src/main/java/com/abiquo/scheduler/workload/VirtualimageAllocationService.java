@@ -340,7 +340,7 @@ public class VirtualimageAllocationService
      */
     protected Integer calculateAvailableTags(final Rack rack)
     {
-        Integer initialValue = rack.getVlanIdMax() - rack.getVlanIdMin();
+        Integer initialValue = rack.getVlanIdMax() - rack.getVlanIdMin() + 1;
         if (rack.getVlansIdAvoided() != null && !rack.getVlansIdAvoided().isEmpty())
         {
             List<String> tagsRangeAvoided = Arrays.asList(rack.getVlansIdAvoided().split(","));
