@@ -626,11 +626,6 @@ public class InfrastructureRep extends DefaultRepBase
             datastoreUuid, originalHypervisorId);
     }
 
-    public List<Integer> getRackIdByMinVLANCount(final int idDatacenter)
-    {
-        return rackDao.getRackIdByMinVLANCount(idDatacenter);
-    }
-
     // Populate requireds
     public Datacenter findByName(final String name)
     {

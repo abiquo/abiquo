@@ -26,27 +26,44 @@ import java.util.List;
 import javax.persistence.EntityManager;
 
 import org.hibernate.Criteria;
+import org.hibernate.Query;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
+import com.abiquo.server.core.infrastructure.Rack;
 
 @Repository("jpaNetworkAssignmentDAO")
 public class NetworkAssignmentDAO extends DefaultDAOBase<Integer, NetworkAssignment>
 {
+    private final static String SQL_RACK_IDS_BY_MIN_VLAN_COUNT = //
+        //
+        "SELECT rack_filtered_dc.idRack FROM "
+            + //
+            "(SELECT r.idRack, r.idDatacenter, r.vlan_id_min, r.vlan_id_max, r.vlan_per_vdc_expected, r.nrsq, count(vn.id) as vlans_used "
+            + //
+            "FROM rack r LEFT JOIN vlan_network_assignment vn ON r.idRack = vn.idRack GROUP BY r.idRack ) as rack_filtered_dc "
+            + //
+            "WHERE rack_filtered_dc.idDataCenter = :idDatacenter AND rack_filtered_dc.vlans_used + rack_filtered_dc.vlan_per_vdc_expected + (((rack_filtered_dc.vlan_id_max - rack_filtered_dc.vlan_id_min +1 ) * (rack_filtered_dc.nrsq)) / 100) <= ((rack_filtered_dc.vlan_id_max - rack_filtered_dc.vlan_id_min) + 1) "
+            + //
+            "ORDER BY rack_filtered_dc.vlans_used + rack_filtered_dc.vlan_per_vdc_expected ASC";
+
+    private final static String VDC_BY_RACK =
+        "SELECT DISTINCT vdc FROM NetworkAssignment na INNER JOIN na.virtualDatacenter vdc WHERE na.rack.id = :rackId";
+
     public NetworkAssignmentDAO()
     {
         super(NetworkAssignment.class);
     }
 
-    public NetworkAssignmentDAO(EntityManager entityManager)
+    public NetworkAssignmentDAO(final EntityManager entityManager)
     {
         super(NetworkAssignment.class, entityManager);
     }
 
-    public List<NetworkAssignment> findByVirtualDatacenter(VirtualDatacenter virtualDatacenter)
+    public List<NetworkAssignment> findByVirtualDatacenter(final VirtualDatacenter virtualDatacenter)
     {
         Criteria criteria = getSession().createCriteria(NetworkAssignment.class);
 
@@ -61,7 +78,7 @@ public class NetworkAssignmentDAO extends DefaultDAOBase<Integer, NetworkAssignm
         return result;
     }
 
-    public NetworkAssignment findByVlanNetwork(VLANNetwork vlanNetwork)
+    public NetworkAssignment findByVlanNetwork(final VLANNetwork vlanNetwork)
     {
         Criteria criteria = getSession().createCriteria(NetworkAssignment.class);
 
@@ -80,6 +97,20 @@ public class NetworkAssignmentDAO extends DefaultDAOBase<Integer, NetworkAssignm
         {
             return null;
         }
+    }
 
+    /**
+     * Return all the virtualdatacenters deployed in a rack.
+     * 
+     * @param rack
+     * @return all the found entities
+     */
+    @SuppressWarnings("unchecked")
+    public List<VirtualDatacenter> findVirtualDatacenterByRack(final Rack rack)
+    {
+        Query query = getSession().createQuery(VDC_BY_RACK);
+        query.setInteger("rackId", rack.getId());
+
+        return query.list();
     }
 }

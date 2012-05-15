@@ -21,10 +21,15 @@
 
 package com.abiquo.scheduler.workload;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 import javax.jms.ResourceAllocationException;
 import javax.persistence.EntityManager;
@@ -256,10 +261,63 @@ public class VirtualimageAllocationService
                 + "(no rack assigned to the network attached). "
                 + "Selecting the rack to be used on the hole virtual appliance.");
 
-            // Gets the rack candidates that would fit a new virtual datacenter
-            return datacenterRepo
-                .getRackIdByMinVLANCount(virtualDatacenter.getDatacenter().getId());
+            // First of all, obtain the number of available tags for the rack.
+            // this is a very slow and manually process, but the query becomes so
+            // complicated and, since it is only executed the first time a virtual datacenter
+            // is assigned to a rack, we can live with it.
+            List<Rack> racks = datacenterRepo.findRacks(virtualDatacenter.getDatacenter());
+            Map<Integer, Integer> tagsMultiset = new HashMap<Integer, Integer>();
 
+            for (Rack rack : racks)
+            {
+                // 'A' value in xfernandez's famous equation: availableTags
+                Integer initialAvailableTags = calculateAvailableTags(rack);
+                Float availableTags =
+                    initialAvailableTags - (float) initialAvailableTags * rack.getNrsq() / 100;
+
+                // 'B' value in xfernandez's famous equation: deployed virtual datacenters in rack.
+                Integer deployedVdcs =
+                    networkAssignmentDao.findVirtualDatacenterByRack(rack).size();
+
+                // 'C' value in xfernandez's famous equation: expected vlans per vdc.
+                Integer expected = rack.getVlanPerVdcReserved();
+
+                // if 'A' - 'B'*'C' is > 1, is a candidate rack.
+                int theValue = new Float(availableTags - deployedVdcs * expected).intValue();
+                if (theValue > 1)
+                {
+                    tagsMultiset.put(rack.getId(), theValue);
+                }
+
+            }
+
+            // return an ordered list of ids by its value.
+            // @see http://code.google.com/p/guava-libraries/wiki/CollectionUtilitiesExplained#Sets
+            // return Multisets.copyHighestCountFirst(tagsMultiset).asList();
+
+            // we create here the comparator to order the hasmap by values. We intend to use the
+            // guava libraries as the code implementation just above, but it seems we have problems
+            // with the guava libraries
+            class ValueComparator implements Comparator<Integer>
+            {
+                private Map<Integer, Integer> baseMap;
+
+                public ValueComparator(final Map<Integer, Integer> baseMap)
+                {
+                    this.baseMap = baseMap;
+                }
+
+                @Override
+                public int compare(final Integer arg0, final Integer arg1)
+                {
+                    return baseMap.get(arg0).compareTo(baseMap.get(arg1)) * -1;
+                }
+            }
+
+            ValueComparator comparator = new ValueComparator(tagsMultiset);
+            Map<Integer, Integer> tagsOrderedMultiset = new TreeMap<Integer, Integer>(comparator);
+            tagsOrderedMultiset.putAll(tagsMultiset);
+            return new ArrayList<Integer>(tagsOrderedMultiset.keySet());
         }
         else
         // the rack is already selected
@@ -271,6 +329,50 @@ public class VirtualimageAllocationService
 
             return Collections.singletonList(idRack);
         }
+    }
+
+    /**
+     * From a given rack, calculate how many available tags it has. Calculates the range between
+     * 'vlanIdMin' and 'vlanIdMax' and discard the avoided tags between these two values.
+     * 
+     * @param rack input rack.
+     * @return integer value of the available tags.
+     */
+    protected Integer calculateAvailableTags(final Rack rack)
+    {
+        Integer initialValue = rack.getVlanIdMax() - rack.getVlanIdMin();
+        if (rack.getVlansIdAvoided() != null && !rack.getVlansIdAvoided().isEmpty())
+        {
+            List<String> tagsRangeAvoided = Arrays.asList(rack.getVlansIdAvoided().split(","));
+            for (String tagRangeAvoided : tagsRangeAvoided)
+            {
+                if (tagRangeAvoided.contains("-"))
+                {
+                    // it is a range of tags
+                    List<String> splittedTags = Arrays.asList(tagRangeAvoided.split("-"));
+                    Integer firstTag = Integer.valueOf(splittedTags.get(0));
+                    Integer lastTag = Integer.valueOf(splittedTags.get(1));
+                    for (int i = firstTag; i <= lastTag; i++)
+                    {
+                        if (i > rack.getVlanIdMin() && i < rack.getVlanIdMax())
+                        {
+                            initialValue--;
+                        }
+                    }
+
+                }
+                else
+                {
+                    // it is a single tag.
+                    Integer tagAvoidedInt = Integer.valueOf(tagRangeAvoided);
+                    if (tagAvoidedInt > rack.getVlanIdMin() && tagAvoidedInt < rack.getVlanIdMax())
+                    {
+                        initialValue--;
+                    }
+                }
+            }
+        }
+        return initialValue;
     }
 
     protected Collection<Machine> findFirstPassCandidates(

@@ -29,7 +29,6 @@ import javax.persistence.EntityManager;
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.Criteria;
 import org.hibernate.Query;
-import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Order;
@@ -150,18 +149,6 @@ import com.softwarementors.bzngine.entities.PersistentEntity;
             equalName(name));
     }
 
-    private final static String SQL_RACK_IDS_BY_MIN_VLAN_COUNT = //
-        //
-        "SELECT rack_filtered_dc.idRack FROM "
-            + //
-            "(SELECT r.idRack, r.idDatacenter, r.vlan_id_min, r.vlan_id_max, r.vlan_per_vdc_expected, r.nrsq, count(vn.id) as vlans_used "
-            + //
-            "FROM rack r LEFT JOIN vlan_network_assignment vn ON r.idRack = vn.idRack GROUP BY r.idRack ) as rack_filtered_dc "
-            + //
-            "WHERE rack_filtered_dc.idDataCenter = :idDatacenter AND rack_filtered_dc.vlans_used + rack_filtered_dc.vlan_per_vdc_expected + (((rack_filtered_dc.vlan_id_max - rack_filtered_dc.vlan_id_min +1 ) * (rack_filtered_dc.nrsq)) / 100) <= ((rack_filtered_dc.vlan_id_max - rack_filtered_dc.vlan_id_min) + 1) "
-            + //
-            "ORDER BY rack_filtered_dc.vlans_used + rack_filtered_dc.vlan_per_vdc_expected ASC";
-
     private final static String SQL_RACK_IDS_BY_MIN_VLAN_COUNT_LITE = //
         //
         "SELECT r.idRack " + //
@@ -169,18 +156,6 @@ import com.softwarementors.bzngine.entities.PersistentEntity;
             "WHERE va.idVirtualApp = :idVApp " + //
             "AND vdc.idVirtualDataCenter = va.idVirtualDataCenter " + //
             "AND vdc.idDataCenter = r.idDatacenter";//
-
-    /**
-     * Obtains the racks (prefiltered by target datacenter and virtualdatacenter) with minimal VLANS
-     * // and with vms deployed
-     */
-    public List<Integer> getRackIdByMinVLANCount(final int idDatacenter)
-    {
-        SQLQuery query = getSession().createSQLQuery(SQL_RACK_IDS_BY_MIN_VLAN_COUNT);
-        query.setInteger("idDatacenter", idDatacenter);
-
-        return query.list();
-    }
 
     private final static String COUNT_DEPLOYED_VLA = //
         "SELECT COUNT(vn.id) " + //
