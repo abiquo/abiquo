@@ -284,7 +284,7 @@ public class VirtualimageAllocationService
 
                 // if 'A' - 'B'*'C' is > 1, is a candidate rack.
                 int theValue = new Float(availableTags - deployedVdcs * expected).intValue();
-                if (theValue > 1)
+                if (theValue >= 1)
                 {
                     tagsMultiset.put(rack.getId(), theValue);
                 }
