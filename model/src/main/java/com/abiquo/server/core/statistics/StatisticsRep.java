@@ -68,7 +68,7 @@ public class StatisticsRep extends DefaultRepBase
     {
         assert idDatacenter != null;
 
-        return this.cloudUsageDAO.findById(idDatacenter);
+        return this.cloudUsageDAO.calculateCloudUsage(idDatacenter);
     }
 
     /**
@@ -80,7 +80,7 @@ public class StatisticsRep extends DefaultRepBase
      */
     public CloudUsage findTotalCloudUsage()
     {
-        CloudUsage cuTotal = this.cloudUsageDAO.sumTotalCloudUsage();
+        CloudUsage cuTotal = this.cloudUsageDAO.calculateCloudUsage(-1);
 
         CloudUsage cuLimits = this.cloudUsageDAO.findById(-1);
 
