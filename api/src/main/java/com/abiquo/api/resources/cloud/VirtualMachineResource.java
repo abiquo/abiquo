@@ -681,8 +681,10 @@ public class VirtualMachineResource extends AbstractResource
         if (!v.getVirtualMachine().isCaptured())
         {
             // Shared templates and users without admin privileges
+            // ## ABICLOUDPREMIUM-3901: To asure that loged user enterprise's match with the
+            // template enterprise to see it, we use the enterprise id from virtual machine
             Integer idEnt =
-                virtualImage.isShared() && user != null ? user.getEnterprise().getId()
+                virtualImage.isShared() ? v.getVirtualMachine().getEnterprise().getId()
                     : virtualImage.getEnterprise().getId();
 
             if (v.getVirtualMachine().isStateful())
@@ -866,9 +868,11 @@ public class VirtualMachineResource extends AbstractResource
         if (vmtemplate.getRepository() != null)
         {
             // Shared templates and users without admin privileges
+            // ## ABICLOUDPREMIUM-3901: To asure that loged user enterprise's match with the
+            // template enterprise to see it, we use the enterprise id from virtual machine
             Integer idEnt =
-                vmtemplate.isShared() && user != null ? user.getEnterprise().getId() : vmtemplate
-                    .getEnterprise().getId();
+                vmtemplate.isShared() ? v.getEnterprise().getId() : vmtemplate.getEnterprise()
+                    .getId();
 
             dto.addLink(restBuilder.buildVirtualMachineTemplateLink(idEnt, vmtemplate
                 .getRepository().getDatacenter().getId(), vmtemplate.getId()));
