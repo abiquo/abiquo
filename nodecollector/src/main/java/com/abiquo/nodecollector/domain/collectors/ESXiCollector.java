@@ -1500,16 +1500,7 @@ public class ESXiCollector extends AbstractCollector
         }
         else if (diskFile instanceof VirtualDiskSparseVer2BackingInfo)
         {
-            // Check if its monolithic or use extents
-            if (((VirtualDiskSparseVer2BackingInfo) diskFile).getSplit())
-            {
-                // Abicloud can not support extent files
-                diskType = VirtualDiskEnumType.INCOMPATIBLE;
-            }
-            else
-            {
-                diskType = VirtualDiskEnumType.VMDK_MONOLITHIC_SPARSE;
-            }
+        	diskType = VirtualDiskEnumType.VMDK_MONOLITHIC_SPARSE;
         }
         else if (diskFile instanceof VirtualDiskRawDiskMappingVer1BackingInfo)
         {
