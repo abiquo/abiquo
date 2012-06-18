@@ -28,6 +28,12 @@ import org.apache.wink.server.handlers.HandlersFactory;
 import org.apache.wink.server.handlers.RequestHandler;
 import org.apache.wink.server.handlers.ResponseHandler;
 
+import com.abiquo.api.handlers.path.AdminEnterpriseSecurityRequestHandler;
+import com.abiquo.api.handlers.path.ChainedPathRequestHandler;
+import com.abiquo.api.handlers.path.ChefBootstrapSecurityRequestHandler;
+import com.abiquo.api.handlers.path.CloudEnterpriseSecurityRequestHandler;
+import com.abiquo.api.handlers.path.PathConstrainedRequestHandler;
+
 public class RESTHandlerFactory extends HandlersFactory
 {
     @Override
@@ -42,10 +48,13 @@ public class RESTHandlerFactory extends HandlersFactory
         listOfHandlers.add(new RESTHandler());
 
         // security path handlers
-        List<SecurityPathRequestHandler> pathHandlers = new ArrayList<SecurityPathRequestHandler>();
+        List<PathConstrainedRequestHandler> pathHandlers =
+            new ArrayList<PathConstrainedRequestHandler>();
+        pathHandlers.add(new ChefBootstrapSecurityRequestHandler());
         pathHandlers.add(new CloudEnterpriseSecurityRequestHandler());
         pathHandlers.add(new AdminEnterpriseSecurityRequestHandler());
-        listOfHandlers.add(new SecurityPathRequestHandler(pathHandlers));
+
+        listOfHandlers.add(new ChainedPathRequestHandler(pathHandlers));
 
         return listOfHandlers;
     }

@@ -18,15 +18,12 @@
  * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
  * Boston, MA 02111-1307, USA.
  */
+package com.abiquo.api.handlers.path;
 
-package com.abiquo.api.handlers;
-
-import java.util.List;
 import java.util.Properties;
 
 import org.apache.wink.server.handlers.HandlersChain;
 import org.apache.wink.server.handlers.MessageContext;
-import org.apache.wink.server.handlers.RequestHandler;
 import org.springframework.security.GrantedAuthority;
 import org.springframework.security.context.SecurityContextHolder;
 
@@ -36,62 +33,23 @@ import com.abiquo.api.spring.security.AbiquoUserDetails;
 import com.abiquo.server.core.enterprise.User.AuthType;
 
 /**
- * Handler with a list of handlers. This handlers check if the request uri path matches with the
- * method <code>matches</code> of the handlers in the list. The first handler who match will be who
- * handle the request.
+ * Base class for path based security handlers.
  * 
- * @author scastro
+ * @author Ignasi Barrera
  */
-public class SecurityPathRequestHandler implements RequestHandler
+public abstract class AbstractSecurityPathHandler implements PathConstrainedRequestHandler
 {
-    private UserService userService;
-
-    private List<SecurityPathRequestHandler> pathHandlers;
-
-    public SecurityPathRequestHandler()
-    {
-        // Must be unused. Exists only to be overrided
-    }
-
-    public SecurityPathRequestHandler(final List<SecurityPathRequestHandler> handlers)
-    {
-        pathHandlers = handlers;
-    }
 
     @Override
     public void init(final Properties props)
     {
+
     }
 
-    /**
-     * Check if the path matches with the handler waits
-     * 
-     * @param path request uri path
-     * @return true if matches, else false
-     */
-    public boolean matches(final String path)
-    {
-        return false;
-    }
-
-    /**
-     * @see org.apache.wink.server.handlers.RequestHandler#handleRequest(org.apache.wink.server.handlers.MessageContext,
-     *      org.apache.wink.server.handlers.HandlersChain)
-     */
     @Override
     public void handleRequest(final MessageContext context, final HandlersChain chain)
         throws Throwable
     {
-        String path = context.getUriInfo().getPath();
-        for (SecurityPathRequestHandler handler : pathHandlers)
-        {
-            if (handler.matches(path))
-            {
-                handler.handleRequest(context, chain);
-                return;
-            }
-        }
-        // if no handler match we must continue
         chain.doChain(context);
     }
 
@@ -106,11 +64,11 @@ public class SecurityPathRequestHandler implements RequestHandler
         String authtype = "";
         String username = "";
         String[] privileges = null;
-        if (SecurityContextHolder.getContext().getAuthentication().getPrincipal() instanceof AbiquoUserDetails)
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        if (principal instanceof AbiquoUserDetails)
         {
-            AbiquoUserDetails details =
-                (AbiquoUserDetails) SecurityContextHolder.getContext().getAuthentication()
-                    .getPrincipal();
+            AbiquoUserDetails details = (AbiquoUserDetails) principal;
 
             AuthType authType =
                 AuthType.valueOf(details.getAuthType() != null ? details.getAuthType()
@@ -135,13 +93,9 @@ public class SecurityPathRequestHandler implements RequestHandler
         return new Object[] {username, authtype, privileges};
     }
 
-    // Service getters and setters
-    public UserService getUserService()
+    protected UserService getUserService()
     {
-        if (userService == null)
-        {
-            userService = BeanLoader.getInstance().getBean(UserService.class);
-        }
-        return userService;
+        return BeanLoader.getInstance().getBean(UserService.class);
     }
+
 }

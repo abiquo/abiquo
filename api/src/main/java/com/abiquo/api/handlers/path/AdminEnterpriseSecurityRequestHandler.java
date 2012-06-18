@@ -19,7 +19,7 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package com.abiquo.api.handlers;
+package com.abiquo.api.handlers.path;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -37,7 +37,7 @@ import com.abiquo.api.resources.EnterprisesResource;
  * 
  * @author scastro
  */
-public class AdminEnterpriseSecurityRequestHandler extends SecurityPathRequestHandler
+public class AdminEnterpriseSecurityRequestHandler extends AbstractSecurityPathHandler
 {
 
     /**
@@ -48,7 +48,7 @@ public class AdminEnterpriseSecurityRequestHandler extends SecurityPathRequestHa
     private static String ENTERPRISES_PATH_REGEX = ENTERPRISE_ID_REGEX + "[/]?.*$";
 
     @Override
-    public boolean matches(final String path)
+    public boolean appliesTo(final String path)
     {
         return path.matches(ENTERPRISES_PATH_REGEX);
     }

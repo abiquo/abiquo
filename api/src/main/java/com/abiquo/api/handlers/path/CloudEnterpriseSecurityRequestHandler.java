@@ -19,7 +19,7 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package com.abiquo.api.handlers;
+package com.abiquo.api.handlers.path;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -38,7 +38,7 @@ import com.abiquo.api.resources.cloud.VirtualDatacentersResource;
  * 
  * @author scastro
  */
-public class CloudEnterpriseSecurityRequestHandler extends SecurityPathRequestHandler
+public class CloudEnterpriseSecurityRequestHandler extends AbstractSecurityPathHandler
 {
 
     private static String VIRTUAL_DATACENTER_ID_REGEX =
@@ -47,7 +47,7 @@ public class CloudEnterpriseSecurityRequestHandler extends SecurityPathRequestHa
     private static String VIRTUAL_DATACENTER_PATH_REGEX = VIRTUAL_DATACENTER_ID_REGEX + "[/]?.*$";
 
     @Override
-    public boolean matches(final String path)
+    public boolean appliesTo(final String path)
     {
         return path.matches(VIRTUAL_DATACENTER_PATH_REGEX);
     }
