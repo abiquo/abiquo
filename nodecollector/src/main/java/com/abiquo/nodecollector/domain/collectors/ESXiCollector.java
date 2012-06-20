@@ -521,7 +521,7 @@ public class ESXiCollector extends AbstractCollector
                 try
                 {
                 	// force vm reload (will detect any disk change) 
-                	getMyConn().reload(esxiMachine.getObj());
+                	// getMyConn().reload(esxiMachine.getObj());
                 	
                     // get the machine name for logging.
                     machineName = (String) getDynamicProperty(esxiMachine, "name");
