@@ -570,7 +570,8 @@ public enum APIError
         "VOL-27", "The volume is already detached"), VOLUME_DETACH_ERROR("VOL-28",
         "An unexpected error occurred while detaching the volume. Please contact the Administrator"), VOLUME_RECONFIGURE_ERROR(
         "VOL-29", "An unexpected error occurred while reconfiguring storage"), VOLUME_WRONG_NEW_VIRTUALDATACENTER(
-        "VOL-39", "The volume can only be moved between Virtual Datacenters in the same Datacenter"),
+        "VOL-39", "The volume can only be moved between Virtual Datacenters in the same Datacenter"), VOLUME_NOT_ENOUGH_RESOURCES_POOL(
+        "VOL-40", "There are not enough resources in the selected pool to create the volume"),
 
     // SSM
     SSM_GET_POOLS_ERROR("SSM-1", "Could not get the storage pools on the target storage device"), SSM_GET_POOL_ERROR(
