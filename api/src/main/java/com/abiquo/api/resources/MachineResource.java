@@ -255,7 +255,7 @@ public class MachineResource extends AbstractResource
                 infraService.checkMachineState(datacenterId, h.getIp(), h.getType(), h.getUser(),
                     h.getPassword(), h.getPort());
 
-            if (sync)
+            if (sync && !beingProcessedByHA(m))
             {
                 m.setState(state);
                 MachineDto machineDto = createTransferObject(m, restBuilder);
@@ -418,6 +418,18 @@ public class MachineResource extends AbstractResource
         }
 
         return machinesDto;
+    }
+
+	/**
+     * Check if a machine is in HA process or if it's disabled for HA.
+     * 
+     * @param machine The machine to check.
+     * @return True if the machine is in HA process or if it's disabled for HA.
+     */
+    private boolean beingProcessedByHA(final Machine machine)
+    {
+        return machine.getState() == MachineState.HA_IN_PROGRESS
+            || machine.getState() == MachineState.DISABLED_FOR_HA;
     }
 
     /**
