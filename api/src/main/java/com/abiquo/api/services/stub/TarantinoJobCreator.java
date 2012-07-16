@@ -473,7 +473,8 @@ public class TarantinoJobCreator extends DefaultApiService
             Integer tag = i.getVlanNetwork().getTag();
             vmDesc.addNetwork(i.getMac(), i.getIp(), virtualMachine.getHypervisor().getMachine()
                 .getVirtualSwitch(), i.getNetworkName(), tag, i.getName(), null, null, null,
-                configuration.getNetMask(), null, null, null, i.getSequence(),
+                configuration.getNetMask(), configuration.getPrimaryDNS(), configuration
+                    .getSecondaryDNS(), configuration.getSufixDNS(), i.getSequence(),
                 toDchpOptionCom(dhcplist), Boolean.FALSE, i.isUnmanagedIp(), driver);
 
         }
