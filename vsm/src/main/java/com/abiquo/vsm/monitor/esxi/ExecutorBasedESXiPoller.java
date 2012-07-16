@@ -20,6 +20,10 @@
  */
 package com.abiquo.vsm.monitor.esxi;
 
+import static com.abiquo.vsm.events.VMEventType.CREATED;
+import static com.abiquo.vsm.events.VMEventType.DESTROYED;
+import static com.abiquo.vsm.events.VMEventType.UNKNOWN;
+
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.HashSet;
@@ -120,7 +124,7 @@ public class ExecutorBasedESXiPoller extends AbstractMonitor
         }
         finally
         {
-            esx.disconnect(physicalMachineAddress);
+            esx.disconnect();
         }
 
         // Publish the event
@@ -152,6 +156,7 @@ public class ExecutorBasedESXiPoller extends AbstractMonitor
      * Performs synchronous polling calls to get the state of the monitored virtual machines.
      * 
      * @author ibarrera
+     * @author Enric Ruiz
      */
     private class Poller extends AbstractTask
     {
@@ -162,23 +167,22 @@ public class ExecutorBasedESXiPoller extends AbstractMonitor
             // machine is added or removed while iterating the list
             synchronized (monitoredMachines)
             {
-                for (String physicalMachineAddress : monitoredMachines)
+                for (String address : monitoredMachines)
                 {
-                    LOGGER.trace("Getting information from: {}", physicalMachineAddress);
+                    LOGGER.trace("Getting information from: {}", address);
 
-                    PhysicalMachine pm = getPhysicalMachine(physicalMachineAddress);
+                    PhysicalMachine pm = getPhysicalMachine(address);
                     VirtualMachinesCache cache = pm.getVirtualMachines();
 
-                    esx.connect(physicalMachineAddress, pm.getUsername(), pm.getPassword());
-
-                    // Current VMs in the hypervisor. Used to detect CREATE and DESTROY events
-                    Set<String> currentVMs = new HashSet<String>();
+                    esx.connect(address, pm.getUsername(), pm.getPassword());
 
                     try
                     {
-                        LOGGER.trace("Getting information from the current VMS...");
+                        // Virtual machines running in the current poller execution
+                        Set<String> current = new HashSet<String>();
 
-                        // Get states
+                        LOGGER.trace("Getting information from the current VMs...");
+
                         ObjectContent[] vms = esx.getAllVMs();
 
                         if (vms != null)
@@ -193,88 +197,121 @@ public class ExecutorBasedESXiPoller extends AbstractMonitor
                                     continue;
                                 }
 
-                                // Save the VM in the list of current VMs
-                                String vmName = decodeURLRawString(vmConfig.getName());
-                                currentVMs.add(vmName);
-
-                                // Get the new state of the VM
-                                VMEventType state = esx.getStateForObject(vm);
-                                LOGGER.trace("Found VM {} in state {}", vmName, state.name());
-
-                                VMEvent event = new VMEvent(state, physicalMachineAddress, vmName);
-
-                                // Propagate the event. RedisSubscriber will decide if it must be
-                                // notified, based on subscription information
-                                ExecutorBasedESXiPoller.this.notify(event);
+                                current.add(decodeURLRawString(vmConfig.getName()));
                             }
                         }
 
-                        if (LOGGER.isTraceEnabled())
+                        // Virtual machines running in last poller execution
+                        Set<String> cached = new HashSet<String>(cache.getCache());
+
+                        // Virtual machines that remains cached and running
+                        Set<String> intersection = new HashSet<String>(cached);
+                        intersection.retainAll(current);
+
+                        // Created virtual machines since last execution
+                        Set<String> created = new HashSet<String>(current);
+                        created.removeAll(cached);
+
+                        // Removed virtual machines since last execution
+                        Set<String> removed = new HashSet<String>(cached);
+                        removed.removeAll(current);
+
+                        // Clear the cache
+                        cache.getCache().clear();
+
+                        // Propagate events and rebuild the cache
+                        for (String virtualMachine : intersection)
                         {
-                            String cacheStr = StringUtils.join(cache.getCache(), ", ");
-                            LOGGER.trace(
-                                "Cache for Machine {} before generating CREATE/DESTROY is: {}",
-                                physicalMachineAddress, cacheStr);
+                            if (!isBeingMigrated(virtualMachine))
+                            {
+                                VMEventType state = esx.getState(virtualMachine);
+
+                                LOGGER.debug("Found {} in state {}", virtualMachine, state.name());
+                                notifyState(state, virtualMachine, address);
+                                cache.getCache().add(virtualMachine);
+                            }
                         }
 
-                        // Propagate create and destroy events
-                        propagateCreateAndDestroyEvents(pm, currentVMs);
-
-                        // Update the physical machine with the current machines in the hypervisor
-                        cache.getCache().clear();
-                        cache.getCache().addAll(currentVMs);
-
-                        if (LOGGER.isTraceEnabled())
+                        for (String virtualMachine : created)
                         {
-                            String cacheStr = StringUtils.join(cache.getCache(), ", ");
-                            LOGGER.trace(
-                                "Cache for Machine {} after generating CREATE/DESTROY is: {}",
-                                physicalMachineAddress, cacheStr);
+                            if (!isBeingMigrated(virtualMachine))
+                            {
+                                LOGGER.debug("Created {} at {}", virtualMachine, address);
+                                notifyState(CREATED, virtualMachine, address);
+                                cache.getCache().add(virtualMachine);
+                            }
+                        }
+
+                        for (String virtualMachine : removed)
+                        {
+                            if (!isBeingMigrated(virtualMachine))
+                            {
+                                if (!existInVCenter(virtualMachine))
+                                {
+                                    LOGGER.debug("Removed {} from {}", virtualMachine, address);
+                                    notifyState(DESTROYED, virtualMachine, address);
+                                }
+                                else
+                                {
+                                    // In order to check it in next poller execution
+                                    cache.getCache().add(virtualMachine);
+                                }
+                            }
+                            else
+                            {
+                                // In order to check it in next poller execution
+                                cache.getCache().add(virtualMachine);
+                            }
                         }
                     }
                     finally
                     {
-                        esx.disconnect(physicalMachineAddress);
+                        esx.disconnect();
                     }
                 }
             }
         }
+    }
 
-        /**
-         * Propagates events for each created and destroyed virtual machine.
-         * 
-         * @param pm The physical machine being monitored.
-         * @param currentVMs The current virtual machines in the hypervisor.
-         */
-        private void propagateCreateAndDestroyEvents(final PhysicalMachine pm,
-            final Set<String> currentVMs)
+    /**
+     * Notifies the given {@link VMEventType} state for the given virtual machine and machine
+     * address.
+     * 
+     * @param state the state to notify
+     * @param virtualMachineName the virtual machine name to query about
+     * @param machineAddress the physical machine address where virtual machine is running
+     */
+
+    private void notifyState(final VMEventType state, final String virtualMachineName,
+        final String machineAddress) throws MonitorException
+    {
+        if (!state.equals(UNKNOWN))
         {
-            // Propagate DESTROY events
-            Set<String> removedVMs = pm.getVirtualMachines().getCache();
-            removedVMs.removeAll(currentVMs);
-
-            for (String removed : removedVMs)
-            {
-                VMEvent event = new VMEvent(VMEventType.DESTROYED, pm.getAddress(), removed);
-
-                LOGGER.trace("Removed VM {} from {}", removed, pm.getAddress());
-
-                ExecutorBasedESXiPoller.this.notify(event);
-            }
-
-            // Propagate CREATE events
-            Set<String> createdVMs = new HashSet<String>(currentVMs);
-            createdVMs.removeAll(pm.getVirtualMachines().getCache());
-
-            for (String created : createdVMs)
-            {
-                VMEvent event = new VMEvent(VMEventType.CREATED, pm.getAddress(), created);
-
-                LOGGER.trace("New VM {} at {}", created, pm.getAddress());
-
-                ExecutorBasedESXiPoller.this.notify(event);
-            }
+            VMEvent event = new VMEvent(state, machineAddress, virtualMachineName);
+            ExecutorBasedESXiPoller.this.notify(event);
         }
+    }
+
+    /**
+     * Checks through vCenter if a virtual machine is being migrated.
+     * 
+     * @param virtualMachine the virtual machine name to query about
+     * @return true if the virtual machine is being migrated, otherwise false.
+     */
+    private boolean isBeingMigrated(final String virtualMachine) throws MonitorException
+    {
+        return esx.isManagedByVCenter() ? esx.virtualMachineIsBeingMigrated(virtualMachine) : false;
+    }
+
+    /**
+     * Checks if a virtual machine exists in the associated vCenter
+     * 
+     * @param virtualMachine the virtual machine name to query about
+     * @return true if the virtual machine is running in a monitored host, otherwise false.
+     */
+    private boolean existInVCenter(final String virtualMachine) throws MonitorException
+    {
+        return esx.isManagedByVCenter() ? esx.existVirtualMachineInVCenter(virtualMachine) : false;
     }
 
     protected String decodeURLRawString(final String value)

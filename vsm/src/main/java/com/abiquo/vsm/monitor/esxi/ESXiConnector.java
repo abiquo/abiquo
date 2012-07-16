@@ -20,16 +20,21 @@
  */
 package com.abiquo.vsm.monitor.esxi;
 
+import static com.vmware.vim25.TaskInfoState.queued;
+import static com.vmware.vim25.TaskInfoState.running;
+import static java.lang.System.getProperty;
+
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.rmi.RemoteException;
 
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.abiquo.vsm.events.VMEventType;
 import com.abiquo.vsm.exception.MonitorException;
-import com.vmware.vim25.DynamicProperty;
+import com.vmware.vim25.InvalidLogin;
 import com.vmware.vim25.ManagedObjectReference;
 import com.vmware.vim25.ObjectContent;
 import com.vmware.vim25.ObjectSpec;
@@ -37,11 +42,17 @@ import com.vmware.vim25.PropertyFilterSpec;
 import com.vmware.vim25.PropertySpec;
 import com.vmware.vim25.SelectionSpec;
 import com.vmware.vim25.ServiceContent;
+import com.vmware.vim25.TaskInfoState;
 import com.vmware.vim25.TraversalSpec;
 import com.vmware.vim25.VimPortType;
 import com.vmware.vim25.VirtualMachineConfigInfo;
-import com.vmware.vim25.VirtualMachineRuntimeInfo;
+import com.vmware.vim25.mo.Folder;
+import com.vmware.vim25.mo.HostSystem;
+import com.vmware.vim25.mo.InventoryNavigator;
+import com.vmware.vim25.mo.ManagedEntity;
 import com.vmware.vim25.mo.ServiceInstance;
+import com.vmware.vim25.mo.Task;
+import com.vmware.vim25.mo.VirtualMachine;
 
 /**
  * WMI Connector for ESXi monitoring tasks.
@@ -50,7 +61,6 @@ import com.vmware.vim25.mo.ServiceInstance;
  */
 public class ESXiConnector
 {
-    /** The logger. */
     private final static Logger LOGGER = LoggerFactory.getLogger(ESXiConnector.class);
 
     private ManagedObjectReference rootFolder;
@@ -63,9 +73,15 @@ public class ESXiConnector
 
     private ServiceInstance serviceInstance;
 
+    private ServiceInstance vcenterServiceInstance;
+
     private static final String POWERED_OFF = "poweredOff";
 
     private static final String POWERED_ON = "poweredOn";
+
+    private static final String MIGRATION_TASK_ID = "VirtualMachine.migrate";
+
+    private static final String RELOCATE_TASK_ID = "VirtualMachine.relocate";
 
     public ESXiConnector()
     {
@@ -80,7 +96,7 @@ public class ESXiConnector
         virtualMachineSpec[0].setAll(true);
     }
 
-    public static VMEventType translateState(String state)
+    public static VMEventType translateState(final String state)
     {
         if (state.equalsIgnoreCase(POWERED_OFF))
         {
@@ -104,10 +120,10 @@ public class ESXiConnector
      * @param password The password used to connect to the hypervisor.
      * @throws MonitorException If connection fails.
      */
-    public void connect(String physicalMachineAddress, String username, String password)
-        throws MonitorException
+    public void connect(final String physicalMachineAddress, final String username,
+        final String password) throws MonitorException
     {
-        LOGGER.trace("Connecting to ESXi host: {}", physicalMachineAddress);
+        LOGGER.debug("Connecting to ESXi host: {}", physicalMachineAddress);
 
         try
         {
@@ -115,54 +131,126 @@ public class ESXiConnector
             URL connectionURL = new URL("https://" + url.getHost() + ":" + url.getPort() + "/sdk");
 
             serviceInstance = new ServiceInstance(connectionURL, username, password, true);
-            /*
-             * serviceInstance = new ServiceInstance(new URL("https://" + physicalMachineAddress +
-             * "/sdk"), username, password, true);
-             */
+            vcenterServiceInstance = initializeVCenterServiceInstance(serviceInstance);
         }
         catch (MalformedURLException ex)
         {
+            disconnect();
             throw new MonitorException("Invalid connection URI: " + physicalMachineAddress, ex);
         }
         catch (Exception ex)
         {
+            disconnect();
             throw new MonitorException("Could not connect to ESXi host: " + physicalMachineAddress,
                 ex);
         }
     }
 
     /**
-     * Get the state of the specified virtual machine.
+     * Disconnects from the hypervisor.
      * 
-     * @param virtualMachineName The name of the virtual machine.
-     * @return The virtual machine state.
-     * @throws MonitorException If an error occurs retrieving machine state.
+     * @param physicalMachineAddress The hypervisor address.
      */
-    public VMEventType getState(String virtualMachineName) throws MonitorException
+    public void disconnect()
     {
-        try
+        LOGGER.debug("Disconnecting from ESXi host");
+
+        if (isManagedByVCenter() && vcenterServiceInstance.getServerConnection() != null)
         {
-            // Find the concrete virtual machine
-            ObjectContent[] esxiMachines =
-                getManagedObjectReferencesFromInventory(virtualMachineSpec);
+            vcenterServiceInstance.getServerConnection().logout();
+            vcenterServiceInstance = null;
+        }
 
-            for (ObjectContent esxiMachine : esxiMachines)
+        if (serviceInstance != null && serviceInstance.getServerConnection() != null)
+        {
+            serviceInstance.getServerConnection().logout();
+            serviceInstance = null;
+        }
+    }
+
+    public boolean isManagedByVCenter()
+    {
+        return vcenterServiceInstance != null;
+    }
+
+    private ServiceInstance initializeVCenterServiceInstance(final ServiceInstance serviceInstance)
+        throws MonitorException
+    {
+        String vcenterIp = getHostSystem(serviceInstance).getSummary().getManagementServerIp();
+
+        if (!StringUtils.isEmpty(vcenterIp))
+        {
+            String port = getProperty("abiquo.vcenter.port.connection", "443");
+            String user = getProperty("abiquo.dvs.vcenter.user");
+            String password = getProperty("abiquo.dvs.vcenter.password");
+
+            if (StringUtils.isEmpty(user))
             {
-                VirtualMachineConfigInfo vmConfig = getVMConfigFromObjectContent(esxiMachine);
+                String message =
+                    "Invalid user value to connect to vCenter " + vcenterIp
+                        + ". Please check your abiquo.properties file.";
 
-                if (vmConfig != null && vmConfig.getName().equals(virtualMachineName))
-                {
-                    return getStateForObject(esxiMachine);
-                }
+                LOGGER.error(message);
+                throw new MonitorException(message);
+            }
+
+            if (password == null)
+            {
+                String message =
+                    "Invalid password value to connect to vCenter " + vcenterIp
+                        + ". Please check your abiquo.properties file.";
+
+                LOGGER.error(message);
+                throw new MonitorException(message);
+            }
+
+            try
+            {
+                URL url = new URL("https://" + vcenterIp + ":" + port + "/sdk");
+                LOGGER.debug("Host connected to vCenter at " + vcenterIp);
+                return new ServiceInstance(url, user, password, true);
+            }
+            catch (InvalidLogin e)
+            {
+                String message = "Invalid credentials for logging in vCenter " + vcenterIp;
+                LOGGER.error(message);
+                throw new MonitorException(message, e);
+            }
+            catch (Exception e)
+            {
+                throw new MonitorException("Could not connect to vCenter", e);
             }
         }
-        catch (Exception ex)
+
+        LOGGER.debug("Host not connected to vCenter");
+        return null;
+    }
+
+    private HostSystem getHostSystem(final ServiceInstance serviceInstance) throws MonitorException
+    {
+        ManagedEntity[] mes;
+
+        try
         {
-            throw new MonitorException("Could not retrieve the state of machine: "
-                + virtualMachineName, ex);
+            mes =
+                new InventoryNavigator(serviceInstance.getRootFolder())
+                    .searchManagedEntities("HostSystem");
+        }
+        catch (final RemoteException e)
+        {
+            throw new MonitorException("Host System not found", e);
         }
 
-        throw new MonitorException("Could not retrieve the state of machine: " + virtualMachineName);
+        if (mes == null || mes.length < 1)
+        {
+            throw new MonitorException("Host System not found");
+        }
+        else if (mes.length > 1)
+        {
+            LOGGER.error("There are more than a single Host System, using the first.");
+        }
+
+        return (HostSystem) mes[0];
     }
 
     /**
@@ -183,54 +271,149 @@ public class ESXiConnector
         }
     }
 
-    public VMEventType getStateForObject(ObjectContent esxiMachine) throws MonitorException
+    /**
+     * Get the state of the specified virtual machine.
+     * 
+     * @param virtualMachineName The name of the virtual machine.
+     * @return The virtual machine state
+     * @throws MonitorException If an error occurs retrieving machine state.
+     */
+    public VMEventType getState(final String virtualMachineName) throws MonitorException
     {
-        VirtualMachineConfigInfo vmConfig = getVMConfigFromObjectContent(esxiMachine);
-
         try
         {
-            // Solve [ABICLOUDPREMIUM-321]
-            VirtualMachineRuntimeInfo runInfo = null;
-            boolean found = false;
-            DynamicProperty[] dps = esxiMachine.getPropSet();
-            for (int i = 0; i < dps.length && !found; i++)
+            Folder rootFolder = serviceInstance.getRootFolder();
+            VirtualMachine virtualMachine =
+                (VirtualMachine) new InventoryNavigator(rootFolder).searchManagedEntity(
+                    "VirtualMachine", virtualMachineName);
+
+            if (virtualMachine == null)
             {
-                Object dp = dps[i].getVal();
-                if (dp instanceof VirtualMachineRuntimeInfo)
-                {
-                    runInfo = (VirtualMachineRuntimeInfo) dp;
-                    found = true;
-                }
+                return VMEventType.UNKNOWN;
             }
 
-            if (runInfo == null)
-            {
-                throw new MonitorException("Could not retrieve the state of machine: "
-                    + vmConfig.getName());
-            }
-
-            return translateState(runInfo.getPowerState().name());
+            return translateState(virtualMachine.getRuntime().getPowerState().name());
         }
         catch (Exception ex)
         {
             throw new MonitorException("Could not retrieve the state of machine: "
-                + vmConfig.getName(), ex);
+                + virtualMachineName, ex);
         }
     }
 
     /**
-     * Disconnects from the hypervisor.
+     * Checks if a virtual machine exists in the hypervisor
      * 
-     * @param physicalMachineAddress The hypervisor address.
+     * @param virtualMachineName the name of the virtual machines
+     * @return True if exists, otherwise false.
+     * @throws MonitorException
      */
-    public void disconnect(String physicalMachineAddress)
+    public boolean existVirtualMachine(final String virtualMachineName) throws MonitorException
     {
-        LOGGER.trace("Disconnecting from ESXi host: {}", physicalMachineAddress);
+        Folder rootFolder = serviceInstance.getRootFolder();
+        VirtualMachine virtualMachine = null;
 
-        if (serviceInstance != null && serviceInstance.getServerConnection() != null)
+        try
         {
-            serviceInstance.getServerConnection().logout();
-            serviceInstance = null;
+            virtualMachine =
+                (VirtualMachine) new InventoryNavigator(rootFolder).searchManagedEntity(
+                    "VirtualMachine", virtualMachineName);
+        }
+        catch (Exception ex)
+        {
+            throw new MonitorException("Could not obtain the machine: " + virtualMachineName, ex);
+        }
+
+        return virtualMachine != null;
+    }
+
+    /**
+     * Checks if a virtual machine exists in the associated vCenter
+     * 
+     * @param virtualMachineName the name of the virtual machine
+     * @return True if exists, otherwise false.
+     * @throws MonitorException
+     */
+    public boolean existVirtualMachineInVCenter(final String virtualMachineName)
+        throws MonitorException
+    {
+        VirtualMachine virtualMachine = null;
+
+        try
+        {
+            Folder rootFolder = vcenterServiceInstance.getRootFolder();
+            virtualMachine =
+                (VirtualMachine) new InventoryNavigator(rootFolder).searchManagedEntity(
+                    "VirtualMachine", virtualMachineName);
+        }
+        catch (Exception ex)
+        {
+            throw new MonitorException("Could not obtain from vCenter the machine: "
+                + virtualMachineName, ex);
+        }
+
+        return virtualMachine != null;
+    }
+
+    /**
+     * Checks through vCenter if a virtual machine is being migrated or relocated.
+     * 
+     * @param virtualMachineName the name of the virtual machine
+     * @return true if the virtual machine is being migrated, otherwise false.
+     */
+    public boolean virtualMachineIsBeingMigrated(final String virtualMachineName)
+        throws MonitorException
+    {
+        try
+        {
+            Folder rootFolder = vcenterServiceInstance.getRootFolder();
+            VirtualMachine virtualMachine =
+                (VirtualMachine) new InventoryNavigator(rootFolder).searchManagedEntity(
+                    "VirtualMachine", virtualMachineName);
+
+            if (virtualMachine == null)
+            {
+                return false;
+            }
+
+            if (virtualMachine.getRecentTasks() == null)
+            {
+                return false;
+            }
+
+            boolean beingMigrated = false;
+
+            for (Task task : virtualMachine.getRecentTasks())
+            {
+                if (task.getTaskInfo() == null)
+                {
+                    continue;
+                }
+
+                String descriptionId = task.getTaskInfo().descriptionId;
+
+                if (descriptionId.equalsIgnoreCase(MIGRATION_TASK_ID)
+                    || descriptionId.equalsIgnoreCase(RELOCATE_TASK_ID))
+                {
+                    TaskInfoState state = task.getTaskInfo().getState();
+
+                    if (state != null)
+                    {
+                        if (state.equals(queued) || state.equals(running))
+                        {
+                            beingMigrated = true;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            return beingMigrated;
+        }
+        catch (Exception ex)
+        {
+            throw new MonitorException("Could not obtain from vCenter the machine: "
+                + virtualMachineName, ex);
         }
     }
 
@@ -264,7 +447,7 @@ public class ESXiConnector
      * @return list of ObjectContent with the result of the search.
      * @throws RemoteException if there is any problem working with the remote objects
      */
-    private ObjectContent[] getManagedObjectReferencesFromInventory(PropertySpec[] propSpec)
+    private ObjectContent[] getManagedObjectReferencesFromInventory(final PropertySpec[] propSpec)
         throws RemoteException
     {
         // Set the PropertyFilter Spec previous to put toghether the property Spec
@@ -372,15 +555,15 @@ public class ESXiConnector
         rpToVm};
     }
 
-    private static SelectionSpec createSelectionSpec(String name)
+    private static SelectionSpec createSelectionSpec(final String name)
     {
         SelectionSpec s = new SelectionSpec();
         s.setName(name);
         return s;
     }
 
-    private static TraversalSpec createTraversalSpec(String name, String type, String path,
-        SelectionSpec... selectSet)
+    private static TraversalSpec createTraversalSpec(final String name, final String type,
+        final String path, final SelectionSpec... selectSet)
     {
         TraversalSpec traversalSpec = new TraversalSpec();
         traversalSpec.setName(name);
