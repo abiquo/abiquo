@@ -79,10 +79,6 @@ public class ESXiConnector
 
     private static final String POWERED_ON = "poweredOn";
 
-    private static final String MIGRATION_TASK_ID = "VirtualMachine.migrate";
-
-    private static final String RELOCATE_TASK_ID = "VirtualMachine.relocate";
-
     public ESXiConnector()
     {
         super();
@@ -356,12 +352,12 @@ public class ESXiConnector
     }
 
     /**
-     * Checks through vCenter if a virtual machine is being migrated or relocated.
+     * Checks through vCenter if a virtual machine has tasks in progress.
      * 
      * @param virtualMachineName the name of the virtual machine
-     * @return true if the virtual machine is being migrated, otherwise false.
+     * @return true if the virtual machine has tasks in progress, otherwise false.
      */
-    public boolean virtualMachineIsBeingMigrated(final String virtualMachineName)
+    public boolean hasTasksInProgressInVCenter(final String virtualMachineName)
         throws MonitorException
     {
         try
@@ -371,6 +367,48 @@ public class ESXiConnector
                 (VirtualMachine) new InventoryNavigator(rootFolder).searchManagedEntity(
                     "VirtualMachine", virtualMachineName);
 
+            return hasTasksInProgress(virtualMachine);
+        }
+        catch (Exception ex)
+        {
+            throw new MonitorException("Could not obtain from vCenter the machine: "
+                + virtualMachineName, ex);
+        }
+    }
+
+    /**
+     * Checks if a virtual machine has tasks in progress.
+     * 
+     * @param virtualMachineName the name of the virtual machine
+     * @return true if the virtual machine has tasks in progress, otherwise false.
+     */
+    public boolean hasTasksInProgress(final String virtualMachineName) throws MonitorException
+    {
+        try
+        {
+            Folder rootFolder = serviceInstance.getRootFolder();
+            VirtualMachine virtualMachine =
+                (VirtualMachine) new InventoryNavigator(rootFolder).searchManagedEntity(
+                    "VirtualMachine", virtualMachineName);
+
+            return hasTasksInProgress(virtualMachine);
+        }
+        catch (Exception ex)
+        {
+            throw new MonitorException("Could not obtain the machine: " + virtualMachineName, ex);
+        }
+    }
+
+    /**
+     * Checks if a virtual machine has tasks in progress.
+     * 
+     * @param virtualMachine the {@link VirtualMachine} to query about
+     * @return true if the {@link VirtualMachine} has tasks in progress, otherwise false.
+     */
+    private boolean hasTasksInProgress(final VirtualMachine virtualMachine) throws MonitorException
+    {
+        try
+        {
             if (virtualMachine == null)
             {
                 return false;
@@ -381,7 +419,7 @@ public class ESXiConnector
                 return false;
             }
 
-            boolean beingMigrated = false;
+            boolean tasksInProgress = false;
 
             for (Task task : virtualMachine.getRecentTasks())
             {
@@ -390,30 +428,23 @@ public class ESXiConnector
                     continue;
                 }
 
-                String descriptionId = task.getTaskInfo().descriptionId;
+                TaskInfoState state = task.getTaskInfo().getState();
 
-                if (descriptionId.equalsIgnoreCase(MIGRATION_TASK_ID)
-                    || descriptionId.equalsIgnoreCase(RELOCATE_TASK_ID))
+                if (state != null)
                 {
-                    TaskInfoState state = task.getTaskInfo().getState();
-
-                    if (state != null)
+                    if (state.equals(queued) || state.equals(running))
                     {
-                        if (state.equals(queued) || state.equals(running))
-                        {
-                            beingMigrated = true;
-                            break;
-                        }
+                        tasksInProgress = true;
+                        break;
                     }
                 }
             }
 
-            return beingMigrated;
+            return tasksInProgress;
         }
         catch (Exception ex)
         {
-            throw new MonitorException("Could not obtain from vCenter the machine: "
-                + virtualMachineName, ex);
+            throw new MonitorException("Could not obtain the tasks", ex);
         }
     }
 

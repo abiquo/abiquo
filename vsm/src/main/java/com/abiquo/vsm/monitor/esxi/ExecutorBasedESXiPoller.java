@@ -222,7 +222,7 @@ public class ExecutorBasedESXiPoller extends AbstractMonitor
                         // Propagate events and rebuild the cache
                         for (String virtualMachine : intersection)
                         {
-                            if (!isBeingMigrated(virtualMachine))
+                            if (!hasTasksInProgress(virtualMachine))
                             {
                                 VMEventType state = esx.getState(virtualMachine);
 
@@ -234,7 +234,7 @@ public class ExecutorBasedESXiPoller extends AbstractMonitor
 
                         for (String virtualMachine : created)
                         {
-                            if (!isBeingMigrated(virtualMachine))
+                            if (!hasTasksInProgress(virtualMachine))
                             {
                                 LOGGER.debug("Created {} at {}", virtualMachine, address);
                                 notifyState(CREATED, virtualMachine, address);
@@ -244,7 +244,7 @@ public class ExecutorBasedESXiPoller extends AbstractMonitor
 
                         for (String virtualMachine : removed)
                         {
-                            if (!isBeingMigrated(virtualMachine))
+                            if (!hasTasksInProgress(virtualMachine))
                             {
                                 if (!existInVCenter(virtualMachine))
                                 {
@@ -293,14 +293,16 @@ public class ExecutorBasedESXiPoller extends AbstractMonitor
     }
 
     /**
-     * Checks through vCenter if a virtual machine is being migrated.
+     * Checks if a virtual machine has tasks in progress. Using VCenter is the host is managed by,
+     * otherwise uses the host.
      * 
      * @param virtualMachine the virtual machine name to query about
-     * @return true if the virtual machine is being migrated, otherwise false.
+     * @return true if the virtual machine has tasks in progress, otherwise false.
      */
-    private boolean isBeingMigrated(final String virtualMachine) throws MonitorException
+    private boolean hasTasksInProgress(final String virtualMachine) throws MonitorException
     {
-        return esx.isManagedByVCenter() ? esx.virtualMachineIsBeingMigrated(virtualMachine) : false;
+        return esx.isManagedByVCenter() ? esx.hasTasksInProgressInVCenter(virtualMachine) : esx
+            .hasTasksInProgress(virtualMachine);
     }
 
     /**
