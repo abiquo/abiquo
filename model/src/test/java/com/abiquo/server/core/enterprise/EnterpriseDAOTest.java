@@ -21,23 +21,43 @@
 
 package com.abiquo.server.core.enterprise;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.persistence.EntityManager;
 import javax.persistence.OptimisticLockException;
 
 import org.testng.Assert;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import com.abiquo.server.core.cloud.VirtualDatacenter;
+import com.abiquo.server.core.cloud.VirtualDatacenterGenerator;
 import com.abiquo.server.core.common.Limit;
 import com.abiquo.server.core.common.persistence.DefaultDAOTestBase;
+import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
+import com.abiquo.server.core.infrastructure.storage.VolumeManagementGenerator;
 import com.softwarementors.bzngine.engines.jpa.EntityManagerHelper;
 import com.softwarementors.bzngine.entities.test.PersistentInstanceTester;
 
 @Test
 public class EnterpriseDAOTest extends DefaultDAOTestBase<EnterpriseDAO, Enterprise>
 {
+    private VirtualDatacenterGenerator vdcGenerator;
+
+    private VolumeManagementGenerator volumeGenerator;
 
     @Override
-    protected EnterpriseDAO createDao(EntityManager entityManager)
+    @BeforeMethod
+    protected void methodSetUp()
+    {
+        super.methodSetUp();
+        this.vdcGenerator = new VirtualDatacenterGenerator(getSeed());
+        this.volumeGenerator = new VolumeManagementGenerator(getSeed());
+    }
+
+    @Override
+    protected EnterpriseDAO createDao(final EntityManager entityManager)
     {
         return new EnterpriseDAO(entityManager);
     }
@@ -121,22 +141,93 @@ public class EnterpriseDAOTest extends DefaultDAOTestBase<EnterpriseDAO, Enterpr
         }
     }
 
-    /*
-     * TODO: PAG, pending of full upgrade considerations
-     * @Test public void logicalRemove() { Enterprise enterprise1 = eg().createInstance("abcd");
-     * ds().persistAll(enterprise1); EnterpriseDAO dao = createDaoForReadWriteTransaction();
-     * Enterprise enterprise1B = dao.findById(enterprise1.getId()); enterprise1B.delete();
-     * EntityManagerHelper.commitAndClose(dao.getEntityManager()); EnterpriseDAO dao2 =
-     * createDaoForRollbackTransaction(); Enterprise enterprise1C =
-     * dao2.findById(enterprise1.getId(), true); assertNull(dao2.findById(enterprise1.getId()));
-     * assertNotNull(enterprise1C); assertTrue(enterprise1C.isDeleted()); }
-     * @Test public void findById() { Enterprise enterprise1 = eg().createInstance("abcd");
-     * ds().persistAll(enterprise1); EnterpriseDAO dao = createDaoForReadWriteTransaction();
-     * assertNotNull(dao.findById(enterprise1.getId(), false));
-     * assertNotNull(dao.findById(enterprise1.getId(), true)); reload(dao, enterprise1).delete();
-     * EntityManagerHelper.commitAndClose(dao.getEntityManager()); EnterpriseDAO dao2 =
-     * createDaoForRollbackTransaction(); assertNotNull(dao2.findById(enterprise1.getId(), true));
-     * assertNull(dao2.findById(enterprise1.getId(), false)); }
-     */
+    public void test_getStorageUsageWithoutVolumes()
+    {
+        Enterprise ent = eg().createUniqueInstance();
+        VirtualDatacenter vdc = vdcGenerator.createInstance(ent);
+
+        List<Object> entitiesToPersist = new ArrayList<Object>();
+        vdcGenerator.addAuxiliaryEntitiesToPersist(vdc, entitiesToPersist);
+
+        persistAll(ds(), entitiesToPersist, vdc);
+
+        EnterpriseDAO dao = createDaoForRollbackTransaction();
+        Long used = dao.getStorageUsage(ent.getId());
+
+        assertNotNull(used);
+        assertEquals(used.longValue(), 0L);
+    }
+
+    public void test_getStorageUsageWithoutVolumesInSingleEnterprise()
+    {
+        Enterprise ent = eg().createUniqueInstance();
+        VirtualDatacenter vdc = vdcGenerator.createInstance(ent);
+
+        VolumeManagement vol1 = volumeGenerator.createInstance(vdc);
+        VolumeManagement vol2 = volumeGenerator.createInstance(vol1.getStoragePool(), vdc);
+
+        List<Object> entitiesToPersist = new ArrayList<Object>();
+        vdcGenerator.addAuxiliaryEntitiesToPersist(vdc, entitiesToPersist);
+
+        entitiesToPersist.add(vdc);
+        entitiesToPersist.add(vol1.getStoragePool().getDevice());
+        entitiesToPersist.add(vol1.getStoragePool().getTier());
+        entitiesToPersist.add(vol1.getStoragePool());
+        entitiesToPersist.add(vol1.getRasd());
+        entitiesToPersist.add(vol1);
+        entitiesToPersist.add(vol2.getRasd());
+        entitiesToPersist.add(vol2);
+
+        persistAll(ds(), entitiesToPersist);
+
+        EnterpriseDAO dao = createDaoForRollbackTransaction();
+        Long used = dao.getStorageUsage(ent.getId());
+
+        assertNotNull(used);
+        assertEquals(used.longValue(), vol1.getSizeInMB() + vol2.getSizeInMB());
+    }
+
+    public void test_getStorageUsageWithoutVolumesInMultipleEnterprises()
+    {
+        Enterprise ent1 = eg().createUniqueInstance();
+        Enterprise ent2 = eg().createUniqueInstance();
+        VirtualDatacenter vdc1 = vdcGenerator.createInstance(ent1);
+        VirtualDatacenter vdc2 = vdcGenerator.createInstance(vdc1.getDatacenter(), ent2);
+
+        VolumeManagement vol1 = volumeGenerator.createInstance(vdc1);
+        VolumeManagement vol2 = volumeGenerator.createInstance(vol1.getStoragePool(), vdc1);
+        VolumeManagement vol3 = volumeGenerator.createInstance(vol1.getStoragePool(), vdc2);
+        VolumeManagement vol4 = volumeGenerator.createInstance(vol1.getStoragePool(), vdc2);
+
+        List<Object> entitiesToPersist = new ArrayList<Object>();
+        vdcGenerator.addAuxiliaryEntitiesToPersist(vdc1, entitiesToPersist);
+
+        entitiesToPersist.add(vdc1);
+        entitiesToPersist.add(ent2);
+        entitiesToPersist.add(vdc2);
+
+        entitiesToPersist.add(vol1.getStoragePool().getDevice());
+        entitiesToPersist.add(vol1.getStoragePool().getTier());
+        entitiesToPersist.add(vol1.getStoragePool());
+        entitiesToPersist.add(vol1.getRasd());
+        entitiesToPersist.add(vol1);
+        entitiesToPersist.add(vol2.getRasd());
+        entitiesToPersist.add(vol2);
+        entitiesToPersist.add(vol3.getRasd());
+        entitiesToPersist.add(vol3);
+        entitiesToPersist.add(vol4.getRasd());
+        entitiesToPersist.add(vol4);
+
+        persistAll(ds(), entitiesToPersist);
+
+        EnterpriseDAO dao = createDaoForRollbackTransaction();
+        Long used = dao.getStorageUsage(ent1.getId());
+        assertNotNull(used);
+        assertEquals(used.longValue(), vol1.getSizeInMB() + vol2.getSizeInMB());
+
+        used = dao.getStorageUsage(ent2.getId());
+        assertNotNull(used);
+        assertEquals(used.longValue(), vol3.getSizeInMB() + vol4.getSizeInMB());
+    }
 
 }
