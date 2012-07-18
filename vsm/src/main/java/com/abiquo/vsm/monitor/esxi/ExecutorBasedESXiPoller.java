@@ -251,11 +251,6 @@ public class ExecutorBasedESXiPoller extends AbstractMonitor
                                     LOGGER.debug("Removed {} from {}", virtualMachine, address);
                                     notifyState(DESTROYED, virtualMachine, address);
                                 }
-                                else
-                                {
-                                    // In order to check it in next poller execution
-                                    cache.getCache().add(virtualMachine);
-                                }
                             }
                             else
                             {
