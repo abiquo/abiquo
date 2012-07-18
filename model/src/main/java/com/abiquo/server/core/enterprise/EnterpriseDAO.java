@@ -44,7 +44,6 @@ import com.abiquo.server.core.infrastructure.network.IpPoolManagementDAO;
 import com.abiquo.server.core.infrastructure.network.VLANNetwork;
 import com.abiquo.server.core.infrastructure.network.VLANNetworkDAO;
 import com.abiquo.server.core.infrastructure.storage.StorageRep;
-import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
 import com.abiquo.server.core.pricing.PricingTemplate;
 import com.abiquo.server.core.util.PagedList;
 import com.softwarementors.bzngine.entities.PersistentEntity;
@@ -252,19 +251,26 @@ class EnterpriseDAO extends DefaultDAOBase<Integer, Enterprise>
             + "and rm.idResourceType = '17' and rm.idVirtualDatacenter = vdc.idVirtualDatacenter and vdc.idEnterprise=:enterpriseId "
             + "and  rm.idVM = vm.idVM and vm.state != 'NOT_ALLOCATED' and vm.idHypervisor is not null";
 
+    private static final String SUM_STORAGE_RESOURCES = "select sum(r.limitResource) "
+        + "from volume_management vm, rasd_management rm, virtualdatacenter vdc, rasd r "
+        + "where vm.idManagement = rm.idManagement "//
+        + "and rm.idResource = r.instanceID " //
+        + "and rm.idVirtualDataCenter = vdc.idVirtualDataCenter " //
+        + "and vdc.idEnterprise = :enterpriseId";
+
     public DefaultEntityCurrentUsed getEnterpriseResourceUsage(final int enterpriseId)
     {
         Object[] vmResources =
-            (Object[]) getSession().createSQLQuery(SUM_VM_RESOURCES).setParameter("enterpriseId",
-                enterpriseId).uniqueResult();
+            (Object[]) getSession().createSQLQuery(SUM_VM_RESOURCES)
+                .setParameter("enterpriseId", enterpriseId).uniqueResult();
 
         Long cpu = vmResources[0] == null ? 0 : ((BigDecimal) vmResources[0]).longValue();
         Long ram = vmResources[1] == null ? 0 : ((BigDecimal) vmResources[1]).longValue();
         Long hd = vmResources[2] == null ? 0 : ((BigDecimal) vmResources[2]).longValue();
 
         BigDecimal extraHd =
-            (BigDecimal) getSession().createSQLQuery(SUM_EXTRA_HD_RESOURCES).setParameter(
-                "enterpriseId", enterpriseId).uniqueResult();
+            (BigDecimal) getSession().createSQLQuery(SUM_EXTRA_HD_RESOURCES)
+                .setParameter("enterpriseId", enterpriseId).uniqueResult();
         Long hdTot = extraHd == null ? hd : hd + extraHd.longValue() * 1024 * 1024;
 
         Long storage = getStorageUsage(enterpriseId) * 1024 * 1024; // Storage usage is stored in MB
@@ -290,17 +296,17 @@ class EnterpriseDAO extends DefaultDAOBase<Integer, Enterprise>
      * @return The amount of used storage.
      * @throws PersistenceException If an error occurs.
      */
-    private Long getStorageUsage(final Integer idEnterprise)
+    public Long getStorageUsage(final Integer idEnterprise)
     {
-        final List<VolumeManagement> volumes = storageRep.getVolumesByEnterprise(idEnterprise);
+        // [ABICLOUDPREMIUM-4172] A SQL query must be used here, to avoid taking into account the
+        // objects in the Hibernate session that can have been already modified.
+        // This is the case of volume resize, when this method is called with the object modified in
+        // the session (but still not flushed)
+        BigDecimal storageInDB =
+            (BigDecimal) getSession().createSQLQuery(SUM_STORAGE_RESOURCES)
+                .setParameter("enterpriseId", idEnterprise).uniqueResult();
 
-        long usedStorage = 0L;
-        for (final VolumeManagement vol : volumes)
-        {
-            usedStorage += vol.getSizeInMB();
-        }
-
-        return usedStorage;
+        return storageInDB == null ? 0L : storageInDB.longValue();
     }
 
     /**
