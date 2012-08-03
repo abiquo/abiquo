@@ -171,6 +171,9 @@ public class VirtualMachineService extends DefaultApiService
     private VirtualMachineAllocatorService vmAllocatorService;
 
     @Autowired
+    private VirtualMachineLock virtualMachineLock;
+
+    @Autowired
     private VirtualMachineRequirementsFactory vmRequirements;
 
     @Autowired
@@ -517,10 +520,7 @@ public class VirtualMachineService extends DefaultApiService
 
                 LOGGER
                     .debug("Creating the temporary register in Virtual Machine for rollback purposes");
-                backUpVm = createBackUpMachine(vm);
-                repo.insert(backUpVm);
-                createBackUpResources(vm, backUpVm);
-                insertBackUpResources(backUpVm);
+                backUpVm = virtualMachineLock.createBackUp(vm);
                 LOGGER.debug("Rollback register has id {}" + vm.getId());
 
                 // Before to update the virtualmachine to new values, create the tarantino
@@ -562,6 +562,11 @@ public class VirtualMachineService extends DefaultApiService
             tracer.systemError(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
                 EventType.VM_RECONFIGURE, e, "virtualMachine.reconfigureError", vm.getName());
 
+            LOGGER
+                .debug("Deleting the temporary register in Virtual Machine for rollback purposes");
+            this.deleteBackupResources(backUpVm);
+            LOGGER
+                .debug("Deleting the temporary register in Virtual Machine for rollback purposes done!");
             throw e;
         }
         catch (Exception ex)
@@ -571,6 +576,12 @@ public class VirtualMachineService extends DefaultApiService
 
             tracer.systemError(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
                 EventType.VM_RECONFIGURE, ex, "virtualMachine.reconfigureError", vm.getName());
+            LOGGER
+                .debug("Deleting the temporary register in Virtual Machine for rollback purposes");
+            this.deleteBackupResources(backUpVm);
+
+            LOGGER
+                .debug("Deleting the temporary register in Virtual Machine for rollback purposes done!");
 
             addUnexpectedErrors(APIError.STATUS_INTERNAL_SERVER_ERROR);
             flushErrors();
@@ -640,7 +651,7 @@ public class VirtualMachineService extends DefaultApiService
      * 
      * @param backUpVm
      */
-    private void insertBackUpResources(final VirtualMachine backUpVm)
+    public void insertBackUpResources(final VirtualMachine backUpVm)
     {
 
         for (IpPoolManagement ip : backUpVm.getIps())
@@ -661,7 +672,7 @@ public class VirtualMachineService extends DefaultApiService
         backUpVm.setVolumes(null);
         backUpVm.setDisks(null);
 
-        repo.update(backUpVm);
+        // repo.update(backUpVm);
     }
 
     /**
