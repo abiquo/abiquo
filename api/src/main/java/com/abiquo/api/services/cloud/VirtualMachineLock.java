@@ -387,4 +387,15 @@ public class VirtualMachineLock extends DefaultApiService
         LOGGER.debug("The virtual machine is now in state {}." + vm.getState().name());
     }
 
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
+    public VirtualMachine createBackUp(VirtualMachine virtualMachine)
+    {
+        VirtualMachine old = vmService.getVirtualMachineInitialized(virtualMachine.getId());
+        VirtualMachine backUpVm = vmService.createBackUpMachine(old);
+        vmRepo.createVirtualMachine(backUpVm);
+        vmService.createBackUpResources(old, backUpVm);
+        vmService.insertBackUpResources(backUpVm);
+
+        return backUpVm;
+    }
 }
