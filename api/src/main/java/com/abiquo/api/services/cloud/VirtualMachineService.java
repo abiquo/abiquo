@@ -134,7 +134,6 @@ import com.abiquo.tracer.EventType;
 import com.abiquo.tracer.SeverityType;
 
 @Service
-@Transactional(readOnly = true, propagation = Propagation.REQUIRED)
 public class VirtualMachineService extends DefaultApiService
 {
     /** The logger object **/
@@ -1326,95 +1325,17 @@ public class VirtualMachineService extends DefaultApiService
      * @param restBuilder injected restbuilder context parameter
      * @throws Exception
      */
-    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public String deployVirtualMachine(final Integer vmId, final Integer vappId,
         final Integer vdcId, final Boolean foreceEnterpriseSoftLimits)
     {
         VirtualAppliance vapp = getVirtualApplianceAndCheckVirtualDatacenter(vdcId, vappId);
         VirtualMachine vmachine = getVirtualMachine(vdcId, vappId, vmId);
 
-        allocate(vmachine, vapp, foreceEnterpriseSoftLimits);
+        virtualMachineLock.allocate(vmachine, vapp, foreceEnterpriseSoftLimits);
 
         return sendDeploy(vmachine, vapp);
     }
 
-    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public void allocate(final VirtualMachine virtualMachine, final VirtualAppliance vapp,
-        final Boolean foreceEnterpriseSoftLimits)
-    {
-        LOGGER.debug("Starting the deploy of the virtual machine {}", virtualMachine.getId());
-        // We need to operate with concrete and this also check that the VirtualMachine belongs to
-        // those VirtualAppliance and VirtualDatacenter
-
-        LOGGER.debug("Check for permissions");
-        // The user must have the proper permission
-        userService.checkCurrentEnterpriseForPostMethods(virtualMachine.getEnterprise());
-        LOGGER.debug("Permission granted");
-
-        LOGGER.debug("Checking the virtual machine state. It must be in NOT_ALLOCATED");
-
-        // The remote services must be up for this Datacenter if we are to deploy
-        // LOGGER.debug("Check remote services");
-        // FIXME checkRemoteServicesByVirtualDatacenter(vdcId);
-        // LOGGER.debug("Remote services are ok!");
-
-        // Tasks needs the definition of the virtual machine
-        // VirtualAppliance virtualAppliance =
-        // getVirtualApplianceAndCheckVirtualDatacenter(vdcId, vappId);
-
-        try
-        {
-            LOGGER.debug("Allocating with force enterpise  soft limits : "
-                + foreceEnterpriseSoftLimits);
-
-            /*
-             * Select a machine to allocate the virtual machine, Check limits, Check resources If
-             * one of the above fail we cannot allocate the VirtualMachine
-             */
-            vmAllocatorService.allocateVirtualMachine(virtualMachine, vapp,
-                foreceEnterpriseSoftLimits);
-            LOGGER.debug("Allocated!");
-
-            LOGGER.debug("Mapping the external volumes");
-            // We need to map all attached volumes if any
-            initiatorMappings(virtualMachine);
-            LOGGER.debug("Mapping done!");
-        }
-        catch (APIException e)
-        {
-            traceApiExceptionVm(e, virtualMachine.getName());
-
-            /*
-             * Select a machine to allocate the virtual machine, Check limits, Check resources If
-             * one of the above fail we cannot allocate the VirtualMachine It also perform the
-             * resource recompute
-             */
-            if (virtualMachine.getHypervisor() != null)
-            {
-                vmAllocatorService.deallocateVirtualMachine(virtualMachine);
-            }
-
-            throw e;
-        }
-        catch (Exception ex)
-        {
-            tracer.log(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE, EventType.VM_DEPLOY,
-                "virtualMachine.deploy", virtualMachine.getName());
-
-            tracer.systemError(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
-                EventType.VM_DEPLOY, ex, "virtualMachine.deploy", virtualMachine.getName());
-
-            if (virtualMachine.getHypervisor() != null)
-            {
-                vmAllocatorService.deallocateVirtualMachine(virtualMachine);
-            }
-
-            addUnexpectedErrors(APIError.STATUS_INTERNAL_SERVER_ERROR);
-            flushErrors();
-        }
-    }
-
-    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public String sendDeploy(final VirtualMachine virtualMachine,
         final VirtualAppliance virtualAppliance)
     {
@@ -1460,7 +1381,7 @@ public class VirtualMachineService extends DefaultApiService
         }
     }
 
-    private void traceApiExceptionVm(final APIException exception, final String vmName)
+    public void traceApiExceptionVm(final APIException exception, final String vmName)
     {
         if (exception.getErrors().isEmpty())
         {

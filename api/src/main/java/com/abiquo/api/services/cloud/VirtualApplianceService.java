@@ -139,6 +139,9 @@ public class VirtualApplianceService extends DefaultApiService
     @Autowired
     SecurityService securityService;
 
+    @Autowired
+    private VirtualMachineLock virtualMachineLock;
+
     public VirtualApplianceService()
     {
 
@@ -567,7 +570,7 @@ public class VirtualApplianceService extends DefaultApiService
                 final VirtualMachine virtualMachine = nvi.getVirtualMachine();
 
                 // XXX duplicated limit checker
-                vmService.allocate(virtualMachine, vapp, foreceEnterpriseSoftLimits);
+                virtualMachineLock.allocate(virtualMachine, vapp, foreceEnterpriseSoftLimits);
 
             }
             // XXX consider (try to) having the SchechedulerLock by each VM
@@ -624,7 +627,6 @@ public class VirtualApplianceService extends DefaultApiService
      * @param vappId {@link VirtualAppliance}
      * @return List<String>
      */
-    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public Map<Integer, String> deployVirtualAppliance(final Integer vdcId, final Integer vappId,
         final boolean forceLimits)
     {
