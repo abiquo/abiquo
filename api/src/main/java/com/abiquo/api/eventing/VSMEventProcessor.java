@@ -261,7 +261,7 @@ public class VSMEventProcessor implements VSMCallback
                 "DESTROY event for virtualmachine '" + virtualMachine.getName() + "'";
             try
             {
-                SchedulerLock.acquire(lockMessage);
+                SchedulerLock.acquireSystem(lockMessage);
                 allocatorService.deallocateVirtualMachine(virtualMachine);
             }
             finally

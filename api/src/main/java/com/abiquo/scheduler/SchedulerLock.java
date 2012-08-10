@@ -21,6 +21,7 @@
 
 package com.abiquo.scheduler;
 
+import java.math.BigDecimal;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -43,6 +44,15 @@ public class SchedulerLock
         "com.abiquo.schedulerlock.timeout", "30000"));
 
     /**
+     * Since TIMEOUT value can be greater than ((Long.MAX_VALUE + 1) / 3) multiplying by 3 must be
+     * done with more bytes.
+     */
+    private final static long SYSTEM_TIMEOUT = new BigDecimal(System.getProperty(
+        "com.abiquo.schedulerlock.system.timeout",
+        String.valueOf(BigDecimal.valueOf(TIMEOUT).multiply(BigDecimal.valueOf(Long.valueOf(3))))))
+        .longValue();
+
+    /**
      * Gain access to modify resources in the physical infrastructure.
      * 
      * @param msg, cause of the lock
@@ -57,6 +67,36 @@ public class SchedulerLock
         try
         {
             if (!THE_LOCK.tryLock(TIMEOUT, TimeUnit.MILLISECONDS))
+            {
+                LOG.error("Can't acquire lock after {}ms - {}", TIMEOUT, msg);
+                throw new ServiceUnavailableException(APIError.SERVICE_UNAVAILABLE_ERROR);
+            }
+        }
+        catch (InterruptedException e)
+        {
+            LOG.error("Lock interrupted - {}", msg, e);
+            throw new ServiceUnavailableException(APIError.SERVICE_UNAVAILABLE_ERROR);
+        }
+
+        LOG.debug("Adquired lock after {}ms - {}", System.currentTimeMillis() - start, msg);
+    }
+
+    /**
+     * Gain access to modify resources in the physical infrastructure. It multiplies the value of
+     * timeout by a factor of 3 by default.
+     * 
+     * @param msg, cause of the lock
+     * @throws ServiceUnavailableException if can't acquire the lock in the configured timeout.
+     */
+    public static void acquireSystem(final String msg)
+    {
+        final long start = System.currentTimeMillis();
+
+        LOG.debug("Wait to adquire lock - {}", msg);
+
+        try
+        {
+            if (!THE_LOCK.tryLock(SYSTEM_TIMEOUT, TimeUnit.MILLISECONDS))
             {
                 LOG.error("Can't acquire lock after {}ms - {}", TIMEOUT, msg);
                 throw new ServiceUnavailableException(APIError.SERVICE_UNAVAILABLE_ERROR);
