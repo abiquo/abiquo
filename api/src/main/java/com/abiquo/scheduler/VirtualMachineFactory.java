@@ -118,10 +118,10 @@ public class VirtualMachineFactory
         {
             final long datastoreRequ = virtualMachine.getVirtualMachineTemplate().getDiskFileSize();
             final Datastore datastore = selectDatastore(machine, datastoreRequ);
-            virtualMachine.setDatastore(datastore);
+            int vrdpPort = selectVrdpPort(machine);
 
-            virtualMachine.setVdrpPort(isRemoteAccessEnabled() ? selectVrdpPort(machine)
-                : DISABLED_VRDPORT);
+            virtualMachine.setDatastore(datastore);
+            virtualMachine.setVdrpPort(vrdpPort);
         }
         else
         // its an HA reallocation, the datastore was already
@@ -193,6 +193,11 @@ public class VirtualMachineFactory
 
     protected int selectVrdpPort(final Machine machine) throws NotEnoughResourcesException
     {
+        if (!isRemoteAccessEnabled())
+        {
+            return DISABLED_VRDPORT;
+        }
+
         final List<Integer> usedPorts =
             datacenterRepo.findUsedRemoteDesktopPortsInRack(machine.getRack());
         Integer candidatePort = getNextFreeRemoteDesktopPort(usedPorts);
