@@ -43,9 +43,11 @@ import com.abiquo.server.core.cloud.NodeVirtualImage;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualApplianceState;
 import com.abiquo.server.core.cloud.VirtualMachine;
+import com.abiquo.server.core.cloud.VirtualMachineDAO;
 import com.abiquo.server.core.cloud.VirtualMachineRep;
 import com.abiquo.server.core.cloud.VirtualMachineState;
 import com.abiquo.server.core.cloud.VirtualMachineStateTransition;
+import com.abiquo.server.core.infrastructure.management.RasdManagementDAO;
 import com.abiquo.tracer.ComponentType;
 import com.abiquo.tracer.EventType;
 import com.abiquo.tracer.SeverityType;
@@ -80,6 +82,12 @@ public class VirtualMachineLock extends DefaultApiService
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    protected RasdManagementDAO rasdDao;
+
+    @Autowired
+    protected VirtualMachineDAO vmDao;
 
     public VirtualMachineLock()
     {
@@ -481,6 +489,30 @@ public class VirtualMachineLock extends DefaultApiService
 
             addUnexpectedErrors(APIError.STATUS_INTERNAL_SERVER_ERROR);
             flushErrors();
+        }
+    }
+
+    /**
+     * Cleanup backup resources
+     */
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
+    public void deleteBackupVirtualMachine(final Integer backUpVmId)
+    {
+        try
+        {
+            rasdDao.enableTemporalOnlyFilter();
+            VirtualMachine backUpVm = vmRepo.findVirtualMachineById(backUpVmId);
+            if (backUpVm == null)
+            {
+                return;
+            }
+            vmDao.refresh(backUpVm);
+            vmRepo.deleteVirtualMachine(backUpVm);
+
+        }
+        finally
+        {
+            rasdDao.restoreDefaultFilters();
         }
     }
 }
