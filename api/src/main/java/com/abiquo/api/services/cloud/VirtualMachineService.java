@@ -561,11 +561,14 @@ public class VirtualMachineService extends DefaultApiService
             tracer.systemError(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
                 EventType.VM_RECONFIGURE, e, "virtualMachine.reconfigureError", vm.getName());
 
-            LOGGER
-                .debug("Deleting the temporary register in Virtual Machine for rollback purposes");
-            this.deleteBackupResources(backUpVm);
-            LOGGER
-                .debug("Deleting the temporary register in Virtual Machine for rollback purposes done!");
+            if (backUpVm != null)
+            {
+                LOGGER
+                    .debug("Deleting the temporary register in Virtual Machine for rollback purposes");
+                virtualMachineLock.deleteBackupVirtualMachine(backUpVm.getId());
+                LOGGER
+                    .debug("Deleting the temporary register in Virtual Machine for rollback purposes done!");
+            }
             throw e;
         }
         catch (Exception ex)
@@ -575,13 +578,15 @@ public class VirtualMachineService extends DefaultApiService
 
             tracer.systemError(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
                 EventType.VM_RECONFIGURE, ex, "virtualMachine.reconfigureError", vm.getName());
-            LOGGER
-                .debug("Deleting the temporary register in Virtual Machine for rollback purposes");
-            this.deleteBackupResources(backUpVm);
+            if (backUpVm != null)
+            {
+                LOGGER
+                    .debug("Deleting the temporary register in Virtual Machine for rollback purposes");
+                virtualMachineLock.deleteBackupVirtualMachine(backUpVm.getId());
 
-            LOGGER
-                .debug("Deleting the temporary register in Virtual Machine for rollback purposes done!");
-
+                LOGGER
+                    .debug("Deleting the temporary register in Virtual Machine for rollback purposes done!");
+            }
             addUnexpectedErrors(APIError.STATUS_INTERNAL_SERVER_ERROR);
             flushErrors();
 
@@ -2832,98 +2837,102 @@ public class VirtualMachineService extends DefaultApiService
             rasdDao.enableTemporalOnlyFilter();
 
             List<RasdManagement> rasds = backUpVm.getRasdManagements();
-
-            // First of all, we have to release the VLAN tags if it is needed.
-            // This is not a very optimal algorithm, since we traverse again the Rasds later,
-            // but we need to know the id
-            // of the virtual machine before to delete the entity to know if we can to release the
-            // TAG.
-            for (RasdManagement rollbackRasd : rasds)
+            if (rasds != null)
             {
-                if (rollbackRasd instanceof IpPoolManagement)
+                // First of all, we have to release the VLAN tags if it is needed.
+                // This is not a very optimal algorithm, since we traverse again the Rasds later,
+                // but we need to know the id
+                // of the virtual machine before to delete the entity to know if we can to release
+                // the
+                // TAG.
+                for (RasdManagement rollbackRasd : rasds)
                 {
-
-                    IpPoolManagement originalRasd =
-                        (IpPoolManagement) rasdDao.findById(rollbackRasd.getTemporal());
-
-                    if (!originalRasd.isAttached())
+                    if (rollbackRasd instanceof IpPoolManagement)
                     {
-                        // check if it was the last IP of the VLAN, and release the VLAN
-                        // tag.
-                        VLANNetwork vlanNetwork = originalRasd.getVlanNetwork();
 
-                        final boolean assigned =
-                            ipPoolManDao.isVlanAssignedToDifferentVM(backUpVm.getId(), vlanNetwork);
+                        IpPoolManagement originalRasd =
+                            (IpPoolManagement) rasdDao.findById(rollbackRasd.getTemporal());
 
-                        if (!assigned)
+                        if (!originalRasd.isAttached())
                         {
-                            if (vlanNetwork.getType().equals(NetworkType.INTERNAL))
-                            {
-                                vlanNetwork.setTag(null);
-                            }
+                            // check if it was the last IP of the VLAN, and release the VLAN
+                            // tag.
+                            VLANNetwork vlanNetwork = originalRasd.getVlanNetwork();
 
-                            NetworkAssignment na = netAssignDao.findByVlanNetwork(vlanNetwork);
+                            final boolean assigned =
+                                ipPoolManDao.isVlanAssignedToDifferentVM(backUpVm.getId(),
+                                    vlanNetwork);
 
-                            if (na != null)
+                            if (!assigned)
                             {
-                                netAssignDao.remove(na);
+                                if (vlanNetwork.getType().equals(NetworkType.INTERNAL))
+                                {
+                                    vlanNetwork.setTag(null);
+                                }
+
+                                NetworkAssignment na = netAssignDao.findByVlanNetwork(vlanNetwork);
+
+                                if (na != null)
+                                {
+                                    netAssignDao.remove(na);
+                                }
                             }
                         }
                     }
                 }
-            }
 
-            /*
-             * CAUTION! We need this flush exactly here. Otherwise it tries to set the
-             * vlanNetwork.setTag(null) after to delete the related IpPoolManagement (that will be
-             * deleted in the next loop) and it raises an UnknowEntityException.
-             */
-            vlanNetworkDao.flush();
+                /*
+                 * CAUTION! We need this flush exactly here. Otherwise it tries to set the
+                 * vlanNetwork.setTag(null) after to delete the related IpPoolManagement (that will
+                 * be deleted in the next loop) and it raises an UnknowEntityException.
+                 */
+                vlanNetworkDao.flush();
 
-            for (RasdManagement rollbackRasd : rasds)
-            {
-                if (rollbackRasd instanceof IpPoolManagement)
+                for (RasdManagement rollbackRasd : rasds)
                 {
-                    IpPoolManagement originalRasd =
-                        (IpPoolManagement) rasdDao.findById(rollbackRasd.getTemporal());
-
-                    if (!originalRasd.isAttached())
+                    if (rollbackRasd instanceof IpPoolManagement)
                     {
-                        // remove the rasd
-                        vdcRep.deleteRasd(originalRasd.getRasd());
+                        IpPoolManagement originalRasd =
+                            (IpPoolManagement) rasdDao.findById(rollbackRasd.getTemporal());
 
-                        // unmanaged ips disappear when the are not assigned to a virtual machine.
-                        if (originalRasd.isUnmanagedIp())
+                        if (!originalRasd.isAttached())
                         {
+                            // remove the rasd
+                            vdcRep.deleteRasd(originalRasd.getRasd());
+
+                            // unmanaged ips disappear when the are not assigned to a virtual
+                            // machine.
+                            if (originalRasd.isUnmanagedIp())
+                            {
+                                rasdDao.remove(originalRasd);
+                            }
+
+                            // external ips should remove its MAC and name
+                            if (originalRasd.isExternalIp())
+                            {
+                                originalRasd.setMac(null);
+                                originalRasd.setName(null);
+                            }
+                        }
+                    }
+                    // DiskManagements always are deleted
+                    if (rollbackRasd instanceof DiskManagement)
+                    {
+                        DiskManagement originalRasd =
+                            (DiskManagement) rasdDao.findById(rollbackRasd.getTemporal());
+                        if (!originalRasd.isAttached())
+                        {
+                            vdcRep.deleteRasd(originalRasd.getRasd());
                             rasdDao.remove(originalRasd);
                         }
+                    }
 
-                        // external ips should remove its MAC and name
-                        if (originalRasd.isExternalIp())
-                        {
-                            originalRasd.setMac(null);
-                            originalRasd.setName(null);
-                        }
-                    }
-                }
-                // DiskManagements always are deleted
-                if (rollbackRasd instanceof DiskManagement)
-                {
-                    DiskManagement originalRasd =
-                        (DiskManagement) rasdDao.findById(rollbackRasd.getTemporal());
-                    if (!originalRasd.isAttached())
-                    {
-                        vdcRep.deleteRasd(originalRasd.getRasd());
-                        rasdDao.remove(originalRasd);
-                    }
+                    // refresh as the vm delete was updated the rasd
+                    rasdDao.remove(rasdDao.findById(rollbackRasd.getId()));
                 }
 
-                // refresh as the vm delete was updated the rasd
-                rasdDao.remove(rasdDao.findById(rollbackRasd.getId()));
+                rasdDao.flush();
             }
-
-            rasdDao.flush();
-
             // we need to first delete the vm (as it updates the rasd_man)
             backUpVm.setRasdManagements(null);
             repo.deleteVirtualMachine(backUpVm);
