@@ -41,6 +41,7 @@ import org.testng.annotations.Test;
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.resources.AbstractJpaGeneratorIT;
 import com.abiquo.model.enumerator.HypervisorType;
+import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.model.transport.AcceptedRequestDto;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualApplianceDto;
@@ -53,6 +54,8 @@ import com.abiquo.server.core.cloud.VirtualMachineState;
 import com.abiquo.server.core.cloud.VirtualMachineStateDto;
 import com.abiquo.server.core.cloud.VirtualMachineTaskDto;
 import com.abiquo.server.core.common.EnvironmentGenerator;
+import com.abiquo.server.core.infrastructure.Datacenter;
+import com.abiquo.server.core.infrastructure.RemoteService;
 
 /**
  * Integration tests to verify virtual machine locking logic.
@@ -80,8 +83,11 @@ public class VirtualMachineLockIT extends AbstractJpaGeneratorIT
         env.generateInfrastructure();
         env.generateVirtualDatacenter();
         env.generateAllocatedVirtualMachine();
-
+        RemoteService r =
+            remoteServiceGenerator.createInstance(RemoteServiceType.DHCP_SERVICE,
+                env.get(Datacenter.class));
         setup(env.getEnvironment().toArray());
+        setup(r);
 
         vdc = env.get(VirtualDatacenter.class);
         vapp = env.get(VirtualAppliance.class);
