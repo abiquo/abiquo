@@ -159,9 +159,7 @@ public class InfrastructureRep extends DefaultRepBase
 
     public Datacenter findById(final Integer id)
     {
-        assert id != null;
-
-        return this.dao.findById(id);
+        return this.dao.get(id);
     }
 
     public Collection<Datacenter> findAll()

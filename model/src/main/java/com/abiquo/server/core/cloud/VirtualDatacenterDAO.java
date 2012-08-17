@@ -335,4 +335,9 @@ public class VirtualDatacenterDAO extends DefaultDAOBase<Integer, VirtualDatacen
 
         return query.list();
     }
+
+    public VirtualDatacenter get(Integer id)
+    {
+        return getEntityManager().find(VirtualDatacenter.class, id);
+    }
 }

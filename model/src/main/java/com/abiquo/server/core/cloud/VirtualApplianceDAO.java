@@ -312,4 +312,9 @@ public class VirtualApplianceDAO extends DefaultDAOBase<Integer, VirtualApplianc
 
         return filterDisjunction;
     }
+
+    public VirtualAppliance get(Integer id)
+    {
+        return getEntityManager().find(VirtualAppliance.class, id);
+    }
 }

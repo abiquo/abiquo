@@ -80,7 +80,7 @@ public class RemoteServiceDAO extends DefaultDAOBase<Integer, RemoteService>
     public List<RemoteService> findByDatacenterAndType(final Datacenter datacenter,
         final RemoteServiceType type)
     {
-        return findByCriterions(equalDatacenter(datacenter), equalType(type));
+        return createCriteria(equalDatacenter(datacenter), equalType(type)).list();
     }
 
     public List<RemoteService> findByType(final RemoteServiceType type)

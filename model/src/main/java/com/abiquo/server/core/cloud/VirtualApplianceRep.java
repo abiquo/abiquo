@@ -110,7 +110,7 @@ public class VirtualApplianceRep extends DefaultRepBase
 
     public VirtualAppliance findById(final Integer id)
     {
-        return virtualApplianceDao.findById(id);
+        return virtualApplianceDao.get(id);
     }
 
     public void updateVirtualAppliance(final VirtualAppliance virtualAppliance)

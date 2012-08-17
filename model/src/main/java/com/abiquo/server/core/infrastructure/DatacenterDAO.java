@@ -201,4 +201,9 @@ public class DatacenterDAO extends DefaultDAOBase<Integer, Datacenter>
             + "where vn.network_id = vdc.networktypeId and el.idDatacenter = :datacenterId and el.idEnterprise = :enterpriseId "
             + "and vdc.idEnterprise = el.idEnterprise";
 
+    public Datacenter get(Integer id)
+    {
+        return getEntityManager().find(Datacenter.class, id);
+    }
+
 }

@@ -64,4 +64,8 @@ public class OneTimeTokenSessionDAO extends DefaultDAOBase<Integer, OneTimeToken
         return query.executeUpdate();
     }
 
+    public void save(OneTimeTokenSession oneTimeTokenSession)
+    {
+        getEntityManager().persist(oneTimeTokenSession);
+    }
 }
