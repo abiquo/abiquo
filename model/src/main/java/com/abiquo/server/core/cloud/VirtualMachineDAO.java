@@ -193,8 +193,7 @@ public class VirtualMachineDAO extends DefaultDAOBase<Integer, VirtualMachine>
     {
         Criteria criteria = createCriteria(sameUser(user)).add(sameEnterprise(enterprise));
         criteria.addOrder(Order.asc(VirtualMachine.NAME_PROPERTY));
-        List<VirtualMachine> result = getResultList(criteria);
-        return result;
+        return criteria.list();
     }
 
     public List<VirtualMachine> findVirtualMachinesByVirtualAppliance(final Integer vappId,
@@ -348,5 +347,10 @@ public class VirtualMachineDAO extends DefaultDAOBase<Integer, VirtualMachine>
         }
 
         return queryString.toString();
+    }
+
+    public VirtualMachine get(Integer id)
+    {
+        return getEntityManager().find(VirtualMachine.class, id);
     }
 }

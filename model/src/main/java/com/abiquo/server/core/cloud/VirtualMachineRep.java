@@ -136,7 +136,7 @@ public class VirtualMachineRep extends DefaultRepBase
 
     public VirtualMachine findVirtualMachineById(final Integer vmId)
     {
-        return dao.findById(vmId);
+        return dao.get(vmId);
     }
 
     /**

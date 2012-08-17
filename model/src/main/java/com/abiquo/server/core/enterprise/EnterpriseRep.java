@@ -457,7 +457,7 @@ public class EnterpriseRep extends DefaultRepBase
     public void persistToken(final String token)
     {
         OneTimeTokenSession ottSession = new OneTimeTokenSession(token);
-        ottSessionDAO.persist(ottSession);
+        ottSessionDAO.save(ottSession);
     }
 
     /**
