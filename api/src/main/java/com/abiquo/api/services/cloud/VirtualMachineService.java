@@ -1139,7 +1139,7 @@ public class VirtualMachineService extends DefaultApiService
 
         // Set the user and enterprise
         virtualMachine.setUser(userService.getCurrentUser());
-        virtualMachine.setEnterprise(userService.getCurrentUser().getEnterprise());
+        virtualMachine.setEnterprise(virtualAppliance.getEnterprise());
 
         // We check for a suitable conversion (PREMIUM)
         attachVirtualMachineTemplateConversion(virtualAppliance.getVirtualDatacenter(),
