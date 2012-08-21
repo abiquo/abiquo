@@ -240,12 +240,12 @@
         <dependency>
             <groupId>com.abiquo.heartbeat</groupId>
             <artifactId>client</artifactId>
-            <version>0.2-SNAPSHOT</version>
+            <version>0.2.0</version>
         </dependency>
         <dependency>
             <groupId>com.abiquo.heartbeat</groupId>
             <artifactId>server</artifactId>
-            <version>0.2-SNAPSHOT</version>
+            <version>0.2.0</version>
             <classifier>shared</classifier>
         </dependency>
         <dependency>
