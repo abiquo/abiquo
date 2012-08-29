@@ -37,13 +37,26 @@ public class UserSessionDAOHibernate extends HibernateDAO<UserSession, Integer> 
      * @param date limit.
      * @return number of deleted objects.
      */
-    public int deleteUserSessionsOlderThan(String name, Date date)
+    public int deleteUserSessionsOlderThan(final String name, final Date date)
     {
-        return getSession()
-            .createQuery(
-                "delete from " + UserSession.class.getSimpleName()
-                    + " where user = ? and expireDate < ?").setString(0, name)
-            .setDate(1, new Date()).executeUpdate();
+        return getSession().createQuery(
+            "delete from " + UserSession.class.getSimpleName()
+                + " where user = ? and expireDate < ?").setString(0, name).setDate(1, new Date())
+            .executeUpdate();
+
+    }
+
+    /**
+     * Deletes all sessions.
+     * 
+     * @param name username.
+     * @return number of deleted objects.
+     */
+    public int deleteUserSessions(final String name)
+    {
+        return getSession().createQuery(
+            "delete from " + UserSession.class.getSimpleName() + " where user = ?").setString(0,
+            name).executeUpdate();
 
     }
 
@@ -54,11 +67,10 @@ public class UserSessionDAOHibernate extends HibernateDAO<UserSession, Integer> 
      * @param key key.
      * @return int. Number of deleted objects.
      */
-    public int deleteAllUserSessions(String name, String key)
+    public int deleteAllUserSessions(final String name, final String key)
     {
-        return getSession()
-            .createQuery(
-                "delete from " + UserSession.class.getSimpleName() + " where user = ? and key = ?")
+        return getSession().createQuery(
+            "delete from " + UserSession.class.getSimpleName() + " where user = ? and key = ?")
             .setString(0, name).setString(1, key).executeUpdate();
     }
 
@@ -69,7 +81,7 @@ public class UserSessionDAOHibernate extends HibernateDAO<UserSession, Integer> 
      * @param key key.
      * @return current session if any. Null otherwise. UserSession
      */
-    public UserSession getCurrentUserSession(String name, String key)
+    public UserSession getCurrentUserSession(final String name, final String key)
     {
         return findUniqueByProperties(new String[] {"user", "key"}, new String[] {name, key});
     }

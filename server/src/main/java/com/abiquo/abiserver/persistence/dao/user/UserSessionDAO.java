@@ -45,6 +45,14 @@ public interface UserSessionDAO extends DAO<UserSession, Integer>
     public int deleteUserSessionsOlderThan(String name, Date date);
 
     /**
+     * Deletes all sessions.
+     * 
+     * @param name username.
+     * @return number of deleted objects. int
+     */
+    public int deleteUserSessions(final String name);
+
+    /**
      * Deletes all sessions from user that matches the key.
      * 
      * @param name username.

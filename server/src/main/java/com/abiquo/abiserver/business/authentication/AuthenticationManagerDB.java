@@ -65,8 +65,8 @@ public class AuthenticationManagerDB implements IAuthenticationManager
     private static final ResourceManager resourceManger =
         new ResourceManager(AuthenticationManagerDB.class);
 
-    private final ErrorManager errorManager = ErrorManager
-        .getInstance(AbiCloudConstants.ERROR_PREFIX);
+    private final ErrorManager errorManager =
+        ErrorManager.getInstance(AbiCloudConstants.ERROR_PREFIX);
 
     @Override
     @SuppressWarnings("unchecked")
@@ -104,17 +104,30 @@ public class AuthenticationManagerDB implements IAuthenticationManager
                     // Looking for all existing active sessions of this user, ordered by when were
                     // created
                     ArrayList<UserSession> oldUserSessions =
-                        (ArrayList<UserSession>) session.createCriteria(UserSession.class)
-                            .add(Restrictions.eq("user", login.getUser()))
-                            .addOrder(Order.desc("key")).list();
+                        (ArrayList<UserSession>) session.createCriteria(UserSession.class).add(
+                            Restrictions.eq("user", login.getUser())).addOrder(Order.desc("key"))
+                            .list();
                     Date currentTime = new Date();
 
-                    // We erase old expired sessions
-                    for (UserSession existingSession : oldUserSessions)
+                    // if block duplicated sessions property is setted true- delete all duplicated
+                    // sessions not only expired
+                    if (AbiConfigManager.getInstance().getAbiConfig().blockDuplicatedSessions())
                     {
-                        if (currentTime.after(existingSession.getExpireDate()))
+                        for (UserSession existingSession : oldUserSessions)
                         {
                             session.delete(existingSession);
+                        }
+                    }
+                    // in other case only the expired sessions
+                    else
+                    {
+                        // We erase old expired sessions
+                        for (UserSession existingSession : oldUserSessions)
+                        {
+                            if (currentTime.after(existingSession.getExpireDate()))
+                            {
+                                session.delete(existingSession);
+                            }
                         }
                     }
 
@@ -192,9 +205,9 @@ public class AuthenticationManagerDB implements IAuthenticationManager
 
             // Deleting the user session
             UserSession previousSession =
-                (UserSession) session.createCriteria(UserSession.class)
-                    .add(Restrictions.eq("user", userSession.getUser()))
-                    .add(Restrictions.eq("key", userSession.getKey())).uniqueResult();
+                (UserSession) session.createCriteria(UserSession.class).add(
+                    Restrictions.eq("user", userSession.getUser())).add(
+                    Restrictions.eq("key", userSession.getKey())).uniqueResult();
 
             if (previousSession != null)
             {
@@ -236,9 +249,9 @@ public class AuthenticationManagerDB implements IAuthenticationManager
             transaction = session.beginTransaction();
 
             sessionToCheck =
-                (UserSession) HibernateUtil.getSession().createCriteria(UserSession.class)
-                    .add(Restrictions.eq("user", userSession.getUser()))
-                    .add(Restrictions.eq("key", userSession.getKey())).uniqueResult();
+                (UserSession) HibernateUtil.getSession().createCriteria(UserSession.class).add(
+                    Restrictions.eq("user", userSession.getUser())).add(
+                    Restrictions.eq("key", userSession.getKey())).uniqueResult();
 
             if (sessionToCheck == null)
             {
@@ -382,8 +395,8 @@ public class AuthenticationManagerDB implements IAuthenticationManager
         {
             // Validate credentials with the token
             String signature =
-                TokenUtils.makeTokenSignature(tokenExpiration, userHB.getUser(),
-                    userHB.getPassword());
+                TokenUtils.makeTokenSignature(tokenExpiration, userHB.getUser(), userHB
+                    .getPassword());
 
             if (!signature.equals(tokenSignature))
             {

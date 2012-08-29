@@ -231,6 +231,17 @@ public class AuthenticationManagerApi implements IAuthenticationManager
     }
 
     /**
+     * Delete all sessions from DB.
+     * 
+     * @param userHB
+     * @param dataResult void
+     */
+    private void deleteSessions(final UserHB userHB, final DataResult<LoginResult> dataResult)
+    {
+        getUserSessionDAO().deleteUserSessions(userHB.getUser());
+    }
+
+    /**
      * This function should be deprecated since is an ad-hoc implementation (mostly a hack) to
      * delegates the login to the Abiquo API.
      * 
@@ -602,8 +613,14 @@ public class AuthenticationManagerApi implements IAuthenticationManager
                 {
                     // User exists in database and is active.
 
-                    deleteOldSessions(userHB, dataResult);
-
+                    if (AbiConfigManager.getInstance().getAbiConfig().blockDuplicatedSessions())
+                    {
+                        deleteSessions(userHB, dataResult);
+                    }
+                    else
+                    {
+                        deleteOldSessions(userHB, dataResult);
+                    }
                     // Creating the user session
                     UserSession userSession = createUserSession(userHB);
 

@@ -113,6 +113,12 @@ public class AbiConfig
         return new LimitHB(hard, soft);
     }
 
+    public boolean blockDuplicatedSessions()
+    {
+        return Boolean
+            .valueOf(System.getProperty("abiquo.server.blockduplicatedsessions", "false"));
+    }
+
     /**
      * Whether Abiquo should try to connecto to DB or LDAP/Active Directory and DB.
      * 
