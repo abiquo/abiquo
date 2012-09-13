@@ -95,7 +95,7 @@ public class DatacenterDAO extends DefaultDAOBase<Integer, Datacenter>
 
         BigDecimal extraHd =
             (BigDecimal) getSession().createSQLQuery(SUM_EXTRA_HD_RESOURCES).setParameter(
-                "datacenterId", datacenterId).uniqueResult();
+                "datacenterId", datacenterId).setParameter("enterpriseId", enterpriseId).uniqueResult();
         Long hdTot = extraHd == null ? hd : hd + extraHd.longValue() * 1024 * 1024;
 
         BigDecimal storage =
@@ -175,7 +175,7 @@ public class DatacenterDAO extends DefaultDAOBase<Integer, Datacenter>
     private static final String SUM_EXTRA_HD_RESOURCES =
         "select sum(r.limitResource) from rasd r, rasd_management rm, virtualdatacenter vdc, virtualmachine vm where r.instanceID = rm.idResource "
             + "and rm.idResourceType = '17' and rm.idVirtualDatacenter = vdc.idVirtualDatacenter and vdc.idDatacenter=:datacenterId "
-            + "and  rm.idVM = vm.idVM and vm.state != 'NOT_ALLOCATED' and vm.idHypervisor is not null";
+            + "and vm.idEnterprise = :enterpriseId  and  rm.idVM = vm.idVM and vm.state != 'NOT_ALLOCATED' and vm.idHypervisor is not null";
 
     private static final String SUM_STORAGE_RESOURCES =
         "select sum(r.limitResource) "
