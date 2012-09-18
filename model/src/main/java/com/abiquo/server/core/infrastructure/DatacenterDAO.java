@@ -23,7 +23,9 @@ package com.abiquo.server.core.infrastructure;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.EntityManager;
 
@@ -86,32 +88,34 @@ public class DatacenterDAO extends DefaultDAOBase<Integer, Datacenter>
         final int enterpriseId)
     {
         Object[] vmResources =
-            (Object[]) getSession().createSQLQuery(SUM_VM_RESOURCES).setParameter("datacenterId",
-                datacenterId).setParameter("enterpriseId", enterpriseId).uniqueResult();
+            (Object[]) getSession().createSQLQuery(SUM_VM_RESOURCES)
+                .setParameter("datacenterId", datacenterId)
+                .setParameter("enterpriseId", enterpriseId).uniqueResult();
 
         Long cpu = vmResources[0] == null ? 0 : ((BigDecimal) vmResources[0]).longValue();
         Long ram = vmResources[1] == null ? 0 : ((BigDecimal) vmResources[1]).longValue();
         Long hd = vmResources[2] == null ? 0 : ((BigDecimal) vmResources[2]).longValue();
 
         BigDecimal extraHd =
-            (BigDecimal) getSession().createSQLQuery(SUM_EXTRA_HD_RESOURCES).setParameter(
-                "datacenterId", datacenterId).setParameter("enterpriseId", enterpriseId).uniqueResult();
+            (BigDecimal) getSession().createSQLQuery(SUM_EXTRA_HD_RESOURCES)
+                .setParameter("datacenterId", datacenterId)
+                .setParameter("enterpriseId", enterpriseId).uniqueResult();
         Long hdTot = extraHd == null ? hd : hd + extraHd.longValue() * 1024 * 1024;
 
         BigDecimal storage =
-            (BigDecimal) getSession().createSQLQuery(SUM_STORAGE_RESOURCES).setParameter(
-                "datacenterId", datacenterId).setParameter("enterpriseId", enterpriseId)
-                .uniqueResult();
+            (BigDecimal) getSession().createSQLQuery(SUM_STORAGE_RESOURCES)
+                .setParameter("datacenterId", datacenterId)
+                .setParameter("enterpriseId", enterpriseId).uniqueResult();
 
         BigInteger publicIps =
-            (BigInteger) getSession().createSQLQuery(COUNT_IP_RESOURCES).setParameter(
-                "datacenterId", datacenterId).setParameter("enterpriseId", enterpriseId)
-                .uniqueResult();
+            (BigInteger) getSession().createSQLQuery(COUNT_IP_RESOURCES)
+                .setParameter("datacenterId", datacenterId)
+                .setParameter("enterpriseId", enterpriseId).uniqueResult();
 
         BigInteger vlan =
-            (BigInteger) getSession().createSQLQuery(COUNT_VLAN_RESOURCES).setParameter(
-                "datacenterId", datacenterId).setParameter("enterpriseId", enterpriseId)
-                .uniqueResult();
+            (BigInteger) getSession().createSQLQuery(COUNT_VLAN_RESOURCES)
+                .setParameter("datacenterId", datacenterId)
+                .setParameter("enterpriseId", enterpriseId).uniqueResult();
 
         DefaultEntityCurrentUsed used = new DefaultEntityCurrentUsed(cpu.intValue(), ram, hdTot);
 
@@ -136,8 +140,12 @@ public class DatacenterDAO extends DefaultDAOBase<Integer, Datacenter>
         {
             finalQuery = getSession().createQuery(BY_ENT);
         }
-        finalQuery.setParameter("datacenter_id", datacenter.getId());
-        Integer totalResults = finalQuery.list().size();
+
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("datacenter_id", datacenter.getId());
+        finalQuery.setProperties(params);
+
+        Integer totalResults = count(finalQuery, params).intValue();
 
         Integer Start = firstElem;
         if (totalResults < firstElem)
@@ -201,7 +209,7 @@ public class DatacenterDAO extends DefaultDAOBase<Integer, Datacenter>
             + "where vn.network_id = vdc.networktypeId and el.idDatacenter = :datacenterId and el.idEnterprise = :enterpriseId "
             + "and vdc.idEnterprise = el.idEnterprise";
 
-    public Datacenter get(Integer id)
+    public Datacenter get(final Integer id)
     {
         return getEntityManager().find(Datacenter.class, id);
     }

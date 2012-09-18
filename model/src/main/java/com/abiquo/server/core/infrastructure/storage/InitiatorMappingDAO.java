@@ -26,10 +26,15 @@ import java.util.List;
 import javax.persistence.EntityManager;
 
 import org.hibernate.Criteria;
+import org.hibernate.criterion.Criterion;
+import org.hibernate.criterion.DetachedCriteria;
+import org.hibernate.criterion.Projections;
+import org.hibernate.criterion.Property;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
+import com.abiquo.server.core.infrastructure.Machine;
 
 @Repository("jpaInitiatorMappingDAO")
 public class InitiatorMappingDAO extends DefaultDAOBase<Integer, InitiatorMapping>
@@ -48,15 +53,36 @@ public class InitiatorMappingDAO extends DefaultDAOBase<Integer, InitiatorMappin
         final String initiatorIqn)
     {
         Criteria criteria =
-            createCriteria(Restrictions.eq("volume.id", idVolumeManagement)).add(
+            createCriteria(sameVolume(idVolumeManagement)).add(
                 Restrictions.eq("initiatorIqn", initiatorIqn));
-        Object obj = criteria.uniqueResult();
-        return (InitiatorMapping) obj;
+        // Return null if none found, but do not fail
+        return (InitiatorMapping) criteria.uniqueResult();
     }
 
     public List<InitiatorMapping> findByVolumeId(final Integer idVolume)
     {
-        Criteria criteria = createCriteria(Restrictions.eq("volume.id", idVolume));
-        return criteria.list();
+        Criteria criteria = createCriteria(sameVolume(idVolume));
+        return getResultList(criteria);
+    }
+
+    public InitiatorMapping findBPMMappingForVolume(final Integer idVolume)
+    {
+        // IMPORTANT! This method assumes that a volume can not be moved between physical
+        // Datacenters. Otherwise this must be refactored.
+
+        DetachedCriteria subCriteria = DetachedCriteria.forClass(Machine.class);
+        subCriteria.setProjection(Projections.property("initiatorIQN"));
+
+        Criteria criteria = createCriteria( //
+            sameVolume(idVolume),//
+            Property.forName("initiatorIqn").notIn(subCriteria));
+
+        // Return null if none found, but do not fail
+        return (InitiatorMapping) criteria.uniqueResult();
+    }
+
+    private static Criterion sameVolume(final Integer idVolume)
+    {
+        return Restrictions.eq("volume.id", idVolume);
     }
 }

@@ -22,11 +22,14 @@
 package com.abiquo.server.core.common.persistence;
 
 import java.io.Serializable;
+import java.util.Map;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
 import org.hibernate.Criteria;
+import org.hibernate.Query;
+import org.hibernate.SQLQuery;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Projections;
@@ -139,17 +142,42 @@ public abstract class DefaultDAOBase<I extends Serializable, T extends GenericEn
         return crit;
     }
 
-    protected Long count()
+    protected Number count()
     {
         Criteria criteria = getSession().createCriteria(getPersistentClass());
         return count(criteria);
     }
 
-    protected Long count(final Criteria criteria)
+    protected Number count(final Criteria criteria)
     {
         criteria.setProjection(Projections.rowCount());
+        return (Number) criteria.uniqueResult();
+    }
 
-        return (Long) criteria.uniqueResult();
+    protected Number count(final Query query, final Map< ? , ? > parameters)
+    {
+        String original = query.getQueryString();
+
+        StringBuffer countQuery = new StringBuffer();
+        countQuery.append("select count(*) ");
+        countQuery.append(original.substring(original.toLowerCase().indexOf("from")));
+
+        Query count = getSession().createQuery(countQuery.toString());
+        count.setProperties(parameters);
+        return (Number) count.uniqueResult();
+    }
+
+    protected Number countSQL(final SQLQuery query, final Map< ? , ? > parameters)
+    {
+        String original = query.getQueryString();
+
+        StringBuffer countQuery = new StringBuffer();
+        countQuery.append("select count(*) ");
+        countQuery.append(original.substring(original.toLowerCase().indexOf("from")));
+
+        SQLQuery count = getSession().createSQLQuery(countQuery.toString());
+        count.setProperties(parameters);
+        return (Number) count.uniqueResult();
     }
 
     public void detach(final T entity)

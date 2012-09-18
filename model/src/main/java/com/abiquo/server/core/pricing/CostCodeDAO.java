@@ -80,10 +80,10 @@ public class CostCodeDAO extends DefaultDAOBase<Integer, CostCode>
     {
         Criteria criteria = createCriteria(filter, orderBy, desc);
 
-        Long total = count(criteria);
+        Number total = count(criteria);
 
         criteria = createCriteria(filter, orderBy, desc);
-        numResults = (int) (numResults != 0 ? numResults : total);
+        numResults = (numResults != 0 ? numResults : total.intValue());
         if (numResults != 0)
         {
             criteria.setFirstResult(offset * numResults);

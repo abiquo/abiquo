@@ -22,7 +22,9 @@
 package com.abiquo.server.core.cloud;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.EntityManager;
 import javax.persistence.LockModeType;
@@ -212,10 +214,13 @@ public class VirtualMachineDAO extends DefaultDAOBase<Integer, VirtualMachine>
         String req = query.getQueryString() + orderBy;
         // Add order filter to the query
         Query queryWithOrder = getSession().createQuery(req);
-        queryWithOrder.setInteger("vapp_id", vappId);
-        queryWithOrder.setString("filterLike", filter.isEmpty() ? "%" : "%" + filter + "%");
 
-        Integer size = queryWithOrder.list().size();
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("vapp_id", vappId);
+        params.put("filterLike", filter.isEmpty() ? "%" : "%" + filter + "%");
+        queryWithOrder.setProperties(params);
+
+        Integer size = count(queryWithOrder, params).intValue();
 
         // Limit 0 means no size filter
         if (limit == 0)
@@ -349,7 +354,7 @@ public class VirtualMachineDAO extends DefaultDAOBase<Integer, VirtualMachine>
         return queryString.toString();
     }
 
-    public VirtualMachine get(Integer id)
+    public VirtualMachine get(final Integer id)
     {
         return getEntityManager().find(VirtualMachine.class, id);
     }

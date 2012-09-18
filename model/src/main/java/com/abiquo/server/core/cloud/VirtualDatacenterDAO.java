@@ -162,8 +162,8 @@ public class VirtualDatacenterDAO extends DefaultDAOBase<Integer, VirtualDatacen
 
         if (filterOptions != null)
         {
-            restrictions.add(Restrictions.like(VirtualDatacenter.NAME_PROPERTY, filterOptions
-                .getFilter(), MatchMode.ANYWHERE));
+            restrictions.add(Restrictions.like(VirtualDatacenter.NAME_PROPERTY,
+                filterOptions.getFilter(), MatchMode.ANYWHERE));
         }
 
         return findVirtualDatacentersByCriterions(restrictions, filterOptions);
@@ -183,7 +183,15 @@ public class VirtualDatacenterDAO extends DefaultDAOBase<Integer, VirtualDatacen
 
         if (filterOptions != null)
         {
-            Integer size = criteria.list().size();
+            Integer size = count(criteria).intValue();
+
+            // Recreate the criteria
+            criteria = getSession().createCriteria(VirtualDatacenter.class);
+            for (Criterion criterion : criterions)
+            {
+                criteria.add(criterion);
+            }
+            criteria.addOrder(Order.asc(VirtualDatacenter.NAME_PROPERTY));
 
             criteria.setFirstResult(filterOptions.getStartwith());
             criteria.setMaxResults(filterOptions.getLimit());
@@ -290,25 +298,25 @@ public class VirtualDatacenterDAO extends DefaultDAOBase<Integer, VirtualDatacen
     public DefaultEntityCurrentUsed getCurrentResourcesAllocated(final int virtualDatacenterId)
     {
         Object[] vmResources =
-            (Object[]) getSession().createSQLQuery(SUM_VM_RESOURCES).setParameter(
-                "virtualDatacenterId", virtualDatacenterId).uniqueResult();
+            (Object[]) getSession().createSQLQuery(SUM_VM_RESOURCES)
+                .setParameter("virtualDatacenterId", virtualDatacenterId).uniqueResult();
 
         Long cpu = vmResources[0] == null ? 0 : ((BigDecimal) vmResources[0]).longValue();
         Long ram = vmResources[1] == null ? 0 : ((BigDecimal) vmResources[1]).longValue();
         Long hd = vmResources[2] == null ? 0 : ((BigDecimal) vmResources[2]).longValue();
 
         BigDecimal extraHd =
-            (BigDecimal) getSession().createSQLQuery(SUM_EXTRA_HD_RESOURCES).setParameter(
-                "virtualDatacenterId", virtualDatacenterId).uniqueResult();
+            (BigDecimal) getSession().createSQLQuery(SUM_EXTRA_HD_RESOURCES)
+                .setParameter("virtualDatacenterId", virtualDatacenterId).uniqueResult();
         Long hdTot = extraHd == null ? hd : hd + extraHd.longValue() * 1024 * 1024;
 
         BigDecimal storage =
-            (BigDecimal) getSession().createSQLQuery(SUM_VOLUMES_RESOURCES).setParameter(
-                "virtualDatacenterId", virtualDatacenterId).uniqueResult();
+            (BigDecimal) getSession().createSQLQuery(SUM_VOLUMES_RESOURCES)
+                .setParameter("virtualDatacenterId", virtualDatacenterId).uniqueResult();
 
         BigInteger publicIps =
-            (BigInteger) getSession().createSQLQuery(COUNT_PUBLIC_IP_RESOURCES).setParameter(
-                "virtualDatacenterId", virtualDatacenterId).uniqueResult();
+            (BigInteger) getSession().createSQLQuery(COUNT_PUBLIC_IP_RESOURCES)
+                .setParameter("virtualDatacenterId", virtualDatacenterId).uniqueResult();
 
         DefaultEntityCurrentUsed used = new DefaultEntityCurrentUsed(cpu.intValue(), ram, hdTot);
 
@@ -336,7 +344,7 @@ public class VirtualDatacenterDAO extends DefaultDAOBase<Integer, VirtualDatacen
         return query.list();
     }
 
-    public VirtualDatacenter get(Integer id)
+    public VirtualDatacenter get(final Integer id)
     {
         return getEntityManager().find(VirtualDatacenter.class, id);
     }

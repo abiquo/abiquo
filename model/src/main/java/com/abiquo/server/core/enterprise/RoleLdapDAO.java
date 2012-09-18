@@ -21,10 +21,6 @@
 
 package com.abiquo.server.core.enterprise;
 
-import javax.persistence.EntityManager;
-
-import org.hibernate.Criteria;
-import org.hibernate.criterion.Criterion;
 import java.util.Collection;
 import java.util.List;
 
@@ -37,9 +33,9 @@ import org.hibernate.criterion.Disjunction;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
-import com.abiquo.server.core.util.PagedList;
 
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
+import com.abiquo.server.core.util.PagedList;
 
 /**
  * This class provides access to DB in order to query for {@link RoleLdap}.
@@ -71,7 +67,7 @@ public class RoleLdapDAO extends DefaultDAOBase<Integer, RoleLdap>
      * @param type name of the <code>LdapRoleDAO</code>
      * @return <code>LdapRoleDAO</code>s which type mathes name
      */
-    public RoleLdap findByType(String type)
+    public RoleLdap findByType(final String type)
     {
         if (type == null)
         {
@@ -88,12 +84,12 @@ public class RoleLdapDAO extends DefaultDAOBase<Integer, RoleLdap>
      * @param type name.
      * @return Criteria that matches type.
      */
-    private Criterion sameType(String type)
+    private Criterion sameType(final String type)
     {
         return Restrictions.eq("ldapRole", type);
     }
 
-    private Criteria createCriteria(String type)
+    private Criteria createCriteria(final String type)
     {
 
         Criteria criteria = createCriteria();
@@ -131,7 +127,7 @@ public class RoleLdapDAO extends DefaultDAOBase<Integer, RoleLdap>
     {
         Criteria criteria = createCriteria(filter, orderBy, desc);
 
-        Long total = count(criteria);
+        Number total = count(criteria);
 
         criteria = createCriteria(filter, orderBy, desc);
 

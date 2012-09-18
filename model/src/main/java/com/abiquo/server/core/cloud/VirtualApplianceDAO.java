@@ -111,7 +111,7 @@ public class VirtualApplianceDAO extends DefaultDAOBase<Integer, VirtualApplianc
         Criteria criteria = createCriteria(enterprise, filter, orderByEnum, asc);
 
         // Check if the page requested is bigger than the last one
-        Long total = count(criteria);
+        Number total = count(criteria);
         criteria = createCriteria(enterprise, filter, orderByEnum, asc);
         Integer totalResults = total.intValue();
         limit = limit != 0 ? limit : totalResults;
@@ -226,7 +226,7 @@ public class VirtualApplianceDAO extends DefaultDAOBase<Integer, VirtualApplianc
         Criteria criteria = createCriteria(virtualDatacenter, filter, orderByEnum, asc);
 
         // Check if the page requested is bigger than the last one
-        Long total = count(criteria);
+        Number total = count(criteria);
         criteria = createCriteria(virtualDatacenter, filter, orderByEnum, asc);
         Integer totalResults = total.intValue();
         limit = limit != 0 ? limit : totalResults;
@@ -313,7 +313,7 @@ public class VirtualApplianceDAO extends DefaultDAOBase<Integer, VirtualApplianc
         return filterDisjunction;
     }
 
-    public VirtualAppliance get(Integer id)
+    public VirtualAppliance get(final Integer id)
     {
         return getEntityManager().find(VirtualAppliance.class, id);
     }

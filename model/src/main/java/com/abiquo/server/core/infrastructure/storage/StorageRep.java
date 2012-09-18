@@ -412,4 +412,9 @@ public class StorageRep extends DefaultRepBase
     {
         return volumeDAO.getVolumesByVirtualAppliance(vapp);
     }
+
+    public InitiatorMapping findBPMMappingForVolume(final VolumeManagement volume)
+    {
+        return initiatorMappingDAO.findBPMMappingForVolume(volume.getId());
+    }
 }

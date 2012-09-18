@@ -31,6 +31,8 @@ public class InitiatorMappingGenerator extends DefaultEntityGenerator<InitiatorM
 {
     public static String DEFAULT_INITIATOR = "iqn.1993-08.org.debian:initiator";
 
+    public static String DEFAULT_TARGET = "iqn.1993-08.com.abiquo:target";
+
     private VolumeManagementGenerator volumeGenerator;
 
     public InitiatorMappingGenerator(final SeedGenerator seed)
@@ -52,16 +54,23 @@ public class InitiatorMappingGenerator extends DefaultEntityGenerator<InitiatorM
     @Override
     public InitiatorMapping createUniqueInstance()
     {
-        VolumeManagement vm = volumeGenerator.createUniqueInstance();
-        return createInstance(vm);
+        return createInstance(DEFAULT_INITIATOR);
     }
 
-    public InitiatorMapping createInstance(final VolumeManagement vm)
+    public InitiatorMapping createInstance(final String initiatorIQN)
     {
-        String initiator = DEFAULT_INITIATOR;
-        String target = "iqn.1993-08.com.abiquo:target";
+        VolumeManagement volume = volumeGenerator.createUniqueInstance();
+        return createInstance(DEFAULT_INITIATOR, volume);
+    }
 
-        return new InitiatorMapping(initiator, vm, target, nextSeed());
+    public InitiatorMapping createInstance(final VolumeManagement volume)
+    {
+        return createInstance(DEFAULT_INITIATOR, volume);
+    }
+
+    public InitiatorMapping createInstance(final String initiatorIQN, final VolumeManagement volume)
+    {
+        return new InitiatorMapping(initiatorIQN, volume, DEFAULT_TARGET, nextSeed());
     }
 
     @Override

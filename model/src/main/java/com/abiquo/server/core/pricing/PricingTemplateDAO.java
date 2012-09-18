@@ -86,10 +86,10 @@ public class PricingTemplateDAO extends DefaultDAOBase<Integer, PricingTemplate>
     {
         Criteria criteria = createCriteria(filter, orderBy, desc);
 
-        Long total = count(criteria);
+        Number total = count(criteria);
 
         criteria = createCriteria(filter, orderBy, desc);
-        numResults = (int) (numResults != 0 ? numResults : total);
+        numResults = (int) (numResults != 0 ? numResults : total.intValue());
         criteria.setFirstResult(offset * numResults);
         if (startwith != -1)
         {

@@ -43,7 +43,6 @@ import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagementDAO;
 import com.abiquo.server.core.infrastructure.network.VLANNetwork;
 import com.abiquo.server.core.infrastructure.network.VLANNetworkDAO;
-import com.abiquo.server.core.infrastructure.storage.StorageRep;
 import com.abiquo.server.core.pricing.PricingTemplate;
 import com.abiquo.server.core.util.PagedList;
 import com.softwarementors.bzngine.entities.PersistentEntity;
@@ -51,8 +50,6 @@ import com.softwarementors.bzngine.entities.PersistentEntity;
 @Repository("jpaEnterpriseDAO")
 class EnterpriseDAO extends DefaultDAOBase<Integer, Enterprise>
 {
-    @Autowired
-    private StorageRep storageRep;
 
     @Autowired
     private VLANNetworkDAO vlanNetDAO;
@@ -69,7 +66,6 @@ class EnterpriseDAO extends DefaultDAOBase<Integer, Enterprise>
     {
         super(Enterprise.class, entityManager);
 
-        this.storageRep = new StorageRep(entityManager);
         this.vlanNetDAO = new VLANNetworkDAO(entityManager);
         this.ipPoolDao = new IpPoolManagementDAO(entityManager);
     }
@@ -77,7 +73,7 @@ class EnterpriseDAO extends DefaultDAOBase<Integer, Enterprise>
     @Override
     public List<Enterprise> findAll()
     {
-        return createCriteria().list();
+        return getResultList(createCriteria());
     }
 
     public List<Enterprise> findAll(Integer firstElem, final Integer numResults)
@@ -85,7 +81,7 @@ class EnterpriseDAO extends DefaultDAOBase<Integer, Enterprise>
 
         // Check if the page requested is bigger than the last one
         Criteria criteria = createCriteria();
-        Long total = count();
+        Number total = count();
 
         if (firstElem >= total.intValue())
         {
@@ -123,7 +119,7 @@ class EnterpriseDAO extends DefaultDAOBase<Integer, Enterprise>
 
         Criteria criteria = createCriteria(pt, included, filterName, idEnterprise);
 
-        Long total = count(criteria);
+        Number total = count(criteria);
 
         if (firstElem >= total.intValue())
         {

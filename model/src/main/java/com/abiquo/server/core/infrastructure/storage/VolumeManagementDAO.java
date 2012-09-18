@@ -22,12 +22,15 @@
 package com.abiquo.server.core.infrastructure.storage;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.EntityManager;
 
 import org.hibernate.Criteria;
 import org.hibernate.Query;
+import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Restrictions;
@@ -58,14 +61,8 @@ import com.softwarementors.bzngine.entities.PersistentEntity;
         super(VolumeManagement.class, entityManager);
     }
 
-    /**
-     * HQL does not support UNION, but since Volume_management is only related to the Enterprise via
-     * the VirtualDataCenter, two queries are needed: - First one retrieves all volumes assigned to
-     * any VirtualDataCenter of the specified Enterprise; - Second one retrieves all volumes of a
-     * stateful image that is not in use (does not have a VirtualDataCenter) filtering by the
-     * enterprise of the stateful image.
-     **/
-    private final String SQL_VOLUME_MANAGEMENT_GET_VOLUMES_FROM_ENTERPRISE =
+    /** Get all volumes assigned to any VirtualDataCenter of the specified Enterprise. */
+    private static final String SQL_VOLUME_MANAGEMENT_GET_VOLUMES_FROM_ENTERPRISE_AND_VDC =
         "select volman.idManagement as idman, vdc.name as vdcname, virtualapp.name as vaname, "
             + "virtualmachine.name as vmname, rasd.limitResource as size, "
             + "rasd.reservation as available, volman.usedSize as used, "
@@ -75,30 +72,41 @@ import com.softwarementors.bzngine.entities.PersistentEntity;
             + "left join virtualapp on rasdm.idVirtualApp = virtualapp.idVirtualApp "
             + "left join storage_pool on volman.idStorage = storage_pool.idStorage "
             + "left join tier on storage_pool.idTier = tier.id "
-            + "where "
-            + "volman.idManagement = rasdm.idManagement "
+            + "where volman.idManagement = rasdm.idManagement "
             + "and rasdm.idResource = rasd.instanceID "
             + "and rasdm.idVirtualDataCenter = vdc.idVirtualDataCenter "
-            + "and vdc.idEnterprise = :idEnterprise "
-            + "and ( "
-            + "rasd.elementName like :filterLike "
-            + "or virtualmachine.name like :filterLike "
-            + "or virtualapp.name like :filterLike "
-            + "or vdc.name like :filterLike "
-            + "or tier.name like :filterLike "
-            + ") "
-            + "union "
-            + "select volman.idManagement as idman, '' as vdcname, '' as vaname, '' as vmname, "
+            + "and vdc.idEnterprise = :idEnterprise and ( "
+            + "rasd.elementName like :filterLike  or virtualmachine.name like :filterLike "
+            + "or virtualapp.name like :filterLike or vdc.name like :filterLike "
+            + "or tier.name like :filterLike )";
+
+    /**
+     * Get all volumes of a stateful image that is not in use (does not have a VirtualDataCenter)
+     * filtering by the enterprise of the stateful image.
+     */
+    private static final String SQL_VOLUME_MANAGEMENT_GET_VOLUMES_STATEFUL_NOT_USED =
+        "select volman.idManagement as idman, '' as vdcname, '' as vaname, '' as vmname, "
             + "rasd.limitResource as size, rasd.reservation as available, volman.usedSize as used, "
             + "rasd.elementName as elementname, volman.state as state, tier.name as tier "
             + "from (volume_management volman, virtualimage vi, rasd, rasd_management rasdm) "
             + "left join storage_pool on volman.idStorage = storage_pool.idStorage "
-            + "left join tier on storage_pool.idTier = tier.id " + "where "
-            + "volman.idImage = vi.idImage " + "and volman.idManagement = rasdm.idManagement "
-            + "and rasdm.idResource = rasd.instanceID " + "and rasdm.idVirtualDataCenter is null "
-            + "and rasdm.idVirtualApp is null " + "and rasdm.idVM is null "
-            + "and vi.idEnterprise = :idEnterprise " + "and (rasd.elementName like :filterLike "
+            + "left join tier on storage_pool.idTier = tier.id where "
+            + "volman.idImage = vi.idImage and volman.idManagement = rasdm.idManagement "
+            + "and rasdm.idResource = rasd.instanceID and rasdm.idVirtualDataCenter is null "
+            + "and rasdm.idVirtualApp is null and rasdm.idVM is null "
+            + "and vi.idEnterprise = :idEnterprise and (rasd.elementName like :filterLike "
             + "or tier.name like :filterLike )";
+
+    /**
+     * HQL does not support UNION, but since Volume_management is only related to the Enterprise via
+     * the VirtualDataCenter, two queries are needed: - First one retrieves all volumes assigned to
+     * any VirtualDataCenter of the specified Enterprise; - Second one retrieves all volumes of a
+     * stateful image that is not in use (does not have a VirtualDataCenter) filtering by the
+     * enterprise of the stateful image.
+     **/
+    private static final String SQL_VOLUME_MANAGEMENT_GET_VOLUMES_FROM_ENTERPRISE =
+        SQL_VOLUME_MANAGEMENT_GET_VOLUMES_FROM_ENTERPRISE_AND_VDC + " union "
+            + SQL_VOLUME_MANAGEMENT_GET_VOLUMES_STATEFUL_NOT_USED;
 
     public List<VolumeManagement> getVolumesByPool(final StoragePool sp)
     {
@@ -160,11 +168,14 @@ import com.softwarementors.bzngine.entities.PersistentEntity;
         String req = query.getQueryString() + orderBy;
         // Add order filter to the query
         Query queryWithOrder = getSession().createQuery(req);
-        queryWithOrder.setString("poolId", sp.getId());
-        queryWithOrder.setString("filterLike",
-            filters.getFilter().isEmpty() ? "%" : "%" + filters.getFilter() + "%");
 
-        Integer size = queryWithOrder.list().size();
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("poolId", sp.getId());
+        params.put("filterLike", filters.getFilter().isEmpty() ? "%" : "%" + filters.getFilter()
+            + "%");
+        queryWithOrder.setProperties(params);
+
+        Integer size = count(queryWithOrder, params).intValue();
 
         queryWithOrder.setFirstResult(filters.getStartwith());
         queryWithOrder.setMaxResults(filters.getLimit());
@@ -193,11 +204,14 @@ import com.softwarementors.bzngine.entities.PersistentEntity;
         String req = query.getQueryString() + orderBy;
         // Add order filter to the query
         Query queryWithOrder = getSession().createQuery(req);
-        queryWithOrder.setInteger("vdcId", vdc.getId());
-        queryWithOrder.setString("filterLike",
-            filters.getFilter().isEmpty() ? "%" : "%" + filters.getFilter() + "%");
 
-        Integer size = queryWithOrder.list().size();
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("vdcId", vdc.getId());
+        params.put("filterLike", filters.getFilter().isEmpty() ? "%" : "%" + filters.getFilter()
+            + "%");
+        queryWithOrder.setProperties(params);
+
+        Integer size = count(queryWithOrder, params).intValue();
 
         queryWithOrder.setFirstResult(filters.getStartwith());
         queryWithOrder.setMaxResults(filters.getLimit());
@@ -223,16 +237,27 @@ import com.softwarementors.bzngine.entities.PersistentEntity;
         // Check if the orderBy element is actually one of the available ones
         VolumeManagement.OrderByEnum orderByEnum =
             VolumeManagement.OrderByEnum.valueOf(filters.getOrderBy().toUpperCase());
+        String order = defineOrderBy(orderByEnum.getColumnSQL(), filters.getAsc());
 
-        Query query =
-            getSession().createSQLQuery(
-                SQL_VOLUME_MANAGEMENT_GET_VOLUMES_FROM_ENTERPRISE
-                    + defineOrderBy(orderByEnum.getColumnSQL(), filters.getAsc()));
-        query.setParameter("idEnterprise", id);
-        query.setParameter("filterLike",
-            filters.getFilter().isEmpty() ? "%" : "%" + filters.getFilter() + "%");
+        SQLQuery query =
+            getSession().createSQLQuery(SQL_VOLUME_MANAGEMENT_GET_VOLUMES_FROM_ENTERPRISE + order);
 
-        Integer size = getSQLQueryResults(getSession(), query, VolumeManagement.class, 0).size();
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("idEnterprise", id);
+        params.put("filterLike", filters.getFilter().isEmpty() ? "%" : "%" + filters.getFilter()
+            + "%");
+        query.setProperties(params);
+
+        // We need to bypass union to get a valid count query. Count them separately and aggregate
+        // the results
+        SQLQuery count1 =
+            getSession().createSQLQuery(SQL_VOLUME_MANAGEMENT_GET_VOLUMES_FROM_ENTERPRISE_AND_VDC);
+        count1.setProperties(params);
+        SQLQuery count2 =
+            getSession().createSQLQuery(SQL_VOLUME_MANAGEMENT_GET_VOLUMES_STATEFUL_NOT_USED);
+        count2.setProperties(params);
+
+        Integer size = countSQL(count1, params).intValue() + countSQL(count2, params).intValue();
 
         query.setFirstResult(filters.getStartwith());
         query.setMaxResults(filters.getLimit());
@@ -262,11 +287,14 @@ import com.softwarementors.bzngine.entities.PersistentEntity;
         String req = query.getQueryString() + orderBy;
         // Add order filter to the query
         Query queryWithOrder = getSession().createQuery(req);
-        queryWithOrder.setInteger("vdcId", vdc.getId());
-        queryWithOrder.setString("filterLike",
-            filters.getFilter().isEmpty() ? "%" : "%" + filters.getFilter() + "%");
 
-        Integer size = queryWithOrder.list().size();
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("vdcId", vdc.getId());
+        params.put("filterLike", filters.getFilter().isEmpty() ? "%" : "%" + filters.getFilter()
+            + "%");
+        queryWithOrder.setProperties(params);
+
+        Integer size = count(queryWithOrder, params).intValue();
 
         // Limit 0 means no size filter
         if (filters.getLimit() == 0)
@@ -383,12 +411,15 @@ import com.softwarementors.bzngine.entities.PersistentEntity;
             String req = query.getQueryString() + orderBy;
             // Add order filter to the query
             Query queryWithOrder = getSession().createQuery(req);
-            queryWithOrder.setInteger("vmId", vm.getId());
-            queryWithOrder.setParameter("state", VolumeState.ATTACHED);
-            queryWithOrder.setString("filterLike", filters.getFilter().isEmpty() ? "%" : "%"
-                + filters.getFilter() + "%");
 
-            Integer size = queryWithOrder.list().size();
+            Map<String, Object> params = new HashMap<String, Object>();
+            params.put("vmId", vm.getId());
+            params.put("state", VolumeState.ATTACHED);
+            params.put("filterLike",
+                filters.getFilter().isEmpty() ? "%" : "%" + filters.getFilter() + "%");
+            queryWithOrder.setProperties(params);
+
+            Integer size = count(queryWithOrder, params).intValue();
 
             queryWithOrder.setFirstResult(filters.getStartwith());
             queryWithOrder.setMaxResults(filters.getLimit());

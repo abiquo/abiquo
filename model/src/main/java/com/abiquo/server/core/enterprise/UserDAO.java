@@ -124,7 +124,7 @@ public class UserDAO extends DefaultDAOBase<Integer, User>
             filters = filter.split("\\s+");
         }
         Criteria criteria = createCriteria(enterprise, role, filters, orderBy, desc, connected);
-        Long total = count(criteria);
+        Number total = count(criteria);
         criteria = createCriteria(enterprise, role, filters, orderBy, desc, connected);
 
         criteria.setFirstResult(offset * numResults);

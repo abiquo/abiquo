@@ -114,7 +114,7 @@ public class RoleDAO extends DefaultDAOBase<Integer, Role>
         Criteria criteria =
             createCriteria(enterprise, filter, orderBy, desc, discardNullEnterprises);
 
-        Long total = count(criteria);
+        Number total = count(criteria);
 
         criteria = createCriteria(enterprise, filter, orderBy, desc, discardNullEnterprises);
 
@@ -139,7 +139,7 @@ public class RoleDAO extends DefaultDAOBase<Integer, Role>
         Criteria criteria =
             createCriteriaExactly(enterprise, filter, orderBy, desc, discardNullEnterprises);
 
-        Long total = count(criteria);
+        Number total = count(criteria);
 
         criteria = createCriteriaExactly(enterprise, filter, orderBy, desc, discardNullEnterprises);
 
