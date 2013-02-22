@@ -21,11 +21,11 @@
 package com.abiquo.vsm;
 
 import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.AfterTest;
+import org.testng.annotations.BeforeTest;
 
+import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
-
-import com.abiquo.vsm.redis.dao.RedisTestDaoFactory;
 
 /**
  * Base class for unit tests that persist data on Redis.
@@ -46,19 +46,28 @@ public abstract class TestBase
     /** The Redis pool. */
     protected JedisPool pool;
 
-    @BeforeMethod
+    public TestBase()
+    {
+        pool = JedisPoolForTesting.instance();
+    }
+
+    @BeforeTest
     public void setUpDatabase() throws Exception
     {
-        setUp();
-        pool = RedisTestDaoFactory.selectDatabase(TEST_HOST, TEST_PORT, TEST_DATABASE);
-        RedisTestDaoFactory.cleanDatabase(pool);
+        cleanDatabase();
     }
 
     @AfterMethod
+    @AfterTest
     public void tearDown() throws Exception
     {
-        RedisTestDaoFactory.cleanDatabase(pool);
+        cleanDatabase();
     }
 
-    protected abstract void setUp() throws Exception;
+    protected void cleanDatabase()
+    {
+        Jedis redis = pool.getResource();
+        redis.flushDB();
+        pool.returnResource(redis);
+    }
 }

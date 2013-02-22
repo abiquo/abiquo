@@ -26,6 +26,7 @@ import static org.testng.Assert.assertNull;
 
 import java.util.UUID;
 
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.abiquo.vsm.TestBase;
@@ -37,6 +38,7 @@ import com.abiquo.vsm.monitor.MockMonitor.InfiniteMachineMonitor;
 import com.abiquo.vsm.monitor.MockMonitor.MulipleMachineMonitor;
 import com.abiquo.vsm.monitor.MockMonitor.SingleMachineMonitor;
 import com.abiquo.vsm.monitor.Monitor.Type;
+import com.abiquo.vsm.redis.dao.RedisDao;
 
 /**
  * Unit tests for the {@link MonitorManager} class.
@@ -48,11 +50,11 @@ public class MonitorManagerTest extends TestBase
     /** The monitor manager to test. */
     private MockMonitorManager monitorManager;
 
-    @Override
+    @BeforeMethod
     public void setUp() throws Exception
     {
         // Create the manager and load the monitors
-        monitorManager = new MockMonitorManager();
+        monitorManager = new MockMonitorManager(new RedisDao(pool));
     }
 
     @Test
@@ -214,7 +216,7 @@ public class MonitorManagerTest extends TestBase
             .toString());
     }
 
-    private PhysicalMachine monitor(String address, Type type) throws Exception
+    private PhysicalMachine monitor(final String address, final Type type) throws Exception
     {
         PhysicalMachine pm = monitorManager.monitor(address, type, "", "");
 

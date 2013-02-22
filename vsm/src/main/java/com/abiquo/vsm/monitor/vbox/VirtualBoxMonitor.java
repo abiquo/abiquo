@@ -222,6 +222,7 @@ public class VirtualBoxMonitor extends AbstractMonitor
                     }
                     finally
                     {
+                        dao.save(pm);
                         vboxConnector.disconnect(physicalMachineAddress);
                     }
                 }

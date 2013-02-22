@@ -20,6 +20,7 @@
  */
 package com.abiquo.vsm.monitor;
 
+import com.abiquo.vsm.redis.dao.RedisDao;
 
 /**
  * Mock {@link MonitorManager} to test functionality without connecting to the target physical
@@ -29,11 +30,10 @@ package com.abiquo.vsm.monitor;
  */
 public class MockMonitorManager extends MonitorManager
 {
-
     /**
      * Creates a new <code>MockMonitorTest</code> that replaces the default monitors by mocked ones.
      */
-    public MockMonitorManager()
+    public MockMonitorManager(final RedisDao redisDaoForTesting)
     {
         super();
 
@@ -42,6 +42,8 @@ public class MockMonitorManager extends MonitorManager
         registerMonitor(MockMonitor.SingleMachineMonitor.class);
         registerMonitor(MockMonitor.MulipleMachineMonitor.class);
         registerMonitor(MockMonitor.InfiniteMachineMonitor.class);
-    }
 
+        // Replace the RedisDao
+        dao = redisDaoForTesting;
+    }
 }

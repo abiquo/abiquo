@@ -24,26 +24,14 @@ package com.abiquo.vsm.model;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
-import redis.clients.johm.Attribute;
-import redis.clients.johm.Id;
-import redis.clients.johm.Indexed;
-import redis.clients.johm.Model;
-import redis.clients.johm.Reference;
-
-@Model
 public class VirtualMachine
 {
-    @Id
     private Integer id;
 
-    @Attribute
-    @Indexed
     private String name;
 
-    @Attribute
     private String lastKnownState;
 
-    @Reference
     private PhysicalMachine physicalMachine;
 
     public Integer getId()
@@ -51,7 +39,7 @@ public class VirtualMachine
         return id;
     }
 
-    public void setId(Integer id)
+    public void setId(final Integer id)
     {
         this.id = id;
     }
@@ -61,7 +49,7 @@ public class VirtualMachine
         return name;
     }
 
-    public void setName(String uuid)
+    public void setName(final String uuid)
     {
         this.name = uuid;
     }
@@ -71,7 +59,7 @@ public class VirtualMachine
         return lastKnownState;
     }
 
-    public void setLastKnownState(String lastKnownState)
+    public void setLastKnownState(final String lastKnownState)
     {
         this.lastKnownState = lastKnownState;
     }
@@ -81,7 +69,7 @@ public class VirtualMachine
         return physicalMachine;
     }
 
-    public void setPhysicalMachine(PhysicalMachine physicalMachine)
+    public void setPhysicalMachine(final PhysicalMachine physicalMachine)
     {
         this.physicalMachine = physicalMachine;
     }
@@ -89,12 +77,12 @@ public class VirtualMachine
     @Override
     public int hashCode()
     {
-        return new HashCodeBuilder().append(getName()).append(getLastKnownState()).append(
-            getPhysicalMachine()).toHashCode();
+        return new HashCodeBuilder().append(getName()).append(getLastKnownState())
+            .append(getPhysicalMachine()).toHashCode();
     }
 
     @Override
-    public boolean equals(Object obj)
+    public boolean equals(final Object obj)
     {
         if (this == obj)
         {
@@ -105,9 +93,9 @@ public class VirtualMachine
         {
             VirtualMachine other = (VirtualMachine) obj;
 
-            return new EqualsBuilder().append(getName(), other.getName()).append(
-                getLastKnownState(), other.getLastKnownState()).append(getPhysicalMachine(),
-                other.getPhysicalMachine()).isEquals();
+            return new EqualsBuilder().append(getName(), other.getName())
+                .append(getLastKnownState(), other.getLastKnownState())
+                .append(getPhysicalMachine(), other.getPhysicalMachine()).isEquals();
         }
 
         return false;

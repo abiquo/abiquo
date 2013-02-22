@@ -37,12 +37,11 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.abiquo.commons.amqp.impl.vsm.VSMConfiguration;
+import com.abiquo.commons.amqp.config.DefaultConfiguration;
 import com.abiquo.vsm.VSMManager;
 import com.abiquo.vsm.model.PhysicalMachine;
 import com.abiquo.vsm.model.VirtualMachine;
 import com.abiquo.vsm.redis.dao.RedisDao;
-import com.abiquo.vsm.redis.dao.RedisDaoFactory;
 
 public class ConsoleServlet extends HttpServlet
 {
@@ -51,7 +50,7 @@ public class ConsoleServlet extends HttpServlet
     protected class PhysicalMachineComparator implements Comparator<PhysicalMachine>
     {
         @Override
-        public int compare(PhysicalMachine o1, PhysicalMachine o2)
+        public int compare(final PhysicalMachine o1, final PhysicalMachine o2)
         {
             return o1.getAddress().compareTo(o2.getAddress());
         }
@@ -60,14 +59,14 @@ public class ConsoleServlet extends HttpServlet
     protected class VirtualMachineComparator implements Comparator<VirtualMachine>
     {
         @Override
-        public int compare(VirtualMachine o1, VirtualMachine o2)
+        public int compare(final VirtualMachine o1, final VirtualMachine o2)
         {
             return o1.getName().compareTo(o2.getName());
         }
     }
 
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+    protected void doGet(final HttpServletRequest request, final HttpServletResponse response)
         throws ServletException, IOException
     {
         // Read configuration
@@ -88,15 +87,15 @@ public class ConsoleServlet extends HttpServlet
 
         config.put("Redis host", redisHost);
         config.put("Redis port", redisPort);
-        config.put("RabbitMQ host", VSMConfiguration.getHost());
-        config.put("RabbitMQ port", VSMConfiguration.getPort());
+        config.put("RabbitMQ host", DefaultConfiguration.getHost());
+        config.put("RabbitMQ port", DefaultConfiguration.getPort());
 
         request.setAttribute("config", config);
 
         // Extended report
         if (request.getParameterMap().containsKey("extended"))
         {
-            RedisDao dao = RedisDaoFactory.getInstance();
+            RedisDao dao = new RedisDao(VSMManager.getRedisPoolInstance());
 
             List<PhysicalMachine> pms = new ArrayList(dao.findAllPhysicalMachines());
             Collections.sort(pms, new PhysicalMachineComparator());
@@ -158,7 +157,7 @@ public class ConsoleServlet extends HttpServlet
     }
 
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp)
+    protected void doPost(final HttpServletRequest req, final HttpServletResponse resp)
         throws ServletException, IOException
     {
         doGet(req, resp);

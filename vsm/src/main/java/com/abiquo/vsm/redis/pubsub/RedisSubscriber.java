@@ -28,8 +28,6 @@ import org.slf4j.LoggerFactory;
 
 import redis.clients.jedis.Jedis;
 
-import com.abiquo.vsm.redis.dao.RedisDaoFactory;
-
 /**
  * Performs the subscription to redis eventing channel (where events are published).
  * 
@@ -56,7 +54,7 @@ public class RedisSubscriber implements Runnable
     /** Redis port */
     private int port;
 
-    public RedisSubscriber(String host, int port)
+    public RedisSubscriber(final String host, final int port)
     {
         this.host = host;
         this.port = port;
@@ -82,8 +80,6 @@ public class RedisSubscriber implements Runnable
         }
         catch (Exception e)
         {
-            RedisDaoFactory.refreshConnectionsPool();
-
             logger.error("Error on redis subscription. {}.", e);
             logger.error("VSM is not able to notify events. Please check redis server at {}:{}.",
                 host, port);

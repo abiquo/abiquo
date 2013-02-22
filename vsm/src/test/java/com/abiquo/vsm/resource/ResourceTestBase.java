@@ -32,6 +32,7 @@ import com.abiquo.vsm.events.VMEventType;
 import com.abiquo.vsm.model.transport.PhysicalMachineDto;
 import com.abiquo.vsm.model.transport.VirtualMachineDto;
 import com.abiquo.vsm.monitor.Monitor.Type;
+import com.abiquo.vsm.redis.dao.RedisDao;
 
 /**
  * Base class for all REST resource tests.
@@ -46,25 +47,25 @@ public class ResourceTestBase extends TestBase
     /** The physical machine resource. */
     protected PhysicalMachineResource pmResource;
 
-    @Override
-    public void setUp()
+    public ResourceTestBase()
     {
         VSMService mockVSMService = new MockVSMService();
 
-        pmResource = new PhysicalMachineResource();
-        subsResource = new SubscriptionResource();
+        RedisDao dao = new RedisDao(pool);
+        pmResource = new PhysicalMachineResource(dao);
+        subsResource = new SubscriptionResource(dao);
 
         subsResource.vsmService = mockVSMService;
         pmResource.vsmService = mockVSMService;
     }
 
-    protected PhysicalMachineDto monitor(String physicalMachineAddress, Type type)
+    protected PhysicalMachineDto monitor(final String physicalMachineAddress, final Type type)
     {
         return monitor(physicalMachineAddress, type, "dummy", "dummy");
     }
 
-    protected PhysicalMachineDto monitor(String physicalMachineAddress, Type type, String username,
-        String password)
+    protected PhysicalMachineDto monitor(final String physicalMachineAddress, final Type type,
+        final String username, final String password)
     {
         PhysicalMachineDto dto = new PhysicalMachineDto();
         dto.setAddress(physicalMachineAddress);
@@ -79,7 +80,8 @@ public class ResourceTestBase extends TestBase
         return pm;
     }
 
-    protected VirtualMachineDto subscribe(PhysicalMachineDto pm, String virtualMachineName)
+    protected VirtualMachineDto subscribe(final PhysicalMachineDto pm,
+        final String virtualMachineName)
     {
         assertNotNull(pm.getId());
         assertNotNull(pm.getAddress());
@@ -101,7 +103,7 @@ public class ResourceTestBase extends TestBase
         return vm;
     }
 
-    protected String toBasicAuth(String username, String password)
+    protected String toBasicAuth(final String username, final String password)
     {
         String token = username + ":" + password;
         String encoded = new String(Base64.encodeBase64(token.getBytes()));

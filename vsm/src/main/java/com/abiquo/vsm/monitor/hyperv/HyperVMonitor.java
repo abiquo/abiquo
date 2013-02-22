@@ -225,6 +225,7 @@ public class HyperVMonitor extends AbstractMonitor
                     }
                     finally
                     {
+                        dao.save(pm);
                         hyperv.disconnect(physicalMachineAddress);
                     }
                 }

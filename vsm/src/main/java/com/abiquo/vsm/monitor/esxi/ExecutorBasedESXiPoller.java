@@ -261,6 +261,7 @@ public class ExecutorBasedESXiPoller extends AbstractMonitor
                     }
                     finally
                     {
+                        dao.save(pm);
                         esx.disconnect();
                     }
                 }

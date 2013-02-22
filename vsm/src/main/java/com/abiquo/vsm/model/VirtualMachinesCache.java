@@ -21,25 +21,15 @@
 
 package com.abiquo.vsm.model;
 
+import java.util.HashSet;
 import java.util.Set;
 
-import redis.clients.johm.Attribute;
-import redis.clients.johm.CollectionSet;
-import redis.clients.johm.Id;
-import redis.clients.johm.Indexed;
-import redis.clients.johm.Model;
-
-@Model
 public class VirtualMachinesCache
 {
-    @Id
     private Integer id;
 
-    @CollectionSet(of = String.class)
-    @Indexed
-    private Set<String> cache;
+    private Set<String> cache = new HashSet<String>();
 
-    @Attribute
     private String dummy = "workaround";
 
     public Integer getId()
@@ -47,7 +37,7 @@ public class VirtualMachinesCache
         return id;
     }
 
-    public void setId(Integer id)
+    public void setId(final Integer id)
     {
         this.id = id;
     }

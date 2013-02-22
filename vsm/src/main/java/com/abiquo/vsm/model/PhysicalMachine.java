@@ -21,40 +21,26 @@
 
 package com.abiquo.vsm.model;
 
-import redis.clients.johm.Attribute;
-import redis.clients.johm.Id;
-import redis.clients.johm.Indexed;
-import redis.clients.johm.Model;
-import redis.clients.johm.Reference;
-
-@Model
 public class PhysicalMachine
 {
-    @Id
     private Integer id;
 
-    @Attribute
-    @Indexed
     private String address;
 
-    @Attribute
     private String type;
 
-    @Attribute
     private String username;
 
-    @Attribute
     private String password;
 
-    @Reference
-    private VirtualMachinesCache virtualMachines;
+    private VirtualMachinesCache virtualMachines = new VirtualMachinesCache();
 
     public Integer getId()
     {
         return id;
     }
 
-    public void setId(Integer id)
+    public void setId(final Integer id)
     {
         this.id = id;
     }
@@ -64,7 +50,7 @@ public class PhysicalMachine
         return address;
     }
 
-    public void setAddress(String address)
+    public void setAddress(final String address)
     {
         this.address = address;
     }
@@ -74,7 +60,7 @@ public class PhysicalMachine
         return type;
     }
 
-    public void setType(String type)
+    public void setType(final String type)
     {
         this.type = type;
     }
@@ -84,7 +70,7 @@ public class PhysicalMachine
         return username;
     }
 
-    public void setUsername(String username)
+    public void setUsername(final String username)
     {
         this.username = username;
     }
@@ -94,7 +80,7 @@ public class PhysicalMachine
         return password;
     }
 
-    public void setPassword(String password)
+    public void setPassword(final String password)
     {
         this.password = password;
     }
@@ -104,7 +90,7 @@ public class PhysicalMachine
         return virtualMachines;
     }
 
-    public void setVirtualMachines(VirtualMachinesCache virtualMachines)
+    public void setVirtualMachines(final VirtualMachinesCache virtualMachines)
     {
         this.virtualMachines = virtualMachines;
     }

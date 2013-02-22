@@ -238,6 +238,7 @@ public class XenServerMonitor extends AbstractMonitor
                     }
                     finally
                     {
+                        dao.save(pm);
                         connector.disconnect();
                     }
                 }

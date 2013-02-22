@@ -32,13 +32,13 @@ import java.util.concurrent.Callable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.abiquo.vsm.VSMManager;
 import com.abiquo.vsm.events.VMEvent;
 import com.abiquo.vsm.events.VMEventType;
 import com.abiquo.vsm.model.PhysicalMachine;
 import com.abiquo.vsm.monitor.AbstractMonitor;
 import com.abiquo.vsm.monitor.esxi.util.ExtendedAppUtil;
 import com.abiquo.vsm.redis.dao.RedisDao;
-import com.abiquo.vsm.redis.dao.RedisDaoFactory;
 import com.vmware.vim25.ArrayOfEvent;
 import com.vmware.vim25.Event;
 import com.vmware.vim25.EventFilterSpec;
@@ -94,7 +94,7 @@ public class ESXiPoller implements Callable<Integer>
     /**
      * Instantiates a new eS xi poller.
      */
-    public ESXiPoller(AbstractMonitor monitor)
+    public ESXiPoller(final AbstractMonitor monitor)
     {
         eventTranslation = new Hashtable<String, VMEventType>();
         this.monitor = monitor;
@@ -109,7 +109,7 @@ public class ESXiPoller implements Callable<Integer>
         // VMWare dependent
         optsEntered = new HashMap<String, String>();
 
-        dao = RedisDaoFactory.getInstance();
+        dao = new RedisDao(VSMManager.getRedisPoolInstance());
     }
 
     /**
@@ -118,7 +118,7 @@ public class ESXiPoller implements Callable<Integer>
      * @param user the admin user
      * @param password admin password
      */
-    public void init(String user, String password)
+    public void init(final String user, final String password)
     {
         optsEntered.put("username", user);
         optsEntered.put("password", password);
@@ -145,7 +145,7 @@ public class ESXiPoller implements Callable<Integer>
      * @return the managed object reference
      * @throws Exception the exception
      */
-    private ManagedObjectReference createEventHistoryCollector(ExtendedAppUtil apputil)
+    private ManagedObjectReference createEventHistoryCollector(final ExtendedAppUtil apputil)
         throws Exception
     {
         // Create an Entity Event Filter Spec to
@@ -195,7 +195,8 @@ public class ESXiPoller implements Callable<Integer>
      * @param eventHistoryCollector the event history collector
      * @return the property filter spec
      */
-    private PropertyFilterSpec createEventFilterSpec(ManagedObjectReference eventHistoryCollector)
+    private PropertyFilterSpec createEventFilterSpec(
+        final ManagedObjectReference eventHistoryCollector)
     {
         // Set up a PropertySpec to use the latestPage attribute
         // of the EventHistoryCollector
@@ -235,7 +236,7 @@ public class ESXiPoller implements Callable<Integer>
      * @param update the update
      * @return the hashtable< string, list< vm event>>
      */
-    private Hashtable<String, List<VmEvent>> handleUpdate(UpdateSet update)
+    private Hashtable<String, List<VmEvent>> handleUpdate(final UpdateSet update)
     {
         Hashtable<String, List<VmEvent>> events = new Hashtable<String, List<VmEvent>>();
         ArrayList<ObjectUpdate> vmUpdates = new ArrayList<ObjectUpdate>();
@@ -268,7 +269,8 @@ public class ESXiPoller implements Callable<Integer>
      * @param events the events
      * @param oUpdate the o update
      */
-    void handleObjectUpdate(Hashtable<String, List<VmEvent>> events, ObjectUpdate oUpdate)
+    void handleObjectUpdate(final Hashtable<String, List<VmEvent>> events,
+        final ObjectUpdate oUpdate)
     {
         PropertyChange[] pc = oUpdate.getChangeSet();
 
@@ -282,13 +284,14 @@ public class ESXiPoller implements Callable<Integer>
      * @param events the events
      * @param changes the changes
      */
-    private void handleChanges(Hashtable<String, List<VmEvent>> events, PropertyChange[] changes)
+    private void handleChanges(final Hashtable<String, List<VmEvent>> events,
+        final PropertyChange[] changes)
     {
 
-        for (int pci = 0; pci < changes.length; ++pci)
+        for (PropertyChange change : changes)
         {
-            Object value = changes[pci].getVal();
-            PropertyChangeOp op = changes[pci].getOp();
+            Object value = change.getVal();
+            PropertyChangeOp op = change.getOp();
 
             if (value != null && !op.name().equalsIgnoreCase("remove"))
             {
@@ -310,7 +313,8 @@ public class ESXiPoller implements Callable<Integer>
         }
     }
 
-    private void handleVMEvent(Object event, Hashtable<String, List<VmEvent>> events, String log)
+    private void handleVMEvent(final Object event, final Hashtable<String, List<VmEvent>> events,
+        final String log)
     {
         if (event instanceof VmEvent)
         {
@@ -407,8 +411,8 @@ public class ESXiPoller implements Callable<Integer>
                             continue;
                         }
 
-                        credentialCache.put(url, pm.getUsername() + "#" + url + "#"
-                            + pm.getPassword());
+                        credentialCache.put(url,
+                            pm.getUsername() + "#" + url + "#" + pm.getPassword());
                         init(pm.getUsername(), pm.getPassword());
                     }
                     else
@@ -426,7 +430,7 @@ public class ESXiPoller implements Callable<Integer>
 
                     apputil =
                         ExtendedAppUtil.init(serviceInstance, constructOptions(), optsEntered);
-                    
+
                     // Filters configuration
                     ManagedObjectReference eventHistoryCollector =
                         createEventHistoryCollector(apputil);
@@ -461,13 +465,12 @@ public class ESXiPoller implements Callable<Integer>
                     // Destroying the property poller
                     service.destroyPropertyFilter(propFilter);
 
-                    
                 }
                 catch (Exception e)
                 {
                     logger.warn(e.getMessage() + " ignoring it.", e);
                 }
-                finally 
+                finally
                 {
                     apputil.disConnect();
                     logger.trace("Disconnected from the VMWARE ESXI located in: {}", url);
@@ -482,8 +485,8 @@ public class ESXiPoller implements Callable<Integer>
      * @param physicalMachineAddress the physical machine address
      * @param events the events
      */
-    private void filterAndSend(Hashtable<String, List<VmEvent>> events,
-        String physicalMachineAddress)
+    private void filterAndSend(final Hashtable<String, List<VmEvent>> events,
+        final String physicalMachineAddress)
     {
         // logger.debug("Calling check and send demands: {} events: {}", list.size(),
         // events.size());

@@ -36,7 +36,6 @@ import com.abiquo.vsm.exception.MonitorException;
 import com.abiquo.vsm.model.PhysicalMachine;
 import com.abiquo.vsm.model.VirtualMachine;
 import com.abiquo.vsm.redis.dao.RedisDao;
-import com.abiquo.vsm.redis.dao.RedisDaoFactory;
 import com.abiquo.vsm.redis.pubsub.RedisPublisher;
 
 /**
@@ -56,7 +55,7 @@ public abstract class AbstractMonitor
     protected List<String> monitoredMachines;
 
     /** The dao used to access stored data. */
-    private RedisDao dao;
+    protected RedisDao dao;
 
     protected String uuid;
 
@@ -70,7 +69,7 @@ public abstract class AbstractMonitor
 
         redisPublisher = new RedisPublisher(redisHost, redisPort);
         monitoredMachines = Collections.synchronizedList(new LinkedList<String>());
-        dao = RedisDaoFactory.getInstance();
+        dao = new RedisDao(VSMManager.getRedisPoolInstance());
         uuid = UUID.randomUUID().toString();
 
         LOGGER.debug("New monitor with UUID " + uuid + " created.");

@@ -33,7 +33,6 @@ import com.abiquo.vsm.events.VMEventType;
 import com.abiquo.vsm.exception.MonitorException;
 import com.abiquo.vsm.model.PhysicalMachine;
 import com.abiquo.vsm.model.VirtualMachine;
-import com.abiquo.vsm.model.VirtualMachinesCache;
 import com.abiquo.vsm.monitor.Monitor.Type;
 import com.abiquo.vsm.monitor.esxi.ExecutorBasedESXiPoller;
 import com.abiquo.vsm.monitor.hyperv.HyperVMonitor;
@@ -42,7 +41,6 @@ import com.abiquo.vsm.monitor.libvirt.XenMonitor;
 import com.abiquo.vsm.monitor.vbox.VirtualBoxMonitor;
 import com.abiquo.vsm.monitor.xenserver.XenServerMonitor;
 import com.abiquo.vsm.redis.dao.RedisDao;
-import com.abiquo.vsm.redis.dao.RedisDaoFactory;
 
 /**
  * Manages physical machine monitor life cycle.
@@ -71,7 +69,7 @@ public class MonitorManager
         super();
         monitorClasses = new HashMap<Type, Class< ? extends AbstractMonitor>>();
         runningMonitors = new HashMap<Type, List<AbstractMonitor>>();
-        dao = RedisDaoFactory.getInstance();
+        dao = new RedisDao(VSMManager.getRedisPoolInstance());
 
         // Register monitors
         registerMonitor(KVMMonitor.class);
@@ -110,12 +108,8 @@ public class MonitorManager
                 return pm;
             }
 
-            VirtualMachinesCache cache = new VirtualMachinesCache();
-            dao.save(cache);
-
             pm = new PhysicalMachine();
             pm.setAddress(physicalMachineAddress);
-            pm.setVirtualMachines(cache);
             pm.setUsername(username);
             pm.setPassword(password);
             pm.setType(type.name());

@@ -19,37 +19,29 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package com.abiquo.vsm.migration;
+package com.abiquo.vsm.redis.dao;
 
-/**
- * A java namespace key builder for redis and others key-value databases.
- * 
- * @author eruiz
- */
-public class Keymaker
+import java.util.LinkedList;
+import java.util.Queue;
+
+import redis.clients.jedis.Builder;
+import redis.clients.jedis.Response;
+import redis.clients.jedis.TransactionBlock;
+
+public abstract class TransactionBlock2 extends TransactionBlock
 {
-    protected String namespace;
-
-    public Keymaker(String namespace)
-    {
-        this.namespace = namespace;
-    }
-
-    public Keymaker build(String... namespaces)
-    {
-        StringBuilder builder = new StringBuilder(this.namespace);
-
-        for (String name : namespaces)
-        {
-            builder.append(":").append(name);
-        }
-
-        return new Keymaker(builder.toString());
-    }
+    private Queue<Response< ? >> responses = new LinkedList<Response< ? >>();
 
     @Override
-    public String toString()
+    protected <T> Response<T> getResponse(final Builder<T> builder)
     {
-        return this.namespace;
+        Response<T> response = super.getResponse(builder);
+        responses.add(response);
+        return response;
+    }
+
+    public Queue<Response< ? >> getResponses()
+    {
+        return responses;
     }
 }

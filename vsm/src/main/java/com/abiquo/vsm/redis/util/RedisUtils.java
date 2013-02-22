@@ -21,8 +21,6 @@
 
 package com.abiquo.vsm.redis.util;
 
-import java.io.IOException;
-
 import redis.clients.jedis.Jedis;
 
 /**
@@ -39,7 +37,7 @@ public class RedisUtils
      * @param port The redis port
      * @return True on successful ping. Otherwise false.
      */
-    public static boolean ping(String host, int port)
+    public static boolean ping(final String host, final int port)
     {
         Jedis client = new Jedis(host, port);
         boolean success = false;
@@ -50,7 +48,7 @@ public class RedisUtils
             success = client.ping().equalsIgnoreCase("pong");
             client.disconnect();
         }
-        catch (IOException e)
+        catch (Exception e)
         {
             return false;
         }

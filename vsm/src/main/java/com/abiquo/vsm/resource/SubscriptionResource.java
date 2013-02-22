@@ -35,13 +35,13 @@ import javax.ws.rs.core.Response.Status;
 
 import org.apache.wink.common.annotations.Workspace;
 
+import com.abiquo.vsm.VSMManager;
 import com.abiquo.vsm.VSMService;
 import com.abiquo.vsm.exception.VSMException;
 import com.abiquo.vsm.model.VirtualMachine;
 import com.abiquo.vsm.model.transport.VirtualMachineDto;
 import com.abiquo.vsm.model.transport.VirtualMachinesDto;
 import com.abiquo.vsm.redis.dao.RedisDao;
-import com.abiquo.vsm.redis.dao.RedisDaoFactory;
 
 /**
  * Resource with information about virtual machine subscriptions.
@@ -76,7 +76,13 @@ public class SubscriptionResource extends AbstractResource
     public SubscriptionResource()
     {
         vsmService = VSMService.getInstance();
-        dao = RedisDaoFactory.getInstance();
+        dao = new RedisDao(VSMManager.getRedisPoolInstance());
+    }
+
+    public SubscriptionResource(final RedisDao redisDaoForTesting)
+    {
+        super();
+        this.dao = redisDaoForTesting;
     }
 
     /**
@@ -131,7 +137,7 @@ public class SubscriptionResource extends AbstractResource
      * @return The subscription details.
      */
     @POST
-    public VirtualMachineDto subscribe(VirtualMachineDto virtualMachine)
+    public VirtualMachineDto subscribe(final VirtualMachineDto virtualMachine)
     {
         checkSystem();
 

@@ -36,13 +36,13 @@ import javax.ws.rs.core.Response.Status;
 
 import org.apache.wink.common.annotations.Workspace;
 
+import com.abiquo.vsm.VSMManager;
 import com.abiquo.vsm.VSMService;
 import com.abiquo.vsm.exception.VSMException;
 import com.abiquo.vsm.model.PhysicalMachine;
 import com.abiquo.vsm.model.transport.PhysicalMachineDto;
 import com.abiquo.vsm.model.transport.PhysicalMachinesDto;
 import com.abiquo.vsm.redis.dao.RedisDao;
-import com.abiquo.vsm.redis.dao.RedisDaoFactory;
 
 /**
  * Resource with information about monitored cloud nodes.
@@ -84,7 +84,13 @@ public class PhysicalMachineResource extends AbstractResource
     public PhysicalMachineResource()
     {
         vsmService = VSMService.getInstance();
-        dao = RedisDaoFactory.getInstance();
+        dao = new RedisDao(VSMManager.getRedisPoolInstance());
+    }
+
+    public PhysicalMachineResource(final RedisDao redisDaoForTesting)
+    {
+        super();
+        this.dao = redisDaoForTesting;
     }
 
     /**

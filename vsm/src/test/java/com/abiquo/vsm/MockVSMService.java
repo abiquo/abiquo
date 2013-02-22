@@ -21,6 +21,7 @@
 package com.abiquo.vsm;
 
 import com.abiquo.vsm.monitor.MockMonitorManager;
+import com.abiquo.vsm.redis.dao.RedisDao;
 
 /**
  * Mock class of the {@link VSMService} to run tests without connecting to the target physical
@@ -35,7 +36,7 @@ public class MockVSMService extends VSMService
      */
     public MockVSMService()
     {
-        monitorManager = new MockMonitorManager();
+        monitorManager = new MockMonitorManager(new RedisDao(JedisPoolForTesting.instance()));
     }
 
 }

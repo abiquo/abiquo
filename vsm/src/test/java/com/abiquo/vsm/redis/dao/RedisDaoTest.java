@@ -26,19 +26,15 @@ import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
-
-import redis.clients.johm.JOhm;
 
 import com.abiquo.vsm.TestBase;
 import com.abiquo.vsm.model.PhysicalMachine;
 import com.abiquo.vsm.model.VirtualMachine;
-import com.abiquo.vsm.model.VirtualMachinesCache;
 
 /**
  * Unit tests for the {@link RedisDao} class. The tests use one instance of the latest redis
@@ -48,13 +44,12 @@ import com.abiquo.vsm.model.VirtualMachinesCache;
  */
 public class RedisDaoTest extends TestBase
 {
-
     private RedisDao dao;
 
-    @Override
+    @BeforeTest
     public void setUp() throws Exception
     {
-        dao = new RedisDao();
+        dao = new RedisDao(pool);
     }
 
     @Test
@@ -73,37 +68,16 @@ public class RedisDaoTest extends TestBase
         assertEquals(machine.getType(), saved.getType());
         assertEquals(machine.getUsername(), saved.getUsername());
         assertEquals(machine.getPassword(), saved.getPassword());
-        assertNull(machine.getVirtualMachines());
+        assertNotNull(machine.getVirtualMachines());
 
-        PhysicalMachine recovered = JOhm.get(PhysicalMachine.class, saved.getId());
+        PhysicalMachine recovered = dao.getPhysicalMachine(saved.getId());
 
         assertNotNull(recovered);
         assertEquals(machine.getAddress(), recovered.getAddress());
         assertEquals(machine.getType(), recovered.getType());
         assertEquals(machine.getUsername(), recovered.getUsername());
         assertEquals(machine.getPassword(), recovered.getPassword());
-        assertNull(recovered.getVirtualMachines());
-    }
-
-    @Test(expectedExceptions = RuntimeException.class)
-    public void test_savePhysicalMachineForceRuntimeException()
-    {
-        PhysicalMachine machine0 = new PhysicalMachine();
-        machine0.setAddress("10.60.1.79");
-        machine0.setType("KVM");
-        machine0.setUsername("thomas.sullivan");
-        machine0.setPassword("magnum");
-
-        PhysicalMachine saved = dao.save(machine0);
-        assertNotNull(saved);
-
-        PhysicalMachine machine1 = new PhysicalMachine();
-        machine1.setAddress("10.60.1.79");
-        machine1.setType("KVM");
-        machine1.setUsername("thomas.sullivan");
-        machine1.setPassword("magnum");
-
-        saved = dao.save(machine1);
+        assertNotNull(recovered.getVirtualMachines());
     }
 
     @Test
@@ -111,13 +85,14 @@ public class RedisDaoTest extends TestBase
     {
         VirtualMachine vmachine = new VirtualMachine();
         vmachine.setName(UUID.randomUUID().toString());
+        vmachine.setLastKnownState("UNKNOWN");
 
         VirtualMachine saved = dao.save(vmachine);
 
         assertNotNull(saved);
         assertEquals(vmachine.getName(), saved.getName());
         assertNull(saved.getPhysicalMachine());
-        assertNull(saved.getLastKnownState());
+        assertNotNull(saved.getLastKnownState());
 
         vmachine.setLastKnownState("POWER_ON");
         saved = dao.save(vmachine);
@@ -133,7 +108,7 @@ public class RedisDaoTest extends TestBase
         machine.setUsername("thomas.sullivan");
         machine.setPassword("magnum");
 
-        JOhm.save(machine);
+        dao.save(machine);
 
         saved.setPhysicalMachine(machine);
         saved = dao.save(saved);
@@ -141,22 +116,7 @@ public class RedisDaoTest extends TestBase
         assertNotNull(saved);
         assertEquals(vmachine.getName(), saved.getName());
         assertEquals(vmachine.getLastKnownState(), saved.getLastKnownState());
-        assertEquals(machine.getId(), vmachine.getPhysicalMachine().getId());
-    }
-
-    @Test(expectedExceptions = RuntimeException.class)
-    public void test_saveVirtualMachineForceRuntimeException()
-    {
-        VirtualMachine vmachine0 = new VirtualMachine();
-        vmachine0.setName(UUID.randomUUID().toString());
-
-        VirtualMachine saved = dao.save(vmachine0);
-        assertNotNull(saved);
-
-        VirtualMachine vmachine1 = new VirtualMachine();
-        vmachine1.setName(vmachine0.getName());
-
-        saved = dao.save(vmachine1);
+        assertEquals(machine.getId(), saved.getPhysicalMachine().getId());
     }
 
     @Test
@@ -171,7 +131,7 @@ public class RedisDaoTest extends TestBase
         PhysicalMachine saved = dao.save(machine);
 
         dao.delete(saved);
-        saved = JOhm.get(PhysicalMachine.class, saved.getId());
+        saved = dao.getPhysicalMachine(saved.getId());
         assertNull(saved);
 
         saved = dao.findPhysicalMachineByAddress("10.60.1.79");
@@ -200,10 +160,10 @@ public class RedisDaoTest extends TestBase
         VirtualMachine saved = dao.save(vmachine);
 
         dao.delete(saved);
-        saved = JOhm.get(VirtualMachine.class, saved.getId());
+        saved = dao.getVirtualMachine(saved.getId());
         assertNull(saved);
 
-        PhysicalMachine m = JOhm.get(PhysicalMachine.class, machine.getId());
+        PhysicalMachine m = dao.getPhysicalMachine(machine.getId());
         assertNotNull(m);
 
         VirtualMachine p = dao.findVirtualMachineByName(uuid);
@@ -231,8 +191,8 @@ public class RedisDaoTest extends TestBase
 
         dao.delete(machine);
 
-        assertNull(JOhm.get(PhysicalMachine.class, machine.getId()));
-        assertNotNull(JOhm.get(VirtualMachine.class, saved.getId()));
+        assertNull(dao.getPhysicalMachine(machine.getId()));
+        assertNotNull(dao.getVirtualMachine(saved.getId()));
     }
 
     @Test
@@ -299,21 +259,6 @@ public class RedisDaoTest extends TestBase
         assertNull(dao.findVirtualMachineByName("FAKE"));
     }
 
-    @Test(expectedExceptions = RuntimeException.class)
-    public void test_findVirtualMachineByNameForceRuntimeException()
-    {
-        VirtualMachine vmachine0 = new VirtualMachine();
-        vmachine0.setName(UUID.randomUUID().toString());
-
-        VirtualMachine vmachine1 = new VirtualMachine();
-        vmachine1.setName(vmachine0.getName());
-
-        assertNotNull(JOhm.save(vmachine0));
-        assertNotNull(JOhm.save(vmachine1));
-
-        dao.findVirtualMachineByName(vmachine0.getName());
-    }
-
     @Test
     public void test_findVirtualMachineByName()
     {
@@ -323,8 +268,8 @@ public class RedisDaoTest extends TestBase
         VirtualMachine vmachine1 = new VirtualMachine();
         vmachine1.setName(UUID.randomUUID().toString());
 
-        assertNotNull(JOhm.save(vmachine0));
-        assertNotNull(JOhm.save(vmachine1));
+        assertNotNull(dao.save(vmachine0));
+        assertNotNull(dao.save(vmachine1));
 
         VirtualMachine recovered = dao.findVirtualMachineByName(vmachine1.getName());
 
@@ -337,21 +282,6 @@ public class RedisDaoTest extends TestBase
     public void test_findPhysicalMachineByInexistentAddress()
     {
         assertNull(dao.findPhysicalMachineByAddress("FAKE"));
-    }
-
-    @Test(expectedExceptions = RuntimeException.class)
-    public void test_findPhysicalMachineByAddressForceRuntimeException()
-    {
-        PhysicalMachine machine0 = new PhysicalMachine();
-        machine0.setAddress("10.60.1.79");
-
-        PhysicalMachine machine1 = new PhysicalMachine();
-        machine1.setAddress(machine0.getAddress());
-
-        assertNotNull(JOhm.save(machine0));
-        assertNotNull(JOhm.save(machine1));
-
-        dao.findPhysicalMachineByAddress(machine0.getAddress());
     }
 
     @Test
@@ -381,7 +311,7 @@ public class RedisDaoTest extends TestBase
         assertEquals(machine1.getPassword(), recovered.getPassword());
         assertEquals(machine1.getType(), recovered.getType());
         assertEquals(machine1.getUsername(), recovered.getUsername());
-        assertNull(recovered.getVirtualMachines());
+        assertNotNull(recovered.getVirtualMachines());
     }
 
     @Test
@@ -405,7 +335,7 @@ public class RedisDaoTest extends TestBase
         assertEquals(pm.getPassword(), existing.getPassword());
         assertEquals(pm.getType(), existing.getType());
         assertEquals(pm.getUsername(), existing.getUsername());
-        assertNull(existing.getVirtualMachines());
+        assertNotNull(existing.getVirtualMachines());
     }
 
     @Test
@@ -426,75 +356,75 @@ public class RedisDaoTest extends TestBase
         assertEquals(vm.getLastKnownState(), existing.getLastKnownState());
     }
 
-    @Test
-    public void test_saveVirtualMachinesCache()
-    {
-        VirtualMachinesCache cache = new VirtualMachinesCache();
-        dao.save(cache);
-
-        cache.getCache().add("bloblo");
-
-        VirtualMachinesCache savedCache = JOhm.get(VirtualMachinesCache.class, cache.getId());
-
-        assertNotNull(savedCache);
-        assertEquals(cache.getId(), savedCache.getId());
-        assertEquals(savedCache.getCache().size(), 1);
-        assertTrue(savedCache.getCache().contains("bloblo"));
-    }
-
-    @Test
-    public void test_saveAndGetPhysicalMachineWithCache()
-    {
-        VirtualMachinesCache cache = new VirtualMachinesCache();
-        dao.save(cache);
-
-        PhysicalMachine pm = new PhysicalMachine();
-        pm.setAddress("10.60.1.79");
-        pm.setType("vmx-04");
-        pm.setUsername("thomas.sullivan");
-        pm.setPassword("magnum");
-        pm.setVirtualMachines(cache);
-
-        pm = dao.save(pm);
-
-        PhysicalMachine saved = JOhm.get(PhysicalMachine.class, pm.getId());
-
-        assertNotNull(saved);
-        assertNotNull(saved.getVirtualMachines());
-        assertEquals(saved.getVirtualMachines().getCache().size(), 0);
-
-        String uuid1 = UUID.randomUUID().toString();
-        saved.getVirtualMachines().getCache().add(uuid1);
-
-        saved = JOhm.get(PhysicalMachine.class, pm.getId());
-
-        assertNotNull(saved);
-        assertNotNull(saved.getVirtualMachines());
-        assertEquals(saved.getVirtualMachines().getCache().size(), 1);
-        assertTrue(saved.getVirtualMachines().getCache().contains(uuid1));
-
-        String uuid2 = UUID.randomUUID().toString();
-        saved.getVirtualMachines().getCache().add(uuid2);
-
-        saved = JOhm.get(PhysicalMachine.class, pm.getId());
-
-        assertNotNull(saved);
-        assertNotNull(saved.getVirtualMachines());
-        assertEquals(saved.getVirtualMachines().getCache().size(), 2);
-        assertTrue(saved.getVirtualMachines().getCache().contains(uuid1));
-        assertTrue(saved.getVirtualMachines().getCache().contains(uuid2));
-
-        List<String> items = new ArrayList<String>();
-        items.add(UUID.randomUUID().toString());
-
-        VirtualMachinesCache cache2 = saved.getVirtualMachines();
-        cache2.getCache().clear();
-        cache2.getCache().addAll(items);
-
-        saved = JOhm.get(PhysicalMachine.class, pm.getId());
-
-        assertNotNull(saved);
-        assertNotNull(saved.getVirtualMachines());
-        assertEquals(saved.getVirtualMachines().getCache().size(), 1);
-    }
+    // @Test
+    // public void test_saveVirtualMachinesCache()
+    // {
+    // VirtualMachinesCache cache = new VirtualMachinesCache();
+    // dao.save(cache);
+    //
+    // cache.getCache().add("bloblo");
+    //
+    // VirtualMachinesCache savedCache = JOhm.get(VirtualMachinesCache.class, cache.getId());
+    //
+    // assertNotNull(savedCache);
+    // assertEquals(cache.getId(), savedCache.getId());
+    // assertEquals(savedCache.getCache().size(), 1);
+    // assertTrue(savedCache.getCache().contains("bloblo"));
+    // }
+    //
+    // @Test
+    // public void test_saveAndGetPhysicalMachineWithCache()
+    // {
+    // VirtualMachinesCache cache = new VirtualMachinesCache();
+    // dao.save(cache);
+    //
+    // PhysicalMachine pm = new PhysicalMachine();
+    // pm.setAddress("10.60.1.79");
+    // pm.setType("vmx-04");
+    // pm.setUsername("thomas.sullivan");
+    // pm.setPassword("magnum");
+    // pm.setVirtualMachines(cache);
+    //
+    // pm = dao.save(pm);
+    //
+    // PhysicalMachine saved = JOhm.get(PhysicalMachine.class, pm.getId());
+    //
+    // assertNotNull(saved);
+    // assertNotNull(saved.getVirtualMachines());
+    // assertEquals(saved.getVirtualMachines().getCache().size(), 0);
+    //
+    // String uuid1 = UUID.randomUUID().toString();
+    // saved.getVirtualMachines().getCache().add(uuid1);
+    //
+    // saved = JOhm.get(PhysicalMachine.class, pm.getId());
+    //
+    // assertNotNull(saved);
+    // assertNotNull(saved.getVirtualMachines());
+    // assertEquals(saved.getVirtualMachines().getCache().size(), 1);
+    // assertTrue(saved.getVirtualMachines().getCache().contains(uuid1));
+    //
+    // String uuid2 = UUID.randomUUID().toString();
+    // saved.getVirtualMachines().getCache().add(uuid2);
+    //
+    // saved = JOhm.get(PhysicalMachine.class, pm.getId());
+    //
+    // assertNotNull(saved);
+    // assertNotNull(saved.getVirtualMachines());
+    // assertEquals(saved.getVirtualMachines().getCache().size(), 2);
+    // assertTrue(saved.getVirtualMachines().getCache().contains(uuid1));
+    // assertTrue(saved.getVirtualMachines().getCache().contains(uuid2));
+    //
+    // List<String> items = new ArrayList<String>();
+    // items.add(UUID.randomUUID().toString());
+    //
+    // VirtualMachinesCache cache2 = saved.getVirtualMachines();
+    // cache2.getCache().clear();
+    // cache2.getCache().addAll(items);
+    //
+    // saved = JOhm.get(PhysicalMachine.class, pm.getId());
+    //
+    // assertNotNull(saved);
+    // assertNotNull(saved.getVirtualMachines());
+    // assertEquals(saved.getVirtualMachines().getCache().size(), 1);
+    // }
 }

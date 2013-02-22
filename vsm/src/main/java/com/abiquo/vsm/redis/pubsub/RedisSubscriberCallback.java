@@ -34,12 +34,12 @@ import redis.clients.jedis.JedisPubSub;
 import com.abiquo.commons.amqp.impl.vsm.VSMProducer;
 import com.abiquo.commons.amqp.impl.vsm.domain.VirtualSystemEvent;
 import com.abiquo.commons.amqp.util.RabbitMQUtils;
+import com.abiquo.vsm.VSMManager;
 import com.abiquo.vsm.events.VMEventType;
 import com.abiquo.vsm.model.PhysicalMachine;
 import com.abiquo.vsm.model.VirtualMachine;
 import com.abiquo.vsm.monitor.Monitor.Type;
 import com.abiquo.vsm.redis.dao.RedisDao;
-import com.abiquo.vsm.redis.dao.RedisDaoFactory;
 import com.abiquo.vsm.redis.pubsub.notifier.GenericNotifier;
 import com.abiquo.vsm.redis.pubsub.notifier.impl.ESXiNotifier;
 import com.abiquo.vsm.redis.pubsub.notifier.impl.HyperVNotifier;
@@ -67,13 +67,13 @@ public class RedisSubscriberCallback extends JedisPubSub
 
     private Map<String, GenericNotifier> notifiers;
 
-    public RedisSubscriberCallback(String host, int port)
+    public RedisSubscriberCallback(final String host, final int port)
     {
         // RabbitMQ producer
         broker = new VSMProducer();
 
         // DAO for redis persistence
-        dao = RedisDaoFactory.getInstance();
+        dao = new RedisDao(VSMManager.getRedisPoolInstance());
 
         // Instance all available types of notifiers
         notifiers = new HashMap<String, GenericNotifier>();
@@ -93,7 +93,7 @@ public class RedisSubscriberCallback extends JedisPubSub
      * @param message The 'serialized' notification info.
      */
     @Override
-    public void onMessage(String channel, String message)
+    public void onMessage(final String channel, final String message)
     {
         String fields[] = getMessageFields(message);
 
@@ -257,31 +257,31 @@ public class RedisSubscriberCallback extends JedisPubSub
     }
 
     @Override
-    public void onPMessage(String arg0, String arg1, String arg2)
+    public void onPMessage(final String arg0, final String arg1, final String arg2)
     {
         // Auto-generated method stub
     }
 
     @Override
-    public void onPSubscribe(String arg0, int arg1)
+    public void onPSubscribe(final String arg0, final int arg1)
     {
         // Auto-generated method stub
     }
 
     @Override
-    public void onPUnsubscribe(String arg0, int arg1)
+    public void onPUnsubscribe(final String arg0, final int arg1)
     {
         // Auto-generated method stub
     }
 
     @Override
-    public void onSubscribe(String channel, int arg)
+    public void onSubscribe(final String channel, final int arg)
     {
         logger.info("VSM subscribed to redis {} channel", channel);
     }
 
     @Override
-    public void onUnsubscribe(String channel, int arg)
+    public void onUnsubscribe(final String channel, final int arg)
     {
         logger.info("VSM unsubscribed to redis {} channel", channel);
     }

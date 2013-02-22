@@ -18,40 +18,10 @@
  * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
  * Boston, MA 02111-1307, USA.
  */
-package com.abiquo.vsm;
 
-import com.abiquo.vsm.model.transport.PhysicalMachineDto;
-import com.abiquo.vsm.monitor.Monitor.Type;
-import com.abiquo.vsm.resource.ResourceTestBase;
+package com.abiquo.vsm.redis.dao;
 
-/**
- * Utility class to populate data to Redis.
- * 
- * @author ibarrera
- */
-public class RedisPopulate extends ResourceTestBase
+public interface Function<I, O>
 {
-    /**
-     * Populates the model to Redis.
-     */
-    private void populate()
-    {
-        PhysicalMachineDto hyperv =
-            monitor("10.60.1.78", Type.HYPERV_301, "Administrator", "Windowssucks0!");
-
-        subscribe(hyperv, "vsm-test");
-    }
-
-    public static void main(String[] args)
-    {
-        VSMManager.getInstance().initialize();
-
-        RedisPopulate populate = new RedisPopulate();
-        populate.setUp();
-        populate.populate();
-
-        VSMManager.getInstance().destroy();
-
-        System.exit(0);
-    }
+    public O apply(final I input);
 }

@@ -24,13 +24,15 @@ package com.abiquo.vsm;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import org.apache.commons.pool.impl.GenericObjectPool.Config;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import redis.clients.jedis.JedisPool;
 
 import com.abiquo.commons.amqp.util.RabbitMQUtils;
 import com.abiquo.vsm.model.PhysicalMachine;
 import com.abiquo.vsm.redis.dao.RedisDao;
-import com.abiquo.vsm.redis.dao.RedisDaoFactory;
 import com.abiquo.vsm.redis.pubsub.RedisSubscriber;
 import com.abiquo.vsm.redis.util.RedisUtils;
 
@@ -49,7 +51,7 @@ public class VSMManager
 
         public InitializationSteps next()
         {
-            return ordinal() < (values().length - 1) ? values()[ordinal() + 1] : this;
+            return ordinal() < values().length - 1 ? values()[ordinal() + 1] : this;
         }
 
         public boolean isInitialized()
@@ -70,12 +72,18 @@ public class VSMManager
 
     private ExecutorService subscriberExecutor;
 
+    private static JedisPool redisPool;
+
     private VSMManager()
     {
         current = InitializationSteps.Uninitialized;
 
         redisHost = getProperty("abiquo.redis.host", "localhost");
         redisPort = Integer.valueOf(getProperty("abiquo.redis.port", "6379"));
+
+        Config poolConfig = new Config();
+        poolConfig.testOnBorrow = true;
+        redisPool = new JedisPool(poolConfig, redisHost, redisPort);
 
         subscriberExecutor = Executors.newSingleThreadExecutor();
     }
@@ -90,7 +98,12 @@ public class VSMManager
         return instance;
     }
 
-    private String getProperty(String name, String defaultValue)
+    public static JedisPool getRedisPoolInstance()
+    {
+        return redisPool;
+    }
+
+    private String getProperty(final String name, final String defaultValue)
     {
         String value = System.getProperty(name);
         return value == null ? defaultValue : value;
@@ -235,7 +248,7 @@ public class VSMManager
      */
     protected void reloadMonitors()
     {
-        RedisDao dao = RedisDaoFactory.getInstance();
+        RedisDao dao = new RedisDao(redisPool);
 
         VSMService.getInstance().stopAllMonitors();
 
